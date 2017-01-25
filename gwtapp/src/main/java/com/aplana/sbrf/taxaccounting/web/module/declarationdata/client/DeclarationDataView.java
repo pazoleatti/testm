@@ -296,13 +296,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         guid.setVisible(isVisibleAsnu);
         guidLabel.setVisible(isVisibleAsnu);
 
-        if (taxType == TaxType.TRANSPORT) {
-            taxOrganCodeLabel.setText("Налоговый орган (кон.):");
-        } else if (taxType == TaxType.LAND) {
-            taxOrganCodeLabel.setText("Код налогового органа (кон.):");
-        } else {
-            taxOrganCodeLabel.setText("Налоговый орган:");
-        }
+		taxOrganCodeLabel.setText("Налоговый орган:");
     }
 
     @Override

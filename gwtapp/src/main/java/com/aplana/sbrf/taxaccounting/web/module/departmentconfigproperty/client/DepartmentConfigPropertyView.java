@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
@@ -91,6 +92,29 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             new TableHeader("APPROVE_ORG_NAME")
     };
 
+    private TableHeader[] tableHeaderPfr = new TableHeader[]{
+            new TableHeader("TAX_ORGAN_CODE"),
+            new TableHeader("TAX_ORGAN_CODE_MID"),
+
+            new TableHeader("KPP"),
+            new TableHeader("PRESENT_PLACE"),
+            new TableHeader("NAME"),
+            new TableHeader("OKVED"),
+            new TableHeader("REGION"),
+            new TableHeader("OKTMO"),
+            new TableHeader("PHONE"),
+
+            new TableHeader("REORG_FORM_CODE"),
+            new TableHeader("REORG_INN"),
+            new TableHeader("REORG_KPP"),
+            new TableHeader("SIGNATORY_ID"),
+            new TableHeader("SIGNATORY_SURNAME"),
+            new TableHeader("SIGNATORY_FIRSTNAME"),
+            new TableHeader("SIGNATORY_LASTNAME"),
+            new TableHeader("APPROVE_DOC_NAME"),
+            new TableHeader("APPROVE_ORG_NAME")
+    };
+
 
     public final class TableHeader {
         String name;
@@ -111,6 +135,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @UiField
     DataGrid<DataRow<Cell>> table;
+    @UiField
+    FlexiblePager pager;
     @UiField
     TextBox inn;
     @UiField
@@ -264,6 +290,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         };
 
+        pager.setDisplay(table);
         // хак для горизонтального скроллбара у пустой таблицы
         table.setEmptyTableWidget(noResultLabel);
     }
@@ -272,6 +299,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
         if (taxType == TaxType.NDFL) {
             ConstNdflHeaderBuilder hb = new ConstNdflHeaderBuilder(table);
+            hb.setNeedCheckedRow(false);
+            table.setHeaderBuilder(hb);
+        } else if (taxType == TaxType.PFR) {
+            ConstPfrHeaderBuilder hb = new ConstPfrHeaderBuilder(table);
             hb.setNeedCheckedRow(false);
             table.setHeaderBuilder(hb);
         }
@@ -317,6 +348,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public TableHeader[] getCurrentTableHeaders() {
         if (taxType == TaxType.NDFL) {
             return tableHeaderNdfl;
+        } else if (taxType == TaxType.PFR) {
+            return tableHeaderPfr;
         }
         return new TableHeader[0];
     }
@@ -444,21 +477,13 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         taxRateBlock.setVisible(false);
         formatVersionBlock.setVisible(true);
         otherDetails.setVisible(true);
-        if (taxType == TaxType.TRANSPORT) {
-            taxTypeLbl.setText("Транспортный налог");
-        } else if (taxType == TaxType.PROPERTY) {
-            versionBlock.setVisible(true);
-            taxTypeLbl.setText("Налог на имущество");
-        } else if (taxType == TaxType.NDFL) {
-            otherDetails.setVisible(false);
-            taxRateBlock.setVisible(false);
-            formatVersionBlock.setVisible(false);
+        if (taxType == TaxType.NDFL) {
             taxTypeLbl.setText("НДФЛ");
-        } else if (taxType == TaxType.LAND) {
+        } else if (taxType == TaxType.PFR) {
+            otherDetails.setVisible(false);
             taxRateBlock.setVisible(false);
             formatVersionBlock.setVisible(false);
-            otherDetails.setVisible(false);
-            taxTypeLbl.setText("Земельный налог");
+            taxTypeLbl.setText("Страховые сборы, взносы");
         }
     }
 

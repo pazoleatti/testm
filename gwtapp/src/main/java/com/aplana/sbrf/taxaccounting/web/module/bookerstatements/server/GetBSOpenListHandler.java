@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookBookerStatementPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -34,8 +36,7 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
     @Autowired
     SourceService departmentFormTypService;
     @Autowired
-    @Qualifier(value = "refBookBookerStatementPeriod")
-    RefBookDataProvider bookerRefBookDataProvider;
+    RefBookFactory refBookFactory;
 
     public GetBSOpenListHandler() {
         super(GetBSOpenListAction.class);
@@ -71,6 +72,8 @@ public class GetBSOpenListHandler extends AbstractActionHandler<GetBSOpenListAct
         // Подразделение текущего пользователя
         result.setDepartment(departmentService.getDepartment(currUser.getDepartmentId()));
         result.setBookerReportTypes(Arrays.asList(BookerStatementsType.values()));
+
+        RefBookDataProvider bookerRefBookDataProvider = refBookFactory.getDataProvider(RefBookBookerStatementPeriodDao.REF_BOOK_ID);
 
         PagingResult<Map<String, RefBookValue>> records = bookerRefBookDataProvider.getRecords(null, null, null, null, true);
         List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>(records.size());

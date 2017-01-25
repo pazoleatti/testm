@@ -37,6 +37,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private static final long TABLE_NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getTableRefBookId();
     private static final long NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getRefBookId();
+    private static final long TABLE_FOND_REFBOOK_ID = RefBook.WithTable.FOND.getTableRefBookId();
+    private static final long FOND_REFBOOK_ID =  RefBook.WithTable.FOND.getRefBookId();
 
     private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
@@ -216,6 +218,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private Long getCurrentRefBookId() {
         if (getView().getTaxType() == TaxType.NDFL) {
             return NDFL_REFBOOK_ID;
+        } else if (getView().getTaxType() == TaxType.PFR) {
+            return FOND_REFBOOK_ID;
         }
 
         return null;
@@ -224,6 +228,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private Long getCurrentTableRefBookId() {
         if (getView().getTaxType() == TaxType.NDFL) {
             return TABLE_NDFL_REFBOOK_ID;
+        } else if (getView().getTaxType() == TaxType.PFR) {
+            return TABLE_FOND_REFBOOK_ID;
         }
 
         return null;
@@ -302,6 +308,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartmentId(getView().getDepartmentId());
         action.setOldUUID(uuid);
+        action.setTaxType(getView().getTaxType());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetRefBookValuesResult>() {
                     @Override
@@ -377,20 +384,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
             return true;
         }
         return false;
-    }
-
-    private boolean isProductAgreementNameFilled(List<Map<String, TableCell>> rows) {
-        if (TaxType.LAND.equals(getView().getTaxType())) {
-            for (Map<String, TableCell> row : rows) {
-                if (isProductAgreementNameRequired(row)) {
-                    String productAgreementName = row.get("PRODUCT_AGREEMENT_NAME").getStringValue();
-                    if (productAgreementName == null || productAgreementName.isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
     }
 
     private boolean isKppTaxOrgCodeFiled(List<Map<String, TableCell>> rows) {
@@ -502,10 +495,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private boolean checkBeforeSave(List<Map<String, TableCell>> rows) {
         if (!isKppTaxOrgCodeFiled(rows)) {
             Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"" + getColumn("TAX_ORGAN_CODE").getName() + "\" и \"" + getColumn("KPP").getName() + "\"");
-            return false;
-        }
-        if (!isProductAgreementNameFilled(rows)) {
-            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнено обязательное поле \"" + getColumn("PRODUCT_AGREEMENT_NAME").getName() + "\"");
             return false;
         }
         return true;

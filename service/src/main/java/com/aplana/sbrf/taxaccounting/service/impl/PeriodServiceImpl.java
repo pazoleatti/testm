@@ -492,16 +492,6 @@ public class PeriodServiceImpl implements PeriodService {
         }
 
         switch (taxType) {
-            case PROPERTY:
-            case TRANSPORT:
-            case LAND:
-                departmentIds = departmentService.getAllChildrenIds(drp.getDepartmentId());
-                break;
-            case INCOME:
-            case DEAL:
-            case VAT:
-            case MARKET:
-            case ETR:
             case NDFL:
             case PFR:
                 departmentIds = departmentService.getBADepartmentIds(user.getUser());
@@ -636,11 +626,6 @@ public class PeriodServiceImpl implements PeriodService {
 	public List<Integer> getAvailableDepartments(TaxType taxType, TAUser user, Operation operation, int departmentId) {
 		if (user.hasRole("ROLE_CONTROL_UNP")) {
 			switch (taxType) {
-				case INCOME:
-				case VAT:
-				case DEAL:
-				case MARKET:
-                case ETR:
                 case NDFL:
                 case PFR:
                     switch (operation) {
@@ -656,47 +641,14 @@ public class PeriodServiceImpl implements PeriodService {
 								return departmentService.getBADepartmentIds(user);
 					}
 					break;
-				case PROPERTY:
-				case TRANSPORT:
-                case LAND:
-					switch (operation) {
-						case FIND:
-							return Collections.singletonList(departmentId);
-						case OPEN:
-						case CLOSE:
-						case DELETE:
-                        case EDIT:
-						case EDIT_DEADLINE:
-							return departmentService.getAllChildrenIds(departmentId);
-					}
-					break;
 			}
 		} else if  (user.hasRole("ROLE_CONTROL_NS")) {
 			switch (taxType) {
-				case INCOME:
-				case VAT:
-				case DEAL:
-				case MARKET:
-                case ETR:
                 case NDFL:
                 case PFR:
                     switch (operation) {
 						case FIND:
 							return departmentService.getTBDepartmentIds(user);
-						case EDIT_DEADLINE:
-							return departmentService.getBADepartmentIds(user);
-					}
-					break;
-				case PROPERTY:
-				case TRANSPORT:
-                case LAND:
-					switch (operation) {
-						case FIND:
-							return departmentService.getTBDepartmentIds(user);
-						case OPEN:
-						case CLOSE:
-						case DELETE:
-                        case EDIT:
 						case EDIT_DEADLINE:
 							return departmentService.getBADepartmentIds(user);
 					}

@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.RECORD_PARENT_ID_ALIAS;
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id.*;
 
 /**
  * Реализация фабрики провайдеров данных для справочников
@@ -41,24 +42,35 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     private static final Log LOG = LogFactory.getLog(RefBookFactoryImpl.class);
 
+	private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return new SimpleDateFormat("dd.MM.yyyy");
+		}
+	};
+
+	// Список простых нередактируемых справочников
+	private static final List<Long> simpleReadOnlyRefBooks = Arrays.asList(new Long[]{
+			USER.getId(), SEC_ROLE.getId(), DEPARTMENT_TYPE.getId(), ASNU.getId(),
+			DECLARATION_DATA_KIND_REF_BOOK.getId(), DECLARATION_DATA_TYPE_REF_BOOK.getId(),
+            DECLARATION_TEMPLATE.getId()
+	});
+	// Список простых редактируемых версионируемых справочников
+	private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
+			PERSON.getId(), NDFL.getId(), NDFL_DETAIL.getId(), FIAS_OPERSTAT.getId(),
+			FIAS_SOCRBASE.getId(), FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
+			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(),
+			REGION.getId(), NDFL.getId(), NDFL_DETAIL.getId(), ID_DOC.getId()
+	});
+
     @Autowired
     private RefBookDao refBookDao;
-
     @Autowired
     private ApplicationContext applicationContext;
-
     @Autowired
     private RefBookScriptingService refBookScriptingService;
-
     @Autowired
     private LockDataService lockDataService;
-
-    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        }
-    };
 
     @Override
     public RefBook get(Long refBookId) {
@@ -78,148 +90,52 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Override
     public RefBookDataProvider getDataProvider(Long refBookId) {
-        //RefBook.Id refBookEnumId = RefBook.Id.getById(refBookId);
+		RefBook refBook = get(refBookId);
 
-        if (RefBookDepartment.REF_BOOK_ID.equals(refBookId)) {
+		if (simpleReadOnlyRefBooks.contains(refBookId)) {
+			RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+			dataProvider.setRefBook(refBook);
+			return dataProvider;
+		}
+		if (simpleEditableRefBooks.contains(refBookId)) {
+			RefBookSimpleDataProvider dataProvider = (RefBookSimpleDataProvider) applicationContext.getBean("refBookSimpleDataProvider", RefBookDataProvider.class);
+			dataProvider.setRefBook(refBook);
+			return dataProvider;
+		}
+
+        if (DEPARTMENT.getId() == refBookId) {
             return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
-        } else if (RefBookIncome101.REF_BOOK_ID.equals(refBookId)) {
-			return applicationContext.getBean("refBookIncome101", RefBookDataProvider.class);
-        } else if (RefBookIncome102.REF_BOOK_ID.equals(refBookId)) {
-			return applicationContext.getBean("refBookIncome102", RefBookDataProvider.class);
-        } else if (RefBookUser.REF_BOOK_ID.equals(refBookId)) {
-            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.USER_REF_BOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.USER_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Виды налоговых форм"
-			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-			refBookSimple.setRefBookId(RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID);
-			refBookSimple.setTableName(RefBookSimpleReadOnly.FORM_TYPE_TABLE_NAME);
-			refBookSimple.setWhereClause("STATUS = 0");
-			return refBookSimple;
-		} else if (RefBookSimpleReadOnly.DECLARATION_TYPE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Виды деклараций"
-			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-			refBookSimple.setRefBookId(RefBookSimpleReadOnly.DECLARATION_TYPE_REF_BOOK_ID);
-			refBookSimple.setTableName(RefBookSimpleReadOnly.DECLARATION_TYPE_TABLE_NAME);
-			refBookSimple.setWhereClause("STATUS = 0");
-			return refBookSimple;
-		}else if (RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Системные роли"
-			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-			refBookSimple.setRefBookId(RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID);
-			refBookSimple.setTableName(RefBookSimpleReadOnly.SEC_ROLE_TABLE_NAME);
-			return refBookSimple;
-        } else if(RefBookOktmoProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
+        }
+		if(RefBookOktmoProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
             RefBookOktmoProvider dataProvider = (RefBookOktmoProvider) applicationContext.getBean("RefBookOktmoProvider", RefBookDataProvider.class);
             dataProvider.setRefBookId(refBookId);
-            if (RefBookOktmoProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {
-                dataProvider.setTableName(RefBookOktmoProvider.OKTMO_TABLE_NAME);
-            }
+			dataProvider.setTableName(RefBookOktmoProvider.OKTMO_TABLE_NAME);
             return dataProvider;
-		} else if (RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID.equals(refBookId)) { // Справочник "Типы налоговых форм"
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.FORM_DATA_KIND_TABLE_NAME);
-            return refBookSimple;
-		} else if (RefBookSimpleReadOnly.COLOR_REF_BOOK_ID.equals(refBookId)) { // Справочник "Цвета"
-			RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-			refBookSimple.setRefBookId(RefBookSimpleReadOnly.COLOR_REF_BOOK_ID);
-			refBookSimple.setTableName(RefBookSimpleReadOnly.COLOR_TABLE_NAME);
-			return refBookSimple;
-		} else if (RefBookSimpleReadOnly.DEPARTMENT_TYPE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Типы подразделений"
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.DEPARTMENT_TYPE_REF_BOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.DEPARTMENT_TYPE_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookConfigurationParam.REF_BOOK_ID.equals(refBookId)) {
+		}
+		if (CONFIGURATION_PARAM.getId() == refBookId) {
             RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
-            dataProvider.setRefBookId(refBookId);
+            dataProvider.setRefBook(refBook);
             return dataProvider;
-		}  else if (RefBookAuditFieldList.REF_BOOK_ID.equals(refBookId)) {
+		}
+		if (AUDIT_FIELD.getId() == refBookId) {
             RefBookAuditFieldList dataProvider = applicationContext.getBean("refBookAuditFieldList", RefBookAuditFieldList.class);
-            dataProvider.setRefBookId(refBookId);
+			dataProvider.setRefBook(refBook);
             return dataProvider;
-		} else if (RefBookBookerStatementPeriod.REF_BOOK_ID.equals(refBookId)) {
-            RefBookBookerStatementPeriod dataProvider = applicationContext.getBean("refBookBookerStatementPeriod", RefBookBookerStatementPeriod.class);
-            dataProvider.setRefBookId(refBookId);
-            return dataProvider;
-        } else if (RefBookTaxOrganCode.REF_BOOK_ID.equals(refBookId)) {
-            RefBookTaxOrganCode dataProvider = applicationContext.getBean("refBookTaxOrganCode", RefBookTaxOrganCode.class);
-            dataProvider.setRefBookId(refBookId);
-            return dataProvider;
-        } else if (RefBookTaxOrganKpp.REF_BOOK_ID.equals(refBookId)) {
-            RefBookTaxOrganKpp dataProvider = applicationContext.getBean("refBookTaxOrganKpp", RefBookTaxOrganKpp.class);
-            dataProvider.setRefBookId(refBookId);
-            return dataProvider;
-        } else if (RefBook.EMAIL_CONFIG.equals(refBookId)) {
+        }
+		if (EMAIL_CONFIG.getId() == refBookId) {
             return applicationContext.getBean("refBookRefBookEmailConfig", RefBookEmailConfigProvider.class);
-        } else if (RefBook.ASYNC_CONFIG.equals(refBookId)) {
+        }
+		if (ASYNC_CONFIG.getId() == refBookId) {
             return applicationContext.getBean("refBookAsyncConfigProvider", RefBookAsyncConfigProvider.class);
-        } else if (RefBookVzlHistory.REF_BOOK_ID.equals(refBookId)) {
-            return applicationContext.getBean("refBookVzlHistory", RefBookVzlHistory.class);
-        }  else if (RefBookCurrencyMetals.REF_BOOK_ID.equals(refBookId)) {
-            return applicationContext.getBean("RefBookCurrencyMetals", RefBookCurrencyMetals.class);
-        }  else if (RefBookCreditRatingsClasses.REF_BOOK_ID.equals(refBookId)) {
-            return applicationContext.getBean("RefBookCreditRatingsClasses", RefBookCreditRatingsClasses.class);
-        }  else if (RefBookSimpleReadOnly.ASNU_REF_BOOK_ID.equals(refBookId)) {
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.ASNU_REF_BOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.ASNU_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBook.Id.REGION.getId() == refBookId ||
-                RefBook.Id.NDFL.getId() == refBookId ||
-                RefBook.Id.NDFL_DETAIL.getId() == refBookId) {
-            RefBookSimpleDataProvider provider = (RefBookSimpleDataProvider) applicationContext.getBean("refBookSimpleDataProvider", RefBookDataProvider.class);
-            provider.setRefBookId(refBookId);
-            return provider;
-        } else if (RefBookSimpleReadOnly.FIAS_OPERSTAT_ID.equals(refBookId)){ //Справочники ФИАС
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_OPERSTAT_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_OPERSTAT_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.FIAS_SOCRBASE_ID.equals(refBookId)){
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_SOCRBASE_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_SOCRBASE_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_ID.equals(refBookId)){
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.FIAS_HOUSE_ID.equals(refBookId)){
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_HOUSE_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_HOUSE_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.FIAS_HOUSEINT_ID.equals(refBookId)){
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_HOUSEINT_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_HOUSEINT_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.FIAS_ROOM_ID.equals(refBookId)){
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.FIAS_ROOM_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.FIAS_ROOM_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.DECLARATION_DATA_KIND_REF_BOOK_ID.equals(refBookId)){
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.DECLARATION_DATA_KIND_REF_BOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.DECLARATION_DATA_KIND_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.NDFL_REFBOOK_ID.equals(refBookId)){
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.NDFL_REFBOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.NDFL_REFBOOK_TABLE_NAME);
-            return refBookSimple;
-        } else if (RefBookSimpleReadOnly.TABLE_NDFL_REFBOOK_ID.equals(refBookId)){
-            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(RefBookSimpleReadOnly.TABLE_NDFL_REFBOOK_ID);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.TABLE_NDFL_TABLE_NAME);
-            return refBookSimple;
+        }
+        if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
+            RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            dataProvider.setRefBook(refBook);
+            return dataProvider;
         } else {
-			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
-			refBookUniversal.setRefBookId(refBookId);
-			return refBookUniversal;
+            RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
+            refBookUniversal.setRefBookId(refBookId);
+            return refBookUniversal;
         }
     }
 

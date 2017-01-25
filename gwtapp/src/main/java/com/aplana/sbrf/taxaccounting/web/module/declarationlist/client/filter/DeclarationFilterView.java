@@ -82,6 +82,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationKindPicker.setWidth("100%");
         declarationKindPicker.setPeriodDates(new Date(), new Date());
         declarationKindPicker.setManualUpdate(true);
+        declarationKindPicker.setMultiSelect(true);
 
         declarationTypePicker = new RefBookPickerWidget(false, false);
         declarationTypePicker.setVersionEnabled(false);
@@ -89,6 +90,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationTypePicker.setWidth("100%");
         declarationTypePicker.setPeriodDates(new Date(), new Date());
         declarationTypePicker.setManualUpdate(true);
+        declarationTypePicker.setMultiSelect(true);
 
         asnuPicker = new RefBookPickerWidget(false, false);
         asnuPicker.setVersionEnabled(false);
@@ -145,8 +147,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         this.formDataFilter = formDataFilter;
         departmentPicker.setValue(formDataFilter.getDepartmentIds());
         reportPeriodPicker.setValue(formDataFilter.getReportPeriodIds());
-        if (formDataFilter.getDeclarationTypeId() != null) {
-            declarationTypePicker.setValue(Arrays.asList(formDataFilter.getDeclarationTypeId().longValue()));
+        if (formDataFilter.getDeclarationTypeIds() != null) {
+            declarationTypePicker.setValue(formDataFilter.getDeclarationTypeIds());
         } else {
             declarationTypePicker.setValue(null);
         }
@@ -160,9 +162,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         formDataFilter.setReportPeriodIds(reportPeriodPicker.getValue());
         List<Long> values = declarationTypePicker.getValue();
         if (values != null && !values.isEmpty()) {
-            formDataFilter.setDeclarationTypeId(values.get(0).intValue());
+            formDataFilter.setDeclarationTypeIds(values);
         } else {
-            formDataFilter.setDeclarationTypeId(null);
+            formDataFilter.setDeclarationTypeIds(null);
         }
         formDataFilter.setFormState(formStatePicker.getValue());
         formDataFilter.setTaxOrganCode(taxOrganisationPicker.getValue());
@@ -176,9 +178,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         }
         List<Long> kindPickerValues = declarationKindPicker.getValue();
         if (kindPickerValues != null && !kindPickerValues.isEmpty()) {
-            formDataFilter.setFormKind(kindPickerValues.get(0));
+            formDataFilter.setFormKindIds(kindPickerValues);
         } else {
-            formDataFilter.setFormKind(null);
+            formDataFilter.setFormKindIds(null);
         }
         formDataFilter.setFileName(fileNamePicker.getValue());
 		return formDataFilter;
@@ -239,20 +241,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         style.setProperty("height", (taxType == TaxType.PFR || taxType == TaxType.NDFL) ? (65 + 22) : 22, Style.Unit.PX);
 
         switch (taxType) {
-            case DEAL:
-                fillDeal();
-                break;
-            case PROPERTY:
-            case TRANSPORT:
-            case LAND:
-                fillTransportAndPropertyAndLand(taxType);
-                break;
-            case INCOME:
-                fillIncome();
-                break;
             case NDFL:
             case PFR:
-                fillNdfl();
+                fillNdflPfr(taxType);
                 break;
             default:
                 fillDefault();
@@ -355,14 +346,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel5.add(declarationTypePicker);
         verticalPanel5.add(formStatePicker);
 
-
-        if (taxType == TaxType.TRANSPORT) {
-            label = getLabel("Налоговый орган (кон.):");
-        } else if (taxType == TaxType.LAND) {
-            label = getLabel("Код налогового органа (кон.):");
-        } else {
-            label = getLabel("Налоговый орган:");
-        }
+        label = getLabel("Налоговый орган:");
         verticalPanel6.add(label);
 
         label = getLabel("КПП:");
@@ -457,7 +441,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         panel.add(horizontalPanel);
     }
 
-    private void fillNdfl() {
+    private void fillNdflPfr(TaxType taxType) {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.setWidth("100%");
         VerticalPanel verticalPanel1 = new VerticalPanel();
@@ -501,24 +485,27 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         label = getLabel("Вид налоговой формы:");
         //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel4.add(label);
-        label = getLabel("Состояние:");
-        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel4.add(label);
 
         verticalPanel5.add(declarationKindPicker);
         verticalPanel5.add(declarationTypePicker);
-        verticalPanel5.add(formStatePicker);
 
+        /*
         label = getLabel("АСНУ:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel6.add(label);
-        verticalPanel7.add(asnuPicker);
+        verticalPanel7.add(asnuPicker);*/
 
-        label = getLabel("Файл:");
+        label = getLabel("Состояние:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel6.add(label);
-        verticalPanel7.add(fileNamePicker);
+        verticalPanel7.add(formStatePicker);
 
+        if (taxType.equals(TaxType.PFR)) {
+            label = getLabel("Файл:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel6.add(label);
+            verticalPanel7.add(fileNamePicker);
+        }
         panel.add(horizontalPanel);
     }
 

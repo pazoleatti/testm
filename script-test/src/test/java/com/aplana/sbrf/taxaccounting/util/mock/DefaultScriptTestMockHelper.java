@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -270,7 +271,9 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
 
     @Override
     public RefBookFactory mockRefBookFactory() {
-        return mock(RefBookFactory.class);
+        RefBookFactory refBookFactory = mock(RefBookFactory.class);
+        when(refBookFactory.getDataProvider(anyLong())).thenReturn(refBookDataProvider);
+        return refBookFactory;
     }
 
     @Override
@@ -443,8 +446,15 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     private RefBookDataProvider mockRefBookDataProvider() {
-        return mock(RefBookDataProvider.class);
+        RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = mock(Map.class);
+        when(pagingResultItem.get(any())).thenReturn(new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+        pagingResult.add(pagingResultItem);
+        when(refBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(pagingResult);
+        return refBookDataProvider;
     }
+
 
     @Override
     public DataRowHelper getDataRowHelper() {

@@ -42,12 +42,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     // Тип налога -> ID справочника с параметрами подразделения
     private static final Map<TaxType, Long> TAX_TYPE_TO_REF_BOOK_MAP = new HashMap<TaxType, Long>() {
         {
-            put(TaxType.INCOME, RefBook.DEPARTMENT_CONFIG_INCOME);
-            put(TaxType.TRANSPORT, RefBook.DEPARTMENT_CONFIG_TRANSPORT);
-            put(TaxType.DEAL, RefBook.DEPARTMENT_CONFIG_DEAL);
-            put(TaxType.VAT, RefBook.DEPARTMENT_CONFIG_VAT);
-            put(TaxType.PROPERTY, RefBook.DEPARTMENT_CONFIG_PROPERTY);
-            put(TaxType.LAND, RefBook.DEPARTMENT_CONFIG_LAND);
+            put(TaxType.NDFL, RefBook.Id.NDFL.getId());
+            put(TaxType.PFR, RefBook.Id.FOND.getId());
         }
     };
 
@@ -73,6 +69,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
+    public DeclarationData getDeclarationData(long declarationDataId) {
+        return declarationDataDao.get(declarationDataId);
+    }
+
+    @Override
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
     }
@@ -85,6 +86,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
         return declarationDataDao.getLast(declarationTypeId, departmentId, reportPeriodId);
+    }
+
+    @Override
+    public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId){
+        return declarationDataDao.findAllDeclarationData(declarationTypeId, departmentId, reportPeriodId);
     }
 
     @Override
@@ -169,7 +175,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
         // фильтр
-        declarationFilter.setDeclarationTypeId(declarationTypeId);
+        declarationFilter.setDeclarationTypeIds(Arrays.asList((long)declarationTypeId));
         declarationFilter.setReportPeriodIds(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
         declarationFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
         declarationFilter.setCorrectionTag(departmentReportPeriod.getCorrectionDate() != null);

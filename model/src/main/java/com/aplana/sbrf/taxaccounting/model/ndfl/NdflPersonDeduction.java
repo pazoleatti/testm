@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * @author Andrey Drunk
  */
-public class NdflPersonDeduction extends NdflPersonDetail {
+public class NdflPersonDeduction extends NdflPersonOperation {
 
     private String typeCode;
     private String notifType;

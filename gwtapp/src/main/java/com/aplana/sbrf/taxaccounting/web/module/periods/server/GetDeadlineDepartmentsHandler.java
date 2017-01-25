@@ -37,22 +37,6 @@ public class GetDeadlineDepartmentsHandler extends AbstractActionHandler<GetDead
 		Department d = null;
 		if (userInfo.getUser().hasRole("ROLE_CONTROL_UNP")) {
 			switch (taxType) {
-				case PROPERTY:
-				case TRANSPORT:
-                case LAND:
-					departments.addAll(departmentService.getAllChildren(action.getDepartment().getDepartmentId()));
-					for (Department dep : departments) {
-						if (dep.getType() == DepartmentType.TERR_BANK) {
-							d = dep;
-							break;
-						}
-					}
-					break;
-				case INCOME:
-				case DEAL:
-				case VAT:
-                case MARKET:
-                case ETR:
                 case NDFL:
                 case PFR:
 					departments.addAll(departmentService.getBADepartments(userInfo.getUser()));

@@ -758,7 +758,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
         try {
             List<Relation> result = new ArrayList<Relation>();
-            getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result, light, true, true));
+            //TODO 19.01.2017 Запрос источников создаваемых через форму источники-приемники не используется, отключил вызов из-за ошибок
+            //getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result, light, true, true));
             return result;
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Relation>();

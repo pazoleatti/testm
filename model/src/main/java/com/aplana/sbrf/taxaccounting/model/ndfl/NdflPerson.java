@@ -11,7 +11,22 @@ import java.util.*;
  */
 public class NdflPerson extends IdentityObject<Long> {
 
+    /**
+     * Порядковый номер строки
+     */
+    private Integer rowNum;
+
+
+    /**
+     * Ссылка на справочник физлиц
+     */
+    private Long personId;
+
+    /**
+     * Ссылка на декларацию к которой относятся данные
+     */
     private Long declarationDataId;
+
     private String inp;
     private String snils;
     private String lastName;
@@ -37,15 +52,15 @@ public class NdflPerson extends IdentityObject<Long> {
     private String address;
     private String additionalData;
 
-    private List<NdflPersonIncome> ndflPersonIncomes;
-    private List<NdflPersonDeduction> ndflPersonDeductions;
-    private List<NdflPersonPrepayment> ndflPersonPrepayments;
+    private List<NdflPersonIncome> incomes;
+    private List<NdflPersonDeduction> deductions;
+    private List<NdflPersonPrepayment> prepayments;
 
     public NdflPerson() {
         super();
-        ndflPersonIncomes = new ArrayList<NdflPersonIncome>();
-        ndflPersonDeductions = new ArrayList<NdflPersonDeduction>();
-        ndflPersonPrepayments = new ArrayList<NdflPersonPrepayment>();
+        incomes = new ArrayList<NdflPersonIncome>();
+        deductions = new ArrayList<NdflPersonDeduction>();
+        prepayments = new ArrayList<NdflPersonPrepayment>();
     }
 
     public static final String TABLE_NAME = "ndfl_person";
@@ -325,27 +340,27 @@ public class NdflPerson extends IdentityObject<Long> {
         this.additionalData = additionalData;
     }
 
-    public List<NdflPersonIncome> getNdflPersonIncomes() {
-        return ndflPersonIncomes != null ? ndflPersonIncomes : Collections.<NdflPersonIncome>emptyList();
+    public List<NdflPersonIncome> getIncomes() {
+        return incomes != null ? incomes : Collections.<NdflPersonIncome>emptyList();
     }
 
-    public void setNdflPersonIncomes(List<NdflPersonIncome> ndflPersonIncomes) {
-        this.ndflPersonIncomes = ndflPersonIncomes;
+    public void setIncomes(List<NdflPersonIncome> incomes) {
+        this.incomes = incomes;
     }
 
-    public List<NdflPersonDeduction> getNdflPersonDeductions() {
-        return ndflPersonDeductions != null ? ndflPersonDeductions : Collections.<NdflPersonDeduction>emptyList();
+    public List<NdflPersonDeduction> getDeductions() {
+        return deductions != null ? deductions : Collections.<NdflPersonDeduction>emptyList();
     }
 
-    public void setNdflPersonDeductions(List<NdflPersonDeduction> ndflPersonDeductions) {
-        this.ndflPersonDeductions = ndflPersonDeductions;
+    public void setDeductions(List<NdflPersonDeduction> deductions) {
+        this.deductions = deductions;
     }
 
-    public List<NdflPersonPrepayment> getNdflPersonPrepayments() {
-        return ndflPersonPrepayments != null ? ndflPersonPrepayments : Collections.<NdflPersonPrepayment>emptyList();
+    public List<NdflPersonPrepayment> getPrepayments() {
+        return prepayments != null ? prepayments : Collections.<NdflPersonPrepayment>emptyList();
     }
 
-    public void setNdflPersonPrepayments(List<NdflPersonPrepayment> ndflPersonPrepayments) {
-        this.ndflPersonPrepayments = ndflPersonPrepayments;
+    public void setPrepayments(List<NdflPersonPrepayment> prepayments) {
+        this.prepayments = prepayments;
     }
 }

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -46,8 +45,6 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
     private BDUtils dbUtils;
     @Autowired
     private LockDataService lockService;
-    @Autowired
-    private FormDataService formDataService;
     @Autowired
     private RefBookHelper refBookHelper;
     @Autowired
@@ -255,17 +252,8 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
             //Проверка корректности
             checkCorrectness(logger, refBook, null, versionFrom, attributes, records);
 
-            if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
-                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
-                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
-                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
-                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
-                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_LAND) &&
-                    !refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
-                    !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) &&
-                    !refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId()) &&
-                    !refBookId.equals(RefBook.WithTable.LAND.getTableRefBookId())
-                    ) {
+            if (!refBookId.equals(RefBook.WithTable.NDFL.getTableRefBookId()) &&
+				!refBookId.equals(RefBook.WithTable.FOND.getTableRefBookId())) {
 
                 if (refBook.isVersioned()) {
                     for (RefBookRecord record : records) {
@@ -317,19 +305,11 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
         }
 
         //Признак настроек подразделений
-        boolean isConfig = refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) ||
-                refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) ||
-                refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) ||
-                refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) ||
-                refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) ||
-                refBookId.equals(RefBook.DEPARTMENT_CONFIG_LAND) ||
-                refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) ||
-                refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) ||
-                refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId()) ||
-                refBookId.equals(RefBook.WithTable.LAND.getTableRefBookId());
+        boolean isConfig =
+				refBookId.equals(RefBook.WithTable.FOND.getTableRefBookId()) ||
+                refBookId.equals(RefBook.WithTable.NDFL.getTableRefBookId());
 
         if (!isConfig) {
-
             //Проверка отсутствия конфликта с датой актуальности родительского элемента
             if (refBook.isHierarchic() && refBook.isVersioned()) {
                 checkParentConflict(logger, versionFrom, records);
@@ -368,9 +348,9 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
             }
             boolean isDepartmentConfigTable = false;
             Integer i = null;
-            if (Arrays.asList(RefBook.WithTable.INCOME.getTableRefBookId(),
-                    RefBook.WithTable.PROPERTY.getTableRefBookId(),
-                    RefBook.WithTable.TRANSPORT.getTableRefBookId()).contains(refBook.getId())) {
+            if (Arrays.asList(
+					RefBook.WithTable.NDFL.getTableRefBookId(),
+                    RefBook.WithTable.FOND.getTableRefBookId()).contains(refBook.getId())) {
                 isDepartmentConfigTable = true;
                 i = 1;
             }
@@ -423,10 +403,9 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
                 }
                 if (isDepartmentConfigTable) i++;
             }
-            if (Arrays.asList(RefBook.WithTable.INCOME.getRefBookId(), RefBook.WithTable.INCOME.getTableRefBookId(),
-                    RefBook.WithTable.PROPERTY.getRefBookId(), RefBook.WithTable.PROPERTY.getTableRefBookId(),
-                    RefBook.WithTable.TRANSPORT.getRefBookId(), RefBook.WithTable.TRANSPORT.getTableRefBookId(),
-                    RefBook.DEPARTMENT_CONFIG_DEAL, RefBook.DEPARTMENT_CONFIG_VAT).contains(refBook.getId())) {
+            if (Arrays.asList(
+					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId(),
+                    RefBook.WithTable.FOND.getRefBookId(), RefBook.WithTable.FOND.getTableRefBookId()).contains(refBook.getId())) {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
             } else {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);
@@ -844,10 +823,10 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
         List<FormLink> forms = isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
         for (FormLink form : forms) {
             //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
-            if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
+            //if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
                 //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
-                formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
-                        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
+                //formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
+                //        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
                 /*
                 reportService.delete(form.getFormDataId(), null);
                 List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
@@ -865,10 +844,10 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
                         }
                     }
                 }*/
-            } else {
+            //} else {
                 logger.error(form.getMsg());
                 used = true;
-            }
+            //}
         }
 
         //Проверка использования в настройках подразделений

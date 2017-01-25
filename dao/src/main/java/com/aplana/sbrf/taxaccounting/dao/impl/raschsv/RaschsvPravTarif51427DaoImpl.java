@@ -62,7 +62,7 @@ public class RaschsvPravTarif51427DaoImpl extends AbstractDao implements Raschsv
             raschsvPravTarif51427.setRaschsvObyazPlatSvId(SqlUtils.getLong(rs, RaschsvPravTarif51427.COL_RASCHSV_OBYAZ_PLAT_SV_ID));
             raschsvPravTarif51427.setDoh346_15vs(rs.getLong(RaschsvPravTarif51427.COL_DOH346_15VS));
             raschsvPravTarif51427.setDoh6_427(rs.getLong(RaschsvPravTarif51427.COL_DOH6_427));
-            raschsvPravTarif51427.setDolDoh6_427(rs.getDouble(RaschsvPravTarif51427.COL_DOL_DOH6_427));
+            raschsvPravTarif51427.setDolDoh6_427(rs.getBigDecimal(RaschsvPravTarif51427.COL_DOL_DOH6_427));
 
             return raschsvPravTarif51427;
         }

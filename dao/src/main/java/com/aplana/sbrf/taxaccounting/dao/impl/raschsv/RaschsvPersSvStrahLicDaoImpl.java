@@ -38,9 +38,9 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     private static final String SV_VYPL_FIELDS = SqlUtils.getColumnsToString(RaschsvSvVypl.COLUMNS, ":");
 
     // Перечень столбцов таблицы СвВыплМК
-    private static final String SV_VYPL_MK_COLS = SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, null);
-    private static final String SV_VYPL_MK_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, SV_VYPL_MT_ALIAS + ".");
-    private static final String SV_VYPL_MK_FIELDS = SqlUtils.getColumnsToString(RaschsvSvVyplMt.COLUMNS, ":");
+    private static final String SV_VYPL_MK_COLS = SqlUtils.getColumnsToString(RaschsvSvVyplMk.COLUMNS, null);
+    private static final String SV_VYPL_MK_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvSvVyplMk.COLUMNS, SV_VYPL_MT_ALIAS + ".");
+    private static final String SV_VYPL_MK_FIELDS = SqlUtils.getColumnsToString(RaschsvSvVyplMk.COLUMNS, ":");
 
     // Перечень столбцов таблицы ВыплСВДоп
     private static final String VYPL_SV_DOP_COLS = SqlUtils.getColumnsToString(RaschsvVyplSvDop.COLUMNS, null);
@@ -60,7 +60,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             " (" + SV_VYPL_COLS + ") VALUES (" + SV_VYPL_FIELDS + ")";
 
     // sql запрос для сохранения в СвВыплМК
-    private static final String SQL_INSERT_SV_VYPL_MT = "INSERT INTO " + RaschsvSvVyplMt.TABLE_NAME +
+    private static final String SQL_INSERT_SV_VYPL_MT = "INSERT INTO " + RaschsvSvVyplMk.TABLE_NAME +
             " (" + SV_VYPL_MK_COLS + ") VALUES (" + SV_VYPL_MK_FIELDS + ")";
 
     // sql запрос для сохранения в ВыплСВДоп
@@ -86,9 +86,9 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
     // sql запрос для выборки из СвВыплМК
     private static final StringBuilder SQL_SELECT_SV_VYPL_MT_BY_PERSON_IDS = new StringBuilder()
-            .append("SELECT " + SV_VYPL_MK_COLS_WITH_ALIAS + " FROM " + RaschsvSvVyplMt.TABLE_NAME + " " + SV_VYPL_MT_ALIAS)
+            .append("SELECT " + SV_VYPL_MK_COLS_WITH_ALIAS + " FROM " + RaschsvSvVyplMk.TABLE_NAME + " " + SV_VYPL_MT_ALIAS)
             .append(" INNER JOIN " + RaschsvSvVypl.TABLE_NAME + " " + SV_VYPL_ALIAS +
-                    " ON " + SV_VYPL_MT_ALIAS + "." + RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID + " = " + SV_VYPL_ALIAS + "." + RaschsvSvVypl.COL_ID)
+                    " ON " + SV_VYPL_MT_ALIAS + "." + RaschsvSvVyplMk.COL_RASCHSV_SV_VYPL_ID + " = " + SV_VYPL_ALIAS + "." + RaschsvSvVypl.COL_ID)
             .append( " WHERE ");
 
     // sql запрос для выборки из ВыплСВДоп
@@ -190,10 +190,10 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             }
 
             // Получим СвВыплМК
-            List<RaschsvSvVyplMt> raschsvSvVyplMtList = findSvVyplMtListByPersonIds(persSvStrahLicIds);
-            for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVyplMtList) {
-                RaschsvSvVypl raschsvSvVypl = mapSvVypl.get(raschsvSvVyplMt.getRaschsvSvVyplId());
-                raschsvSvVypl.addRaschsvSvVyplMt(raschsvSvVyplMt);
+            List<RaschsvSvVyplMk> raschsvSvVyplMkList = findSvVyplMtListByPersonIds(persSvStrahLicIds);
+            for (RaschsvSvVyplMk raschsvSvVyplMk : raschsvSvVyplMkList) {
+                RaschsvSvVypl raschsvSvVypl = mapSvVypl.get(raschsvSvVyplMk.getRaschsvSvVyplId());
+                raschsvSvVypl.addRaschsvSvVyplMt(raschsvSvVyplMk);
             }
 
             // Получим ВыплСВДоп
@@ -231,7 +231,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
      * @param persSvStrahLicIds - перечень идентификаторов застрахованных лиц
      * @return
      */
-    private List<RaschsvSvVyplMt> findSvVyplMtListByPersonIds(List<Long> persSvStrahLicIds) {
+    private List<RaschsvSvVyplMk> findSvVyplMtListByPersonIds(List<Long> persSvStrahLicIds) {
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_SV_VYPL_MT_BY_PERSON_IDS +
                 SqlUtils.transformToSqlInStatement(SV_VYPL_ALIAS + "." + RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID, persSvStrahLicIds), new RaschsvSvVyplMtRowMapper());
     }
@@ -297,7 +297,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 batchValues.toArray(new Map[raschsvPersSvStrahLicList.size()]));
 
         List<RaschsvSvVypl> raschsvSvVyplList = new ArrayList<RaschsvSvVypl>();
-        List<RaschsvSvVyplMt> raschsvSvVyplMtList = new ArrayList<RaschsvSvVyplMt>();
+        List<RaschsvSvVyplMk> raschsvSvVyplMkList = new ArrayList<RaschsvSvVyplMk>();
 
         List<RaschsvVyplSvDop> raschsvVyplSvDopList = new ArrayList<RaschsvVyplSvDop>();
         List<RaschsvVyplSvDopMt> raschsvVyplSvDopMtList = new ArrayList<RaschsvVyplSvDopMt>();
@@ -309,10 +309,10 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 raschsvSvVypl.setRaschsvPersSvStrahLicId(raschsvPersSvStrahLic.getId());
                 raschsvSvVyplList.add(raschsvSvVypl);
 
-                for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVypl.getRaschsvSvVyplMtList()) {
-                    raschsvSvVyplMt.setRaschsvSvVyplId(raschsvSvVypl.getId());
-                    raschsvSvVyplMt.setId(generateId(RaschsvSvVyplMt.SEQ, Long.class));
-                    raschsvSvVyplMtList.add(raschsvSvVyplMt);
+                for (RaschsvSvVyplMk raschsvSvVyplMk : raschsvSvVypl.getRaschsvSvVyplMkList()) {
+                    raschsvSvVyplMk.setRaschsvSvVyplId(raschsvSvVypl.getId());
+                    raschsvSvVyplMk.setId(generateId(RaschsvSvVyplMk.SEQ, Long.class));
+                    raschsvSvVyplMkList.add(raschsvSvVyplMk);
                 }
             }
 
@@ -341,8 +341,8 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         }
 
         // Сохранение "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица"
-        if (!raschsvSvVyplMtList.isEmpty()) {
-            insertRaschsvSvVyplMt(raschsvSvVyplMtList);
+        if (!raschsvSvVyplMkList.isEmpty()) {
+            insertRaschsvSvVyplMt(raschsvSvVyplMkList);
         }
 
         // Сохранение ВыплСВДопМТ
@@ -378,25 +378,25 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
     /**
      * Сохранение СвВыплМК
-     * @param raschsvSvVyplMtList - перечень сведений о сумме выплат по месяцу и коду категории застрахованного лица
+     * @param raschsvSvVyplMkList - перечень сведений о сумме выплат по месяцу и коду категории застрахованного лица
      * @return
      */
-    private Integer insertRaschsvSvVyplMt(final List<RaschsvSvVyplMt> raschsvSvVyplMtList) {
-        List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvSvVyplMtList.size());
-        for (RaschsvSvVyplMt raschsvSvVyplMt : raschsvSvVyplMtList) {
+    private Integer insertRaschsvSvVyplMt(final List<RaschsvSvVyplMk> raschsvSvVyplMkList) {
+        List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvSvVyplMkList.size());
+        for (RaschsvSvVyplMk raschsvSvVyplMk : raschsvSvVyplMkList) {
             batchValues.add(
-                    new MapSqlParameterSource(RaschsvSvVyplMt.COL_ID, raschsvSvVyplMt.getId())
-                            .addValue(RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID, raschsvSvVyplMt.getRaschsvSvVyplId())
-                            .addValue(RaschsvSvVyplMt.COL_MESYAC, raschsvSvVyplMt.getMesyac())
-                            .addValue(RaschsvSvVyplMt.COL_KOD_KAT_LIC, raschsvSvVyplMt.getKodKatLic())
-                            .addValue(RaschsvSvVyplMt.COL_SUM_VYPL, raschsvSvVyplMt.getSumVypl())
-                            .addValue(RaschsvSvVyplMt.COL_VYPL_OPS, raschsvSvVyplMt.getVyplOps())
-                            .addValue(RaschsvSvVyplMt.COL_VYPL_OPS_DOG, raschsvSvVyplMt.getVyplOpsDog())
-                            .addValue(RaschsvSvVyplMt.COL_NACHISL_SV, raschsvSvVyplMt.getNachislSv())
+                    new MapSqlParameterSource(RaschsvSvVyplMk.COL_ID, raschsvSvVyplMk.getId())
+                            .addValue(RaschsvSvVyplMk.COL_RASCHSV_SV_VYPL_ID, raschsvSvVyplMk.getRaschsvSvVyplId())
+                            .addValue(RaschsvSvVyplMk.COL_MESYAC, raschsvSvVyplMk.getMesyac())
+                            .addValue(RaschsvSvVyplMk.COL_KOD_KAT_LIC, raschsvSvVyplMk.getKodKatLic())
+                            .addValue(RaschsvSvVyplMk.COL_SUM_VYPL, raschsvSvVyplMk.getSumVypl())
+                            .addValue(RaschsvSvVyplMk.COL_VYPL_OPS, raschsvSvVyplMk.getVyplOps())
+                            .addValue(RaschsvSvVyplMk.COL_VYPL_OPS_DOG, raschsvSvVyplMk.getVyplOpsDog())
+                            .addValue(RaschsvSvVyplMk.COL_NACHISL_SV, raschsvSvVyplMk.getNachislSv())
                             .getValues());
         }
         int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_SV_VYPL_MT,
-                batchValues.toArray(new Map[raschsvSvVyplMtList.size()]));
+                batchValues.toArray(new Map[raschsvSvVyplMkList.size()]));
 
         return res.length;
     }
@@ -486,10 +486,10 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             RaschsvSvVypl raschsvSvVypl = new RaschsvSvVypl();
             raschsvSvVypl.setId(SqlUtils.getLong(rs, RaschsvSvVypl.COL_ID));
             raschsvSvVypl.setRaschsvPersSvStrahLicId(SqlUtils.getLong(rs, RaschsvSvVypl.COL_RASCHSV_PERS_SV_STRAH_LIC_ID));
-            raschsvSvVypl.setSumVyplVs3(rs.getDouble(RaschsvSvVypl.COL_SUM_VYPL_VS3));
-            raschsvSvVypl.setVyplOpsVs3(rs.getDouble(RaschsvSvVypl.COL_VYPL_OPS_VS3));
-            raschsvSvVypl.setVyplOpsDogVs3(rs.getDouble(RaschsvSvVypl.COL_VYPL_OPS_DOG_VS3));
-            raschsvSvVypl.setNachislSvVs3(rs.getDouble(RaschsvSvVypl.COL_NACHISL_SV_VS3));
+            raschsvSvVypl.setSumVyplVs3(rs.getBigDecimal(RaschsvSvVypl.COL_SUM_VYPL_VS3));
+            raschsvSvVypl.setVyplOpsVs3(rs.getBigDecimal(RaschsvSvVypl.COL_VYPL_OPS_VS3));
+            raschsvSvVypl.setVyplOpsDogVs3(rs.getBigDecimal(RaschsvSvVypl.COL_VYPL_OPS_DOG_VS3));
+            raschsvSvVypl.setNachislSvVs3(rs.getBigDecimal(RaschsvSvVypl.COL_NACHISL_SV_VS3));
 
             return raschsvSvVypl;
         }
@@ -498,20 +498,20 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     /**
      * Маппинг для СвВыплМК
      */
-    private static final class RaschsvSvVyplMtRowMapper implements RowMapper<RaschsvSvVyplMt> {
+    private static final class RaschsvSvVyplMtRowMapper implements RowMapper<RaschsvSvVyplMk> {
         @Override
-        public RaschsvSvVyplMt mapRow(ResultSet rs, int index) throws SQLException {
-            RaschsvSvVyplMt raschsvSvVyplMt = new RaschsvSvVyplMt();
-            raschsvSvVyplMt.setId(SqlUtils.getLong(rs, RaschsvSvVyplMt.COL_ID));
-            raschsvSvVyplMt.setRaschsvSvVyplId(SqlUtils.getLong(rs, RaschsvSvVyplMt.COL_RASCHSV_SV_VYPL_ID));
-            raschsvSvVyplMt.setMesyac(rs.getString(RaschsvSvVyplMt.COL_MESYAC));
-            raschsvSvVyplMt.setKodKatLic(rs.getString(RaschsvSvVyplMt.COL_KOD_KAT_LIC));
-            raschsvSvVyplMt.setSumVypl(rs.getDouble(RaschsvSvVyplMt.COL_SUM_VYPL));
-            raschsvSvVyplMt.setVyplOps(rs.getDouble(RaschsvSvVyplMt.COL_VYPL_OPS));
-            raschsvSvVyplMt.setVyplOpsDog(rs.getDouble(RaschsvSvVyplMt.COL_VYPL_OPS_DOG));
-            raschsvSvVyplMt.setNachislSv(rs.getDouble(RaschsvSvVyplMt.COL_NACHISL_SV));
+        public RaschsvSvVyplMk mapRow(ResultSet rs, int index) throws SQLException {
+            RaschsvSvVyplMk raschsvSvVyplMk = new RaschsvSvVyplMk();
+            raschsvSvVyplMk.setId(SqlUtils.getLong(rs, RaschsvSvVyplMk.COL_ID));
+            raschsvSvVyplMk.setRaschsvSvVyplId(SqlUtils.getLong(rs, RaschsvSvVyplMk.COL_RASCHSV_SV_VYPL_ID));
+            raschsvSvVyplMk.setMesyac(rs.getString(RaschsvSvVyplMk.COL_MESYAC));
+            raschsvSvVyplMk.setKodKatLic(rs.getString(RaschsvSvVyplMk.COL_KOD_KAT_LIC));
+            raschsvSvVyplMk.setSumVypl(rs.getBigDecimal(RaschsvSvVyplMk.COL_SUM_VYPL));
+            raschsvSvVyplMk.setVyplOps(rs.getBigDecimal(RaschsvSvVyplMk.COL_VYPL_OPS));
+            raschsvSvVyplMk.setVyplOpsDog(rs.getBigDecimal(RaschsvSvVyplMk.COL_VYPL_OPS_DOG));
+            raschsvSvVyplMk.setNachislSv(rs.getBigDecimal(RaschsvSvVyplMk.COL_NACHISL_SV));
 
-            return raschsvSvVyplMt;
+            return raschsvSvVyplMk;
         }
     }
 
@@ -524,8 +524,8 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             RaschsvVyplSvDop raschsvVyplSvDop = new RaschsvVyplSvDop();
             raschsvVyplSvDop.setId(SqlUtils.getLong(rs, RaschsvVyplSvDop.COL_ID));
             raschsvVyplSvDop.setRaschsvPersSvStrahLicId(SqlUtils.getLong(rs, RaschsvVyplSvDop.COL_RASCHSV_PERS_SV_STRAH_LIC_ID));
-            raschsvVyplSvDop.setVyplSvVs3(rs.getDouble(RaschsvVyplSvDop.COL_VYPL_SV_VS3));
-            raschsvVyplSvDop.setNachislSvVs3(rs.getDouble(RaschsvVyplSvDop.COL_NACHISL_SV_VS3));
+            raschsvVyplSvDop.setVyplSvVs3(rs.getBigDecimal(RaschsvVyplSvDop.COL_VYPL_SV_VS3));
+            raschsvVyplSvDop.setNachislSvVs3(rs.getBigDecimal(RaschsvVyplSvDop.COL_NACHISL_SV_VS3));
 
             return raschsvVyplSvDop;
         }
@@ -542,8 +542,8 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             raschsvVyplSvDopMt.setRaschsvVyplSvDopId(SqlUtils.getLong(rs, RaschsvVyplSvDopMt.COL_RASCHSV_VYPL_SV_DOP_ID));
             raschsvVyplSvDopMt.setMesyac(rs.getString(RaschsvVyplSvDopMt.COL_MESYAC));
             raschsvVyplSvDopMt.setTarif(rs.getString(RaschsvVyplSvDopMt.COL_TARIF));
-            raschsvVyplSvDopMt.setVyplSv(rs.getDouble(RaschsvVyplSvDopMt.COL_VYPL_SV));
-            raschsvVyplSvDopMt.setNachislSv(rs.getDouble(RaschsvVyplSvDopMt.COL_NACHISL_SV));
+            raschsvVyplSvDopMt.setVyplSv(rs.getBigDecimal(RaschsvVyplSvDopMt.COL_VYPL_SV));
+            raschsvVyplSvDopMt.setNachislSv(rs.getBigDecimal(RaschsvVyplSvDopMt.COL_NACHISL_SV));
 
             return raschsvVyplSvDopMt;
         }

@@ -29,7 +29,7 @@ import java.util.*;
 public abstract class AbstractReadOnlyRefBook extends AbstractRefBookDataProvider {
 
 	/** Код справочника */
-    private Long refBookId;
+    protected RefBook refBook;
 
     @Autowired
     RefBookDao refBookDao;
@@ -175,14 +175,18 @@ public abstract class AbstractReadOnlyRefBook extends AbstractRefBookDataProvide
     }
 
 	public Long getRefBookId() {
-		if (refBookId == null) {
-			throw new IllegalArgumentException("Field \"refBookId\" must be set");
+		if (refBook == null) {
+			throw new IllegalArgumentException("Field \"refBook\" must be set");
 		}
-		return refBookId;
+		return refBook.getId();
 	}
 
-	public void setRefBookId(Long refBookId) {
-		this.refBookId = refBookId;
+	public RefBook getRefBook() {
+		return refBook;
+	}
+
+	public void setRefBook(RefBook refBook) {
+		this.refBook = refBook;
 	}
 
     @Override
@@ -193,7 +197,7 @@ public abstract class AbstractReadOnlyRefBook extends AbstractRefBookDataProvide
     @Override
     public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute,
                           boolean isSortAscending) {
-        return refBookDao.getRowNum(refBookId, version, recordId, filter, sortAttribute, isSortAscending);
+        return refBookDao.getRowNum(getRefBookId(), version, recordId, filter, sortAttribute, isSortAscending);
     }
 
     @Override

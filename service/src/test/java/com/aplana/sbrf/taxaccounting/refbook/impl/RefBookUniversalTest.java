@@ -73,7 +73,6 @@ public class RefBookUniversalTest {
         ReflectionTestUtils.setField(provider, "lockService", lockService);
 
         FormDataService formDataService = mock(FormDataService.class);
-        ReflectionTestUtils.setField(provider, "formDataService", formDataService);
 
         RefBookHelper refBookHelper = mock(RefBookHelper.class);
         ReflectionTestUtils.setField(provider, "refBookHelper", refBookHelper);

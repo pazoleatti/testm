@@ -563,19 +563,11 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
                         provider.deleteRecordVersions(logger, uniqueIds, false);
                     }
                 }
-                provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_DEAL);
-                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
-                }
-                provider = rbFactory.getDataProvider(RefBook.DEPARTMENT_CONFIG_VAT);
-                uniqueIds = provider.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
-                if (!uniqueIds.isEmpty()){
-                    provider.deleteRecordVersions(logger, uniqueIds, false);
-                }
-
                 //удаление ссылок
-                if (deleteReference(new RefBookAttribute(){{setRefBookId(30L);setId(160L);}}, uniqueRecordIds.get(0), logger)) {
+                if (deleteReference(new RefBookAttribute(){{
+						setRefBookId(RefBook.Id.DEPARTMENT.getId());
+						setId(160L);
+					}}, uniqueRecordIds.get(0), logger)) {
                     throw new ServiceLoggerException(
                             "Подразделение не может быть удалено, так как обнаружены ссылки на подразделение!",
                             logEntryService.save(logger.getEntries())
@@ -699,7 +691,7 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
         }
         //2
         List<DepartmentReportPeriod> listDRP =
-                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.INCOME, TaxType.DEAL, TaxType.VAT, TaxType.ETR, TaxType.NDFL, TaxType.PFR), Arrays.asList(0));
+                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.NDFL, TaxType.PFR), Arrays.asList(0));
         if (!listDRP.isEmpty()){
             for (DepartmentReportPeriod drp : listDRP)
                 //1А.1.1.1
@@ -832,39 +824,16 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
         Map<Integer, Map<String, Object>> records =
                 refBookDepartmentDao.isVersionUsedInRefBooks(
                         Arrays.asList(
-                                RefBook.DEPARTMENT_CONFIG_INCOME,
-                                RefBook.DEPARTMENT_CONFIG_TRANSPORT,
-                                RefBook.DEPARTMENT_CONFIG_DEAL,
-                                RefBook.DEPARTMENT_CONFIG_VAT,
-                                RefBook.DEPARTMENT_CONFIG_PROPERTY,
-                                RefBook.DEPARTMENT_CONFIG_LAND),
+                                RefBook.Id.NDFL.getId(),
+								RefBook.Id.FOND.getId()),
                         Arrays.asList((long) department.getId())
                 );
         for (Map.Entry<Integer, Map<String, Object>> entry : records.entrySet()){
-            TaxType taxType;
-            switch (((Long)entry.getValue().get(RefBookDepartmentDao.REFBOOK_ID_ALIAS)).intValue()){
-                case 31:
-                    taxType = TaxType.TRANSPORT;
-                    break;
-                case 33:
-                    taxType = TaxType.INCOME;
-                    break;
-                case 37:
-                    taxType = TaxType.DEAL;
-                    break;
-                case 98:
-                    taxType = TaxType.VAT;
-                    break;
-                case 99:
-                    taxType = TaxType.PROPERTY;
-                    break;
-                case 199: //ToDo
-                    taxType = TaxType.LAND;
-                    break;
-                default:
-                    taxType = TaxType.INCOME;
-                    break;
-            }
+			int refBookId = ((Long)entry.getValue().get(RefBookDepartmentDao.REFBOOK_ID_ALIAS)).intValue();
+			TaxType taxType = TaxType.NDFL;
+			if (refBookId == RefBook.Id.FOND.getId()) {
+				taxType = TaxType.PFR;
+			}
             Date startDate = (Date)entry.getValue().get(RefBookDepartmentDao.VERSION_START_ALIAS);
             String rpName =
                     refBookDepartmentDao.getReportPeriodNameByDate(taxType, startDate);

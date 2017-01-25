@@ -2,6 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:w='urn:import:com.aplana.gwt.client.mask.ui'>
     <ui:style>
         .marginLeft {
@@ -53,6 +54,21 @@
                 <g:Label width="250px" text="Наименование декларации:"/>
                 <g:TextBox width="500px" ui:field="decName" addStyleNames="{style.fix}"/>
             </g:HorizontalPanel>
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label width="250px" text="Тип налоговой формы:"/>
+                <r:RefBookPickerWidget ui:field="formKindPicker" width="100%" searchEnabled="false"
+                                       versionEnabled="false" manualUpdate="false"
+                                       attributeIdInt="9321" isHierarchical="false" multiSelect="false"
+                                       filter="record_id = 2 or record_id = 3 or record_id = 7"
+                                       title="Выбор типа налоговой формы"/>
+            </g:HorizontalPanel>
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label width="250px" text="Вип налоговой формы:"/>
+                <r:RefBookPickerWidget ui:field="formTypePicker" width="100%" versionEnabled="false" manualUpdate="false"
+                                       attributeIdInt="9312" isHierarchical="false" multiSelect="false"
+                                       title="Выбор вида налоговой формы"/>
+            </g:HorizontalPanel>
+
         </g:FlowPanel>
 
         <g:HorizontalPanel>

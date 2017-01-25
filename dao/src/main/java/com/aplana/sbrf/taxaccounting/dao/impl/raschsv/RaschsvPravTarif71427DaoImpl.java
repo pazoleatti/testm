@@ -77,8 +77,8 @@ public class RaschsvPravTarif71427DaoImpl extends AbstractDao implements Raschsv
             raschsvPravTarif71427.setDohGrantPer(rs.getLong(RaschsvPravTarif71427.COL_DOH_GRANT_PER));
             raschsvPravTarif71427.setDohEkDeyatPred(rs.getLong(RaschsvPravTarif71427.COL_DOH_EK_DEYAT_PRED));
             raschsvPravTarif71427.setDohEkDeyatPer(rs.getLong(RaschsvPravTarif71427.COL_DOH_EK_DEYAT_PER));
-            raschsvPravTarif71427.setDolDohPred(rs.getDouble(RaschsvPravTarif71427.COL_DOL_DOH_PRED));
-            raschsvPravTarif71427.setDolDohPer(rs.getDouble(RaschsvPravTarif71427.COL_DOL_DOH_PER));
+            raschsvPravTarif71427.setDolDohPred(rs.getBigDecimal(RaschsvPravTarif71427.COL_DOL_DOH_PRED));
+            raschsvPravTarif71427.setDolDohPer(rs.getBigDecimal(RaschsvPravTarif71427.COL_DOL_DOH_PER));
 
             return raschsvPravTarif71427;
         }

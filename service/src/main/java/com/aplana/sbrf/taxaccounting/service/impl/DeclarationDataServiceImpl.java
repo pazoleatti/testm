@@ -282,12 +282,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, WorkflowState.ACCEPTED, userInfo, logger)){
             formDataIds.add(relation.getFormDataId());
         }
+
+        //TODO 19.01.2017 Доработать таблицу DECLARATION_DATA_CONSOLIDATION, добавить столбец для хранения идентификатора декларации источника
         //Обновление информации о консолидации.
-        sourceService.deleteDeclarationConsolidateInfo(id);
-        sourceService.addDeclarationConsolidationInfo(id, formDataIds);
+        //sourceService.deleteDeclarationConsolidateInfo(id);
+        //sourceService.addDeclarationConsolidationInfo(id, formDataIds);
+
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Декларация обновлена", null);
+
     }
 
     @Override
@@ -346,6 +350,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             DeclarationData declarationData = declarationDataDao.get(id);
+
+            Logger logger = new Logger();
+            declarationDataScriptingService.executeScript(userInfo,
+                    declarationData, FormDataEvent.DELETE, new Logger(), null);
+
+            // Проверяем ошибки
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Найдены ошибки при выполнении удаления налоговой формы",
+                        logEntryService.save(logger.getEntries()));
+            }
 
             deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
             declarationDataDao.delete(id);
@@ -1400,6 +1415,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
 
             DeclarationData declarationData = get(declarationDataId, userInfo);
+
+            // проверка по xsd
+            validateDeclaration(userInfo, declarationData, logger, true, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, new LockStateLogger() {
+                @Override
+                public void updateState(String state) {
+                    // ничего не делаем
+                }
+            });
 
             //Архивирование перед сохраннеием в базу
             File zipOutFile = null;

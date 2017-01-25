@@ -66,15 +66,15 @@ public class RaschsvUplPrevOssDaoImpl extends AbstractDao implements RaschsvUplP
             RaschsvUplPrevOss raschsvUplPrevOss = new RaschsvUplPrevOss();
             raschsvUplPrevOss.setId(SqlUtils.getLong(rs, RaschsvUplPrevOss.COL_ID));
             raschsvUplPrevOss.setRaschsvObyazPlatSvId(SqlUtils.getLong(rs, RaschsvUplPrevOss.COL_RASCHSV_OBYAZ_PLAT_SV_ID));
-            raschsvUplPrevOss.setSumSbUplPer(rs.getDouble(RaschsvUplPrevOss.COL_SUM_SB_UPL_PER));
             raschsvUplPrevOss.setKbk(rs.getString(RaschsvUplPrevOss.COL_KBK));
-            raschsvUplPrevOss.setSumSbUpl1m(rs.getDouble(RaschsvUplPrevOss.COL_SUM_SB_UPL_1M));
-            raschsvUplPrevOss.setSumSbUpl2m(rs.getDouble(RaschsvUplPrevOss.COL_SUM_SB_UPL_2M));
-            raschsvUplPrevOss.setSumSbUpl3m(rs.getDouble(RaschsvUplPrevOss.COL_SUM_SB_UPL_3M));
-            raschsvUplPrevOss.setPrevRashSvPer(rs.getDouble(RaschsvUplPrevOss.COL_PREV_RASH_SV_PER));
-            raschsvUplPrevOss.setPrevRashSv1m(rs.getDouble(RaschsvUplPrevOss.COL_PREV_RASH_SV_1M));
-            raschsvUplPrevOss.setPrevRashSv2m(rs.getDouble(RaschsvUplPrevOss.COL_PREV_RASH_SV_2M));
-            raschsvUplPrevOss.setPrevRashSv3m(rs.getDouble(RaschsvUplPrevOss.COL_PREV_RASH_SV_3M));
+            raschsvUplPrevOss.setSumSbUplPer(rs.getBigDecimal(RaschsvUplPrevOss.COL_SUM_SB_UPL_PER));
+            raschsvUplPrevOss.setSumSbUpl1m(rs.getBigDecimal(RaschsvUplPrevOss.COL_SUM_SB_UPL_1M));
+            raschsvUplPrevOss.setSumSbUpl2m(rs.getBigDecimal(RaschsvUplPrevOss.COL_SUM_SB_UPL_2M));
+            raschsvUplPrevOss.setSumSbUpl3m(rs.getBigDecimal(RaschsvUplPrevOss.COL_SUM_SB_UPL_3M));
+            raschsvUplPrevOss.setPrevRashSvPer(rs.getBigDecimal(RaschsvUplPrevOss.COL_PREV_RASH_SV_PER));
+            raschsvUplPrevOss.setPrevRashSv1m(rs.getBigDecimal(RaschsvUplPrevOss.COL_PREV_RASH_SV_1M));
+            raschsvUplPrevOss.setPrevRashSv2m(rs.getBigDecimal(RaschsvUplPrevOss.COL_PREV_RASH_SV_2M));
+            raschsvUplPrevOss.setPrevRashSv3m(rs.getBigDecimal(RaschsvUplPrevOss.COL_PREV_RASH_SV_3M));
 
             return raschsvUplPrevOss;
         }

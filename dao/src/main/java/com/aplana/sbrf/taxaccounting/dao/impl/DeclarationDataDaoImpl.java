@@ -280,8 +280,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     .append(transformToSqlInStatement("drp.department_id", filter.getDepartmentIds()));
         }
 
-        if (filter.getDeclarationTypeId() != null) {
-            sql.append(" AND dectype.id = ").append(filter.getDeclarationTypeId());
+        if (filter.getDeclarationTypeIds() != null && !filter.getDeclarationTypeIds().isEmpty()) {
+            sql.append(" AND ")
+                    .append(transformToSqlInStatement("dectype.id", filter.getDeclarationTypeIds()));
         }
 
         if (filter.getFormState() != null) {
@@ -297,20 +298,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             }
         }
 
-        if (TaxType.NDFL.equals(filter.getTaxType()) || TaxType.PFR.equals(filter.getTaxType())) {
-            if (filter.getAsnuId() != null) {
-                sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
-            }
-            if (filter.getFormKind() != null) {
-                sql.append(" AND dectemplate.form_kind = ").append(filter.getFormKind());
-            }
-            if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
-                sql.append(" AND lower(dec.file_name) like lower(:fileName)");
-                values.put("fileName", "%"+filter.getFileName()+"%");
-            }
+        if (filter.getAsnuId() != null) {
+            sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
+        }
+        if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
+            sql.append(" AND ")
+            .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));
+        }
+        if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
+            sql.append(" AND lower(dec.file_name) like lower(:fileName)");
+            values.put("fileName", "%"+filter.getFileName()+"%");
         }
 
-        if (filter.getTaxType() == TaxType.PROPERTY || filter.getTaxType() == TaxType.TRANSPORT || filter.getTaxType() == TaxType.INCOME || filter.getTaxType() == TaxType.LAND || filter.getTaxType() == TaxType.NDFL || filter.getTaxType() == TaxType.PFR) {
+        if (filter.getTaxType() == TaxType.NDFL || filter.getTaxType() == TaxType.PFR) {
             if (filter.getTaxOrganCode() != null && !filter.getTaxOrganCode().isEmpty()) {
                 String[] codes = filter.getTaxOrganCode().split("; ");
                 for (int i = 0; i < codes.length; i++) {
@@ -521,4 +521,24 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return getNamedParameterJdbcTemplate().queryForObject("SELECT note FROM declaration_data WHERE id = :declarationDataId", values, String.class);
     }
 
+    @Override
+    public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.state, dd.department_report_period_id, dd.asnu_id, dd.file_name, drp.report_period_id, drp.department_id, rownum \n");
+            sb.append("FROM declaration_data dd, department_report_period drp, declaration_template dt \n");
+            sb.append("WHERE dd.department_report_period_id = drp.id \n");
+            sb.append("AND dt.id                            = dd.declaration_template_id \n");
+            sb.append("AND dt.declaration_type_id           = ? \n");
+            sb.append("AND drp.department_id                = ? \n");
+            sb.append("AND drp.report_period_id             = ? \n");
+            sb.append("ORDER BY drp.correction_date DESC nulls last");
+            return getJdbcTemplate().query(sb.toString(),
+                    new Object[]{declarationTypeId, departmentId, reportPeriodId},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
+                    new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

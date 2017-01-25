@@ -46,16 +46,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @UiField
     RefBookPickerWidget declarationTypeId;
     @UiField
-    RefBookPickerWidget taxOrganCode;
-    @UiField
-    RefBookPicker taxOrganKpp;
-    @UiField
-    Label taxOrganCodeLabel;
-    @UiField
-    HorizontalPanel codePanel;
-    @UiField
-    HorizontalPanel kppPanel;
-    @UiField
     HorizontalPanel correctionPanel;
     @UiField
     Label correctionDate;
@@ -80,8 +70,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         } else {
             declarationTypeId.setTitle("Выбор вида декларации");
         }
-        taxOrganCode.setEnabled(false);
-        taxOrganKpp.setEnabled(false);
         correctionPanel.setVisible(false);
         declarationTypeId.setPeriodDates(new Date(), new Date());
         declarationTypeId.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
@@ -90,77 +78,21 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
                 updateEnabled();
             }
         });
-        taxOrganCode.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<List<Long>> event) {
-                updateEnabled();
-                if (taxOrganCode.getFilter() != null) {
-                    taxOrganKpp.setFilter(taxOrganCode.getFilter() + " and TAX_ORGAN_CODE = '" + taxOrganCode.getDereferenceValue().trim() + "'");
-                    if (event.getValue() != null && !event.getValue().isEmpty() && !event.getValue().get(0).equals(taxOrganKpp.getSingleValue())) {
-                        taxOrganKpp.setSingleValue(null);
-                    }
-                }
-            }
-        });
     }
 
     @Override
     public void initRefBooks(Date version, String filter, TaxType taxType) {
-        taxOrganCode.setMultiSelect(false);
-        taxOrganKpp.setMultiSelect(false);
-        taxOrganCode.setDistinct(true);
-        if (taxType == TaxType.TRANSPORT) {
-            taxOrganCode.setAttributeId(3102L);
-            taxOrganKpp.setAttributeId(3103L);
-        }
-        if (taxType == TaxType.PROPERTY) {
-            taxOrganCode.setAttributeId(951L);
-            taxOrganKpp.setAttributeId(952L);
-        }
-
-        if (taxType == TaxType.INCOME) {
-            taxOrganCode.setAttributeId(3304L);
-            taxOrganKpp.setAttributeId(3305L);
-        }
-
-        if (taxType == TaxType.LAND) {
-            taxOrganCode.setAttributeId(7102L);
-            taxOrganKpp.setAttributeId(7103L);
-        }
-
-        if (filter != null && !filter.isEmpty()) {
-            taxOrganKpp.setFilter(filter);
-            taxOrganCode.setFilter(filter);
-            taxOrganKpp.setPeriodDates(version, version);
-            taxOrganCode.setPeriodDates(version, version);
-        } else {
-            taxOrganKpp.setFilter("0 = 1");
-            taxOrganCode.setFilter("0 = 1");
-        }
-
-        if (taxType == TaxType.TRANSPORT || taxType == TaxType.LAND) {
-            taxOrganCode.setTitle("Код налогового органа (кон.)");
-            taxOrganCodeLabel.setText("Код налогового органа (кон.)");
-        } else {
-            taxOrganCode.setTitle("Код налогового органа");
-            taxOrganCodeLabel.setText("Код налогового органа");
-        }
-        taxOrganCode.setSingleColumn("TAX_ORGAN_CODE");
-        taxOrganKpp.setSingleColumn("KPP");
     }
 
     @Override
     public void updateEnabled() {
         boolean departmentSelected =  departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
-        boolean taxOrganCodeSelected = departmentSelected && taxOrganCode.getValue() != null && !taxOrganCode.getValue().isEmpty();
         boolean periodSelected = periodPicker.getValue() != null && !periodPicker.getValue().isEmpty();
         boolean correctionDateSelected = correctionDate.getText() != null && !correctionDate.getText().isEmpty();
         boolean declarationTypeIdSelected = declarationTypeId.getValue() != null && !declarationTypeId.getValue().isEmpty();
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(periodSelected);
         declarationTypeId.setEnabled(departmentSelected);
-        taxOrganCode.setEnabled(departmentSelected);
-        taxOrganKpp.setEnabled(codePanel.isVisible() ? taxOrganCodeSelected : departmentSelected);
         // дата корректировки
         correctionPanel.setVisible(departmentSelected && correctionDateSelected);
     }
@@ -235,12 +167,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @UiHandler("departmentPicker")
     public void onDepartmentPickerChange(ValueChangeEvent<List<Integer>> event) {
         declarationTypeId.setValue(null);
-        taxOrganCode.setValue(null);
-        taxOrganKpp.setValue(null);
         if (getSelectedDepartment().isEmpty()) {
             declarationTypeId.setEnabled(false);
-            taxOrganCode.setEnabled(false);
-            taxOrganKpp.setEnabled(false);
         }
         getUiHandlers().onDepartmentChange();
     }
@@ -268,12 +196,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public void setSelectedTaxOrganCode(String code) {
-        taxOrganCode.setDereferenceValue(code);
     }
 
     @Override
     public void setSelectedTaxOrganKpp(String kpp) {
-        taxOrganKpp.setDereferenceValue(kpp);
     }
 
     @Override
@@ -307,22 +233,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE_D);
         }
 
-        boolean isCodeKppVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME) || taxType.equals(TaxType.LAND);
-        boolean isCodeVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.LAND);
-        codePanel.setVisible(isCodeVisible);
-        kppPanel.setVisible(isCodeKppVisible);
+        boolean isCodeKppVisible = taxType.equals(TaxType.NDFL) || taxType.equals(TaxType.PFR);
+        boolean isCodeVisible = taxType.equals(TaxType.NDFL) || taxType.equals(TaxType.PFR);
 
         declarationTypeId.setVisible(true);
-    }
-
-    @Override
-    public String getTaxOrganCode() {
-        return taxOrganCode.getDereferenceValue().trim();
-    }
-
-    @Override
-    public String getTaxOrganKpp() {
-        return taxOrganKpp.getDereferenceValue().trim();
     }
 
     @Override

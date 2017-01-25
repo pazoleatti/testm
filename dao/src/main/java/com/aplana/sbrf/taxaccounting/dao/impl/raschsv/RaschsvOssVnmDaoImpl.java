@@ -386,7 +386,7 @@ public class RaschsvOssVnmDaoImpl extends AbstractDao implements RaschsvOssVnmDa
             raschsvUplSvPrev.setRaschsvOssVnmId(SqlUtils.getLong(rs, RaschsvUplSvPrev.COL_RASCHSV_OSS_VNM_ID));
             raschsvUplSvPrev.setNodeName(rs.getString(RaschsvUplSvPrev.COL_NODE_NAME));
             raschsvUplSvPrev.setPriznak(rs.getString(RaschsvUplSvPrev.COL_PRIZNAK));
-            raschsvUplSvPrev.setSvSum(rs.getDouble(RaschsvUplSvPrev.COL_SV_SUM));
+            raschsvUplSvPrev.setSvSum(rs.getBigDecimal(RaschsvUplSvPrev.COL_SV_SUM));
 
             return raschsvUplSvPrev;
         }

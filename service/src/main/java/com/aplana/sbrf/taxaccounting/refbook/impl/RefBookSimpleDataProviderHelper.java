@@ -76,16 +76,9 @@ public class RefBookSimpleDataProviderHelper {
         }
 
         //Признак настроек подразделений
-        boolean isConfig = refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_INCOME) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_DEAL) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_VAT) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_LAND) ||
-                refBook.getId().equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.INCOME.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.LAND.getTableRefBookId());
+        boolean isConfig =
+				refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId()) ||
+				refBook.getId().equals(RefBook.WithTable.FOND.getTableRefBookId());
 
         if (!isConfig) {
 
@@ -201,9 +194,9 @@ public class RefBookSimpleDataProviderHelper {
             }
             boolean isDepartmentConfigTable = false;
             Integer i = null;
-            if (Arrays.asList(RefBook.WithTable.INCOME.getTableRefBookId(),
-                    RefBook.WithTable.PROPERTY.getTableRefBookId(),
-                    RefBook.WithTable.TRANSPORT.getTableRefBookId()).contains(refBook.getId())) {
+            if (Arrays.asList(
+					RefBook.WithTable.FOND.getTableRefBookId(),
+					RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
                 isDepartmentConfigTable = true;
                 i = 1;
             }
@@ -256,10 +249,9 @@ public class RefBookSimpleDataProviderHelper {
                 }
                 if (isDepartmentConfigTable) i++;
             }
-            if (Arrays.asList(RefBook.WithTable.INCOME.getRefBookId(), RefBook.WithTable.INCOME.getTableRefBookId(),
-                    RefBook.WithTable.PROPERTY.getRefBookId(), RefBook.WithTable.PROPERTY.getTableRefBookId(),
-                    RefBook.WithTable.TRANSPORT.getRefBookId(), RefBook.WithTable.TRANSPORT.getTableRefBookId(),
-                    RefBook.DEPARTMENT_CONFIG_DEAL, RefBook.DEPARTMENT_CONFIG_VAT).contains(refBook.getId())) {
+            if (Arrays.asList(
+					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId(),
+					RefBook.WithTable.FOND.getRefBookId(), RefBook.WithTable.FOND.getTableRefBookId()).contains(refBook.getId())) {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
             } else {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);
@@ -349,10 +341,10 @@ public class RefBookSimpleDataProviderHelper {
         List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
         for (FormLink form : forms) {
             //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
-            if (refBook.getId() == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
+            //if (refBook.getId() == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
                 //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
-                formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
-                        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
+                //formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
+                //        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
                 /*
                 reportService.delete(form.getFormDataId(), null);
                 List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
@@ -370,10 +362,10 @@ public class RefBookSimpleDataProviderHelper {
                         }
                     }
                 }*/
-            } else {
+            //} else {
                 logger.error(form.getMsg());
                 used = true;
-            }
+            //}
         }
 
         //Проверка использования в настройках подразделений

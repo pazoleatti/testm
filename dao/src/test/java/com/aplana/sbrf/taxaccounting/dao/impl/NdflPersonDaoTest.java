@@ -56,7 +56,7 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testFindNdflPerson() {
-        List<NdflPerson> result = ndflPersonDao.findNdflPerson(1);
+        List<NdflPerson> result = ndflPersonDao.findPerson(1);
         Assert.assertEquals(2, result.size());
     }
 
@@ -70,48 +70,15 @@ public class NdflPersonDaoTest {
 
         NdflPerson ndflPerson = ndflPersonDao.get(id);
 
-        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "ndflPersonIncomes", "ndflPersonDeductions", "ndflPersonPrepayments"));
+        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "incomes", "deductions", "prepayments"));
 
-        boolean incomesEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getNdflPersonIncomes(), ndflPerson.getNdflPersonIncomes(), new Equator<NdflPersonIncome>() {
-            @Override
-            public boolean equate(NdflPersonIncome o1, NdflPersonIncome o2) {
-                return EqualsBuilder.reflectionEquals(o1, o2);
-            }
-
-            @Override
-            public int hash(NdflPersonIncome o) {
-                return HashCodeBuilder.reflectionHashCode(o);
-            }
-        });
-
+        boolean incomesEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getIncomes(), ndflPerson.getIncomes(), new NdflPersonIncomeEquator());
         Assert.assertTrue(incomesEquals);
 
-
-        boolean deductionsEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getNdflPersonDeductions(), ndflPerson.getNdflPersonDeductions(), new Equator<NdflPersonDeduction>() {
-            @Override
-            public boolean equate(NdflPersonDeduction o1, NdflPersonDeduction o2) {
-                return EqualsBuilder.reflectionEquals(o1, o2);
-            }
-
-            @Override
-            public int hash(NdflPersonDeduction o) {
-                return HashCodeBuilder.reflectionHashCode(o);
-            }
-        });
-
+        boolean deductionsEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getDeductions(), ndflPerson.getDeductions(), new NdflPersonDeductionEquator());
         Assert.assertTrue(deductionsEquals);
 
-        boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getNdflPersonPrepayments(), ndflPerson.getNdflPersonPrepayments(), new Equator<NdflPersonPrepayment>() {
-            @Override
-            public boolean equate(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
-                return EqualsBuilder.reflectionEquals(o1, o2);
-            }
-
-            @Override
-            public int hash(NdflPersonPrepayment o) {
-                return HashCodeBuilder.reflectionHashCode(o);
-            }
-        });
+        boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getPrepayments(), ndflPerson.getPrepayments(), new NdflPersonPrepaymentEquator());
         Assert.assertTrue(prepaymentEquals);
 
     }
@@ -131,7 +98,7 @@ public class NdflPersonDaoTest {
         Assert.assertNotNull(id);
 
         NdflPerson ndflPerson = ndflPersonDao.get(id);
-        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "ndflPersonIncomes", "ndflPersonDeductions", "ndflPersonPrepayments"));
+        Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "incomes", "deductions", "prepayments"));
 
         ndflPersonDao.delete(id);
         NdflPerson deleted = ndflPersonDao.get(id);
@@ -164,9 +131,9 @@ public class NdflPersonDaoTest {
 
         person.setInnNp("123456789123");
         person.setInnForeign("");
-        person.setIdDocType("010203");
+        person.setIdDocType("11");
         person.setIdDocNumber("2002 123456");
-        person.setStatus("11");
+        person.setStatus("1");
         person.setPostIndex("394000");
         person.setRegionCode("77");
         person.setArea("MSK");
@@ -186,12 +153,12 @@ public class NdflPersonDaoTest {
         ndflPersonIncomes.add(createNdflPersonIncomes(1));
         ndflPersonIncomes.add(createNdflPersonIncomes(2));
         ndflPersonIncomes.add(createNdflPersonIncomes(3));
-        person.setNdflPersonIncomes(ndflPersonIncomes);
+        person.setIncomes(ndflPersonIncomes);
 
         List<NdflPersonDeduction> ndflPersonDeductions = new ArrayList<NdflPersonDeduction>();
         ndflPersonDeductions.add(createNdflPersonDeduction(1));
         ndflPersonDeductions.add(createNdflPersonDeduction(2));
-        person.setNdflPersonDeductions(ndflPersonDeductions);
+        person.setDeductions(ndflPersonDeductions);
 
         List<NdflPersonPrepayment> ndflPersonPrepayments = new ArrayList<NdflPersonPrepayment>();
         ndflPersonPrepayments.add(createNdflPersonPrepayment(1));
@@ -200,7 +167,7 @@ public class NdflPersonDaoTest {
         ndflPersonPrepayments.add(createNdflPersonPrepayment(5));
         ndflPersonPrepayments.add(createNdflPersonPrepayment(5));
 
-        person.setNdflPersonPrepayments(ndflPersonPrepayments);
+        person.setPrepayments(ndflPersonPrepayments);
 
 
         return person;
@@ -213,7 +180,6 @@ public class NdflPersonDaoTest {
         personIncome.setOperationId(11111L);
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
-        //TODO and add another field values...
         return personIncome;
     }
 
@@ -254,6 +220,45 @@ public class NdflPersonDaoTest {
 
         return personPrepayment;
     }
+
+
+    class NdflPersonIncomeEquator implements  Equator<NdflPersonIncome>{
+        @Override
+        public boolean equate(NdflPersonIncome o1, NdflPersonIncome o2) {
+            return EqualsBuilder.reflectionEquals(o1, o2);
+        }
+
+        @Override
+        public int hash(NdflPersonIncome o) {
+            return HashCodeBuilder.reflectionHashCode(o);
+        }
+    }
+
+    class NdflPersonDeductionEquator implements  Equator<NdflPersonDeduction>{
+        @Override
+        public boolean equate(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+            return EqualsBuilder.reflectionEquals(o1, o2);
+        }
+
+        @Override
+        public int hash(NdflPersonDeduction o) {
+            return HashCodeBuilder.reflectionHashCode(o);
+        }
+    }
+
+    class NdflPersonPrepaymentEquator implements  Equator<NdflPersonPrepayment>{
+        @Override
+        public boolean equate(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+            return EqualsBuilder.reflectionEquals(o1, o2);
+        }
+
+        @Override
+        public int hash(NdflPersonPrepayment o) {
+            return HashCodeBuilder.reflectionHashCode(o);
+        }
+    }
+
+
 
 
 }

@@ -274,9 +274,11 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                     "  rp.calendar_start_date\n" +
                     "FROM report_period rp\n" +
                     "  JOIN tax_period tp ON rp.tax_period_id = tp.id\n" +
-                    "  JOIN DEPARTMENT_REPORT_PERIOD drp ON drp.REPORT_PERIOD_ID = rp.id\n" +
-                    "WHERE tp.tax_type = ? AND rp.end_date >= ? AND (? IS NULL OR rp.calendar_start_date <= ?)\n" +
-                    "      AND drp.DEPARTMENT_ID = ?\n" +
+                    "  JOIN department_report_period drp ON drp.report_period_id = rp.id\n" +
+                    "WHERE tp.tax_type = ? " +
+					"  AND rp.end_date >= ? " +
+					"  AND (? IS NULL OR rp.calendar_start_date <= ?)\n" +
+                    "  AND drp.department_id = ?\n" +
                     "ORDER BY rp.end_date";
     @Override
     public List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate) {

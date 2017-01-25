@@ -1158,35 +1158,39 @@ comment on column department_change.sunr_use is 'Признак, что испо
 create table ndfl_person (
   id                  number(18)        not null,
   declaration_data_id number(18)        not null,
-  inp                 varchar2(30 char),
-  snils               varchar2(30 char),
-  last_name           varchar2(60 char),
-  first_name          varchar2(60 char),
-  middle_name         varchar2(60 char),
+  person_id           number(18),
+  row_num             number(10),
+  inp                 varchar2(14 char),
+  snils               varchar2(14 char),
+  last_name           varchar2(36 char),
+  first_name          varchar2(36 char),
+  middle_name         varchar2(36 char),
   birth_day           date,
-  citizenship         varchar2(60 char),
+  citizenship         varchar2(3 char),
   inn_np              varchar2(12 char),
-  inn_foreign         varchar2(12 char),
-  id_doc_type         varchar2(60 char),
-  id_doc_number       varchar2(60 char),
-  status              varchar2(60 char),
+  inn_foreign         varchar2(50 char),
+  id_doc_type         varchar2(2 char),
+  id_doc_number       varchar2(25 char),
+  status              varchar2(1 char),
   post_index          varchar2(6 char),
-  region_code         varchar2(30 char),
+  region_code         varchar2(10 char),
   area                varchar2(60 char),
-  city                varchar2(500 char),
-  locality            varchar2(500 char),
-  street              varchar2(500 char),
-  house               varchar2(10 char),
-  building            varchar2(10 char),
+  city                varchar2(50 char),
+  locality            varchar2(50 char),
+  street              varchar2(120 char),
+  house               varchar2(20 char),
+  building            varchar2(20 char),
   flat                varchar2(10 char),
   country_code        varchar2(10 char),
-  address             varchar2(500 char),
+  address             varchar2(200 char),
   additional_data     varchar2(4000 char)
 );
 
 comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
 comment on column ndfl_person.id is 'Суррогатный ключ';
 comment on column ndfl_person.declaration_data_id is 'Идентификатор декларации к которой относятся данные';
+comment on column ndfl_person.person_id is 'Идентификатор в справочнике физлиц';
+comment on column ndfl_person.row_num is 'Порядковый номер строки';
 comment on column ndfl_person.inp is 'Уникальный код клиента';
 comment on column ndfl_person.snils is 'Страховой номер индивидуального лицевого счёта';
 comment on column ndfl_person.last_name is 'Фамилия';
@@ -1218,12 +1222,13 @@ create table ndfl_person_income
 (
   id                    number(18) not null,
   ndfl_person_id        number(18) not null,
-  row_num               number(10),
-  income_code           varchar2(100 char),
-  income_type           varchar2(100 char),
-  operation_id          number(18),
-  oktmo                 varchar2(20 char),
-  kpp                   varchar2(20 char),
+  source_id             number(18),
+  row_num               number(20),
+  operation_id          varchar2(10 char),
+  income_code           varchar2(10 char),
+  income_type           varchar2(10 char),
+  oktmo                 varchar2(11 char),
+  kpp                   varchar2(9 char),
   income_accrued_date   date,
   income_payout_date    date,
   income_accrued_summ   number(20, 2),
@@ -1232,11 +1237,11 @@ create table ndfl_person_income
   tax_base              number(20, 2),
   tax_rate              number(2),
   tax_date              date,
-  calculated_tax        number(10),
-  withholding_tax       number(10),
-  not_holding_tax       number(10),
-  overholding_tax       number(10),
-  refound_tax           number(10),
+  calculated_tax        number(20),
+  withholding_tax       number(20),
+  not_holding_tax       number(20),
+  overholding_tax       number(20),
+  refound_tax           number(15),
   tax_transfer_date     date,
   payment_date          date,
   payment_number        varchar2(20 char),
@@ -1245,6 +1250,7 @@ create table ndfl_person_income
 
 
 comment on table ndfl_person_income is 'Сведения о доходах физического лица';
+comment on column ndfl_person_income.source_id is 'Cсылка на запись которая является источником при формирование консолидированной формы';
 comment on column ndfl_person_income.row_num is 'Порядковый номер строки';
 comment on column ndfl_person_income.income_code is 'Код дохода';
 comment on column ndfl_person_income.income_type is 'Признак дохода';
@@ -1275,8 +1281,9 @@ create table ndfl_person_deduction
 (
   id               number(18)        not null,
   ndfl_person_id   number(18)        not null,
-  row_num          number(10),
-  operation_id     number(18),
+  source_id        number(18),
+  row_num          number(20),
+  operation_id     varchar2(10 char),
   type_code        varchar2(3 char),
   notif_type       varchar2(2 char),
   notif_date       date,
@@ -1293,6 +1300,9 @@ create table ndfl_person_deduction
 );
 
 comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
+
+comment on column ndfl_person_deduction.source_id is 'Cсылка на запись которая является источником при формирование консолидированной формы';
+
 comment on column ndfl_person_deduction.row_num is 'Порядковый номер строки';
 comment on column ndfl_person_deduction.operation_id is 'Номер операции';
 comment on column ndfl_person_deduction.type_code is 'Код вычета';
@@ -1318,8 +1328,9 @@ create table ndfl_person_prepayment
 (
   id             number(18)        not null,
   ndfl_person_id number(18)        not null,
-  row_num        number(10),
-  operation_id   number(18),
+  source_id      number(18),
+  row_num        number(20),
+  operation_id   varchar2(10 char),
   summ           number(18),
   notif_num      varchar2(20 char),
   notif_date     date,
@@ -1327,6 +1338,8 @@ create table ndfl_person_prepayment
 );
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
+
+comment on column ndfl_person_prepayment.source_id is  'Cсылка на запись которая является источником при формирование консолидированной формы';
 comment on column ndfl_person_prepayment.row_num is 'Порядковый номер строки';
 comment on column ndfl_person_prepayment.operation_id is 'Номер операции';
 comment on column ndfl_person_prepayment.summ is 'Сумма фиксированного авансового платежа';

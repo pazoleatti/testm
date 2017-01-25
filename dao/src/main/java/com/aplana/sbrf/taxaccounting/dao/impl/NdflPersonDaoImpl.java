@@ -41,9 +41,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             List<NdflPersonDeduction> ndflPersonDeductions = findDeductions(ndflPersonId);
             List<NdflPersonPrepayment> ndflPersonPrepayments = findPrepayments(ndflPersonId);
 
-            ndflPerson.setNdflPersonIncomes(ndflPersonIncomes);
-            ndflPerson.setNdflPersonDeductions(ndflPersonDeductions);
-            ndflPerson.setNdflPersonPrepayments(ndflPersonPrepayments);
+            ndflPerson.setIncomes(ndflPersonIncomes);
+            ndflPerson.setDeductions(ndflPersonDeductions);
+            ndflPerson.setPrepayments(ndflPersonPrepayments);
 
             return ndflPerson;
         } catch (EmptyResultDataAccessException e) {
@@ -52,7 +52,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> findNdflPerson(long declarationDataId) {
+    public List<NdflPerson> findPerson(long declarationDataId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPerson.COLUMNS, "np") + " from ndfl_person np where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -64,6 +64,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public List<NdflPersonIncome> findIncomes(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " from ndfl_person_income npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonIncome> findIncomesByDeclarationDataId(long declarationDataId) {
+        String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
+                " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
+                " WHERE np.declaration_data_id = ?";
+        try {
+            return getJdbcTemplate().query(sql, new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonIncome>();
         }
@@ -88,40 +100,61 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId) {
+        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " FROM ndfl_person_prepayment npi " +
+                " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
+                " WHERE np.declaration_data_id = ?";
+        try {
+            return getJdbcTemplate().query(sql, new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonPrepayment>();
+        }
+    }
+
+
+
+    @Override
     public Long save(final NdflPerson ndflPerson) {
 
-        if (ndflPerson.getId() != null) {
-            throw new DaoException(DUPLICATE_ERORR_MSG);
-        }
+        saveNewObject(ndflPerson, NdflPerson.TABLE_NAME, NdflPerson.SEQ, NdflPerson.COLUMNS, NdflPerson.FIELDS);
 
-        saveObject(ndflPerson, NdflPerson.TABLE_NAME, NdflPerson.SEQ, NdflPerson.COLUMNS, NdflPerson.FIELDS);
-
-        List<NdflPersonIncome> ndflPersonIncomes = ndflPerson.getNdflPersonIncomes();
+        List<NdflPersonIncome> ndflPersonIncomes = ndflPerson.getIncomes();
         if (ndflPersonIncomes == null || ndflPersonIncomes.isEmpty()) {
             throw new DaoException("Пропущены обязательные данные о доходах!");
         }
         saveDetails(ndflPerson, ndflPersonIncomes);
 
-        List<NdflPersonDeduction> ndflPersonDeductions = ndflPerson.getNdflPersonDeductions();
+        List<NdflPersonDeduction> ndflPersonDeductions = ndflPerson.getDeductions();
         saveDetails(ndflPerson, ndflPersonDeductions);
 
-        List<NdflPersonPrepayment> ndflPersonPrepayments = ndflPerson.getNdflPersonPrepayments();
+        List<NdflPersonPrepayment> ndflPersonPrepayments = ndflPerson.getPrepayments();
         saveDetails(ndflPerson, ndflPersonPrepayments);
 
         return ndflPerson.getId();
     }
 
-    private void saveDetails(NdflPerson ndflPerson, List<? extends NdflPersonDetail> details) {
-        for (NdflPersonDetail detail : details) {
-            if (detail.getId() != null) {
-                throw new DaoException(DUPLICATE_ERORR_MSG);
-            }
+    private void saveDetails(NdflPerson ndflPerson, List<? extends NdflPersonOperation> details) {
+        for (NdflPersonOperation detail : details) {
             detail.setNdflPersonId(ndflPerson.getId());
-            saveObject(detail, detail.getTableName(), detail.getSeq(), detail.getColumns(), detail.getFields());
+            saveNewObject(detail, detail.getTableName(), detail.getSeq(), detail.getColumns(), detail.getFields());
         }
     }
 
-    private <E extends IdentityObject> void saveObject(E identityObject, String table, String seq, String[] columns, String[] fields) {
+    /**
+     * Метод сохраняет новый объект в БД и возвращает этот же объект с присвоенным id
+     * @param identityObject объект обладающий суррогатным ключом
+     * @param table наименование таблицы используемой для хранения данных объекта
+     * @param seq наименование последовательностт используемой для генерации ключей
+     * @param columns массив содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields массив содержащий наименования параметров соответствующих столбцам
+     * @param <E> тип объекта
+     */
+    private <E extends IdentityObject> void saveNewObject(E identityObject, String table, String seq, String[] columns, String[] fields) {
+
+        if (identityObject.getId() != null) {
+            throw new DaoException(DUPLICATE_ERORR_MSG);
+        }
+
         String insert = createInsert(table, seq, columns, fields);
         NamedParameterJdbcTemplate jdbcTemplate = getNamedParameterJdbcTemplate();
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -272,11 +305,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setTaxRate(SqlUtils.getInteger(rs, "tax_rate"));
             personIncome.setTaxDate(rs.getDate("tax_date"));
 
-            personIncome.setCalculatedTax(SqlUtils.getInteger(rs, "calculated_tax"));
-            personIncome.setWithholdingTax(SqlUtils.getInteger(rs, "withholding_tax"));
-            personIncome.setNotHoldingTax(SqlUtils.getInteger(rs, "not_holding_tax"));
-            personIncome.setOverholdingTax(SqlUtils.getInteger(rs, "overholding_tax"));
-            personIncome.setRefoundTax(SqlUtils.getInteger(rs, "refound_tax"));
+            personIncome.setCalculatedTax(SqlUtils.getLong(rs, "calculated_tax"));
+            personIncome.setWithholdingTax(SqlUtils.getLong(rs, "withholding_tax"));
+            personIncome.setNotHoldingTax(SqlUtils.getLong(rs, "not_holding_tax"));
+            personIncome.setOverholdingTax(SqlUtils.getLong(rs, "overholding_tax"));
+            personIncome.setRefoundTax(SqlUtils.getLong(rs, "refound_tax"));
 
             personIncome.setTaxTransferDate(rs.getDate("tax_transfer_date"));
             personIncome.setPaymentDate(rs.getDate("payment_date"));
