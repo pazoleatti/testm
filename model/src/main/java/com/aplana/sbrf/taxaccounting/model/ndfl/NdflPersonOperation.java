@@ -5,12 +5,26 @@ import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 /**
  * @author Andrey Drunk
  */
-public abstract class NdflPersonDetail extends IdentityObject<Long> {
+public abstract class NdflPersonOperation extends IdentityObject<Long> {
 
+    /**
+     * Cсылка на запись которая является источником при формирование консолидированной формы
+     */
+    protected Long sourceId;
+
+    /**
+     * Порядковый номер строки
+     */
     protected Integer rowNum;
 
+    /**
+     * Идентификатор операции
+     */
     protected Long operationId;
 
+    /**
+     * Ссылка на физлицо
+     */
     protected Long ndflPersonId;
 
     public Long getNdflPersonId() {
@@ -35,6 +49,14 @@ public abstract class NdflPersonDetail extends IdentityObject<Long> {
 
     public void setOperationId(Long operationId) {
         this.operationId = operationId;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
     }
 
     public abstract String getTableName();
