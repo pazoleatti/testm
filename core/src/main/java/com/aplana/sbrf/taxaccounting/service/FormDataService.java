@@ -60,18 +60,6 @@ public interface FormDataService {
      */
     void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream is, String fileName, LockStateLogger stateLogger);
 
-    /**
-     * Метод для импорта данных из модуля миграции
-     *
-     * @param logger
-     * @param userInfo
-     * @param formDataId
-     * @param is
-     * @param fileName
-     *
-     */
-    void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream is, String fileName);
-	
 	/**
 	 * Выполнить расчёты по налоговой форме
 	 * @param logger логгер-объект для фиксации диагностических сообщений

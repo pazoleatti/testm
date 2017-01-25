@@ -200,12 +200,6 @@ public class FormDataServiceImpl implements FormDataService {
         loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT, stateLogger);
     }
 
-    @Override
-    @Transactional
-    public void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, false, false, inputStream, fileName, FormDataEvent.MIGRATION, null);
-    }
-
     private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, boolean isInner, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger) {
         String key = generateTaskKey(formDataId, ReportType.EDIT_FD);
 

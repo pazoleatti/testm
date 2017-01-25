@@ -238,7 +238,6 @@ public class AuditDaoTest {
         LogSystem logSystem = new LogSystem();
         logSystem.setId(10l);
         logSystem.setIp("192.168.72.16");
-        logSystem.setEventId(FormDataEvent.MIGRATION.getCode());
         logSystem.setUserLogin("controlBank");
         logSystem.setRoles("operator");
         logSystem.setFormDepartmentName("ТБ");

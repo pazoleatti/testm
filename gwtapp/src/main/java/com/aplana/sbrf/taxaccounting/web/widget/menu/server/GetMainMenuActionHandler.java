@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.lock.client.LockTokens;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
-import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
@@ -186,8 +185,6 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                     adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
                             + ConfigurationPresenter.TOKEN));
-                    adminMenuItem.getSubMenu().add(new MenuItem("Миграция данных", NUMBER_SIGN
-                            + MigrationTokens.migration));
                     adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
                             + SchedulerTokens.taskList));
                 }

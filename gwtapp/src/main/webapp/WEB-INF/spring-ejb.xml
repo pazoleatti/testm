@@ -7,10 +7,6 @@
 
     <import resource="classpath:/spring/enterprise-context.xml"/>
 
-    <jee:local-slsb id="messageService"
-                     jndi-name="ejblocal:${releaseName}/migration-ejb.jar/MessageServiceBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal"
-                     business-interface="com.aplana.sbrf.taxaccounting.service.MessageService"/>
-
     <jee:local-slsb
             id="taskManager"
             jndi-name="ejblocal:${releaseName}/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal"

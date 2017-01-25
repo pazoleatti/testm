@@ -10,9 +10,6 @@
         </web>
     </module>
     <module>
-        <ejb>migration-ejb.jar</ejb>
-    </module>
-    <module>
         <ejb>mdb.jar</ejb>
     </module>
     <module>

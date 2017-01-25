@@ -119,14 +119,6 @@
         </Arg>
     </New>
 
-    <!-- Подмена EJB-модуля MigrationBean на maven-зависимость для dev-mode -->
-    <New class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg>ejblocal:${releaseName}/migration-ejb.jar/MessageServiceBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal</Arg>
-        <Arg>
-            <New class="com.aplana.sbrf.taxaccounting.service.MessageServiceBean"/>
-        </Arg>
-    </New>
-
     <!-- Подмена EJB-модуля TaskManager на maven-зависимость для dev-mode -->
     <New class="org.mortbay.jetty.plus.naming.Resource">
         <Arg>ejblocal:${releaseName}/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal</Arg>
