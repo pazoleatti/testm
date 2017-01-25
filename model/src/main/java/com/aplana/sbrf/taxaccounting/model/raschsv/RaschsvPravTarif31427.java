@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -16,8 +17,8 @@ public class RaschsvPravTarif31427 extends IdentityObject<Long> {
     private Long doh248Per;
     private Long dohKr54279mpr;
     private Long dohKr5427Per;
-    private Double dohDoh54279mpr;
-    private Double dohDoh5427per;
+    private BigDecimal dohDoh54279mpr;
+    private BigDecimal dohDoh5427per;
     private Date dataZapAkOrg;
     private String nomZapAkOrg;
 
@@ -85,17 +86,17 @@ public class RaschsvPravTarif31427 extends IdentityObject<Long> {
         this.dohKr5427Per = dohKr5427Per;
     }
 
-    public Double getDohDoh54279mpr() {
+    public BigDecimal getDohDoh54279mpr() {
         return dohDoh54279mpr;
     }
-    public void setDohDoh54279mpr(Double dohDoh54279mpr) {
+    public void setDohDoh54279mpr(BigDecimal dohDoh54279mpr) {
         this.dohDoh54279mpr = dohDoh54279mpr;
     }
 
-    public Double getDohDoh5427per() {
+    public BigDecimal getDohDoh5427per() {
         return dohDoh5427per;
     }
-    public void setDohDoh5427per(Double dohDoh5427per) {
+    public void setDohDoh5427per(BigDecimal dohDoh5427per) {
         this.dohDoh5427per = dohDoh5427per;
     }
 

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class RaschsvVyplPrichina extends IdentityObject<Long> {
 
     private Long raschsvVyplFinFbId;
     private String nodeName;
-    private Double svVnfUhodInv;
+    private BigDecimal svVnfUhodInv;
 
     // Информация по конкретной ВыплФинФБ
     private List<RaschsvRashVypl> raschsvRashVyplList;
@@ -45,10 +46,10 @@ public class RaschsvVyplPrichina extends IdentityObject<Long> {
         this.nodeName = nodeName;
     }
 
-    public Double getSvVnfUhodInv() {
+    public BigDecimal getSvVnfUhodInv() {
         return svVnfUhodInv;
     }
-    public void setSvVnfUhodInv(Double svVnfUhodInv) {
+    public void setSvVnfUhodInv(BigDecimal svVnfUhodInv) {
         this.svVnfUhodInv = svVnfUhodInv;
     }
 

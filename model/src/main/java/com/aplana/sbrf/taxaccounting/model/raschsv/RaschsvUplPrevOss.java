@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
+
 /**
  * Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством (УплПревОСС)
  */
@@ -9,14 +11,14 @@ public class RaschsvUplPrevOss extends IdentityObject<Long> {
 
     private Long raschsvObyazPlatSvId;
     private String kbk;
-    private Double sumSbUplPer;
-    private Double sumSbUpl1m;
-    private Double sumSbUpl2m;
-    private Double sumSbUpl3m;
-    private Double prevRashSvPer;
-    private Double prevRashSv1m;
-    private Double prevRashSv2m;
-    private Double prevRashSv3m;
+    private BigDecimal sumSbUplPer;
+    private BigDecimal sumSbUpl1m;
+    private BigDecimal sumSbUpl2m;
+    private BigDecimal sumSbUpl3m;
+    private BigDecimal prevRashSvPer;
+    private BigDecimal prevRashSv1m;
+    private BigDecimal prevRashSv2m;
+    private BigDecimal prevRashSv3m;
 
     public static final String SEQ = "seq_raschsv_upl_prev_oss";
     public static final String TABLE_NAME = "raschsv_upl_prev_oss";
@@ -42,27 +44,27 @@ public class RaschsvUplPrevOss extends IdentityObject<Long> {
     public String getKbk() { return kbk; }
     public void setKbk(String kbk) { this.kbk = kbk; }
 
-    public Double getSumSbUplPer() { return sumSbUplPer; }
-    public void setSumSbUplPer(Double sumSbUplPer) { this.sumSbUplPer = sumSbUplPer; }
+    public BigDecimal getSumSbUplPer() { return sumSbUplPer; }
+    public void setSumSbUplPer(BigDecimal sumSbUplPer) { this.sumSbUplPer = sumSbUplPer; }
 
-    public Double getSumSbUpl1m() { return sumSbUpl1m; }
-    public void setSumSbUpl1m(Double sumSbUpl1m) { this.sumSbUpl1m = sumSbUpl1m; }
+    public BigDecimal getSumSbUpl1m() { return sumSbUpl1m; }
+    public void setSumSbUpl1m(BigDecimal sumSbUpl1m) { this.sumSbUpl1m = sumSbUpl1m; }
 
-    public Double getSumSbUpl2m() { return sumSbUpl2m; }
-    public void setSumSbUpl2m(Double sumSbUpl2m) { this.sumSbUpl2m = sumSbUpl2m; }
+    public BigDecimal getSumSbUpl2m() { return sumSbUpl2m; }
+    public void setSumSbUpl2m(BigDecimal sumSbUpl2m) { this.sumSbUpl2m = sumSbUpl2m; }
 
-    public Double getSumSbUpl3m() { return sumSbUpl3m; }
-    public void setSumSbUpl3m(Double sumSbUpl3m) { this.sumSbUpl3m = sumSbUpl3m; }
+    public BigDecimal getSumSbUpl3m() { return sumSbUpl3m; }
+    public void setSumSbUpl3m(BigDecimal sumSbUpl3m) { this.sumSbUpl3m = sumSbUpl3m; }
 
-    public Double getPrevRashSvPer() { return prevRashSvPer; }
-    public void setPrevRashSvPer(Double prevRashSvPer) { this.prevRashSvPer = prevRashSvPer; }
+    public BigDecimal getPrevRashSvPer() { return prevRashSvPer; }
+    public void setPrevRashSvPer(BigDecimal prevRashSvPer) { this.prevRashSvPer = prevRashSvPer; }
 
-    public Double getPrevRashSv1m() { return prevRashSv1m; }
-    public void setPrevRashSv1m(Double prevRashSv1m) { this.prevRashSv1m = prevRashSv1m; }
+    public BigDecimal getPrevRashSv1m() { return prevRashSv1m; }
+    public void setPrevRashSv1m(BigDecimal prevRashSv1m) { this.prevRashSv1m = prevRashSv1m; }
 
-    public Double getPrevRashSv2m() { return prevRashSv2m; }
-    public void setPrevRashSv2m(Double prevRashSv2m) { this.prevRashSv2m = prevRashSv2m; }
+    public BigDecimal getPrevRashSv2m() { return prevRashSv2m; }
+    public void setPrevRashSv2m(BigDecimal prevRashSv2m) { this.prevRashSv2m = prevRashSv2m; }
 
-    public Double getPrevRashSv3m() { return prevRashSv3m; }
-    public void setPrevRashSv3m(Double prevRashSv3m) { this.prevRashSv3m = prevRashSv3m; }
+    public BigDecimal getPrevRashSv3m() { return prevRashSv3m; }
+    public void setPrevRashSv3m(BigDecimal prevRashSv3m) { this.prevRashSv3m = prevRashSv3m; }
 }
