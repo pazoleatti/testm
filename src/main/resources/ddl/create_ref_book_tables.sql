@@ -200,6 +200,25 @@ comment on column ref_book_deduction_mark.name is 'Наименование пр
 
 create sequence seq_ref_book_deduction_mark start with 11 increment by 1;
 
+-- Коды форм реорганизации (ликвидации) организации
+create table ref_book_reorganization 
+(
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
+  code      varchar2(1 char)    not null,
+  name      varchar2(255 char)  not null
+);
+
+comment on table ref_book_reorganization is 'Коды форм реорганизации (ликвидации) организации';
+comment on column ref_book_reorganization.id is 'Уникальный идентификатор';
+comment on column ref_book_reorganization.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_reorganization.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_reorganization.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_reorganization.code is 'Код';
+comment on column ref_book_reorganization.name is 'Наименование';
+
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (
