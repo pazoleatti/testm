@@ -28,12 +28,12 @@ public class NdflPersonIncome extends NdflPersonDetail {
     // Дата налога
     private Date taxDate;
     // Сумма налога исчисленная
-    private Integer calculatedTax;
+    private Long calculatedTax;
     // Сумма налога удержанная
-    private Integer withholdingTax;
-    private Integer notHoldingTax;
-    private Integer overholdingTax;
-    private Integer refoundTax;
+    private Long withholdingTax;
+    private Long notHoldingTax;
+    private Long overholdingTax;
+    private Long refoundTax;
     // Срок перечисления налога
     private Date taxTransferDate;
     private Date paymentDate;
@@ -169,43 +169,43 @@ public class NdflPersonIncome extends NdflPersonDetail {
         this.taxDate = taxDate;
     }
 
-    public Integer getCalculatedTax() {
+    public Long getCalculatedTax() {
         return calculatedTax;
     }
 
-    public void setCalculatedTax(Integer calculatedTax) {
+    public void setCalculatedTax(Long calculatedTax) {
         this.calculatedTax = calculatedTax;
     }
 
-    public Integer getWithholdingTax() {
+    public Long getWithholdingTax() {
         return withholdingTax;
     }
 
-    public void setWithholdingTax(Integer withholdingTax) {
+    public void setWithholdingTax(Long withholdingTax) {
         this.withholdingTax = withholdingTax;
     }
 
-    public Integer getNotHoldingTax() {
+    public Long getNotHoldingTax() {
         return notHoldingTax;
     }
 
-    public void setNotHoldingTax(Integer notHoldingTax) {
+    public void setNotHoldingTax(Long notHoldingTax) {
         this.notHoldingTax = notHoldingTax;
     }
 
-    public Integer getOverholdingTax() {
+    public Long getOverholdingTax() {
         return overholdingTax;
     }
 
-    public void setOverholdingTax(Integer overholdingTax) {
+    public void setOverholdingTax(Long overholdingTax) {
         this.overholdingTax = overholdingTax;
     }
 
-    public Integer getRefoundTax() {
+    public Long getRefoundTax() {
         return refoundTax;
     }
 
-    public void setRefoundTax(Integer refoundTax) {
+    public void setRefoundTax(Long refoundTax) {
         this.refoundTax = refoundTax;
     }
 

@@ -305,11 +305,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setTaxRate(SqlUtils.getInteger(rs, "tax_rate"));
             personIncome.setTaxDate(rs.getDate("tax_date"));
 
-            personIncome.setCalculatedTax(SqlUtils.getInteger(rs, "calculated_tax"));
-            personIncome.setWithholdingTax(SqlUtils.getInteger(rs, "withholding_tax"));
-            personIncome.setNotHoldingTax(SqlUtils.getInteger(rs, "not_holding_tax"));
-            personIncome.setOverholdingTax(SqlUtils.getInteger(rs, "overholding_tax"));
-            personIncome.setRefoundTax(SqlUtils.getInteger(rs, "refound_tax"));
+            personIncome.setCalculatedTax(SqlUtils.getLong(rs, "calculated_tax"));
+            personIncome.setWithholdingTax(SqlUtils.getLong(rs, "withholding_tax"));
+            personIncome.setNotHoldingTax(SqlUtils.getLong(rs, "not_holding_tax"));
+            personIncome.setOverholdingTax(SqlUtils.getLong(rs, "overholding_tax"));
+            personIncome.setRefoundTax(SqlUtils.getLong(rs, "refound_tax"));
 
             personIncome.setTaxTransferDate(rs.getDate("tax_transfer_date"));
             personIncome.setPaymentDate(rs.getDate("payment_date"));
