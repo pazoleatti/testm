@@ -1,3 +1,5 @@
+-- Перенос настроек подразделений из промежуточных в постоянные таблицы
+-- скрипт выполняется третьим (последним)
 insert into ref_book_ndfl(department_id, inn, version, record_id, status, id)
 select tab.*,rownum,0,rownum
   from (select d.dep_id,first_value(t.inn) over(partition by t.depcode) inn,
