@@ -49,9 +49,6 @@ public class RefBookDaoTest {
 	@Autowired
     RefBookDao refBookDao;
 
-    @Autowired
-    RefBookIncome102DaoImpl refBookIncome102Dao;
-
     @Before
     public void init() {
         ReflectionTestUtils.setField(refBookDao, "dbUtils", BDUtilsMock.getBDUtils());
@@ -707,8 +704,6 @@ public class RefBookDaoTest {
         map.put("ITEM_NAME", new RefBookValue(RefBookAttributeType.STRING, "identifier"));
         map.put("ACCOUNT_PERIOD_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
         records.add(map);
-
-        refBookIncome102Dao.updateRecords(records);
 
         RefBook refBook = refBookDao.get(52L);
         List<RefBookAttribute> attributes = refBook.getAttributes();

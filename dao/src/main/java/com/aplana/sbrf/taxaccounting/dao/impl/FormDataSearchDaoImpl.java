@@ -207,9 +207,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
         sql.append(") dat) ordDat where form_data_id = ?");
 
         try {
-            return getJdbcTemplate(). queryForLong(
+            return getJdbcTemplate(). queryForObject(
                     sql.toString(),
-                    formDataId);
+                    new Object[]{formDataId}, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -303,6 +303,6 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		StringBuilder sql = new StringBuilder("select count(*)");
         appendFromClause(sql);
 		appendWhereClause(sql, filter);
-		return getJdbcTemplate().queryForInt(sql.toString());
+		return getJdbcTemplate().queryForObject(sql.toString(), Integer.class);
 	}
 }

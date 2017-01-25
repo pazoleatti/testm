@@ -117,7 +117,7 @@ public class RefBookTaxOrganDaoImpl extends AbstractDao implements RefBookTaxOrg
     public int getRecordsCount(Long refBookId, String filter) {
         PreparedStatementData ps = getRefBookSql(filter, refBookNameMapping.get(refBookId));
         ps.setQuery(new StringBuilder("SELECT count(*) FROM (" + ps.getQuery().toString() + ")"));
-        return getJdbcTemplate().queryForInt(ps.getQuery().toString(), ps.getParams().toArray());
+        return getJdbcTemplate().queryForObject(ps.getQuery().toString(), ps.getParams().toArray(), Integer.class);
     }
 
     /**

@@ -98,9 +98,6 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.TemplateChangesDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.BookerStatementsSearchDao"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.SourceDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
@@ -132,9 +129,6 @@
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookBookerStatementPeriodDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao"/>

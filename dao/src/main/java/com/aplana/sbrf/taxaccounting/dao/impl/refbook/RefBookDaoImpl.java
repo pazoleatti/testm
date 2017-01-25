@@ -140,9 +140,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Cacheable(value = "PermanentData", key = "'RefBook_attribute_'+#attributeId.toString()")
     public RefBook getByAttribute(Long attributeId) {
         try {
-            return get(getJdbcTemplate().queryForLong(
+            return get(getJdbcTemplate().queryForObject(
                     "SELECT r.id FROM ref_book r JOIN ref_book_attribute a ON a.ref_book_id = r.id WHERE a.id = ?",
-                    new Object[]{attributeId}, new int[]{Types.NUMERIC}));
+                    new Object[]{attributeId}, new int[]{Types.NUMERIC}, Long.class));
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найден атрибут справочника с id = %d", attributeId));
         }
@@ -151,9 +151,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public RefBook getByRecord(@NotNull Long uniqueRecordId) {
         try {
-            return get(getJdbcTemplate().queryForLong(
+            return get(getJdbcTemplate().queryForObject(
                     "SELECT b.id FROM ref_book b JOIN ref_book_record r ON r.ref_book_id = b.id WHERE r.id = ?",
-                    new Object[]{uniqueRecordId}, new int[]{Types.NUMERIC}));
+                    new Object[]{uniqueRecordId}, new int[]{Types.NUMERIC}, Long.class));
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найдена запись справочника с id = %d", uniqueRecordId));
         }
@@ -313,7 +313,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         // Получение количества данных в справочнике
         PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, null, true, false, null);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
-        result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
+        result.setTotalCount(getJdbcTemplate().queryForObject(psForCount.getQuery().toString(), psForCount.getParams().toArray(), Integer.class));
         return result;
     }
 
@@ -493,7 +493,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public int getRecordsCount(Long refBookId, Date version, String filter) {
         PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, null, filter, null, true, false, null);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
-        return getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray());
+        return getJdbcTemplate().queryForObject(psForCount.getQuery().toString(), psForCount.getParams().toArray(), Integer.class);
     }
 
     private PagingResult<Map<String, RefBookValue>> getChildren(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
@@ -505,7 +505,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         // Получение количества данных в справкочнике
         PreparedStatementData psForCount = getChildrenStatement(refBookId, null, version, sortAttribute, filter, null, true, parentId);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
-        result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
+        result.setTotalCount(getJdbcTemplate().queryForObject(psForCount.getQuery().toString(), psForCount.getParams().toArray(), Integer.class));
         return result;
     }
 
@@ -1241,9 +1241,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             if (LOG.isDebugEnabled()) {
                 LOG.trace(String.format("refBookId: %d; version: %s; rowId: %s", refBookId, version.toString(), rowId));
             }
-            return getJdbcTemplate().queryForLong(CHECK_REF_BOOK_RECORD_UNIQUE_SQL,
+            return getJdbcTemplate().queryForObject(CHECK_REF_BOOK_RECORD_UNIQUE_SQL,
                     new Object[]{refBookId, version, rowId},
-                    new int[]{Types.BIGINT, Types.DATE, Types.BIGINT});
+                    new int[]{Types.BIGINT, Types.DATE, Types.BIGINT},
+					Long.class);
         } catch (EmptyResultDataAccessException ex) {
             return null;
         }
@@ -1326,16 +1327,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public int getRecordVersionsCount(Long refBookId, Long uniqueRecordId) {
-        return getJdbcTemplate().queryForInt("select count(*) as cnt from REF_BOOK_RECORD " +
+        return getJdbcTemplate().queryForObject("select count(*) as cnt from REF_BOOK_RECORD " +
                 "where REF_BOOK_ID=? and STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=(select RECORD_ID from REF_BOOK_RECORD where ID=?)",
-                refBookId, uniqueRecordId);
+                new Object[]{refBookId, uniqueRecordId}, Integer.class);
     }
 
     @Override
     public int getRecordVersionsCountByRecordId(Long refBookId, Long recordId) {
-        return getJdbcTemplate().queryForInt("select count(*) as cnt from REF_BOOK_RECORD " +
+        return getJdbcTemplate().queryForObject("select count(*) as cnt from REF_BOOK_RECORD " +
                         "where REF_BOOK_ID=? and STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=?",
-                refBookId, recordId);
+                new Object[]{refBookId, recordId}, Integer.class);
     }
 
     private static final String RECORD_VERSION =
@@ -1510,7 +1511,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public boolean hasLoops(Long uniqueRecordId, Long parentRecordId) {
-        return getJdbcTemplate().queryForInt(CHECK_LOOPS, parentRecordId, uniqueRecordId) == 1;
+        return getJdbcTemplate().queryForObject(CHECK_LOOPS, new Object[]{parentRecordId, uniqueRecordId}, Integer.class) == 1;
     }
 
     @Override
@@ -2329,7 +2330,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public Long getRecordId(Long uniqueRecordId) {
         try {
-            return getJdbcTemplate().queryForLong("select record_id from ref_book_record where id=?", uniqueRecordId);
+            return getJdbcTemplate().queryForObject("select record_id from ref_book_record where id=?", new Object[]{uniqueRecordId}, Long.class);
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найдена запись справочника с id = %d", uniqueRecordId));
         }
@@ -2338,7 +2339,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public Long findRecord(Long refBookId, Long recordId, Date version) {
         try {
-            return getJdbcTemplate().queryForLong("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ? and status != -1", refBookId, recordId, version);
+            return getJdbcTemplate().queryForObject("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ? and status != -1",
+					new Object[]{refBookId, recordId, version}, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -2477,7 +2479,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 
     private Long getRowId(@NotNull Long recordId) {
-        return getJdbcTemplate().queryForLong("select record_id from ref_book_record where id = ?", new Object[]{recordId});
+        return getJdbcTemplate().queryForObject("select record_id from ref_book_record where id = ?", new Object[]{recordId}, Long.class);
     }
 
     @Override
@@ -2984,7 +2986,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public Long getRowNum(PreparedStatementData ps, Long recordId) {
         try {
             ps.addParam(recordId);
-            return getJdbcTemplate().queryForLong("select " + RefBook.RECORD_SORT_ALIAS + " from (" + ps.getQuery().toString() + ") where " + RefBook.RECORD_ID_ALIAS + " = ?", ps.getParams().toArray());
+            return getJdbcTemplate().queryForObject("select " + RefBook.RECORD_SORT_ALIAS + " from (" + ps.getQuery().toString() + ") where " + RefBook.RECORD_ID_ALIAS + " = ?",
+					ps.getParams().toArray(), Long.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -2993,9 +2996,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public Integer getRecordsCount(PreparedStatementData ps) {
         if (!ps.getParams().isEmpty()) {
-            return getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")", ps.getParams().toArray());
+            return getJdbcTemplate().queryForObject("select count(*) from (" + ps.getQuery().toString() + ")", ps.getParams().toArray(), Integer.class);
         } else {
-            return getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")");
+            return getJdbcTemplate().queryForObject("select count(*) from (" + ps.getQuery().toString() + ")", Integer.class);
         }
     }
 
@@ -3192,7 +3195,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
         String sql = "select count(*) from ref_book_record where ref_book_id = ? and %s and version = trunc(?, 'DD') and status != -1";
-        return getJdbcTemplate().queryForInt(String.format(sql, transformToSqlInStatement("record_id", recordIds)), refBookId, version) != 0;
+        return getJdbcTemplate().queryForObject(String.format(sql, transformToSqlInStatement("record_id", recordIds)),
+				new Object[]{refBookId, version}, Integer.class) != 0;
     }
 
     private static final String GET_INACTIVE_RECORDS_IN_PERIOD = "select id, start_version as versionFrom, end_version as versionTo, \n" +

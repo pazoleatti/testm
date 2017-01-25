@@ -195,7 +195,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
         try {
-            Long formDataId = getJdbcTemplate().queryForLong(
+            Long formDataId = getJdbcTemplate().queryForObject(
                     "select fd.id from form_data fd, department_report_period drp " +
                             "where fd.department_report_period_id = drp.id " +
                             "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
@@ -215,7 +215,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             Types.NUMERIC,
                             Types.NUMERIC,
                             Types.NUMERIC
-                    }
+                    },
+					Long.class
             );
             return get(formDataId, null);
         } catch (EmptyResultDataAccessException e) {

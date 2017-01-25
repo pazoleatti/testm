@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -87,14 +85,6 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
     private FormTemplateService formTemplateService;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
-    @Autowired
-    private RefBookIncome101 refBookIncome101;
-    @Autowired
-    private RefBookIncome102 refBookIncome102;
-    @Autowired
-    RefBookIncome101Dao refBookIncome101Dao;
-    @Autowired
-    RefBookIncome102Dao refBookIncome102Dao;
     @Autowired
     AuditService auditService;
     @Autowired
@@ -770,7 +760,7 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
                     departmentService.getDepartment(type.getDepartmentId()).getName()));
         }
 
-        //7 точка запроса
+/*        //7 точка запроса
         List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null, "department_id = " + department.getId());
         for (Long accountPeriodId: ids) {
             List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format("account_period_id = %d", accountPeriodId));
@@ -783,7 +773,7 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
                 logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
                         department.getName(), refBookIncome102Dao.getPeriodNameFromRefBook(id)));
             }
-        }
+        }*/
 
         //8 точка запроса
         List<TAUserView> users = taUserService.getUsersByFilter(new MembersFilterData() {{

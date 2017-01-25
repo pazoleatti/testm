@@ -224,11 +224,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     @Override
-    public BookerStatementService mockBookerStatementService() {
-        return mock(BookerStatementService.class);
-    }
-
-    @Override
     public ImportService mockImportService() {
         return new ImportServiceImpl();
     }

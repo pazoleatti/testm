@@ -207,7 +207,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             throw new DaoException("Произведена попытка перезаписать уже сохранённую декларацию!");
         }
 
-        int countOfExisted = jt.queryForInt("SELECT COUNT(*) FROM declaration_data WHERE declaration_template_id = ?" +
+        int countOfExisted = jt.queryForObject("SELECT COUNT(*) FROM declaration_data WHERE declaration_template_id = ?" +
                 " AND department_report_period_id = ? and (? is null or tax_organ_code = ?) and (? is null or kpp = ?)" +
                 " AND (? is null or asnu_id = ?) and (? is null or file_name = ?)",
                 new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(),
@@ -215,7 +215,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         declarationData.getKpp(), declarationData.getKpp(), declarationData.getAsnuId(), declarationData.getAsnuId(),
                         declarationData.getFileName(), declarationData.getFileName() },
                 new int[]{Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-                        Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR});
+                        Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR}, Integer.class);
 
         if (countOfExisted != 0) {
             throw new DaoException("Декларация с заданными параметрами уже существует!");

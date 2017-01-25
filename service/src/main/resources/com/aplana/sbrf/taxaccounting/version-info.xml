@@ -11,6 +11,5 @@
     <util:properties id="versionInfoProperties">
         <prop key="version">${version}</prop>
         <prop key="revision">${git.buildnumber}.${timestamp}</prop>
-        <prop key="guarantee.url">${guaranteeUrl}</prop>
     </util:properties>
 </beans>
