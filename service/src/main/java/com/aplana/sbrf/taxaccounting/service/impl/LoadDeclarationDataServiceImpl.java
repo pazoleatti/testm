@@ -349,7 +349,12 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     }
 
     private List<LogEntry> loadDeclarationDataFile(TAUserInfo userInfo, Integer departmentId, String fileName, FileWrapper currentFile, Logger logger, String lockId) {
-        TransportDataParam transportDataParam = TransportDataParam.valueOfDec(fileName);
+        TransportDataParam transportDataParam;
+        try {
+            transportDataParam = TransportDataParam.valueOfDec(fileName);
+        } catch (IllegalArgumentException e) {
+            return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.Ln_2, logger, lockId, fileName)));
+        }
         String reportPeriodCode = transportDataParam.getReportPeriodCode();
         Integer year = transportDataParam.getYear();
         String departmentCode = transportDataParam.getDepartmentCode();
@@ -361,6 +366,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         // для 1151111 парсим файл для определения периода
         if (declarationTypeId == 200) {
             departmentCode = "18_0000_00"; // ToDo нужно определять по КПП
+            kpp = null;
             InputStream inputStream = currentFile.getInputStream();
             try {
                 SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -373,17 +379,17 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                 try {
                     year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
                 } catch (NumberFormatException nfe) {
-                    // Ignore
+                    return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.Ln_4, logger, lockId, fileName)));
                 }
             } catch (IOException e) {
                 LOG.error("", e);
-                throw new ServiceException("", e);
+                return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.Ln_1, logger, lockId, fileName)));
             } catch (ParserConfigurationException e) {
                 LOG.error("Ошибка при парсинге xml", e);
-                throw new ServiceException("", e);
+                return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.Ln_2, logger, lockId, fileName)));
             } catch (SAXException e) {
                 LOG.error("", e);
-                throw new ServiceException("", e);
+                return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.Ln_2, logger, lockId, fileName)));
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
@@ -483,7 +489,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         // Открытость периода
         if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
             String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
-            return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.L9, logger, lockId, declarationType.getName(), reportPeriodName)));
+            return Collections.singletonList(new LogEntry(LogLevel.ERROR, log(userInfo, LogData.Ln_5, logger, lockId, formDepartment.getCode(), reportPeriodName)));
         }
 
         // Проверка GUID
@@ -620,7 +626,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             ));
 
         try {
-            // 15 Проверка по XSD + Скрипт
+            // 15 Проверка по XSD + Скрипт загрузки ТФ
             try {
                 declarationDataService.importDeclarationData(localLogger, userInfo, declarationData.getId(), inputStream,
                         fileName, FormDataEvent.IMPORT_TRANSPORT_FILE, null, lock);
@@ -632,11 +638,6 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             if (localLogger.containsLevel(LogLevel.ERROR)) {
                 // Исключение для отката транзакции сознания и заполнения НФ
                 throw new ServiceException("При выполнении загрузки произошли ошибки");
-            } else {
-                if (!formWasCreated) {
-                    logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.CREATE, null);
-                    auditService.add(FormDataEvent.CREATE, userInfo, declarationData, null, "Декларация создана", null);
-                }
             }
         } finally {
             // Снимаем блокировку

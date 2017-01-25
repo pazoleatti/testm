@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * @author Andrey Drunk
  */
-public class NdflPersonPrepayment extends NdflPersonDetail {
+public class NdflPersonPrepayment extends NdflPersonOperation {
 
     private BigDecimal summ;
     private String notifNum;

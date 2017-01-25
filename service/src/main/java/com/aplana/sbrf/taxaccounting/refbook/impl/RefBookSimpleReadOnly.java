@@ -22,9 +22,6 @@ import java.util.Map;
 @Transactional
 public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
-	/** Название таблицы для запроса данных*/
-	private String tableName;
-
 	/** Дополнительная фильтрация выборки */
 	private String whereClause;
 
@@ -81,10 +78,6 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 		return refBook.getTableName();
 	}
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-
 	public String getWhereClause() {
 		return whereClause;
 	}
@@ -95,7 +88,7 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
 	@Override
 	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
-		return refBookDao.dereferenceValues(tableName, attributeId, recordIds);
+		return refBookDao.dereferenceValues(getTableName(), attributeId, recordIds);
 	}
 
     @Override
@@ -105,6 +98,6 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
     @Override
     public List<ReferenceCheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return refBookDao.getInactiveRecords(tableName, recordIds);
+        return refBookDao.getInactiveRecords(getTableName(), recordIds);
     }
 }

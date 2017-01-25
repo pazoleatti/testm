@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * @author Andrey Drunk
  */
-public class NdflPersonIncome extends NdflPersonDetail {
+public class NdflPersonIncome extends NdflPersonOperation {
 
     // Код дохода
     private String incomeCode;

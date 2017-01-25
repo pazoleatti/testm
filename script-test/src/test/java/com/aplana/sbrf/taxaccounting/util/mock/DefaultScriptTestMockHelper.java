@@ -467,6 +467,11 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     @Override
+    public NdflPersonService getNdflPersonService() {
+        return mock(NdflPersonService.class);
+    }
+
+    @Override
     public Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId) {
         return refBookMap.get(refBookId);
     }

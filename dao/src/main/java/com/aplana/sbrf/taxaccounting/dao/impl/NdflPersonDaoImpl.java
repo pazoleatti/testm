@@ -133,8 +133,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return ndflPerson.getId();
     }
 
-    private void saveDetails(NdflPerson ndflPerson, List<? extends NdflPersonDetail> details) {
-        for (NdflPersonDetail detail : details) {
+    private void saveDetails(NdflPerson ndflPerson, List<? extends NdflPersonOperation> details) {
+        for (NdflPersonOperation detail : details) {
             detail.setNdflPersonId(ndflPerson.getId());
             saveNewObject(detail, detail.getTableName(), detail.getSeq(), detail.getColumns(), detail.getFields());
         }

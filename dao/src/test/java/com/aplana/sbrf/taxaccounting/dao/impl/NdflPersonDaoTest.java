@@ -72,46 +72,13 @@ public class NdflPersonDaoTest {
 
         Assert.assertTrue(EqualsBuilder.reflectionEquals(goodNdflPerson, ndflPerson, "incomes", "deductions", "prepayments"));
 
-        boolean incomesEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getIncomes(), ndflPerson.getIncomes(), new Equator<NdflPersonIncome>() {
-            @Override
-            public boolean equate(NdflPersonIncome o1, NdflPersonIncome o2) {
-                return EqualsBuilder.reflectionEquals(o1, o2);
-            }
-
-            @Override
-            public int hash(NdflPersonIncome o) {
-                return HashCodeBuilder.reflectionHashCode(o);
-            }
-        });
-
+        boolean incomesEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getIncomes(), ndflPerson.getIncomes(), new NdflPersonIncomeEquator());
         Assert.assertTrue(incomesEquals);
 
-
-        boolean deductionsEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getDeductions(), ndflPerson.getDeductions(), new Equator<NdflPersonDeduction>() {
-            @Override
-            public boolean equate(NdflPersonDeduction o1, NdflPersonDeduction o2) {
-                return EqualsBuilder.reflectionEquals(o1, o2);
-            }
-
-            @Override
-            public int hash(NdflPersonDeduction o) {
-                return HashCodeBuilder.reflectionHashCode(o);
-            }
-        });
-
+        boolean deductionsEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getDeductions(), ndflPerson.getDeductions(), new NdflPersonDeductionEquator());
         Assert.assertTrue(deductionsEquals);
 
-        boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getPrepayments(), ndflPerson.getPrepayments(), new Equator<NdflPersonPrepayment>() {
-            @Override
-            public boolean equate(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
-                return EqualsBuilder.reflectionEquals(o1, o2);
-            }
-
-            @Override
-            public int hash(NdflPersonPrepayment o) {
-                return HashCodeBuilder.reflectionHashCode(o);
-            }
-        });
+        boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getPrepayments(), ndflPerson.getPrepayments(), new NdflPersonPrepaymentEquator());
         Assert.assertTrue(prepaymentEquals);
 
     }
@@ -164,9 +131,9 @@ public class NdflPersonDaoTest {
 
         person.setInnNp("123456789123");
         person.setInnForeign("");
-        person.setIdDocType("010203");
+        person.setIdDocType("11");
         person.setIdDocNumber("2002 123456");
-        person.setStatus("11");
+        person.setStatus("1");
         person.setPostIndex("394000");
         person.setRegionCode("77");
         person.setArea("MSK");
@@ -253,6 +220,45 @@ public class NdflPersonDaoTest {
 
         return personPrepayment;
     }
+
+
+    class NdflPersonIncomeEquator implements  Equator<NdflPersonIncome>{
+        @Override
+        public boolean equate(NdflPersonIncome o1, NdflPersonIncome o2) {
+            return EqualsBuilder.reflectionEquals(o1, o2);
+        }
+
+        @Override
+        public int hash(NdflPersonIncome o) {
+            return HashCodeBuilder.reflectionHashCode(o);
+        }
+    }
+
+    class NdflPersonDeductionEquator implements  Equator<NdflPersonDeduction>{
+        @Override
+        public boolean equate(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+            return EqualsBuilder.reflectionEquals(o1, o2);
+        }
+
+        @Override
+        public int hash(NdflPersonDeduction o) {
+            return HashCodeBuilder.reflectionHashCode(o);
+        }
+    }
+
+    class NdflPersonPrepaymentEquator implements  Equator<NdflPersonPrepayment>{
+        @Override
+        public boolean equate(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+            return EqualsBuilder.reflectionEquals(o1, o2);
+        }
+
+        @Override
+        public int hash(NdflPersonPrepayment o) {
+            return HashCodeBuilder.reflectionHashCode(o);
+        }
+    }
+
+
 
 
 }
