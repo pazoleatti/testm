@@ -109,6 +109,7 @@ public class RefBook implements Serializable {
 		EMAIL_CONFIG(400), 							// Настройки почтового клиента
 		ASYNC_CONFIG(401), 							// Настройки асинхронных задач
 		ID_DOC(902),                                // Документ, удостоверяющий личность
+		REORGANIZATION(5),							// Коды форм реорганизации (ликвидации) организации
 		USER(74); 									// Пользователи
 
         private final long id;
