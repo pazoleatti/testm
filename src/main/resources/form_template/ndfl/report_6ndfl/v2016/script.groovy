@@ -44,14 +44,14 @@ def buildXml() {
     // Коды представления налоговой декларации по месту нахождения (учёта)
     def taxPlaceTypeCode = getRefBookValue(2, departmentParamIncomeRow?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue
 
-    def ndflPersonIncomeCommonValue;
-    def ndflPersonIncomeByDateList = []
-    def ndflPersonIncomeByRateList = []
+    def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id);
+    def ndflPersonIncomeByRateList = ndflPersonIncomeCommonValue?.ndflPersonIncomeByRateList
+    def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id)
 
     def builder = new MarkupBuilder(xml)
     builder.mkp.xmlDeclaration(version: "1.0", encoding: "utf-8")
     builder.Файл(
-            ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, departmentParamIncomeRow.KPP),
+            ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, declarationData.kpp),
             ВерсПрог: applicationVersion,
             ВерсФорм: "5.01"
     ) {
@@ -71,7 +71,7 @@ def buildXml() {
                 НПЮЛ(
                         НаимОрг: departmentParamIncomeRow.NAME,
                         ИННЮЛ: departmentParam.INN,
-                        КПП: departmentParamIncomeRow.KPP
+                        КПП: declarationData.kpp
                 )
             }
             Подписант(
@@ -93,37 +93,38 @@ def buildXml() {
             }
             НДФЛ6(){
                 ОбобщПоказ(
-                        КолФЛДоход: "",
-                        УдержНалИт: "",
-                        НеУдержНалИт: "",
-                        ВозврНалИт: ""
+                        КолФЛДоход: ndflPersonIncomeCommonValue?.countPerson?.value,
+                        УдержНалИт: ndflPersonIncomeCommonValue?.withholdingTax?.value,
+                        НеУдержНалИт: ndflPersonIncomeCommonValue?.notHoldingTax?.value,
+                        ВозврНалИт: ndflPersonIncomeCommonValue?.refoundTax?.value
                 ) {
                     ndflPersonIncomeByRateList.each { ndflPersonIncomeByRate ->
-                        СумСтавка {
-                            Ставка: ndflPersonIncomeByRate.getTaxRate()
-                            НачислДох: ndflPersonIncomeByRate.getIncomeAccruedSumm()
-                            НачислДохДив: ndflPersonIncomeByRate.getIncomeAccruedSummDiv()
-                            ВычетНал: ndflPersonIncomeByRate.getTotalDeductionsSumm()
-                            ИсчислНал: ndflPersonIncomeByRate.getCalculatedTax()
-                            ИсчислНалДив: ndflPersonIncomeByRate.getCalculatedTaxDiv()
-                            АвансПлат: ndflPersonIncomeByRate.getPrepaymentSum()
-                        }
+                        СумСтавка (
+                            Ставка: ndflPersonIncomeByRate.taxRate,
+                            НачислДох: ndflPersonIncomeByRate.incomeAccruedSumm.toDouble().round(2),
+                            НачислДохДив: ndflPersonIncomeByRate.incomeAccruedSummDiv.toDouble().round(2),
+                            ВычетНал: ndflPersonIncomeByRate.totalDeductionsSumm.toDouble().round(2),
+                            ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
+                            ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
+                            АвансПлат: ndflPersonIncomeByRate.prepaymentSum.toDouble().round(2)
+                        ) {}
                     }
                 }
                 ДохНал() {
                     ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
-                        СумДата {
-                            ДатаФактДох: ndflPersonIncomeByDate.getIncomeAccruedDate()
-                            ДатаУдержНал: ndflPersonIncomeByDate.getTaxDate()
-                            СрокПрчслНал: ndflPersonIncomeByDate.getTaxTransferDate()
-                            ФактДоход: ndflPersonIncomeByDate.getIncomeAccruedDate()
-                            УдержНал: ndflPersonIncomeByDate.getWithholdingTax()
-                        }
+                        СумДата (
+                            ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format("dd.MM.yyyy"),
+                            ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format("dd.MM.yyyy"),
+                            СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format("dd.MM.yyyy"),
+                            ФактДоход: ndflPersonIncomeByDate.incomePayoutSumm.toDouble().round(2),
+                            УдержНал: ndflPersonIncomeByDate.withholdingTax
+                        ) {}
                     }
                 }
             }
         }
     }
+    println(xml)
 }
 
 /**
@@ -141,7 +142,7 @@ def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP) {
     def R_T = "NO_NDFL6"
     def A = departmentParamIncomeRow?.TAX_ORGAN_CODE_MID?.value
     def K = departmentParamIncomeRow?.TAX_ORGAN_CODE?.value
-    def O = INN?.value + KPP?.value
+    def O = INN?.value + KPP
     def GGGG = new Date().format("yyyy")
     def MM = new Date().format("MM")
     def DD = new Date().format("dd")

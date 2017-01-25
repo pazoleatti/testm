@@ -1417,7 +1417,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             DeclarationData declarationData = get(declarationDataId, userInfo);
 
             // проверка по xsd
-            validateDeclaration(userInfo, declarationData, logger, true, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, new LockStateLogger() {
+            validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
                     // ничего не делаем
