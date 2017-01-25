@@ -19,9 +19,9 @@ public class NdflSumByRate {
     // ВычетНал
     private BigDecimal totalDeductionsSumm;
     // ИсчислНал
-    private Integer calculatedTax;
+    private Long calculatedTax;
     // ИсчислНалДив
-    private Integer calculatedTaxDiv;
+    private Long calculatedTaxDiv;
     // АвансПлат
     private BigDecimal prepaymentSum;
 
@@ -74,24 +74,24 @@ public class NdflSumByRate {
                 this.totalDeductionsSumm.add(totalDeductionsSumm);
     }
 
-    public Integer getCalculatedTax() {
+    public Long getCalculatedTax() {
         return calculatedTax;
     }
-    public void setCalculatedTax(Integer calculatedTax) {
+    public void setCalculatedTax(Long calculatedTax) {
         this.calculatedTax = calculatedTax;
     }
-    public void addCalculatedTax(Integer calculatedTax) {
+    public void addCalculatedTax(Long calculatedTax) {
         this.calculatedTax = this.calculatedTax == null ? calculatedTax :
                 this.calculatedTax + calculatedTax;
     }
 
-    public Integer getCalculatedTaxDiv() {
+    public Long getCalculatedTaxDiv() {
         return calculatedTaxDiv;
     }
-    public void setCalculatedTaxDiv(Integer calculatedTaxDiv) {
+    public void setCalculatedTaxDiv(Long calculatedTaxDiv) {
         this.calculatedTaxDiv = calculatedTaxDiv;
     }
-    public void addCalculatedTaxDiv(Integer calculatedTaxDiv) {
+    public void addCalculatedTaxDiv(Long calculatedTaxDiv) {
         this.calculatedTaxDiv = this.calculatedTaxDiv == null ? calculatedTaxDiv :
                 this.calculatedTaxDiv + calculatedTaxDiv;
     }

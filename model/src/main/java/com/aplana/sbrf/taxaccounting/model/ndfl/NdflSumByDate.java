@@ -21,7 +21,7 @@ public class NdflSumByDate {
     private BigDecimal incomePayoutSumm;
 
     // Сумма налога удержанная
-    private Integer withholdingTax;
+    private Long withholdingTax;
 
     public Date getIncomeAccruedDate() {
         return incomeAccruedDate;
@@ -54,13 +54,13 @@ public class NdflSumByDate {
         this.incomePayoutSumm.add(incomePayoutSumm);
     }
 
-    public Integer getWithholdingTax() {
+    public Long getWithholdingTax() {
         return withholdingTax;
     }
-    public void setWithholdingTax(Integer withholdingTax) {
+    public void setWithholdingTax(Long withholdingTax) {
         this.withholdingTax = withholdingTax;
     }
-    public void addWithholdingTax(Integer withholdingTax) {
+    public void addWithholdingTax(Long withholdingTax) {
         this.withholdingTax += withholdingTax;
     }
 }
