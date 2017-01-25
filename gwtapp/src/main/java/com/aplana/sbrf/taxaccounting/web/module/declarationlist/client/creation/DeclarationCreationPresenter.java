@@ -49,9 +49,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         List<Integer> getSelectedDepartment();
         void setTaxType(TaxType taxType);
 
-        String getTaxOrganCode();
-        String getTaxOrganKpp();
-
         void init();
 
         void initRefBooks(Date version, String filter, TaxType taxType);
@@ -84,8 +81,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
         filter.setDepartmentIds(getView().getSelectedDepartment());
         filter.setReportPeriodIds(getView().getSelectedReportPeriod());
-        filter.setTaxOrganCode(getView().getTaxOrganCode());
-        filter.setTaxOrganKpp(getView().getTaxOrganKpp());
         if(isFilterDataCorrect(filter)){
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);

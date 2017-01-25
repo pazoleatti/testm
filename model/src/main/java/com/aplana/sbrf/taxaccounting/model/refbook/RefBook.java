@@ -102,7 +102,8 @@ public class RefBook implements Serializable {
 		FIAS_HOUSE(1040),
 		FIAS_HOUSEINT(1050),
 		FIAS_ROOM(1060), 							// ФИАС >
-		DECLARATION_DATA_KIND_REF_BOOK(932), 		// Типы форм (declaration)
+        DECLARATION_TEMPLATE(207), 		            // Макеты налоговых форм
+        DECLARATION_DATA_KIND_REF_BOOK(932), 		// Типы форм (declaration)
 		DECLARATION_DATA_TYPE_REF_BOOK(931), 		// Випы налоговых форм (declaration)
 		CONFIGURATION_PARAM(105), 					// Конфигурационные параметры
 		AUDIT_FIELD(104), 							// Список полей для журнала аудита

@@ -52,7 +52,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
 	// Список простых нередактируемых справочников
 	private static final List<Long> simpleReadOnlyRefBooks = Arrays.asList(new Long[]{
 			USER.getId(), SEC_ROLE.getId(), DEPARTMENT_TYPE.getId(), ASNU.getId(),
-			DECLARATION_DATA_KIND_REF_BOOK.getId(), DECLARATION_DATA_TYPE_REF_BOOK.getId()
+			DECLARATION_DATA_KIND_REF_BOOK.getId(), DECLARATION_DATA_TYPE_REF_BOOK.getId(),
+            DECLARATION_TEMPLATE.getId()
 	});
 	// Список простых редактируемых версионируемых справочников
 	private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
@@ -127,9 +128,15 @@ public class RefBookFactoryImpl implements RefBookFactory {
 		if (ASYNC_CONFIG.getId() == refBookId) {
             return applicationContext.getBean("refBookAsyncConfigProvider", RefBookAsyncConfigProvider.class);
         }
-		RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
-		refBookUniversal.setRefBookId(refBookId);
-		return refBookUniversal;
+        if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
+            RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            dataProvider.setRefBook(refBook);
+            return dataProvider;
+        } else {
+            RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
+            refBookUniversal.setRefBookId(refBookId);
+            return refBookUniversal;
+        }
     }
 
     @Override

@@ -120,7 +120,7 @@ public class GetMainMenuActionHandler extends
                                 new MenuItem("Назначение форм",
                                         NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
                                                 + TYPE + "=" + menu.getMeta() + ";"
-                                                + TaxFormNominationToken.isForm + "=" + true));
+                                                + TaxFormNominationToken.isForm + "=" + false));
 
                         menu.getSubMenu().add(
                                 new MenuItem("Назначение источников-приёмников",
