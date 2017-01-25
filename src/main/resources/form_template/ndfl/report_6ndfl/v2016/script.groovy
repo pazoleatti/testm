@@ -34,6 +34,9 @@ def buildXml() {
     def departmentParamIncomeRow = getDepartmentParamTable(departmentParam.record_id.value)
     println(departmentParamIncomeRow)
 
+    def ndflPersonIncomeByDateList = []
+    def ndflPersonIncomeByRateList = []
+
     def builder = new MarkupBuilder(xml)
     builder.mkp.xmlDeclaration(version: "1.0", encoding: "utf-8")
     builder.Файл(
@@ -51,13 +54,13 @@ def buildXml() {
                 ПоМесту: ""
         ) {
             СвНП(
-                    ОКТМО: "",
+                    ОКТМО: getOKTMO(departmentParamIncomeRow),
                     Тлф: ""
             ){
                 НПЮЛ(
                         НаимОрг: "",
                         ИННЮЛ: "",
-                        КПП: ""
+                        КПП: getKPP(departmentParamIncomeRow)
                 )
             }
             Подписант(
@@ -74,7 +77,35 @@ def buildXml() {
                 )
             }
             НДФЛ6(){
-
+                ОбобщПоказ(
+                        КолФЛДоход: "",
+                        УдержНалИт: "",
+                        НеУдержНалИт: "",
+                        ВозврНалИт: ""
+                ) {
+                    ndflPersonIncomeByRateList.each { ndflPersonIncomeByRate ->
+                        СумСтавка {
+                            Ставка: ndflPersonIncomeByRate.getTaxRate()
+                            НачислДох: ndflPersonIncomeByRate.getIncomeAccruedSumm()
+                            НачислДохДив: ndflPersonIncomeByRate.getIncomeAccruedSummDiv()
+                            ВычетНал: ndflPersonIncomeByRate.getTotalDeductionsSumm()
+                            ИсчислНал: ndflPersonIncomeByRate.getCalculatedTax()
+                            ИсчислНалДив: ndflPersonIncomeByRate.getCalculatedTaxDiv()
+                            АвансПлат: ndflPersonIncomeByRate.getPrepaymentSum()
+                        }
+                    }
+                }
+                ДохНал() {
+                    ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
+                        СумДата {
+                            ДатаФактДох: ndflPersonIncomeByDate.getIncomeAccruedDate()
+                            ДатаУдержНал: ndflPersonIncomeByDate.getTaxDate()
+                            СрокПрчслНал: ndflPersonIncomeByDate.getTaxTransferDate()
+                            ФактДоход: ndflPersonIncomeByDate.getIncomeAccruedDate()
+                            УдержНал: ndflPersonIncomeByDate.getWithholdingTax()
+                        }
+                    }
+                }
             }
         }
     }
@@ -116,6 +147,14 @@ def getReportPeriodStartDate() {
         startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     }
     return startDate
+}
+
+def getOKTMO(def departmentParamRow) {
+    departmentParamRow?.OKTMO?.value
+}
+
+def getKPP(def departmentParamRow) {
+    departmentParamRow?.KPP?.value
 }
 
 def getReportPeriodEndDate() {

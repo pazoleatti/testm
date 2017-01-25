@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Модельный класс сумм по датам для формирования 6 НДФЛ
+ * Суммы по датам для формирования 6 НДФЛ
  */
-public class NdflSumByDate {
+public class NdflPersonIncomeByDate {
 
     // Дата начисления дохода
     private Date incomeAccruedDate;
