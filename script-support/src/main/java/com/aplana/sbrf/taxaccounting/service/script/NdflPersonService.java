@@ -41,7 +41,7 @@ public interface NdflPersonService {
      * @param declarationDataId - идентификатор декларации
      * @return
      */
-    NdflPersonIncomeCommonValue findNdflPersonIncomeByRate(long declarationDataId);
+    NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId);
 
     /**
      * Найти данные о доходах физ лиц в разрезе дат

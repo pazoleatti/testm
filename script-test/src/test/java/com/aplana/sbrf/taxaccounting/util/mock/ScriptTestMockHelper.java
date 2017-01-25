@@ -29,6 +29,7 @@ public interface ScriptTestMockHelper {
     DeclarationService mockDeclarationService();
     TransactionHelper mockTransactionHelper();
     NdflPersonService mockNdflPersonService();
+    NdflPersonService getNdflPersonService();
     DataRowHelper getDataRowHelper();
     RefBookDataProvider getRefBookDataProvider();
     DeclarationService getDeclarationService();

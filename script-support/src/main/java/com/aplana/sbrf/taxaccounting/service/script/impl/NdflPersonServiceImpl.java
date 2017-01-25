@@ -39,7 +39,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public NdflPersonIncomeCommonValue findNdflPersonIncomeByRate(long declarationDataId) {
+    public NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId) {
         /*
         Одним из полей Обобщенных показателей о доходах является перечень просуммированых доходов и авансов для каждой ставки.
         В рамках одной ставки может быть несколько операций.
