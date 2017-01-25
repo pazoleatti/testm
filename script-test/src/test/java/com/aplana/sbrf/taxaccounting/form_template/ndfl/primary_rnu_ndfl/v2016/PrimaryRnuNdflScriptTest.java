@@ -9,6 +9,7 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Before;
 import org.junit.Test;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -16,6 +17,8 @@ import java.util.Map;
 /**
  * @author Andrey Drunk
  */
+
+
 public class PrimaryRnuNdflScriptTest extends ScriptTestBase {
 
     /**
@@ -42,6 +45,7 @@ public class PrimaryRnuNdflScriptTest extends ScriptTestBase {
 
     @Override
     protected FormData getFormData() {
+
         FormData formData = new FormData();
         FormType formType = new FormType();
         formType.setId(TYPE_ID);

@@ -75,9 +75,9 @@ public class DeclarationTestScriptHelper {
     /**
      * Сервис работы со скриптами декларации в тестовом режиме
      *
-     * @param path Относительный путь к каталогу со скриптом
+     * @param path            Относительный путь к каталогу со скриптом
      * @param declarationData Экземпляр декларации
-     * @param mockHelper Хэлпер с заглушками других сервисов, можно переопределить
+     * @param mockHelper      Хэлпер с заглушками других сервисов, можно переопределить
      */
     public DeclarationTestScriptHelper(String path, DeclarationData declarationData, ScriptTestMockHelper mockHelper) {
         super();
@@ -171,7 +171,6 @@ public class DeclarationTestScriptHelper {
             scriptingService.logScriptException(e, logger);
         }
     }
-
 
 
     /**
@@ -277,5 +276,17 @@ public class DeclarationTestScriptHelper {
      */
     public Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId) {
         return mockHelper.getRefBookAllRecords(refBookId);
+    }
+
+    public static ScriptingService getScriptingService() {
+        return scriptingService;
+    }
+
+    public DeclarationService getDeclarationService() {
+        return declarationService;
+    }
+
+    public FormSources getSources() {
+        return sources;
     }
 }

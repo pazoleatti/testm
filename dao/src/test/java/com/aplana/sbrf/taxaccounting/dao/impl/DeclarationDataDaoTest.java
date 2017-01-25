@@ -269,6 +269,13 @@ public class DeclarationDataDaoTest {
         Assert.assertEquals(6, declarationDataDao.findDeclarationDataByFormTemplate(1, format.parse("2013.01.01")).size());
     }
 
+    @Test
+    public void findAllDeclarationData() {
+        List<DeclarationData> declarationDataList = declarationDataDao.findAllDeclarationData(1, 1, 20);
+        Assert.assertNotNull(declarationDataList);
+        Assert.assertEquals(1, declarationDataList.size());
+    }
+
 	private void assertIdsEquals(long[] expected, List<DeclarationDataSearchResultItem> items) {
 		if (expected.length != items.size()) {
 			fail("List size mismatch: " + expected.length + " expected but " + items.size() + " received");

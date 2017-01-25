@@ -15,6 +15,7 @@ public interface NdflPersonService {
 
     /**
      * Создает новую запись о доходах ФЛ привязанную к ПНФ
+     *
      * @param ndflPerson фл
      * @return
      */
@@ -22,6 +23,7 @@ public interface NdflPersonService {
 
     /**
      * Получить запись с данными о доходах
+     *
      * @param ndflPersonId
      * @return
      */
@@ -29,12 +31,14 @@ public interface NdflPersonService {
 
     /**
      * Найти все данные о доходах физ лица привязанные к декларации
+     *
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPerson> findNdflPerson(long declarationDataId);
 
     /**
      * Найти все данные о доходах физ лица в разрезе ставок
+     *
      * @param declarationDataId - идентификатор декларации
      * @return
      */
@@ -42,8 +46,16 @@ public interface NdflPersonService {
 
     /**
      * Найти все данные о доходах физ лица в разрезе дат
+     *
      * @param declarationDataId - идентификатор декларации
      * @return
      */
     List<NdflSumByDate> findNdflSumByDate(long declarationDataId);
+
+    /**
+     * Удаляет все данные о физлицах из декларации
+     *
+     * @param declarationDataId
+     */
+    void deleteAll(long declarationDataId);
 }

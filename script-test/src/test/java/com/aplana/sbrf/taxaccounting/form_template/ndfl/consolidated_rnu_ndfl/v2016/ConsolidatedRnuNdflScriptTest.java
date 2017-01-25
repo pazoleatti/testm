@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.consolidated_rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -11,19 +12,16 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -45,7 +43,6 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
     @Override
     protected DeclarationData getDeclarationData() {
         DeclarationData declarationData = new DeclarationData();
-        declarationData.setId(DeclarationTestScriptHelper.CURRENT_DECLARATION_DATA_ID);
         declarationData.setId(DeclarationTestScriptHelper.CURRENT_DECLARATION_DATA_ID);
         declarationData.setDepartmentId(DEPARTMENT_ID);
         declarationData.setDeclarationTemplateId(DECLARATION_TEMPLATE_ID);
@@ -94,6 +91,20 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
 
     @Test
     public void calcCompose() throws Exception {
+
+        //mock service
+        when(testHelper.getDeclarationService().getDeclarationSourcesInfo(any(DeclarationData.class),
+                anyBoolean(), anyBoolean(), Matchers.isNull(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenAnswer(new Answer<List<Relation>>() {
+            @Override
+            public List<Relation> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                List<Relation> relation = new ArrayList<Relation>();
+                //relation.add(createRelation());
+                return relation;
+            }
+        });
+
+       //declarationService.getDeclarationSourcesInfo(declarationData, false, false, null, userInfo, logger);
+
         testHelper.execute(FormDataEvent.COMPOSE);
         checkLogger();
     }
@@ -109,5 +120,11 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
     //    testHelper.execute(FormDataEvent.CREATE_SPECIFIC_REPORT);
     //    checkLogger();
     //}
+
+    private Relation createRelation(){
+        Relation relation = new Relation();
+        return relation;
+    }
+
 
 }

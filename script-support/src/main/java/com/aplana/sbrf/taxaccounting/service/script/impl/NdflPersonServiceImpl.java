@@ -101,10 +101,10 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
         List<NdflSumByRate> ndflSumByRateList = new ArrayList<NdflSumByRate>();
 
-        for (Map.Entry<Integer, Map> iterTaxRate: mapTaxRate.entrySet()) {
+        for (Map.Entry<Integer, Map> iterTaxRate : mapTaxRate.entrySet()) {
             Map<Long, NdflSumByRate> mapO = iterTaxRate.getValue();
             NdflSumByRate ndflSumByRate = new NdflSumByRate();
-            for (Map.Entry<Long, NdflSumByRate> iterOperation  : mapO.entrySet()) {
+            for (Map.Entry<Long, NdflSumByRate> iterOperation : mapO.entrySet()) {
                 NdflSumByRate sbr = iterOperation.getValue();
                 BigDecimal summPrepayment = mapSumPrepayment.get(iterOperation.getKey());
 
@@ -144,4 +144,13 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         }
         return new ArrayList<NdflSumByDate>(mapNdflPersonIncome.values());
     }
+
+    @Override
+    public void deleteAll(long declarationDataId) {
+        List<NdflPerson> ndflPersonList = findNdflPerson(declarationDataId);
+        for (NdflPerson ndflPerson : ndflPersonList) {
+            ndflPersonDao.delete(ndflPerson.getId());
+        }
+    }
+
 }
