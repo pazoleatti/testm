@@ -46,8 +46,11 @@ alter table ref_book_okved add constraint chk_ref_book_okved_status check (statu
 alter table ref_book_deduction_mark add constraint pk_ref_book_deduction_mark primary key(id);
 alter table ref_book_deduction_mark add constraint chk_ref_book_ded_mark_status check (status between -1 and 2);
 
--- Параметры подразделения по НДФЛ
+-- Коды форм реорганизации (ликвидации) организации
+alter table ref_book_reorganization add constraint pk_ref_book_reorganization primary key(id);
+alter table ref_book_reorganization add constraint chk_ref_book_reorg_status check(status between -1 and 2);
 
+-- Параметры подразделения по НДФЛ
 alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
 alter table ref_book_ndfl_detail add constraint pk_ref_book_ndfl_detail primary key(id);
 
@@ -65,7 +68,6 @@ alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_signatory f
 alter table ref_book_ndfl_detail add constraint chk_ref_book_ndfl_det_status check (status in (-1,0,1,2));
 
 -- Параметры подразделения по сборам, взносам
-
 alter table ref_book_fond add constraint pk_ref_book_fond primary key(id);
 alter table ref_book_fond_detail add constraint pk_ref_book_fond_detail primary key(id);
 
