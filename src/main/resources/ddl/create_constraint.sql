@@ -547,6 +547,7 @@ alter table ref_book_person add constraint fk_ref_book_person_citizenship foreig
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_doc_id foreign key (doc_id) references ref_book_record(id);
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_record(id);
+-- create unique index unq_ref_book_id_doc_pers_inc1 on ref_book_id_doc (decode(inc_rep,1,person_id,null));
 
 alter table ref_book_person add constraint chk_ref_book_person_pension check (pension in (1,2));
 alter table ref_book_person add constraint chk_ref_book_person_medical check (medical in(1,2));
