@@ -18,6 +18,7 @@ import org.custommonkey.xmlunit.DifferenceListener;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.w3c.dom.Node;
@@ -96,7 +97,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         testHelper.reset();
     }
 
-    //@Test
+    @Test
     public void buildXmlTest() throws IOException, SAXException {
         when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class))).thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
             @Override
@@ -150,12 +151,20 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         XMLUnit.setIgnoreWhitespace(true);
         Diff xmlDiff = new Diff(correctXml, testHelper.getXmlStringWriter().toString());
         xmlDiff.overrideDifferenceListener(new DifferenceListener() {
+
+            // Атрибуты, значения которых будем игнорировать
+            private final List<String> IGNORE_ATTRS =  new ArrayList<String>(){{
+                add("ДатаДок");
+                add("ИдФайл");
+                add("ОтчетГод");
+            }};
+
             @Override
             public int differenceFound(Difference diff) {
-                if (diff.getControlNodeDetail().getNode().getNodeName() == "ИдФайл") {
+                if (IGNORE_ATTRS.contains(diff.getControlNodeDetail().getNode().getNodeName())) {
                     return RETURN_IGNORE_DIFFERENCE_NODES_IDENTICAL;
                 } else {
-                    System.err.println("called: " + diff);
+                    System.err.println(diff);
                     return RETURN_ACCEPT_DIFFERENCE;
                 }
             }

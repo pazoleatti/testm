@@ -11,6 +11,9 @@ switch (formDataEvent) {
         break
 }
 
+@Field final String DATE_FORMAT_UNDERLINE = "yyyy_MM_dd"
+@Field final String DATE_FORMAT_DOT = "dd.MM.yyyy"
+
 // Кэш провайдеров
 @Field def providerCache = [:]
 
@@ -57,7 +60,7 @@ def buildXml() {
     ) {
         Документ(
                 КНД: "1151099",
-                ДатаДок: new Date().format("dd.MM.yyyy"),
+                ДатаДок: new Date().format(DATE_FORMAT_DOT),
                 Период: getPeriod(departmentParamIncomeRow, periodCode),
                 ОтчетГод: reportPeriod.taxPeriod.year,
                 КодНО: declarationData.taxOrganCode,
@@ -143,11 +146,9 @@ def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP) {
     def A = departmentParamIncomeRow?.TAX_ORGAN_CODE_MID?.value
     def K = departmentParamIncomeRow?.TAX_ORGAN_CODE?.value
     def O = INN?.value + KPP
-    def GGGG = new Date().format("yyyy")
-    def MM = new Date().format("MM")
-    def DD = new Date().format("dd")
+    def currDate = new Date().format(DATE_FORMAT_UNDERLINE)
     def N = UUID.randomUUID().toString().toUpperCase()
-    def res = R_T + "_" + A + "_" + K + "_" + O + "_" + GGGG + "_" + MM + "_" + DD + "_" + N
+    def res = R_T + "_" + A + "_" + K + "_" + O + "_" + currDate + "_" + N
     return res
 }
 
