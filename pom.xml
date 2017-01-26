@@ -36,7 +36,7 @@
 		<gwtp.version>1.0</gwtp.version>
 		<jetty.version>6.1H.22</jetty.version>
 		<springframework.version>4.2.9.RELEASE</springframework.version>
-		<springsecurity.version>4.1.1.RELEASE</springsecurity.version>
+        <springsecurity.version>3.2.3.RELEASE</springsecurity.version>
 		<org.aspectj.version>1.8.0</org.aspectj.version>
 		<groovy.version>2.4.5</groovy.version>
 		<jasperreports.version>5.0.1</jasperreports.version>
