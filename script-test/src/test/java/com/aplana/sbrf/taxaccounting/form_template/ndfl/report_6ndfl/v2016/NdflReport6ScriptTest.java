@@ -110,7 +110,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                 ndflPersonIncomeByDate1.setIncomeAccruedDate(format.parse("24.01.2017"));
                 ndflPersonIncomeByDate1.setTaxDate(format.parse("24.01.2017"));
                 ndflPersonIncomeByDate1.setTaxTransferDate(format.parse("24.01.2017"));
-                ndflPersonIncomeByDate1.setIncomePayoutSumm(new BigDecimal(1111.11));
+                ndflPersonIncomeByDate1.setIncomePayoutSumm(new BigDecimal(1111.5));
                 ndflPersonIncomeByDate1.setWithholdingTax(2222L);
                 ndflPersonIncomeByDateList.add(ndflPersonIncomeByDate1);
 

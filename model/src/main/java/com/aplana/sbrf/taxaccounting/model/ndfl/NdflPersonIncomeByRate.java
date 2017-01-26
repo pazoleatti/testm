@@ -25,6 +25,10 @@ public class NdflPersonIncomeByRate {
     // АвансПлат
     private BigDecimal prepaymentSum;
 
+    /**
+     * Суммирование в рамках конкретной ставки
+     * @param ndflPersonIncomeByRate
+     */
     public void addNdflSumByRate(NdflPersonIncomeByRate ndflPersonIncomeByRate) {
         addIncomeAccruedSumm(ndflPersonIncomeByRate.getIncomeAccruedSumm());
         addIncomeAccruedSummDiv(ndflPersonIncomeByRate.getIncomeAccruedSummDiv());

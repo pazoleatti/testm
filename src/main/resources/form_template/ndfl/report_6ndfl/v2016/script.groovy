@@ -1,5 +1,6 @@
 package form_template.ndfl.report_6ndfl.v2016
 
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
@@ -104,22 +105,22 @@ def buildXml() {
                     ndflPersonIncomeByRateList.each { ndflPersonIncomeByRate ->
                         СумСтавка (
                             Ставка: ndflPersonIncomeByRate.taxRate,
-                            НачислДох: ndflPersonIncomeByRate.incomeAccruedSumm.toDouble().round(2),
-                            НачислДохДив: ndflPersonIncomeByRate.incomeAccruedSummDiv.toDouble().round(2),
-                            ВычетНал: ndflPersonIncomeByRate.totalDeductionsSumm.toDouble().round(2),
+                            НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 0),
+                            НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 0),
+                            ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 0),
                             ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
                             ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
-                            АвансПлат: ndflPersonIncomeByRate.prepaymentSum.toDouble().round(2)
+                            АвансПлат: ScriptUtils.round(ndflPersonIncomeByRate.prepaymentSum, 0)
                         ) {}
                     }
                 }
                 ДохНал() {
                     ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
                         СумДата (
-                            ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format("dd.MM.yyyy"),
-                            ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format("dd.MM.yyyy"),
-                            СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format("dd.MM.yyyy"),
-                            ФактДоход: ndflPersonIncomeByDate.incomePayoutSumm.toDouble().round(2),
+                            ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format(DATE_FORMAT_DOT),
+                            ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format(DATE_FORMAT_DOT),
+                            СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format(DATE_FORMAT_DOT),
+                            ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 0),
                             УдержНал: ndflPersonIncomeByDate.withholdingTax
                         ) {}
                     }
@@ -152,21 +153,23 @@ def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP) {
     return res
 }
 
-// Код периода
+/**
+ * Период
+ */
 def getPeriod(def departmentParamIncomeRow, def periodCode) {
     if (departmentParamIncomeRow?.REORG_FORM_CODE?.value) {
         def result;
         switch (periodCode) {
-            case 21:
+            case "21":
                 result = "51"
                 break
-            case 31:
+            case "31":
                 result = "52"
                 break
-            case 33:
+            case "33":
                 result = "53"
                 break
-            case 34:
+            case "34":
                 result = "90"
                 break
         }
