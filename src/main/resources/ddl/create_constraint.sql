@@ -571,3 +571,12 @@ alter table state_change add constraint fk_state_change_from foreign key(from_id
 alter table state_change add constraint fk_state_change_to foreign key(to_id) references state(id);
 alter table declaration_data add constraint fk_declaration_data_state foreign key(state) references state(id);
 --------------------------------------------------------------------------------------------------------------------------
+alter table raschsv_itog_strah_lic add constraint pk_raschsv_itog_strah_lic primary key(id);
+
+alter table raschsv_itog_vypl add constraint pk_raschsv_itog_vypl primary key(id);
+alter table raschsv_itog_vypl add constraint fk_raschsv_itog_vypl_strah foreign key(raschsv_itog_strah_lic_id) references raschsv_itog_strah_lic(id);
+
+alter table raschsv_itog_vypl_dop add constraint pk_raschsv_itog_vypl_dop primary key(id);
+alter table raschsv_itog_vypl_dop add constraint fk_raschsv_itog_vypl_dop_strah foreign key(raschsv_itog_strah_lic_id) references raschsv_itog_strah_lic(id);
+--------------------------------------------------------------------------------------------------------------------------
+

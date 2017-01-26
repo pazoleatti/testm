@@ -2322,3 +2322,58 @@ comment on column state_change.id is 'Уникальный идентифика�
 comment on column state_change.from_id is 'Из какого статуса переход';
 comment on column state_change.to_id is 'В какой статус переходим';
 --------------------------------------------------------------------------------------------------------------------------
+-- НФ вида 1151111
+--------------------------------------------------------------------------------------------------------------------------
+
+create table raschsv_itog_strah_lic (
+  id                  number(18)  not null,
+  declaration_data_id number(18)  not null,
+  kol_lic             number(20)
+);
+
+comment on table raschsv_itog_strah_lic is 'НФ вида 1151111: Сводные показатели формы';
+comment on column raschsv_itog_strah_lic.id is 'Уникальный идентификатор';
+comment on column raschsv_itog_strah_lic.declaration_data_id is 'Идентификатор декларации';
+comment on column raschsv_itog_strah_lic.kol_lic is 'Количество ФЛ';
+
+create table raschsv_itog_vypl (
+  id                        number(18)        not null,
+  raschsv_itog_strah_lic_id number(18)        not null,
+  mesyac                    varchar2(2 char)  not null,
+  kod_kat_lic               varchar2(4 char)  not null,
+  kol_fl                    number(20)        not null,
+  sum_vypl                  number(23,2)      not null,
+  vypl_ops                  number(23,2),
+  vypl_ops_dog              number(23,2),
+  sum_nachisl               number(23,2)
+);
+
+comment on table raschsv_itog_vypl is 'НФ вида 1151111: Сводные сведения о выплатах';
+comment on column raschsv_itog_vypl.id is 'Уникальный идентификатор';
+comment on column raschsv_itog_vypl.raschsv_itog_strah_lic_id is 'Внешний ключ на НФ вида 1151111: Сводные показатели формы';
+comment on column raschsv_itog_vypl.mesyac is 'Месяц';
+comment on column raschsv_itog_vypl.kod_kat_lic is 'Категория';
+comment on column raschsv_itog_vypl.kol_fl is 'Количество ФЛ';
+comment on column raschsv_itog_vypl.sum_vypl is 'Сумма выплат';
+comment on column raschsv_itog_vypl.vypl_ops is 'База ОПС';
+comment on column raschsv_itog_vypl.vypl_ops_dog is 'База ОПС Договор';
+comment on column raschsv_itog_vypl.sum_nachisl is 'Сумма начислено';
+
+create table raschsv_itog_vypl_dop (
+  id                        number(18)        not null,
+  raschsv_itog_strah_lic_id number(18)        not null,
+  mesyac                    varchar2(2 char)  not null,
+  tarif                     varchar2(2 char)  not null,
+  kol_fl                    number(20)        not null,
+  sum_vypl                  number(23,2)      not null,
+  sum_nachisl               number(23,2)
+);
+
+comment on table raschsv_itog_vypl_dop is 'НФ вида 1151111: Сводные сведения о выплатах по доп. тарифам';
+comment on column raschsv_itog_vypl_dop.id is 'Уникальный идентификатор';
+comment on column raschsv_itog_vypl_dop.raschsv_itog_strah_lic_id is 'Внешний ключ на НФ вида 1151111: Сводные показатели формы';
+comment on column raschsv_itog_vypl_dop.mesyac is 'Месяц';
+comment on column raschsv_itog_vypl_dop.tarif is 'Тариф';
+comment on column raschsv_itog_vypl_dop.kol_fl is 'Количество ФЛ';
+comment on column raschsv_itog_vypl_dop.sum_vypl is 'Сумма выплат';
+comment on column raschsv_itog_vypl_dop.sum_nachisl is 'Сумма начислено';
