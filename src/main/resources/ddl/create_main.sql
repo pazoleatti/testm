@@ -2228,7 +2228,7 @@ create table ref_book_id_doc
   doc_number varchar2(25 char) not null,
   issued_by varchar2(255 char),
   issued_date date,
-  inc_rep number(1)
+  inc_rep number(1) default 0 not null
 );
 
 comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';
