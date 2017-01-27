@@ -4,23 +4,21 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Ref;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -257,9 +255,32 @@ public class RefBookSimpleDaoTest {
 
     }
 
-    public void getMatchedRecordsByUniqueAttributes() throws Exception {
+    @Test
+    public void getMatchedRecordsByUniqueAttributesFindsRecord1() throws Exception {
         RefBook refBook = createRefBook();
-        dao.getMatchedRecordsByUniqueAttributes(refBook, 4L, refBook.getAttributes(), createRecords());
+        List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, null, createRecords().get(0));
+
+        assertEquals(1, matchedRecords.size());
+        assertEquals((Long)1L, matchedRecords.get(0).getFirst());
+
+        System.out.println(matchedRecords);
+    }
+
+    @Test
+    public void getMatchedRecordsByUniqueAttributesFindsRecord2() throws Exception {
+        RefBook refBook = createRefBook();
+        List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, 4L, createRecords().get(1));
+
+        assertEquals(1, matchedRecords.size());
+        assertEquals((Long)2L, matchedRecords.get(0).getFirst());
+    }
+
+    @Test
+    public void getMatchedRecordsByUniqueAttributesNotFindsRecord() throws Exception {
+        RefBook refBook = createRefBook();
+        List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, 2L, createRecords().get(1));
+
+        assertEquals(0, matchedRecords.size());
     }
 
     private RefBook createRefBook() {
@@ -291,5 +312,176 @@ public class RefBookSimpleDaoTest {
         record2.setValues(existingRecordsValues.get(1));
 
         return new ArrayList<RefBookRecord>(Arrays.asList(record, record2));
+    }
+
+    @Test
+    public void checkConflictValuesVersionsReturnsConflict() throws Exception {
+        List<Long> conflicts = dao.checkConflictValuesVersions(createRefBook(), createValues(), new Date(0), new Date());
+        assertEquals(1, conflicts.size());
+        assertEquals((Long)1L, conflicts.get(0));
+    }
+
+    private List<Pair<Long, String>> createValues(){
+        Pair<Long, String> p1 = new Pair<Long, String>(1L, "ИНН в Российской Федерации,ИНН в стране гражданства,СНИЛС");
+        return new ArrayList<Pair<Long, String>>(Arrays.asList(p1));
+    }
+
+    @Test
+    public void checkConflictValuesVersionsReturnsNoConflict() throws Exception {
+        Date d2013 = new GregorianCalendar(2013,0,1).getTime();
+        Date d2015 = new GregorianCalendar(2015,0,1).getTime();
+        List<Long> conflicts = dao.checkConflictValuesVersions(createRefBook(), createValues(), d2013, d2015);
+        assertEquals(0, conflicts.size());
+    }
+
+    @Test
+    public void checkParentConflictReturnsConflictIfVersionIsEarlier() throws Exception {
+        RefBook refBook = createHierarchyRefBook();
+        RefBookRecord record = createHierarchyRecord("Афанасий", "Иванович", "Иванов", 1L, new GregorianCalendar(2015,0,1).getTime(), null);
+
+        Date versionFrom = new GregorianCalendar(2013, Calendar.MARCH, 1).getTime();
+        List<Pair<Long, Integer>> conflict = dao.checkParentConflict(refBook, versionFrom, new ArrayList<RefBookRecord>(Arrays.asList(record)));
+        Pair<Long, Integer> expected = new Pair<Long, Integer>(1L, -1);
+        System.out.println(conflict);
+
+        assertEquals(1, conflict.size());
+        assertEquals(expected, conflict.get(0));
+    }
+
+    @Test
+    public void checkParentConflictNotReturnsConflict() throws Exception {
+        RefBook refBook = createHierarchyRefBook();
+        RefBookRecord record = createHierarchyRecord("Афанасий", "Иванович", "Иванов", 1L, new GregorianCalendar(2019,0,1).getTime(), null);
+
+        Date versionFrom = new GregorianCalendar(2017, Calendar.MARCH, 1).getTime();
+        List<Pair<Long, Integer>> conflict = dao.checkParentConflict(refBook, versionFrom, new ArrayList<RefBookRecord>(Arrays.asList(record)));
+        Pair<Long, Integer> expected = new Pair<Long, Integer>(1L, 0);
+
+        assertEquals(1, conflict.size());
+        assertEquals(expected, conflict.get(0));
+    }
+
+    private RefBookRecord createHierarchyRecord(String firstName, String lastName, String middleName, Long parentId, Date version, Long recordId)  {
+        RefBookValue fNameVal = new RefBookValue(RefBookAttributeType.STRING, firstName);
+        RefBookValue lNameVal = new RefBookValue(RefBookAttributeType.STRING, lastName);
+        RefBookValue mNameVal = new RefBookValue(RefBookAttributeType.STRING, middleName);
+        RefBookValue parentVal = new RefBookValue(RefBookAttributeType.REFERENCE, parentId);
+        RefBookValue birthVal = new RefBookValue(RefBookAttributeType.DATE, new GregorianCalendar(1970,3,5).getTime());
+        RefBookValue citizVal = new RefBookValue(RefBookAttributeType.REFERENCE, 266174099L);
+        RefBookValue socVal = new RefBookValue(RefBookAttributeType.STRING, "1");
+        RefBookValue pensVal = new RefBookValue(RefBookAttributeType.STRING, "1");
+        RefBookValue medVal = new RefBookValue(RefBookAttributeType.STRING, "1");
+        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+        values.put("FIRST_NAME", fNameVal);
+        values.put("LAST_NAME", lNameVal);
+        values.put("MIDDLE_NAME", mNameVal);
+        values.put(RefBook.RECORD_PARENT_ID_ALIAS, parentVal);
+        values.put("BIRTH_DATE", birthVal);
+        values.put("CITIZENSHIP", citizVal);
+        values.put("SOCIAL", socVal);
+        values.put("PENSION", pensVal);
+        values.put("MEDICAL", medVal);
+
+        RefBookRecord record = new RefBookRecord();
+        record.setVersionTo(version);
+        record.setValues(values);
+        if (recordId != null) {
+            record.setRecordId(recordId);
+        }
+        return record;
+    }
+
+    private RefBook createHierarchyRefBook() {
+        RefBook refBook = new RefBook();
+        refBook.setTableName("REF_BOOK_FAMILY");
+        refBook.setId(1983L);
+        refBook.setType(1);
+        refBook.setReadOnly(false);
+        refBook.setVersioned(true);
+        return refBook;
+    }
+
+    @Test
+    public void checkCrossVersionsExecutes() throws Exception {
+        List<CheckCrossVersionsResult> resultList = dao.checkCrossVersions(createRefBook(), 4L, new Date(0), new Date(), null);
+        assertNotNull(resultList);
+    }
+
+    @Test
+    public void isVersionUsedLikeParentExecutes() throws Exception {
+        List<Pair<Date, Date>> list = dao.isVersionUsedLikeParent(createHierarchyRefBook(), 1L, new Date(0));
+        assertNotNull(list);
+    }
+
+    @Test
+    public void getNextVersionExecutes() throws Exception {
+        dao.getNextVersion(createRefBook(), new Date(0), "SEX = 1");
+    }
+
+    @Test
+    public void getNextVersionReturnsNextVersion() throws Exception {
+        RefBookRecordVersion nextVersion = dao.getNextVersion(createRefBook(), 1L, new Date(0));
+        Date expectedStartDate = new GregorianCalendar(2017, 0, 9).getTime();
+
+        assertEquals(expectedStartDate, nextVersion.getVersionStart());
+        assertEquals(null, nextVersion.getVersionEnd());
+        assertEquals((Long)1L, nextVersion.getRecordId());
+    }
+
+    @Test
+    public void getNextVersionReturnsNextVersion2() throws Exception {
+        RefBookRecordVersion nextVersion = dao.getNextVersion(createRefBook(), 4L, new Date(0));
+        Date expectedStartDate = new GregorianCalendar(2010, 0, 1).getTime();
+        Date expectedEndDate = new GregorianCalendar(2010, 11, 31).getTime();
+
+        assertEquals(expectedStartDate, nextVersion.getVersionStart());
+        assertEquals(expectedEndDate, nextVersion.getVersionEnd());
+        assertEquals((Long)4L, nextVersion.getRecordId());
+    }
+
+    @Test
+    public void getNextVersionReturnsNextVersion3() throws Exception {
+        Date versionFrom = new GregorianCalendar(2010,6,22).getTime();
+        RefBookRecordVersion nextVersion = dao.getNextVersion(createRefBook(), 4L, versionFrom);
+        Date expectedStartDate = new GregorianCalendar(2011, 0, 1).getTime();
+        Date expectedEndDate = null;
+
+        assertEquals(expectedStartDate, nextVersion.getVersionStart());
+        assertEquals(expectedEndDate, nextVersion.getVersionEnd());
+        assertEquals((Long)5L, nextVersion.getRecordId());
+    }
+
+    public void createFakeRecordVersionInsertsData() throws Exception {
+        Date version = new GregorianCalendar(2020,5,5).getTime();
+        Date versionFrom = new GregorianCalendar(2010,5,5).getTime();
+        RefBook refBook = createRefBook();
+
+        dao.createFakeRecordVersion(refBook, 4L, version);
+        PagingResult<Map<String, RefBookValue>> records = dao.getRecordVersionsByRecordId(refBook.getId(), 4L, null, null, null);
+        RefBookRecordVersion nextVersion = dao.getNextVersion(refBook, 4L, versionFrom);
+
+        assertEquals(3, records.getTotalCount());
+        assertEquals(version, nextVersion.getVersionEnd());
+    }
+
+    @Test
+    public void createRecordVersionInsertsRecords() throws Exception {
+        Date version = new GregorianCalendar(2020,5,14).getTime();
+        RefBook refBook = createRefBook();
+
+        dao.createRecordVersion(refBook, version, VersionedObjectStatus.NORMAL, createRecordsForCreateRecordsVersion());
+        PagingResult<Map<String, RefBookValue>> result1 = dao.getRecordVersionsByRecordId(refBook.getId(), 1L, null, null, null);
+        PagingResult<Map<String, RefBookValue>> result2 = dao.getRecordVersionsByRecordId(refBook.getId(), 4L, null, null, null);
+
+        assertEquals(2, result1.size());
+        assertEquals(3, result2.size());
+    }
+
+    private List<RefBookRecord> createRecordsForCreateRecordsVersion() {
+        List<RefBookRecord> records = new ArrayList<RefBookRecord>();
+        records.add(createHierarchyRecord("Федор", "Иванов", "Семёнович", null, null, 1L));
+        records.add(createHierarchyRecord("Чарльз", "Иванов", "Васильевич", null, null, 4L));
+
+        return records;
     }
 }

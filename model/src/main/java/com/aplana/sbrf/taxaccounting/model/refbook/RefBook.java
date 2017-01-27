@@ -4,12 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Cправочник
@@ -36,6 +31,9 @@ public class RefBook implements Serializable {
 	public static final String RECORD_HAS_CHILD_ALIAS = "HAS_CHILD";
 
 	public static final String RECORD_SORT_ALIAS = "row_number_over";
+
+	public static final List<String> SYSTEM_ALIASES = new ArrayList<String>(Arrays.asList("id", "version", "status",
+			RECORD_ID_ALIAS, RECORD_PARENT_ID_ALIAS));
 
     public static final Long DEPARTMENT_CONFIG_TRANSPORT = 31L;
     public static final Long DEPARTMENT_CONFIG_INCOME = 33L;

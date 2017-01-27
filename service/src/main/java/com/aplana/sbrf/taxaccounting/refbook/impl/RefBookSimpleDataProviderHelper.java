@@ -2,10 +2,8 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.FormLink;
-import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -53,11 +51,12 @@ public class RefBookSimpleDataProviderHelper {
     private BDUtils dbUtils;
     @Autowired
     private RefBookDao refBookDao;
+    @Autowired
+    private RefBookSimpleDao dao;
 
     /**
      * Проверка корректности
      */
-    // TODO использую в скрипте
     void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, List<RefBookRecord> records) {
         List<RefBookAttribute> attributes = refBook.getAttributes();
         //Проверка обязательности заполнения записей справочника
@@ -88,18 +87,13 @@ public class RefBookSimpleDataProviderHelper {
                 refBook.getId().equals(RefBook.WithTable.LAND.getTableRefBookId());
 
         if (!isConfig) {
-
-            //Проверка отсутствия конфликта с датой актуальности родительского элемента
             if (refBook.isHierarchic() && refBook.isVersioned()) {
-                checkParentConflict(logger, versionFrom, records);
+                checkParentConflict(refBook, logger, versionFrom, records);
             }
-
             for (RefBookRecord record : records) {
-                //Получаем записи у которых совпали значения уникальных атрибутов
-                List<Pair<Long, String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), uniqueRecordId, attributes, Arrays.asList(record));
+                List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, uniqueRecordId, record);
                 if (matchedRecords != null && !matchedRecords.isEmpty()) {
-                    //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-                    List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, record.getVersionTo());
+                    List<Long> conflictedIds = dao.checkConflictValuesVersions(refBook, matchedRecords, versionFrom, record.getVersionTo());
 
                     if (!conflictedIds.isEmpty()) {
                         throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, conflictedIds)));
@@ -117,16 +111,14 @@ public class RefBookSimpleDataProviderHelper {
     /**
      * Проверка отсутствия конфликта с датой актуальности родительского элемента
      */
-    private void checkParentConflict(Logger logger, Date versionFrom, List<RefBookRecord> records) {
-        List<Pair<Long, Integer>> checkResult = refBookDao.checkParentConflict(versionFrom, records);
+    private void checkParentConflict(RefBook refBook, Logger logger, Date versionFrom, List<RefBookRecord> records) {
+        List<Pair<Long, Integer>> checkResult = dao.checkParentConflict(refBook, versionFrom, records);
         if (!checkResult.isEmpty()) {
             for (Pair<Long, Integer> conflict : checkResult) {
-                //Дата окончания периода актуальности проверяемой версии больше даты окончания периода актуальности родительской записи для проверяемой версии
                 if (conflict.getSecond() == 1) {
                     logger.error("Запись " + findNameByParent(records, conflict.getFirst()) +
                             ": Дата окончания периода актуальности версии должна быть не больше даты окончания периода актуальности записи, которая является родительской в иерархии!");
                 }
-                //Дата начала периода актуальности проверяемой версии меньше даты начала периода актуальности родительской записи для проверяемой версии
                 if (conflict.getSecond() == -1) {
                     logger.error("Запись " + findNameByParent(records, conflict.getFirst()) +
                             ": Дата начала периода актуальности версии должна быть не меньше даты начала периода актуальности записи, которая является родительской в иерархии!");
@@ -282,21 +274,9 @@ public class RefBookSimpleDataProviderHelper {
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.NEED_CHECK_USAGES) {
                 if (refBook.isHierarchic()) {
-                    //Поиск среди дочерних элементов
-                    List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBook.getId(), result.getRecordId(), versionFrom);
-                    if (childrenVersions != null && !childrenVersions.isEmpty()) {
-                        for (Pair<Date, Date> versions : childrenVersions) {
-                            if (logger != null) {
-                                logger.error(String.format("Существует дочерняя запись, действует с %s по %s",
-                                        formatter.get().format(versions.getFirst()), versions.getSecond() != null ? formatter.get().format(versions.getSecond()) : "-"));
-                            }
-                        }
-                        throw new ServiceException(CROSS_ERROR_MSG);
-                    }
+                    checkIfChildrenRecordsExists(refBook, versionFrom, logger, CROSS_ERROR_MSG, result.getRecordId());
                 }
 
-                //Ищем все ссылки на запись справочника в новом периоде
-                checkUsages(refBook, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, logger, CROSS_ERROR_MSG);
                 if (logger != null) {
                     logger.info("Установлена дата окончания актуальности версии " + formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1)) + " для предыдущей версии");
                 }
@@ -312,85 +292,23 @@ public class RefBookSimpleDataProviderHelper {
         return true;
     }
 
-    private void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
-        //Проверка использования
-        if (refBook.isHierarchic()) {
-            //Поиск среди дочерних элементов
-            for (Long uniqueRecordId : uniqueRecordIds) {
-                List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBook.getId(), uniqueRecordId, versionFrom);
-                if (childrenVersions != null && !childrenVersions.isEmpty()) {
-                    for (Pair<Date, Date> versions : childrenVersions) {
-                        if (logger != null) {
-                            String msg = "Существует дочерняя запись";
-                            if (refBook.isVersioned()) {
-                                msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
-                                        (versions.getSecond() != null ? " по " + formatter.get().format(versions.getSecond()) : "-");
-                            }
-                            logger.error(msg);
-                        }
+    private void checkIfChildrenRecordsExists(RefBook refBook, Date versionFrom, Logger logger, String errorMsg, Long uniqueRecordId) {
+        List<Pair<Date, Date>> childrenVersions = dao.isVersionUsedLikeParent(refBook, uniqueRecordId, versionFrom);
+        if (childrenVersions != null && !childrenVersions.isEmpty()) {
+            for (Pair<Date, Date> versions : childrenVersions) {
+                if (logger != null) {
+                    String msg = "Существует дочерняя запись";
+                    if (refBook.isVersioned()) {
+                        msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
+                                (versions.getSecond() != null ? " по " + formatter.get().format(versions.getSecond()) : "-");
                     }
-                    throw new ServiceException(errorMsg);
+                    logger.error(msg);
                 }
             }
-        }
-
-        boolean used = false;
-
-        //Проверка использования в справочниках
-        List<String> refBooks = refBookDao.isVersionUsedInRefBooks(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
-                RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
-                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
-        for (String refBookMsg : refBooks) {
-            logger.error(refBookMsg);
-            used = true;
-        }
-
-        //Проверка использования в нф
-        List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
-        for (FormLink form : forms) {
-            //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
-            if (refBook.getId() == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
-                //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
-                formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
-                        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
-                /*
-                reportService.delete(form.getFormDataId(), null);
-                List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
-                for (ReportType interruptedType : interruptedReportTypes) {
-                    List<String> taskKeyList = new ArrayList<String>();
-                    if (ReportType.CSV.equals(interruptedType) || ReportType.EXCEL.equals(interruptedType)) {
-                        taskKeyList.addAll(formDataService.generateReportKeys(interruptedType, form.getFormDataId(), null));
-                    } else {
-                        taskKeyList.add(formDataService.generateTaskKey(form.getFormDataId(), interruptedType));
-                    }
-                    for(String key: taskKeyList) {
-                        LockData lockData = lockService.getLock(key);
-                        if (lockData != null) {
-                            lockService.interruptTask(lockData, logger.getTaUserInfo().getUser().getId(), true, cause);
-                        }
-                    }
-                }*/
-            } else {
-                logger.error(form.getMsg());
-                used = true;
-            }
-        }
-
-        //Проверка использования в настройках подразделений
-        List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
-                RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
-                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
-        for (String configMsg : configs) {
-            logger.error(configMsg);
-            used = true;
-        }
-
-        if (used) {
             throw new ServiceException(errorMsg);
         }
     }
 
-    // TODO использую в скрипте
     List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
         List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
@@ -399,7 +317,7 @@ public class RefBookSimpleDataProviderHelper {
             for (RefBookRecord record : records) {
                 RefBookRecordVersion nextVersion = null;
                 if (record.getRecordId() != null) {
-                    nextVersion = refBookDao.getNextVersion(refBook.getId(), record.getRecordId(), versionFrom);
+                    nextVersion = dao.getNextVersion(refBook, record.getRecordId(), versionFrom);
                 } else {
                     record.setRecordId(generatedIds.get(counter));
                     counter++;
@@ -412,11 +330,11 @@ public class RefBookSimpleDataProviderHelper {
                     if (!excludedVersionEndRecords.contains(record.getRecordId())) {
                         if (nextVersion == null) {
                             //Следующая версия не существует - создаем фиктивную версию
-                            refBookDao.createFakeRecordVersion(refBook.getId(), record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+                            dao.createFakeRecordVersion(refBook, record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
                         } else {
                             int days = SimpleDateUtils.daysBetween(versionTo, nextVersion.getVersionStart());
                             if (days != 1) {
-                                refBookDao.createFakeRecordVersion(refBook.getId(), record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+                                dao.createFakeRecordVersion(refBook, record.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
                             }
                         }
                     }
@@ -431,6 +349,6 @@ public class RefBookSimpleDataProviderHelper {
             }
         }
 
-        return refBookDao.createRecordVersion(refBook.getId(), versionFrom, VersionedObjectStatus.NORMAL, records);
+        return dao.createRecordVersion(refBook, versionFrom, VersionedObjectStatus.NORMAL, records);
     }
 }

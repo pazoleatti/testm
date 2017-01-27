@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
@@ -116,11 +117,85 @@ public interface RefBookSimpleDao {
      *
      * @param refBook справочник
      * @param uniqueRecordId уникальный идентификатор записи справочника. Может быть null (при создании нового элемента). Используется для исключения из проверки указанного элемента справочника
-     * @param attributes атрибуты справочника
-     * @param records новые значения полей элемента справочника
+     * @param record новые значения полей элемента справочника
      * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
      */
     List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull RefBook refBook, Long uniqueRecordId,
-                                                                @NotNull List<RefBookAttribute> attributes,
-                                                                @NotNull List<RefBookRecord> records);
+                                                                @NotNull RefBookRecord record);
+
+    /**
+     * Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
+     * @param recordPairs записи, у которых совпали уникальные атрибуты
+     * @param versionFrom дата начала актуальности новой версии
+     * @param versionTo дата конца актуальности новой версии
+     * @return список идентификаторов записей, в которых есть пересечение
+     */
+    public List<Long> checkConflictValuesVersions(@NotNull RefBook refBook, List<Pair<Long, String>> recordPairs,
+                                                  Date versionFrom, Date versionTo);
+
+    /**
+     * Проверяет существуют ли конфликты в датах актуальности у проверяемых записей и их родительских записей (в иерархических справочниках)
+     * @param versionFrom дата начала актуальности
+     * @param records проверяемые записи
+     */
+    List<Pair<Long, Integer>> checkParentConflict(@NotNull RefBook refBook, Date versionFrom, List<RefBookRecord> records);
+
+    /**
+     * Поиск существующих версий, которые могут пересекаться с новой версией
+     * @param refBook справочник
+     * @param recordId идентификатор записи справочника (без учета версий)
+     * @param versionFrom дата начала актуальности новой версии
+     * @param versionTo дата окончания актуальности новой версии
+     * @param excludedRecordId идентификатор версии записи справочника, которая исключается из проверки пересечения. Используется только при редактировании
+     * @return результат проверки по каждой версии, с которой есть пересечение
+     */
+    List<CheckCrossVersionsResult> checkCrossVersions(RefBook refBook, Long recordId,
+                                                      Date versionFrom, Date versionTo, Long excludedRecordId);
+
+    /**
+     * Проверяет использование записи как родителя для дочерних
+     * @param refBook справочник
+     * @param recordId уникальный идентификатор записи
+     * @param versionFrom дата начала актуальности новой версии
+     * @return список пар <дата начала - дата окончания> периода актуальности обнаруженных дочерних записей
+     */
+    List<Pair<Date, Date>> isVersionUsedLikeParent(@NotNull RefBook refBook, @NotNull Long recordId, @NotNull Date versionFrom);
+
+    /**
+     * Возвращает дату начала версии следующей за указанной
+     * @param refBook справочник
+     * @param version дата актуальности
+     * @param filter фильтр для отбора записей. Обязательное поле, т.к записи не фильтруются по RECORD_ID
+     * @return дата начала следующей версии
+     */
+    Date getNextVersion(@NotNull RefBook refBook, Date version, @NotNull String filter);
+
+    /**
+     * Возвращает данные о версии следующей за указанной
+     * @param refBook справочник
+     * @param recordId идентификатор записи справочника (без учета версий)
+     * @param versionFrom дата начала актуальности версии текущей версии, после которой будет выполняться поиск следующей версии
+     * @return данные версии
+     */
+    RefBookRecordVersion getNextVersion(@NotNull RefBook refBook, @NotNull Long recordId, @NotNull Date versionFrom);
+
+    /**
+     * Создает фиктивную запись, являющуюся датой окончания периода актуальности какой то версии
+     * @param refBook справочник
+     * @param recordId идентификатор записи справочника без учета версий
+     * @param version версия записи справочника
+     */
+    void createFakeRecordVersion(@NotNull RefBook refBook, @NotNull Long recordId, @NotNull Date version);
+
+    /**
+     * Создает новые версии записи в справочнике.
+     * Если задан параметр recordId - то создается новая версия записи справочника
+     * @param refBook справочник
+     * @param version дата актуальности новых записей
+     * @param status статус записи
+     * @param records список новых записей
+     * @return идентификатор записи справочника (без учета версий)
+     */
+    List<Long> createRecordVersion(@NotNull RefBook refBook, @NotNull Date version, @NotNull VersionedObjectStatus status,
+                                   List<RefBookRecord> records);
 }
