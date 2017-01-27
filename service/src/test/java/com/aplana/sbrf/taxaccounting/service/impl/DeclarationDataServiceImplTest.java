@@ -318,7 +318,7 @@ public class DeclarationDataServiceImplTest {
         r1.setCorrectionDate(new Date(0));
         r1.setCreated(true);
         r1.setDeclarationDataId(11L);
-        r1.setStateDecl(State.ACCEPTED);
+        r1.setDeclarationState(State.ACCEPTED);
 
         Relation r2 = new Relation();
         DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
