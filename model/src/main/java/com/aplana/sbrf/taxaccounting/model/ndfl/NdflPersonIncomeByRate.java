@@ -23,7 +23,7 @@ public class NdflPersonIncomeByRate {
     // ИсчислНалДив
     private Long calculatedTaxDiv;
     // АвансПлат
-    private BigDecimal prepaymentSum;
+    private Long prepaymentSum;
 
     /**
      * Суммирование в рамках конкретной ставки
@@ -100,14 +100,14 @@ public class NdflPersonIncomeByRate {
                 this.calculatedTaxDiv + calculatedTaxDiv;
     }
 
-    public BigDecimal getPrepaymentSum() {
+    public Long getPrepaymentSum() {
         return prepaymentSum;
     }
-    public void setPrepaymentSum(BigDecimal prepaymentSum) {
+    public void setPrepaymentSum(Long prepaymentSum) {
         this.prepaymentSum = prepaymentSum;
     }
-    public void addPrepaymentSum(BigDecimal prepaymentSum) {
+    public void addPrepaymentSum(Long prepaymentSum) {
         this.prepaymentSum = this.prepaymentSum == null ? prepaymentSum :
-                this.prepaymentSum.add(prepaymentSum);
+                this.prepaymentSum + prepaymentSum;
     }
 }

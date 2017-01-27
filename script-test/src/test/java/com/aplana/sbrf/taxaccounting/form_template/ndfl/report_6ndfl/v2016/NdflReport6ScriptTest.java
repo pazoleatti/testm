@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.report_6ndfl.v2016;
 
+import com.aplana.sbrf.taxaccounting.form_template.ndfl.report_2ndfl.v2016.SchemaSimpleTest;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.State;
@@ -7,32 +8,36 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByRate;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.Difference;
-import org.custommonkey.xmlunit.DifferenceListener;
-import org.custommonkey.xmlunit.XMLUnit;
+import org.custommonkey.xmlunit.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.*;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -49,7 +54,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final long ASNU_ID = 1000;
     private static final String KPP = "123456789";
-    private static final String CODE_ORG = "0123456789";
+    private static final String CODE_ORG = "1234";
 
     @Override
     protected DeclarationData getDeclarationData() {
@@ -99,7 +104,35 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
 
     @Test
     public void buildXmlTest() throws IOException, SAXException {
-        when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class))).thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
+        // СумСтавка
+        when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class), any(Date.class), any(Date.class))).thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
+            @Override
+            public NdflPersonIncomeCommonValue answer(InvocationOnMock invocationOnMock) throws Throwable {
+                NdflPersonIncomeCommonValue ndflPersonIncomeCommonValue = new NdflPersonIncomeCommonValue();
+                ndflPersonIncomeCommonValue.setCountPerson(11);
+                ndflPersonIncomeCommonValue.setWithholdingTax(22L);
+                ndflPersonIncomeCommonValue.setNotHoldingTax(33L);
+                ndflPersonIncomeCommonValue.setRefoundTax(44L);
+
+                List<NdflPersonIncomeByRate> ndflPersonIncomeByRateList = new ArrayList<NdflPersonIncomeByRate>();
+                NdflPersonIncomeByRate ndflPersonIncomeByRate1 = new NdflPersonIncomeByRate();
+                ndflPersonIncomeByRate1.setTaxRate(13);
+                ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(5555.55));
+                ndflPersonIncomeByRate1.setIncomeAccruedSummDiv(new BigDecimal(6666.66));
+                ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(7777.77));
+                ndflPersonIncomeByRate1.setCalculatedTax(8888L);
+                ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
+                ndflPersonIncomeByRate1.setPrepaymentSum(1111L);
+                ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
+
+                ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);
+
+                return ndflPersonIncomeCommonValue;
+            }
+        });
+
+        // СумДата
+        when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class), any(Date.class), any(Date.class))).thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
             @Override
             public List<NdflPersonIncomeByDate> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
@@ -118,36 +151,61 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
             }
         });
 
-        when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class))).thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
-            @Override
-            public NdflPersonIncomeCommonValue answer(InvocationOnMock invocationOnMock) throws Throwable {
-                NdflPersonIncomeCommonValue ndflPersonIncomeCommonValue = new NdflPersonIncomeCommonValue();
-                ndflPersonIncomeCommonValue.setCountPerson(11);
-                ndflPersonIncomeCommonValue.setWithholdingTax(22L);
-                ndflPersonIncomeCommonValue.setNotHoldingTax(33L);
-                ndflPersonIncomeCommonValue.setRefoundTax(44L);
+        // Период
+        when(testHelper.getFormDataService().getRefBookValue(eq(8L), anyLong(), anyMap())).thenAnswer(
+                new Answer<Map<String, RefBookValue>>() {
+                    @Override
+                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
+                        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+                        result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "21"));
+                        return result;
+                    }
+                }
+        );
 
-                List<NdflPersonIncomeByRate> ndflPersonIncomeByRateList = new ArrayList<NdflPersonIncomeByRate>();
-                NdflPersonIncomeByRate ndflPersonIncomeByRate1 = new NdflPersonIncomeByRate();
-                ndflPersonIncomeByRate1.setTaxRate(13);
-                ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(5555.55));
-                ndflPersonIncomeByRate1.setIncomeAccruedSummDiv(new BigDecimal(6666.66));
-                ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(7777.77));
-                ndflPersonIncomeByRate1.setCalculatedTax(8888L);
-                ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
-                ndflPersonIncomeByRate1.setPrepaymentSum(new BigDecimal(1111.11));
-                ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
+        // ПоМесту
+        when(testHelper.getFormDataService().getRefBookValue(eq(2L), anyLong(), anyMap())).thenAnswer(
+                new Answer<Map<String, RefBookValue>>() {
+                    @Override
+                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
+                        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+                        result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "120"));
+                        return result;
+                    }
+                }
+        );
 
-                ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);
+        // ПрПодп
+        when(testHelper.getFormDataService().getRefBookValue(eq(35L), anyLong(), anyMap())).thenAnswer(
+                new Answer<Map<String, RefBookValue>>() {
+                    @Override
+                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
+                        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+                        result.put("CODE", new RefBookValue(RefBookAttributeType.NUMBER, 2));
+                        return result;
+                    }
+                }
+        );
 
-                return ndflPersonIncomeCommonValue;
-            }
-        });
+        // НомКорр
+        when(testHelper.getReportPeriodService().getCorrectionNumber(anyInt())).thenReturn(111);
 
         testHelper.execute(FormDataEvent.CALCULATE);
-        checkLogger();
 
-        String correctXml = IOUtils.toString(getClass().getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/report_6ndfl.xml"), "UTF-8");
+        // 1. валидация по xsd
+        try {
+            SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            URL xsdResource = getClass().getResource("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/schema.xsd");
+            Schema schema = factory.newSchema(xsdResource);
+            Validator validator = schema.newValidator();
+            validator.validate(new StreamSource(new StringReader(testHelper.getXmlStringWriter().toString())));
+        } catch (SAXException e) {
+            System.out.println("Exception: "+ e.getMessage());
+            assertTrue(false);
+        }
+
+        // 2. сравнение со сгенерированным xml
+        String correctXml = IOUtils.toString(getClass().getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/report_6ndfl.xml"), "windows-1251");
         XMLUnit.setIgnoreWhitespace(true);
         Diff xmlDiff = new Diff(correctXml, testHelper.getXmlStringWriter().toString());
         xmlDiff.overrideDifferenceListener(new DifferenceListener() {
@@ -172,5 +230,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
             public void skippedComparison(Node arg0, Node arg1) { }
         });
         assertTrue(xmlDiff.identical());
+
+        checkLogger();
     }
 }

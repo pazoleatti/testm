@@ -31,6 +31,10 @@ public class RefBookValue implements Serializable {
 		return attributeType;
 	}
 
+	public Object getValue() {
+		return value;
+	}
+
 	public String getStringValue() {
 		if (value != null && attributeType == RefBookAttributeType.STRING) {
 			return (String) value;

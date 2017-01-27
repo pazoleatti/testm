@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,8 @@ public class PreparedStatementData {
 	// набор параметров
 	private List<Object> params = new ArrayList<Object>();
 
+    private MapSqlParameterSource namedParams = new MapSqlParameterSource();
+
 	public PreparedStatementData(){
 	}
 
@@ -35,12 +39,20 @@ public class PreparedStatementData {
         return query;
     }
 
+    public String getQueryString(){
+        return query.toString();
+    }
+
     public void setParams(List<Object> params){
         this.params = params;
     }
 
     public List<Object> getParams(){
         return params;
+    }
+
+    public MapSqlParameterSource getNamedParams() {
+        return namedParams;
     }
 
     public void addParam(Object object){
@@ -51,8 +63,21 @@ public class PreparedStatementData {
         params.addAll(objects);
     }
 
+    public void addNamedParam(String key, Object value){
+        namedParams.addValue(key, value);
+    }
+
+    public void addNamedParam(String key, Object value, int sqlType){
+        namedParams.addValue(key, value, sqlType);
+    }
+
     public void appendQuery(String query){
         this.query.append(query);
+    }
+
+    public PreparedStatementData append(Object query) {
+        this.query.append(query);
+        return this;
     }
 
     public void setJoinPartsOfQuery(String joinPartsOfQuery){

@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrey Drunk
@@ -39,7 +36,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId) {
+    public NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId, Date startDate, Date endDate) {
         /*
         Одним из полей Обобщенных показателей о доходах является перечень просуммированых доходов и авансов для каждой ставки.
         В рамках одной ставки может быть несколько операций.
@@ -62,23 +59,23 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
         // 1. Суммируем Авансы в рамках операции
         // Мапа <Номер_операции, Сумма_аванса>
-        Map<Long, BigDecimal> mapSumPrepayment = new HashMap<Long, BigDecimal>();
+        Map<Long, Long> mapSumPrepayment = new HashMap<Long, Long>();
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonDao.findPrepaymentsByDeclarationDataId(declarationDataId);
         for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
-            BigDecimal summPrepayment = mapSumPrepayment.get(ndflPersonPrepayment.getOperationId());
+            Long summPrepayment = mapSumPrepayment.get(ndflPersonPrepayment.getOperationId());
             if (summPrepayment == null) {
                 summPrepayment = ndflPersonPrepayment.getSumm();
-                mapSumPrepayment.put(ndflPersonPrepayment.getOperationId(), summPrepayment);
             } else {
-                summPrepayment.add(ndflPersonPrepayment.getSumm());
+                summPrepayment += ndflPersonPrepayment.getSumm();
             }
+            mapSumPrepayment.put(ndflPersonPrepayment.getOperationId(), summPrepayment);
         }
 
         // Мапа <Номер_операции, Суммы>
         // Мапа <Ставка, Мапа>
         Map<Integer, Map> mapTaxRate = new HashMap<Integer, Map>();
 
-        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByDeclarationDataId(declarationDataId);
+        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, startDate, endDate);
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
             // Обобщенные показатели о доходах
@@ -121,6 +118,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
                     ndflPersonIncomeByRate.addIncomeAccruedSummDiv(ndflPersonIncome.getIncomeAccruedSumm());
                     ndflPersonIncomeByRate.addCalculatedTaxDiv(ndflPersonIncome.getCalculatedTax());
                 }
+                mapO.put(ndflPersonIncome.getOperationId(), ndflPersonIncomeByRate);
             }
         }
 
@@ -135,7 +133,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
                 NdflPersonIncomeByRate sbr = iterOperation.getValue();
 
                 // Получим Аванс для конкретной операции
-                BigDecimal summPrepayment = mapSumPrepayment.get(iterOperation.getKey());
+                Long summPrepayment = mapSumPrepayment.get(iterOperation.getKey());
 
                 // 3. Связываем Аванс с Доходом для конкретной операции
                 sbr.setPrepaymentSum(summPrepayment);
@@ -152,7 +150,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId) {
+    public List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId, Date startDate, Date endDate) {
         /*
         Метод возвращает просуммированные доходы и налоги, группируя их по трем датам:
         - Дата начисления дохода
@@ -160,7 +158,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         - Срок (дата) перечисления налога
          */
         Map<String, NdflPersonIncomeByDate> mapNdflPersonIncome = new HashMap<String, NdflPersonIncomeByDate>();
-        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByDeclarationDataId(declarationDataId);
+        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, startDate, endDate);
 
         DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {

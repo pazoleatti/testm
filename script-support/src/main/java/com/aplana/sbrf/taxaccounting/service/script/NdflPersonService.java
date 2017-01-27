@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,16 +40,20 @@ public interface NdflPersonService {
     /**
      * Найти обобщенные данные о доходах физ лиц и данные в разрезе ставок
      * @param declarationDataId - идентификатор декларации
+     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
-    NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId);
+    NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId, Date startDate, Date endDate);
 
     /**
      * Найти данные о доходах физ лиц в разрезе дат
      * @param declarationDataId - идентификатор декларации
+     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
-    List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId);
+    List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId, Date startDate, Date endDate);
 
     /**
      * Удаляет все данные о физлицах из декларации
