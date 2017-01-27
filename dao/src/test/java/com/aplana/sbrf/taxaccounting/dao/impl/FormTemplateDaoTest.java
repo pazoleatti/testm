@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import static org.junit.Assert.assertEquals;
  * @author Vitalii Samolovskikh
  * 			Damir Sultanbekov
  */
+@Ignore("Налоговые формы не используются!")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormTemplateDaoTest.xml"})
 @Transactional

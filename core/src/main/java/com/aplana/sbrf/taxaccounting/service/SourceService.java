@@ -570,6 +570,6 @@ public interface SourceService {
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction,
                                              TAUserInfo userInfo, Logger logger);
 }

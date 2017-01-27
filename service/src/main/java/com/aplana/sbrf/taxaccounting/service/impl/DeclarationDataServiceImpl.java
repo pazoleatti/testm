@@ -278,16 +278,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
 
         //3. обновляет записи о консолидации
-        ArrayList<Long> formDataIds = new ArrayList<Long>();
-        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, WorkflowState.ACCEPTED, userInfo, logger)){
-            formDataIds.add(relation.getFormDataId());
+        ArrayList<Long> declarationDataIds = new ArrayList<Long>();
+        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, State.ACCEPTED, userInfo, logger)){
+            declarationDataIds.add(relation.getFormDataId());
         }
 
-        //TODO 19.01.2017 Доработать таблицу DECLARATION_DATA_CONSOLIDATION, добавить столбец для хранения идентификатора декларации источника
         //Обновление информации о консолидации.
-        //sourceService.deleteDeclarationConsolidateInfo(id);
-        //sourceService.addDeclarationConsolidationInfo(id, formDataIds);
-
+        sourceService.deleteDeclarationConsolidateInfo(id);
+        sourceService.addDeclarationConsolidationInfo(id, declarationDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Декларация обновлена", null);
@@ -1325,23 +1323,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logger.warn(
                             NOT_EXIST_SOURCE_DECLARATION_WARNING,
                             relation.getFullDepartmentName(),
-                            relation.getFormTypeName(),
-                            relation.getFormDataKind().getTitle(),
-                            relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                            relation.getDeclarationTemplate().getName(),
+                            relation.getDeclarationTemplate().getDeclarationFormKind().getTitle(),
+                            relation.getPeriodName(),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     sdf.get().format(relation.getCorrectionDate())) : "");
-                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getFormDataId())){
+                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getDeclarationDataId())){
                     consolidationOk = false;
                     logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
                             relation.getFullDepartmentName(),
-                            relation.getFormTypeName(),
-                            relation.getFormDataKind().getTitle(),
-                            relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                            relation.getDeclarationTemplate().getName(),
+                            relation.getDeclarationTemplate().getDeclarationFormKind().getTitle(),
+                            relation.getPeriodName(),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     sdf.get().format(relation.getCorrectionDate())) : "",
-                            relation.getState().getTitle());
+                            relation.getStateDecl().getTitle());
                 }
             }
 

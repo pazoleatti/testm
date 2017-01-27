@@ -1269,7 +1269,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+    public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger) {
         /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
         Map<String, Object> params = new HashMap<String, Object>();
         FormSources sources = new FormSources();
@@ -1288,10 +1288,6 @@ public class SourceServiceImpl implements SourceService {
         if (scriptLogger.containsLevel(LogLevel.ERROR)) { // проверяем scriptLogger, т.к. в logger уже могут быть ошибки
             throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
         }
-        if (sources.isSourcesProcessedByScript()) {
-            return sources.getSourceList();
-        } else {
-            return sourceDao.getDeclarationSourcesInfo(declaration, light, excludeIfNotExist, stateRestriction);
-        }
+        return sources.getSourceList();
     }
 }

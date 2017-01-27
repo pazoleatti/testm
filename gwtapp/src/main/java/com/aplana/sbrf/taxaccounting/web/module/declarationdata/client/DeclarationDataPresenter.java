@@ -178,7 +178,7 @@ public class DeclarationDataPresenter
                                 declarationData = result.getDeclarationData();
 								taxName = result.getTaxType().name();
                                 taxType = result.getTaxType();
-                                sourcesPresenter.setTaxType(taxType);
+                                //sourcesPresenter.setTaxType(taxType);
                                 getView().setType(result.getDeclarationFormType());
                                 getView().setFormKind(result.getDeclarationFormKind());
                                 String periodStr = result.getReportPeriodYear() + ", " + result.getReportPeriod();

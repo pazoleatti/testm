@@ -25,7 +25,6 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
 
     public interface MyView extends PopupView, HasUiHandlers<SourcesUiHandlers> {
         void setTableData(List<Relation> tableData);
-        void setTaxType(TaxType taxType);
     }
 
     private final DispatchAsync dispatcher;
@@ -53,10 +52,6 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
     public void setDeclarationId(long declarationId) {
         this.declarationId = declarationId;
         reloadData();
-    }
-
-    public void setTaxType(TaxType taxType) {
-        getView().setTaxType(taxType);
     }
 }
 
