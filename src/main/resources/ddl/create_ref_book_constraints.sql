@@ -83,7 +83,7 @@ alter table ref_book_fond add constraint chk_ref_book_fond_status check (status 
 --alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_region foreign key(region) references ref_book_region(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_oblig foreign key(obligation) references ref_book_record(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_type foreign key(type) references ref_book_record(id);
---alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_re_code foreign key(reorg_form_code) references ref_book_record(id);
+--alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_re_code foreign key(reorg_form_code) references ref_book_reorganization(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_signatory foreign key(signatory_id) references ref_book_record(id);
 alter table ref_book_fond_detail add constraint chk_ref_book_fond_det_status check (status in (-1,0,1,2));
 
