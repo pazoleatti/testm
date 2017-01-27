@@ -243,28 +243,15 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
             //Проверка корректности
             helper.checkCorrectness(logger, getRefBook(), null, versionFrom, records);
 
-            if (!getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_LAND) &&
-                    !getRefBookId().equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
-                    !getRefBookId().equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) &&
-                    !getRefBookId().equals(RefBook.WithTable.INCOME.getTableRefBookId()) &&
-                    !getRefBookId().equals(RefBook.WithTable.LAND.getTableRefBookId())
-                    ) {
-
-                if (refBook.isVersioned()) {
-                    for (RefBookRecord record : records) {
-                        //Проверка пересечения версий
-                        if (record.getRecordId() != null) {
-                            boolean needToCreateFakeVersion = helper.crossVersionsProcessing(dao.checkCrossVersions(getRefBook(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
-                                    getRefBook(), versionFrom, record.getVersionTo(), logger);
-                            if (!needToCreateFakeVersion) {
-                                //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
-                                excludedVersionEndRecords.add(record.getRecordId());
-                            }
+            if (refBook.isVersioned()) {
+                for (RefBookRecord record : records) {
+                    //Проверка пересечения версий
+                    if (record.getRecordId() != null) {
+                        boolean needToCreateFakeVersion = helper.crossVersionsProcessing(dao.checkCrossVersions(getRefBook(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
+                                getRefBook(), versionFrom, record.getVersionTo(), logger);
+                        if (!needToCreateFakeVersion) {
+                            //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
+                            excludedVersionEndRecords.add(record.getRecordId());
                         }
                     }
                 }
