@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -70,12 +71,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByDeclarationDataId(long declarationDataId) {
+    public List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate) {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
-                " WHERE np.declaration_data_id = ?";
+                " WHERE np.declaration_data_id = :declaration_data_id" +
+                " AND npi.tax_date >= :startDate AND npi.tax_date <= :endDate" +
+                " AND npi.payment_date >= :startDate AND npi.payment_date <= :endDate";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("declaration_data_id", declarationDataId)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
         try {
-            return getJdbcTemplate().query(sql, new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonIncome>();
         }
