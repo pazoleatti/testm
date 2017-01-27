@@ -73,10 +73,10 @@ public class RaschsvUplPerDaoImpl extends AbstractDao implements RaschsvUplPerDa
             raschsvUplPer.setRaschsvObyazPlatSvId(SqlUtils.getLong(rs, RaschsvUplPer.COL_RASCHSV_OBYAZ_PLAT_SV_ID));
             raschsvUplPer.setNodeName(rs.getString(RaschsvUplPer.COL_NODE_NAME));
             raschsvUplPer.setKbk(rs.getString(RaschsvUplPer.COL_KBK));
-            raschsvUplPer.setSumSbUplPer(rs.getDouble(RaschsvUplPer.COL_SUM_SB_UPL_PER));
-            raschsvUplPer.setSumSbUpl1m(rs.getDouble(RaschsvUplPer.COL_SUM_SB_UPL_1M));
-            raschsvUplPer.setSumSbUpl2m(rs.getDouble(RaschsvUplPer.COL_SUM_SB_UPL_2M));
-            raschsvUplPer.setSumSbUpl3m(rs.getDouble(RaschsvUplPer.COL_SUM_SB_UPL_3M));
+            raschsvUplPer.setSumSbUplPer(rs.getBigDecimal(RaschsvUplPer.COL_SUM_SB_UPL_PER));
+            raschsvUplPer.setSumSbUpl1m(rs.getBigDecimal(RaschsvUplPer.COL_SUM_SB_UPL_1M));
+            raschsvUplPer.setSumSbUpl2m(rs.getBigDecimal(RaschsvUplPer.COL_SUM_SB_UPL_2M));
+            raschsvUplPer.setSumSbUpl3m(rs.getBigDecimal(RaschsvUplPer.COL_SUM_SB_UPL_3M));
 
             return raschsvUplPer;
         }

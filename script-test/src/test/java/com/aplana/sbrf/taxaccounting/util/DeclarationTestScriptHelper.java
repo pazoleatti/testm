@@ -54,6 +54,13 @@ public class DeclarationTestScriptHelper {
     private RefBookDataProvider refBookDataProvider;
     private DeclarationService declarationService;
     private TransactionHelper transactionHelper;
+
+    //Сервисы НДФЛ
+    private NdflPersonService ndflPersonService;
+
+    // Задаются из конкретного теста
+    private InputStream importFileInputStream;
+
     //список источников получаемый из скрипта по событию com.aplana.sbrf.taxaccounting.model.FormDataEvent.GET_SOURCES.
     private FormSources sources;
 
@@ -72,12 +79,24 @@ public class DeclarationTestScriptHelper {
 
     private StringWriter xmlStringWriter;
 
+    public NdflPersonService getNdflPersonService() {
+        return ndflPersonService;
+    }
+
+    public void setNdflPersonService(NdflPersonService ndflPersonService) {
+        this.ndflPersonService = ndflPersonService;
+    }
+
+    public void setImportFileInputStream(InputStream importFileInputStream) {
+        this.importFileInputStream = importFileInputStream;
+    }
+
     /**
      * Сервис работы со скриптами декларации в тестовом режиме
      *
-     * @param path Относительный путь к каталогу со скриптом
+     * @param path            Относительный путь к каталогу со скриптом
      * @param declarationData Экземпляр декларации
-     * @param mockHelper Хэлпер с заглушками других сервисов, можно переопределить
+     * @param mockHelper      Хэлпер с заглушками других сервисов, можно переопределить
      */
     public DeclarationTestScriptHelper(String path, DeclarationData declarationData, ScriptTestMockHelper mockHelper) {
         super();
@@ -110,6 +129,7 @@ public class DeclarationTestScriptHelper {
         refBookDataProvider = mockHelper.getRefBookDataProvider();
         declarationService = mockHelper.getDeclarationService();
         transactionHelper = mockHelper.mockTransactionHelper();
+        ndflPersonService = mockHelper.mockNdflPersonService();
     }
 
     /**
@@ -133,6 +153,8 @@ public class DeclarationTestScriptHelper {
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("refBookDataProvider", refBookDataProvider);
         bindings.put("declarationService", declarationService);
+        bindings.put("ndflPersonService", ndflPersonService);
+
 
         bindings.put("formDataDepartment", userDepartment);
         bindings.put("declarationData", declarationData);
@@ -140,6 +162,8 @@ public class DeclarationTestScriptHelper {
         bindings.put("userInfo", new TAUserInfo());
         bindings.put("user", user);
         bindings.put("applicationVersion", "test-version");
+
+
 
         if (formDataEvent == FormDataEvent.CALCULATE) {
             Calendar calendar = Calendar.getInstance();
@@ -165,13 +189,26 @@ public class DeclarationTestScriptHelper {
             //bindings.put("form", true);
         }
 
+
+        if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
+
+
+            bindings.put("ImportInputStream", importFileInputStream);
+            bindings.put("importService", mockHelper.mockImportService());
+        }
+
         try {
             scriptingService.getEngine().eval(script, bindings);
         } catch (ScriptException e) {
             scriptingService.logScriptException(e, logger);
+        } finally {
+            if (importFileInputStream != null) {
+                try {
+                    importFileInputStream.close();
+                } catch (IOException e) {}
+            }
         }
     }
-
 
 
     /**
@@ -277,5 +314,17 @@ public class DeclarationTestScriptHelper {
      */
     public Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId) {
         return mockHelper.getRefBookAllRecords(refBookId);
+    }
+
+    public static ScriptingService getScriptingService() {
+        return scriptingService;
+    }
+
+    public DeclarationService getDeclarationService() {
+        return declarationService;
+    }
+
+    public FormSources getSources() {
+        return sources;
     }
 }

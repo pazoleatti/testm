@@ -75,16 +75,9 @@ public class RefBookSimpleDataProviderHelper {
         }
 
         //Признак настроек подразделений
-        boolean isConfig = refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_INCOME) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_DEAL) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_VAT) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) ||
-                refBook.getId().equals(RefBook.DEPARTMENT_CONFIG_LAND) ||
-                refBook.getId().equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.INCOME.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.LAND.getTableRefBookId());
+        boolean isConfig =
+				refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId()) ||
+				refBook.getId().equals(RefBook.WithTable.FOND.getTableRefBookId());
 
         if (!isConfig) {
             if (refBook.isHierarchic() && refBook.isVersioned()) {
@@ -193,9 +186,9 @@ public class RefBookSimpleDataProviderHelper {
             }
             boolean isDepartmentConfigTable = false;
             Integer i = null;
-            if (Arrays.asList(RefBook.WithTable.INCOME.getTableRefBookId(),
-                    RefBook.WithTable.PROPERTY.getTableRefBookId(),
-                    RefBook.WithTable.TRANSPORT.getTableRefBookId()).contains(refBook.getId())) {
+            if (Arrays.asList(
+					RefBook.WithTable.FOND.getTableRefBookId(),
+					RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
                 isDepartmentConfigTable = true;
                 i = 1;
             }
@@ -248,10 +241,9 @@ public class RefBookSimpleDataProviderHelper {
                 }
                 if (isDepartmentConfigTable) i++;
             }
-            if (Arrays.asList(RefBook.WithTable.INCOME.getRefBookId(), RefBook.WithTable.INCOME.getTableRefBookId(),
-                    RefBook.WithTable.PROPERTY.getRefBookId(), RefBook.WithTable.PROPERTY.getTableRefBookId(),
-                    RefBook.WithTable.TRANSPORT.getRefBookId(), RefBook.WithTable.TRANSPORT.getTableRefBookId(),
-                    RefBook.DEPARTMENT_CONFIG_DEAL, RefBook.DEPARTMENT_CONFIG_VAT).contains(refBook.getId())) {
+            if (Arrays.asList(
+					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId(),
+					RefBook.WithTable.FOND.getRefBookId(), RefBook.WithTable.FOND.getTableRefBookId()).contains(refBook.getId())) {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
             } else {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);
@@ -277,6 +269,8 @@ public class RefBookSimpleDataProviderHelper {
                     checkIfChildrenRecordsExists(refBook, versionFrom, logger, CROSS_ERROR_MSG, result.getRecordId());
                 }
 
+                //Ищем все ссылки на запись справочника в новом периоде
+                checkUsages(refBook, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, logger, CROSS_ERROR_MSG);
                 if (logger != null) {
                     logger.info("Установлена дата окончания актуальности версии " + formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1)) + " для предыдущей версии");
                 }
@@ -309,6 +303,85 @@ public class RefBookSimpleDataProviderHelper {
         }
     }
 
+    private void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
+        //Проверка использования
+        if (refBook.isHierarchic()) {
+            //Поиск среди дочерних элементов
+            for (Long uniqueRecordId : uniqueRecordIds) {
+                List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBook.getId(), uniqueRecordId, versionFrom);
+                if (childrenVersions != null && !childrenVersions.isEmpty()) {
+                    for (Pair<Date, Date> versions : childrenVersions) {
+                        if (logger != null) {
+                            String msg = "Существует дочерняя запись";
+                            if (refBook.isVersioned()) {
+                                msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
+                                        (versions.getSecond() != null ? " по " + formatter.get().format(versions.getSecond()) : "-");
+                            }
+                            logger.error(msg);
+                        }
+                    }
+                    throw new ServiceException(errorMsg);
+                }
+            }
+        }
+
+        boolean used = false;
+
+        //Проверка использования в справочниках
+        List<String> refBooks = refBookDao.isVersionUsedInRefBooks(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
+                RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
+                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
+        for (String refBookMsg : refBooks) {
+            logger.error(refBookMsg);
+            used = true;
+        }
+
+        //Проверка использования в нф
+        List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
+        for (FormLink form : forms) {
+            //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
+            //if (refBook.getId() == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
+                //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
+                //formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
+                //        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
+                /*
+                reportService.delete(form.getFormDataId(), null);
+                List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
+                for (ReportType interruptedType : interruptedReportTypes) {
+                    List<String> taskKeyList = new ArrayList<String>();
+                    if (ReportType.CSV.equals(interruptedType) || ReportType.EXCEL.equals(interruptedType)) {
+                        taskKeyList.addAll(formDataService.generateReportKeys(interruptedType, form.getFormDataId(), null));
+                    } else {
+                        taskKeyList.add(formDataService.generateTaskKey(form.getFormDataId(), interruptedType));
+                    }
+                    for(String key: taskKeyList) {
+                        LockData lockData = lockService.getLock(key);
+                        if (lockData != null) {
+                            lockService.interruptTask(lockData, logger.getTaUserInfo().getUser().getId(), true, cause);
+                        }
+                    }
+                }*/
+            //} else {
+                logger.error(form.getMsg());
+                used = true;
+            //}
+        }
+
+        //Проверка использования в настройках подразделений
+        List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
+                RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
+                        Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
+        for (String configMsg : configs) {
+            logger.error(configMsg);
+            used = true;
+        }
+
+        if (used) {
+            throw new ServiceException(errorMsg);
+        }
+    }
+
+    // TODO использую в скрипте
     List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
         List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);

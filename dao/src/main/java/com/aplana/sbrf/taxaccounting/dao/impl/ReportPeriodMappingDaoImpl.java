@@ -31,10 +31,11 @@ public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPer
         sql.append("order by rfr.version desc ");
         sql.append(") where rownum = 1");
         try {
-            return getJdbcTemplate().queryForInt(
+            return getJdbcTemplate().queryForObject(
                     sql.toString(),
                     new Object[]{taxPeriodId, dictTaxPeriodId},
-                    new int[]{Types.NUMERIC, Types.NUMERIC}
+                    new int[]{Types.NUMERIC, Types.NUMERIC},
+					Integer.class
             );
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не существует периода с tax_period_id=" + taxPeriodId + " и dict_tax_period_id = " + dictTaxPeriodId);
@@ -44,9 +45,9 @@ public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPer
     @Override
     public Integer getTaxPeriodByDate(String year) {
         try {
-            return getJdbcTemplate().queryForInt("select id from tax_period where tax_type = ? and year = ?",
+            return getJdbcTemplate().queryForObject("select id from tax_period where tax_type = ? and year = ?",
 					new Object[]{TaxType.INCOME.getCode(), year},
-					new int[]{Types.VARCHAR, Types.NUMERIC});
+					new int[]{Types.VARCHAR, Types.NUMERIC}, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не существует налогового периода типа I для года " + year);
         }

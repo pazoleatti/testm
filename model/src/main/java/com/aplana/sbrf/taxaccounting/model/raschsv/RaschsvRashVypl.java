@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
+
 /**
  * Информация по конкретной ВыплФинФБ
  */
@@ -11,7 +13,7 @@ public class RaschsvRashVypl extends IdentityObject<Long> {
     private String nodeName;
     private Integer chislPoluch;
     private Integer kolVypl;
-    private Double rashod;
+    private BigDecimal rashod;
 
     public static final String SEQ = "seq_raschsv_rash_vypl";
     public static final String TABLE_NAME = "raschsv_rash_vypl";
@@ -53,10 +55,10 @@ public class RaschsvRashVypl extends IdentityObject<Long> {
         this.kolVypl = kolVypl;
     }
 
-    public Double getRashod() {
+    public BigDecimal getRashod() {
         return rashod;
     }
-    public void setRashod(Double rashod) {
+    public void setRashod(BigDecimal rashod) {
         this.rashod = rashod;
     }
 }

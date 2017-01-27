@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
 import com.aplana.sbrf.taxaccounting.web.module.audit.server.AuditFormServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server.BookerStatementsServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.server.BookerStatementsDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.server.ConfigurationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.DeclarationDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.DeclarationServerModule;
@@ -17,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server.T
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.server.IfrsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.lock.server.LockServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.members.server.MembersServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.migration.server.MigrationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
@@ -47,8 +44,8 @@ import org.springframework.context.annotation.Import;
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
         HistoryServerModule.class, TemplateVersionListServerModule.class, MembersServerModule.class, ConfigurationServerModule.class,
         AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class,
-        DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class, BookerStatementsServerModule.class, BookerStatementsDataServerModule.class,
-        RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class,
+        DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class,
+        RefBookListServerModule.class, RefBookDataServerModule.class, SchedulerServerModule.class,
         TestPageServerModule.class, DeclarationVersionListServerModule.class, VersionHistoryServerModule.class,
         RefBookMultiPickerServerModule.class, ScriptExecutionServerModule.class, ScriptsImportServerModule.class, UploadTransportDataServerModule.class, IfrsServerModule.class, LockServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)

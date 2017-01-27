@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValuesResult> {
@@ -8,6 +9,7 @@ public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValues
     private Integer reportPeriodId;
     private Integer departmentId;
     private String oldUUID;
+    private TaxType taxType;
 
     public Long getRefBookId() {
         return refBookId;
@@ -47,5 +49,13 @@ public class GetRefBookValuesAction extends UnsecuredActionImpl<GetRefBookValues
 
     public void setOldUUID(String oldUUID) {
         this.oldUUID = oldUUID;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
     }
 }

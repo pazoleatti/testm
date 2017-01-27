@@ -49,9 +49,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         List<Integer> getSelectedDepartment();
         void setTaxType(TaxType taxType);
 
-        String getTaxOrganCode();
-        String getTaxOrganKpp();
-
         void init();
 
         void initRefBooks(Date version, String filter, TaxType taxType);
@@ -84,8 +81,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
         filter.setDepartmentIds(getView().getSelectedDepartment());
         filter.setReportPeriodIds(getView().getSelectedReportPeriod());
-        filter.setTaxOrganCode(getView().getTaxOrganCode());
-        filter.setTaxOrganKpp(getView().getTaxOrganKpp());
         if(isFilterDataCorrect(filter)){
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);
@@ -132,7 +127,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             @Override
             public void onSuccess(GetDeclarationTypeResult result) {
                 getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
-                if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT || taxType == TaxType.INCOME || taxType == TaxType.LAND || taxType == TaxType.NDFL || taxType == TaxType.PFR) {
+                if (taxType == TaxType.NDFL || taxType == TaxType.PFR) {
                     getView().initRefBooks(result.getVersion(), result.getFilter(), taxType);
                 }
                 if (result.getCorrectionDate() != null) {

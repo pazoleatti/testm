@@ -411,8 +411,12 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     }
 
     public void setRefBookId(RefBook.Id id) {
-        setRefBookId(id.getId());
-    }
+		setRefBookId(id.getId());
+	}
+
+	public void setRefBookId(RefBook refBook) {
+		this.refBook = refBook;
+	}
 
     public boolean isRefBookSupported(RefBook refBook) {
         return refBook.isVersioned() && !refBook.isReadOnly();

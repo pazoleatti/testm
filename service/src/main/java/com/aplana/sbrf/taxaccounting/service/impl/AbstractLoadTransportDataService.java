@@ -50,6 +50,16 @@ public abstract class AbstractLoadTransportDataService {
         L0_INFO("%s", LogLevel.INFO, true, true),
         L0_ERROR("%s", LogLevel.ERROR, true, true),
 
+        Ln_1("Ошибка чтения файла \"%s\".", LogLevel.ERROR, true, false),
+        Ln_2("Некорректное имя или формат файла \"%s\".", LogLevel.INFO, true, false),
+        Ln_3("ТФ с GUID \"%s\" уже загружен в систему.", LogLevel.ERROR, true, false),
+        Ln_4("Ошибка заполнения атрибутов транспортного файла \"%s\"", LogLevel.ERROR, true, false),
+        Ln_5("Нет открытых отчетных периодов для \"%s\" за \"%s\".", LogLevel.ERROR, true, false),
+        Ln_6("Нет открытых отчетных периодов для ТФ \"%s\".", LogLevel.ERROR, true, false),
+        Ln_7("Ошибка сохранения разделов ТФ \"%s\"", LogLevel.ERROR, true, false),
+        Ln_8("Несоответствие кодов доходов или кодов вычета ТФ и системы.", LogLevel.ERROR, true, false),
+        Ln_9("Таблица сводных показателей формы не сохранена.", LogLevel.ERROR, true, false),
+
         L1("Запущена процедура загрузки транспортных файлов, содержащих данные налоговых форм.", LogLevel.INFO, true, false),
         L2("Завершена процедура загрузки транспортных файлов, содержащих данные налоговых форм. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true, false),
         L3("В каталоге загрузки для подразделения «%s» не найдены файлы!", LogLevel.ERROR, true, false),

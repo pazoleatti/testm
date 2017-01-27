@@ -1,6 +1,7 @@
 ALTER TABLE ref_book DISABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_attribute_id;
 ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_ref_book_id;
+ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_reference_id;
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (0,'Тест',0,0,0,null);
 
@@ -526,9 +527,9 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9051, 904, 'Место рождения', 'BIRTH_PLACE', 1, 11, null, null, 1, null, 15, 0, 0, null, null, 0, 255);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9052, 904, 'Гражданство', 'CITIZENSHIP', 4, 12, 10, 50, 1, null, 3, 1, 0, null, null, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9054, 904, 'Адрес места жительства', 'ADDRESS', 4, 14, 901, 9114, 1, null, 15, 0, 0, null, null, 0, null);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9055, 904, 'Признак застрахованного лица в системе обязательного пенсионного страхования', 'PENSION', 1, 15, null, null, 1, null, 15, 1, 0, null, null, 0, 1);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9056, 904, 'Признак застрахованного лица в системе обязательного медицинского страхования', 'MEDICAL', 1, 16, null, null, 1, null, 15, 1, 0, null, null, 0, 1);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9057, 904, 'Признак застрахованного лица в системе обязательного социального страхования', 'SOCIAL', 1, 17, null, null, 1, null, 15, 1, 0, null, null, 0, 1);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9055, 904, 'Признак застрахованного лица в системе обязательного пенсионного страхования', 'PENSION', 2, 15, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9056, 904, 'Признак застрахованного лица в системе обязательного медицинского страхования', 'MEDICAL', 2, 16, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9057, 904, 'Признак застрахованного лица в системе обязательного социального страхования', 'SOCIAL', 2, 17, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9058, 904, 'Сотрудник', 'EMPLOYEE', 2, 18, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9061, 905, 'ИНП', 'INP', 1, 1, null, null, 1, null, 15, 1, 1, null, null, 0, 14);
@@ -569,6 +570,10 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (927,'Признак кода вычета',1,0,1,null,'REF_BOOK_DEDUCTION_MARK');
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (9271,927,'Код','CODE',2,1,null,null,1,0,6,1,1,null,null,0,1);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (9272,927,'Наименование','NAME',1,2,null,null,1,null,30,1,0,null,null,0,30);
+
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (928,'Коды форм реорганизации (ликвидации) организации',1,0,0,null,'REF_BOOK_REORGANIZATION');
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (9281,928,'Код','CODE',1,0,null,null,1,null,10,1,1,null,null,0,1);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (9282,928,'Наименование','NAME',1,1,null,null,1,null,50,1,0,null,null,0,255);
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (931,'Виды налоговых форм',1,0,1,null,'REF_BOOK_FORM_TYPE',0);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9311, 931,'Код','CODE',1,1,null,null,1,null,9,1,1,null,null,0,14);
@@ -642,3 +647,4 @@ insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,refer
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_ref_book_id;
+ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_reference_id;

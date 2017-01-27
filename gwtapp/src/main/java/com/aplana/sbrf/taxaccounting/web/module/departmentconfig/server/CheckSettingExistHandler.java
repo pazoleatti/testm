@@ -38,25 +38,11 @@ public class CheckSettingExistHandler extends AbstractActionHandler<CheckSetting
 
         Long refBookId = null;
         switch (action.getTaxType()) {
-            case INCOME:
             case NDFL:
+                refBookId = RefBook.Id.NDFL.getId();
+                break;
             case PFR:
-                refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
-                break;
-            case TRANSPORT:
-                refBookId = RefBook.DEPARTMENT_CONFIG_TRANSPORT;
-                break;
-            case DEAL:
-                refBookId = RefBook.DEPARTMENT_CONFIG_DEAL;
-                break;
-            case VAT:
-                refBookId = RefBook.DEPARTMENT_CONFIG_VAT;
-                break;
-            case PROPERTY:
-                refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
-                break;
-            case LAND:
-                refBookId = RefBook.DEPARTMENT_CONFIG_LAND;
+                refBookId =RefBook.Id.FOND.getId();
                 break;
         }
 

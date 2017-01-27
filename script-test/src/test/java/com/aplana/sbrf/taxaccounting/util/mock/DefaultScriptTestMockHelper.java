@@ -224,11 +224,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     @Override
-    public BookerStatementService mockBookerStatementService() {
-        return mock(BookerStatementService.class);
-    }
-
-    @Override
     public ImportService mockImportService() {
         return new ImportServiceImpl();
     }
@@ -455,6 +450,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return refBookDataProvider;
     }
 
+
     @Override
     public DataRowHelper getDataRowHelper() {
         return currentDataRowHelper;
@@ -468,6 +464,11 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     @Override
     public DeclarationService getDeclarationService() {
         return mock(DeclarationService.class);
+    }
+
+    @Override
+    public NdflPersonService getNdflPersonService() {
+        return mock(NdflPersonService.class);
     }
 
     @Override

@@ -231,27 +231,6 @@ public class AuditDaoTest {
         assertEquals(2, records.size());
     }
 
-
-    @Test
-    @Transactional(readOnly = false)
-    public void testAddNull() {
-        LogSystem logSystem = new LogSystem();
-        logSystem.setId(10l);
-        logSystem.setIp("192.168.72.16");
-        logSystem.setEventId(FormDataEvent.MIGRATION.getCode());
-        logSystem.setUserLogin("controlBank");
-        logSystem.setRoles("operator");
-        logSystem.setFormDepartmentName("ТБ");
-        logSystem.setReportPeriodName(null);
-        logSystem.setDeclarationTypeName(null);
-        logSystem.setFormTypeName(null);
-        logSystem.setFormKindId(null);
-        logSystem.setNote("the best note");
-        logSystem.setUserDepartmentName("Подразделение");
-
-        auditDao.add(logSystem);
-    }
-
     @Test
     public void testCutOffLogSystemFilter() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method method = AuditDaoImpl.class.getDeclaredMethod("cutOffLogSystemFilter", LogSystemFilter.class);

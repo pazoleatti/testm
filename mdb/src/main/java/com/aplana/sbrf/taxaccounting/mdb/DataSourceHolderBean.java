@@ -19,16 +19,8 @@ public class DataSourceHolderBean implements DataSourceHolderService {
     @Resource(name = "jdbc/TaxAccDS")
     DataSource applicationDataSource;
 
-    @Resource(name = "jdbc/TaxAccDS_MIGRATION")
-    DataSource migrationDataSource;
-
     @Override
     public DataSource getApplicationDataSource() {
         return applicationDataSource;
-    }
-
-    @Override
-    public DataSource getMigrationDataSource() {
-        return migrationDataSource;
     }
 }

@@ -88,7 +88,7 @@ public class ConfigurationServiceTest {
         config2.put("VALUE", new RefBookValue(RefBookAttributeType.STRING, "tes_"));
         emailValues.add(config2);
         when(providerEmail.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(emailValues);
-        when(refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG)).thenReturn(providerEmail);
+        when(refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId())).thenReturn(providerEmail);
 
         RefBookDataProvider providerAsync = mock(RefBookDataProvider.class);
         PagingResult<Map<String, RefBookValue>> asyncValues = new PagingResult<Map<String, RefBookValue>>();
@@ -106,7 +106,7 @@ public class ConfigurationServiceTest {
         asyncValues.add(configAsync2);
 
         when(providerAsync.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(asyncValues);
-        when(refBookFactory.getDataProvider(RefBook.ASYNC_CONFIG)).thenReturn(providerAsync);
+        when(refBookFactory.getDataProvider(RefBook.Id.ASYNC_CONFIG.getId())).thenReturn(providerAsync);
         RefBook refBookAsyncConfig = new RefBook();
         List<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
         attributes.add(new RefBookAttribute(){{
@@ -118,7 +118,7 @@ public class ConfigurationServiceTest {
             setName("TASK_LIMIT");
         }});
         refBookAsyncConfig.setAttributes(attributes);
-        when(refBookFactory.get(RefBook.ASYNC_CONFIG)).thenReturn(refBookAsyncConfig);
+        when(refBookFactory.get(RefBook.Id.ASYNC_CONFIG.getId())).thenReturn(refBookAsyncConfig);
         ReflectionTestUtils.setField(service, "refBookFactory", refBookFactory);
 
         ReflectionTestUtils.setField(service, "auditService", auditService);

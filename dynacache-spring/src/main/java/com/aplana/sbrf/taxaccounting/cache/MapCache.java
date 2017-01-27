@@ -48,10 +48,10 @@ public class MapCache implements Cache {
 				: null);
 	}
 
-/*    @Override
+    @Override
     public <T> T get(Object key, Class<T> type) {
         return (T) fromStoreValue(store.get(key));
-    }*/
+    }
 
     @Override
     public void put(Object key, Object value) {
@@ -61,7 +61,7 @@ public class MapCache implements Cache {
 		store.put(key, toStoreValue(value));
 	}
 
-/*    @Override
+    @Override
     public ValueWrapper putIfAbsent(Object key, Object value) {
 		Object existingValue = fromStoreValue(store.get(key));
 		if (existingValue == null) {
@@ -70,7 +70,7 @@ public class MapCache implements Cache {
 		} else {
 			return new SimpleValueWrapper(existingValue);
 		}
-    }*/
+    }
 
     @Override
 	public void evict(Object key) {

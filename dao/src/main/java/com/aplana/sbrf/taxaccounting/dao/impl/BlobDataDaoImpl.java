@@ -156,9 +156,10 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     @Override
     public long getLength(String uuid) {
         try{
-            return getJdbcTemplate().queryForLong("SELECT dbms_lob.getlength(data) FROM blob_data WHERE id = ?",
+            return getJdbcTemplate().queryForObject("SELECT dbms_lob.getlength(data) FROM blob_data WHERE id = ?",
                     new Object[]{uuid},
-                    new int[]{Types.CHAR});
+                    new int[]{Types.CHAR},
+					Long.class);
         }catch (EmptyResultDataAccessException e){
             return 0;
         }

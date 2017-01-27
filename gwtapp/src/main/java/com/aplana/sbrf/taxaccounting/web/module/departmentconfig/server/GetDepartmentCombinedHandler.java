@@ -76,30 +76,12 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         }
 
         switch (action.getTaxType()) {
-            case INCOME:
             case NDFL:
+                parentRefBookId = RefBook.Id.NDFL.getId();
+                provider = rbFactory.getDataProvider(parentRefBookId);
+                break;
             case PFR:
-                parentRefBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
-                provider = rbFactory.getDataProvider(parentRefBookId);
-                break;
-            case TRANSPORT:
-                parentRefBookId = RefBook.DEPARTMENT_CONFIG_TRANSPORT;
-                provider = rbFactory.getDataProvider(parentRefBookId);
-                break;
-            case DEAL:
-                parentRefBookId = RefBook.DEPARTMENT_CONFIG_DEAL;
-                provider = rbFactory.getDataProvider(parentRefBookId);
-                break;
-            case VAT:
-                parentRefBookId = RefBook.DEPARTMENT_CONFIG_VAT;
-                provider = rbFactory.getDataProvider(parentRefBookId);
-                break;
-            case PROPERTY:
-                parentRefBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
-                provider = rbFactory.getDataProvider(parentRefBookId);
-                break;
-            case LAND:
-                parentRefBookId = RefBook.DEPARTMENT_CONFIG_LAND;
+                parentRefBookId = RefBook.Id.FOND.getId();
                 provider = rbFactory.getDataProvider(parentRefBookId);
                 break;
         }
@@ -169,22 +151,6 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 depCombined.setTaxRate(taxRate == null ? null : taxRate.doubleValue());
                 depCombined.setType(getList(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue()));
                 depCombined.setAdditionalName(paramsMap.get(DepartmentParamAliases.ADDITIONAL_NAME.name()).getStringValue());
-            }
-
-            // Транспортный налог
-            if (action.getTaxType() == TaxType.TRANSPORT) {
-                Number prepayment = paramsMap.get(DepartmentParamAliases.PREPAYMENT.name()).getNumberValue();
-                depCombined.setPrepayment(prepayment == null ? false : prepayment.longValue() == 1L);
-            }
-
-            // НДС
-            if (TaxType.VAT.equals(action.getTaxType())) {
-                depCombined.setTaxOrganCodeProm((paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name()).getStringValue()));
-            }
-
-            // МУКС
-            if (TaxType.DEAL.equals(action.getTaxType())) {
-                depCombined.setTaxOrganCodeProm((paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name()).getStringValue()));
             }
         }
 

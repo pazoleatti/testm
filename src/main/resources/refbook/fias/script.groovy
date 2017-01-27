@@ -45,42 +45,42 @@ void importData() {
     //Начинаем заливать данные из таблиц справочника
     startImport(getInputStream(archive, itemsMap, "AS_OPERSTAT_"),
             QName.valueOf('OperationStatus'),
-            RefBookSimpleReadOnly.FIAS_OPERSTAT_TABLE_NAME,
+            RefBook.Table.FIAS_OPERSTAT.getTable(),
             { generatedId, attr ->
                 operationStatusRowMapper(generatedId, attr)
             })
 
     startImport(getInputStream(archive, itemsMap, "AS_SOCRBASE_"),
             QName.valueOf('AddressObjectType'),
-            RefBookSimpleReadOnly.FIAS_SOCRBASE_TABLE_NAME,
+            RefBook.Table.FIAS_SOCRBASE.getTable(),
             { generatedId, attr ->
                 addressObjectTypeRowMapper(generatedId, attr)
             })
 
     startImport(getInputStream(archive, itemsMap, "AS_ADDROBJ_"),
             QName.valueOf('Object'),
-            RefBookSimpleReadOnly.FIAS_ADDR_OBJECT_TABLE_NAME,
+            RefBook.Table.FIAS_ADDR_OBJECT.getTable(),
             { generatedId, attr ->
                 addressObjectRowMapper(addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
             })
 
     startImport(getInputStream(archive, itemsMap, "AS_HOUSE_"),
             QName.valueOf('House'),
-            RefBookSimpleReadOnly.FIAS_HOUSE_TABLE_NAME,
+            RefBook.Table.FIAS_HOUSE.getTable(),
             { generatedId, attr ->
                 houseRowMapper(generatedId, addressObjectGuidsMap, houseGuidsMap, attr)
             })
 
     startImport(getInputStream(archive, itemsMap, "AS_HOUSEINT_"),
             QName.valueOf('HouseInterval'),
-            RefBookSimpleReadOnly.FIAS_HOUSEINT_TABLE_NAME,
+            RefBook.Table.FIAS_HOUSEINT.getTable(),
             { generatedId, attr ->
                 houseIntervalRowMapper(generatedId, addressObjectGuidsMap, attr)
             })
 
     startImport(getInputStream(archive, itemsMap, "AS_ROOM_"),
             QName.valueOf('Room'),
-            RefBookSimpleReadOnly.FIAS_ROOM_TABLE_NAME,
+            RefBook.Table.FIAS_ROOM.getTable(),
             { generatedId, attr ->
                 roomRowMapper(generatedId, houseGuidsMap, attr)
             })

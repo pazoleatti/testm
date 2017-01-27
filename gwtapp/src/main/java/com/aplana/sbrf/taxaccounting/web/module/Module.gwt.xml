@@ -9,8 +9,6 @@
 	<!-- TaxAccounting Modules -->
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.about.AboutModule" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.audit.Audit"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.BookerStatements"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.bookerstatementsdata.BookerStatementsData"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.configuration.Configuration"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationdata.DeclarationData" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationlist.DeclarationList"/>
@@ -25,7 +23,6 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.TemplateVersionList"/>
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.home.HomeModule" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.members.Members"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.migration.Migration"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.periods.Periods"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbookdata.RefBookData"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbooklist.RefBookList"/>

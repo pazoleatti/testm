@@ -216,7 +216,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             String fullSql = "SELECT * FROM" + sql + "WHERE rn BETWEEN :start AND :count";
             String countSql = "SELECT COUNT(*) FROM" + sql;
             List<LockData> records = getNamedParameterJdbcTemplate().query(fullSql, params, new LockDataMapper());
-            int count = getNamedParameterJdbcTemplate().queryForInt(countSql, params);
+            int count = getNamedParameterJdbcTemplate().queryForObject(countSql, params, Integer.class);
             return new PagingResult<LockData>(records, count);
         } catch (EmptyResultDataAccessException e) {
 			// недостижимое место из-за особенности запроса

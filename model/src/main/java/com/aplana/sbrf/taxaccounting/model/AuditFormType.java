@@ -11,8 +11,8 @@ public enum AuditFormType {
     FORM_TYPE_DECLARATION(2, "Декларация"),
     FORM_TEMPLATE_VERSION(3, "Версия макета НФ"),
     DECLARATION_VERSION(4, "Версия макета декларации"),
-    INCOME101(5, BookerStatementsType.INCOME101.getName()),
-    INCOME102(6, BookerStatementsType.INCOME102.getName());
+    INCOME101(5, "Форма 101"),
+    INCOME102(6, "Форма 102");
 
     private int id;
     private String name;

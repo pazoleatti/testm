@@ -402,8 +402,8 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     @Override
     public int getRecordVersionsCount(String tableName, Long uniqueRecordId) {
         String sql = "select count(*) as cnt from %s where STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=(select RECORD_ID from %s where ID=?)";
-        return getJdbcTemplate().queryForInt(String.format(sql, tableName, tableName),
-                uniqueRecordId);
+        return getJdbcTemplate().queryForObject(String.format(sql, tableName, tableName),
+                new Object[]{uniqueRecordId}, Integer.class);
     }
 
     @Override
@@ -421,7 +421,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     @Override
     public Long getRecordId(String tableName, Long uniqueRecordId) {
         try {
-            return getJdbcTemplate().queryForLong(String.format("select record_id from %s where id=?",tableName), uniqueRecordId);
+            return getJdbcTemplate().queryForObject(String.format("select record_id from %s where id=?", tableName), new Object[]{uniqueRecordId}, Long.class);
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найдена запись справочника с id = %d", uniqueRecordId));
         }
@@ -552,7 +552,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     @Override
     public boolean isVersionsExist(String tableName, List<Long> recordIds, Date version) {
         String sql = String.format("select count(*) from %s where %s and version = trunc(?, 'DD') and status != -1", tableName, SqlUtils.transformToSqlInStatement("record_id", recordIds));
-        return getJdbcTemplate().queryForInt(sql, version) != 0;
+        return getJdbcTemplate().queryForObject(sql, new Object[]{version}, Integer.class) != 0;
     }
 
     private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from %s r where record_id=? and (? is null or id=?)),\n" +
@@ -605,7 +605,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
         String sql = String.format("select count(r.id) from %s r, ref_book_record rr, ref_book_value v where v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and rr.version >= ? and v.REFERENCE_VALUE=r.id and v.RECORD_ID=rr.id and r.id=?", tableName);
-        return getJdbcTemplate().queryForInt(sql, refBookId, versionFrom, uniqueRecordId) != 0;
+        return getJdbcTemplate().queryForObject(sql, new Object[]{refBookId, versionFrom, uniqueRecordId}, Integer.class) != 0;
     }
 
     private static final String CHECK_USAGES_IN_REFBOOK = "with checkRecords as (select * from %s where %s)\n" +
@@ -618,11 +618,11 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         //Проверка использования в справочниках и настройках подразделений
         String idIn = SqlUtils.transformToSqlInStatement("id", uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, tableName, idIn);
-        boolean hasReferences = getJdbcTemplate().queryForInt(sql, refBookId) != 0;
+        boolean hasReferences = getJdbcTemplate().queryForObject(sql, new Object[]{refBookId}, Integer.class) != 0;
         if (!hasReferences) {
             String recordIdIn = SqlUtils.transformToSqlInStatement("record_id", uniqueRecordIds);
             sql = String.format(CHECK_USAGES_IN_FORMS, recordIdIn);
-            return getJdbcTemplate().queryForInt(sql, refBookId) != 0;
+            return getJdbcTemplate().queryForObject(sql, new Object[]{refBookId}, Integer.class) != 0;
         } else return true;
     }
 
@@ -812,7 +812,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     @Override
     public Long getFirstRecordId(String tableName, Long refBookId, Long uniqueRecordId) {
         try {
-            return getJdbcTemplate().queryForLong(String.format(GET_FIRST_RECORD_ID, tableName, tableName), uniqueRecordId, uniqueRecordId);
+            return getJdbcTemplate().queryForObject(String.format(GET_FIRST_RECORD_ID, tableName, tableName), new Object[]{uniqueRecordId, uniqueRecordId}, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

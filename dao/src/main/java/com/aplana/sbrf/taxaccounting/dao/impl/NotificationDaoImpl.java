@@ -274,7 +274,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
             //Дополнительные фильтры
             params.addValue("read", filter.isRead() == null ? null : filter.isRead());
-			return getNamedParameterJdbcTemplate().queryForInt(sql, params);
+			return getNamedParameterJdbcTemplate().queryForObject(sql, params, Integer.class);
 		} catch (EmptyResultDataAccessException e) {
 			return 0;
 		}

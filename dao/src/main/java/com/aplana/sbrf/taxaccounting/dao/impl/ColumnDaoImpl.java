@@ -506,9 +506,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
     @Override
     public int getColumnIdByAlias(int formTemplateId, String columnAlias){
         try {
-            return getJdbcTemplate().queryForInt(
+            return getJdbcTemplate().queryForObject(
                     "SELECT id FROM form_column WHERE form_template_id = ? and alias = ?",
-                    formTemplateId, columnAlias);
+                    new Object[]{formTemplateId, columnAlias}, Integer.class);
         } catch (DataAccessException e){
 			LOG.error("", e);
             throw new DaoException("", e);

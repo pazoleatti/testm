@@ -9,6 +9,4 @@ import javax.sql.DataSource;
  */
 public interface DataSourceHolderService {
     DataSource getApplicationDataSource();
-
-    DataSource getMigrationDataSource();
 }

@@ -123,8 +123,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
                 departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                String.format(FAIL, move.getFromState().getTitle(), move.getToState().getTitle(),formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL || formData.getFormType().getTaxType() == TaxType.MARKET ?
-                        "форму" : "налоговую форму"),
+                String.format(FAIL, move.getFromState().getTitle(), move.getToState().getTitle(), "налоговую форму"),
                 formData,
                 department.getName(),
                 false,

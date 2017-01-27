@@ -253,7 +253,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 
 	@Override
 	public int checkUserRole(String role) {
-		return getJdbcTemplate().queryForInt("select count(*) from sec_role where alias=? ", role);
+		return getJdbcTemplate().queryForObject("select count(*) from sec_role where alias=? ", new Object[]{role}, Integer.class);
 	}
 
 	@Override
@@ -348,7 +348,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
         }
         try {
             PagingResult<TAUserView> pagingResult = new PagingResult<TAUserView>(getJdbcTemplate().query(sql.toString(), TA_USER_VIEW_MAPPER));
-            pagingResult.setTotalCount(filter == null ? pagingResult.size() : getJdbcTemplate().queryForInt(sqlForCount.toString()));
+            pagingResult.setTotalCount(filter == null ? pagingResult.size() : getJdbcTemplate().queryForObject(sqlForCount.toString(), Integer.class));
             return pagingResult;
         } catch (DataAccessException e) {
             throw new DaoException("Ошибка при получении списка пользователей. " + e.getLocalizedMessage());
@@ -403,7 +403,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 		sql.append(")");
 		try {
-			return getJdbcTemplate().queryForInt(sql.toString());
+			return getJdbcTemplate().queryForObject(sql.toString(), Integer.class);
 		} catch (DataAccessException e) {
 			throw new DaoException("Ошибка при получении кол-ва пользователей. " + e.getLocalizedMessage());
 		}
@@ -417,6 +417,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	 */
 	@Override
 	public boolean existsUser(String login) {
-		return getJdbcTemplate().queryForInt("select count(id) from sec_user where lower(login) = ?", login.toLowerCase()) == 1;
+		return getJdbcTemplate().queryForObject("select count(id) from sec_user where lower(login) = ?", new Object[]{login.toLowerCase()}, Integer.class) == 1;
 	}
 }

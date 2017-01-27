@@ -62,7 +62,6 @@ public class TestScriptHelper {
     private DepartmentFormTypeService departmentFormTypeService;
     private ReportPeriodService reportPeriodService;
     private DepartmentService departmentService;
-    private BookerStatementService bookerStatementService;
     private RefBookService refBookService;
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
@@ -166,7 +165,6 @@ public class TestScriptHelper {
         departmentFormTypeService = mockHelper.mockDepartmentFormTypeService();
         reportPeriodService = mockHelper.mockReportPeriodService();
         departmentService = mockHelper.mockDepartmentService();
-        bookerStatementService = mockHelper.mockBookerStatementService();
         refBookService = mockHelper.mockRefBookService();
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
@@ -293,7 +291,6 @@ public class TestScriptHelper {
         bindings.put("formDataService", formDataService);
         bindings.put("reportPeriodService", reportPeriodService);
         bindings.put("departmentService", departmentService);
-        bindings.put("bookerStatementService", bookerStatementService);
         bindings.put("refBookService", refBookService);
         bindings.put("departmentFormTypeService", departmentFormTypeService);
         bindings.put("departmentReportPeriodService", departmentReportPeriodService);
@@ -437,13 +434,6 @@ public class TestScriptHelper {
      */
     public DepartmentService getDepartmentService() {
         return departmentService;
-    }
-
-    /**
-     * Mock BookerStatementService для реализации mock-логики внутри теста
-     */
-    public BookerStatementService getBookerStatementService() {
-        return bookerStatementService;
     }
 
     /**

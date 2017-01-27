@@ -207,7 +207,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             throw new DaoException("Произведена попытка перезаписать уже сохранённую декларацию!");
         }
 
-        int countOfExisted = jt.queryForInt("SELECT COUNT(*) FROM declaration_data WHERE declaration_template_id = ?" +
+        int countOfExisted = jt.queryForObject("SELECT COUNT(*) FROM declaration_data WHERE declaration_template_id = ?" +
                 " AND department_report_period_id = ? and (? is null or tax_organ_code = ?) and (? is null or kpp = ?)" +
                 " AND (? is null or asnu_id = ?) and (? is null or file_name = ?)",
                 new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(),
@@ -215,7 +215,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         declarationData.getKpp(), declarationData.getKpp(), declarationData.getAsnuId(), declarationData.getAsnuId(),
                         declarationData.getFileName(), declarationData.getFileName() },
                 new int[]{Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-                        Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR});
+                        Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR}, Integer.class);
 
         if (countOfExisted != 0) {
             throw new DaoException("Декларация с заданными параметрами уже существует!");
@@ -298,21 +298,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             }
         }
 
-        if (TaxType.NDFL.equals(filter.getTaxType()) || TaxType.PFR.equals(filter.getTaxType())) {
-            if (filter.getAsnuId() != null) {
-                sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
-            }
-            if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
-                sql.append(" AND ")
-                .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));
-            }
-            if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
-                sql.append(" AND lower(dec.file_name) like lower(:fileName)");
-                values.put("fileName", "%"+filter.getFileName()+"%");
-            }
+        if (filter.getAsnuId() != null) {
+            sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
+        }
+        if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
+            sql.append(" AND ")
+            .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));
+        }
+        if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
+            sql.append(" AND lower(dec.file_name) like lower(:fileName)");
+            values.put("fileName", "%"+filter.getFileName()+"%");
         }
 
-        if (filter.getTaxType() == TaxType.PROPERTY || filter.getTaxType() == TaxType.TRANSPORT || filter.getTaxType() == TaxType.INCOME || filter.getTaxType() == TaxType.LAND || filter.getTaxType() == TaxType.NDFL || filter.getTaxType() == TaxType.PFR) {
+        if (filter.getTaxType() == TaxType.NDFL || filter.getTaxType() == TaxType.PFR) {
             if (filter.getTaxOrganCode() != null && !filter.getTaxOrganCode().isEmpty()) {
                 String[] codes = filter.getTaxOrganCode().split("; ");
                 for (int i = 0; i < codes.length; i++) {

@@ -2,7 +2,18 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.LogSystem;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -22,7 +33,10 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * User: lhaziev
@@ -94,7 +108,7 @@ public class AuditServiceImplTest {
         when(departmentService.getParentsHierarchy(1)).thenReturn("Центральный аппарат/Управление налогового планирования");
         when(serverInfo.getServerName()).thenReturn("server");
 
-        auditService.add(FormDataEvent.MIGRATION, userInfo, 0, null, null, null, null, "MIGRATION", null);
+        auditService.add(FormDataEvent.CALCULATE, userInfo, 0, null, null, null, null, "MIGRATION", null);
         auditService.add(FormDataEvent.LOGIN, userInfo, 1, null, null, null, null, "LOGIN", null);
 
         ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);
@@ -143,7 +157,7 @@ public class AuditServiceImplTest {
         type.setName("217");
         formData.setFormType(type);
 
-        auditService.add(FormDataEvent.MIGRATION, userInfo, null, formData, null, null);
+        auditService.add(FormDataEvent.CALCULATE, userInfo, null, formData, null, null);
 
         ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);
         verify(auditDao, atLeastOnce()).add(argument.capture());
@@ -185,11 +199,11 @@ public class AuditServiceImplTest {
         type.setName("217");
         formData.setFormType(type);
 
-        CALENDAR.set(2014, Calendar.JANUARY, 1);
-        Date startDate = CALENDAR.getTime();
-        CALENDAR.set(2015, Calendar.JANUARY, 1);
-        Date endDate = CALENDAR.getTime();
-        auditService.add(FormDataEvent.MIGRATION, userInfo, startDate, endDate, null, formData.getFormType().getName(), null, null);
+		CALENDAR.set(2014, Calendar.JANUARY, 1);
+		Date startDate = CALENDAR.getTime();
+		CALENDAR.set(2015, Calendar.JANUARY, 1);
+		Date endDate = CALENDAR.getTime();
+		auditService.add(FormDataEvent.CALCULATE, userInfo, startDate, endDate, null, formData.getFormType().getName(), null, null);
         CALENDAR.clear();
 
         ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);

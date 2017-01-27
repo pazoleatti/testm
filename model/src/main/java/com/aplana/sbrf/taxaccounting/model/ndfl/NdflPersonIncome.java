@@ -6,26 +6,37 @@ import java.util.Date;
 /**
  * @author Andrey Drunk
  */
-public class NdflPersonIncome extends NdflPersonDetail {
+public class NdflPersonIncome extends NdflPersonOperation {
 
+    // Код дохода
     private String incomeCode;
     private String incomeType;
     private String oktmo;
     private String kpp;
-
+    // Дата начисления дохода
     private Date incomeAccruedDate;
     private Date incomePayoutDate;
+    // Сумма начисленного дохода
     private BigDecimal incomeAccruedSumm;
+    // Сумма выплаченного дохода
     private BigDecimal incomePayoutSumm;
+    // Общая сумма вычетов
     private BigDecimal totalDeductionsSumm;
     private BigDecimal taxBase;
+    // Ставка
     private Integer taxRate;
+    // Дата удержания налога
     private Date taxDate;
-    private Integer calculatedTax;
-    private Integer withholdingTax;
-    private Integer notHoldingTax;
-    private Integer overholdingTax;
-    private Integer refoundTax;
+    // Сумма налога исчисленная
+    private Long calculatedTax;
+    // Сумма налога удержанная
+    private Long withholdingTax;
+    // Сумма налога, не удержанная налоговым агентом
+    private Long notHoldingTax;
+    private Long overholdingTax;
+    // Сумма возвращенного налога
+    private Long refoundTax;
+    // Срок (дата) перечисления налога
     private Date taxTransferDate;
     private Date paymentDate;
     private String paymentNumber;
@@ -160,43 +171,43 @@ public class NdflPersonIncome extends NdflPersonDetail {
         this.taxDate = taxDate;
     }
 
-    public Integer getCalculatedTax() {
+    public Long getCalculatedTax() {
         return calculatedTax;
     }
 
-    public void setCalculatedTax(Integer calculatedTax) {
+    public void setCalculatedTax(Long calculatedTax) {
         this.calculatedTax = calculatedTax;
     }
 
-    public Integer getWithholdingTax() {
+    public Long getWithholdingTax() {
         return withholdingTax;
     }
 
-    public void setWithholdingTax(Integer withholdingTax) {
+    public void setWithholdingTax(Long withholdingTax) {
         this.withholdingTax = withholdingTax;
     }
 
-    public Integer getNotHoldingTax() {
+    public Long getNotHoldingTax() {
         return notHoldingTax;
     }
 
-    public void setNotHoldingTax(Integer notHoldingTax) {
+    public void setNotHoldingTax(Long notHoldingTax) {
         this.notHoldingTax = notHoldingTax;
     }
 
-    public Integer getOverholdingTax() {
+    public Long getOverholdingTax() {
         return overholdingTax;
     }
 
-    public void setOverholdingTax(Integer overholdingTax) {
+    public void setOverholdingTax(Long overholdingTax) {
         this.overholdingTax = overholdingTax;
     }
 
-    public Integer getRefoundTax() {
+    public Long getRefoundTax() {
         return refoundTax;
     }
 
-    public void setRefoundTax(Integer refoundTax) {
+    public void setRefoundTax(Long refoundTax) {
         this.refoundTax = refoundTax;
     }
 

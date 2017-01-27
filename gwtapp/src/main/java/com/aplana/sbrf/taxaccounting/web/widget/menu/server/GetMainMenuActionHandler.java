@@ -5,18 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
-import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client.BookerStatementsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyTokens;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
-import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.IfrsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.lock.client.LockTokens;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
-import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
@@ -120,7 +115,7 @@ public class GetMainMenuActionHandler extends
                                 new MenuItem("Назначение форм",
                                         NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
                                                 + TYPE + "=" + menu.getMeta() + ";"
-                                                + TaxFormNominationToken.isForm + "=" + true));
+                                                + TaxFormNominationToken.isForm + "=" + false));
 
                         menu.getSubMenu().add(
                                 new MenuItem("Назначение источников-приёмников",
@@ -148,11 +143,6 @@ public class GetMainMenuActionHandler extends
             MenuItem nsiMenuItem = new MenuItem("НСИ");
             nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
 
-            if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN
-                        + BookerStatementsTokens.bookerStatements));
-            }
             menuItems.add(nsiMenuItem);
         }
 
@@ -195,8 +185,6 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                     adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
                             + ConfigurationPresenter.TOKEN));
-                    adminMenuItem.getSubMenu().add(new MenuItem("Миграция данных", NUMBER_SIGN
-                            + MigrationTokens.migration));
                     adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
                             + SchedulerTokens.taskList));
                 }

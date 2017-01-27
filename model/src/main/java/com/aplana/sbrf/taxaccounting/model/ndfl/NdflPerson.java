@@ -11,7 +11,22 @@ import java.util.*;
  */
 public class NdflPerson extends IdentityObject<Long> {
 
+    /**
+     * Порядковый номер строки
+     */
+    private Integer rowNum;
+
+
+    /**
+     * Ссылка на справочник физлиц
+     */
+    private Long personId;
+
+    /**
+     * Ссылка на декларацию к которой относятся данные
+     */
     private Long declarationDataId;
+
     private String inp;
     private String snils;
     private String lastName;

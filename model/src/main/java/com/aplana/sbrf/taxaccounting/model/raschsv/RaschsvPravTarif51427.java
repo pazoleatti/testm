@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model.raschsv;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
+
 /**
  * Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427 (ПравТариф5.1.427)
  */
@@ -10,7 +12,7 @@ public class RaschsvPravTarif51427 extends IdentityObject<Long> {
     private Long raschsvObyazPlatSvId;
     private Long doh346_15vs;
     private Long doh6_427;
-    private Double dolDoh6_427;
+    private BigDecimal dolDoh6_427;
 
     public static final String SEQ = "seq_raschsv_prav_tarif5_1_427";
     public static final String TABLE_NAME = "raschsv_prav_tarif5_1_427";
@@ -39,10 +41,10 @@ public class RaschsvPravTarif51427 extends IdentityObject<Long> {
         this.doh6_427 = doh6_427;
     }
 
-    public Double getDolDoh6_427() {
+    public BigDecimal getDolDoh6_427() {
         return dolDoh6_427;
     }
-    public void setDolDoh6_427(Double dolDoh6_427) {
+    public void setDolDoh6_427(BigDecimal dolDoh6_427) {
         this.dolDoh6_427 = dolDoh6_427;
     }
 }

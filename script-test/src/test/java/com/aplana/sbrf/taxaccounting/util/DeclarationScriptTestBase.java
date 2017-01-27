@@ -44,6 +44,7 @@ public abstract class DeclarationScriptTestBase {
                 throw new ServiceException("Test folder path is null!");
             }
             testHelper = new DeclarationTestScriptHelper(path, getDeclarationData(), getMockHelper());
+            testHelper.setImportFileInputStream(getInputStream());
         }
         testHelper.reset();
     }
@@ -79,6 +80,10 @@ public abstract class DeclarationScriptTestBase {
 
     protected InputStream getCustomInputStream(String fileName) {
         return this.getClass().getResourceAsStream(fileName);
+    }
+
+    protected InputStream getInputStream() {
+        return null;
     }
 
     /**

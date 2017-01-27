@@ -241,17 +241,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         style.setProperty("height", (taxType == TaxType.PFR || taxType == TaxType.NDFL) ? (65 + 22) : 22, Style.Unit.PX);
 
         switch (taxType) {
-            case DEAL:
-                fillDeal();
-                break;
-            case PROPERTY:
-            case TRANSPORT:
-            case LAND:
-                fillTransportAndPropertyAndLand(taxType);
-                break;
-            case INCOME:
-                fillIncome();
-                break;
             case NDFL:
             case PFR:
                 fillNdflPfr(taxType);
@@ -357,14 +346,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel5.add(declarationTypePicker);
         verticalPanel5.add(formStatePicker);
 
-
-        if (taxType == TaxType.TRANSPORT) {
-            label = getLabel("Налоговый орган (кон.):");
-        } else if (taxType == TaxType.LAND) {
-            label = getLabel("Код налогового органа (кон.):");
-        } else {
-            label = getLabel("Налоговый орган:");
-        }
+        label = getLabel("Налоговый орган:");
         verticalPanel6.add(label);
 
         label = getLabel("КПП:");

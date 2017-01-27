@@ -48,17 +48,17 @@ public class ConstNdflHeaderBuilder extends AbstractHeaderOrFooterBuilder implem
 
         buildHeader(tr, new TextHeader("Сведения о реорганизации"), 3, 0, true);
 
-        buildHeader(tr, new TextHeader("Ответственный за декларацию"), 6, 0, true);
+        buildHeader(tr, new TextHeader("Ответственный за расчет"), 6, 0, true);
 
         tr.endTR();
 
         tr = startRow();
 
-        buildHeader(tr, new TextHeader("Код налогового органа (кон.)"), 0, 0, true);
+        buildHeader(tr, new TextHeader("Код НО конечного"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("КПП"), 0, 0, true);
 
-        buildHeader(tr, new TextHeader("Код налогового органа (пром.)"), 0, 0, true);
+        buildHeader(tr, new TextHeader("Код НО промежуточного"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("Код места, по которому представляется документ"), 0, 0, true);
 

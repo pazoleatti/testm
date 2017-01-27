@@ -116,9 +116,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         JdbcTemplate jt = getJdbcTemplate();
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
         try {
-            return jt.queryForInt(getActiveVersionSql(),
+            return jt.queryForObject(getActiveVersionSql(),
                     new Object[]{declarationTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
-                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}
+                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}, Integer.class
             );
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Выбранный вид декларации %d - %s не существует в выбранном периоде.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
@@ -414,9 +414,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             valueMap.put("statusList", statusList);
             valueMap.put("actualBeginVersion", actualBeginVersion);
 
-            return getNamedParameterJdbcTemplate().queryForInt("select * from (select id from declaration_template where declaration_type_id = :typeId " +
+            return getNamedParameterJdbcTemplate().queryForObject("select * from (select id from declaration_template where declaration_type_id = :typeId " +
                     " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version) where rownum = 1",
-                    valueMap);
+                    valueMap, Integer.class);
         } catch(EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){
@@ -460,7 +460,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         if (!statusList.isEmpty())
             builder.append(" and status in (:statusList)");
         try {
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+            return getNamedParameterJdbcTemplate().queryForObject(builder.toString(), valueMap, Integer.class);
         }catch (EmptyResultDataAccessException e){
             return 0;
         }

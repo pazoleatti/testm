@@ -99,7 +99,7 @@ public class RaschsvParseTest extends ScriptTestBase {
 
         InputStream inputStream = RaschsvParseTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/primary_1151111/v2016/schema.xml");
 
-        Map<String, Object> param = new HashedMap<String, Object>();
+        Map<String, Object> params = new HashedMap<String, Object>();
 
         // Проверка соответствия числа узлов по их имени
         Map<String, Integer> countNodes = new HashedMap<String, Integer>();
@@ -129,11 +129,11 @@ public class RaschsvParseTest extends ScriptTestBase {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(1L);
 
-        param.put("declarationData", declarationData);
-        param.put("countNodes", countNodes);
+        params.put("declarationData", declarationData);
+        params.put("countNodes", countNodes);
 
         testHelper.setImportFileInputStream(inputStream);
-        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, param);
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, params);
 
         checkLogger();
     }

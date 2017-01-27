@@ -340,10 +340,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     public boolean existForDepartment(int departmentId, int reportPeriodId) {
-        Integer count = getJdbcTemplate().queryForInt(
+        Integer count = getJdbcTemplate().queryForObject(
                 "select count(*) from department_report_period where department_id = ? and report_period_id = ?",
                 new Object[]{departmentId, reportPeriodId},
-                new int[]{Types.NUMERIC, Types.NUMERIC}
+                new int[]{Types.NUMERIC, Types.NUMERIC},
+				Integer.class
         );
         return count != 0;
     }
@@ -388,13 +389,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Override
     public Integer getCorrectionNumber(int id) {
         try {
-            return getJdbcTemplate().queryForInt(
+            return getJdbcTemplate().queryForObject(
                     "select num from (\n" +
                             "select id, correction_date as corr_date,\n" +
                             "row_number() over(partition by report_period_id, department_id order by correction_date nulls first) - 1 as num\n" +
                             "from department_report_period drp) where id = ?",
                     new Object[]{id},
                     new int[]{Types.NUMERIC}
+					, Integer.class
             );
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -405,10 +407,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
         try {
             return getJdbcTemplate().
-                    queryForInt(
+                    queryForObject(
                             "select count(*) from department_report_period drp where " +
                                     "drp.DEPARTMENT_ID = ? and drp.report_period_id = ? and drp.CORRECTION_DATE > ?",
-                            departmentId, reportPeriodId, correctionDate) > 0;
+							new Object[]{departmentId, reportPeriodId, correctionDate}, Integer.class) > 0;
         } catch (DataAccessException e){
 			LOG.error("", e);
             throw new DaoException("", e);

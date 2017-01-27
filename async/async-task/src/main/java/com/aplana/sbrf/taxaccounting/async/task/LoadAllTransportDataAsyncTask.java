@@ -67,6 +67,8 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
             // Справочники
             loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate, true);
 
+            // Налоговые формы
+            lockDataService.updateState(lock, lockDate, "Импорт налоговых форм");
             loadDeclarationDataService.importDeclaration(userInfo, loadFormDataService.getTB(userInfo, logger), logger, lock, true);
         } finally {
             lockDataService.unlock(key, userInfo.getUser().getId());

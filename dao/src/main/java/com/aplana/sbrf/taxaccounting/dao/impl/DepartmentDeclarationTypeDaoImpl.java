@@ -387,6 +387,6 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         QueryData assignedDeclarationsQueryData = getAssignedDeclarationsQueryData(departmentsIds, taxType, null);
         String query = "SELECT count(*) FROM ( " + assignedDeclarationsQueryData.getQuery() + " )";
 
-        return getNamedParameterJdbcTemplate().queryForInt(query, assignedDeclarationsQueryData.getParameterSource());
+        return getNamedParameterJdbcTemplate().queryForObject(query, assignedDeclarationsQueryData.getParameterSource(), Integer.class);
     }
 }

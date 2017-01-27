@@ -318,11 +318,6 @@
                     <artifactId>openejb-core</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>migration-ejb</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-                <dependency>
                     <groupId>com.aplana.taxaccounting</groupId>
                     <artifactId>scheduler-mock</artifactId>
                     <version>${project.version}</version>

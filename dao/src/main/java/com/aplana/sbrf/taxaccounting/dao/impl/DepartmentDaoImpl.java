@@ -112,8 +112,8 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public Integer getParentTBId(int departmentId) {
         try {
-            return getJdbcTemplate().queryForInt("SELECT id FROM department WHERE parent_id = 0 and type = 2 " +
-                    "START WITH id = ? CONNECT BY id = prior parent_id", departmentId);
+            return getJdbcTemplate().queryForObject("SELECT id FROM department WHERE parent_id = 0 and type = 2 " +
+                    "START WITH id = ? CONNECT BY id = prior parent_id", new Object[]{departmentId}, Integer.class);
         } catch (EmptyResultDataAccessException e){
             return null;
         } catch (DataAccessException e){

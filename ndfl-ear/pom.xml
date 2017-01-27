@@ -18,12 +18,6 @@
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
-                    <artifactId>migration-ejb</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                </dependency>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
                     <artifactId>mdb</artifactId>
                     <version>${project.version}</version>
                     <type>ejb</type>
@@ -56,23 +50,6 @@
         <profile>
             <id>production</id>
             <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>migration-ejb</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                    <classifier>jar-with-dependencies</classifier>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>core</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>dao</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
                     <artifactId>mdb</artifactId>
@@ -198,12 +175,6 @@
                                     <bundleFileName>gwtapp.war</bundleFileName>
                                     <contextRoot>/${releaseName}/gwtapp</contextRoot>
                                 </webModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>migration-ejb</artifactId>
-                                    <bundleFileName>migration-ejb.jar</bundleFileName>
-                                    <classifier>jar-with-dependencies</classifier>
-                                </ejbModule>
                                 <ejbModule>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>mdb</artifactId>

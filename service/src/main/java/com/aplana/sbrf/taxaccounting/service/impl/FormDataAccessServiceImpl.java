@@ -696,15 +696,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                 || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             formDataKindList.add(FormDataKind.CONSOLIDATED);
-            if (!taxTypes.contains(TaxType.VAT))
-                formDataKindList.add(FormDataKind.SUMMARY);
-        }
-        if (taxTypes.contains(TaxType.INCOME)) {
-            formDataKindList.add(FormDataKind.ADDITIONAL);
-            formDataKindList.add(FormDataKind.UNP);
-        }
-        if (taxTypes.contains(TaxType.ETR)) {
-            formDataKindList.add(FormDataKind.CALCULATED);
+            formDataKindList.add(FormDataKind.SUMMARY);
         }
         return formDataKindList;
     }
