@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources;
 
 import com.aplana.gwt.client.ModalWindow;
-import com.aplana.sbrf.taxaccounting.model.Months;
 import com.aplana.sbrf.taxaccounting.model.Relation;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.core.client.GWT;
@@ -49,8 +46,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
     public static final String TITLE_FORM = "Формы источники/приемники";
-    public static final String TITLE_DEC = "Декларации приемники";
-    public static final String TITLE_DEC_DEAL = "Уведомления приемники";
 
     interface UrlTemplates extends SafeHtmlTemplates {
 
@@ -166,30 +161,11 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         };
         correctionDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        TextColumn<Relation> performerColumn = new TextColumn<Relation>() {
-            @Override
-            public String getValue(Relation object) {
-                if (object.getPerformerNames() != null && !object.getPerformerNames().isEmpty()) {
-                    StringBuilder performers = new StringBuilder();
-                    for (String performer : object.getPerformerNames()) {
-                        if (performers.length() > 0) {
-                            performers.append("; ");
-                        }
-                        performers.append(performer);
-                    }
-                    return performers.toString();
-                } else {
-                    return "";
-                }
-            }
-        };
-
         TextColumn<Relation> stateColumn = new TextColumn<Relation>() {
             @Override
             public String getValue(Relation object) {
-                //return object.isCreated() ? object.getState().getTitle(): "Не создана";
                 return urlTemplates.getColValue(
-                        object.isCreated() ? object.getStateDecl().getTitle() : "Не создана",
+                        object.isCreated() ? object.getDeclarationState().getTitle() : "Не создана",
                         !object.isStatus() ? " (версия макета выведена из действия)" : "").
                         asString();
             }
@@ -219,16 +195,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        TextColumn<Relation> comparativePeriodColumn = new TextColumn<Relation>() {
-            @Override
-            public String getValue(Relation object) {
-                return object.getComparativePeriodName() != null ?
-                        object.getComparativePeriodYear() + ", " + object.getComparativePeriodName() : "";
-            }
-        };
-
         Column<Relation, String> formTypeColumn = new Column<Relation, String>(new ClickableTextCell()){
-
             @Override
             public void render(Cell.Context context, Relation object, SafeHtmlBuilder sb) {
                 String link;
@@ -266,27 +233,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         };
 
         formKindColumn.setCellStyleNames("linkCell");
-
-        TextColumn<Relation> monthColumn = new TextColumn<Relation>() {
-            @Override
-            public String getValue(Relation object) {
-                return object.getMonth() != null ? Months.fromId(object.getMonth()).getTitle() : "";
-            }
-        };
-
-        TextColumn<Relation> declarationTaxOrganColumn = new TextColumn<Relation>() {
-            @Override
-            public String getValue(Relation object) {
-                return object.getTaxOrganCode() != null ? object.getTaxOrganCode() : "";
-            }
-        };
-
-        TextColumn<Relation> declarationTaxOrganKppColumn = new TextColumn<Relation>() {
-            @Override
-            public String getValue(Relation object) {
-                return object.getKpp() != null ? object.getKpp() : "";
-            }
-        };
 
         table.addColumn(counterColumn, "№");
         table.setColumnWidth(counterColumn, 20, Style.Unit.PX);

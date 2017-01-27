@@ -17,9 +17,6 @@ public class Relation implements Serializable {
     private DepartmentReportPeriod departmentReportPeriod;
     /** Статус ЖЦ */
     private WorkflowState state;
-    /** Статус ЖЦ */
-    private State stateDecl;
-
     /** форма/декларация создана/не создана */
     private boolean created;
     /** является ли форма источников, в противном случае приемник*/
@@ -350,14 +347,6 @@ public class Relation implements Serializable {
 
     public void setPerformerNames(List<String> performerNames) {
         this.performerNames = performerNames;
-    }
-
-    public State getStateDecl() {
-        return stateDecl;
-    }
-
-    public void setStateDecl(State stateDecl) {
-        this.stateDecl = stateDecl;
     }
 
     @Override

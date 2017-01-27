@@ -995,6 +995,11 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public void updateDDConsolidation(long sourceFormId) {
+        sourceDao.updateDDConsolidationInfo(sourceFormId);
+    }
+
+    @Override
     public boolean isFDConsolidationTopical(long fdTargetId) {
         return sourceDao.isFDConsolidationTopical(fdTargetId);
     }

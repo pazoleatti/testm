@@ -438,6 +438,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         declarationData.setState(State.CREATED);
+        sourceService.updateDDConsolidation(declarationData.getId());
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
         auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
@@ -1339,7 +1340,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     sdf.get().format(relation.getCorrectionDate())) : "",
-                            relation.getStateDecl().getTitle());
+                            relation.getDeclarationState().getTitle());
                 }
             }
 
