@@ -21,6 +21,8 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 
     private String taxOrganKpp;
 
+	private String oktmo;
+
     public Integer getDeclarationTypeId() {
         return declarationTypeId;
     }
@@ -69,7 +71,15 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
         this.taxOrganKpp = taxOrganKpp;
     }
 
-    @Override
+	public String getOktmo() {
+		return oktmo;
+	}
+
+	public void setOktmo(String oktmo) {
+		this.oktmo = oktmo;
+	}
+
+	@Override
     public String getName() {
         return "Создание налоговой формы";
     }

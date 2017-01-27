@@ -1,6 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
+import com.aplana.sbrf.taxaccounting.model.Relation;
+import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -9,7 +18,6 @@ import net.sf.jasperreports.engine.util.JRSwapFile;
 import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
@@ -30,7 +38,7 @@ public interface DeclarationService {
     /**
      * Поиск декларации в отчетном периоде подразделения + «КПП» и «Налоговый орган»
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode, Long asnuId, String guid);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String guid);
 
     /**
      * Декларация в последнем отчетном периоде подразделения

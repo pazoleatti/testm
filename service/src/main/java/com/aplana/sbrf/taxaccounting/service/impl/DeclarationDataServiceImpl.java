@@ -183,7 +183,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, Long asunId, String fileName) {
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -203,6 +203,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         taxOrganKpp != null
                                 ? ", КПП: \"" + taxOrganKpp + "\""
                                 : "",
+						oktmo != null
+								? ", ОКТМО: \"" + oktmo + "\""
+								: "",
                         asunId != null
                                 ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
                                 : "",
@@ -212,7 +215,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ) == null) {
             //Если блокировка успешно установлена
             try {
-                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, taxOrganCode, asunId, fileName);
+                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, oktmo, taxOrganCode, asunId, fileName);
                 if (declarationData != null) {
                     String msg = (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ?
                             "Уведомление с заданными параметрами уже существует" :
@@ -236,6 +239,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setDeclarationTemplateId(declarationTemplateId);
                 newDeclaration.setTaxOrganCode(taxOrganCode);
                 newDeclaration.setKpp(taxOrganKpp);
+				newDeclaration.setOktmo(oktmo);
                 newDeclaration.setAsnuId(asunId);
                 newDeclaration.setFileName(fileName);
 
@@ -975,8 +979,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String fileName) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode, asnuId, fileName);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, oktmo, taxOrganCode, asnuId, fileName);
     }
 
     @Override
