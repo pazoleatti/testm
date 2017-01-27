@@ -42,18 +42,23 @@ def buildXml() {
     // Код периода
     def periodCode = getRefBookValue(8, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
 
-    // Признак лица, подписавшего документ
-    def signatoryId = getRefBookValue(35, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
-
     // Коды представления налоговой декларации по месту нахождения (учёта)
     def taxPlaceTypeCode = getRefBookValue(2, departmentParamIncomeRow?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue
 
-    def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id);
+    // Признак лица, подписавшего документ
+    def signatoryId = getRefBookValue(35, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
+
+    // Период
+    def period = getPeriod(departmentParamIncomeRow, periodCode)
+
+    // Учитывать будем только информацию о доходах/налогах только за отчетный период
+    def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id, reportPeriod.startDate, reportPeriod.endDate);
     def ndflPersonIncomeByRateList = ndflPersonIncomeCommonValue?.ndflPersonIncomeByRateList
-    def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id)
+    // Учитывать будем только информацию о доходах/налогах за последний квартал отчетного периода
+    def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate)
 
     def builder = new MarkupBuilder(xml)
-    builder.mkp.xmlDeclaration(version: "1.0", encoding: "utf-8")
+    builder.mkp.xmlDeclaration(version: "1.0", encoding: "windows-1251")
     builder.Файл(
             ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, declarationData.kpp),
             ВерсПрог: applicationVersion,
@@ -62,7 +67,7 @@ def buildXml() {
         Документ(
                 КНД: "1151099",
                 ДатаДок: new Date().format(DATE_FORMAT_DOT),
-                Период: getPeriod(departmentParamIncomeRow, periodCode),
+                Период: period,
                 ОтчетГод: reportPeriod.taxPeriod.year,
                 КодНО: declarationData.taxOrganCode,
                 НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
@@ -86,13 +91,11 @@ def buildXml() {
                         Имя: departmentParamIncomeRow.SIGNATORY_FIRSTNAME,
                         Отчество: departmentParamIncomeRow.SIGNATORY_LASTNAME
                 ){}
-                if (signatoryId == 1) {
+                if (signatoryId == 2) {
                     СвПред(
                             НаимДок: departmentParamIncomeRow.APPROVE_DOC_NAME,
                             НаимОрг: departmentParamIncomeRow.APPROVE_ORG_NAME
-                    )
-                } else {
-                    СвПред()
+                    ){}
                 }
             }
             НДФЛ6(){
@@ -105,9 +108,9 @@ def buildXml() {
                     ndflPersonIncomeByRateList.each { ndflPersonIncomeByRate ->
                         СумСтавка (
                             Ставка: ndflPersonIncomeByRate.taxRate,
-                            НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 0),
-                            НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 0),
-                            ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 0),
+                            НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 2),
+                            НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 2),
+                            ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
                             ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
                             ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
                             АвансПлат: ScriptUtils.round(ndflPersonIncomeByRate.prepaymentSum, 0)
@@ -120,7 +123,7 @@ def buildXml() {
                             ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format(DATE_FORMAT_DOT),
                             ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format(DATE_FORMAT_DOT),
                             СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format(DATE_FORMAT_DOT),
-                            ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 0),
+                            ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 2),
                             УдержНал: ndflPersonIncomeByDate.withholdingTax
                         ) {}
                     }
@@ -128,7 +131,7 @@ def buildXml() {
             }
         }
     }
-    println(xml)
+//    println(xml)
 }
 
 /**
@@ -157,7 +160,7 @@ def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP) {
  * Период
  */
 def getPeriod(def departmentParamIncomeRow, def periodCode) {
-    if (departmentParamIncomeRow?.REORG_FORM_CODE?.value) {
+    if (departmentParamIncomeRow.REORG_FORM_CODE) {
         def result;
         switch (periodCode) {
             case "21":

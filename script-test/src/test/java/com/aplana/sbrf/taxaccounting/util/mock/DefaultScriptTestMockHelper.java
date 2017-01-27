@@ -445,6 +445,8 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
         Map<String, RefBookValue> pagingResultItem = mock(Map.class);
         when(pagingResultItem.get(any())).thenReturn(new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+        when(pagingResultItem.get("OKTMO")).thenReturn(new RefBookValue(RefBookAttributeType.STRING, "12345678"));
+        when(pagingResultItem.get("INN")).thenReturn(new RefBookValue(RefBookAttributeType.STRING, "0123456789"));
         pagingResult.add(pagingResultItem);
         when(refBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(pagingResult);
         return refBookDataProvider;
