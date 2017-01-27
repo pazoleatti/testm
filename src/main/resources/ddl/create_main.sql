@@ -938,13 +938,13 @@ comment on column form_data_consolidation.target_form_data_id is 'Идентиф
 
 create table declaration_data_consolidation
 (
-  source_form_data_id        number(9),
-  target_declaration_data_id number(9) not null
+  target_declaration_data_id number(18) not null,
+  source_declaration_data_id number(18)
 );
 
 comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм в декларации';
-comment on column declaration_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
-comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор декларации приемника';
+comment on column declaration_data_consolidation.source_declaration_data_id is 'Идентификатор НФ источника';
+comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор НФ приемника';
 
 --------------------------------------------------------------------------------------------------------
 create table log_system_report
