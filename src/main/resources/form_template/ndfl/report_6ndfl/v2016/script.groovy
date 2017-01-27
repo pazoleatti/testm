@@ -73,10 +73,11 @@ def buildXml() {
                 НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 ПоМесту: taxPlaceTypeCode
         ) {
-            СвНП(
-                    ОКТМО: departmentParamIncomeRow.OKTMO,
-                    Тлф: departmentParamIncomeRow.PHONE
-            ){
+            def svNP = ["ОКТМО": departmentParamIncomeRow.OKTMO]
+            if (departmentParamIncomeRow.PHONE && !departmentParamIncomeRow.PHONE.empty) {
+                svNP.put("Тлф", departmentParamIncomeRow.PHONE)
+            }
+            СвНП(svNP){
                 НПЮЛ(
                         НаимОрг: departmentParamIncomeRow.NAME,
                         ИННЮЛ: departmentParam.INN,
@@ -86,16 +87,20 @@ def buildXml() {
             Подписант(
                     ПрПодп: signatoryId
             ){
-                ФИО(
-                        Фамилия: departmentParamIncomeRow.SIGNATORY_SURNAME,
-                        Имя: departmentParamIncomeRow.SIGNATORY_FIRSTNAME,
-                        Отчество: departmentParamIncomeRow.SIGNATORY_LASTNAME
-                ){}
+                // Узел ФИО необязателен
+                if (departmentParamIncomeRow.SIGNATORY_SURNAME && !departmentParamIncomeRow.SIGNATORY_SURNAME.empty) {
+                    def fio = ["Фамилия": departmentParamIncomeRow.SIGNATORY_SURNAME, "Имя": departmentParamIncomeRow.SIGNATORY_FIRSTNAME]
+                    if (departmentParamIncomeRow.SIGNATORY_LASTNAME && !departmentParamIncomeRow.SIGNATORY_LASTNAME.empty) {
+                        fio.put("Отчество", departmentParamIncomeRow.SIGNATORY_LASTNAME)
+                    }
+                    ФИО(fio){}
+                }
                 if (signatoryId == 2) {
-                    СвПред(
-                            НаимДок: departmentParamIncomeRow.APPROVE_DOC_NAME,
-                            НаимОрг: departmentParamIncomeRow.APPROVE_ORG_NAME
-                    ){}
+                    def svPred = ["НаимДок": departmentParamIncomeRow.APPROVE_DOC_NAME]
+                    if (departmentParamIncomeRow.APPROVE_ORG_NAME && !departmentParamIncomeRow.APPROVE_ORG_NAME.empty) {
+                        svPred.put("НаимОрг", departmentParamIncomeRow.APPROVE_ORG_NAME)
+                    }
+                    СвПред(svPred){}
                 }
             }
             НДФЛ6(){
@@ -117,15 +122,18 @@ def buildXml() {
                         ) {}
                     }
                 }
-                ДохНал() {
-                    ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
-                        СумДата (
-                            ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format(DATE_FORMAT_DOT),
-                            ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format(DATE_FORMAT_DOT),
-                            СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format(DATE_FORMAT_DOT),
-                            ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 2),
-                            УдержНал: ndflPersonIncomeByDate.withholdingTax
-                        ) {}
+                // Узел ДохНал необязателен
+                if (ndflPersonIncomeByDateList.size() > 0) {
+                    ДохНал() {
+                        ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
+                            СумДата(
+                                    ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format(DATE_FORMAT_DOT),
+                                    ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format(DATE_FORMAT_DOT),
+                                    СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format(DATE_FORMAT_DOT),
+                                    ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 2),
+                                    УдержНал: ndflPersonIncomeByDate.withholdingTax
+                            ) {}
+                        }
                     }
                 }
             }

@@ -205,7 +205,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         }
 
         // 2. сравнение со сгенерированным xml
-        String correctXml = IOUtils.toString(getClass().getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/report_6ndfl.xml"), "UTF-8");
+        String correctXml = IOUtils.toString(getClass().getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/report_6ndfl.xml"), "windows-1251");
         XMLUnit.setIgnoreWhitespace(true);
         Diff xmlDiff = new Diff(correctXml, testHelper.getXmlStringWriter().toString());
         xmlDiff.overrideDifferenceListener(new DifferenceListener() {
