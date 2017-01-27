@@ -58,7 +58,6 @@ def buildXml() {
     def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate)
 
     def builder = new MarkupBuilder(xml)
-    builder.mkp.xmlDeclaration(version: "1.0", encoding: "windows-1251")
     builder.Файл(
             ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, declarationData.kpp),
             ВерсПрог: applicationVersion,
