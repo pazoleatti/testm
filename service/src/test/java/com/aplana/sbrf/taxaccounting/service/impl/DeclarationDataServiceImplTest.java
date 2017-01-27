@@ -317,7 +317,7 @@ public class DeclarationDataServiceImplTest {
         r1.setYear(2015);
         r1.setCorrectionDate(new Date(0));
         r1.setCreated(true);
-        r1.setFormDataId(11L);
+        r1.setDeclarationDataId(11L);
         r1.setStateDecl(State.ACCEPTED);
 
         Relation r2 = new Relation();
