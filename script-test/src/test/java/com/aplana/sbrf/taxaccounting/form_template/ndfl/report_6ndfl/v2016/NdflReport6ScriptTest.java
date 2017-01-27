@@ -122,7 +122,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                 ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(7777.77));
                 ndflPersonIncomeByRate1.setCalculatedTax(8888L);
                 ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
-                ndflPersonIncomeByRate1.setPrepaymentSum(new BigDecimal(1111.11));
+                ndflPersonIncomeByRate1.setPrepaymentSum(1111L);
                 ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
 
                 ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);

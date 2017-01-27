@@ -118,7 +118,7 @@ def buildXml() {
                             ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
                             ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
                             ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
-                            АвансПлат: ScriptUtils.round(ndflPersonIncomeByRate.prepaymentSum, 0)
+                            АвансПлат: ndflPersonIncomeByRate.prepaymentSum
                         ) {}
                     }
                 }
@@ -218,7 +218,7 @@ def getDepartmentParam() {
  */
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamTable == null) {
-        def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
+        def filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(951).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения")

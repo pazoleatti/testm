@@ -370,7 +370,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setRowNum(rs.getInt("row_num"));
             personPrepayment.setOperationId(SqlUtils.getLong(rs, "operation_id"));
 
-            personPrepayment.setSumm(rs.getBigDecimal("summ"));
+            personPrepayment.setSumm(rs.getLong("summ"));
             personPrepayment.setNotifNum(rs.getString("notif_num"));
             personPrepayment.setNotifDate(rs.getDate("notif_date"));
             personPrepayment.setNotifSource(rs.getString("notif_source"));

@@ -59,16 +59,16 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
         // 1. Суммируем Авансы в рамках операции
         // Мапа <Номер_операции, Сумма_аванса>
-        Map<Long, BigDecimal> mapSumPrepayment = new HashMap<Long, BigDecimal>();
+        Map<Long, Long> mapSumPrepayment = new HashMap<Long, Long>();
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonDao.findPrepaymentsByDeclarationDataId(declarationDataId);
         for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
-            BigDecimal summPrepayment = mapSumPrepayment.get(ndflPersonPrepayment.getOperationId());
+            Long summPrepayment = mapSumPrepayment.get(ndflPersonPrepayment.getOperationId());
             if (summPrepayment == null) {
                 summPrepayment = ndflPersonPrepayment.getSumm();
-                mapSumPrepayment.put(ndflPersonPrepayment.getOperationId(), summPrepayment);
             } else {
-                summPrepayment.add(ndflPersonPrepayment.getSumm());
+                summPrepayment += ndflPersonPrepayment.getSumm();
             }
+            mapSumPrepayment.put(ndflPersonPrepayment.getOperationId(), summPrepayment);
         }
 
         // Мапа <Номер_операции, Суммы>
@@ -118,6 +118,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
                     ndflPersonIncomeByRate.addIncomeAccruedSummDiv(ndflPersonIncome.getIncomeAccruedSumm());
                     ndflPersonIncomeByRate.addCalculatedTaxDiv(ndflPersonIncome.getCalculatedTax());
                 }
+                mapO.put(ndflPersonIncome.getOperationId(), ndflPersonIncomeByRate);
             }
         }
 
@@ -132,7 +133,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
                 NdflPersonIncomeByRate sbr = iterOperation.getValue();
 
                 // Получим Аванс для конкретной операции
-                BigDecimal summPrepayment = mapSumPrepayment.get(iterOperation.getKey());
+                Long summPrepayment = mapSumPrepayment.get(iterOperation.getKey());
 
                 // 3. Связываем Аванс с Доходом для конкретной операции
                 sbr.setPrepaymentSum(summPrepayment);
