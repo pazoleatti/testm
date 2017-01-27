@@ -20,8 +20,6 @@ comment on column ref_book_income_type.status is 'Статус записи (0 -
 comment on column ref_book_income_type.code is 'Код';
 comment on column ref_book_income_type.name is 'Наименование дохода';
 
-create sequence seq_ref_book_income_type start with 21 increment by 1;
-
 -- Коды видов вычетов
 create table ref_book_deduction_type
 (
@@ -42,8 +40,6 @@ comment on column ref_book_deduction_type.status is 'Статус записи (
 comment on column ref_book_deduction_type.code is 'Код';
 comment on column ref_book_deduction_type.name is 'Наименование вычета';
 comment on column ref_book_deduction_type.deduction_mark is 'Код признака вычета';
-
-create sequence seq_ref_book_deduction_type start with 106 increment by 1;
 
 -- Коды субъектов РФ
 create table ref_book_region
@@ -72,8 +68,6 @@ comment on column ref_book_region.okato_definition is 'Определяющая 
 comment on column ref_book_region.oktmo is 'Ссылка на код ОКТМО';
 comment on column ref_book_region.oktmo_definition is 'Определяющая часть кода ОКТМО';
 
-create sequence seq_ref_book_region start with 101 increment by 1;
-
 -- Коды места представления расчета
 create table ref_book_present_place
 (
@@ -97,18 +91,16 @@ comment on column ref_book_present_place.name is 'Наименование';
 comment on column ref_book_present_place.for_ndfl is 'Используется для НДФЛ';
 comment on column ref_book_present_place.for_fond is 'Используется для Страховых сборов взносов';
 
-create sequence seq_ref_book_present_place start with 21 increment by 1;
-
 -- Справочник АСНУ
 create table ref_book_asnu (
-  id       number(9) not null,
-  code     varchar2(4) not null,
-  name     varchar2(100) not null,
-  type     varchar2(255) not null
+  id        number(9)           not null,
+  code      varchar2(4)         not null,
+  name      varchar2(100)       not null,
+  type      varchar2(255)       not null
 );
 
 comment on table ref_book_asnu is 'Справочник АСНУ';
-comment on column ref_book_asnu.id is 'Идентификатор';
+comment on column ref_book_asnu.id is 'Уникальный идентификатор';
 comment on column ref_book_asnu.code is 'Код АСНУ';
 comment on column ref_book_asnu.name is 'Наименование АСНУ';
 comment on column ref_book_asnu.type is 'Тип дохода';
@@ -158,8 +150,6 @@ comment on column ref_book_okved.status is 'Статус записи (0 - об�
 comment on column ref_book_okved.code is 'Код ОКВЭД';
 comment on column ref_book_okved.name is 'Наименование';
 
-create sequence seq_ref_book_okved start with 301 increment by 1;
-
 -- ОКАТО
 create table ref_book_okato 
 (
@@ -178,8 +168,6 @@ comment on column ref_book_okato.status is 'Статус записи (0 - об�
 comment on column ref_book_okato.okato is 'Код ОКАТО';
 comment on column ref_book_okato.name is 'Наименование';
 
-create sequence seq_ref_book_okato start with 243278745 increment by 1;
-
 -- Признак кода вычета
 create table ref_book_deduction_mark
 (
@@ -197,8 +185,6 @@ comment on column ref_book_deduction_mark.version is 'Версия. Дата а�
 comment on column ref_book_deduction_mark.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_deduction_mark.code is 'Код признака вычета';
 comment on column ref_book_deduction_mark.name is 'Наименование признака кода вычета';
-
-create sequence seq_ref_book_deduction_mark start with 11 increment by 1;
 
 -- Коды форм реорганизации (ликвидации) организации
 create table ref_book_reorganization 
@@ -237,8 +223,6 @@ comment on column ref_book_ndfl.version is 'Версия. Дата актуал�
 comment on column ref_book_ndfl.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_ndfl.department_id is 'Подразделение';
 comment on column ref_book_ndfl.inn is 'ИНН';
-
-create sequence seq_ref_book_ndfl start with 1 increment by 1;
 
 -- Параметры подразделения по НДФЛ (таблица)
 create table ref_book_ndfl_detail
@@ -304,8 +288,6 @@ comment on column ref_book_ndfl_detail.signatory_lastname is 'Отчество �
 comment on column ref_book_ndfl_detail.approve_doc_name is 'Наименование документа, подтверждающего полномочия';
 comment on column ref_book_ndfl_detail.approve_org_name is 'Наименование организации-представителя налогоплательщика';
 
-create sequence seq_ref_book_ndfl_detail start with 1 increment by 1;
-
 -- Параметры подразделения по сборам, взносам
 create table ref_book_fond
 (
@@ -324,8 +306,6 @@ comment on column ref_book_fond.version is 'Версия. Дата актуал�
 comment on column ref_book_fond.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_fond.department_id is 'Подразделение';
 comment on column ref_book_fond.inn is 'ИНН';
-
-create sequence seq_ref_book_fond start with 1 increment by 1;
 
 -- Параметры подразделения по сборам, взносам (таблица)
 create table ref_book_fond_detail
@@ -390,7 +370,5 @@ comment on column ref_book_fond_detail.signatory_firstname is 'Имя подпи
 comment on column ref_book_fond_detail.signatory_lastname is 'Отчество подписанта';
 comment on column ref_book_fond_detail.approve_doc_name is 'Наименование документа, подтверждающего полномочия';
 comment on column ref_book_fond_detail.approve_org_name is 'Наименование организации-представителя налогоплательщика';
-
-create sequence seq_ref_book_fond_detail start with 1 increment by 1;
 
 -----------------------------------------------------------------------------------------------------------------------------
