@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrey Drunk
@@ -35,6 +36,14 @@ public interface NdflPersonService {
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPerson> findNdflPerson(long declarationDataId);
+
+    /**
+     * Найти NdflPerson привязанные к декларации для построения отчета.  Если найдено больше 1 запись, метод выкидывает исключение ServiceExeption
+     * @param declarationDataId идентификатор декларации
+     * @param subreportParameters заданные параметры отчета для поиска NdflPerson
+     * @return NdflPerson или исключение если найденно больше одной записи
+     */
+    NdflPerson findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters);
 
     /**
      * Найти обобщенные данные о доходах физ лиц и данные в разрезе ставок

@@ -11,8 +11,16 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import groovy.lang.Closure;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRSwapFile;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.apache.commons.codec.CharEncoding;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,10 +30,10 @@ import org.springframework.stereotype.Service;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.zip.ZipInputStream;
 
@@ -89,7 +97,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId){
+    public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
         return declarationDataDao.findAllDeclarationData(declarationTypeId, departmentId, reportPeriodId);
     }
 
@@ -97,7 +105,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) {
         List<Relation> relations = sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, logger);
         List<FormData> sources = new ArrayList<FormData>();
-        for (Relation relation : relations){
+        for (Relation relation : relations) {
             if (relation.getState() == WorkflowState.ACCEPTED) {
                 FormData formData = formDataDao.get(relation.getFormDataId(), relation.isManual());
                 sources.add(formData);
@@ -175,7 +183,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
         // фильтр
-        declarationFilter.setDeclarationTypeIds(Arrays.asList((long)declarationTypeId));
+        declarationFilter.setDeclarationTypeIds(Arrays.asList((long) declarationTypeId));
         declarationFilter.setReportPeriodIds(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
         declarationFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
         declarationFilter.setCorrectionTag(departmentReportPeriod.getCorrectionDate() != null);
@@ -239,16 +247,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params) {
-        return declarationDataService.createJasperReport(xmlIn, jrxml, jrSwapFile, params);
-    }
-
-    @Override
-    public void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
-        declarationDataService.exportXLSX(jasperPrint, data);
-    }
-
-    @Override
     public DeclarationType getType(int declarationTypeId) {
         return declarationTypeDao.get(declarationTypeId);
     }
@@ -259,7 +257,39 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params) {
+        return declarationDataService.createJasperReport(xmlIn, jrxml, jrSwapFile, params);
+    }
+
+    @Override
+    public JasperPrint createJasperReport(InputStream jrxmlTemplate, Map<String, Object> parameters, Closure xmlBuilder) {
+        ByteArrayInputStream xmlData = generateXmlData(xmlBuilder);
+        return declarationDataService.createJasperReport(xmlData, jrxmlTemplate, parameters);
+    }
+
+    @Override
+    public ByteArrayInputStream generateXmlData(Closure xmlBuilder) {
+        try {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            OutputStreamWriter writer = new OutputStreamWriter(byteStream, CharEncoding.UTF_8);
+            //вызываем замыкание, в котором описано формирование xml
+            xmlBuilder.call(writer);
+            byte[] buffer = byteStream.toByteArray();
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
+            return inputStream;
+        } catch (UnsupportedEncodingException e) {
+            throw new ServiceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
+        declarationDataService.exportXLSX(jasperPrint, data);
+    }
+
+    @Override
     public void exportPDF(JasperPrint jasperPrint, OutputStream data) {
         declarationDataService.exportPDF(jasperPrint, data);
     }
+
 }

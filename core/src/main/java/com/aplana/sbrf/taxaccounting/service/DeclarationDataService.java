@@ -5,11 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -272,6 +274,29 @@ public interface DeclarationDataService {
      * @return
      */
     JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params);
+
+
+	/**
+	 * Формирование jasper-отчета, данный метод не использует JRSwapFile для промежуточного хранения данных, вместо этого данные загружаются в буффер
+	 * @param xmlData xml поток входных данных
+	 * @param jrxmlTemplate шаблон отчета
+	 * @param params набор параметров отчета
+     * @return сформированный отчет
+     */
+	JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> params);
+
+
+	/**
+	 * Формирование jasper-отчета, расширенный вариант метода
+	 * {@link DeclarationDataService#createJasperReport(InputStream, InputStream, Map)}
+     */
+	JasperPrint createJasperReport(InputStream xmlIn, InputStream jrxml, Map<String, Object> parameters, Connection connection);
+
+	/**
+	 * Получить соединение для передачи в отчет
+	 * @return
+     */
+	Connection getReportConnection();
 
     /**
      * Формирование PDF отчета

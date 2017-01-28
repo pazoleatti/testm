@@ -39,6 +39,15 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public NdflPerson findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters) {
+
+
+
+        //TODO call DAO...
+        return null;
+    }
+
+    @Override
     public NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId) {
         /*
         Одним из полей Обобщенных показателей о доходах является перечень просуммированых доходов и авансов для каждой ставки.

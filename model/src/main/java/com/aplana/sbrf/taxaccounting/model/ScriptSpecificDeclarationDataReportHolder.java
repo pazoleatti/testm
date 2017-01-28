@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.util.Map;
 
 /**
  * Объект-хранилище данных для формирования специфичных отчетов декларации в скрипте
+ *
  * @author lhaziev
  */
 public class ScriptSpecificDeclarationDataReportHolder {
@@ -73,4 +75,22 @@ public class ScriptSpecificDeclarationDataReportHolder {
     public void setSubreportParamValues(Map<String, Object> subreportParamValues) {
         this.subreportParamValues = subreportParamValues;
     }
+
+    public Object getSubreportParamNullCheck(String alias) {
+        Object result = getSubreportParam(alias);
+        if (result != null) {
+            return result;
+        } else {
+            throw new ServiceException("Не указано значение обязательного параметра: '"+alias+"'!");
+        }
+    }
+
+    public Object getSubreportParam(String alias) {
+        if (subreportParamValues != null) {
+            return subreportParamValues.get(alias);
+        }
+        return null;
+    }
+
+
 }

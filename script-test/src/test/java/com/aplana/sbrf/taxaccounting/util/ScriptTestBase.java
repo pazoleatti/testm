@@ -78,9 +78,9 @@ public abstract class ScriptTestBase {
      * Проверка логгера на наличие ошибок
      */
     protected void checkLogger() {
-		if (testHelper.getLogger().containsLevel(LogLevel.ERROR)) {
-			printLog();
-		}
+        if (testHelper.getLogger().containsLevel(LogLevel.ERROR)) {
+            printLog();
+        }
         Assert.assertFalse("Logger contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
@@ -130,7 +130,7 @@ public abstract class ScriptTestBase {
      *
      * @param aliases  алиасы граф для проверки
      * @param rowCount ожидаемое количесвто строк в НФ
-     * @param year год для проверки дат
+     * @param year     год для проверки дат
      * @throws java.text.ParseException
      */
     protected void defaultCheckLoadData(List<String> aliases, int rowCount, String year) {
@@ -138,7 +138,7 @@ public abstract class ScriptTestBase {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         Calendar calendar = Calendar.getInstance();
         try {
-            calendar.setTime(sdf.parse("01.01."+year));
+            calendar.setTime(sdf.parse("01.01." + year));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -178,7 +178,6 @@ public abstract class ScriptTestBase {
         when(testHelper.getReportPeriodService().getEndDate(anyInt())).thenCallRealMethod();
         when(testHelper.getReportPeriodService().getReportDate(anyInt())).thenCallRealMethod();
         when(testHelper.getReportPeriodService().get(anyInt())).thenCallRealMethod();
-
 
 
         testHelper.execute(FormDataEvent.CHECK_SCRIPT);

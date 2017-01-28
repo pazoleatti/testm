@@ -106,7 +106,6 @@ public class NdflPersonDaoTest {
         //test cascade delete
     }
 
-
     public static Date toDate(String dateStr) {
         try {
             return new SimpleDateFormat("dd.MM.yyyy").parse(dateStr);
@@ -114,7 +113,6 @@ public class NdflPersonDaoTest {
             return null;
         }
     }
-
 
     private NdflPerson createGoodNdflPerson() {
 

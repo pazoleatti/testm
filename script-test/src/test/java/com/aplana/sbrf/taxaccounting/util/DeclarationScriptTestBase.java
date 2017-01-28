@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.mock.DefaultScriptTestMockHelper;
@@ -12,19 +12,21 @@ import org.junit.BeforeClass;
 import org.xml.sax.InputSource;
 
 import javax.xml.xpath.XPathFactory;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Базовый класс для тестов скриптов.
- *
+ * <p>
  * TODO: сделать загрузку xml из ресурсов, для проверки сформированой или для вытаскивания данных из другой декларации.
  */
 public abstract class DeclarationScriptTestBase {
     // Хэлпер для работы со скриптами декларации в тестовом режиме
     // Один набор тестов для скрипта — один хелпер
     protected static DeclarationTestScriptHelper testHelper;
+
 
     @BeforeClass
     public static void initClass() {
@@ -45,9 +47,11 @@ public abstract class DeclarationScriptTestBase {
             }
             testHelper = new DeclarationTestScriptHelper(path, getDeclarationData(), getMockHelper());
             testHelper.setImportFileInputStream(getInputStream());
+
         }
         testHelper.reset();
     }
+
 
     /**
      * Печать вывода скрипта после каждого теста
@@ -61,6 +65,51 @@ public abstract class DeclarationScriptTestBase {
      * Экземпляр декларации
      */
     protected abstract DeclarationData getDeclarationData();
+
+
+    protected DeclarationSubreport createDeclarationSubreport() {
+        DeclarationSubreport result = new DeclarationSubreport();
+        result.setId(1L);
+        result.setAlias("report");
+        result.setName("report");
+        result.setBlobDataId("100500");
+        result.setOrder(1);
+        result.setDeclarationSubreportParams(Collections.EMPTY_LIST);
+        return result;
+    }
+
+    /**
+     * Создает базовый ReportHolder
+     *
+     * @return
+     */
+    protected ScriptSpecificDeclarationDataReportHolder createReportHolder() {
+        DeclarationSubreport subreport = createDeclarationSubreport();
+        try {
+            FileInputStream jrxmlTemplate = new FileInputStream(getSpecificReportPath(subreport.getName()));
+            ScriptSpecificDeclarationDataReportHolder reportHolder = new ScriptSpecificDeclarationDataReportHolder();
+            DeclarationDataReportType reportType = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport);
+            reportHolder.setFileOutputStream(new ByteArrayOutputStream());
+            reportHolder.setFileInputStream(jrxmlTemplate);
+            reportHolder.setDeclarationSubreport(reportType.getSubreport());
+            reportHolder.setFileName(reportType.getSubreport().getAlias());
+            reportHolder.setSubreportParamValues(new HashMap<String, Object>());
+            return reportHolder;
+        } catch (FileNotFoundException e) {
+            throw new ServiceException("Не найден файл шаблон спецотчета: " + getSpecificReportPath(subreport.getName()));
+        }
+    }
+
+    /**
+     * Получить полный путь к файлу спецотчета
+     *
+     * @param reportName имя отчета
+     * @return
+     */
+    public String getSpecificReportPath(String reportName) {
+        return DeclarationTestScriptHelper.SCRIPT_PATH_PREFIX + getFolderPath() + (reportName != null ? reportName : reportName) + ".jrxml";
+    }
+
 
     /**
      * Путь к каталогу декларации
@@ -112,7 +161,8 @@ public abstract class DeclarationScriptTestBase {
 
     /**
      * Метод возвращает результат выполнения XPath выражения, над xml документом
-     * @param xml документ xml
+     *
+     * @param xml        документ xml
      * @param expression выражение XPath
      * @return результат выполнения XPath выражения
      * @throws Exception ошибка выполнения XPath выражения

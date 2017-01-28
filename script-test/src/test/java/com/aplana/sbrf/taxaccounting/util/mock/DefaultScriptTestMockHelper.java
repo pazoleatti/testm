@@ -11,22 +11,32 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import net.sf.jasperreports.engine.JasperPrint;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.OutputStream;
 import java.util.*;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * Реализация хэлпера с заглушками сервисов по-умолчанию
@@ -99,9 +109,9 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
             }
         });
         when(formDataService.getRefBookRecordImport(anyLong(), anyMap(), anyMap(), anyMap(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Map<String, RefBookValue> >() {
+                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
             @Override
-            public Map<String, RefBookValue>  answer(InvocationOnMock invocation) throws Throwable {
+            public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
                 Long refBookId = (Long) invocation.getArguments()[0];
                 String alias = (String) invocation.getArguments()[4];
                 String value = (String) invocation.getArguments()[5];
@@ -109,9 +119,9 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
             }
         });
         when(formDataService.getRefBookRecordImport(anyLong(), anyMap(), anyMap(), anyMap(), anyString(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Map<String, RefBookValue> >() {
+                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
             @Override
-            public Map<String, RefBookValue>  answer(InvocationOnMock invocation) throws Throwable {
+            public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
                 Long refBookId = (Long) invocation.getArguments()[0];
                 String alias = (String) invocation.getArguments()[4];
                 String value = (String) invocation.getArguments()[5];
@@ -282,8 +292,36 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     @Override
-    public DeclarationService mockDeclarationService(){
-        return mock(DeclarationService.class);
+    public DeclarationService mockDeclarationService() {
+
+        DeclarationService mockDeclarationService = mock(DeclarationServiceImpl.class);
+
+        //желательно вынести утилитные методы в отдельный сервис, чтобы не приходилось, переопределять их вне mock контекста
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                JasperPrint jasperPrint = (JasperPrint) args[0];
+                OutputStream outputStream = (OutputStream) args[1];
+                DeclarationDataService ds = new DeclarationDataServiceImpl();
+                ds.exportXLSX(jasperPrint, outputStream);
+                return null;
+            }
+        }).when(mockDeclarationService).exportXLSX(any(JasperPrint.class), any(OutputStream.class));
+
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                JasperPrint jasperPrint = (JasperPrint) args[0];
+                OutputStream outputStream = (OutputStream) args[1];
+                DeclarationDataService ds = new DeclarationDataServiceImpl();
+                ds.exportPDF(jasperPrint, outputStream);
+                return null;
+            }
+        }).when(mockDeclarationService).exportPDF(any(JasperPrint.class), any(OutputStream.class));
+
+        return mockDeclarationService;
     }
 
     @Override
@@ -459,16 +497,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     @Override
     public RefBookDataProvider getRefBookDataProvider() {
         return refBookDataProvider;
-    }
-
-    @Override
-    public DeclarationService getDeclarationService() {
-        return mock(DeclarationService.class);
-    }
-
-    @Override
-    public NdflPersonService getNdflPersonService() {
-        return mock(NdflPersonService.class);
     }
 
     @Override
