@@ -58,7 +58,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         List<Long> personIds = new ArrayList<Long>();
 
         // 1. Суммируем Авансы в рамках операции
-        // Мапа <Номер_операции, Сумма_аванса>
+        // Мапа <Идентификатор_операции, Сумма_аванса>
         Map<Long, Long> mapSumPrepayment = new HashMap<Long, Long>();
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonDao.findPrepaymentsByDeclarationDataId(declarationDataId);
         for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
@@ -71,7 +71,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
             mapSumPrepayment.put(ndflPersonPrepayment.getOperationId(), summPrepayment);
         }
 
-        // Мапа <Номер_операции, Суммы>
+        // Мапа <Идентификатор_операции, Суммы>
         // Мапа <Ставка, Мапа>
         Map<Integer, Map> mapTaxRate = new HashMap<Integer, Map>();
 
@@ -153,39 +153,58 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId, Date calendarStartDate, Date endDate) {
         /*
-        Метод возвращает просуммированные доходы и налоги, группируя их идентификатору операции.
-        Показатели рассчитываются только за последний квартал отчетного периода.
+        Для заполнения СумДата будем учитывать только записи, в которых выполнены условия:
+        "Дата удержания налога" и "Дата платежного поручения" должны быть >= даты начала последнего квартала отчетного периода.
+        "Дата удержания налога" и "Дата платежного поручения" <= даты окончания последнего квартала отчетного периода.
+
+        Из выбранных будем учитывать только те записи, в которых обязательно заполнено одно из полей: либо "Дата начисления дохода", либо "Сумма налога удержанная".
+        Одновременно заполненных полей "Дата начисления дохода" и "Сумма налога удержанная" в одной и той же записи быть не может.
+        Но могут быть записи, в которых не заполнены оба поля "Дата начисления дохода" и "Сумма налога удержанная" - такие записи мы учитывать не будем.
+
+        Выбранные записи группируем по парам на основании ID операции.
+
+        В каждой паре поля будут заполнятся следующим образом:
+        "Дата начисления дохода" берем только из той записи пары, в которой оно заполнено.
+        "Дата налога" берем из той записи пары, в которой заполнено поле "Сумма налога удержанная".
+        "Срок перечисления налога в бюджет" берем только из той записи пары, в которой заполнено поле "Сумма налога удержанная".
+        "Сумма выплаченного дохода" суммируем для всех записей пары.
+        "Сумма налога удержанная" суммируем для всех записей пары.
          */
-        // Мапа <Номер_операции, Суммы_по_датам>
+        // Мапа <Идентификатор_операции, Суммы_по_датам>
         Map<Long, NdflPersonIncomeByDate> mapNdflPersonIncome = new HashMap<Long, NdflPersonIncomeByDate>();
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, calendarStartDate, endDate);
 
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
-            // todo oshelepaev Учитываем только те записи, у которых заполнено поле "Сумма налога удержанная"
-//            if (ndflPersonIncome.getWithholdingTax() != null) {
+            // Учитываем только те записи, у которых заполнено либо "Дата начисления дохода", либо "Сумма налога удержанная"
+            if (ndflPersonIncome.getIncomeAccruedDate() != null || ndflPersonIncome.getWithholdingTax() != null) {
                 NdflPersonIncomeByDate ndflPersonIncomeByDate = mapNdflPersonIncome.get(ndflPersonIncome.getOperationId());
                 if (ndflPersonIncomeByDate == null) {
                     ndflPersonIncomeByDate = new NdflPersonIncomeByDate();
-                    ndflPersonIncomeByDate.setIncomeAccruedDate(ndflPersonIncome.getIncomeAccruedDate());
-                    ndflPersonIncomeByDate.setTaxDate(ndflPersonIncome.getTaxDate());
-                    ndflPersonIncomeByDate.setTaxTransferDate(ndflPersonIncome.getTaxTransferDate());
                     ndflPersonIncomeByDate.setIncomePayoutSumm(ndflPersonIncome.getIncomePayoutSumm());
                     ndflPersonIncomeByDate.setWithholdingTax(ndflPersonIncome.getWithholdingTax());
                     mapNdflPersonIncome.put(ndflPersonIncome.getOperationId(), ndflPersonIncomeByDate);
                 } else {
-                    if (ndflPersonIncomeByDate.getIncomeAccruedDate() == null) {
-                        ndflPersonIncomeByDate.setIncomeAccruedDate(ndflPersonIncome.getIncomeAccruedDate());
-                    }
-                    if (ndflPersonIncomeByDate.getTaxDate() == null) {
-                        ndflPersonIncomeByDate.setTaxDate(ndflPersonIncome.getTaxDate());
-                    }
-                    if (ndflPersonIncomeByDate.getTaxTransferDate() != null) {
-                        ndflPersonIncomeByDate.setTaxTransferDate(ndflPersonIncome.getTaxTransferDate());
-                    }
                     ndflPersonIncomeByDate.addIncomePayoutSumm(ndflPersonIncome.getIncomePayoutSumm());
                     ndflPersonIncomeByDate.addWithholdingTax(ndflPersonIncome.getWithholdingTax());
                 }
-//            }
+
+                // Если заполнено поле "Дата начисления дохода", то будем учитывать это поле
+                if (ndflPersonIncome.getIncomeAccruedDate() != null) {
+                    if (ndflPersonIncomeByDate.getIncomeAccruedDate() == null) {
+                        ndflPersonIncomeByDate.setIncomeAccruedDate(ndflPersonIncome.getIncomeAccruedDate());
+                    }
+                }
+
+                // Если заполнено поле "Сумма налога удержанная", то учитываем поля "Дата удержания налога" и "Срок (дата) перечисления налога"
+                if (ndflPersonIncome.getWithholdingTax() != null) {
+                    if (ndflPersonIncomeByDate.getTaxDate() == null) {
+                        ndflPersonIncomeByDate.setTaxDate(ndflPersonIncome.getTaxDate());
+                    }
+                    if (ndflPersonIncomeByDate.getTaxTransferDate() == null) {
+                        ndflPersonIncomeByDate.setTaxTransferDate(ndflPersonIncome.getTaxTransferDate());
+                    }
+                }
+            }
         }
         return new ArrayList<NdflPersonIncomeByDate>(mapNdflPersonIncome.values());
     }
