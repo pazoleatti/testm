@@ -54,6 +54,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final long ASNU_ID = 1000;
     private static final String KPP = "123456789";
+    private static final String OKTMO = "12345678";
     private static final String CODE_ORG = "1234";
 
     @Override
@@ -67,6 +68,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         declarationData.setAsnuId(ASNU_ID);
         declarationData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         declarationData.setKpp(KPP);
+        declarationData.setOktmo(OKTMO);
         declarationData.setTaxOrganCode(CODE_ORG);
         return declarationData;
     }

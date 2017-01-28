@@ -52,8 +52,10 @@ public class NdflPersonIncomeByRate {
         this.incomeAccruedSumm = incomeAccruedSumm;
     }
     public void addIncomeAccruedSumm(BigDecimal incomeAccruedSumm) {
-        this.incomeAccruedSumm = this.incomeAccruedSumm == null ? incomeAccruedSumm :
-                this.incomeAccruedSumm.add(incomeAccruedSumm);
+        if (incomeAccruedSumm != null) {
+            this.incomeAccruedSumm = this.incomeAccruedSumm == null ? incomeAccruedSumm :
+                    this.incomeAccruedSumm.add(incomeAccruedSumm);
+        }
     }
 
     public BigDecimal getIncomeAccruedSummDiv() {
@@ -63,8 +65,10 @@ public class NdflPersonIncomeByRate {
         this.incomeAccruedSummDiv = incomeAccruedSummDiv;
     }
     public void addIncomeAccruedSummDiv(BigDecimal incomeAccruedSummDiv) {
-        this.incomeAccruedSummDiv = this.incomeAccruedSummDiv == null ? incomeAccruedSummDiv :
-                this.incomeAccruedSummDiv.add(incomeAccruedSummDiv);
+        if (incomeAccruedSummDiv != null) {
+            this.incomeAccruedSummDiv = this.incomeAccruedSummDiv == null ? incomeAccruedSummDiv :
+                    this.incomeAccruedSummDiv.add(incomeAccruedSummDiv);
+        }
     }
 
     public BigDecimal getTotalDeductionsSumm() {
@@ -74,8 +78,10 @@ public class NdflPersonIncomeByRate {
         this.totalDeductionsSumm = totalDeductionsSumm;
     }
     public void addTotalDeductionsSumm(BigDecimal totalDeductionsSumm) {
-        this.totalDeductionsSumm = this.totalDeductionsSumm == null ? totalDeductionsSumm :
-                this.totalDeductionsSumm.add(totalDeductionsSumm);
+        if (totalDeductionsSumm != null) {
+            this.totalDeductionsSumm = this.totalDeductionsSumm == null ? totalDeductionsSumm :
+                    this.totalDeductionsSumm.add(totalDeductionsSumm);
+        }
     }
 
     public Long getCalculatedTax() {
@@ -85,8 +91,10 @@ public class NdflPersonIncomeByRate {
         this.calculatedTax = calculatedTax;
     }
     public void addCalculatedTax(Long calculatedTax) {
-        this.calculatedTax = this.calculatedTax == null ? calculatedTax :
-                this.calculatedTax + calculatedTax;
+        if (calculatedTax != null) {
+            this.calculatedTax = this.calculatedTax == null ? calculatedTax :
+                    this.calculatedTax + calculatedTax;
+        }
     }
 
     public Long getCalculatedTaxDiv() {
@@ -96,8 +104,10 @@ public class NdflPersonIncomeByRate {
         this.calculatedTaxDiv = calculatedTaxDiv;
     }
     public void addCalculatedTaxDiv(Long calculatedTaxDiv) {
-        this.calculatedTaxDiv = this.calculatedTaxDiv == null ? calculatedTaxDiv :
-                this.calculatedTaxDiv + calculatedTaxDiv;
+        if (calculatedTaxDiv != null) {
+            this.calculatedTaxDiv = this.calculatedTaxDiv == null ? calculatedTaxDiv :
+                    this.calculatedTaxDiv + calculatedTaxDiv;
+        }
     }
 
     public Long getPrepaymentSum() {
@@ -107,7 +117,9 @@ public class NdflPersonIncomeByRate {
         this.prepaymentSum = prepaymentSum;
     }
     public void addPrepaymentSum(Long prepaymentSum) {
-        this.prepaymentSum = this.prepaymentSum == null ? prepaymentSum :
-                this.prepaymentSum + prepaymentSum;
+        if (prepaymentSum != null) {
+            this.prepaymentSum = this.prepaymentSum == null ? prepaymentSum :
+                    this.prepaymentSum + prepaymentSum;
+        }
     }
 }
