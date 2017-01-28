@@ -421,14 +421,15 @@ create sequence seq_declaration_template start with 10000;
 
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_data (
-  id                          number(18)  not null,
-  declaration_template_id     number(9)   not null,
-  tax_organ_code              varchar2(4),
-  kpp                         varchar2(9),
-  department_report_period_id number(18)  not null,
-  asnu_id                     number(9),
-  note                        varchar2(512),
-  state                       number(1)   default 1 not null,
+  id                          number(18) not null,
+  declaration_template_id     number(9) not null,
+  tax_organ_code              varchar2(4 char),
+  kpp                         varchar2(9 char),
+  oktmo                       varchar2(11 char),
+  department_report_period_id number(18) not null,
+  asnu_id                     number(18),
+  note                        varchar2(512  char),
+  state                       number(1) default 1 not null,
   file_name                   varchar2(255 char)
 );
 
@@ -438,6 +439,7 @@ comment on column declaration_data.id is 'Идентификатор (перви
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
 comment on column declaration_data.tax_organ_code is 'Налоговый орган';
 comment on column declaration_data.kpp is 'КПП';
+comment on column declaration_data.oktmo is 'ОКТМО';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
 comment on column declaration_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
@@ -938,13 +940,13 @@ comment on column form_data_consolidation.target_form_data_id is 'Идентиф
 
 create table declaration_data_consolidation
 (
-  source_form_data_id        number(9),
-  target_declaration_data_id number(9) not null
+  target_declaration_data_id number(18) not null,
+  source_declaration_data_id number(18)
 );
 
 comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм в декларации';
-comment on column declaration_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
-comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор декларации приемника';
+comment on column declaration_data_consolidation.source_declaration_data_id is 'Идентификатор НФ источника';
+comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор НФ приемника';
 
 --------------------------------------------------------------------------------------------------------
 create table log_system_report
@@ -2228,7 +2230,7 @@ create table ref_book_id_doc
   doc_number varchar2(25 char) not null,
   issued_by varchar2(255 char),
   issued_date date,
-  inc_rep number(1)
+  inc_rep number(1) default 0 not null
 );
 
 comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';

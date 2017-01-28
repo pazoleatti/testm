@@ -38,6 +38,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Long refoundTax;
     // Срок (дата) перечисления налога
     private Date taxTransferDate;
+    // Дата платежного поручения
     private Date paymentDate;
     private String paymentNumber;
     private Integer taxSumm;

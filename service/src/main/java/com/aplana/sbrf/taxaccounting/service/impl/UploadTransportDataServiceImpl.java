@@ -508,7 +508,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 return null;
             }
 
-            DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, asnuId, guid);
+            DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, null, asnuId, guid);
 
             // Экземпляр уже есть и не в статусе «Создана»
             if (declarationData != null) {

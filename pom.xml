@@ -24,7 +24,6 @@
 		<module>scheduler</module>
         <module>gwt-widget</module>
         <module>async</module>
-        <module>common</module>
         <module>script-test</module>
         <module>schematron</module>
     </modules>

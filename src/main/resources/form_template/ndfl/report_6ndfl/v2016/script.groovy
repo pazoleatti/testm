@@ -42,18 +42,19 @@ def buildXml() {
     // Код периода
     def periodCode = getRefBookValue(8, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
 
-    // Признак лица, подписавшего документ
-    def signatoryId = getRefBookValue(35, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
-
     // Коды представления налоговой декларации по месту нахождения (учёта)
     def taxPlaceTypeCode = getRefBookValue(2, departmentParamIncomeRow?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue
 
-    def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id);
+    // Признак лица, подписавшего документ
+    def signatoryId = getRefBookValue(35, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
+
+    // Учитывать будем только информацию о доходах/налогах только за отчетный период
+    def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id, reportPeriod.startDate, reportPeriod.endDate);
     def ndflPersonIncomeByRateList = ndflPersonIncomeCommonValue?.ndflPersonIncomeByRateList
-    def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id)
+    // Учитывать будем только информацию о доходах/налогах за последний квартал отчетного периода
+    def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate)
 
     def builder = new MarkupBuilder(xml)
-    builder.mkp.xmlDeclaration(version: "1.0", encoding: "utf-8")
     builder.Файл(
             ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, declarationData.kpp),
             ВерсПрог: applicationVersion,
@@ -64,14 +65,16 @@ def buildXml() {
                 ДатаДок: new Date().format(DATE_FORMAT_DOT),
                 Период: getPeriod(departmentParamIncomeRow, periodCode),
                 ОтчетГод: reportPeriod.taxPeriod.year,
-                КодНО: declarationData.taxOrganCode,
+                КодНО: departmentParamIncomeRow?.TAX_ORGAN_CODE?.value,
                 НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 ПоМесту: taxPlaceTypeCode
         ) {
-            СвНП(
-                    ОКТМО: departmentParamIncomeRow.OKTMO,
-                    Тлф: departmentParamIncomeRow.PHONE
-            ){
+            def svNP = ["ОКТМО": declarationData.oktmo]
+            // Атрибут Тлф необязателен
+            if (departmentParamIncomeRow.PHONE && !departmentParamIncomeRow.PHONE.empty) {
+                svNP.put("Тлф", departmentParamIncomeRow.PHONE)
+            }
+            СвНП(svNP){
                 НПЮЛ(
                         НаимОрг: departmentParamIncomeRow.NAME,
                         ИННЮЛ: departmentParam.INN,
@@ -81,18 +84,21 @@ def buildXml() {
             Подписант(
                     ПрПодп: signatoryId
             ){
-                ФИО(
-                        Фамилия: departmentParamIncomeRow.SIGNATORY_SURNAME,
-                        Имя: departmentParamIncomeRow.SIGNATORY_FIRSTNAME,
-                        Отчество: departmentParamIncomeRow.SIGNATORY_LASTNAME
-                ){}
-                if (signatoryId == 1) {
-                    СвПред(
-                            НаимДок: departmentParamIncomeRow.APPROVE_DOC_NAME,
-                            НаимОрг: departmentParamIncomeRow.APPROVE_ORG_NAME
-                    )
-                } else {
-                    СвПред()
+                // Узел ФИО необязателен
+                if (departmentParamIncomeRow.SIGNATORY_SURNAME && !departmentParamIncomeRow.SIGNATORY_SURNAME.empty) {
+                    def fio = ["Фамилия": departmentParamIncomeRow.SIGNATORY_SURNAME, "Имя": departmentParamIncomeRow.SIGNATORY_FIRSTNAME]
+                    // Атрибут Отчество необязателен
+                    if (departmentParamIncomeRow.SIGNATORY_LASTNAME && !departmentParamIncomeRow.SIGNATORY_LASTNAME.empty) {
+                        fio.put("Отчество", departmentParamIncomeRow.SIGNATORY_LASTNAME)
+                    }
+                    ФИО(fio){}
+                }
+                if (signatoryId == 2) {
+                    def svPred = ["НаимДок": departmentParamIncomeRow.APPROVE_DOC_NAME]
+                    if (departmentParamIncomeRow.APPROVE_ORG_NAME && !departmentParamIncomeRow.APPROVE_ORG_NAME.empty) {
+                        svPred.put("НаимОрг", departmentParamIncomeRow.APPROVE_ORG_NAME)
+                    }
+                    СвПред(svPred){}
                 }
             }
             НДФЛ6(){
@@ -103,32 +109,59 @@ def buildXml() {
                         ВозврНалИт: ndflPersonIncomeCommonValue?.refoundTax?.value
                 ) {
                     ndflPersonIncomeByRateList.each { ndflPersonIncomeByRate ->
+                        if (ndflPersonIncomeByRate.incomeAccruedSumm == null) {
+                            ndflPersonIncomeByRate.incomeAccruedSumm = 0
+                        }
+                        if (ndflPersonIncomeByRate.incomeAccruedSummDiv == null) {
+                            ndflPersonIncomeByRate.incomeAccruedSummDiv = 0
+                        }
+                        if (ndflPersonIncomeByRate.totalDeductionsSumm == null) {
+                            ndflPersonIncomeByRate.totalDeductionsSumm = 0
+                        }
+                        if (ndflPersonIncomeByRate.calculatedTax == null) {
+                            ndflPersonIncomeByRate.calculatedTax = 0
+                        }
+                        if (ndflPersonIncomeByRate.calculatedTaxDiv == null) {
+                            ndflPersonIncomeByRate.calculatedTaxDiv = 0
+                        }
+                        if (ndflPersonIncomeByRate.prepaymentSum == null) {
+                            ndflPersonIncomeByRate.prepaymentSum = 0
+                        }
                         СумСтавка (
                             Ставка: ndflPersonIncomeByRate.taxRate,
-                            НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 0),
-                            НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 0),
-                            ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 0),
+                            НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 2),
+                            НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 2),
+                            ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
                             ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
                             ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
-                            АвансПлат: ScriptUtils.round(ndflPersonIncomeByRate.prepaymentSum, 0)
+                            АвансПлат: ndflPersonIncomeByRate.prepaymentSum
                         ) {}
                     }
                 }
-                ДохНал() {
-                    ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
-                        СумДата (
-                            ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format(DATE_FORMAT_DOT),
-                            ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format(DATE_FORMAT_DOT),
-                            СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format(DATE_FORMAT_DOT),
-                            ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 0),
-                            УдержНал: ndflPersonIncomeByDate.withholdingTax
-                        ) {}
+                // Узел ДохНал необязателен
+                if (ndflPersonIncomeByDateList.size() > 0) {
+                    ДохНал() {
+                        ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
+                            if (ndflPersonIncomeByDate.incomePayoutSumm == null) {
+                                ndflPersonIncomeByDate.incomePayoutSumm = 0
+                            }
+                            if (ndflPersonIncomeByDate.withholdingTax == null) {
+                                ndflPersonIncomeByDate.withholdingTax = 0
+                            }
+                            СумДата(
+                                    ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format(DATE_FORMAT_DOT),
+                                    ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format(DATE_FORMAT_DOT),
+                                    СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format(DATE_FORMAT_DOT),
+                                    ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 2),
+                                    УдержНал: ndflPersonIncomeByDate.withholdingTax
+                            ) {}
+                        }
                     }
                 }
             }
         }
     }
-    println(xml)
+//    println(xml)
 }
 
 /**
@@ -157,7 +190,7 @@ def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP) {
  * Период
  */
 def getPeriod(def departmentParamIncomeRow, def periodCode) {
-    if (departmentParamIncomeRow?.REORG_FORM_CODE?.value) {
+    if (departmentParamIncomeRow.REORG_FORM_CODE && !departmentParamIncomeRow.REORG_FORM_CODE.empty) {
         def result;
         switch (periodCode) {
             case "21":
@@ -207,7 +240,7 @@ def getDepartmentParam() {
  */
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamTable == null) {
-        def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
+        def filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(951).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения")

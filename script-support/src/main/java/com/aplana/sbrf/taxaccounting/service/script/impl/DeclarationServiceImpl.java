@@ -87,8 +87,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode, Long asnuId, String guid) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, taxOrganCode, asnuId, guid);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String guid) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, oktmo, taxOrganCode, asnuId, guid);
     }
 
     @Override
@@ -207,7 +207,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public boolean checkUnique(DeclarationData declarationData, Logger logger) {
         DeclarationTemplate template = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
         DeclarationData existingDeclarationData = declarationDataDao.find(template.getType().getId(),
-                declarationData.getDepartmentReportPeriodId(), declarationData.getKpp(), declarationData.getTaxOrganCode(),
+                declarationData.getDepartmentReportPeriodId(), declarationData.getKpp(), declarationData.getOktmo(), declarationData.getTaxOrganCode(),
                 declarationData.getAsnuId(), declarationData.getFileName());
         // форма найдена
         if (existingDeclarationData != null) {
@@ -232,7 +232,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+    public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger) {
         return sourceService.getDeclarationSourcesInfo(declaration, light, excludeIfNotExist, stateRestriction, userInfo, logger);
     }
 

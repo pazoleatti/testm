@@ -137,9 +137,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
     public static final String TAG_FILE = "Файл";
-    public static final String TAG_DOCUMENT = "Документ";
-    public static final String ATTR_FILE_ID = "ИдФайл";
-    public static final String ATTR_DOC_DATE = "ДатаДок";
+	public static final String TAG_DOCUMENT = "Документ";
+	public static final String ATTR_FILE_ID = "ИдФайл";
+	public static final String ATTR_DOC_DATE = "ДатаДок";
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
     public static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"%s%s для макета!";
@@ -151,7 +151,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private static final Date MAX_DATE;
     private static final Calendar CALENDAR = Calendar.getInstance();
-
     static {
         CALENDAR.clear();
         CALENDAR.set(9999, Calendar.DECEMBER, 31);
@@ -168,7 +167,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
 
-        public Map<String, String> getValues() {
+        public Map<String, String>  getValues() {
             return values;
         }
 
@@ -188,7 +187,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, Long asunId, String fileName) {
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -208,16 +207,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         taxOrganKpp != null
                                 ? ", КПП: \"" + taxOrganKpp + "\""
                                 : "",
+						oktmo != null
+								? ", ОКТМО: \"" + oktmo + "\""
+								: "",
                         asunId != null
                                 ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
                                 : "",
                         fileName != null
                                 ? ", Имя файла: \"" + fileName + "\""
                                 : "")
-        ) == null) {
+                ) == null) {
             //Если блокировка успешно установлена
             try {
-                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, taxOrganCode, asunId, fileName);
+                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, oktmo, taxOrganCode, asunId, fileName);
                 if (declarationData != null) {
                     String msg = (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ?
                             "Уведомление с заданными параметрами уже существует" :
@@ -241,6 +243,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setDeclarationTemplateId(declarationTemplateId);
                 newDeclaration.setTaxOrganCode(taxOrganCode);
                 newDeclaration.setKpp(taxOrganKpp);
+				newDeclaration.setOktmo(oktmo);
                 newDeclaration.setAsnuId(asunId);
                 newDeclaration.setFileName(fileName);
 
@@ -283,19 +286,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
 
         //3. обновляет записи о консолидации
-        ArrayList<Long> formDataIds = new ArrayList<Long>();
-        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, WorkflowState.ACCEPTED, userInfo, logger)) {
-            formDataIds.add(relation.getFormDataId());
+        ArrayList<Long> declarationDataIds = new ArrayList<Long>();
+        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, State.ACCEPTED, userInfo, logger)){
+            declarationDataIds.add(relation.getFormDataId());
         }
 
-        //TODO 19.01.2017 Доработать таблицу DECLARATION_DATA_CONSOLIDATION, добавить столбец для хранения идентификатора декларации источника
         //Обновление информации о консолидации.
-        //sourceService.deleteDeclarationConsolidateInfo(id);
-        //sourceService.addDeclarationConsolidationInfo(id, formDataIds);
-
+        sourceService.deleteDeclarationConsolidateInfo(id);
+        sourceService.addDeclarationConsolidationInfo(id, declarationDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
-        auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, null, "Декларация обновлена", null);
+        auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Декларация обновлена", null);
 
     }
 
@@ -370,7 +371,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
             declarationDataDao.delete(id);
 
-            auditService.add(FormDataEvent.DELETE, userInfo, declarationData, null, "Декларация удалена", null);
+            auditService.add(FormDataEvent.DELETE , userInfo, declarationData, null, "Декларация удалена", null);
         } else {
             if (lockData == null) lockData = lockDataAccept;
             if (lockData == null) lockData = lockDataCheck;
@@ -394,7 +395,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             lockStateLogger.updateState("Проверка форм-источников");
             checkSources(declarationData, logger, userInfo);
             lockStateLogger.updateState("Проверка данных декларации/уведомления");
-            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, scriptLogger, null);
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , scriptLogger, null);
         } finally {
             logger.getEntries().addAll(scriptLogger.getEntries());
         }
@@ -402,11 +403,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException();
         }
         try {
-            validateDeclaration(userInfo, declarationData, validateLogger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, lockStateLogger);
+            validateDeclaration(userInfo, declarationData, validateLogger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , lockStateLogger);
         } finally {
             logger.getEntries().addAll(validateLogger.getEntries());
         }
-        if (logger.containsLevel(LogLevel.ERROR)) {
+        if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceException();
         }
 
@@ -445,6 +446,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         declarationData.setState(State.CREATED);
+        sourceService.updateDDConsolidation(declarationData.getId());
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
         auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
@@ -614,14 +616,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void setPdfDataBlobs(Logger logger,
-                                DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+                                     DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         LOG.info(String.format("Получение данных декларации %s", declarationData.getId()));
         stateLogger.updateState("Получение данных декларации");
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC);
         if (xmlUuid != null) {
             File pdfFile = null;
             JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
-            try {
+            try {                
                 LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
                 stateLogger.updateState("Заполнение Jasper-макета");
                 JasperPrint jasperPrint = createJasperReport(declarationData, jrSwapFile, userInfo);
@@ -759,7 +761,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Получение имени файла записанного в xml
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
-            SAXHandler handler = new SAXHandler(new HashMap<String, String>() {{
+            SAXHandler handler = new SAXHandler(new HashMap<String, String>(){{
                 put(TAG_FILE, ATTR_FILE_ID);
                 put(TAG_DOCUMENT, ATTR_DOC_DATE);
             }});
@@ -775,7 +777,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 zipOutFile = File.createTempFile("xml", ".zip");
                 FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
                 ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-                ZipEntry zipEntry = new ZipEntry(decName + ".xml");
+                ZipEntry zipEntry = new ZipEntry(decName+".xml");
                 zos.putNextEntry(zipEntry);
                 FileInputStream fi = new FileInputStream(xmlFile);
 
@@ -828,9 +830,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     /**
      * Метод передающий управление на проверку декларации сторонней утилите
-     *
      * @param isErrorFatal true-если ошибки при проверке фатальные
-     * @param xmlFile      файл декларации
+     * @param xmlFile файл декларации
      */
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                                      FormDataEvent operation, File xmlFile, LockStateLogger stateLogger) {
@@ -943,7 +944,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private String saveJPBlobData(JasperPrint jasperPrint) throws IOException {
         File jasperPrintFile = null;
         try {
-            jasperPrintFile = File.createTempFile("report", ".jasper");
+            jasperPrintFile = File.createTempFile("report",".jasper");
             FileOutputStream fileOutputStream = null;
             try {
                 fileOutputStream = new FileOutputStream(jasperPrintFile);
@@ -984,8 +985,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String fileName) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode, asnuId, fileName);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, oktmo, taxOrganCode, asnuId, fileName);
     }
 
     @Override
@@ -1052,8 +1053,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 userInfo.getUser());
     }
 
-    private void checkLock(LockData lockData, TAUser user) {
-        if (lockData != null && lockData.getUserId() != user.getId()) {
+    private void checkLock(LockData lockData, TAUser user){
+        if (lockData!= null && lockData.getUserId() != user.getId()) {
             TAUser lockUser = taUserService.getUser(lockData.getUserId());
             throw new ServiceException(String.format(LockDataService.LOCK_DATA, lockUser.getName(), lockUser.getId()));
         }
@@ -1069,7 +1070,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (ddReportType.isSubreport()) {
                 DeclarationData declarationData = declarationDataDao.get(declarationDataId);
                 List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
-                for (DeclarationSubreport subreport : subreports) {
+                for(DeclarationSubreport subreport : subreports) {
                     ddReportType.setSubreport(subreport);
                     LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
                     if (lock != null)
@@ -1086,7 +1087,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     /**
      * Список операции, по которым требуется удалить блокировку
-     *
      * @param reportType
      * @return
      */
@@ -1113,7 +1113,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         for (DeclarationDataReportType ddReportType : ddReportTypes) {
             if (ddReportType.isSubreport()) {
                 List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
-                for (DeclarationSubreport subreport : subreports) {
+                for(DeclarationSubreport subreport : subreports) {
                     ddReportType.setSubreport(subreport);
                     exist |= checkExistTask(declarationDataId, ddReportType, declarationTemplate.getType().getTaxType(), logger);
                 }
@@ -1152,7 +1152,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             List<String> taskKeyList = new ArrayList<String>();
             if (ddReportType.isSubreport()) {
                 List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
-                for (DeclarationSubreport subreport : subreports) {
+                for(DeclarationSubreport subreport: subreports) {
                     ddReportType.setSubreport(subreport);
                     taskKeyList.add(generateAsyncTaskKey(declarationDataId, ddReportType));
                 }
@@ -1175,7 +1175,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void cleanBlobs(Collection<Long> ids, List<DeclarationDataReportType> reportTypes) {
-        if (ids.isEmpty()) {
+        if (ids.isEmpty()){
             return;
         }
         reportService.deleteDec(ids, reportTypes);
@@ -1185,7 +1185,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger) {
         List<Integer> ddIds = declarationDataDao.findDDIdsByRangeInReportPeriod(decTemplateId,
                 startDate, endDate != null ? endDate : MAX_DATE);
-        for (Integer id : ddIds) {
+        for (Integer id : ddIds){
             DeclarationData dd = declarationDataDao.get(id);
             ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
@@ -1289,14 +1289,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case CHECK_DEC:
                 String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
                 if (uuidXml != null) {
-                    return (long) Math.ceil(blobDataService.getLength(uuidXml) / 1024.);
+                    return (long)Math.ceil(blobDataService.getLength(uuidXml) / 1024.);
                 } else {
                     return null;
                 }
             case XML_DEC:
                 long cellCountSource = 0;
                 DeclarationData declarationData = get(declarationDataId, userInfo);
-                for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, new Logger())) {
+                for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, new Logger())){
                     if (relation.isCreated() && relation.getState() == WorkflowState.ACCEPTED) {
                         FormData formData = formDataDao.getWithoutRows(relation.getFormDataId());
                         int rowCountSource = dataRowDao.getRowCount(formData);
@@ -1318,42 +1318,42 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private void checkSources(DeclarationData dd, Logger logger, TAUserInfo userInfo) {
+    private void checkSources(DeclarationData dd, Logger logger, TAUserInfo userInfo){
         boolean consolidationOk = true;
         //Проверка на неактуальные консолидированные данные  3А
-        if (!sourceService.isDDConsolidationTopical(dd.getId())) {
+        if (!sourceService.isDDConsolidationTopical(dd.getId())){
             logger.error(CALCULATION_NOT_TOPICAL);
             consolidationOk = false;
         } else {
             //Проверка того, что консолидация вообще когда то выполнялась для всех источников
             List<Relation> relations = sourceService.getDeclarationSourcesInfo(dd, true, false, null, userInfo, logger);
-            for (Relation relation : relations) {
-                if (!relation.isCreated()) {
+            for (Relation relation : relations){
+                if (!relation.isCreated()){
                     consolidationOk = false;
                     logger.warn(
                             NOT_EXIST_SOURCE_DECLARATION_WARNING,
                             relation.getFullDepartmentName(),
-                            relation.getFormTypeName(),
-                            relation.getFormDataKind().getTitle(),
-                            relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                            relation.getDeclarationTemplate().getName(),
+                            relation.getDeclarationTemplate().getDeclarationFormKind().getTitle(),
+                            relation.getPeriodName(),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     sdf.get().format(relation.getCorrectionDate())) : "");
-                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getFormDataId())) {
+                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getDeclarationDataId())){
                     consolidationOk = false;
                     logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
                             relation.getFullDepartmentName(),
-                            relation.getFormTypeName(),
-                            relation.getFormDataKind().getTitle(),
-                            relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                            relation.getDeclarationTemplate().getName(),
+                            relation.getDeclarationTemplate().getDeclarationFormKind().getTitle(),
+                            relation.getPeriodName(),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     sdf.get().format(relation.getCorrectionDate())) : "",
-                            relation.getState().getTitle());
+                            relation.getDeclarationState().getTitle());
                 }
             }
 
-            if (!relations.isEmpty() && consolidationOk) {
+            if (!relations.isEmpty() && consolidationOk){
                 logger.info("Консолидация выполнена из всех форм-источников.");
             }
         }
@@ -1387,7 +1387,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 return false;
             }
             if (params.containsKey("isVisiblePDF") && params.get("isVisiblePDF") instanceof Boolean) {
-                return (Boolean) (params.get("isVisiblePDF"));
+                return (Boolean)(params.get("isVisiblePDF"));
             } else {
                 return true;
             }
@@ -1396,7 +1396,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static String getFileName(String filename) {
+    private static String getFileName(String filename){
         int dotPos = filename.lastIndexOf('.');
         if (dotPos < 0) {
             return filename;

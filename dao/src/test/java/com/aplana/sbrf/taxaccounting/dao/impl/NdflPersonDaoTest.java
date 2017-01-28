@@ -211,7 +211,7 @@ public class NdflPersonDaoTest {
         personPrepayment.setRowNum(row);
         personPrepayment.setOperationId(11111L);
 
-        personPrepayment.setSumm(new BigDecimal("1999999")); //по xsd это поле xs:integer
+        personPrepayment.setSumm(1999999L);
         personPrepayment.setNotifNum("123-456-000");
         personPrepayment.setNotifDate(toDate("01.01.2016"));
         personPrepayment.setNotifSource("AAA");

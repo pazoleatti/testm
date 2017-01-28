@@ -307,21 +307,25 @@ public class DeclarationDataServiceImplTest {
 
 
         ArrayList<Relation> sources = new ArrayList<Relation>();
+        DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
+        declarationTemplate1.setName("Тестовый макет");
+        declarationTemplate1.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
         Relation r1 = new Relation();
         r1.setFullDepartmentName("Тестовое подразделение");
-        r1.setFormTypeName("Тестовый макет");
-        r1.setFormDataKind(FormDataKind.PRIMARY);
+        r1.setDeclarationTemplate(declarationTemplate1);
         r1.setPeriodName("1 квартал");
         r1.setYear(2015);
         r1.setCorrectionDate(new Date(0));
         r1.setCreated(true);
-        r1.setFormDataId(11L);
-        r1.setState(WorkflowState.ACCEPTED);
+        r1.setDeclarationDataId(11L);
+        r1.setDeclarationState(State.ACCEPTED);
 
         Relation r2 = new Relation();
+        DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
+        declarationTemplate2.setName("Тестовый макет");
+        declarationTemplate2.setDeclarationFormKind(DeclarationFormKind.CONSOLIDATED);
         r2.setFullDepartmentName("Тестовое подразделение");
-        r2.setFormTypeName("Тестовый макет");
-        r2.setFormDataKind(FormDataKind.CONSOLIDATED);
+        r2.setDeclarationTemplate(declarationTemplate2);
         r2.setPeriodName("1 квартал");
         r2.setYear(2015);
         r2.setCorrectionDate(new Date(0));
@@ -556,7 +560,7 @@ public class DeclarationDataServiceImplTest {
         r2.setCreated(false);
         sources.add(r1);
         sources.add(r2);
-        when(sourceService.getDeclarationSourcesInfo(eq(declarationData), anyBoolean(), anyBoolean(), any(WorkflowState.class), eq(userInfo), any(Logger.class))).thenReturn(sources);
+        when(sourceService.getDeclarationSourcesInfo(eq(declarationData), anyBoolean(), anyBoolean(), any(State.class), eq(userInfo), any(Logger.class))).thenReturn(sources);
 
         DeclarationDataScriptingService declarationDataScriptingService = mock(DeclarationDataScriptingService.class);
         when(declarationDataScriptingService.executeScript(

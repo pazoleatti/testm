@@ -3,9 +3,9 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -13,14 +13,12 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Универсальный провайдер данных для редактируемых версионированных справочников, хранящихся в отдельных таблицах.
@@ -163,10 +161,15 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
         return dao.getRecordVersionsCount(getRefBook().getTableName(), uniqueRecordId);
     }
 
+    private void throwUnsupportedOperation(){
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public List<Long> createRecordVersion(@NotNull Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
-        throw new UnsupportedOperationException();
-        /*if (logger.getTaUserInfo() == null) {
+        throwUnsupportedOperation();
+
+        if (logger.getTaUserInfo() == null) {
             throw new ServiceException("Текущий пользователь не установлен!");
         }
         //Устанавливаем блокировку на тевущий справочник
@@ -212,19 +215,19 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
         } else {
             throw new ServiceLoggerException(String.format(LOCK_MESSAGE, getRefBook().getName()),
                     logEntryService.save(logger.getEntries()));
-        }*/
+        }
     }
 
     @Override
     public List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
-        throw new UnsupportedOperationException();
-        /*
+        throwUnsupportedOperation();
+
         try {
             List<Long> excludedVersionEndRecords = new ArrayList<Long>();
             //Признак того, что для проверок дата окончания была изменена (была использована дата начала следующей версии)
             boolean dateToChangedForChecks = false;
 
-            if (!refBook.isVersioned()) {
+            if (!getRefBook().isVersioned()) {
                 //Устанавливаем минимальную дату
                 versionFrom = new Date(0L);
             }
@@ -238,30 +241,17 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
             }
 
             //Проверка корректности
-            helper.checkCorrectness(logger, refBook, null, versionFrom, records);
+            helper.checkCorrectness(logger, getRefBook(), null, versionFrom, records);
 
-            if (!getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
-                    !getRefBookId().equals(RefBook.DEPARTMENT_CONFIG_LAND) &&
-                    !getRefBookId().equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
-                    !getRefBookId().equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) &&
-                    !getRefBookId().equals(RefBook.WithTable.INCOME.getTableRefBookId()) &&
-                    !getRefBookId().equals(RefBook.WithTable.LAND.getTableRefBookId())
-                    ) {
-
-                if (refBook.isVersioned()) {
-                    for (RefBookRecord record : records) {
-                        //Проверка пересечения версий
-                        if (record.getRecordId() != null) {
-                            boolean needToCreateFakeVersion = helper.crossVersionsProcessing(refBookDao.checkCrossVersions(getRefBookId(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
-                                    refBook, versionFrom, record.getVersionTo(), logger);
-                            if (!needToCreateFakeVersion) {
-                                //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
-                                excludedVersionEndRecords.add(record.getRecordId());
-                            }
+            if (refBook.isVersioned()) {
+                for (RefBookRecord record : records) {
+                    //Проверка пересечения версий
+                    if (record.getRecordId() != null) {
+                        boolean needToCreateFakeVersion = helper.crossVersionsProcessing(dao.checkCrossVersions(getRefBook(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
+                                getRefBook(), versionFrom, record.getVersionTo(), logger);
+                        if (!needToCreateFakeVersion) {
+                            //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
+                            excludedVersionEndRecords.add(record.getRecordId());
                         }
                     }
                 }
@@ -278,7 +268,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
             return helper.createVersions(refBook, versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
         } catch (DataAccessException e) {
             throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!", e);
-        }*/
+        }
     }
 
     @Override

@@ -12,6 +12,6 @@ target
 templatesync/build
 bin
 *~
-.gradle
 libpeerconnection.log
 *.ipr
+.shelf

@@ -51,7 +51,9 @@ public class NdflPersonIncomeByDate {
         this.incomePayoutSumm = incomePayoutSumm;
     }
     public void addIncomePayoutSumm(BigDecimal incomePayoutSumm) {
-        this.incomePayoutSumm = this.incomePayoutSumm == null ? incomePayoutSumm : this.incomePayoutSumm.add(incomePayoutSumm);
+        if (incomePayoutSumm != null) {
+            this.incomePayoutSumm = this.incomePayoutSumm == null ? incomePayoutSumm : this.incomePayoutSumm.add(incomePayoutSumm);
+        }
     }
 
     public Long getWithholdingTax() {
@@ -61,6 +63,8 @@ public class NdflPersonIncomeByDate {
         this.withholdingTax = withholdingTax;
     }
     public void addWithholdingTax(Long withholdingTax) {
-        this.withholdingTax = this.withholdingTax == null ? withholdingTax : this.withholdingTax + withholdingTax;
+        if (withholdingTax != null) {
+            this.withholdingTax = this.withholdingTax == null ? withholdingTax : this.withholdingTax + withholdingTax;
+        }
     }
 }

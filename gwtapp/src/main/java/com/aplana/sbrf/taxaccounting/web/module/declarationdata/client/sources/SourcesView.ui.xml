@@ -1,11 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:dw="urn:import:com.aplana.gwt.client">
 
     <ui:style>
-       .mainPanel {
+        .mainPanel {
             background-color: white;
             position: absolute !important;
             top: 25px;
@@ -16,7 +16,7 @@
 
         .widgetWrapper {
             position: absolute !important;
-            top: 40px;
+            top: 65px;
             left: 8px;
             right: 8px;
             bottom: 50px;
@@ -33,18 +33,45 @@
 
         .checkboxes{
             float: left;
+            margin: 4px 10px 5px 10px;
         }
+
+        .formDecPanel {
+            margin: 10px 10px 4px 10px;
+        }
+
+        .formDecLabel {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .verSep {
+            height: 18px;
+            width: 0;
+            margin: 0px 5px;
+            border-left: 1px solid #aeaeac;
+        }
+
+        .formDecAnchor {
+            font-size: 13px;
+            color: #636460;
+        }
+
     </ui:style>
 
     <dw:ModalWindow ui:field="modalWindow"
                     iconUrl="resources/img/source-target.png"
                     height="400px" width="1000px" minWidth="520px"
-                    title="Источники" resizable="true">
+                    title="Источники и приёмники формы" resizable="true">
 
         <g:FlowPanel addStyleNames="{style.mainPanel}">
-            <g:HorizontalPanel spacing="10" height="22px" verticalAlignment="middle" addStyleNames="{style.checkboxes}">
+            <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.formDecPanel}">
+                <g:Label ui:field="formDecLabel" text="Налоговые формы" addStyleNames="{style.formDecLabel}"/>
+            </g:HorizontalPanel>
+            <g:HorizontalPanel spacing="0" height="22px" verticalAlignment="middle" addStyleNames="{style.checkboxes}">
                 <g:CheckBox ui:field="source" text="Источники"/>
-                <g:CheckBox ui:field="uncreated" text="Не созданные"/>
+                <g:CheckBox ui:field="destination" text="Приемники"/>
+                <g:CheckBox ui:field="uncreated" text="Несозданные"/>
             </g:HorizontalPanel>
 
             <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{style.widgetWrapper}">

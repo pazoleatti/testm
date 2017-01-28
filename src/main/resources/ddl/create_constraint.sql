@@ -4,11 +4,6 @@ alter table form_kind add constraint form_kind_pk primary key (id);
 
 alter table tax_type add constraint tax_type_pk primary key(id);
 
-alter table ref_book_oktmo add constraint ref_book_oktmo_pk primary key (id);
-alter table ref_book_oktmo add constraint ref_book_oktmo_fk_parent_id foreign key (parent_id) references ref_book_oktmo(id);
-alter table ref_book_oktmo add constraint ref_book_oktmo_chk_status check (status in (0,-1,1,2));
-create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
-
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_fk_taxtype foreign key (tax_type) references tax_type(id);
 alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
@@ -299,8 +294,8 @@ alter table form_data_consolidation add constraint form_data_consolidation_fk_sr
 alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id) on delete cascade;
 --create unique index i_form_data_consolidation_unq on form_data_consolidation (case when source_form_data_id is not null then target_form_data_id end, source_form_data_id);
 
-alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id)  on delete cascade;
+alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_declaration_data_id) references declaration_data(id) on delete cascade;
 --create unique index i_decl_data_consolidation_unq on declaration_data_consolidation (case when source_form_data_id is not null then target_declaration_data_id end, source_form_data_id);
 
 alter table log_system_report add constraint log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
@@ -545,8 +540,9 @@ alter table ref_book_person add constraint fk_ref_book_person_address foreign ke
 alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
 alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_record(id);
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_doc_id foreign key (doc_id) references ref_book_record(id);
-alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
+--alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_record(id);
+-- create unique index unq_ref_book_id_doc_pers_inc1 on ref_book_id_doc (decode(inc_rep,1,person_id,null));
 
 alter table ref_book_person add constraint chk_ref_book_person_pension check (pension in (1,2));
 alter table ref_book_person add constraint chk_ref_book_person_medical check (medical in(1,2));
@@ -560,8 +556,8 @@ alter table ref_book_address add constraint chk_ref_book_address_addr_rf check (
 alter table ref_book_id_doc add constraint chk_ref_book_id_doc_rep check(inc_rep in (0,1));
 
 alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primary key (id);
-alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
-alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
+--alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
+--alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
 
 --------------------------------------------------------------------------------------------------------------------------
 alter table state add constraint pk_state primary key(id);

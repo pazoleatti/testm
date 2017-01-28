@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataCSVReportBuilder;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.ClassUtils;
 
@@ -22,6 +23,7 @@ import java.util.List;
 /**
  * User: avanteev
  */
+@Ignore("Налоговые формы не используются!")
 public class FormDataCSVReportBuilderTest {
 
     private final String HEADERROWSS_TEMPLATE = ClassUtils

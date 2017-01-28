@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.model.DataRowType.AUTO;
 
+@Ignore("Налоговые формы не используются!")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "DataRowDaoImplTest.xml" })
 @Transactional

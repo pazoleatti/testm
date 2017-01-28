@@ -1,23 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclaration;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclarationResult;
-import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
+
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import java.text.SimpleDateFormat;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -29,16 +24,12 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 
 	@Autowired
     private DeclarationDataService declarationDataService;
-
 	@Autowired
     private DeclarationTemplateService declarationTemplateService;
-
 	@Autowired
 	private SecurityService securityService;
-
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
@@ -59,7 +50,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                 departmentReportPeriod.getReportPeriod().getId());
         long declarationId = declarationDataService.create(logger, activeDeclarationTemplateId,
                 securityService.currentUserInfo(), departmentReportPeriod, command.getTaxOrganCode(),
-                command.getTaxOrganKpp(), null, null);
+                command.getTaxOrganKpp(), command.getOktmo(), null, null);
         result.setDeclarationId(declarationId);
         if (!logger.getEntries().isEmpty()){
             result.setUuid(logEntryService.save(logger.getEntries()));

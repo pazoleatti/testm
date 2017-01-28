@@ -507,7 +507,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
 
 
         // Поиск экземпляра декларации
-        DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, asnuId, guid);
+        DeclarationData declarationData = declarationDataService.find(declarationTemplateId, departmentReportPeriod.getId(), null, kpp, null, asnuId, guid);
 
         // Экземпляр уже есть и не в статусе «Создана»
         if (declarationData != null) {
@@ -607,7 +607,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         if (declarationData == null) {
             int declarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationType.getId(),
                     departmentReportPeriod.getReportPeriod().getId());
-            long declarationDataId = declarationDataService.create(localLogger, declarationTemplateId, userInfo, departmentReportPeriod, null, transportDataParam.getKpp(), asnuId, fileName);
+            long declarationDataId = declarationDataService.create(localLogger, declarationTemplateId, userInfo, departmentReportPeriod, null, transportDataParam.getKpp(), null, asnuId, fileName);
             declarationData = declarationDataService.get(declarationDataId, userInfo);
         }
 

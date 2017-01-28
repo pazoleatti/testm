@@ -5,24 +5,25 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.*;
 
 public class RefBookSimpleDataProviderTest {
 
     private static final long TEST_RECORD_ID = 122934L;
     private static final long RFB_ID = RefBook.Id.ASNU.getId();
-    private static final String RFB_TABLE_NAME = RefBook.Table.ASNU.getTable();
+    private static final String RFB_TABLE_NAME = "REF_BOOK_ASNU";
     private static final Long RFB_NOT_VERSIONED_ID = 100L;
 
     private RefBookSimpleDataProvider provider;

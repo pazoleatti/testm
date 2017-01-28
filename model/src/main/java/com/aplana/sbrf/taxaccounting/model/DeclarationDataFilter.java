@@ -36,6 +36,8 @@ public class DeclarationDataFilter implements Serializable {
 
     private String taxOrganKpp;
 
+	private String oktmo;
+
     private Long asnuId;
 
     private List<Long> formKindIds;
@@ -141,7 +143,15 @@ public class DeclarationDataFilter implements Serializable {
         this.taxOrganKpp = taxOrganKpp;
     }
 
-    public Boolean getCorrectionTag() {
+	public String getOktmo() {
+		return oktmo;
+	}
+
+	public void setOktmo(String oktmo) {
+		this.oktmo = oktmo;
+	}
+
+	public Boolean getCorrectionTag() {
         return correctionTag;
     }
 
