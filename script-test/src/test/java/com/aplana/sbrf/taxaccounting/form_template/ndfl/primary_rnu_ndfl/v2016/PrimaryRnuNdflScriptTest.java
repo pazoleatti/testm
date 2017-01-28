@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.NdflPersonDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.form_template.ndfl.consolidated_rnu_ndfl.v2016.ConsolidatedRnuNdflScriptTest;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -126,8 +127,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             public Long answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
                 NdflPerson ndflPerson = (NdflPerson) args[0];
-
-                System.out.println(ndflPerson + " [" + ndflPerson.getFirstName() + "," + ndflPerson.getLastName() + "]");
+                //System.out.println(ndflPerson + " [" + ndflPerson.getFirstName() + "," + ndflPerson.getLastName() + "]");
                 importedData.add(ndflPerson);
                 return (long) importedData.size();
             }
@@ -145,9 +145,15 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     @Test
     public void createSpecificReportTest() throws Exception {
 
-        testHelper.setScriptSpecificReportHolder(createReportHolder());
+        ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
+        reportHolder.getSubreportParamValues().put("lastName", "Иванов");
+        testHelper.setScriptSpecificReportHolder(reportHolder);
 
-        when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), anyMap())).thenReturn(createGoodNdflPerson());
+        List<NdflPerson> result = new ArrayList<NdflPerson>();
+        result.add(createGoodNdflPerson());
+        PagingResult pagingResult = new PagingResult<NdflPerson>(result, 1);
+
+        when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), anyMap())).thenReturn(pagingResult);
 
         doAnswer(new Answer<JasperPrint>() {
             @Override
@@ -188,8 +194,8 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         testHelper.execute(FormDataEvent.CREATE_SPECIFIC_REPORT);
 
 
-        ScriptSpecificDeclarationDataReportHolder reportHolder = testHelper.getScriptSpecificReportHolder();
-        ByteArrayOutputStream outputStream = (ByteArrayOutputStream) reportHolder.getFileOutputStream();
+        ScriptSpecificDeclarationDataReportHolder resultReportHolder = testHelper.getScriptSpecificReportHolder();
+        ByteArrayOutputStream outputStream = (ByteArrayOutputStream) resultReportHolder.getFileOutputStream();
 
         //Что-то сформировали
         Assert.assertTrue(outputStream.toByteArray().length > 0);
@@ -205,7 +211,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
         String xml = new String(buf, "UTF-8");
 
-        System.out.println(xml);
+        //System.out.println(xml);
 
         String ndflPersonPath = "//*[local-name()='Файл']/*[local-name()='ИнфЧасть']/*[local-name()='ПолучДох']";
 
@@ -371,12 +377,10 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
         personPrepayment.setRowNum(row);
         personPrepayment.setOperationId(11111L);
-
-        personPrepayment.setSumm(new BigDecimal("1999999")); //по xsd это поле xs:integer
+        personPrepayment.setSumm(1999999L); //по xsd это поле xs:integer
         personPrepayment.setNotifNum("123-456-000");
         personPrepayment.setNotifDate(toDate("01.01.2016"));
         personPrepayment.setNotifSource("AAA");
-
         return personPrepayment;
     }
 

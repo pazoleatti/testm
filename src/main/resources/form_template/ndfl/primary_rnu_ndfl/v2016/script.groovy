@@ -38,23 +38,53 @@ switch (formDataEvent) {
 //------------------ Create Report ----------------------
 
 def createSpecificReport() {
+
+    //Проверка, подготовка данных
     def params = scriptSpecificReportHolder.subreportParamValues
-
     def reportParameters = scriptSpecificReportHolder.getSubreportParamValues();
-    def ndflPerson = ndflPersonService.findNdflPersonByParameters(declarationData.id, reportParameters);
 
+    if (reportParameters.isEmpty()) {
+        throw new ServiceException("Для поиска физического лица необходимо задать один из критериев.");
+    }
+
+    PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, reportParameters);
+
+    if (pagingResult.isEmpty()) {
+        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + params);
+    }
+
+    if (pagingResult.isEmpty()) {
+        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + params);
+    }
+
+    if (pagingResult.size() > 1) {
+        pagingResult.getRecords().each() { ndflPerson ->
+            StringBuilder sb = new StringBuilder();
+            sb.append("[").append("Фамилия: ").append(ndflPerson.lastName).append("],");
+            sb.append("[").append("Имя: ").append(ndflPerson.firstName).append("],");
+            sb.append("[").append("Отчество: ").append(ndflPerson.middleName).append("],");
+            sb.append("[").append("СНИЛС: ").append(ndflPerson.snils).append("],");
+            sb.append("[").append("ИНН: ").append(ndflPerson.innNp).append("],");
+            sb.append("[").append("Дата рождения: ").append(formatDate(ndflPerson.birthDay)).append("],");
+            sb.append("[").append("ДУЛ: ").append(ndflPerson.idDocNumber).append("],");
+            logger.info(sb.toString())
+        }
+        throw new ServiceException("Найдено " + pagingResult.getTotalCount() + " записей. Отображено записей " + pagingResult.size() + ". Уточните критерии поиска.");
+    }
+
+    //формирование отчета
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-        calculateReportData(it, ndflPerson)
+        calculateReportData(it, pagingResult.get(0))
     });
 
     declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-
 }
 
 void calculateReportData(writer, ndflPerson) {
 
     //отчетный период
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+
     //Идентификатор подразделения
     def departmentId = declarationData.departmentId
 
@@ -105,7 +135,6 @@ void calculateReportData(writer, ndflPerson) {
         }
     }
 }
-
 
 def mapToOperationId(collection) {
     def result = [:]

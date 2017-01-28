@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.ndfl;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
@@ -7,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO интерфейс для работы с формой РНУ-НДФЛ
@@ -50,6 +53,23 @@ public interface NdflPersonDao {
      * @return
      */
     List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate);
+
+    /**
+     * Найти все NdflPerson по заданным параметрам
+     * @param declarationDataId идентификатор декларации
+     * @param subreportParameters карта наименований параметров и значений
+     * @param pagingParams параметры вывода результата
+     * @return результат запроса
+     */
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters, PagingParams pagingParams);
+
+    /**
+     *
+     * @param sqlQuery
+     * @param parameters
+     * @return
+     */
+    int getCount(String sqlQuery, Map<String, Object> parameters);
 
     /**
      * Данные об авансах ФЛ по идентификатору декларации

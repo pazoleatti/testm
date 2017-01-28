@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
@@ -22,13 +24,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.AssertTrue;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -49,6 +51,40 @@ public class NdflPersonDaoTest {
     private NdflPersonDao ndflPersonDao;
 
     @Test
+    public void buildQueryTest() {
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("lastName", "Иванов");
+        parameters.put("firstName", "Федор");
+        parameters.put("middleName", "Иванович");
+        String sql = NdflPersonDaoImpl.buildQuery(parameters);
+        Assert.assertTrue(sql.contains("np.last_name = :lastName"));
+        Assert.assertFalse(sql.contains("np.inp = :inp"));
+        //test...
+    }
+
+    @Test
+    public void findNdflPersonByParametersTest() {
+
+        Map<String, Object> parameters = new HashMap<String, Object>();
+
+        parameters.put("lastName", "Иванов");
+        parameters.put("firstName", "Федор");
+        parameters.put("middleName", "Иванович");
+        //parameters.put("snils", "foo");
+        //parameters.put("inn", "foo");
+        //parameters.put("inp", "foo");
+        //parameters.put("fromBirthDay", "foo");
+        parameters.put("toBirthDay", new Date());
+        //parameters.put("idDocNumber", "foo");
+
+        PagingResult<NdflPerson> result = ndflPersonDao.findNdflPersonByParameters(1L, parameters, new PagingParams());
+        assertEquals(1, result.size());
+        assertEquals(1, result.getTotalCount());
+        //добавить тестовых данных
+
+    }
+
+    @Test
     public void testGet() {
         NdflPerson ndflPerson = ndflPersonDao.get(1);
         assertNotNull(ndflPerson);
@@ -57,7 +93,7 @@ public class NdflPersonDaoTest {
     @Test
     public void testFindNdflPerson() {
         List<NdflPerson> result = ndflPersonDao.findPerson(1);
-        Assert.assertEquals(2, result.size());
+        Assert.assertEquals(3, result.size());
     }
 
     @Test
@@ -220,7 +256,7 @@ public class NdflPersonDaoTest {
     }
 
 
-    class NdflPersonIncomeEquator implements  Equator<NdflPersonIncome>{
+    class NdflPersonIncomeEquator implements Equator<NdflPersonIncome> {
         @Override
         public boolean equate(NdflPersonIncome o1, NdflPersonIncome o2) {
             return EqualsBuilder.reflectionEquals(o1, o2);
@@ -232,7 +268,7 @@ public class NdflPersonDaoTest {
         }
     }
 
-    class NdflPersonDeductionEquator implements  Equator<NdflPersonDeduction>{
+    class NdflPersonDeductionEquator implements Equator<NdflPersonDeduction> {
         @Override
         public boolean equate(NdflPersonDeduction o1, NdflPersonDeduction o2) {
             return EqualsBuilder.reflectionEquals(o1, o2);
@@ -244,7 +280,7 @@ public class NdflPersonDaoTest {
         }
     }
 
-    class NdflPersonPrepaymentEquator implements  Equator<NdflPersonPrepayment>{
+    class NdflPersonPrepaymentEquator implements Equator<NdflPersonPrepayment> {
         @Override
         public boolean equate(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
             return EqualsBuilder.reflectionEquals(o1, o2);
@@ -255,8 +291,6 @@ public class NdflPersonDaoTest {
             return HashCodeBuilder.reflectionHashCode(o);
         }
     }
-
-
 
 
 }

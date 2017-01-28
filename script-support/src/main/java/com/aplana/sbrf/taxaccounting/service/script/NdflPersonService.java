@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
@@ -44,7 +45,7 @@ public interface NdflPersonService {
      * @param subreportParameters заданные параметры отчета для поиска NdflPerson
      * @return NdflPerson или исключение если найденно больше одной записи
      */
-    NdflPerson findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters);
+    PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters);
 
     /**
      * Найти обобщенные данные о доходах физ лиц и данные в разрезе ставок

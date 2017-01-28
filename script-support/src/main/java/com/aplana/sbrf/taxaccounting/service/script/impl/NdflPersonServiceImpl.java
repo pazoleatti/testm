@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +38,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public NdflPerson findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters) {
-
-
-
-        //TODO call DAO...
-        return null;
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters) {
+        return ndflPersonDao.findNdflPersonByParameters(declarationDataId, subreportParameters, new PagingParams());
     }
 
     @Override

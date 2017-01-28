@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import org.apache.commons.logging.Log;
@@ -89,6 +92,85 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
+        parameters.put("declarationDataId", declarationDataId);
+        String query = buildQuery(parameters);
+        List<NdflPerson> result = getNamedParameterJdbcTemplate().query(query, parameters, new NdflPersonDaoImpl.NdflPersonRowMapper());
+        return new PagingResult<NdflPerson>(result, getCount(query, parameters));
+    }
+
+    public static String buildQuery(Map<String, Object> parameters) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT " + createColumns(NdflPerson.COLUMNS, "np") + " \n");
+        sb.append("FROM ndfl_person np \n");
+        sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
+
+        if (parameters != null && !parameters.isEmpty()) {
+
+            if (contains(parameters, "lastName")) {
+                sb.append("AND np.last_name = :lastName \n");
+            }
+
+            if (contains(parameters, "firstName")) {
+                sb.append("AND np.first_name = :firstName \n");
+            }
+
+            if (contains(parameters, "middleName")) {
+                sb.append("AND (np.middle_name is null OR np.middle_name = :middleName) \n");
+            }
+
+            if (contains(parameters, "snils")) {
+                sb.append("AND np.snils = :snils \n");
+            }
+
+            if (contains(parameters, "inn")) {
+                sb.append("AND np.inn_np = :inn \n");
+            }
+
+            if (contains(parameters, "inp")) {
+                sb.append("AND np.inp = :inp \n");
+            }
+
+            if (contains(parameters, "fromBirthDay")) {
+                sb.append("AND (np.birth_day is null OR np.birth_day >= :fromBirthDay) \n");
+            }
+
+            if (contains(parameters, "toBirthDay")) {
+                sb.append("AND (np.birth_day is null OR np.birth_day <= :toBirthDay) \n");
+            }
+
+            if (contains(parameters, "idDocNumber")) {
+                sb.append("AND (np.id_doc_number is null OR np.id_doc_number = :idDocNumber) \n");
+            }
+        }
+        return sb.toString();
+
+    }
+
+    private static boolean contains(Map<String, Object> param, String key){
+        return param.containsKey(key) && param.get(key) != null;
+    }
+
+
+
+    /**
+     * Метод вернет количество строк в запросе
+     *
+     * @param sqlQuery   запрос
+     * @param parameters параметры сапроса
+     * @return количество строк
+     */
+    @Override
+    public int getCount(String sqlQuery, Map<String, Object> parameters) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("select count(*) from (");
+        sb.append(sqlQuery);
+        sb.append(")");
+        return getNamedParameterJdbcTemplate().queryForObject(sb.toString(), parameters, Integer.class);
+    }
+
+    @Override
     public List<NdflPersonDeduction> findDeductions(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npi") + " from ndfl_person_deduction npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
@@ -117,7 +199,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             return new ArrayList<NdflPersonPrepayment>();
         }
     }
-
 
 
     @Override
@@ -149,12 +230,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     /**
      * Метод сохраняет новый объект в БД и возвращает этот же объект с присвоенным id
+     *
      * @param identityObject объект обладающий суррогатным ключом
-     * @param table наименование таблицы используемой для хранения данных объекта
-     * @param seq наименование последовательностт используемой для генерации ключей
-     * @param columns массив содержащий наименование столбцов таблицы для вставки в insert
-     * @param fields массив содержащий наименования параметров соответствующих столбцам
-     * @param <E> тип объекта
+     * @param table          наименование таблицы используемой для хранения данных объекта
+     * @param seq            наименование последовательностт используемой для генерации ключей
+     * @param columns        массив содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields         массив содержащий наименования параметров соответствующих столбцам
+     * @param <E>            тип объекта
      */
     private <E extends IdentityObject> void saveNewObject(E identityObject, String table, String seq, String[] columns, String[] fields) {
 
