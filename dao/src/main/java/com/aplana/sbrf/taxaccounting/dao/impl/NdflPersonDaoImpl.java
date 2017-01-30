@@ -78,8 +78,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
                 " WHERE np.declaration_data_id = :declaration_data_id" +
-                " AND npi.tax_date >= :startDate AND npi.tax_date <= :endDate" +
-                " AND npi.payment_date >= :startDate AND npi.payment_date <= :endDate";
+                " AND ((npi.tax_date >= :startDate AND npi.tax_date <= :endDate) OR npi.tax_date IS NULL)" +
+                " AND ((npi.payment_date >= :startDate AND npi.payment_date <= :endDate) OR npi.payment_date IS NULL)" +
+                " AND (npi.tax_date IS NOT NULL OR npi.payment_date IS NOT NULL)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declaration_data_id", declarationDataId)
                 .addValue("startDate", startDate)

@@ -571,6 +571,10 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,ta
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (9281,928,'Код','CODE',1,0,null,null,1,null,10,1,1,null,null,0,1);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (9282,928,'Наименование','NAME',1,1,null,null,1,null,50,1,0,null,null,0,255);
 
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) VALUES (929,'Состояние ЭД',1,0,1,null,'REF_BOOK_DOC_STATE',0);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (9291,929,'КНД','KND',1,1,null,null,1,null,10,0,0,null,null,0,7);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (9292,929,'Наименование','NAME',1,2,null,null,1,null,50,1,0,null,null,0,255);
+
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (931,'Виды налоговых форм',1,0,1,null,'REF_BOOK_FORM_TYPE',0);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9311, 931,'Код','CODE',1,1,null,null,1,null,9,1,1,null,null,0,14);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9312, 931,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,255);

@@ -11,7 +11,7 @@ public class NdflPersonIncomeByDate {
     // Дата начисления дохода
     private Date incomeAccruedDate;
 
-    // Дата налога
+    // Дата удержания налога
     private Date taxDate;
 
     // Срок перечисления налога в бюджет
