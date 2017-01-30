@@ -430,7 +430,8 @@ create table declaration_data (
   asnu_id                     number(18),
   note                        varchar2(512  char),
   state                       number(1) default 1 not null,
-  file_name                   varchar2(255 char)
+  file_name                   varchar2(255 char),
+  doc_state_id                number(18)
 );
 
 
@@ -445,6 +446,7 @@ comment on column declaration_data.asnu_id is 'Идентификатор АСН
 comment on column declaration_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
 comment on column declaration_data.state is 'Состояние формы';
 comment on column declaration_data.file_name is 'Имя файла';
+comment on column declaration_data.doc_state_id is 'Состояние ЭД';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
