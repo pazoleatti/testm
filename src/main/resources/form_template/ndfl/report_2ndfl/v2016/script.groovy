@@ -455,6 +455,14 @@ def groupByDeductionTypeCode(def deductions) {
     return toReturn
 }
 
+// Вычислить сумму для СумДоход
+def getSumDohod(def rows, def operationId) {
+    def toReturn = 0
+
+    rows.each { if (it.operationId == operationId) toReturn += it.incomeAccruedSumm }
+    return toReturn
+}
+
 // Вычислить сумму для СумДохОбщ
 def getSumDohObsh(def incomes) {
     incomes.incomeAccruedSumm.sum()
