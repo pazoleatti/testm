@@ -33,11 +33,6 @@
 			<artifactId>dao</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>com.aplana.taxaccounting</groupId>
-            <artifactId>common-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>fonts</artifactId>

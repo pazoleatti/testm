@@ -91,7 +91,7 @@ public class DeclarationDataServiceImplTest {
                 public void updateState(String state) {
 
                 }
-            });
+            }, null);
 		} catch (ServiceException e) {
 			//Nothing
 		}
@@ -111,7 +111,7 @@ public class DeclarationDataServiceImplTest {
             public void updateState(String state) {
 
             }
-        });
+        }, null);
 	}
 
     @Test
