@@ -278,12 +278,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger) {
+    public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger, Map<String, Object> exchangeParams) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
 
         //2. проверяет состояние XML отчета экземпляра декларации
-        setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
+        setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger, exchangeParams);
 
         //3. обновляет записи о консолидации
         ArrayList<Long> declarationDataIds = new ArrayList<Long>();
@@ -728,9 +728,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     // расчет декларации
     private void setDeclarationBlobs(Logger logger,
-                                     DeclarationData declarationData, Date docDate, TAUserInfo userInfo, LockStateLogger stateLogger) {
-
-        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+                                     DeclarationData declarationData, Date docDate, TAUserInfo userInfo, LockStateLogger stateLogger, Map<String, Object> exchangeParams) {
+        if (exchangeParams == null) {
+            exchangeParams = new HashMap<String, Object>();
+        }
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
 
         File xmlFile = null;
@@ -1557,4 +1558,37 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    @Override
+    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
+        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();
+        additionalParameters.put("formMap", formMap);
+        DeclarationData declarationDataTemp = new DeclarationData();
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.get(declarationTypeId, departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+        declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException("Обнаружены фатальные ошибки!");
+        }
+
+        for (Map.Entry<Long, Map<String, Object>> entry: formMap.entrySet()) {
+            Logger scriptLogger = new Logger();
+            try {
+                calculate(scriptLogger, entry.getKey(), userInfo, new Date(), stateLogger, entry.getValue());
+                validateDeclaration(userInfo, get(entry.getKey(), userInfo), scriptLogger, true, null, stateLogger);
+            } catch (ServiceException e) {
+                scriptLogger.error(e);
+            } finally {
+                if (scriptLogger.containsLevel(LogLevel.ERROR)) {
+                    logger.error("Обнаружены фатальные ошибки!");
+                    logger.getEntries().addAll(scriptLogger.getEntries());
+                    declarationDataDao.delete(entry.getKey());
+                } else {
+                    logger.info("Успешно произведен расчет для формы!");
+                    logger.getEntries().addAll(scriptLogger.getEntries());
+                    declarationDataDao.setStatus(entry.getKey(), State.ACCEPTED);
+                }
+            }
+        }
+    }
 }
