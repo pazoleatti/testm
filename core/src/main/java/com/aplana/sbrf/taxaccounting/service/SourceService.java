@@ -516,6 +516,13 @@ public interface SourceService {
     void updateFDDDConsolidation(long sourceFormId);
 
     /**
+     * Проставление признака неактуальности данных в НФ-приёмнике
+     * http://conf.aplana.com/pages/viewpage.action?pageId=19662408
+     * @param sourceFormId идентификатор источника
+     */
+    void updateDDConsolidation(long sourceFormId);
+
+    /**
      * Проверяет не изменились ли данные консолидации для НФ
      * @param fdTargetId идентификатор нф-приемника для проверки
      * @return true - данные актуальны
@@ -570,6 +577,6 @@ public interface SourceService {
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction,
                                              TAUserInfo userInfo, Logger logger);
 }

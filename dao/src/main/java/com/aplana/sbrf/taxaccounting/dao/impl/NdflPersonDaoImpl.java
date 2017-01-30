@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import org.apache.commons.logging.Log;
@@ -75,8 +78,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
                 " WHERE np.declaration_data_id = :declaration_data_id" +
-                " AND npi.tax_date >= :startDate AND npi.tax_date <= :endDate" +
-                " AND npi.payment_date >= :startDate AND npi.payment_date <= :endDate";
+                " AND ((npi.tax_date >= :startDate AND npi.tax_date <= :endDate) OR npi.tax_date IS NULL)" +
+                " AND ((npi.payment_date >= :startDate AND npi.payment_date <= :endDate) OR npi.payment_date IS NULL)" +
+                " AND (npi.tax_date IS NOT NULL OR npi.payment_date IS NOT NULL)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declaration_data_id", declarationDataId)
                 .addValue("startDate", startDate)
@@ -86,6 +90,85 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonIncome>();
         }
+    }
+
+    @Override
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
+        parameters.put("declarationDataId", declarationDataId);
+        String query = buildQuery(parameters);
+        List<NdflPerson> result = getNamedParameterJdbcTemplate().query(query, parameters, new NdflPersonDaoImpl.NdflPersonRowMapper());
+        return new PagingResult<NdflPerson>(result, getCount(query, parameters));
+    }
+
+    public static String buildQuery(Map<String, Object> parameters) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT " + createColumns(NdflPerson.COLUMNS, "np") + " \n");
+        sb.append("FROM ndfl_person np \n");
+        sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
+
+        if (parameters != null && !parameters.isEmpty()) {
+
+            if (contains(parameters, "lastName")) {
+                sb.append("AND np.last_name = :lastName \n");
+            }
+
+            if (contains(parameters, "firstName")) {
+                sb.append("AND np.first_name = :firstName \n");
+            }
+
+            if (contains(parameters, "middleName")) {
+                sb.append("AND (np.middle_name is null OR np.middle_name = :middleName) \n");
+            }
+
+            if (contains(parameters, "snils")) {
+                sb.append("AND np.snils = :snils \n");
+            }
+
+            if (contains(parameters, "inn")) {
+                sb.append("AND np.inn_np = :inn \n");
+            }
+
+            if (contains(parameters, "inp")) {
+                sb.append("AND np.inp = :inp \n");
+            }
+
+            if (contains(parameters, "fromBirthDay")) {
+                sb.append("AND (np.birth_day is null OR np.birth_day >= :fromBirthDay) \n");
+            }
+
+            if (contains(parameters, "toBirthDay")) {
+                sb.append("AND (np.birth_day is null OR np.birth_day <= :toBirthDay) \n");
+            }
+
+            if (contains(parameters, "idDocNumber")) {
+                sb.append("AND (np.id_doc_number is null OR np.id_doc_number = :idDocNumber) \n");
+            }
+        }
+        return sb.toString();
+
+    }
+
+    private static boolean contains(Map<String, Object> param, String key){
+        return param.containsKey(key) && param.get(key) != null;
+    }
+
+
+
+    /**
+     * Метод вернет количество строк в запросе
+     *
+     * @param sqlQuery   запрос
+     * @param parameters параметры сапроса
+     * @return количество строк
+     */
+    @Override
+    public int getCount(String sqlQuery, Map<String, Object> parameters) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("select count(*) from (");
+        sb.append(sqlQuery);
+        sb.append(")");
+        return getNamedParameterJdbcTemplate().queryForObject(sb.toString(), parameters, Integer.class);
     }
 
     @Override
@@ -119,7 +202,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
 
-
     @Override
     public Long save(final NdflPerson ndflPerson) {
 
@@ -149,12 +231,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     /**
      * Метод сохраняет новый объект в БД и возвращает этот же объект с присвоенным id
+     *
      * @param identityObject объект обладающий суррогатным ключом
-     * @param table наименование таблицы используемой для хранения данных объекта
-     * @param seq наименование последовательностт используемой для генерации ключей
-     * @param columns массив содержащий наименование столбцов таблицы для вставки в insert
-     * @param fields массив содержащий наименования параметров соответствующих столбцам
-     * @param <E> тип объекта
+     * @param table          наименование таблицы используемой для хранения данных объекта
+     * @param seq            наименование последовательностт используемой для генерации ключей
+     * @param columns        массив содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields         массив содержащий наименования параметров соответствующих столбцам
+     * @param <E>            тип объекта
      */
     private <E extends IdentityObject> void saveNewObject(E identityObject, String table, String seq, String[] columns, String[] fields) {
 
@@ -370,7 +453,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setRowNum(rs.getInt("row_num"));
             personPrepayment.setOperationId(SqlUtils.getLong(rs, "operation_id"));
 
-            personPrepayment.setSumm(rs.getBigDecimal("summ"));
+            personPrepayment.setSumm(rs.getLong("summ"));
             personPrepayment.setNotifNum(rs.getString("notif_num"));
             personPrepayment.setNotifDate(rs.getDate("notif_date"));
             personPrepayment.setNotifSource(rs.getString("notif_source"));

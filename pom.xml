@@ -24,7 +24,6 @@
 		<module>scheduler</module>
         <module>gwt-widget</module>
         <module>async</module>
-        <module>common</module>
         <module>script-test</module>
         <module>schematron</module>
     </modules>
@@ -40,6 +39,7 @@
 		<org.aspectj.version>1.8.0</org.aspectj.version>
 		<groovy.version>2.4.5</groovy.version>
 		<jasperreports.version>5.0.1</jasperreports.version>
+		<xalan.version>2.7.1</xalan.version>
 		<poi.version>3.8</poi.version>
         <poi.schemas.version>1.1</poi.schemas.version>
 		<org.slf4j.version>1.7.12</org.slf4j.version>
@@ -289,6 +289,11 @@
 						<groupId>eclipse</groupId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>xalan</groupId>
+				<artifactId>xalan</artifactId>
+				<version>${xalan.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle</groupId>

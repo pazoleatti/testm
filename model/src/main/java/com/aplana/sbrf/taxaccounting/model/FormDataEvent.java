@@ -33,6 +33,8 @@ public enum FormDataEvent implements Serializable {
     CALCULATE_TASK_COMPLEXITY(21, "Рассчитать сложность задачи формирования специфичных отчетов"),
     CHECK_VISIBILITY_PDF(22, "Проверка видимости формы предварительного просмотра для декларации"),
 
+    CREATE_FORMS(23, "Создание экземпляров форм"), // Вызывается не для экземпляра формы
+
 	MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),
 	MOVE_APPROVED_TO_ACCEPTED(103, "Принять из \"Утверждена\""),

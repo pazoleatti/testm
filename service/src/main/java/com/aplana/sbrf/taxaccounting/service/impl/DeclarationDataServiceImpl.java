@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import groovy.lang.Closure;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -26,6 +27,7 @@ import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +46,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -61,7 +65,7 @@ import java.util.zip.ZipOutputStream;
 @Transactional(readOnly = true)
 public class DeclarationDataServiceImpl implements DeclarationDataService {
 
-	private static final Log LOG = LogFactory.getLog(DeclarationDataService.class);
+    private static final Log LOG = LogFactory.getLog(DeclarationDataService.class);
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
     private static final String ENCODING = "UTF-8";
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
@@ -76,7 +80,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         }
     };
-    private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
+    private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir") + File.separator + "%s.%s";
     private static final String CALCULATION_NOT_TOPICAL = "Декларация / Уведомление содержит неактуальные консолидированные данные  " +
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
             "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
@@ -183,7 +187,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, Long asunId, String fileName) {
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -203,6 +207,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         taxOrganKpp != null
                                 ? ", КПП: \"" + taxOrganKpp + "\""
                                 : "",
+						oktmo != null
+								? ", ОКТМО: \"" + oktmo + "\""
+								: "",
                         asunId != null
                                 ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
                                 : "",
@@ -212,7 +219,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ) == null) {
             //Если блокировка успешно установлена
             try {
-                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, taxOrganCode, asunId, fileName);
+                DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, oktmo, taxOrganCode, asunId, fileName);
                 if (declarationData != null) {
                     String msg = (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ?
                             "Уведомление с заданными параметрами уже существует" :
@@ -236,6 +243,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setDeclarationTemplateId(declarationTemplateId);
                 newDeclaration.setTaxOrganCode(taxOrganCode);
                 newDeclaration.setKpp(taxOrganKpp);
+				newDeclaration.setOktmo(oktmo);
                 newDeclaration.setAsnuId(asunId);
                 newDeclaration.setFileName(fileName);
 
@@ -278,16 +286,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
 
         //3. обновляет записи о консолидации
-        ArrayList<Long> formDataIds = new ArrayList<Long>();
-        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, WorkflowState.ACCEPTED, userInfo, logger)){
-            formDataIds.add(relation.getFormDataId());
+        ArrayList<Long> declarationDataIds = new ArrayList<Long>();
+        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, State.ACCEPTED, userInfo, logger)){
+            declarationDataIds.add(relation.getFormDataId());
         }
 
-        //TODO 19.01.2017 Доработать таблицу DECLARATION_DATA_CONSOLIDATION, добавить столбец для хранения идентификатора декларации источника
         //Обновление информации о консолидации.
-        //sourceService.deleteDeclarationConsolidateInfo(id);
-        //sourceService.addDeclarationConsolidationInfo(id, formDataIds);
-
+        sourceService.deleteDeclarationConsolidateInfo(id);
+        sourceService.addDeclarationConsolidationInfo(id, declarationDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Декларация обновлена", null);
@@ -440,6 +446,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         declarationData.setState(State.CREATED);
+        sourceService.updateDDConsolidation(declarationData.getId());
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
         auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
@@ -538,9 +545,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-	@Override
+    @Override
     public InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo) {
-		declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL0);
+        declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL0);
         String pdfUuid = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.PDF_DEC);
         if (pdfUuid == null) {
             return null;
@@ -548,27 +555,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return blobDataService.get(pdfUuid).getInputStream();
     }
 
-    private InputStream getJasper(String jrxml) {
-        ByteArrayOutputStream compiledReport = new ByteArrayOutputStream();
-        ByteArrayInputStream byteArrayInputStream = null;
+    private InputStream getJasper(String jrxmlTemplate) {
         try {
-            try {
-                byteArrayInputStream = new ByteArrayInputStream(jrxml.getBytes(ENCODING));
-                JasperDesign jasperDesign = JRXmlLoader.load(byteArrayInputStream);
-                JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
-            } catch (JRException e) {
-                LOG.error(e.getMessage(), e);
-                throw new ServiceException("Произошли ошибки во время формирования отчета!");
-            } catch (UnsupportedEncodingException e2) {
-                LOG.error(e2.getMessage(), e2);
-                throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
-            }
-            return new ByteArrayInputStream(compiledReport.toByteArray());
-        } finally {
-            IOUtils.closeQuietly(byteArrayInputStream);
-            IOUtils.closeQuietly(compiledReport);
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(jrxmlTemplate.getBytes(ENCODING));
+            return compileReport(inputStream);
+        } catch (UnsupportedEncodingException e2) {
+            LOG.error(e2.getMessage(), e2);
+            throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
         }
     }
+
+    private ByteArrayInputStream compileReport(InputStream jrxml) {
+        ByteArrayOutputStream compiledReport = new ByteArrayOutputStream();
+        try {
+            JasperDesign jasperDesign = JRXmlLoader.load(jrxml);
+            JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
+        } catch (JRException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException("Ошибка компиляции jrxml-шаблона! "+jrxml);
+        }
+        return new ByteArrayInputStream(compiledReport.toByteArray());
+    }
+
 
     @Override
     public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params) {
@@ -605,7 +613,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             IOUtils.closeQuietly(zipXml);
         }
     }
-    
+
     @Override
     public void setPdfDataBlobs(Logger logger,
                                      DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
@@ -977,8 +985,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String fileName) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, taxOrganCode, asnuId, fileName);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, oktmo, taxOrganCode, asnuId, fileName);
     }
 
     @Override
@@ -1325,23 +1333,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logger.warn(
                             NOT_EXIST_SOURCE_DECLARATION_WARNING,
                             relation.getFullDepartmentName(),
-                            relation.getFormTypeName(),
-                            relation.getFormDataKind().getTitle(),
-                            relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                            relation.getDeclarationTemplate().getName(),
+                            relation.getDeclarationTemplate().getDeclarationFormKind().getTitle(),
+                            relation.getPeriodName(),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     sdf.get().format(relation.getCorrectionDate())) : "");
-                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getFormDataId())){
+                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), relation.getDeclarationDataId())){
                     consolidationOk = false;
                     logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
                             relation.getFullDepartmentName(),
-                            relation.getFormTypeName(),
-                            relation.getFormDataKind().getTitle(),
-                            relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                            relation.getDeclarationTemplate().getName(),
+                            relation.getDeclarationTemplate().getDeclarationFormKind().getTitle(),
+                            relation.getPeriodName(),
                             relation.getYear(),
                             relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     sdf.get().format(relation.getCorrectionDate())) : "",
-                            relation.getState().getTitle());
+                            relation.getDeclarationState().getTitle());
                 }
             }
 
@@ -1507,6 +1515,46 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void saveFilesComments(long declarationDataId, String note, List<DeclarationDataFile> files) {
         declarationDataDao.updateNote(declarationDataId, note);
         declarationDataFileDao.saveFiles(declarationDataId, files);
+    }
+
+    /**
+     * Получить соединение для передачи в отчет, вынесено в отдельный метод для более удобного тестирования
+     *
+     * @return соединение, после завершения работы в вызывающем коде необходимо закрыть соединение
+     */
+    @Override
+    public Connection getReportConnection() {
+        try {
+            return ((DataSource) applicationContext.getBean("dataSource")).getConnection();
+        } catch (SQLException e) {
+            throw new ServiceException("Ошибка при попытке получить соединение с БД!", e);
+        }
+    }
+
+
+    @Override
+    public JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> parameters) {
+        return createJasperReport(xmlData, jrxmlTemplate, parameters, getReportConnection());
+    }
+
+    @Override
+    public JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> parameters, Connection connection) {
+
+        parameters.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xmlData);
+
+        ByteArrayInputStream inputStream = compileReport(jrxmlTemplate);
+
+        try {
+            return JasperFillManager.fillReport(inputStream, parameters, connection);
+        } catch (JRException e) {
+            throw new ServiceException("Ошибка при вычислении отчета!", e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                LOG.warn("Ошибка при попытке закрыть соединение с БД!", e);
+            }
+        }
     }
 
 }

@@ -12,14 +12,19 @@ import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import org.apache.commons.io.IOUtils;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.util.TestScriptHelper.readFile;
+import static com.aplana.sbrf.taxaccounting.util.TestUtils.readFile;
 
 /**
  * Хэлпер для работы со скриптами декларации в тестовом режиме
@@ -39,7 +44,7 @@ public class DeclarationTestScriptHelper {
     // Кодировка XML
     private final static String XML_ENCODING = "UTF-8";
     // Префикс пути скрипта
-    private final static String SCRIPT_PATH_PREFIX = "../src/main/resources";
+    public final static String SCRIPT_PATH_PREFIX = "../src/main/resources";
     // Имя файла скрипта
     private final String SCRIPT_PATH_FILE_NAME = "script.groovy";
     // Сервис работы со скриптами
@@ -54,14 +59,20 @@ public class DeclarationTestScriptHelper {
     private RefBookDataProvider refBookDataProvider;
     private DeclarationService declarationService;
     private TransactionHelper transactionHelper;
-
-    //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
 
     // Задаются из конкретного теста
+
     private InputStream importFileInputStream;
 
-    //список источников получаемый из скрипта по событию com.aplana.sbrf.taxaccounting.model.FormDataEvent.GET_SOURCES.
+    /**
+     * Объект передаваемый в скрипт при формировании спец отчета
+     */
+    private ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder;
+
+    /**
+     * Cписок источников получаемый из скрипта по событию com.aplana.sbrf.taxaccounting.model.FormDataEvent.GET_SOURCES
+     */
     private FormSources sources;
 
 
@@ -83,12 +94,16 @@ public class DeclarationTestScriptHelper {
         return ndflPersonService;
     }
 
-    public void setNdflPersonService(NdflPersonService ndflPersonService) {
-        this.ndflPersonService = ndflPersonService;
-    }
-
     public void setImportFileInputStream(InputStream importFileInputStream) {
         this.importFileInputStream = importFileInputStream;
+    }
+
+    public ScriptSpecificDeclarationDataReportHolder getScriptSpecificReportHolder() {
+        return scriptSpecificReportHolder;
+    }
+
+    public void setScriptSpecificReportHolder(ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder) {
+        this.scriptSpecificReportHolder = scriptSpecificReportHolder;
     }
 
     /**
@@ -107,6 +122,7 @@ public class DeclarationTestScriptHelper {
         userDepartment.setRegionId(DEPARTMENT_REGION_ID);
         userDepartment.setName(DEPARTMENT_NAME);
         this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;
+
         try {
             script = readFile(this.path, charsetName);
         } catch (IOException e) {
@@ -115,6 +131,7 @@ public class DeclarationTestScriptHelper {
         // Моск сервисов
         initMock();
     }
+
 
     /**
      * Моск сервисов
@@ -127,7 +144,7 @@ public class DeclarationTestScriptHelper {
         refBookService = mockHelper.mockRefBookService();
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
-        declarationService = mockHelper.getDeclarationService();
+        declarationService = mockHelper.mockDeclarationService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
     }
@@ -155,6 +172,7 @@ public class DeclarationTestScriptHelper {
         bindings.put("declarationService", declarationService);
         bindings.put("ndflPersonService", ndflPersonService);
 
+        bindings.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
 
         bindings.put("formDataDepartment", userDepartment);
         bindings.put("declarationData", declarationData);
@@ -163,6 +181,7 @@ public class DeclarationTestScriptHelper {
         bindings.put("user", user);
         bindings.put("applicationVersion", "test-version");
 
+        bindings.put(DeclarationDataScriptParams.DOC_DATE, new Date());
 
 
         if (formDataEvent == FormDataEvent.CALCULATE) {
@@ -191,8 +210,6 @@ public class DeclarationTestScriptHelper {
 
 
         if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
-
-
             bindings.put("ImportInputStream", importFileInputStream);
             bindings.put("importService", mockHelper.mockImportService());
         }
@@ -202,12 +219,16 @@ public class DeclarationTestScriptHelper {
         } catch (ScriptException e) {
             scriptingService.logScriptException(e, logger);
         } finally {
+
             if (importFileInputStream != null) {
-                try {
-                    importFileInputStream.close();
-                } catch (IOException e) {}
+                IOUtils.closeQuietly(importFileInputStream);
+            }
+
+            if (scriptSpecificReportHolder != null) {
+                IOUtils.closeQuietly(scriptSpecificReportHolder.getFileInputStream());
             }
         }
+
     }
 
 

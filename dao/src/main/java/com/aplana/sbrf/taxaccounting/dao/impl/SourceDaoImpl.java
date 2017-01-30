@@ -393,12 +393,12 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     }
 
     private static final String FIND_CONSOLIDATED_FORMS =
-            "SELECT tfd.id as form_data_id, fd.id as source_form_data_id, tfd.kind AS kind, tfmt.name AS type, td.name AS department, trp.name AS period, ttp.year AS year, tfd.period_order AS month, tdrp.correction_date AS correctionDate, tfd.COMPARATIVE_DEP_REP_PER_ID as drpCompareId \n" +
+            "SELECT tfd.id as form_data_id, fd.id as SOURCE_DECLARATION_DATA_ID, tfd.kind AS kind, tfmt.name AS type, td.name AS department, trp.name AS period, ttp.year AS year, tfd.period_order AS month, tdrp.correction_date AS correctionDate, tfd.COMPARATIVE_DEP_REP_PER_ID as drpCompareId \n" +
                     "FROM department_form_type dft\n" +
                     "JOIN form_template ft ON ft.type_id = dft.form_type_id\n" +
                     "JOIN department_report_period drp ON drp.department_id = dft.department_id\n" +
                     "JOIN form_data fd ON (fd.kind = dft.kind AND fd.form_template_id = ft.id AND fd.department_report_period_id = drp.id)\n" +
-                    "JOIN form_data_consolidation fdc ON fdc.source_form_data_id = fd.id\n" +
+                    "JOIN form_data_consolidation fdc ON fdc.SOURCE_DECLARATION_DATA_ID = fd.id\n" +
                     "JOIN form_data tfd ON tfd.id = fdc.target_form_data_id\n" +
                     "JOIN form_template tft ON tft.id = tfd.form_template_id\n" +
                     "JOIN form_type tfmt ON tfmt.id = tft.type_id\n" +
@@ -413,12 +413,12 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     ")";
 
     private static final String FIND_CONSOLIDATED_DECLARATIONS =
-            "select tdd.id as declaration_id, fd.id as source_form_data_id, dt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate, tdd.tax_organ_code as taxOrganCode, tdd.kpp as kpp \n" +
+            "select tdd.id as declaration_id, fd.id as SOURCE_DECLARATION_DATA_ID, dt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate, tdd.tax_organ_code as taxOrganCode, tdd.kpp as kpp \n" +
             "from department_form_type dft\n" +
             "join form_template ft on ft.type_id = dft.form_type_id\n" +
             "join department_report_period drp on drp.department_id = dft.department_id\n" +
             "join form_data fd on (fd.kind = dft.kind and fd.form_template_id = ft.id and fd.department_report_period_id = drp.id)\n" +
-            "join declaration_data_consolidation ddc on ddc.source_form_data_id = fd.id\n" +
+            "join declaration_data_consolidation ddc on ddc.SOURCE_DECLARATION_DATA_ID = fd.id\n" +
             "join declaration_data tdd on tdd.id = ddc.target_declaration_data_id\n" +
             "join declaration_template tdt on tdt.id = tdd.declaration_template_id\n" +
             "join declaration_type dt on dt.id = tdt.declaration_type_id\n" +
@@ -448,7 +448,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
                     ConsolidatedInstance declaration = new ConsolidatedInstance();
                     declaration.setId(rs.getLong("declaration_id"));
-                    declaration.setSourceId(rs.getLong("source_form_data_id"));
+                    declaration.setSourceId(rs.getLong("SOURCE_DECLARATION_DATA_ID"));
                     declaration.setType(rs.getString("type"));
                     declaration.setDepartment(rs.getString("department"));
                     declaration.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
@@ -466,7 +466,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
                     ConsolidatedInstance form = new ConsolidatedInstance();
                     form.setId(rs.getLong("form_data_id"));
-                    form.setSourceId(rs.getLong("source_form_data_id"));
+                    form.setSourceId(rs.getLong("SOURCE_DECLARATION_DATA_ID"));
                     form.setFormKind(rs.getInt("kind"));
                     form.setType(rs.getString("type"));
                     form.setDepartment(rs.getString("department"));
@@ -515,7 +515,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     }
 
     private static final String ADD_DECLARATION_CONSOLIDATION =
-            "insert into DECLARATION_DATA_CONSOLIDATION (TARGET_DECLARATION_DATA_ID, SOURCE_FORM_DATA_ID) values (?,?)";
+            "insert into DECLARATION_DATA_CONSOLIDATION (TARGET_DECLARATION_DATA_ID, SOURCE_DECLARATION_DATA_ID) values (?,?)";
 
     @Override
     public void addDeclarationConsolidationInfo(final Long tgtDeclarationId, Collection<Long> srcFormDataIds) {
@@ -548,7 +548,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId) {
         try {
             getJdbcTemplate().queryForObject(
-                    "select 1 from DECLARATION_DATA_CONSOLIDATION where target_declaration_data_id = ? and source_form_data_id = ?",
+                    "select 1 from DECLARATION_DATA_CONSOLIDATION where target_declaration_data_id = ? and SOURCE_DECLARATION_DATA_ID = ?",
                     Integer.class,
                     declarationId, sourceFormDataId);
         } catch (EmptyResultDataAccessException e) {
@@ -559,7 +559,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     }
 
     private static final String ADD_CONSOLIDATION =
-            "insert into FORM_DATA_CONSOLIDATION (TARGET_FORM_DATA_ID, SOURCE_FORM_DATA_ID) values (?,?)";
+            "insert into FORM_DATA_CONSOLIDATION (TARGET_FORM_DATA_ID, SOURCE_DECLARATION_DATA_ID) values (?,?)";
     @Override
     public void addFormDataConsolidationInfo(final Long tgtFormDataId, Collection<Long> srcFormDataIds) {
         final Object[] srcArray = srcFormDataIds.toArray();
@@ -607,7 +607,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select 1 from FORM_DATA_CONSOLIDATION where TARGET_FORM_DATA_ID = ? and source_form_data_id = ?",
+                    "select 1 from FORM_DATA_CONSOLIDATION where TARGET_FORM_DATA_ID = ? and SOURCE_DECLARATION_DATA_ID = ?",
                     Integer.class,
                     formDataId, sourceFormDataId) > 0;
         } catch (EmptyResultDataAccessException e) {
@@ -618,7 +618,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public void updateFDConsolidationInfo(long sourceFormId) {
         getJdbcTemplate().update(
-                "update FORM_DATA_CONSOLIDATION set source_form_data_id = null where source_form_data_id = ?",
+                "update FORM_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where SOURCE_DECLARATION_DATA_ID = ?",
                 sourceFormId);
     }
 
@@ -626,10 +626,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public void updateConsolidationInfo(Set<ConsolidatedInstance> instances, boolean declaration) {
         String sql;
         if (declaration) {
-            sql = "update DECLARATION_DATA_CONSOLIDATION set source_form_data_id = null where " + buildConsolidatedPairsInQuery("(source_form_data_id, target_declaration_data_id)", instances);
+            sql = "update DECLARATION_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where " + buildConsolidatedPairsInQuery("(SOURCE_DECLARATION_DATA_ID, target_declaration_data_id)", instances);
             getJdbcTemplate().update(sql);
         } else {
-            sql = "update FORM_DATA_CONSOLIDATION set source_form_data_id = null where " + buildConsolidatedPairsInQuery("(source_form_data_id, target_form_data_id)", instances);
+            sql = "update FORM_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where " + buildConsolidatedPairsInQuery("(SOURCE_DECLARATION_DATA_ID, target_form_data_id)", instances);
         }
         getJdbcTemplate().update(sql);
     }
@@ -637,21 +637,21 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public int updateDDConsolidationInfo(long sourceFormId) {
         return getJdbcTemplate().update(
-                "update DECLARATION_DATA_CONSOLIDATION set source_form_data_id = null where source_form_data_id = ?",
+                "update DECLARATION_DATA_CONSOLIDATION set SOURCE_DECLARATION_DATA_ID = null where SOURCE_DECLARATION_DATA_ID = ?",
                 sourceFormId);
     }
 
     @Override
     public boolean isFDConsolidationTopical(long fdTargetId) {
         return getJdbcTemplate().queryForObject(
-                "select count(*) from form_data_consolidation where TARGET_FORM_DATA_ID = ? and SOURCE_FORM_DATA_ID is null",
+                "select count(*) from form_data_consolidation where TARGET_FORM_DATA_ID = ? and SOURCE_DECLARATION_DATA_ID is null",
                 Integer.class, fdTargetId) == 0;
     }
 
     @Override
     public boolean isDDConsolidationTopical(long ddTargetId) {
         return getJdbcTemplate().queryForObject(
-                "select count(*) from DECLARATION_DATA_CONSOLIDATION where TARGET_DECLARATION_DATA_ID = ? and SOURCE_FORM_DATA_ID is null",
+                "select count(*) from DECLARATION_DATA_CONSOLIDATION where TARGET_DECLARATION_DATA_ID = ? and SOURCE_DECLARATION_DATA_ID is null",
                 Integer.class, ddTargetId) == 0;
     }
 
@@ -737,7 +737,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     } else {
                         relation.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs, "departmentId")));
                         relation.setDepartmentReportPeriod(departmentReportPeriodDao.get(SqlUtils.getInteger(rs, "departmentReportPeriod")));
-                        relation.setDeclarationType(declarationTypeDao.get(SqlUtils.getInteger(rs, "declarationTypeId")));
+                        //relation.setDeclarationType(declarationTypeDao.get(SqlUtils.getInteger(rs, "declarationTypeId")));
                     }
                     return relation;
                 }

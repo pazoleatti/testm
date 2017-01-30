@@ -54,6 +54,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final long ASNU_ID = 1000;
     private static final String KPP = "123456789";
+    private static final String OKTMO = "12345678";
     private static final String CODE_ORG = "1234";
 
     @Override
@@ -67,6 +68,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         declarationData.setAsnuId(ASNU_ID);
         declarationData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         declarationData.setKpp(KPP);
+        declarationData.setOktmo(OKTMO);
         declarationData.setTaxOrganCode(CODE_ORG);
         return declarationData;
     }
@@ -122,7 +124,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                 ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(7777.77));
                 ndflPersonIncomeByRate1.setCalculatedTax(8888L);
                 ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
-                ndflPersonIncomeByRate1.setPrepaymentSum(new BigDecimal(1111.11));
+                ndflPersonIncomeByRate1.setPrepaymentSum(1111L);
                 ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
 
                 ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);
@@ -205,7 +207,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         }
 
         // 2. сравнение со сгенерированным xml
-        String correctXml = IOUtils.toString(getClass().getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/report_6ndfl.xml"), "UTF-8");
+        String correctXml = IOUtils.toString(getClass().getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/ndfl/report_6ndfl/v2016/report_6ndfl.xml"), "windows-1251");
         XMLUnit.setIgnoreWhitespace(true);
         Diff xmlDiff = new Diff(correctXml, testHelper.getXmlStringWriter().toString());
         xmlDiff.overrideDifferenceListener(new DifferenceListener() {

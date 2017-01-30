@@ -34,7 +34,9 @@ public class NdflPersonIncomeCommonValue {
         this.countPerson = countPerson;
     }
     public void addCountPerson(Integer countPerson) {
-        this.countPerson = this.countPerson == null ? countPerson : this.countPerson + countPerson;
+        if (countPerson != null) {
+            this.countPerson = this.countPerson == null ? countPerson : this.countPerson + countPerson;
+        }
     }
 
     public Long getWithholdingTax() {
@@ -44,7 +46,9 @@ public class NdflPersonIncomeCommonValue {
         this.withholdingTax = withholdingTax;
     }
     public void addWithholdingTax(Long withholdingTax) {
-        this.withholdingTax = this.withholdingTax == null ? withholdingTax : this.withholdingTax + withholdingTax;
+        if (withholdingTax != null) {
+            this.withholdingTax = this.withholdingTax == null ? withholdingTax : this.withholdingTax + withholdingTax;
+        }
     }
 
     public Long getNotHoldingTax() {
@@ -54,7 +58,9 @@ public class NdflPersonIncomeCommonValue {
         this.notHoldingTax = notHoldingTax;
     }
     public void addNotHoldingTax(Long notHoldingTax) {
-        this.notHoldingTax = this.notHoldingTax == null ? notHoldingTax : this.notHoldingTax + notHoldingTax;
+        if (notHoldingTax != null) {
+            this.notHoldingTax = this.notHoldingTax == null ? notHoldingTax : this.notHoldingTax + notHoldingTax;
+        }
     }
 
     public Long getRefoundTax() {
@@ -64,7 +70,9 @@ public class NdflPersonIncomeCommonValue {
         this.refoundTax = refoundTax;
     }
     public void addRefoundTax(Long refoundTax) {
-        this.refoundTax = this.refoundTax == null ? refoundTax : this.refoundTax + refoundTax;
+        if (refoundTax != null) {
+            this.refoundTax = this.refoundTax == null ? refoundTax : this.refoundTax + refoundTax;
+        }
     }
 
     public List<NdflPersonIncomeByRate> getNdflPersonIncomeByRateList() {

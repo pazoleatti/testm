@@ -17,7 +17,6 @@ public class Relation implements Serializable {
     private DepartmentReportPeriod departmentReportPeriod;
     /** Статус ЖЦ */
     private WorkflowState state;
-
     /** форма/декларация создана/не создана */
     private boolean created;
     /** является ли форма источников, в противном случае приемник*/
@@ -51,7 +50,7 @@ public class Relation implements Serializable {
     /** Идентификатор созданной декларации */
     private Long declarationDataId;
     /** Вид декларации */
-    private DeclarationType declarationType;
+    private DeclarationTemplate declarationTemplate;
     /** Налоговый орган */
     private String taxOrganCode;
     /** КПП */
@@ -214,12 +213,12 @@ public class Relation implements Serializable {
         this.declarationDataId = declarationDataId;
     }
 
-    public DeclarationType getDeclarationType() {
-        return declarationType;
+    public DeclarationTemplate getDeclarationTemplate() {
+        return declarationTemplate;
     }
 
-    public void setDeclarationType(DeclarationType declarationType) {
-        this.declarationType = declarationType;
+    public void setDeclarationTemplate(DeclarationTemplate declarationTemplate) {
+        this.declarationTemplate = declarationTemplate;
     }
 
     public String getTaxOrganCode() {
@@ -377,7 +376,7 @@ public class Relation implements Serializable {
         if (month != null ? !month.equals(relation.month) : relation.month != null) return false;
         if (declarationDataId != null ? !declarationDataId.equals(relation.declarationDataId) : relation.declarationDataId != null)
             return false;
-        if (declarationType != null ? !declarationType.equals(relation.declarationType) : relation.declarationType != null)
+        if (declarationTemplate != null ? !declarationTemplate.equals(relation.declarationTemplate) : relation.declarationTemplate != null)
             return false;
         if (taxOrganCode != null ? !taxOrganCode.equals(relation.taxOrganCode) : relation.taxOrganCode != null)
             return false;
@@ -416,7 +415,7 @@ public class Relation implements Serializable {
         result = 31 * result + (month != null ? month.hashCode() : 0);
         result = 31 * result + (manual ? 1 : 0);
         result = 31 * result + (declarationDataId != null ? declarationDataId.hashCode() : 0);
-        result = 31 * result + (declarationType != null ? declarationType.hashCode() : 0);
+        result = 31 * result + (declarationTemplate != null ? declarationTemplate.hashCode() : 0);
         result = 31 * result + (taxOrganCode != null ? taxOrganCode.hashCode() : 0);
         result = 31 * result + (kpp != null ? kpp.hashCode() : 0);
         result = 31 * result + departmentId;

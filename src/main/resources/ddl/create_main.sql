@@ -421,15 +421,17 @@ create sequence seq_declaration_template start with 10000;
 
 -----------------------------------------------------------------------------------------------------------------------------------
 create table declaration_data (
-  id                          number(18)  not null,
-  declaration_template_id     number(9)   not null,
-  tax_organ_code              varchar2(4),
-  kpp                         varchar2(9),
-  department_report_period_id number(18)  not null,
-  asnu_id                     number(9),
-  note                        varchar2(512),
-  state                       number(1)   default 1 not null,
-  file_name                   varchar2(255 char)
+  id                          number(18) not null,
+  declaration_template_id     number(9) not null,
+  tax_organ_code              varchar2(4 char),
+  kpp                         varchar2(9 char),
+  oktmo                       varchar2(11 char),
+  department_report_period_id number(18) not null,
+  asnu_id                     number(18),
+  note                        varchar2(512  char),
+  state                       number(1) default 1 not null,
+  file_name                   varchar2(255 char),
+  doc_state_id                number(18)
 );
 
 
@@ -438,11 +440,13 @@ comment on column declaration_data.id is 'Идентификатор (перви
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
 comment on column declaration_data.tax_organ_code is 'Налоговый орган';
 comment on column declaration_data.kpp is 'КПП';
+comment on column declaration_data.oktmo is 'ОКТМО';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
 comment on column declaration_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
 comment on column declaration_data.state is 'Состояние формы';
 comment on column declaration_data.file_name is 'Имя файла';
+comment on column declaration_data.doc_state_id is 'Состояние ЭД';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------
@@ -1183,7 +1187,9 @@ create table ndfl_person (
   flat                varchar2(10 char),
   country_code        varchar2(10 char),
   address             varchar2(200 char),
-  additional_data     varchar2(4000 char)
+  additional_data     varchar2(4000 char),
+  country_code_out    varchar2(3 char),
+  address_out         varchar2(200 char)
 );
 
 comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
@@ -1215,6 +1221,8 @@ comment on column ndfl_person.flat is 'Квартира';
 comment on column ndfl_person.country_code is 'Код страны';
 comment on column ndfl_person.address is 'Адрес';
 comment on column ndfl_person.additional_data is 'Дополнительная информация';
+comment on column ndfl_person.country_code_out is 'Код страны проживания вне РФ';
+comment on column ndfl_person.address_out is 'Адрес проживания вне РФ';
 
 create sequence seq_ndfl_person start with 1000;
 ------------------------------------------------------------------------------------------------------

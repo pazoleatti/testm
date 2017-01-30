@@ -6,18 +6,181 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.refbook.*
+import groovy.transform.Field
 import groovy.util.slurpersupport.NodeChild
+import groovy.xml.MarkupBuilder
 
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.Characters
 import javax.xml.stream.events.XMLEvent
+import java.text.SimpleDateFormat
+
+
+/**
+ * Справочник "Коды, определяющие налоговый (отчётный) период"
+ */
+@Field
+def PERIOD_CODE_REFBOOK = 8L;
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
         break
+    case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        createSpecificReport();
+        break
 }
+
+//------------------ Create Report ----------------------
+
+def createSpecificReport() {
+
+    //Проверка, подготовка данных
+    def params = scriptSpecificReportHolder.subreportParamValues
+    def reportParameters = scriptSpecificReportHolder.getSubreportParamValues();
+
+    if (reportParameters.isEmpty()) {
+        throw new ServiceException("Для поиска физического лица необходимо задать один из критериев.");
+    }
+
+    PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, reportParameters);
+
+    if (pagingResult.isEmpty()) {
+        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + params);
+    }
+
+    if (pagingResult.isEmpty()) {
+        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + params);
+    }
+
+    if (pagingResult.size() > 1) {
+        pagingResult.getRecords().each() { ndflPerson ->
+            StringBuilder sb = new StringBuilder();
+            sb.append("[").append("Фамилия: ").append(ndflPerson.lastName).append("],");
+            sb.append("[").append("Имя: ").append(ndflPerson.firstName).append("],");
+            sb.append("[").append("Отчество: ").append(ndflPerson.middleName).append("],");
+            sb.append("[").append("СНИЛС: ").append(ndflPerson.snils).append("],");
+            sb.append("[").append("ИНН: ").append(ndflPerson.innNp).append("],");
+            sb.append("[").append("Дата рождения: ").append(formatDate(ndflPerson.birthDay)).append("],");
+            sb.append("[").append("ДУЛ: ").append(ndflPerson.idDocNumber).append("],");
+            logger.info(sb.toString())
+        }
+        throw new ServiceException("Найдено " + pagingResult.getTotalCount() + " записей. Отображено записей " + pagingResult.size() + ". Уточните критерии поиска.");
+    }
+
+    //формирование отчета
+    def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
+        calculateReportData(it, pagingResult.get(0))
+    });
+
+    declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+}
+
+void calculateReportData(writer, ndflPerson) {
+
+    //отчетный период
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+
+    //Идентификатор подразделения
+    def departmentId = declarationData.departmentId
+
+    //Подразделение
+    def department = departmentService.get(departmentId)
+
+    def reportPeriodCode = findReportPeriodCode(reportPeriod)
+
+    def builder = new MarkupBuilder(writer)
+    builder.Файл() {
+
+        СлЧасть('КодПодр': department.sbrfCode) {}
+        ИнфЧасть('ПериодОтч': reportPeriodCode, 'ОтчетГод': reportPeriod?.taxPeriod?.year) {
+            ПолучДох(ndflPersonAttr(ndflPerson)) {
+                def incomes = ndflPerson.incomes.sort { a, b -> (a.rowNum <=> b.rowNum) }
+                def deductions = ndflPerson.deductions.sort { a, b -> a.rowNum <=> b.rowNum }
+                def prepayments = ndflPerson.prepayments.sort { a, b -> a.rowNum <=> b.rowNum }
+
+                def operationList = incomes.collectEntries { personIncome ->
+                    def key = personIncome.operationId
+                    def value = ["ИдОпер": personIncome.operationId, "КПП": personIncome.kpp, "ОКТМО": personIncome.oktmo]
+                    return [key, value]
+                }
+
+                def incomeOperations = mapToOperationId(incomes);
+                def deductionOperations = mapToOperationId(deductions);
+                def prepaymentOperations = mapToOperationId(prepayments);
+
+                operationList.each { key, value ->
+                    СведОпер(value) {
+                        //доходы
+                        incomeOperations.get(key).each { personIncome ->
+                            СведДохНал(incomeAttr(personIncome)) {}
+                        }
+
+                        //Вычеты
+                        deductionOperations.get(key).each { personDeduction ->
+                            СведВыч(deductionAttr(personDeduction)) {}
+                        }
+
+                        //Авансовые платежи
+                        prepaymentOperations.get(key).each { personPrepayment ->
+                            СведАванс(prepaymentAttr(personPrepayment)) {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+def mapToOperationId(collection) {
+    def result = [:]
+    collection.collectEntries(result) { personOperation ->
+        def key = personOperation.operationId
+        def value
+        if (result.containsKey(key)) {
+            value = result.get(key);
+        } else {
+            value = [].toList()
+        }
+        value.add(personOperation)
+        return [key, value]
+    }
+    return result;
+}
+
+
+def formatDate(date) {
+    return ScriptUtils.formatDate(date, "dd.MM.yyyy")
+}
+
+Date parseDate(xmlDate) {
+    return new java.text.SimpleDateFormat('dd.MM.yyyy').parse(xmlDate.text())
+}
+
+/**
+ * Получить полное название подразделения по id подразделения.
+ */
+def getDepartmentFullName(def id) {
+    return departmentService.getParentsHierarchy(id)
+}
+
+/**
+ * Находит код периода из справочника "Коды, определяющие налоговый (отчётный) период"
+ */
+def findReportPeriodCode(reportPeriod) {
+    RefBookDataProvider dataProvider = refBookFactory.getDataProvider(PERIOD_CODE_REFBOOK)
+    Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
+    if (refBookValueMap.isEmpty()) {
+        throw new ServiceException("Некорректные данные в справочнике \"Коды, определяющие налоговый (отчётный) период\"");
+    }
+    return refBookValueMap.get("CODE").getStringValue();
+}
+
+//------------------Import Data ----------------------
 
 void importData() {
 
@@ -44,7 +207,7 @@ void importData() {
                 continue;
             }
 
-            if (!event.isStartElement() && !event.isEndElement()){
+            if (!event.isStartElement() && !event.isEndElement()) {
                 continue;
             }
 
@@ -96,6 +259,8 @@ void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOpera
     }
 
 }
+
+// ----------------- Data -----------------------
 
 NdflPerson transformNdflPersonNode(NodeChild node) {
     NdflPerson ndflPerson = new NdflPerson()
@@ -192,6 +357,93 @@ NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
     return personPrepayment;
 }
 
-Date parseDate(xmlDate) {
-    return new java.text.SimpleDateFormat('dd.MM.yyyy').parse(xmlDate.text())
+def ndflPersonAttr(ndflPerson) {
+    [
+            'ИНП'        : ndflPerson.inp,
+            'СНИЛС'      : ndflPerson.snils,
+            'ФамФЛ'      : ndflPerson.lastName,
+            'ИмяФЛ'      : ndflPerson.firstName,
+            'ОтчФЛ'      : ndflPerson.middleName,
+            'ДатаРожд'   : formatDate(ndflPerson.birthDay),
+            'Гражд'      : ndflPerson.citizenship,
+            'ИННФЛ'      : ndflPerson.innNp,
+            'ИННИно'     : ndflPerson.innForeign,
+            'УдЛичнФЛКод': ndflPerson.idDocType,
+            'УдЛичнФЛНом': ndflPerson.idDocNumber,
+            'СтатусФЛ'   : ndflPerson.status,
+            'Индекс'     : ndflPerson.postIndex,
+            'КодРегион'  : ndflPerson.regionCode,
+            'Район'      : ndflPerson.area,
+            'Город'      : ndflPerson.city,
+            'НаселПункт' : ndflPerson.locality,
+            'Улица'      : ndflPerson.street,
+            'Дом'        : ndflPerson.house,
+            'Корпус'     : ndflPerson.building,
+            'Кварт'      : ndflPerson.flat,
+            'КодСтрИно'  : ndflPerson.countryCode,
+            'АдресИно'   : ndflPerson.address,
+            'ДопИнф'     : ndflPerson.additionalData]
+
+
+}
+
+def incomeAttr(personIncome) {
+    [
+            'НомСтр'      : personIncome.rowNum,
+            'КодДох'      : personIncome.incomeCode,
+            'ТипДох'      : personIncome.incomeType,
+
+            'ИдОпер'      : personIncome.operationId,//toBigDecimal()
+            'ОКТМО'       : personIncome.oktmo,
+            'КПП'         : personIncome.kpp,
+
+            'ДатаДохНач'  : formatDate(personIncome.incomeAccruedDate),
+            'ДатаДохВыпл' : formatDate(personIncome.incomePayoutDate),
+            'СуммДохНач'  : personIncome.incomeAccruedSumm,//toBigDecimal()
+            'СуммДохВыпл' : personIncome.incomePayoutSumm,//toBigDecimal()
+            'СумВыч'      : personIncome.totalDeductionsSumm,//toBigDecimal()
+            'НалБаза'     : personIncome.taxBase,//toBigDecimal()
+            'Ставка'      : personIncome.taxRate,//toInteger()
+            'ДатаНалог'   : formatDate(personIncome.taxDate),
+            'НИ'          : personIncome.calculatedTax,//toInteger()
+            'НУ'          : personIncome.withholdingTax,//toInteger()
+            'ДолгНП'      : personIncome.notHoldingTax,//toInteger()
+            'ДолгНА'      : personIncome.overholdingTax,//toInteger()
+            'ВозврНал'    : personIncome.refoundTax,//toInteger()
+            'СрокПрчслНал': formatDate(personIncome.taxTransferDate),
+            'ПлПоручДат'  : formatDate(personIncome.paymentDate),
+            'ПлатПоручНом': personIncome.paymentNumber,
+            'НалПерСумм'  : personIncome.taxSumm,//toInteger()
+    ]
+}
+
+def deductionAttr(personDeduction) {
+    [
+            'НомСтр'     : personDeduction.rowNum,//toInteger()
+            'ИдОпер'     : personDeduction.operationId,//toBigDecimal()
+            'ВычетКод'   : personDeduction.typeCode,
+            'УведТип'    : personDeduction.notifType,
+            'УведДата'   : formatDate(personDeduction.notifDate),
+            'УведНом'    : personDeduction.notifNum,
+            'УведИФНС'   : personDeduction.notifSource,
+            'УведСум'    : personDeduction.notifSumm,//toBigDecimal()
+            'ДатаДохНач' : formatDate(personDeduction.incomeAccrued),
+            'КодДох'     : personDeduction.incomeCode,
+            'СуммДохНач' : personDeduction.incomeSumm,//toBigDecimal()
+            'ДатаПредВыч': formatDate(personDeduction.periodPrevDate),
+            'СумПредВыч' : personDeduction.periodPrevSumm,//toBigDecimal()
+            'ДатаТекВыч' : formatDate(personDeduction.periodCurrDate),
+            'СумТекВыч'  : personDeduction.periodCurrSumm//toBigDecimal()
+    ]
+}
+
+def prepaymentAttr(personPrepayment) {
+    [
+            "НомСтр"  : personPrepayment.rowNum,//.toInteger()
+            "ИдОпер"  : personPrepayment.operationId,//toBigDecimal()
+            "Аванс"   : personPrepayment.summ,//toBigDecimal()
+            "УведНом" : personPrepayment.notifNum,
+            "УведДата": formatDate(personPrepayment.notifDate),
+            "УведИФНС": personPrepayment.notifSource
+    ]
 }

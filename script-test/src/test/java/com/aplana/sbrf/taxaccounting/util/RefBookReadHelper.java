@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.util.TestUtils.readFile;
+
 /**
  * Хэлпер для чтения csv-файлов со справочными данными
  * Данные необходимы для эмуляции справочных данных
@@ -54,7 +56,7 @@ public class RefBookReadHelper {
      */
     private static Map<Long, Map<String, RefBookValue>> getRecords(String path) throws IOException, ParseException {
         Map<Long, Map<String, RefBookValue>> retVal = new HashMap<Long, Map<String, RefBookValue>>();
-        String string = TestScriptHelper.readFile(path, "UTF-8");
+        String string = readFile(path, "UTF-8");
         String[] rows = string.split("\n");
         String firstRow = rows[0];
         String[] attributes = firstRow.split(";");

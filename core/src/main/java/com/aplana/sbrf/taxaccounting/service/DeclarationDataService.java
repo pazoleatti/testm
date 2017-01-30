@@ -5,11 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -28,10 +30,11 @@ public interface DeclarationDataService {
      * @param departmentReportPeriod отчетный период подразделения
      * @param taxOrganCode налоговый орган (для налога на имущество)
      * @param taxOrganKpp КПП (для налога на имущество)
+	 * @param oktmo ОКТМО, для НДФЛ
      * @return идентификатор созданной декларации
      */
     Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp,
+                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo,
                 Long asunId, String guid);
 
 	/**
@@ -165,7 +168,7 @@ public interface DeclarationDataService {
      * @param departmentReportPeriod Отчетный период подразделения
      * @return
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode, Long asnuId, String fileName);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
     List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate);
 
@@ -272,6 +275,29 @@ public interface DeclarationDataService {
      * @return
      */
     JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params);
+
+
+	/**
+	 * Формирование jasper-отчета, данный метод не использует JRSwapFile для промежуточного хранения данных, вместо этого данные загружаются в буффер
+	 * @param xmlData xml поток входных данных
+	 * @param jrxmlTemplate шаблон отчета
+	 * @param params набор параметров отчета
+     * @return сформированный отчет
+     */
+	JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> params);
+
+
+	/**
+	 * Формирование jasper-отчета, расширенный вариант метода
+	 * {@link DeclarationDataService#createJasperReport(InputStream, InputStream, Map)}
+     */
+	JasperPrint createJasperReport(InputStream xmlIn, InputStream jrxml, Map<String, Object> parameters, Connection connection);
+
+	/**
+	 * Получить соединение для передачи в отчет
+	 * @return
+     */
+	Connection getReportConnection();
 
     /**
      * Формирование PDF отчета

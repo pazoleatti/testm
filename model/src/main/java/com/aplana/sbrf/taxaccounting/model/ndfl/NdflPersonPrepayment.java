@@ -8,7 +8,8 @@ import java.util.Date;
  */
 public class NdflPersonPrepayment extends NdflPersonOperation {
 
-    private BigDecimal summ;
+    // Сумма фиксированного авансового платежа
+    private Long summ;
     private String notifNum;
     private Date notifDate;
     private String notifSource;
@@ -38,12 +39,10 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
         return FIELDS;
     }
 
-    public BigDecimal getSumm() {
-
+    public Long getSumm() {
         return summ;
     }
-
-    public void setSumm(BigDecimal summ) {
+    public void setSumm(Long summ) {
         this.summ = summ;
     }
 

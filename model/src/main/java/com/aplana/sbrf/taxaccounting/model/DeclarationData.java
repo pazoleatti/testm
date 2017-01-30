@@ -17,6 +17,7 @@ public class DeclarationData extends IdentityObject<Long> {
 
     private String taxOrganCode;
     private String kpp;
+	private String oktmo;
     /**
      * Идентификатор АСНУ
      */
@@ -138,4 +139,12 @@ public class DeclarationData extends IdentityObject<Long> {
     public void setState(State state) {
         this.state = state;
     }
+
+	public String getOktmo() {
+		return oktmo;
+	}
+
+	public void setOktmo(String oktmo) {
+		this.oktmo = oktmo;
+	}
 }

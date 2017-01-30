@@ -48,9 +48,6 @@ def buildXml() {
     // Признак лица, подписавшего документ
     def signatoryId = getRefBookValue(35, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
 
-    // Период
-    def period = getPeriod(departmentParamIncomeRow, periodCode)
-
     // Учитывать будем только информацию о доходах/налогах только за отчетный период
     def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id, reportPeriod.startDate, reportPeriod.endDate);
     def ndflPersonIncomeByRateList = ndflPersonIncomeCommonValue?.ndflPersonIncomeByRateList
@@ -58,7 +55,6 @@ def buildXml() {
     def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate)
 
     def builder = new MarkupBuilder(xml)
-    builder.mkp.xmlDeclaration(version: "1.0", encoding: "windows-1251")
     builder.Файл(
             ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, declarationData.kpp),
             ВерсПрог: applicationVersion,
@@ -67,16 +63,18 @@ def buildXml() {
         Документ(
                 КНД: "1151099",
                 ДатаДок: new Date().format(DATE_FORMAT_DOT),
-                Период: period,
+                Период: getPeriod(departmentParamIncomeRow, periodCode),
                 ОтчетГод: reportPeriod.taxPeriod.year,
-                КодНО: declarationData.taxOrganCode,
+                КодНО: departmentParamIncomeRow?.TAX_ORGAN_CODE?.value,
                 НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 ПоМесту: taxPlaceTypeCode
         ) {
-            СвНП(
-                    ОКТМО: departmentParamIncomeRow.OKTMO,
-                    Тлф: departmentParamIncomeRow.PHONE
-            ){
+            def svNP = ["ОКТМО": declarationData.oktmo]
+            // Атрибут Тлф необязателен
+            if (departmentParamIncomeRow.PHONE && !departmentParamIncomeRow.PHONE.empty) {
+                svNP.put("Тлф", departmentParamIncomeRow.PHONE)
+            }
+            СвНП(svNP){
                 НПЮЛ(
                         НаимОрг: departmentParamIncomeRow.NAME,
                         ИННЮЛ: departmentParam.INN,
@@ -86,16 +84,21 @@ def buildXml() {
             Подписант(
                     ПрПодп: signatoryId
             ){
-                ФИО(
-                        Фамилия: departmentParamIncomeRow.SIGNATORY_SURNAME,
-                        Имя: departmentParamIncomeRow.SIGNATORY_FIRSTNAME,
-                        Отчество: departmentParamIncomeRow.SIGNATORY_LASTNAME
-                ){}
+                // Узел ФИО необязателен
+                if (departmentParamIncomeRow.SIGNATORY_SURNAME && !departmentParamIncomeRow.SIGNATORY_SURNAME.empty) {
+                    def fio = ["Фамилия": departmentParamIncomeRow.SIGNATORY_SURNAME, "Имя": departmentParamIncomeRow.SIGNATORY_FIRSTNAME]
+                    // Атрибут Отчество необязателен
+                    if (departmentParamIncomeRow.SIGNATORY_LASTNAME && !departmentParamIncomeRow.SIGNATORY_LASTNAME.empty) {
+                        fio.put("Отчество", departmentParamIncomeRow.SIGNATORY_LASTNAME)
+                    }
+                    ФИО(fio){}
+                }
                 if (signatoryId == 2) {
-                    СвПред(
-                            НаимДок: departmentParamIncomeRow.APPROVE_DOC_NAME,
-                            НаимОрг: departmentParamIncomeRow.APPROVE_ORG_NAME
-                    ){}
+                    def svPred = ["НаимДок": departmentParamIncomeRow.APPROVE_DOC_NAME]
+                    if (departmentParamIncomeRow.APPROVE_ORG_NAME && !departmentParamIncomeRow.APPROVE_ORG_NAME.empty) {
+                        svPred.put("НаимОрг", departmentParamIncomeRow.APPROVE_ORG_NAME)
+                    }
+                    СвПред(svPred){}
                 }
             }
             НДФЛ6(){
@@ -106,6 +109,24 @@ def buildXml() {
                         ВозврНалИт: ndflPersonIncomeCommonValue?.refoundTax?.value
                 ) {
                     ndflPersonIncomeByRateList.each { ndflPersonIncomeByRate ->
+                        if (ndflPersonIncomeByRate.incomeAccruedSumm == null) {
+                            ndflPersonIncomeByRate.incomeAccruedSumm = 0
+                        }
+                        if (ndflPersonIncomeByRate.incomeAccruedSummDiv == null) {
+                            ndflPersonIncomeByRate.incomeAccruedSummDiv = 0
+                        }
+                        if (ndflPersonIncomeByRate.totalDeductionsSumm == null) {
+                            ndflPersonIncomeByRate.totalDeductionsSumm = 0
+                        }
+                        if (ndflPersonIncomeByRate.calculatedTax == null) {
+                            ndflPersonIncomeByRate.calculatedTax = 0
+                        }
+                        if (ndflPersonIncomeByRate.calculatedTaxDiv == null) {
+                            ndflPersonIncomeByRate.calculatedTaxDiv = 0
+                        }
+                        if (ndflPersonIncomeByRate.prepaymentSum == null) {
+                            ndflPersonIncomeByRate.prepaymentSum = 0
+                        }
                         СумСтавка (
                             Ставка: ndflPersonIncomeByRate.taxRate,
                             НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 2),
@@ -113,19 +134,28 @@ def buildXml() {
                             ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
                             ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
                             ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
-                            АвансПлат: ScriptUtils.round(ndflPersonIncomeByRate.prepaymentSum, 0)
+                            АвансПлат: ndflPersonIncomeByRate.prepaymentSum
                         ) {}
                     }
                 }
-                ДохНал() {
-                    ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
-                        СумДата (
-                            ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format(DATE_FORMAT_DOT),
-                            ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format(DATE_FORMAT_DOT),
-                            СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format(DATE_FORMAT_DOT),
-                            ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 2),
-                            УдержНал: ndflPersonIncomeByDate.withholdingTax
-                        ) {}
+                // Узел ДохНал необязателен
+                if (ndflPersonIncomeByDateList.size() > 0) {
+                    ДохНал() {
+                        ndflPersonIncomeByDateList.each { ndflPersonIncomeByDate ->
+                            if (ndflPersonIncomeByDate.incomePayoutSumm == null) {
+                                ndflPersonIncomeByDate.incomePayoutSumm = 0
+                            }
+                            if (ndflPersonIncomeByDate.withholdingTax == null) {
+                                ndflPersonIncomeByDate.withholdingTax = 0
+                            }
+                            СумДата(
+                                    ДатаФактДох: ndflPersonIncomeByDate.incomeAccruedDate.format(DATE_FORMAT_DOT),
+                                    ДатаУдержНал: ndflPersonIncomeByDate.taxDate.format(DATE_FORMAT_DOT),
+                                    СрокПрчслНал: ndflPersonIncomeByDate.taxTransferDate.format(DATE_FORMAT_DOT),
+                                    ФактДоход: ScriptUtils.round(ndflPersonIncomeByDate.incomePayoutSumm, 2),
+                                    УдержНал: ndflPersonIncomeByDate.withholdingTax
+                            ) {}
+                        }
                     }
                 }
             }
@@ -160,7 +190,7 @@ def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP) {
  * Период
  */
 def getPeriod(def departmentParamIncomeRow, def periodCode) {
-    if (departmentParamIncomeRow.REORG_FORM_CODE) {
+    if (departmentParamIncomeRow.REORG_FORM_CODE && !departmentParamIncomeRow.REORG_FORM_CODE.empty) {
         def result;
         switch (periodCode) {
             case "21":
@@ -210,7 +240,7 @@ def getDepartmentParam() {
  */
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamTable == null) {
-        def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
+        def filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(951).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения")

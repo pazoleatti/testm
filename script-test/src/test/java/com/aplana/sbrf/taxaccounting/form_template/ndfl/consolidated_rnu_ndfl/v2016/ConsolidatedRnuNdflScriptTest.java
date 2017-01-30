@@ -94,7 +94,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
 
         //mock service
         when(testHelper.getDeclarationService().getDeclarationSourcesInfo(any(DeclarationData.class),
-                anyBoolean(), anyBoolean(), Matchers.isNull(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenAnswer(new Answer<List<Relation>>() {
+                anyBoolean(), anyBoolean(), Matchers.isNull(State.class), any(TAUserInfo.class), any(Logger.class))).thenAnswer(new Answer<List<Relation>>() {
             @Override
             public List<Relation> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 List<Relation> relation = new ArrayList<Relation>();

@@ -1,5 +1,3 @@
--- Перенос настроек подразделений из промежуточных в постоянные таблицы
--- скрипт выполняется третьим (последним)
 insert into ref_book_ndfl(department_id, inn, version, record_id, status, id)
 select tab.*,rownum,0,rownum
   from (select d.dep_id,first_value(t.inn) over(partition by t.depcode) inn,
@@ -30,17 +28,6 @@ select d.dep_id, seq_ref_book_ndfl_detail.nextval,n.id ndfl_id,seq_ref_book_ndfl
                                                     where v.attribute_id in (212,213)
                                                     group by record_id) vl left join ref_book_record rec on (rec.id=vl.record_id and trunc(sysdate,'y') between rec.version and trunc(sysdate,'y'))
                                             order by rec.id) s on (s.code=t.sign and trunc(sysdate,'y') between s.version and trunc(sysdate,'y'))
-                                left join (select rec.id,
-                                                  rec.record_id,
-                                                  rec.version,
-                                                  rec.status,
-                                                  vl.code,vl.name
-                                            from (select record_id,
-                                                         max(decode(v.attribute_id,13,v.string_value)) code,
-                                                         max(decode(v.attribute_id,14,v.string_value)) name
-                                                    from ref_book_value v
-                                                   where v.attribute_id in (13,14)
-                                                   group by record_id) vl left join ref_book_record rec on (rec.id=vl.record_id and trunc(sysdate,'y') between rec.version and trunc(sysdate,'y'))
-                                           order by rec.id) ro on (ro.code=t.reorgcode and trunc(sysdate,'y') between ro.version and trunc(sysdate,'y'))
+                                left join ref_book_reorganization ro on (ro.code=t.reorgcode and trunc(sysdate,'y') between ro.version and trunc(sysdate,'y'))
 /*where t.depcode='ЦЧБ'*/;     
 

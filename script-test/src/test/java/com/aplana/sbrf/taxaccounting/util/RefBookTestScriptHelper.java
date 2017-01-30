@@ -15,13 +15,17 @@ import net.sf.sevenzipjbinding.IInArchive;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static com.aplana.sbrf.taxaccounting.util.TestUtils.readFile;
 
 /**
  * Хэлпер для работы со скриптами справочников в тестовом режиме
@@ -180,24 +184,6 @@ public class RefBookTestScriptHelper {
         }
     }
 
-    /**
-     * Чтение из файла в строку
-     */
-    public static String readFile(String path, String charset) throws IOException {
-        FileInputStream stream = new FileInputStream(new File(path));
-        try {
-            Reader reader = new BufferedReader(new InputStreamReader(stream, charset));
-            StringBuilder builder = new StringBuilder();
-            char[] buffer = new char[10240];
-            int read;
-            while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
-                builder.append(buffer, 0, read);
-            }
-            return builder.toString();
-        } finally {
-            stream.close();
-        }
-    }
 
     /**
      * Вывод логов после работы скрипта

@@ -374,7 +374,6 @@ public class TestScriptHelper {
     }
 
 
-
     /**
      * Вывод логов после работы скрипта
      */

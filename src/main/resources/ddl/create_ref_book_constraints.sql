@@ -1,8 +1,11 @@
 -----------------------------------------------------------------------------------------------------------------------------
 -- Создание ограничений для справочников
 -----------------------------------------------------------------------------------------------------------------------------
---ОКТМО (на случай, если ключ отсутствует)
---alter table ref_book_oktmo add constraint pk_ref_book_oktmo primary key (id);
+--ОКТМО
+alter table ref_book_oktmo add constraint ref_book_oktmo_pk primary key (id);
+--alter table ref_book_oktmo add constraint ref_book_oktmo_fk_parent_id foreign key (parent_id) references ref_book_oktmo(id);
+alter table ref_book_oktmo add constraint ref_book_oktmo_chk_status check (status in (0,-1,1,2));
+create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
 
 -- ОКАТО
 alter table ref_book_okato add constraint pk_ref_book_okato primary key(id);
@@ -19,8 +22,8 @@ alter table ref_book_region add constraint chk_ref_book_region_status check (sta
 alter table ref_book_region add constraint chk_ref_book_region_okato_def check (decode(translate('#'||okato_definition,'#1234567890','#'),'#','ЦИФРЫ','Буквы')='ЦИФРЫ');
 alter table ref_book_region add constraint chk_ref_book_region_oktmo_def check (decode(translate('#'||oktmo_definition,'#1234567890','#'),'#','ЦИФРЫ','Буквы')='ЦИФРЫ');
 
-alter table ref_book_region add constraint fk_ref_book_region_okato foreign key(okato) references ref_book_okato(id);
-alter table ref_book_region add constraint fk_ref_book_region_oktmo foreign key(oktmo) references ref_book_oktmo(id);
+--alter table ref_book_region add constraint fk_ref_book_region_okato foreign key(okato) references ref_book_okato(id);
+--alter table ref_book_region add constraint fk_ref_book_region_oktmo foreign key(oktmo) references ref_book_oktmo(id);
 
 --Коды места представления расчета
 alter table ref_book_present_place add constraint pk_ref_book_present_place primary key(id);
@@ -50,6 +53,9 @@ alter table ref_book_deduction_mark add constraint chk_ref_book_ded_mark_status 
 alter table ref_book_reorganization add constraint pk_ref_book_reorganization primary key(id);
 alter table ref_book_reorganization add constraint chk_ref_book_reorg_status check(status between -1 and 2);
 
+-- Состояния ЭД
+alter table ref_book_doc_state add constraint pk_ref_book_doc_state primary key (id);
+
 -- Параметры подразделения по НДФЛ
 alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
 alter table ref_book_ndfl_detail add constraint pk_ref_book_ndfl_detail primary key(id);
@@ -57,13 +63,13 @@ alter table ref_book_ndfl_detail add constraint pk_ref_book_ndfl_detail primary 
 alter table ref_book_ndfl add constraint fk_ref_book_ndfl_depart foreign key(department_id) references department(id);
 alter table ref_book_ndfl add constraint chk_ref_book_ndfl_status check (status in (-1,0,1,2));
 
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_parent foreign key(ref_book_ndfl_id) references ref_book_ndfl(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_okved foreign key(okved) references ref_book_okved(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_region foreign key(region) references ref_book_region(id);
+--alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_parent foreign key(ref_book_ndfl_id) references ref_book_ndfl(id);
+--alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
+--alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_okved foreign key(okved) references ref_book_okved(id);
+--alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_region foreign key(region) references ref_book_region(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_oblig foreign key(obligation) references ref_book_record(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_type foreign key(type) references ref_book_record(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_re_code foreign key(reorg_form_code) references ref_book_record(id);
+--alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_re_code foreign key(reorg_form_code) references ref_book_record(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_signatory foreign key(signatory_id) references ref_book_record(id);
 alter table ref_book_ndfl_detail add constraint chk_ref_book_ndfl_det_status check (status in (-1,0,1,2));
 
@@ -74,18 +80,19 @@ alter table ref_book_fond_detail add constraint pk_ref_book_fond_detail primary 
 alter table ref_book_fond add constraint fk_ref_book_fond_depart foreign key(department_id) references department(id);
 alter table ref_book_fond add constraint chk_ref_book_fond_status check (status in (-1,0,1,2));
 
-alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_parent foreign key(ref_book_fond_id) references ref_book_fond(id);
-alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
-alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_okved foreign key(okved) references ref_book_okved(id);
-alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_region foreign key(region) references ref_book_region(id);
+--alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_parent foreign key(ref_book_fond_id) references ref_book_fond(id);
+--alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
+--alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_okved foreign key(okved) references ref_book_okved(id);
+--alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_region foreign key(region) references ref_book_region(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_oblig foreign key(obligation) references ref_book_record(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_type foreign key(type) references ref_book_record(id);
-alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_re_code foreign key(reorg_form_code) references ref_book_record(id);
+--alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_re_code foreign key(reorg_form_code) references ref_book_reorganization(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_signatory foreign key(signatory_id) references ref_book_record(id);
 alter table ref_book_fond_detail add constraint chk_ref_book_fond_det_status check (status in (-1,0,1,2));
 
 -----------------------------------------------------------------------------------------------------------------------------
-alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
+--alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
 -----------------------------------------------------------------------------------------------------------------------------
 alter table declaration_template add constraint fk_declaration_template_fkind foreign key(form_kind) references declaration_kind(id);
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
+alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);

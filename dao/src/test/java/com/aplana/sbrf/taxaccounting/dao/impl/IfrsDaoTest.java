@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.IfrsDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+@Ignore("Налоговые формы не используются!")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"IfrsDaoTest.xml"})
 @Transactional
