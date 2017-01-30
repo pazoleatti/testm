@@ -139,7 +139,6 @@ create table ref_book_okved
   status    number(1) default 0 not null,
   code      varchar2(8 char) not null,
   name      varchar2(500 char) not null
-
 );
 
 comment on table ref_book_okved is 'Общероссийский классификатор видов экономической деятельности';
