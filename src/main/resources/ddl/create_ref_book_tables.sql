@@ -205,6 +205,18 @@ comment on column ref_book_reorganization.status is 'Статус записи (
 comment on column ref_book_reorganization.code is 'Код';
 comment on column ref_book_reorganization.name is 'Наименование';
 
+--Состояния ЭД
+create table ref_book_doc_state (
+  id number(18) not null,
+  knd varchar2(7 char),
+  name varchar2(255 char) not null
+);
+
+comment on table ref_book_doc_state is 'Состояние ЭД';
+comment on column ref_book_doc_state.id is 'Уникальный идентификатор';
+comment on column ref_book_doc_state.knd is 'Код формы по КНД';
+comment on column ref_book_doc_state.name is 'Наименование состояния';
+
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (
