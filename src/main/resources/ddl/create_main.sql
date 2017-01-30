@@ -1185,7 +1185,9 @@ create table ndfl_person (
   flat                varchar2(10 char),
   country_code        varchar2(10 char),
   address             varchar2(200 char),
-  additional_data     varchar2(4000 char)
+  additional_data     varchar2(4000 char),
+  country_code_out    varchar2(3 char),
+  address_out         varchar2(200 char)
 );
 
 comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
@@ -1217,6 +1219,8 @@ comment on column ndfl_person.flat is 'Квартира';
 comment on column ndfl_person.country_code is 'Код страны';
 comment on column ndfl_person.address is 'Адрес';
 comment on column ndfl_person.additional_data is 'Дополнительная информация';
+comment on column ndfl_person.country_code_out is 'Код страны проживания вне РФ';
+comment on column ndfl_person.address_out is 'Адрес проживания вне РФ';
 
 create sequence seq_ndfl_person start with 1000;
 ------------------------------------------------------------------------------------------------------
