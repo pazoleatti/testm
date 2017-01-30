@@ -90,7 +90,7 @@ public class DeclarationListView extends
 	Label titleDesc;
 
     @UiField
-    LinkButton create;
+    LinkButton create, createReports;
 
     @UiField
     ResizeLayoutPanel tableWrapper;
@@ -414,6 +414,14 @@ public class DeclarationListView extends
     void onCreateButtonClicked(ClickEvent event){
         if (getUiHandlers() != null) {
             getUiHandlers().onCreateClicked();
+        }
+    }
+
+
+    @UiHandler("createReports")
+    void onCreateReportsButtonClicked(ClickEvent event){
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateReportsClicked();
         }
     }
 
