@@ -3010,7 +3010,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static String CHECK_REFERENCE_VERSIONS_START = "select id from %s where VERSION < ? and %s";
 
     @Override
-    public Map<String, RefBookValue> getRecordData(final Long refBookId, final String tableName, final Long recordId) {
+    public Map<String, RefBookValue> getRecordData(final Long refBookId, final String tableName, final Long id) {
         RefBook refBook = get(refBookId);
         StringBuilder sql = new StringBuilder("SELECT id ");
         sql.append(RefBook.RECORD_ID_ALIAS);
@@ -3022,7 +3022,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         sql.append(tableName);
         sql.append(" WHERE id = :id");
         Map<String, Long> params = new HashMap<String, Long>();
-        params.put("id", recordId);
+        params.put("id", id);
         try {
             return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
         } catch (EmptyResultDataAccessException e) {

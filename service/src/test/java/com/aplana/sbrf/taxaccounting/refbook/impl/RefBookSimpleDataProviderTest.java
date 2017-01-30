@@ -191,4 +191,9 @@ public class RefBookSimpleDataProviderTest {
         provider.getRecordVersionsByRecordId(4L, null, null, null);
         verify(daoMock).getRecordVersionsByRecordId(RFB_ID, 4L, null, null, null);
     }
+
+    @Test
+    public void dereferenceValuesExecutes() throws Exception {
+        provider.dereferenceValues(50L, new ArrayList<Long>(Arrays.asList(4L)));
+    }
 }

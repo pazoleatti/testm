@@ -113,8 +113,8 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     }
 
     @Override
-    public Map<String, RefBookValue> getRecordData(@NotNull Long recordId) {
-        return refBookDao.getRecordData(getRefBook().getId(), getRefBook().getTableName(), recordId);
+    public Map<String, RefBookValue> getRecordData(@NotNull Long id) {
+        return refBookDao.getRecordData(getRefBook().getId(), getRefBook().getTableName(), id);
     }
 
     @Override
