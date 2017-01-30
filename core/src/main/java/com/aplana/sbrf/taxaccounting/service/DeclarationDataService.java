@@ -45,7 +45,7 @@ public interface DeclarationDataService {
      * @param docDate - дата обновления декларации
      * @param stateLogger - логгер для обновления статуса асинхронной задачи
      */
-	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger);
+	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger, Map<String, Object> exchangeParams);
 
     /**
      * Формирование Pdf отчета
@@ -341,4 +341,11 @@ public interface DeclarationDataService {
      * Сохранение данных формы "Файлы и комментарии"
      */
     void saveFilesComments(long declarationDataId, String note, List<DeclarationDataFile> files);
+
+    /**
+     * Создание экземпляров форм
+     * @param departmentReportPeriod - отчетный период
+     * @param declarationTypeId идентификатор типа декларации
+     */
+    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
 }

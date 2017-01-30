@@ -2110,7 +2110,6 @@ create table fias_house
     housenum   varchar2(20 char),
     buildnum   varchar2(10 char),
     strucnum   varchar2(10 char)
-
 );
 comment on table fias_house  is 'Сведения по отдельным зданиям, сооружениям';
 comment on column fias_house.id is 'Глобальный уникальный идентификатор дома';

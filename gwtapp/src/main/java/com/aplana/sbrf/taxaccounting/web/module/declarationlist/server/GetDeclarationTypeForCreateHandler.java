@@ -43,23 +43,9 @@ public class GetDeclarationTypeForCreateHandler extends AbstractActionHandler<Ge
     @Override
     public GetDeclarationTypeResult execute(GetDeclarationTypeAction action, ExecutionContext executionContext) throws ActionException {
         GetDeclarationTypeResult result = new GetDeclarationTypeResult();
-        result.setDeclarationTypes(declarationTypeService.getTypes(action.getDepartmentId(), action.getReportPeriod(), action.getTaxType(), Arrays.asList(DeclarationFormKind.CONSOLIDATED)));
+        result.setDeclarationTypes(declarationTypeService.getTypes(action.getDepartmentId(), action.getReportPeriod(), action.getTaxType(), Arrays.asList(action.getDeclarationFormKind())));
         result.setCorrectionDate(departmentReportPeriodService.getLast(action.getDepartmentId(), action.getReportPeriod()).getCorrectionDate());
         result.setTaxType(action.getTaxType());
-
-        if (action.getTaxType() == TaxType.NDFL || action.getTaxType() == TaxType.PFR) {
-            RefBookDataProvider provider = rbFactory.getDataProvider(RefBook.WithTable.getByTaxType(action.getTaxType()).getRefBookId());
-            ReportPeriod period = periodService.getReportPeriod(action.getReportPeriod());
-            Date version = DateUtils.addDays(period.getEndDate(), -1);
-            String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
-
-            PagingResult<Map<String, RefBookValue>> records = provider.getRecords(version, null, filter, null);
-            if (records != null && !records.isEmpty()) {
-                result.setFilter("LINK = " + records.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-            }
-            // для выставления дат актуальности у виджетов выбора из справочника
-            result.setVersion(version);
-        }
         return result;
     }
 

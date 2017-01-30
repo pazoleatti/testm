@@ -107,6 +107,7 @@ public class RefBook implements Serializable {
 		ASYNC_CONFIG(401), 							// Настройки асинхронных задач
 		ID_DOC(902),                                // Документ, удостоверяющий личность
 		REORGANIZATION(5),							// Коды форм реорганизации (ликвидации) организации
+		DOC_STATE(929),								// Состояние ЭД
 		USER(74); 									// Пользователи
 
         private final long id;

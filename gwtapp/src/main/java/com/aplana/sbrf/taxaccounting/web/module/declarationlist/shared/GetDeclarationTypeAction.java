@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetDeclarationTypeAction extends UnsecuredActionImpl<GetDeclarationTypeResult> {
-	int departmentId;
-	int reportPeriod;
-	TaxType taxType;
+	private int departmentId;
+    private int reportPeriod;
+    private TaxType taxType;
+    private DeclarationFormKind declarationFormKind;
 
-	public int getDepartmentId() {
+    public int getDepartmentId() {
 		return departmentId;
 	}
 
@@ -31,4 +33,12 @@ public class GetDeclarationTypeAction extends UnsecuredActionImpl<GetDeclaration
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
 	}
+
+    public DeclarationFormKind getDeclarationFormKind() {
+        return declarationFormKind;
+    }
+
+    public void setDeclarationFormKind(DeclarationFormKind declarationFormKind) {
+        this.declarationFormKind = declarationFormKind;
+    }
 }
