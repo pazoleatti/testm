@@ -4,12 +4,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
+ * Сведения о доходах физического лица
  * @author Andrey Drunk
  */
 public class NdflPersonIncome extends NdflPersonOperation {
 
-    // Код дохода
+    // Код вида дохода
     private String incomeCode;
+    // Признак вида дохода
     private String incomeType;
     private String oktmo;
     private String kpp;

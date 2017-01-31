@@ -397,7 +397,7 @@ create table declaration_template (
   id                  number(9)           not null,
   status              number(1) default 0 not null,
   version             date                not null,
-  name                varchar2(1000)      not null,
+  name                varchar2(512 char)  not null,
   create_script       clob,
   jrxml               varchar2(36),
   declaration_type_id number(9) not null,

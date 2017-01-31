@@ -151,15 +151,15 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
 
         // Провайдер стран
-        RefBookDataProvider countryProvider = mock(RefBookDataProvider.class);
-        PagingResult<Map<String, RefBookValue>> pagingResultCountry = new PagingResult<Map<String, RefBookValue>>();
-//        Map<String, RefBookValue> mapCountry = mock(Map.class);
-        Map<String, RefBookValue> mapCountry = new HashMap<String, RefBookValue>();
-//        when(mapCountry.get("CODE")).thenReturn(new RefBookValue(RefBookAttributeType.STRING, "512"));
-        mapCountry.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "512"));
-        pagingResultCountry.add(mapCountry);
-        when(refBookFactory.getDataProvider(10L)).thenReturn(countryProvider);
-        when(countryProvider.getRecords(any(Date.class), any(PagingParams.class), any(String.class), any(RefBookAttribute.class))).thenReturn(pagingResultCountry);
+//        RefBookDataProvider countryProvider = mock(RefBookDataProvider.class);
+//        when(testHelper.getRefBookFactory().getDataProvider(any(Long.class))).thenReturn(countryProvider);
+//        PagingResult<Map<String, RefBookValue>> pagingResultCountry = new PagingResult<Map<String, RefBookValue>>();
+//        Map<String, RefBookValue> mapCountry = new HashMap<String, RefBookValue>();
+//        mapCountry.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "512"));
+////        Map<String, RefBookValue> mapCountry = mock(Map.class);
+////        when(mapCountry.get("CODE")).thenReturn(new RefBookValue(RefBookAttributeType.STRING, "512"));
+//        pagingResultCountry.add(mapCountry);
+//        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), any(String.class), any(RefBookAttribute.class))).thenReturn(pagingResultCountry);
 
         // Данные о физическом лице - получателе дохода
         when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenAnswer(new Answer<List<NdflPerson>>() {
