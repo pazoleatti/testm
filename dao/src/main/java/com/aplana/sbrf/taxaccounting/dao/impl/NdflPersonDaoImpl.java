@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -96,8 +95,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
         parameters.put("declarationDataId", declarationDataId);
         String query = buildQuery(parameters);
-        List<NdflPerson> result = getNamedParameterJdbcTemplate().query(query, parameters, new NdflPersonDaoImpl.NdflPersonRowMapper());
-        return new PagingResult<NdflPerson>(result, getCount(query, parameters));
+        String totalQuery = query;
+        if (pagingParams != null) {
+            long lastindex = pagingParams.getStartIndex() + pagingParams.getCount();
+            totalQuery = "select * from \n (" +
+                    "select rating.*, rownum rnum from \n (" +
+                    query + ") rating where rownum <" +
+                    lastindex +
+                    ") where rnum >= " +
+                    pagingParams.getStartIndex();
+        }
+        List<NdflPerson> result = getNamedParameterJdbcTemplate().query(totalQuery, parameters, new NdflPersonDaoImpl.NdflPersonRowMapper());
+        return new PagingResult<NdflPerson>(result, getCount(totalQuery, parameters));
     }
 
     public static String buildQuery(Map<String, Object> parameters) {
@@ -145,14 +154,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 sb.append("AND (np.id_doc_number is null OR np.id_doc_number = :idDocNumber) \n");
             }
         }
+        sb.append("ORDER BY row_num \n");
         return sb.toString();
 
     }
 
-    private static boolean contains(Map<String, Object> param, String key){
+    private static boolean contains(Map<String, Object> param, String key) {
         return param.containsKey(key) && param.get(key) != null;
     }
-
 
 
     /**
