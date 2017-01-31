@@ -220,7 +220,10 @@ def getReportPeriodEndDate() {
     return reportPeriodEndDate
 }
 
-// Получить параметры подразделения (из справочника 950)
+/**
+ *
+ * @return
+ */
 def getDepartmentParam() {
     if (departmentParam == null) {
         def departmentId = declarationData.departmentId

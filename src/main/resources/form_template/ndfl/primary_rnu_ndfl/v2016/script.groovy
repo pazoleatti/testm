@@ -19,7 +19,6 @@ import javax.xml.stream.events.Characters
 import javax.xml.stream.events.XMLEvent
 import java.text.SimpleDateFormat
 
-
 /**
  * Справочник "Коды, определяющие налоговый (отчётный) период"
  */
@@ -32,6 +31,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         createSpecificReport();
+        break
+    case FormDataEvent.CHECK:
+        checkData();
         break
 }
 
@@ -446,4 +448,75 @@ def prepaymentAttr(personPrepayment) {
             "УведДата": formatDate(personPrepayment.notifDate),
             "УведИФНС": personPrepayment.notifSource
     ]
+}
+
+//------------------Check Data ----------------------
+// Кэш провайдеров
+@Field def providerCache = [:]
+
+// Кэш стран мира
+@Field def countryCache = []
+
+@Field final ERROR_MESSAGE_REF_BOOK = "Ошибка в значении \"%s\". Значение не соответсвует справочнику \"%s\"."
+
+def checkData() {
+    ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    def countryList = getCountry()
+//    ndflPersonList.childNodes().each { ndflPerson ->
+//        if (!countryList.containsValue(ndflPerson.citizenship)) {
+//            logger.error(ERROR_MESSAGE, "Гражданство (код страны)", "ОК 025-2001 (Общероссийский классификатор стран мира)");
+//        }
+//    }
+}
+
+/**
+ * Получить перечень цифровых кодов всех стран
+ * @return
+ */
+def getCountry() {
+    if (countryCache.size() == 0) {
+        def refBookList = getRefBook(10)
+//        refBookList.childNodes().each { refBook ->
+//            countryCache.add(refBook?.CODE?.stringValue)
+//        }
+    }
+    return countryCache;
+}
+
+/**
+ * Получить все записи справочника по его идентификатору
+ * @param refBookId - идентификатор справочника
+ * @return
+ */
+def getRefBook(def long refBookId) {
+    // Передаем как аргумент только срок действия версии справочника
+    println(getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, null, null))
+//    def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, null, null)
+//    if (refBookList == null || refBookList.size() == 0 || refBookList.get(0) == null) {
+//        throw new Exception("Ошибка при получении записей справочника")
+//    }
+//    return refBookList
+}
+
+/**
+ * Получение провайдера с использованием кеширования.
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
+}
+
+/**
+ * Получить окончание отчетного периода
+ * @return
+ */
+def getReportPeriodEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
 }
