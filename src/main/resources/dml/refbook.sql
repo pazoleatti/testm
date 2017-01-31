@@ -6,7 +6,7 @@ ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_reference_id;
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (0,'Тест',0,0,0,null);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (2,'Коды представления налоговой декларации по месту нахождения (учёта)',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (3,'Коды ОКАТО', 1, 0, 1, null, 'ref_book_okato');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (3,'Коды ОКАТО',1,0,1,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (4,'Коды субъектов Российской Федерации',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (8,'Коды, определяющие налоговый (отчётный) период',1,0,1,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (10,'ОК 025-2001 (Общероссийский классификатор стран мира)',1,0,0,null);
@@ -527,6 +527,8 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9056, 904, 'Признак застрахованного лица в системе обязательного медицинского страхования', 'MEDICAL', 2, 16, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9057, 904, 'Признак застрахованного лица в системе обязательного социального страхования', 'SOCIAL', 2, 17, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9058, 904, 'Сотрудник', 'EMPLOYEE', 2, 18, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9060, 904, 'Система-источник', 'SOURCE_ID', 4, 19, 900, 9002, 1, null, 15, 0, 0, null, null, 0, null);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9063, 904, 'Дублирует', 'DUBLICATES', 4, 20, 904, 9059, 1, null, 15, 0, 0, null, null, 0, null);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9061, 905, 'ИНП', 'INP', 1, 1, null, null, 1, null, 15, 1, 1, null, null, 0, 14);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9062, 905, 'АС НУ', 'AS_NU', 4, 2, 900, 9002, 1, null, 15, 1, 0, null, null, 0, null);

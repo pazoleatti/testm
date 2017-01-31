@@ -2214,26 +2214,28 @@ comment on column ref_book_taxpayer_state.name is 'Наименование';
 
 create table ref_book_person
 (
-  id number(18) not null,
-  last_name varchar2(60 char) not null,
-  first_name varchar2(60 char) not null,
-  middle_name varchar2(60 char),
-  sex number(1),
-  inn varchar2(12 char),
-  inn_foreign varchar2(50 char),
-  snils varchar2(14 char),
+  id             number(18) not null,
+  last_name      varchar2(60 char) not null,
+  first_name     varchar2(60 char) not null,
+  middle_name    varchar2(60 char),
+  sex            number(1),
+  inn            varchar2(12 char),
+  inn_foreign    varchar2(50 char),
+  snils          varchar2(14 char),
   taxpayer_state number(18),
-  birth_date date not null,
-  birth_place varchar2(255 char),
-  citizenship number(18),
-  address number(18),
-  pension number(1) default 2 not null,
-  medical number(1) default 2 not null,
-  social number(1) default 2 not null,
-  employee number(1) default 2 not null,
-  record_id number(18) not null,
-  version date not null,
-  status number(1) default 0 not null
+  birth_date     date not null,
+  birth_place    varchar2(255 char),
+  citizenship    number(18),
+  address        number(18),
+  pension        number(1) default 2 not null,
+  medical        number(1) default 2 not null,
+  social         number(1) default 2 not null,
+  employee       number(1) default 2 not null,
+  record_id      number(18) not null,
+  version        date not null,
+  status         number(1) default 0 not null,
+  source_id      number(18),
+  dublicates     number(18)
 );
 
 comment on table ref_book_person is 'Физические лица';
@@ -2257,6 +2259,8 @@ comment on column ref_book_person.employee is 'Признак, показыва�
 comment on column ref_book_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
 comment on column ref_book_person.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_person.dublicates is 'Дублирует: ссылка на запись оригинал';
+comment on column ref_book_person.source_id is 'Система-источник: ссылка на справочник кодов АС НУ';
 
 create table ref_book_id_doc
 (
