@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -29,11 +28,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     }
 
     public static final String DECLARATION_TITLE = "Создание налоговой формы";
-    public static final String DECLARATION_TITLE_D = "Создание уведомления";
+    public static final String DECLARATION_TITLE_R = "Создание отчетности";
     public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы:";
-    public static final String DECLARATION_TYPE_TITLE_D = "Вид:";
+    public static final String DECLARATION_TYPE_TITLE_R = "Вид отчетности:";
     public static final String DECLARATION_CORRECTION = "Налоговая форма будет создана в корректирующем периоде, дата сдачи корректировки: ";
-    public static final String NOTIFICATION_CORRECTION = "Уведомление будет создано в корректирующем периоде, дата сдачи корректировки: ";
+    public static final String NOTIFICATION_CORRECTION = "Отчетности будут созданы в корректирующем периоде, дата сдачи корректировки: ";
 
     @UiField
     ModalWindow modalWindowTitle;
@@ -65,11 +64,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public void init() {
         departmentPicker.setEnabled(false);
         declarationTypeId.setEnabled(false);
-        if (getUiHandlers().getTaxType().equals(TaxType.DEAL)) {
-            declarationTypeId.setTitle("Выбор вида уведомления");
-        } else {
-            declarationTypeId.setTitle("Выбор вида декларации");
-        }
+        declarationTypeId.setTitle("Выбор вида налоговой формы");
         correctionPanel.setVisible(false);
         declarationTypeId.setPeriodDates(new Date(), new Date());
         declarationTypeId.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
@@ -78,10 +73,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
                 updateEnabled();
             }
         });
-    }
-
-    @Override
-    public void initRefBooks(Date version, String filter, TaxType taxType) {
     }
 
     @Override
@@ -120,9 +111,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     }
 
     @Override
-    public void setCorrectionDate(String correctionDate, TaxType taxType) {
+    public void setCorrectionDate(String correctionDate, DeclarationFormKind declarationFormKind) {
         correctionPanel.setVisible(correctionDate != null);
-        this.correctionDate.setText((correctionDate != null) ? ((taxType == TaxType.DEAL ? NOTIFICATION_CORRECTION : DECLARATION_CORRECTION) + correctionDate) : "");
+        this.correctionDate.setText((correctionDate != null) ? (((declarationFormKind.equals(DeclarationFormKind.REPORTS)) ? NOTIFICATION_CORRECTION : DECLARATION_CORRECTION) + correctionDate) : "");
     }
 
     @Override
@@ -195,14 +186,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     }
 
     @Override
-    public void setSelectedTaxOrganCode(String code) {
-    }
-
-    @Override
-    public void setSelectedTaxOrganKpp(String kpp) {
-    }
-
-    @Override
     public Integer getSelectedDeclarationType() {
         List<Long> values = declarationTypeId.getValue();
         if (values != null && !values.isEmpty())
@@ -225,16 +208,13 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @Override
     public void setTaxType(TaxType taxType) {
         periodPicker.setType(taxType.name());
-        if (!taxType.equals(TaxType.DEAL)) {
+        if (!(getUiHandlers().getDeclarationFormKind().equals(DeclarationFormKind.REPORTS))) {
             modalWindowTitle.setText(DECLARATION_TITLE);
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE);
         } else {
-            modalWindowTitle.setText(DECLARATION_TITLE_D);
-            declarationTypeLabel.setText(DECLARATION_TYPE_TITLE_D);
+            modalWindowTitle.setText(DECLARATION_TITLE_R);
+            declarationTypeLabel.setText(DECLARATION_TYPE_TITLE_R);
         }
-
-        boolean isCodeKppVisible = taxType.equals(TaxType.NDFL) || taxType.equals(TaxType.PFR);
-        boolean isCodeVisible = taxType.equals(TaxType.NDFL) || taxType.equals(TaxType.PFR);
 
         declarationTypeId.setVisible(true);
     }

@@ -5,6 +5,7 @@ import java.util.Date;
 
 /**
  * @author Andrey Drunk
+ * Cведения о доходах в виде авансовых платежей
  */
 public class NdflPersonPrepayment extends NdflPersonOperation {
 
@@ -12,6 +13,7 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     private Long summ;
     private String notifNum;
     private Date notifDate;
+    // Код налогового органа, выдавшего уведомление
     private String notifSource;
 
     public static final String TABLE_NAME = "ndfl_person_prepayment";

@@ -74,7 +74,7 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
             public void updateState(String state) {
                 lockService.updateState(lock, lockDate, state);
             }
-        });
+        }, null);
         return new TaskStatus(true, null);
     }
 

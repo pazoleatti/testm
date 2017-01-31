@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -59,7 +60,12 @@ public class DeclarationListPresenter extends
 
     @Override
     public void onCreateClicked() {
-        creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), this);
+        creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), DeclarationFormKind.CONSOLIDATED, this);
+    }
+
+    @Override
+    public void onCreateReportsClicked() {
+        creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), DeclarationFormKind.REPORTS, this);
     }
 
     @ProxyCodeSplit

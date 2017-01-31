@@ -17,8 +17,6 @@ import javax.xml.namespace.QName
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.Characters
 import javax.xml.stream.events.XMLEvent
-import java.text.SimpleDateFormat
-
 
 /**
  * Справочник "Коды, определяющие налоговый (отчётный) период"
@@ -32,6 +30,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         createSpecificReport();
+        break
+    case FormDataEvent.CHECK:
+        checkData();
         break
 }
 
@@ -446,4 +447,260 @@ def prepaymentAttr(personPrepayment) {
             "УведДата": formatDate(personPrepayment.notifDate),
             "УведИФНС": personPrepayment.notifSource
     ]
+}
+
+//------------------Check Data ----------------------
+// Кэш провайдеров
+@Field def providerCache = [:]
+
+// Страны
+@Field def countryCodesCache = []
+@Field final long REF_BOOK_COUNTRY_ID = 10
+
+// Документы, удостоверяющие личность
+@Field def documentCodesCache = []
+@Field final long REF_BOOK_DOCUMENT_ID = 360
+
+// Статус налогоплательщика
+@Field def taxpayerStatusCache = []
+@Field final long REF_BOOK_TAXPAYER_STATUS_ID = 903
+
+// Коды видов доходов
+@Field def incomeCodeCache = []
+@Field final long REF_BOOK_INCOME_CODE_ID = 922
+
+// Коды видов вычетов
+@Field def deductionTypeCache = []
+@Field final long REF_BOOK_DEDUCTION_TYPE_ID = 921
+
+// todo Пустой справочник
+// Коды налоговых органов
+@Field def notifSourceCache = []
+@Field final long REF_BOOK_NOTIF_SOURCE_ID = 204
+
+// Дата окончания отчетного периода
+@Field def reportPeriodEndDate = null
+
+@Field final ERROR_MESSAGE_REF_BOOK = "Ошибка в значении \"%s\". Значение не соответсвует справочнику \"%s\"."
+
+def checkData() {
+    // Страны
+    def countryCodesList = getCountry()
+
+    // Документы, удостоверяющие личность
+    def documentCodesList = getDocument()
+
+    // Статус налогоплательщика
+    def taxpayerStatusList = getTaxpayerStatus()
+
+    ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    if (ndflPersonList.size() > 0) {
+        throw new Exception("Не найдены записи в таблице \"%s\".", "Данные о физическом лице - получателе дохода")
+    }
+    ndflPersonList.each { ndflPerson ->
+        // Страны
+        if (!countryCodesList.containsValue(ndflPerson.citizenship)) {
+            logger.error(ERROR_MESSAGE_REF_BOOK, "Гражданство (код страны)", "ОК 025-2001 (Общероссийский классификатор стран мира)");
+        }
+
+        // Документы, удостоверяющие личность
+        if (!documentCodesList.containsValue(ndflPerson.idDocType)) {
+            logger.error(ERROR_MESSAGE_REF_BOOK, "Код вида документа", "Коды документов");
+        }
+
+        // Статус налогоплательщика
+        if (!taxpayerStatusList.containsValue(ndflPerson.status)) {
+            logger.error(ERROR_MESSAGE_REF_BOOK, "Cтатус налогоплательщика", "Статусы налогоплательщика");
+        }
+    }
+
+
+    // Коды видов доходов
+    def incomeCodeList = getIncomeCode()
+
+    ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+    if (ndflPersonIncomeList != null || ndflPersonIncomeList.size() > 0 || ndflPersonIncomeList.get(0) != null) {
+        throw new Exception("Не найдены записи в таблице \"%s\".", "Сведения о доходах физического лица")
+    }
+    ndflPersonIncomeList.each { ndflPersonIncome ->
+        // Коды видов доходов
+        if (!incomeCodeList.containsValue(ndflPersonIncome.incomeCode)) {
+            logger.error(ERROR_MESSAGE_REF_BOOK, "Код вида дохода", "Коды видов доходов");
+        }
+
+        // todo Реализовать после добавления справочника
+        // Признак вида дохода
+
+        // todo Реализовать после добавления справочника
+        // Ставка
+    }
+
+    // Коды видов вычетов
+    def deductionTypeList = getDeductionType()
+
+    // Коды налоговых органов
+    def notifSourceList = getNotifSource()
+
+    ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+    if (ndflPersonDeductionList != null || ndflPersonDeductionList.size() > 0 || ndflPersonDeductionList.get(0) != null) {
+        throw new Exception("Не найдены записи в таблице \"%s\".", "Стандартные, социальные и имущественные налоговые вычеты")
+    }
+    ndflPersonDeductionList.each { ndflPersonDeduction ->
+        // Коды видов вычетов
+        if (!deductionTypeList.containsValue(ndflPersonDeduction.typeCode)) {
+            logger.error(ERROR_MESSAGE_REF_BOOK, "Код вида вычета", "Коды видов вычетов");
+        }
+
+        // Коды налоговых органов
+        if (!notifSourceList.containsValue(ndflPersonDeduction.notifSource)) {
+            logger.error(ERROR_MESSAGE_REF_BOOK, "Код налогового органа, выдавшего уведомление", "Коды налоговых органов");
+        }
+    }
+
+    ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+    if (ndflPersonPrepaymentList != null || ndflPersonPrepaymentList.size() > 0 || ndflPersonPrepaymentList.get(0) != null) {
+        throw new Exception("Не найдены записи в таблице \"%s\".", "Cведения о доходах в виде авансовых платежей")
+    }
+    ndflPersonPrepaymentList.each { ndflPersonPrepayment ->
+        // Коды налоговых органов
+        if (!notifSourceList.containsValue(ndflPersonPrepayment.notifSource)) {
+            logger.error(ERROR_MESSAGE_REF_BOOK, "Код налогового органа, выдавшего уведомление", "Коды налоговых органов");
+        }
+    }
+}
+
+/**
+ * Получить "Страны"
+ * @return
+ */
+def getCountry() {
+    if (countryCodesCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_COUNTRY_ID)
+        if (refBookList != null || refBookList.size() > 0 || refBookList.get(0) != null) {
+            refBookList.each { refBook ->
+                countryCodesCache.add(refBook?.CODE?.stringValue)
+            }
+        }
+    }
+    return countryCodesCache;
+}
+
+/**
+ * Получить "Коды документов, удостоверяющих личность"
+ * @return
+ */
+def getDocument() {
+    if (documentCodesCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
+        if (refBookList != null || refBookList.size() > 0 || refBookList.get(0) != null) {
+            refBookList.each { refBook ->
+                documentCodesCache.add(refBook?.CODE?.stringValue)
+            }
+        }
+    }
+    return documentCodesCache;
+}
+
+/**
+ * Получить "Статусы налогоплательщика"
+ * @return
+ */
+def getTaxpayerStatus() {
+    if (taxpayerStatusCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_TAXPAYER_STATUS_ID)
+        if (refBookList.size() > 0) {
+            refBookList.each { refBook ->
+                taxpayerStatusCache.add(refBook?.CODE?.stringValue)
+            }
+        }
+    }
+    return taxpayerStatusCache;
+}
+
+/**
+ * Получить "Коды видов доходов"
+ * @return
+ */
+def getIncomeCode() {
+    if (incomeCodeCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_INCOME_CODE_ID)
+        if (refBookList.size() > 0) {
+            refBookList.each { refBook ->
+                incomeCodeCache.add(refBook?.CODE?.stringValue)
+            }
+        }
+    }
+    return incomeCodeCache;
+}
+
+/**
+ * Получить "Коды видов вычетов"
+ * @return
+ */
+def getDeductionType() {
+    if (deductionTypeCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_DEDUCTION_TYPE_ID)
+        if (refBookList.size() > 0) {
+            refBookList.each { refBook ->
+                deductionTypeCache.add(refBook?.CODE?.stringValue)
+            }
+        }
+    }
+    return deductionTypeCache;
+}
+
+/**
+ * Получить "Коды налоговых органов"
+ * @return
+ */
+def getNotifSource() {
+    if (notifSourceCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_NOTIF_SOURCE_ID)
+        if (refBookList.size() > 0) {
+            refBookList.each { refBook ->
+                notifSourceCache.add(refBook?.CODE?.stringValue)
+            }
+        }
+    }
+    return notifSourceCache;
+}
+
+/**
+ * Получить все записи справочника по его идентификатору
+ * @param refBookId - идентификатор справочника
+ * @return
+ */
+def getRefBook(def long refBookId) {
+    // Передаем как аргумент только срок действия версии справочника
+    def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, null, null)
+    // todo Пустые справочники
+    if (refBookId != REF_BOOK_NOTIF_SOURCE_ID) {
+        if (refBookList == null || refBookList.size() == 0 || refBookList.get(0) == null) {
+            throw new Exception("Ошибка при получении записей справочника " + refBookId)
+        }
+    }
+    return refBookList
+}
+
+/**
+ * Получение провайдера с использованием кеширования.
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
+}
+
+/**
+ * Получить окончание отчетного периода
+ * @return
+ */
+def getReportPeriodEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
 }

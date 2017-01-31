@@ -197,7 +197,6 @@ public class DeclarationTemplateInfoPresenter
         handlerRegistrations[6] = getView().addStartLoadHandlerJrxml(startLoadFileHandler);
     }
 
-    @ProxyEvent
     @Override
     public void onUpdateTemplate(UpdateTemplateEvent event) {
         getView().setDeclarationTemplate(declarationTemplateMainPresenter.getDeclarationTemplateExt());

@@ -108,7 +108,13 @@ public class RefBook implements Serializable {
 		ID_DOC(902),                                // Документ, удостоверяющий личность
 		REORGANIZATION(5),							// Коды форм реорганизации (ликвидации) организации
 		DOC_STATE(929),								// Состояние ЭД
-		USER(74); 									// Пользователи
+		USER(74),                                   // Пользователи
+		COUNTRY(10), 								// Страны
+		DOCUMENT_CODES(360),						// Документы, удостоверяющие личность
+		TAXPAYER_STATUS(903),						// Статус налогоплательщика
+		INCOME_TYPE(922),							// Коды видов доходов
+		DEDUCTION_TYPE(921),						// Коды видов вычетов
+		NOTIF_SOURCE(204);							// Коды налоговых органов
 
         private final long id;
 

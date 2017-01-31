@@ -644,9 +644,11 @@ insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,refer
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9632,961,21,'Отчество подписанта','SIGNATORY_LASTNAME',1,1,null,null,20,0,0,60,null);
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9633,961,22,'Наименование документа, подтверждающего полномочия представителя','APPROVE_DOC_NAME',1,1,null,null,20,0,0,120,null);
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9634,961,23,'Наименование организации-представителя налогоплательщика','APPROVE_ORG_NAME',1,1,null,null,20,0,0,1000,null);
-
+commit;
 ---------------------------------
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_ref_book_id;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_reference_id;
+
+exit;

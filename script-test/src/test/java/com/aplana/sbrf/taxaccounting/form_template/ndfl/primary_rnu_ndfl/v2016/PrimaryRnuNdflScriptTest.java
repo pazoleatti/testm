@@ -14,8 +14,12 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl;
@@ -39,7 +43,9 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -68,8 +74,7 @@ import static com.aplana.sbrf.taxaccounting.util.TestUtils.readFile;
 import static com.aplana.sbrf.taxaccounting.util.TestUtils.toDate;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Andrey Drunk
@@ -84,7 +89,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     private static final String KPP = "123456789";
     private static final String CODE_ORG = "0123456789";
     private static final String REPORT_PERSON_NAME = "report_person";
-
 
     @Override
     protected DeclarationData getDeclarationData() {
@@ -134,6 +138,43 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         });
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         Assert.assertEquals(importedData.size(), 2);
+        checkLogger();
+    }
+
+    /**
+     * Тестирование проверок НДФЛ
+     * @throws IOException
+     */
+//    @Test
+    public void checkDataTest() throws IOException {
+
+        RefBookFactory refBookFactory = mock(RefBookFactory.class);
+
+        // Провайдер стран
+//        RefBookDataProvider countryProvider = mock(RefBookDataProvider.class);
+//        when(testHelper.getRefBookFactory().getDataProvider(any(Long.class))).thenReturn(countryProvider);
+//        PagingResult<Map<String, RefBookValue>> pagingResultCountry = new PagingResult<Map<String, RefBookValue>>();
+//        Map<String, RefBookValue> mapCountry = new HashMap<String, RefBookValue>();
+//        mapCountry.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "512"));
+////        Map<String, RefBookValue> mapCountry = mock(Map.class);
+////        when(mapCountry.get("CODE")).thenReturn(new RefBookValue(RefBookAttributeType.STRING, "512"));
+//        pagingResultCountry.add(mapCountry);
+//        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), any(String.class), any(RefBookAttribute.class))).thenReturn(pagingResultCountry);
+
+        // Данные о физическом лице - получателе дохода
+        when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenAnswer(new Answer<List<NdflPerson>>() {
+            @Override
+            public List<NdflPerson> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                NdflPerson ndflPerson1 = new NdflPerson();
+                ndflPerson1.setCitizenship("512");
+
+                List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>();
+                ndflPersonList.add(ndflPerson1);
+                return ndflPersonList;
+            }
+        });
+
+        testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
     }
 
