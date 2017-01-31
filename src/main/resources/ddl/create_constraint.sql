@@ -335,6 +335,9 @@ alter table ndfl_person_prepayment add constraint ndfl_pp_pk primary key (id);
 alter table ndfl_person_prepayment add constraint ndfl_pp_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
 alter table ndfl_person_prepayment add constraint ndfl_pp_fk_s foreign key (source_id) references ndfl_person_prepayment(id);
 
+alter table ndfl_references add constraint pk_ndfl_references primary key(id);
+alter table ndfl_references add constraint fk_ndfl_refers_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
+alter table ndfl_references add constraint fk_ndfl_refers_person foreign key(person_id) references ref_book_person(id);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);

@@ -1177,7 +1177,7 @@ create table ndfl_person (
   id_doc_number       varchar2(25 char),
   status              varchar2(1 char),
   post_index          varchar2(6 char),
-  region_code         varchar2(10 char),
+  region_code         varchar2(2 char),
   area                varchar2(60 char),
   city                varchar2(50 char),
   locality            varchar2(50 char),
@@ -1233,8 +1233,8 @@ create table ndfl_person_income
   source_id             number(18),
   row_num               number(20),
   operation_id          varchar2(10 char),
-  income_code           varchar2(10 char),
-  income_type           varchar2(10 char),
+  income_code           varchar2(4 char),
+  income_type           varchar2(2 char),
   oktmo                 varchar2(11 char),
   kpp                   varchar2(9 char),
   income_accrued_date   date,
@@ -1339,7 +1339,7 @@ create table ndfl_person_prepayment
   source_id      number(18),
   row_num        number(20),
   operation_id   varchar2(10 char),
-  summ           number(18),
+  summ           number(20),
   notif_num      varchar2(20 char),
   notif_date     date,
   notif_source   varchar2(20 char)
@@ -1356,6 +1356,33 @@ comment on column ndfl_person_prepayment.notif_date is 'Дата выдачи у
 comment on column ndfl_person_prepayment.notif_source is 'Код налогового органа, выдавшего уведомление';
 
 create sequence seq_ndfl_person_prepayment start with 1000;
+------------------------------------------------------------------------------------------------------
+create table ndfl_references
+(
+  id number(18) not null,
+  declaration_data_id number(18)not null,
+  person_id number(18) not null,
+  num number(10) not null,
+  surname varchar2(60 char) not null,
+  name varchar2(60 char) not null,
+  lastname varchar2(60 char),
+  birthday  date not null,
+  errtext varchar2(4000 char)
+);
+
+comment on table ndfl_references is 'Реестр справок';
+comment on column ndfl_references.id is 'Уникальный идентификатор';
+comment on column ndfl_references.declaration_data_id is 'Идентификатор декларации к которой относятся данные';
+comment on column ndfl_references.person_id is 'Физическое лицо';
+comment on column ndfl_references.num is 'Номер справки';
+comment on column ndfl_references.surname is 'Фамилия';
+comment on column ndfl_references.name is 'Имя';
+comment on column ndfl_references.lastname is 'Отчество';
+comment on column ndfl_references.birthday is 'Дата рождения ФЛ';
+comment on column ndfl_references.errtext is 'Текст ошибки от ФНС';
+
+create sequence seq_ndfl_references start with 1;
+
 ------------------------------------------------------------------------------------------------------
 --  Расчет по страховым взносам 1151111
 ------------------------------------------------------------------------------------------------------
