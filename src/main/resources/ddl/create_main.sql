@@ -645,7 +645,8 @@ create table log_system (
   form_type_id          number(9, 0),
   is_error              number(1) default 0 not null,
   audit_form_type_id    number(9, 0),
-  server                varchar2(200)
+  server                varchar2(200),
+  log_id                 varchar2(36)
 );
 comment on table log_system is 'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -667,6 +668,7 @@ comment on column log_system.form_type_id is 'Идентификатор вид�
 comment on column log_system.is_error is 'Признак ошибки';
 comment on column log_system.audit_form_type_id is 'Тип формы';
 comment on column log_system.server is 'Сервер';
+comment on column log_system.log_id is 'Ссылка на журнал действий пользователей';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -723,7 +725,8 @@ create table notification (
   is_read                number(1) default 0    not null,
   blob_data_id           varchar2(36),
   type                   number(2, 0) default 0 not null,
-  report_id              varchar2(36)
+  report_id              varchar2(36),
+  log_id                 varchar2(36)
 );
 
 comment on table notification is 'Оповещения';
@@ -740,6 +743,7 @@ comment on column notification.is_read is 'Признак прочтения';
 comment on column notification.blob_data_id is 'Ссылка на логи';
 comment on column notification.type is 'Тип оповещения (0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
 comment on column notification.report_id is 'Идентификатор отчета';
+comment on column notification.log_id is 'Ссылка на журнал действий пользователей';
 
 create sequence seq_notification start with 10000;
 
@@ -2411,3 +2415,40 @@ comment on column raschsv_itog_vypl_dop.tarif is 'Тариф';
 comment on column raschsv_itog_vypl_dop.kol_fl is 'Количество ФЛ';
 comment on column raschsv_itog_vypl_dop.sum_vypl is 'Сумма выплат';
 comment on column raschsv_itog_vypl_dop.sum_nachisl is 'Сумма начислено';
+--------------------------------------------------------------------------------------------------------------------------
+-- Журналирование действий пользователей
+--------------------------------------------------------------------------------------------------------------------------
+create table log 
+(
+    id            varchar2(36) not null,
+    user_id       number(18),
+    creation_date timestamp not null
+);
+
+comment on table log is 'Журналы действий пользователей';
+comment on column log.id is 'Уникальный идентификатор';
+comment on column log.user_id is 'Ссылка на пользователя';
+comment on column log.creation_date is 'Дата-время, включая мс';
+
+create sequence seq_log start with 1;
+
+
+create table log_entry 
+(
+    log_id        varchar2(36)  not null,
+    ord           number(9)     not null,
+    creation_date timestamp     not null,
+    log_level number(1)         not null,
+    message varchar2(2000 char)
+);
+
+comment on table log_entry is 'Сообщения в журнале';
+comment on column log_entry.log_id is 'Ссылка на журнал';
+comment on column log_entry.ord is 'Порядковый номер сообщения';
+comment on column log_entry.creation_date is 'Дата-время, включая мс';
+comment on column log_entry.log_level is 'Уровень важности (0 - информация, 1 - предупреждение, 2 - ошибка)';
+comment on column log_entry.message is 'Текст сообщения';
+
+create sequence seq_log_entry start with 1;
+
+

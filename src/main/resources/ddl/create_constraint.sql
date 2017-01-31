@@ -578,4 +578,16 @@ alter table raschsv_itog_vypl add constraint fk_raschsv_itog_vypl_strah foreign 
 alter table raschsv_itog_vypl_dop add constraint pk_raschsv_itog_vypl_dop primary key(id);
 alter table raschsv_itog_vypl_dop add constraint fk_raschsv_itog_vypl_dop_strah foreign key(raschsv_itog_strah_lic_id) references raschsv_itog_strah_lic(id);
 --------------------------------------------------------------------------------------------------------------------------
+-- Журналирование действий пользователей
+--------------------------------------------------------------------------------------------------------------------------
+alter table log add constraint pk_log primary key(id);
+alter table log add constraint fk_log_user foreign key(user_id) references sec_user(id);
+
+alter table log_entry add constraint pk_log_entry primary key(log_id,ord);
+alter table log_entry add constraint fk_log_entry_log foreign key(log_id) references log(id);
+alter table log_entry add constraint chk_log_entry_lev check(log_level in (0,1,2));
+
+alter table notification add constraint fk_notification_log foreign key(log_id) references log(id);
+alter table log_system add constraint fk_log_system_log foreign key(log_id) references log(id);
+--------------------------------------------------------------------------------------------------------------------------
 
