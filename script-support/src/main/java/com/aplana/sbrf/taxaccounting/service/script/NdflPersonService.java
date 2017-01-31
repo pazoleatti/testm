@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.Date;
@@ -34,10 +32,27 @@ public interface NdflPersonService {
 
     /**
      * Найти все данные о доходах физ лица привязанные к декларации
-     *
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPerson> findNdflPerson(long declarationDataId);
+
+    /**
+     * Найти все "Сведения о доходах физического лица" привязанные к декларации
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
+
+    /**
+     * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId);
+
+    /**
+     * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
 
     /**
      * Найти NdflPerson привязанные к декларации для построения отчета.  Если найдено больше 1 запись, метод выкидывает исключение ServiceExeption
