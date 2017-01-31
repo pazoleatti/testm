@@ -540,7 +540,6 @@ alter table ref_book_person add constraint fk_ref_book_person_address foreign ke
 alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
 alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_record(id);
 alter table ref_book_person add constraint fk_ref_book_person_dubl foreign key(dublicates) references ref_book_person(id);
-alter table ref_book_person add constraint fk_ref_book_person_source foreign key(source_id) references ref_book_asnu(id);
 
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_doc_id foreign key (doc_id) references ref_book_record(id);
 --alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
