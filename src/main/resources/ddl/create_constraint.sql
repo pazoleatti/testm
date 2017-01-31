@@ -562,6 +562,8 @@ alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primar
 --alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
 
 --------------------------------------------------------------------------------------------------------------------------
+alter table raschsv_pers_sv_strah_lic add constraint fk_rsv_p_sv_strah_lic_person foreign key(person_id) references ref_book_person(id);
+--------------------------------------------------------------------------------------------------------------------------
 alter table state add constraint pk_state primary key(id);
 alter table state_change add constraint pk_state_change primary key(id);
 

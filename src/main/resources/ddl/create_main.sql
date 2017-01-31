@@ -1937,7 +1937,8 @@ create table raschsv_pers_sv_strah_lic
    priz_oss           VARCHAR2(1 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   middle_name          VARCHAR2(60 CHAR)
+   middle_name        VARCHAR2(60 CHAR),
+   person_id          number(18)
 );
 create sequence seq_raschsv_pers_sv_strah_lic start with 1;
 comment on table raschsv_pers_sv_strah_lic is 'Персонифицированные сведения о застрахованных лицах (ПерсСвСтрахЛиц)';
@@ -1961,6 +1962,7 @@ comment on column raschsv_pers_sv_strah_lic.priz_oss is 'Признак заст
 comment on column raschsv_pers_sv_strah_lic.familia is 'Фамилия (Фамилия)';
 comment on column raschsv_pers_sv_strah_lic.imya is 'Имя (Имя)';
 comment on column raschsv_pers_sv_strah_lic.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_pers_sv_strah_lic.person_id is 'Ссылка на справочник физ. лиц';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_vypl
 (
