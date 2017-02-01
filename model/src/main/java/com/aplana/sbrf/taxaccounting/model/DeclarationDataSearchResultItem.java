@@ -60,6 +60,10 @@ public class DeclarationDataSearchResultItem implements Serializable {
      */
     private DeclarationFormKind declarationFormKind;
 
+    private String docState;
+
+    private String note;
+
 	public Long getDeclarationDataId() {
 		return declarationDataId;
 	}
@@ -202,5 +206,21 @@ public class DeclarationDataSearchResultItem implements Serializable {
 
     public void setDeclarationFormKind(DeclarationFormKind declarationFormKind) {
         this.declarationFormKind = declarationFormKind;
+    }
+
+    public String getDocState() {
+        return docState;
+    }
+
+    public void setDocState(String docState) {
+        this.docState = docState;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

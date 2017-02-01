@@ -29,6 +29,8 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         result.setAsnuId(SqlUtils.getLong(rs,"asnu_id"));
         result.setFileName(rs.getString("file_name"));
         result.setDeclarationFormKind(DeclarationFormKind.fromId(SqlUtils.getLong(rs,"form_kind")));
+        result.setNote(rs.getString("note"));
+        result.setDocState(rs.getString("doc_state"));
         return result;
 	}
 }

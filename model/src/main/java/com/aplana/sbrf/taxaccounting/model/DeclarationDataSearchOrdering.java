@@ -40,5 +40,13 @@ public enum DeclarationDataSearchOrdering {
     /**
      * Файл
      */
-    FILE_NAME
+    FILE_NAME,
+    /**
+     * Примечание
+     */
+    NOTE,
+    /**
+     * Статус ЭД
+     */
+    DOC_STATE
 }

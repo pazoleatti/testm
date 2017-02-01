@@ -73,11 +73,18 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(RefBook refBook, List<Long> recordIds) {
-        Map<Long, Map<String, RefBookValue>> recordsData = new HashMap<Long, Map<String, RefBookValue>>();
-        for (Long recordId : recordIds) {
-            recordsData.put(recordId, getRecordData(refBook, recordId));
+        PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, recordIds);
+        List<Map<String, RefBookValue>> recordsList;
+        try {
+            recordsList = getJdbcTemplate().query(ps.getQueryString(), new RefBookValueMapper(refBook));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        return recordsData;
+        Map<Long, Map<String, RefBookValue>> recordData = new HashMap<Long, Map<String, RefBookValue>>();
+        for (Map<String, RefBookValue> record : recordsList) {
+            recordData.put(record.get("id").getNumberValue().longValue(), record);
+        }
+        return recordData;
     }
 
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(String tableName, Long refBookId, Date version,
