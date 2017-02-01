@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.LogDao;
 import com.aplana.sbrf.taxaccounting.dao.LogEntryDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -18,14 +19,27 @@ import java.io.*;
 import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"BlobDataDaoTest.xml"})
+@ContextConfiguration({"LogEntryDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class LogEntryDaoTest {
     private static final String FILE_NAME = "c:\\test\\test.txt";
+    private static final String UID_WITHOUT_LOG_ENTRY_1 = "1-1-1";
+    private static final String UID_WITHOUT_LOG_ENTRY_2 = "2-2-2";
+    private static final String UID_WITHOUT_LOG_ENTRY_3 = "3-3-3";
+    private static final String UID_WITH_LOG_ENTRY_4 = "4-4-4";
+    private static final String UID_WITH_LOG_ENTRY_5 = "5-5-5";
 
     @Autowired
     LogEntryDao logEntryDao;
+
+    @Autowired
+    LogDao logDao;
+
+    @Test
+    public void testLogSave() {
+        logDao.save(UUID.randomUUID().toString().toLowerCase());
+    }
 
     @Test
     public void testSave() {
@@ -34,9 +48,8 @@ public class LogEntryDaoTest {
         logger.error("E2");
         logger.warn("W1");
         logger.warn("W2");
-        String uuid = UUID.randomUUID().toString().toLowerCase();
 
-        logEntryDao.save(logger.getEntries(), uuid);
+        logEntryDao.save(logger.getEntries(), UID_WITHOUT_LOG_ENTRY_1);
     }
 
     @Test
@@ -46,13 +59,27 @@ public class LogEntryDaoTest {
         logger.error("E2");
         logger.warn("W1");
         logger.warn("W2");
-        String uuid = UUID.randomUUID().toString().toLowerCase();
-        logEntryDao.save(logger.getEntries(), uuid);
-        List<LogEntry> lel = logEntryDao.get(uuid);
+        logEntryDao.save(logger.getEntries(), UID_WITHOUT_LOG_ENTRY_2);
+        List<LogEntry> lel = logEntryDao.get(UID_WITHOUT_LOG_ENTRY_2);
 
         Assert.assertEquals(lel.size(), 4);
         Assert.assertEquals(lel.get(0).getMessage(), "E1");
         Assert.assertEquals(lel.get(3).getLevel(), LogLevel.WARNING);
+    }
+
+    @Test
+    public void testGetEmptyPage() {
+        List<LogEntry> emptyPage = logEntryDao.get(UID_WITHOUT_LOG_ENTRY_3, 1, 10);
+        Assert.assertTrue(emptyPage.isEmpty());
+    }
+
+    @Test
+    public void testGetPage() {
+        List<LogEntry> page = logEntryDao.get(UID_WITH_LOG_ENTRY_4, 1, 2);
+
+        Assert.assertEquals(page.size(), 2);
+        Assert.assertEquals(page.get(0).getOrd(), 2);
+        Assert.assertEquals(page.get(1).getOrd(), 3);
     }
 
     @Test(expected = RuntimeException.class)
@@ -71,28 +98,34 @@ public class LogEntryDaoTest {
     }
 
     @Test
+    public void testMinOrder() {
+        Assert.assertEquals(1, logEntryDao.minOrder(UID_WITH_LOG_ENTRY_4).intValue());
+        Assert.assertNull(logEntryDao.minOrder(UID_WITHOUT_LOG_ENTRY_3));
+    }
+
+    @Test
+    public void testMaxOrder() {
+        Assert.assertEquals(3, logEntryDao.maxOrder(UID_WITH_LOG_ENTRY_4).intValue());
+        Assert.assertNull(logEntryDao.maxOrder(UID_WITHOUT_LOG_ENTRY_3));
+    }
+
+    @Test
     public void testUpdate() {
-        Logger logger = new Logger();
-        logger.error("E1");
-        logger.error("E2");
-        logger.warn("W1");
-        logger.warn("W2");
-        String uuid = UUID.randomUUID().toString().toLowerCase();
-        logEntryDao.save(logger.getEntries(), uuid);
+        List<LogEntry> before = Arrays.asList(new LogEntry(LogLevel.INFO, "-3"), new LogEntry(LogLevel.INFO, "-2"), new LogEntry(LogLevel.INFO, "-1"));
+        List<LogEntry> after = Arrays.asList(new LogEntry(LogLevel.INFO, "1"), new LogEntry(LogLevel.INFO, "2"), new LogEntry(LogLevel.INFO, "3"));
 
-        List<LogEntry> logEntries = logEntryDao.get(uuid);
+        logEntryDao.update(before, UID_WITH_LOG_ENTRY_5, true);
+        logEntryDao.update(after, UID_WITH_LOG_ENTRY_5, false);
 
-        Logger newLogger = new Logger();
-        newLogger.error("E3");
-        newLogger.warn("W3");
-        logEntries.addAll(newLogger.getEntries());
+        List<LogEntry> logEntries = logEntryDao.get(UID_WITH_LOG_ENTRY_5);
 
-        logEntryDao.update(logEntries, uuid);
-        List<LogEntry> list = logEntryDao.get(uuid);
+        Assert.assertEquals(before.get(0).getMessage(), logEntries.get(0).getMessage());
+        Assert.assertEquals(before.get(1).getMessage(), logEntries.get(1).getMessage());
+        Assert.assertEquals(before.get(2).getMessage(), logEntries.get(2).getMessage());
 
-        Assert.assertEquals(list.size(), 6);
-        Assert.assertEquals(list.get(4).getMessage(), "E3");
-        Assert.assertEquals(list.get(5).getLevel(), LogLevel.WARNING);
+        Assert.assertEquals(after.get(0).getMessage(), logEntries.get(7).getMessage());
+        Assert.assertEquals(after.get(1).getMessage(), logEntries.get(8).getMessage());
+        Assert.assertEquals(after.get(2).getMessage(), logEntries.get(9).getMessage());
     }
 
     //@Test

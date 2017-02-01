@@ -34,21 +34,6 @@ public class LogEntryServiceTest {
     }
 
     @Test
-    public void getTest() {
-        Assert.assertEquals(logEntryService.get(UUID, 10, 10).size(), 10);
-        Assert.assertEquals(logEntryService.get(UUID, 95, 10).size(), 5);
-        Assert.assertEquals(logEntryService.get(UUID, 0, 1000).size(), SIZE);
-        Assert.assertEquals(logEntryService.get(UUID, -10, 1000).size(), 0);
-        Assert.assertEquals(logEntryService.get(UUID, 1000, 1).size(), 0);
-        Assert.assertEquals(logEntryService.get(UUID, 1, 0).size(), 0);
-
-        Assert.assertEquals(logEntryService.get(UUID, 1, 0).getTotalCount(), SIZE);
-        Assert.assertEquals(logEntryService.get(UUID, 10, 10).getTotalCount(), SIZE);
-
-        Assert.assertEquals(logEntryService.get(UUID, 10, 20).get(15).getMessage(), "item 25");
-    }
-
-    @Test
     public void getAllTest() {
         Assert.assertEquals(logEntryService.getAll(UUID).size(), SIZE);
     }
@@ -63,5 +48,4 @@ public class LogEntryServiceTest {
 
         Assert.assertEquals(logEntryService.getLogCount("nonexistent").get(LogLevel.INFO).intValue(), 0);
     }
-
 }
