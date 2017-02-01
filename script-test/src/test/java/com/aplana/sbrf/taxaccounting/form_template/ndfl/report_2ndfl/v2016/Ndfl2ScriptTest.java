@@ -17,7 +17,6 @@ import org.custommonkey.xmlunit.Validator;
 import org.custommonkey.xmlunit.exceptions.XpathException;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -32,6 +31,7 @@ import java.util.*;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathExists;
+import static org.custommonkey.xmlunit.XMLAssert.assertXpathNotExists;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -84,8 +84,14 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
     @Test
     public void validation_test() throws IOException, SAXException, XpathException {
-        List<NdflPerson> ndflPersons = createNdflPersonMocks();
-        when(testHelper.getNdflPersonService().findNdflPerson(anyLong())).thenReturn(ndflPersons);
+        Calendar calTax = Calendar.getInstance();
+        calTax.set(2014, 5, 1);
+
+        Calendar calPayment = Calendar.getInstance();
+        calPayment.set(2014, 6, 1);
+        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax.getTime(), calPayment.getTime());
+
+        when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
 
         initNdflRefBook(1, "Сбербанк", "+74955555555");
         initFormDataRefBook("2 НДФЛ (1)");
@@ -93,8 +99,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
         testHelper.execute(FormDataEvent.CALCULATE);
         assertNotNull(testHelper.getXmlStringWriter());
-        assertTrue(validateResultBySchema(testHelper.getXmlStringWriter().toString()));
-        //assertXpathNotExists("/Файл/Документ/Подписант/СвПред", testHelper.getXmlStringWriter().toString());
+        assertTrue(validateResultBySchema("<?xml version='1.0' encoding='utf-8'?>\n" + testHelper.getXmlStringWriter().toString()));
         assertXpathExists("/Файл/СвРекв[@ОКТМО='11223344']", testHelper.getXmlStringWriter().toString());
         assertXpathExists("/Файл/СвРекв[@ПризнакФ='1']", testHelper.getXmlStringWriter().toString());
         assertXpathExists("/Файл/СвРекв/СвЮЛ[@КПП='110101001']", testHelper.getXmlStringWriter().toString());
@@ -124,36 +129,41 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
     }
 
     @Test
-    @Ignore
-    public void prPodp_equals_2_test() throws IOException, SAXException, XpathException {
-        List<NdflPerson> ndflPersons = createNdflPersonMocks();
-        when(testHelper.getNdflPersonService().findNdflPerson(anyLong())).thenReturn(ndflPersons);
+    public void check_selection_when_priznakF_equals_1() throws IOException, SAXException, XpathException {
+        Calendar calTax = Calendar.getInstance();
+        calTax.set(2015, 5, 1);
+        Calendar calPayment = Calendar.getInstance();
+        calPayment.set(2015, 6, 1);
+        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax.getTime(), calPayment.getTime());
 
-        initNdflRefBook(2, "Сбербанк", "+74955555555");
-        initFormDataRefBook("2 НДФЛ (2)");
+        when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
+
+        initNdflRefBook(1, "Сбербанк", "+74955555555");
+        initFormDataRefBook("2 НДФЛ (1)");
         initOther();
 
         testHelper.execute(FormDataEvent.CALCULATE);
         assertNotNull(testHelper.getXmlStringWriter());
-        assertTrue(validateResultBySchema(testHelper.getXmlStringWriter().toString()));
-        assertXpathExists("/Файл/Документ/Подписант/СвПред", testHelper.getXmlStringWriter().toString());
-        checkLogger();
+        assertXpathNotExists("/Файл/Документ/Подписант/СведДох/ДохВыч", testHelper.getXmlStringWriter().toString());
     }
 
     @Test
-    @Ignore
-    public void optional_elements_equals_null_test() throws IOException, SAXException, XpathException {
-        List<NdflPerson> ndflPersons = createNdflPersonMocks();
-        when(testHelper.getNdflPersonService().findNdflPerson(anyLong())).thenReturn(ndflPersons);
+    public void check_selection_when_priznakF_equals_2() throws IOException, SAXException, XpathException {
+        Calendar calTax = Calendar.getInstance();
+        calTax.set(2015, 5, 1);
+        Calendar calPayment = Calendar.getInstance();
+        calPayment.set(2015, 6, 1);
+        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax.getTime(), calPayment.getTime());
 
-        initNdflRefBook(2, null, null);
+        when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
+
+        initNdflRefBook(1, "Сбербанк", "+74955555555");
         initFormDataRefBook("2 НДФЛ (2)");
         initOther();
 
         testHelper.execute(FormDataEvent.CALCULATE);
         assertNotNull(testHelper.getXmlStringWriter());
-        //assertTrue(validateResultBySchema(testHelper.getXmlStringWriter().toString()));
-        checkLogger();
+        assertXpathNotExists("/Файл/Документ/Подписант/СведДох/ДохВыч", testHelper.getXmlStringWriter().toString());
     }
 
     private void initNdflRefBook(int signatoryId, String approveOrgName, String phone) {
@@ -178,15 +188,15 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
     private void initFormDataRefBook(String code) {
         RefBookDataProvider formTypeRefBookDataProvider = mock(RefBookDataProvider.class);
-        PagingResult<Map<String, RefBookValue>> formTypePagingResult = new PagingResult<Map<String, RefBookValue>>();
-        when(formTypeRefBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(formTypePagingResult);
-        Map<String, RefBookValue> formTypePagingResultItem = new HashMap<String, RefBookValue>();
-        formTypePagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, code));
-        formTypePagingResult.add(formTypePagingResultItem);
+        Map<String, RefBookValue> formTypeResult = new HashMap<String, RefBookValue>();
+        when(formTypeRefBookDataProvider.getRecordData(anyLong())).thenReturn(formTypeResult);
+        formTypeResult.put("CODE", new RefBookValue(RefBookAttributeType.STRING, code));
         when(testHelper.getRefBookFactory().getDataProvider(REB_BOOK_FORM_TYPE_ID)).thenReturn(formTypeRefBookDataProvider);
+
     }
 
     private void initOther() {
+
         when(testHelper.getDeclarationService().getTemplate(anyInt())).thenAnswer(new Answer<DeclarationTemplate>() {
             @Override
             public DeclarationTemplate answer(InvocationOnMock invocation) throws Throwable {
@@ -195,6 +205,8 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
                 return declarationTemplate;
             }
         });
+
+
 
         RefBookDataProvider deductionTypeRefBookDataProvider = mock(RefBookDataProvider.class);
         PagingResult<Map<String, RefBookValue>> deduction5TypePagingResult = new PagingResult<Map<String, RefBookValue>>();
@@ -232,99 +244,104 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         return v.isValid();
     }
 
-    private List<NdflPerson> createNdflPersonMocks() {
+    private List<NdflPerson> createNdflPersonMocks(Date taxDate, Date paymentDate) {
         List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>();
-        NdflPerson ndflPerson = new NdflPerson();
-        ndflPerson.setInnNp("770111111111");
-        ndflPerson.setInnForeign("111111111111");
-        ndflPerson.setStatus("6");
+        NdflPerson ndflPerson = null;
+        for (int i = 0; i <2; i++) {
+            ndflPerson = new NdflPerson();
+            ndflPerson.setId(1L);
+            ndflPerson.setInnNp("770111111111");
+            ndflPerson.setInnForeign("111111111111");
+            ndflPerson.setStatus("6");
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(1985, 0, 1);
-        ndflPerson.setBirthDay(cal.getTime());
+            Calendar cal = Calendar.getInstance();
+            cal.set(1985, 0, 1);
+            ndflPerson.setBirthDay(cal.getTime());
 
-        ndflPerson.setCitizenship("643");
+            ndflPerson.setCitizenship("643");
 
-        ndflPerson.setLastName("Петров");
-        ndflPerson.setFirstName("Петр");
-        ndflPerson.setMiddleName("Петрович");
+            ndflPerson.setLastName("Петров");
+            ndflPerson.setFirstName("Петр");
+            ndflPerson.setMiddleName("Петрович");
 
-        ndflPerson.setIdDocType("21");
-        ndflPerson.setIdDocNumber("1234 5678");
+            ndflPerson.setIdDocType("21");
+            ndflPerson.setIdDocNumber("1234 5678");
 
-        ndflPerson.setPostIndex("111222");
-        ndflPerson.setRegionCode("97");
-        ndflPerson.setArea("Приволжский");
-        ndflPerson.setCity("Москва");
-        ndflPerson.setLocality(null);
-        ndflPerson.setStreet("Ленина");
-        ndflPerson.setHouse("1");
-        ndflPerson.setBuilding("2");
-        ndflPerson.setFlat("3");
+            ndflPerson.setPostIndex("111222");
+            ndflPerson.setRegionCode("97");
+            ndflPerson.setArea("Приволжский");
+            ndflPerson.setCity("Москва");
+            ndflPerson.setLocality(null);
+            ndflPerson.setStreet("Ленина");
+            ndflPerson.setHouse("1");
+            ndflPerson.setBuilding("2");
+            ndflPerson.setFlat("3");
 
-        ndflPerson.setCountryCode("840");
-        ndflPerson.setAddress("Мэдисон авеню д.10");
-        //
-        NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncome();
-        ndflPersonIncome1.setTaxRate(13);
-        ndflPersonIncome1.setIncomeAccruedSumm(BigDecimal.valueOf(100000L));
-        ndflPersonIncome1.setNotHoldingTax(50000L);
-        ndflPersonIncome1.setOperationId(1L);
-        ndflPersonIncome1.setTaxBase(BigDecimal.valueOf(5000L));
-        ndflPersonIncome1.setCalculatedTax(6000L);
-        ndflPersonIncome1.setWithholdingTax(7000L);
-        ndflPersonIncome1.setTaxSumm(8000);
-        ndflPersonIncome1.setOverholdingTax(9000L);
-        ndflPersonIncome1.setNotHoldingTax(4000L);
+            ndflPerson.setCountryCode("840");
+            ndflPerson.setAddress("Мэдисон авеню д.10");
+            //
+            NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncome();
+            ndflPersonIncome1.setTaxRate(13);
+            ndflPersonIncome1.setIncomeAccruedSumm(BigDecimal.valueOf(100000L));
+            ndflPersonIncome1.setNotHoldingTax(50000L);
+            ndflPersonIncome1.setOperationId(1L);
+            ndflPersonIncome1.setTaxBase(BigDecimal.valueOf(5000L));
+            ndflPersonIncome1.setCalculatedTax(6000L);
+            ndflPersonIncome1.setWithholdingTax(7000L);
+            ndflPersonIncome1.setTaxSumm(8000);
+            ndflPersonIncome1.setOverholdingTax(9000L);
+            ndflPersonIncome1.setNotHoldingTax(4000L);
 
-        Calendar calAccrued = Calendar.getInstance();
-        calAccrued.set(2014, 4, 1);
-        ndflPersonIncome1.setTaxDate(calAccrued.getTime());
+            Calendar calAccrued = Calendar.getInstance();
+            calAccrued.set(2014, 4, 1);
+            ndflPersonIncome1.setIncomeAccruedDate(calAccrued.getTime());
 
-        Calendar calTax1 = Calendar.getInstance();
-        calTax1.set(2014, 5, 1);
-        ndflPersonIncome1.setTaxDate(calTax1.getTime());
+            ndflPersonIncome1.setTaxDate(taxDate);
+            ndflPersonIncome1.setPaymentDate(paymentDate);
 
-        Calendar calPayment1 = Calendar.getInstance();
-        calPayment1.set(2014, 6, 1);
-        ndflPersonIncome1.setTaxDate(calPayment1.getTime());
+            ndflPersonIncome1.setIncomeCode("5011");
 
-        ndflPersonIncome1.setIncomeCode("5011");
-
-        ndflPerson.getIncomes().add(ndflPersonIncome1);
+            ndflPerson.getIncomes().add(ndflPersonIncome1);
 
 
-        NdflPersonDeduction ndflPersonDeduction1 = new NdflPersonDeduction();
-        ndflPersonDeduction1.setOperationId(1L);
-        ndflPersonDeduction1.setIncomeAccrued(calAccrued.getTime());
-        ndflPersonDeduction1.setTypeCode("501");
-        ndflPersonDeduction1.setPeriodCurrDate(calTax1.getTime());
-        ndflPersonDeduction1.setPeriodCurrSumm(BigDecimal.valueOf(100000));
-        ndflPersonDeduction1.setIncomeCode("5011");
+            NdflPersonDeduction ndflPersonDeduction1 = new NdflPersonDeduction();
+            ndflPersonDeduction1.setOperationId(1L);
+            ndflPersonDeduction1.setIncomeAccrued(calAccrued.getTime());
+            ndflPersonDeduction1.setTypeCode("501");
+            ndflPersonDeduction1.setPeriodCurrDate(ndflPersonIncome1.getTaxDate());
+            ndflPersonDeduction1.setPeriodCurrSumm(BigDecimal.valueOf(100000));
+            ndflPersonDeduction1.setIncomeCode("5011");
 
-        ndflPerson.getDeductions().add(ndflPersonDeduction1);
+            ndflPerson.getDeductions().add(ndflPersonDeduction1);
 
-        NdflPersonDeduction ndflPersonDeduction2 = new NdflPersonDeduction();
-        ndflPersonDeduction2.setOperationId(1L);
-        ndflPersonDeduction2.setIncomeAccrued(calAccrued.getTime());
-        ndflPersonDeduction2.setTypeCode("101");
-        ndflPersonDeduction2.setPeriodCurrDate(calTax1.getTime());
-        ndflPersonDeduction2.setPeriodCurrSumm(BigDecimal.valueOf(200000));
-        ndflPersonDeduction2.setNotifNum("123");
-        ndflPersonDeduction2.setNotifDate(calPayment1.getTime());
-        ndflPersonDeduction2.setNotifSource("1684");
-        ndflPersonDeduction2.setIncomeCode("5011");
-        ndflPerson.getDeductions().add(ndflPersonDeduction2);
+            NdflPersonDeduction ndflPersonDeduction2 = new NdflPersonDeduction();
+            ndflPersonDeduction2.setOperationId(1L);
+            ndflPersonDeduction2.setIncomeAccrued(calAccrued.getTime());
+            ndflPersonDeduction2.setTypeCode("101");
+            ndflPersonDeduction2.setPeriodCurrDate(ndflPersonIncome1.getTaxDate());
+            ndflPersonDeduction2.setPeriodCurrSumm(BigDecimal.valueOf(200000));
+            ndflPersonDeduction2.setNotifNum("123");
+            ndflPersonDeduction2.setNotifDate(paymentDate);
+            ndflPersonDeduction2.setNotifSource("1684");
+            ndflPersonDeduction2.setIncomeCode("5011");
+            ndflPerson.getDeductions().add(ndflPersonDeduction2);
 
-        NdflPersonPrepayment ndflPersonPrepayment = new NdflPersonPrepayment();
-        ndflPersonPrepayment.setNotifNum("123");
-        ndflPersonPrepayment.setNotifDate(calTax1.getTime());
-        ndflPersonPrepayment.setNotifSource("1684");
-        ndflPersonPrepayment.setSumm(1000L);
+            NdflPersonPrepayment ndflPersonPrepayment = new NdflPersonPrepayment();
+            ndflPersonPrepayment.setNotifNum("123");
+            ndflPersonPrepayment.setNotifDate(ndflPersonIncome1.getTaxDate());
+            ndflPersonPrepayment.setNotifSource("1684");
+            ndflPersonPrepayment.setSumm(1000L);
+            ndflPersonPrepayment.setOperationId(1L);
 
-        ndflPerson.getPrepayments().add(ndflPersonPrepayment);
+            ndflPerson.getPrepayments().add(ndflPersonPrepayment);
 
-        ndflPersonList.add(ndflPerson);
+            ndflPersonList.add(ndflPerson);
+        }
+
+
+        when(testHelper.getNdflPersonService().findIncomesByPeriodAndNdflPersonId(anyLong(), any(Date.class), any(Date.class))).thenReturn(ndflPerson.getIncomes());
+        when(testHelper.getNdflPersonService().findDeductionsByPeriodAndNdflPersonId(anyLong(), any(Date.class), any(Date.class))).thenReturn(ndflPerson.getDeductions());
+        when(testHelper.getNdflPersonService().findPrepaymentsByPeriodAndNdflPersonId(anyLong(), any(Date.class), any(Date.class))).thenReturn(ndflPerson.getPrepayments());
         return ndflPersonList;
     }
 
