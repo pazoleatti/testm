@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 
 import javax.validation.constraints.NotNull;
@@ -13,26 +14,51 @@ import java.util.List;
 public interface LogEntryDao {
 
     /**
-     * Создание записи
+     * Создание записей в логах
      *
-     * @param logEntries
-     * @param uuid
+     * @param logEntries список новых логов
+     * @param logId идентификатор группы логов
      */
-    void save(List<LogEntry> logEntries, String uuid);
+    void save(List<LogEntry> logEntries, String logId);
 
     /**
-     * Получение записи
+     * Добавляет логи в уже существующую группу
      *
-     * @param uuid
-     * @return
+     * @param logEntries список новых логов
+     * @param logId идентификатор группы логов
+     * @param first добавить в начало списка
      */
-    List<LogEntry> get(@NotNull String uuid);
+    void update(List<LogEntry> logEntries, String logId, boolean first);
 
     /**
-     * Обновление записи
+     * Получение списка логов по идентификатору группы
      *
-     * @param logEntries
-     * @param uuid
+     * @param logId идентификатор группы логов
      */
-    void update(List<LogEntry> logEntries, String uuid);
+    List<LogEntry> get(@NotNull String logId);
+
+    /**
+     * Получение страницы логов по идентификатору группы
+     *
+     * @param logId идентификатор группы логов
+     * @param length размер страницы
+     * @param offset смещение
+     */
+    PagingResult<LogEntry> get(@NotNull String logId, int offset, int length);
+
+    /**
+     * Получает минимальное значение order у группы логов
+     *
+     * @param logId идентификатор группы логов
+     * @return порядковый номер
+     */
+    Integer minOrder(@NotNull String logId);
+
+    /**
+     * Получает максимальное значение order у группы логов
+     *
+     * @param logId идентификатор группы логов
+     * @return порядковый номер
+     */
+    Integer maxOrder(@NotNull String logId);
 }
