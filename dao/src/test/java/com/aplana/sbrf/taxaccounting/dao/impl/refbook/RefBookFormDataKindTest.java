@@ -43,7 +43,7 @@ public class RefBookFormDataKindTest {
 
     @Test
     public void test2() {
-        PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(FORM_DATA_KIND_REF_BOOK_ID, FORM_DATA_KIND_TABLE_NAME, null, "record_id > 0 and record_id < 4", null, null);
+        PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(FORM_DATA_KIND_REF_BOOK_ID, FORM_DATA_KIND_TABLE_NAME, null, "id > 0 and id < 4", null, null);
         assertEquals(3, records.size());
     }
 
@@ -85,7 +85,7 @@ public class RefBookFormDataKindTest {
 
     @Test
     public void test7() {
-        assertEquals(2, refBookDao.getRecordsCount(FORM_DATA_KIND_REF_BOOK_ID, FORM_DATA_KIND_TABLE_NAME, "record_id = 2 or record_id = 4"));
+        assertEquals(2, refBookDao.getRecordsCount(FORM_DATA_KIND_REF_BOOK_ID, FORM_DATA_KIND_TABLE_NAME, "id = 2 or id = 4"));
     }
 
     @Test

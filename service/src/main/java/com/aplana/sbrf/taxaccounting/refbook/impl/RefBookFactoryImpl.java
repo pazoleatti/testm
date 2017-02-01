@@ -53,14 +53,15 @@ public class RefBookFactoryImpl implements RefBookFactory {
 	private static final List<Long> simpleReadOnlyRefBooks = Arrays.asList(new Long[]{
 			USER.getId(), SEC_ROLE.getId(), DEPARTMENT_TYPE.getId(), ASNU.getId(),
 			DECLARATION_DATA_KIND_REF_BOOK.getId(), DECLARATION_DATA_TYPE_REF_BOOK.getId(),
-            DECLARATION_TEMPLATE.getId(), DOC_STATE.getId()
+            DECLARATION_TEMPLATE.getId(), DOC_STATE.getId(), TAX_INSPECTION.getId()
 	});
 	// Список простых редактируемых версионируемых справочников
 	private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
 			PERSON.getId(), NDFL.getId(), NDFL_DETAIL.getId(), FIAS_OPERSTAT.getId(),
 			FIAS_SOCRBASE.getId(), FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
 			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(), REORGANIZATION.getId(),
-			REGION.getId(), NDFL.getId(), NDFL_DETAIL.getId(), ID_DOC.getId()
+			REGION.getId(), NDFL.getId(), NDFL_DETAIL.getId(), ID_DOC.getId(),
+            OKATO.getId()
 	});
 
     @Autowired

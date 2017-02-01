@@ -62,6 +62,12 @@ alter table ref_book_doc_state add constraint pk_ref_book_doc_state primary key 
 alter table ref_book_income_kind add constraint pk_ref_book_income_kind primary key (id);
 --alter table ref_book_income_kind add constraint fk_ref_book_inckind_inctype foreign key (income_type_id) references ref_book_income_type(id);
 
+--Категории прикрепленных файлов
+alter table ref_book_attach_file_type add constraint pk_ref_book_attach_file_type primary key(id);
+
+--Налоговые инспекции
+alter table ref_book_tax_inspection add constraint pk_ref_book_tax_inspection primary key(id);
+
 -- Параметры подразделения по НДФЛ
 alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
 alter table ref_book_ndfl_detail add constraint pk_ref_book_ndfl_detail primary key(id);

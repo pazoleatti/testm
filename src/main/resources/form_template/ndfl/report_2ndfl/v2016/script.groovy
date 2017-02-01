@@ -1,5 +1,6 @@
 package form_template.ndfl.report_2ndfl.v2016
 
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
@@ -147,8 +148,8 @@ def buildXml() {
     def kpp = departmentParamRow?.KPP?.value
     def otchetGod = reportPeriod.taxPeriod.year
     def priznakF = definePriznakF()
-    def dataNachalaPerioda = reportPeriodService.getStartDate(declarationData.reportPeriodId)
-    def dataKontsaPerioda = reportPeriodService.getEndDate(declarationData.reportPeriodId)
+    def startDate = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
+    def endDate = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
 
     // Данные для Файл.Документ.Подписант
     def prPodp = departmentParamRow?.SIGNATORY_ID?.value
@@ -163,21 +164,20 @@ def buildXml() {
     def naimOrg = departmentParamRow?.NAME?.value
 
     // 	Данные для Файл.Документ.ПолучДох-(Данные о физическом лице - получателе дохода)
-    def listKnf = ndflPersons.collate(NUMBER_OF_PERSONS).get(currentPageNumber - 1)
-
-    def dateDoc = Calendar.getInstance().getTime()?.format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
+    def listKnf = ndflPersons
 
     // Порядковый номер физического лица
     def nomSpr = (currentPageNumber - 1) * NUMBER_OF_PERSONS + 1
+
+    def dateDoc = Calendar.getInstance().getTime()?.format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
 
     // Номер корректировки
     def nomKorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
     def kodNo = departmentParamRow?.TAX_ORGAN_CODE?.value
 
     def builder = new MarkupBuilder(xml)
-    builder.setOmitNullAttributes(true)
-    builder.mkp.xmlDeclaration(version: "1.0", encoding: "utf-8")
 
+    builder.setOmitNullAttributes(true)
     builder.Файл(ИдФайл: generateXmlFileId(),
             ВерсПрог: applicationVersion,
             ВерсФорм: VERS_FORM) {
@@ -188,10 +188,6 @@ def buildXml() {
                     КПП: kpp) {}
         }
         listKnf.each { knfRow ->
-
-            // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
-            def ndflPersonIncomes = knfRow.incomes
-            def ndflPersonDeductions = knfRow.deductions
             Документ(КНД: KND,
                     ДатаДок: dateDoc,
                     НомСпр: nomSpr++,
@@ -236,94 +232,84 @@ def buildXml() {
                     АдрИНО(КодСтр: knfRow.countryCode,
                             АдрТекст: knfRow.address)
                 }
+
+                // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
+                def ndflPersonIncomes = findIncomes(knfRow.id, priznakF, startDate, endDate)
+                // Сведения о вычетах
+                def ndflPersonDeductions = findDeductions(knfRow.id, startDate, endDate, ndflPersonIncomes)
+                // Сведения о доходах сгруппированные по ставке
                 def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomes)
+                // Сведения о доходах сгруппированные по коду дохода
+                def ndflPersonIncomesGroupedByIncomeCode = groupByIncomeCode(ndflPersonIncomes)
+                // Сведения о вычетах с признаком "Остальные"
+                def deductionsSelectedForDeductionsInfo = ndflPersonDeductions.findAll {
+                    getDeductionMark(getDeductionType(it?.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_OSTALNIE)
+                }
+                // Сведения о вычетах сгруппированные по коду вычета
+                def deductionsGroupedByTypeCodeForDeductionsInfo = groupByDeductionTypeCode(deductionsSelectedForDeductionsInfo)
+
+                def deductionsSelectedForDeductionsSum = selectDeductionsForDeductionsSum(ndflPersonDeductions)
+                def deductionsSelectedGroupedByDeductionTypeCode = groupByDeductionTypeCode(deductionsSelectedForDeductionsSum)
+
+                def ndflPersonPrepayments = findPrepayments(knfRow.id, startDate, endDate, ndflPersonIncomes)
                 ndflPersonIncomesGroupedByTaxRate.each { taxRateGroup ->
                     СведДох(Ставка: taxRateGroup.head()?.taxRate) {
-                        def selectedIncomeRows = selectIncomesForSvSumDoh(taxRateGroup, priznakF, dataNachalaPerioda, dataKontsaPerioda)
-                        selectedIncomeRows.each() { row ->
-                            ДохВыч() {
-                                def month = row.taxDate?.format(DATE_FORMAT_MONTH)
 
-                                def incomesGroupedByIncomeCode = groupByIncomeCode(selectedIncomeRows)
-                                incomesGroupedByIncomeCode.each { incomesGroup ->
-                                    def sortedIncomesGroup = incomesGroup.toSorted { item1, item2 -> item1.taxDate <=> item2.taxDate }
-                                    def incomeCode = sortedIncomesGroup.get(0)?.incomeCode
+                        taxRateGroup.each { ndflPersonIncome ->
+                            ДохВыч() {
+                                def month = ndflPersonIncome.taxDate?.format(DATE_FORMAT_MONTH)
+                                ndflPersonIncomesGroupedByIncomeCode.each { incomeCodeGroup ->
+                                    def sortedIncomeCodeGroup = incomeCodeGroup.toSorted { item1, item2 -> item1.taxDate <=> item2.taxDate }
+                                    def incomeCode = sortedIncomeCodeGroup.get(0)?.incomeCode
                                     СвСумДох(Месяц: month,
                                             КодДоход: incomeCode,
-                                            СумДоход: 100.00) {
-                                        def deductionsGroupedByTypeCode = groupByTypeCode(ndflPersonDeductions)
-                                        deductionsGroupedByTypeCode.each { deductionsGroup ->
-                                            def selectedDeductionRows = []
+                                            СумДоход: ScriptUtils.round(getSumDohod(incomeCodeGroup), 2)) {
 
-                                            [deductionsGroup, sortedIncomesGroup].eachCombination { deduction, inc ->
+                                        deductionsGroupedByTypeCodeForDeductionsInfo.each { deductionByTypeCodeGroup ->
+                                            def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionByTypeCodeGroup)
 
-                                                if (deduction.operationId == inc.operationId &&
-                                                        deduction.incomeAccrued.getTime() == deduction.incomeAccrued.getTime() &&
-                                                        deduction.incomeCode == inc.incomeCode &&
-                                                        getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_OSTALNIE) &&
-                                                        (deduction.periodCurrDate >= dataNachalaPerioda.getTime() && deduction.periodCurrDate <= dataKontsaPerioda.getTime())) {
-                                                    selectedDeductionRows << deduction
-                                                }
-                                            }
-                                            selectedDeductionRows.each { selectedDeduction ->
-                                                СвСумВыч(КодВычет: selectedDeduction.typeCode,
-                                                        СумВычет: selectedDeduction.periodCurrSumm) {
-
-                                                }
+                                            СвСумВыч(КодВычет: deductionsFilteredByIncomeCode.get(0)?.typeCode,
+                                                    СумВычет: ScriptUtils.round(deductionsFilteredByIncomeCode.sum().periodCurrSumm, 2)) {
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                        НалВычССИ() {
-                            def selectedDeductionRows = []
-                            if (taxRateGroup.head()?.taxRate == 13) {
-                                [taxRateGroup, ndflPersonDeductions].eachCombination { income, deduction ->
-                                    if (income.operationId == deduction.operationId &&
-                                            (getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_SOTSIALNIY) ||
-                                                    getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_STANDARTNIY) ||
-                                                    getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY) ||
-                                                    getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_INVESTITSIONNIY)) &&
-                                            (deduction.periodCurrDate >= dataNachalaPerioda.getTime() && deduction.periodCurrDate <= dataKontsaPerioda.getTime())) {
-                                        selectedDeductionRows << deduction
+                        if (taxRateGroup.head()?.taxRate == 13) {
+                            НалВычССИ() {
+                                deductionsSelectedGroupedByDeductionTypeCode.each { group ->
+                                    ПредВычССИ(КодВычет: group.head().typeCode,
+                                            СумВычет: group.sum().periodCurrSumm) {
                                     }
                                 }
-                            }
-                            def selectedDeductionsGroupedByDeductionCodeType = groupByDeductionTypeCode(selectedDeductionRows)
-                            selectedDeductionsGroupedByDeductionCodeType.each { group ->
-                                ПредВычССИ(КодВычет: group.head().typeCode,
-                                        СумВычет: group.sum().periodCurrSumm) {
+                                deductionsSelectedGroupedByDeductionTypeCode.find { group ->
+                                    getDeductionMark(getDeductionType(group.head()?.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_SOTSIALNIY)
+                                }.each {
+                                    УведСоцВыч(НомерУвед: it.notifNum,
+                                            ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
+                                            ИФНСУвед: it.notifSource)
+                                }
+                                deductionsSelectedGroupedByDeductionTypeCode.find { group ->
+                                    getDeductionMark(getDeductionType(group.head()?.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY)
+                                }.each {
+                                    УведИмущВыч(НомерУвед: it.notifNum,
+                                            ДатаУвед: it.notifDate.format(DATE_FORMAT_DOTTED),
+                                            ИФНСУвед: it.notifSource)
                                 }
                             }
-                            selectedDeductionsGroupedByDeductionCodeType.find { group ->
-                                getDeductionMark(getDeductionType(group.head()?.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_SOTSIALNIY)
-                            }.each {
-                                УведСоцВыч(НомерУвед: it.notifNum,
-                                        ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
-                                        ИФНСУвед: it.notifSource)
-                            }
-                            selectedDeductionsGroupedByDeductionCodeType.find { group ->
-                                getDeductionMark(getDeductionType(group.head()?.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY)
-                            }.each {
-                                УведИмущВыч(НомерУвед: it.notifNum,
-                                        ДатаУвед: it.notifDate.format(DATE_FORMAT_DOTTED),
-                                        ИФНСУвед: it.notifSource)
-                            }
                         }
-                        СумИтНалПер(СумДохОбщ: getSumDohObsh(selectedIncomeRows),
-                                НалБаза: getNalBaza(selectedIncomeRows),
-                                НалИсчисл: getNalIschisl(selectedIncomeRows),
-                                АвансПлатФикс: getAvansPlatFix(knfRow.prepayments),
-                                НалУдерж: getNalUderzh(priznakF, selectedIncomeRows),
-                                НалПеречисл: getNalPerechisl(priznakF, selectedIncomeRows),
-                                НалУдержЛиш: getNalUderzhLish(priznakF, selectedIncomeRows),
-                                НалНеУдерж: getNalNeUderzh(selectedIncomeRows)) {
+                        СумИтНалПер(СумДохОбщ: ScriptUtils.round(getSumDohObsh(ndflPersonIncomes), 2),
+                                НалБаза: ScriptUtils.round(getNalBaza(ndflPersonIncomes), 2),
+                                НалИсчисл: getNalIschisl(ndflPersonIncomes),
+                                АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
+                                НалУдерж: getNalUderzh(priznakF, ndflPersonIncomes),
+                                НалПеречисл: getNalPerechisl(priznakF, ndflPersonIncomes),
+                                НалУдержЛиш: getNalUderzhLish(priznakF, ndflPersonIncomes),
+                                НалНеУдерж: getNalNeUderzh(ndflPersonIncomes)) {
 
                             if (knfRow.status == "6") {
-                                def prepayments = knfRow.prepayments
-                                def selectedPrepayments = selectPrepaymentsForUvedFixPlat(prepayments, selectedIncomeRows, priznakF, dataNachalaPerioda, dataKontsaPerioda)
-                                selectedPrepayments.each { prepayment ->
+                                ndflPersonPrepayments.each { prepayment ->
                                     УведФиксПлат(НомерУвед: prepayment.notifNum,
                                             ДатаУвед: prepayment.notifDate?.format(DATE_FORMAT_DOTTED),
                                             ИФНСУвед: prepayment.notifSource) {
@@ -337,9 +323,8 @@ def buildXml() {
             }
         }
     }
-    println(xml)
+    //println(xml)
 }
-
 
 // Генерация имени файла
 def generateXmlFileId() {
@@ -362,49 +347,64 @@ def generateXmlFileId() {
 
 // Получение данных
 def getKnfData() {
-    ndflPersonService.findNdflPerson(declarationData.id)
+    ndflPersonService.findNdflPersonByParameters(declarationData.id, null, pageNumber*3000 - 2999, NUMBER_OF_PERSONS)
 }
 
-// Выборка строк для Файл.Документ.СведДох.ДохВыч.СвСумДох
-def selectIncomesForSvSumDoh(def taxRateGroup, def priznakF, def dataNachalaPerioda, def dataKontsaPerioda) {
-    def selectedIncomeRows = []
-    taxRateGroup.each { incomeRow ->
-        if (priznakF == "1") {
-            if (incomeRow.incomeAccruedSumm != 0 &&
-                    ((dataNachalaPerioda?.getTime().getTime() <= incomeRow.taxDate?.getTime() && dataKontsaPerioda.getTime().getTime() >= incomeRow.taxDate?.getTime()) ||
-                            (dataNachalaPerioda?.getTime().getTime() <= incomeRow.paymentDate?.getTime() && dataKontsaPerioda?.getTime().getTime() >= incomeRow?.paymentDate.getTime()))) {
-                selectedIncomeRows << incomeRow
-            }
-        } else if (priznakF == "2") {
-            if (incomeRow.notHoldingTax > 0 &&
-                    ((dataNachalaPerioda?.getTime().getTime() <= incomeRow.taxDate?.getTime() && dataKontsaPerioda?.getTime().getTime() >= incomeRow.taxDate?.getTime()) ||
-                            (dataNachalaPerioda?.getTime().getTime() <= incomeRow.paymentDate?.getTime() && dataKontsaPerioda?.getTime().getTime() >= incomeRow.paymentDate?.getTime()))) {
-                selectedIncomeRows << incomeRow
-            }
-        }
+// Получить доходы
+def findIncomes(def ndflPersonId, def priznakF, def startDate, def endDate) {
+    def selectedIncomeRows = ndflPersonService.findIncomesByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate)
+    if (priznakF == "1") {
+        selectedIncomeRows.removeAll { it.incomeAccruedSumm == 0 }
+    } else if (priznakF == "2") {
+        selectedIncomeRows.removeAll { it.notHoldingTax < 0 }
     }
     return selectedIncomeRows
 }
 
-// Файл.Документ.СведДох.СумИтНалПер.УведФиксПлат
-def selectPrepaymentsForUvedFixPlat(def prepayments, def selectedIncomeRows, def priznakF, def dataNachalaPerioda, def dataKontsaPerioda) {
-    def selectedPrepayments = []
-    prepayments.each { prepayment ->
-        if (priznakF == "1" &&
-                (dataNachalaPerioda?.getTime().getTime() <= prepayment.notifDate.getTime() &&
-                        dataKontsaPerioda.getTime().getTime() >= prepayment.notifDate.getTime())) {
-            selectedPrepayments << prepayment
-        } else if (priznakF == "2" &&
-                (dataNachalaPerioda?.getTime().getTime() <= prepayment.notifDate.getTime() &&
-                        dataKontsaPerioda.getTime().getTime() >= prepayment.notifDate.getTime())) {
-            selectedIncomeRows.each { income ->
-                if(income.operationId == prepayment.operationId) {
-                    selectedPrepayments << prepayment
-                }
-            }
+// Получить вычеты
+def findDeductions(def ndflPersonId, def startDate, def endDate, def ndflPersonIncomes) {
+    def toReturn = []
+    def selectedDeductionRows = ndflPersonService.findDeductionsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate)
+
+    for (d in selectedDeductionRows) {
+        for (i in ndflPersonIncomes) {
+            if (d.operationId == i.operationId) toReturn << d
         }
     }
-    return selectedPrepayments
+    return toReturn
+}
+
+// отфильтровать вычеты код дохода которых не совпадает
+def filterDeductionsByIncomeCode(def ndflPersonIncomes, def ndflPersonDeductions) {
+    def toReturn = []
+    for (d in ndflPersonDeductions) {
+        for (i in ndflPersonIncomes) {
+            if (d.incomeCode == i.incomeCode) toReturn << d
+        }
+    }
+    return toReturn
+}
+
+// Получить авансы
+def findPrepayments(def ndflPersonId, def startDate, def endDate, def ndflPersonIncomes) {
+    def toReturn = []
+    def selectedPrepayments = ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate)
+    for (p in selectedPrepayments) {
+        for (i in ndflPersonIncomes) {
+            if (p.operationId == i.operationId) toReturn << p
+        }
+    }
+    return toReturn
+}
+
+// Фильтрация налоговых вычетов для сведений о суммах предоставленных налоговых вычетов
+def selectDeductionsForDeductionsSum(def ndflPersonDeductions) {
+    ndflPersonDeductions.findAll { deduction ->
+        getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_SOTSIALNIY) ||
+                getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_STANDARTNIY) ||
+                getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY) ||
+                getDeductionMark(getDeductionType(deduction.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_INVESTITSIONNIY)
+    }
 }
 
 // группирока по налоговой ставке
@@ -455,6 +455,11 @@ def groupByDeductionTypeCode(def deductions) {
     return toReturn
 }
 
+// Вычислить сумму для СумДоход
+def getSumDohod(def rows) {
+    rows.incomeAccruedSumm.sum()
+}
+
 // Вычислить сумму для СумДохОбщ
 def getSumDohObsh(def incomes) {
     incomes.incomeAccruedSumm.sum()
@@ -471,8 +476,8 @@ def getNalIschisl(def incomes) {
 }
 
 //Вычислить сумму для АвансПлатФикс
-def getAvansPlatFix(def incomes) {
-    incomes.sum{it.summ} //TODO: требуется найти сумму id операций???
+def getAvansPlatFix(def prepayments) {
+    prepayments.sum { it.summ }
 }
 
 //Вычислить сумму для НалУдерж
@@ -507,7 +512,6 @@ def getNalNeUderzh(def incomes) {
     incomes.sum { it.notHoldingTax }
 }
 
-
 // Получить параметры подразделения (из справочника 950)
 def getDepartmentParam() {
     if (departmentParam == null) {
@@ -525,7 +529,7 @@ def getDepartmentParam() {
 // Получить детали подразделения из справочника
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamRow == null) {
-        def filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
+        def filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}' and OKTMO = ${declarationData.oktmo}"
         def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
@@ -550,7 +554,6 @@ def getProvider(def long providerId) {
 }
 
 
-
 def getReportPeriodEndDate() {
     if (reportPeriodEndDate == null) {
         reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
@@ -569,12 +572,7 @@ def getDeclarationTemplate() {
 // Получить вид формы
 def getFormType(def id) {
     if (formType == null) {
-        def filter = "ID = '$id'"
-        def formTypeList = getProvider(REB_BOOK_FORM_TYPE_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
-        if (formTypeList == null || formTypeList.size() == 0 || formTypeList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
-        }
-        formType = formTypeList.get(0)
+        formType = getProvider(REB_BOOK_FORM_TYPE_ID).getRecordData(id)
     }
     return formType;
 }

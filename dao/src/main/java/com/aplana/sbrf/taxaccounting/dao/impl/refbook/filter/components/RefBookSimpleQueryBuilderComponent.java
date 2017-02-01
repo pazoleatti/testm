@@ -16,10 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -113,7 +110,7 @@ public class RefBookSimpleQueryBuilderComponent {
         ps.appendQuery("(SELECT DISTINCT ");
         StringBuilder fields = new StringBuilder();
         fields.append("record_id");
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
+        for (RefBookAttribute attribute : getNotSystemAttributes(refBook.getAttributes())) {
             fields.append(", ");
             fields.append(attribute.getAlias());
         }
@@ -130,7 +127,7 @@ public class RefBookSimpleQueryBuilderComponent {
         } else {
             ps.appendQuery(" frb.id as \"RECORD_ID\"");
 
-            for (RefBookAttribute attribute : refBook.getAttributes()) {
+            for (RefBookAttribute attribute : getNotSystemAttributes(refBook.getAttributes())) {
                 ps.appendQuery(", frb.");
                 ps.appendQuery(attribute.getAlias());
                 ps.appendQuery(" as \"");
@@ -249,20 +246,20 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery("SELECT res.*, rownum row_number_over FROM ");
         }
 
-        ps.appendQuery("(select frb.id as ");
+        ps.appendQuery("(SELECT frb.id AS ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
 
         if (version == null) {
-            ps.appendQuery(",  t.version as ");
+            ps.appendQuery(",  t.version AS ");
             ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
             ps.appendQuery(",");
 
-            ps.appendQuery("  t.versionEnd as ");
+            ps.appendQuery("  t.versionEnd AS ");
             ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
         }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (!RefBook.SYSTEM_ALIASES.contains(attribute.getAlias())) {
+            if (!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)) {
                 ps.appendQuery(", frb.");
                 ps.appendQuery(attribute.getAlias());
             }
@@ -290,18 +287,18 @@ public class RefBookSimpleQueryBuilderComponent {
         }
 
         if (filterPS.getQuery().length() > 0 ) {
-            ps.appendQuery(" and ");
+            ps.appendQuery(" AND ");
         } else {
-            ps.appendQuery(" where ");
+            ps.appendQuery(" WHERE ");
         }
-        ps.appendQuery("(frb.version = t.version and frb.record_id = t.record_id)");
+        ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id)");
 
         if (sortAttribute != null) {
-            ps.appendQuery(" order by ");
+            ps.appendQuery(" ORDER BY ");
             ps.appendQuery("frb." + sortAttribute.getAlias());
             ps.appendQuery(isSortAscending ? " ASC":" DESC");
         } else {
-            ps.appendQuery(" order by frb.id");
+            ps.appendQuery(" ORDER BY frb.id");
         }
         if (version == null) {
             ps.appendQuery(" , t.version\n");
@@ -505,7 +502,8 @@ public class RefBookSimpleQueryBuilderComponent {
 
     public PreparedStatementData psCreateFakeRecordVersion(RefBook refBook, Long recordId, Date version) {
         PreparedStatementData sql = new PreparedStatementData();
-        List<RefBookAttribute> requiredAttributes = getRequiredAttributesListFromBook(refBook);
+        List<RefBookAttribute> allRequiredAttributes = getRequiredAttributesListFromBook(refBook);
+        List<RefBookAttribute> requiredAttributes = getNotSystemAttributes(allRequiredAttributes);
 
         sql.addNamedParam("recordId", recordId);
         sql.addNamedParam("version", new java.sql.Date(version.getTime()));
@@ -521,6 +519,16 @@ public class RefBookSimpleQueryBuilderComponent {
         }
         sql.append(")");
         return sql;
+    }
+
+    private List<RefBookAttribute> getNotSystemAttributes(List<RefBookAttribute> attributes) {
+        List<RefBookAttribute> result = new ArrayList<RefBookAttribute>();
+        for (RefBookAttribute attribute : attributes) {
+            if (!RefBook.SYSTEM_ALIASES.contains(attribute.getAlias().toLowerCase())) {
+                result.add(attribute);
+            }
+        }
+        return result;
     }
 
     private void appendFakeAttributeValue(PreparedStatementData sql, RefBookAttribute requiredAttribute) {
@@ -562,12 +570,14 @@ public class RefBookSimpleQueryBuilderComponent {
 
     public PreparedStatementData psCreateRecordVersion(final RefBook refBook) {
         PreparedStatementData sql = new PreparedStatementData();
+        List<RefBookAttribute> attributes = getNotSystemAttributes(refBook.getAttributes());
+
         sql.append("insert into ").append(refBook.getTableName()).append(" (id, record_id, version, status");
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
+        for (RefBookAttribute attribute : attributes) {
             sql.append(", ").append(attribute.getAlias());
         }
         sql.append(") values (:id, :recordId, :version, :status");
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
+        for (RefBookAttribute attribute : attributes) {
             sql.append(", :").append(attribute.getAlias());
         }
         sql.append(")");
@@ -577,6 +587,13 @@ public class RefBookSimpleQueryBuilderComponent {
         return sql;
     }
 
-
-
+    public PreparedStatementData psGetRecordData(RefBook refBook) {
+        PreparedStatementData sql = new PreparedStatementData("SELECT id ");
+        sql.append(RefBook.RECORD_ID_ALIAS);
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            sql.append(", ").append(attribute.getAlias());
+        }
+        sql.append(" FROM ").append(refBook.getTableName()).append(" WHERE id = :id");
+        return sql;
+    }
 }

@@ -116,18 +116,14 @@ public class Logger {
      */
     public void logTopMessage(LogLevel level, String message, Object...args) {
         int topPosition = 0;
-        if (entries.size() == MAX_LOGS_COUNT) {
-            entries.add(0, new LogEntry(LogLevel.INFO, "Выведены первые " + MAX_LOGS_COUNT + " сообщений:"));
-            topPosition = 1;
+
+        String extMessage = String.format(message, args);
+        if (messageDecorator != null) {
+            extMessage = messageDecorator.getDecoratedMessage(extMessage);
         }
-        if (entries.size() < MAX_LOGS_COUNT) {
-            String extMessage = String.format(message, args);
-            if (messageDecorator != null) {
-                extMessage = messageDecorator.getDecoratedMessage(extMessage);
-            }
-            LogEntry entry = new LogEntry(level, extMessage);
-            entries.add(topPosition, entry);
-        }
+
+        LogEntry entry = new LogEntry(level, extMessage);
+        entries.add(topPosition, entry);
     }
 
     // для скриптов
@@ -136,18 +132,14 @@ public class Logger {
     }
 
     private void log(LogLevel level, String message, boolean excludeIfNotExist, Object...args) {
-        if (entries.size() == MAX_LOGS_COUNT) {
-            entries.add(0, new LogEntry(LogLevel.INFO, "Выведены первые " + MAX_LOGS_COUNT + " сообщений:"));
+        String extMessage = String.format(message, args);
+        if (messageDecorator != null) {
+            extMessage = messageDecorator.getDecoratedMessage(extMessage);
         }
-        if (entries.size() < MAX_LOGS_COUNT) {
-            String extMessage = String.format(message, args);
-            if (messageDecorator != null) {
-                extMessage = messageDecorator.getDecoratedMessage(extMessage);
-            }
-            LogEntry entry = new LogEntry(level, extMessage);
-            if (!excludeIfNotExist || !entries.contains(entry)) {
-                entries.add(entry);
-            }
+
+        LogEntry entry = new LogEntry(level, extMessage);
+        if (!excludeIfNotExist || !entries.contains(entry)) {
+            entries.add(entry);
         }
 	}
 	
