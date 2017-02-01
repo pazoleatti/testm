@@ -295,6 +295,14 @@ public interface RefBookDao {
     Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(@NotNull Long refBookId, @NotNull Long recordId);
 
     /**
+     * Возвращает атрибут по его коду
+     *
+     * @param attributeId
+     * @return атрибут справочника
+     */
+    RefBookAttribute getAttribute(@NotNull Long attributeId);
+
+    /**
      * По коду справочника возвращает набор его атрибутов
      *
      * @param refBookId код справочника

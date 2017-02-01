@@ -277,7 +277,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
     }
 
-    private RefBookAttribute getAttribute(@NotNull Long attributeId) {
+    public RefBookAttribute getAttribute(@NotNull Long attributeId) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
