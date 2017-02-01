@@ -17,12 +17,6 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
 
     private TaxType taxType;
 
-    private String taxOrganCode;
-
-    private String taxOrganKpp;
-
-	private String oktmo;
-
     public Integer getDeclarationTypeId() {
         return declarationTypeId;
     }
@@ -55,32 +49,8 @@ public class CreateDeclaration extends UnsecuredActionImpl<CreateDeclarationResu
         this.taxType = taxType;
     }
 
-    public String getTaxOrganCode() {
-        return taxOrganCode;
-    }
-
-    public void setTaxOrganCode(String taxOrganCode) {
-        this.taxOrganCode = taxOrganCode;
-    }
-
-    public String getTaxOrganKpp() {
-        return taxOrganKpp;
-    }
-
-    public void setTaxOrganKpp(String taxOrganKpp) {
-        this.taxOrganKpp = taxOrganKpp;
-    }
-
-	public String getOktmo() {
-		return oktmo;
-	}
-
-	public void setOktmo(String oktmo) {
-		this.oktmo = oktmo;
-	}
-
 	@Override
     public String getName() {
-        return "Создание налоговой формы";
+        return "Создание экземпляров форм";
     }
 }

@@ -397,7 +397,7 @@ create table declaration_template (
   id                  number(9)           not null,
   status              number(1) default 0 not null,
   version             date                not null,
-  name                varchar2(1000)      not null,
+  name                varchar2(512 char)  not null,
   create_script       clob,
   jrxml               varchar2(36),
   declaration_type_id number(9) not null,
@@ -645,7 +645,8 @@ create table log_system (
   form_type_id          number(9, 0),
   is_error              number(1) default 0 not null,
   audit_form_type_id    number(9, 0),
-  server                varchar2(200)
+  server                varchar2(200),
+  log_id                 varchar2(36)
 );
 comment on table log_system is 'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -667,6 +668,7 @@ comment on column log_system.form_type_id is 'Идентификатор вид�
 comment on column log_system.is_error is 'Признак ошибки';
 comment on column log_system.audit_form_type_id is 'Тип формы';
 comment on column log_system.server is 'Сервер';
+comment on column log_system.log_id is 'Ссылка на журнал действий пользователей';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -723,7 +725,8 @@ create table notification (
   is_read                number(1) default 0    not null,
   blob_data_id           varchar2(36),
   type                   number(2, 0) default 0 not null,
-  report_id              varchar2(36)
+  report_id              varchar2(36),
+  log_id                 varchar2(36)
 );
 
 comment on table notification is 'Оповещения';
@@ -740,6 +743,7 @@ comment on column notification.is_read is 'Признак прочтения';
 comment on column notification.blob_data_id is 'Ссылка на логи';
 comment on column notification.type is 'Тип оповещения (0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
 comment on column notification.report_id is 'Идентификатор отчета';
+comment on column notification.log_id is 'Ссылка на журнал действий пользователей';
 
 create sequence seq_notification start with 10000;
 
@@ -1177,7 +1181,7 @@ create table ndfl_person (
   id_doc_number       varchar2(25 char),
   status              varchar2(1 char),
   post_index          varchar2(6 char),
-  region_code         varchar2(10 char),
+  region_code         varchar2(2 char),
   area                varchar2(60 char),
   city                varchar2(50 char),
   locality            varchar2(50 char),
@@ -1233,8 +1237,8 @@ create table ndfl_person_income
   source_id             number(18),
   row_num               number(20),
   operation_id          varchar2(10 char),
-  income_code           varchar2(10 char),
-  income_type           varchar2(10 char),
+  income_code           varchar2(4 char),
+  income_type           varchar2(2 char),
   oktmo                 varchar2(11 char),
   kpp                   varchar2(9 char),
   income_accrued_date   date,
@@ -1339,7 +1343,7 @@ create table ndfl_person_prepayment
   source_id      number(18),
   row_num        number(20),
   operation_id   varchar2(10 char),
-  summ           number(18),
+  summ           number(20),
   notif_num      varchar2(20 char),
   notif_date     date,
   notif_source   varchar2(20 char)
@@ -1933,7 +1937,8 @@ create table raschsv_pers_sv_strah_lic
    priz_oss           VARCHAR2(1 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   middle_name          VARCHAR2(60 CHAR)
+   middle_name        VARCHAR2(60 CHAR),
+   person_id          number(18)
 );
 create sequence seq_raschsv_pers_sv_strah_lic start with 1;
 comment on table raschsv_pers_sv_strah_lic is 'Персонифицированные сведения о застрахованных лицах (ПерсСвСтрахЛиц)';
@@ -1957,6 +1962,7 @@ comment on column raschsv_pers_sv_strah_lic.priz_oss is 'Признак заст
 comment on column raschsv_pers_sv_strah_lic.familia is 'Фамилия (Фамилия)';
 comment on column raschsv_pers_sv_strah_lic.imya is 'Имя (Имя)';
 comment on column raschsv_pers_sv_strah_lic.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_pers_sv_strah_lic.person_id is 'Ссылка на справочник физ. лиц';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_vypl
 (
@@ -2210,26 +2216,28 @@ comment on column ref_book_taxpayer_state.name is 'Наименование';
 
 create table ref_book_person
 (
-  id number(18) not null,
-  last_name varchar2(60 char) not null,
-  first_name varchar2(60 char) not null,
-  middle_name varchar2(60 char),
-  sex number(1),
-  inn varchar2(12 char),
-  inn_foreign varchar2(50 char),
-  snils varchar2(14 char),
+  id             number(18) not null,
+  last_name      varchar2(60 char) not null,
+  first_name     varchar2(60 char) not null,
+  middle_name    varchar2(60 char),
+  sex            number(1),
+  inn            varchar2(12 char),
+  inn_foreign    varchar2(50 char),
+  snils          varchar2(14 char),
   taxpayer_state number(18),
-  birth_date date not null,
-  birth_place varchar2(255 char),
-  citizenship number(18),
-  address number(18),
-  pension number(1) default 2 not null,
-  medical number(1) default 2 not null,
-  social number(1) default 2 not null,
-  employee number(1) default 2 not null,
-  record_id number(18) not null,
-  version date not null,
-  status number(1) default 0 not null
+  birth_date     date not null,
+  birth_place    varchar2(255 char),
+  citizenship    number(18),
+  address        number(18),
+  pension        number(1) default 2 not null,
+  medical        number(1) default 2 not null,
+  social         number(1) default 2 not null,
+  employee       number(1) default 2 not null,
+  record_id      number(18) not null,
+  version        date not null,
+  status         number(1) default 0 not null,
+  source_id      number(18),
+  dublicates     number(18)
 );
 
 comment on table ref_book_person is 'Физические лица';
@@ -2253,6 +2261,8 @@ comment on column ref_book_person.employee is 'Признак, показыва�
 comment on column ref_book_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
 comment on column ref_book_person.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_person.dublicates is 'Дублирует: ссылка на запись оригинал';
+comment on column ref_book_person.source_id is 'Система-источник: ссылка на справочник кодов АС НУ';
 
 create table ref_book_id_doc
 (
@@ -2411,3 +2421,40 @@ comment on column raschsv_itog_vypl_dop.tarif is 'Тариф';
 comment on column raschsv_itog_vypl_dop.kol_fl is 'Количество ФЛ';
 comment on column raschsv_itog_vypl_dop.sum_vypl is 'Сумма выплат';
 comment on column raschsv_itog_vypl_dop.sum_nachisl is 'Сумма начислено';
+--------------------------------------------------------------------------------------------------------------------------
+-- Журналирование действий пользователей
+--------------------------------------------------------------------------------------------------------------------------
+create table log 
+(
+    id            varchar2(36) not null,
+    user_id       number(18),
+    creation_date timestamp not null
+);
+
+comment on table log is 'Журналы действий пользователей';
+comment on column log.id is 'Уникальный идентификатор';
+comment on column log.user_id is 'Ссылка на пользователя';
+comment on column log.creation_date is 'Дата-время, включая мс';
+
+create sequence seq_log start with 1;
+
+
+create table log_entry 
+(
+    log_id        varchar2(36)  not null,
+    ord           number(9)     not null,
+    creation_date timestamp     not null,
+    log_level number(1)         not null,
+    message varchar2(2000 char)
+);
+
+comment on table log_entry is 'Сообщения в журнале';
+comment on column log_entry.log_id is 'Ссылка на журнал';
+comment on column log_entry.ord is 'Порядковый номер сообщения';
+comment on column log_entry.creation_date is 'Дата-время, включая мс';
+comment on column log_entry.log_level is 'Уровень важности (0 - информация, 1 - предупреждение, 2 - ошибка)';
+comment on column log_entry.message is 'Текст сообщения';
+
+create sequence seq_log_entry start with 1;
+
+

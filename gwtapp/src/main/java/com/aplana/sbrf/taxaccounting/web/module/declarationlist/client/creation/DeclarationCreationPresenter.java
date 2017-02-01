@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -82,32 +83,63 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         if(isFilterDataCorrect(filter)){
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);
-            CreateDeclaration command = new CreateDeclaration();
-            command.setDeclarationTypeId(filter.getDeclarationTypeIds().get(0).intValue());
-            command.setDepartmentId(filter.getDepartmentIds().iterator().next());
-            command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-            command.setTaxOrganCode(filter.getTaxOrganCode());
-            command.setTaxOrganKpp(filter.getTaxOrganKpp());
-            command.setTaxType(taxType);
-            dispatcher.execute(command, CallbackUtils
-                    .defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
-                        @Override
-                        public void onSuccess(CreateDeclarationResult result) {
-                            if (result.getDeclarationId() == null) {
-                                LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-                                String title = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Создание отчетности" : "Создание налоговой формы");
-                                String msg = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Отчетности не созданы" : "Налоговоя форма не создана");
-                                Dialog.infoMessage(title, msg);
-                            } else {
-                                onHide();
-                                placeManager
-                                        .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
-                                                .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
-                                LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+            if (declarationFormKind.equals(DeclarationFormKind.REPORTS)) {
+                // создание отчетности
+                onCreateForms(filter, false);
+            } else {
+                CreateDeclaration command = new CreateDeclaration();
+                command.setDeclarationTypeId(filter.getDeclarationTypeIds().get(0).intValue());
+                command.setDepartmentId(filter.getDepartmentIds().iterator().next());
+                command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+                command.setTaxType(taxType);
+                dispatcher.execute(command, CallbackUtils
+                        .defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
+                            @Override
+                            public void onSuccess(CreateDeclarationResult result) {
+                                if (result.getDeclarationId() == null) {
+                                    LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                                    String title = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Создание отчетности" : "Создание налоговой формы");
+                                    String msg = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Отчетности не созданы" : "Налоговоя форма не создана");
+                                    Dialog.infoMessage(title, msg);
+                                } else {
+                                    onHide();
+                                    placeManager
+                                            .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
+                                                    .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
+                                    LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                                }
                             }
-                        }
-                    }, DeclarationCreationPresenter.this));
+                        }, DeclarationCreationPresenter.this));
+
+            }
         }
+    }
+
+    private void onCreateForms(final DeclarationDataFilter filter, final boolean force) {
+        CreateFormsDeclarationAction action = new CreateFormsDeclarationAction();
+        action.setDeclarationTypeId(filter.getDeclarationTypeIds().get(0).intValue());
+        action.setDepartmentId(filter.getDepartmentIds().iterator().next());
+        action.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+        action.setTaxType(taxType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<CreateFormsDeclarationResult>() {
+                    @Override
+                    public void onSuccess(CreateFormsDeclarationResult result) {
+                        LogCleanEvent.fire(DeclarationCreationPresenter.this);
+                        LogShowEvent.fire(DeclarationCreationPresenter.this, false);
+                        if (!result.isStatus()) {
+                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    onCreateForms(filter, true);
+                                }
+                            });
+                        } else {
+                            onHide();
+                            LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                        }
+                    }
+                }, DeclarationCreationPresenter.this));
     }
 
     @Override

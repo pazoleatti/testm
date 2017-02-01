@@ -64,6 +64,39 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonIncome> findPersonIncome(long declarationDataId) {
+        try {
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " from ndfl_person_income npi "
+                    + " inner join ndfl_person np on npi.ndfl_person_id = np.id"
+                    + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId) {
+        try {
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " from ndfl_person_deduction npd "
+                    + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
+                    + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonDeduction>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId) {
+        try {
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " from ndfl_person_prepayment npp "
+                    + " inner join ndfl_person np on npp.ndfl_person_id = np.id"
+                    + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonPrepayment>();
+        }
+    }
+
+    @Override
     public List<NdflPersonIncome> findIncomes(long ndflPersonId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " from ndfl_person_income npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());

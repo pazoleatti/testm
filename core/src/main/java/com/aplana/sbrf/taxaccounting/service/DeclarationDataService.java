@@ -45,7 +45,7 @@ public interface DeclarationDataService {
      * @param docDate - дата обновления декларации
      * @param stateLogger - логгер для обновления статуса асинхронной задачи
      */
-	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger, Map<String, Object> exchangeParams);
+	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
     /**
      * Формирование Pdf отчета
@@ -190,6 +190,12 @@ public interface DeclarationDataService {
     String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
 
     /**
+     * Генерация ключа блокировки для асинхронных задач по декларациям
+     * @return код блокировки
+     */
+    String generateAsyncTaskKey(int declarationTypeId, int reportPeriodId, int departmentId);
+
+    /**
      * Заблокировать DeclarationData.
      * @param declarationDataId - идентификатор декларации
      * @param userInfo информация о пользователе
@@ -265,6 +271,14 @@ public interface DeclarationDataService {
      * @return
      */
     String getTaskName(DeclarationDataReportType ddReportType, TaxType taxType);
+
+    /**
+     * Формирует название операции
+     * @param reportType
+     * @param taxType
+     * @return
+     */
+    String getTaskName(ReportType reportType, TaxType taxType, Map<String, Object> params);
 
     /**
      * Формирование jasper-отчета

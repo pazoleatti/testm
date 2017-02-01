@@ -292,4 +292,14 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         declarationDataService.exportPDF(jasperPrint, data);
     }
 
+    @Override
+    public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName) {
+        return declarationDataService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName);
+    }
+
+    @Override
+    public void delete(long declarationDataId) {
+        declarationDataDao.delete(declarationDataId);
+    }
 }

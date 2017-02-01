@@ -69,12 +69,12 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
-        declarationDataService.calculate(logger, declarationDataId, userInfo, docDate, new LockStateLogger() {
+        declarationDataService.calculate(logger, declarationDataId, userInfo, docDate, null, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 lockService.updateState(lock, lockDate, state);
             }
-        }, null);
+        });
         return new TaskStatus(true, null);
     }
 

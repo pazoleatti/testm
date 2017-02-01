@@ -33,8 +33,6 @@ alter table ref_book_present_place add constraint chk_ref_book_pres_place_st che
 alter table ref_book_asnu add constraint pk_ref_book_asnu primary key(id);
 alter table ref_book_asnu add constraint chk_ref_book_asnu_code check (code between '0000' and '9999');
 
-alter table ref_book_person add constraint fk_ref_book_person_source foreign key(source_id) references ref_book_asnu(id);
-
 -- Виды налоговых форм
 alter table ref_book_form_type add constraint pk_ref_book_form_type primary key(id);
 alter table ref_book_form_type add constraint chk_ref_book_form_type_taxkind check (tax_kind in ('F','N'));
@@ -98,3 +96,7 @@ alter table ref_book_fond_detail add constraint chk_ref_book_fond_det_status che
 alter table declaration_template add constraint fk_declaration_template_fkind foreign key(form_kind) references declaration_kind(id);
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
 alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);
+
+alter table ref_book_person add constraint fk_ref_book_person_source foreign key(source_id) references ref_book_asnu(id);
+-----------------------------------------------------------------------------------------------------------------------------
+exit;
