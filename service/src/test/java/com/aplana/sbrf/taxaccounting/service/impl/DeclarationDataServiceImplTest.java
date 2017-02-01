@@ -86,12 +86,12 @@ public class DeclarationDataServiceImplTest {
 			TAUserInfo userInfo = new TAUserInfo();
 			userInfo.setIp("192.168.72.16");
 			userInfo.setUser(mockUser(10,  0, TARole.ROLE_CONTROL));
-			declarationDataService.calculate(logger, 1l, userInfo, new Date(), new LockStateLogger() {
+			declarationDataService.calculate(logger, 1l, userInfo, new Date(), null, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
 
                 }
-            }, null);
+            });
 		} catch (ServiceException e) {
 			//Nothing
 		}
@@ -106,12 +106,12 @@ public class DeclarationDataServiceImplTest {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp("192.168.72.16");
 		userInfo.setUser(mockUser(10,  2, TARole.ROLE_CONTROL));
-		declarationDataService.calculate(logger, 2l, userInfo, new Date(), new LockStateLogger() {
+		declarationDataService.calculate(logger, 2l, userInfo, new Date(), null, new LockStateLogger() {
             @Override
             public void updateState(String state) {
 
             }
-        }, null);
+        });
 	}
 
     @Test

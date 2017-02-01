@@ -52,7 +52,7 @@ public final class LockData {
     public enum DescriptionTemplate {
         REF_BOOK("Редактирование справочника \"%s\""),
         FORM_DATA_TASK("%s: Период: \"%s%s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\""),
-        DECLARATION_TASK("%s: Период: \"%s%s\", Подразделение: \"%s\", Вид: \"%s\"%s%s"),
+        DECLARATION_TASK("%s: Период: \"%s%s\", Подразделение: \"%s\", Вид: \"%s\"%s%s%s"),
         FILE("Загрузка ТФ \"%s\""),
         DECLARATION_TEMPLATE("Редактирование версии макета декларации \"%s\" (%s) за период с %s по %s"),
         FORM_TEMPLATE("Редактирование версии макета \"%s\" (%s) за период с %s по %s"),
