@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components;
 import com.aplana.sbrf.taxaccounting.dao.impl.DBInfo;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
@@ -594,6 +595,18 @@ public class RefBookSimpleQueryBuilderComponent {
             sql.append(", ").append(attribute.getAlias());
         }
         sql.append(" FROM ").append(refBook.getTableName()).append(" WHERE id = :id");
+        return sql;
+    }
+
+    public PreparedStatementData psGetRecordsData(RefBook refBook, List<Long> recordIds) {
+        String inStatement = SqlUtils.transformToSqlInStatement("id", recordIds);
+
+        PreparedStatementData sql = new PreparedStatementData("SELECT id ");
+        sql.append(RefBook.RECORD_ID_ALIAS);
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            sql.append(", ").append(attribute.getAlias());
+        }
+        sql.append(" FROM ").append(refBook.getTableName()).append(" WHERE ").append(inStatement);
         return sql;
     }
 }
