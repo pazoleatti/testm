@@ -50,7 +50,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                 departmentReportPeriod.getReportPeriod().getId());
         long declarationId = declarationDataService.create(logger, activeDeclarationTemplateId,
                 securityService.currentUserInfo(), departmentReportPeriod, null,
-                null, null, null, null);
+                null, null, null, null, null);
         result.setDeclarationId(declarationId);
         if (!logger.getEntries().isEmpty()){
             result.setUuid(logEntryService.save(logger.getEntries()));

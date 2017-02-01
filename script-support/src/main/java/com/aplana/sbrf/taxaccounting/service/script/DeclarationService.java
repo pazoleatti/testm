@@ -181,7 +181,7 @@ public interface DeclarationService {
     DeclarationTemplate getTemplate(int declarationTemplateId);
 
     Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName);
+                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note);
 
     void delete(long declarationDataId);
 }

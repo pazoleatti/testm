@@ -607,7 +607,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         if (declarationData == null) {
             int declarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationType.getId(),
                     departmentReportPeriod.getReportPeriod().getId());
-            long declarationDataId = declarationDataService.create(localLogger, declarationTemplateId, userInfo, departmentReportPeriod, null, transportDataParam.getKpp(), null, asnuId, fileName);
+            long declarationDataId = declarationDataService.create(localLogger, declarationTemplateId, userInfo, departmentReportPeriod, null, transportDataParam.getKpp(), null, asnuId, fileName, null);
             declarationData = declarationDataService.get(declarationDataId, userInfo);
         }
 

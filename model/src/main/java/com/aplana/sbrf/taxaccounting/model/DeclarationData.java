@@ -33,6 +33,11 @@ public class DeclarationData extends IdentityObject<Long> {
     private State state;
 
     /**
+     * Статус ЭД
+     */
+    private Long docState;
+
+    /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
 	 * @return идентификатор шаблона декларации
 	 */
@@ -147,4 +152,12 @@ public class DeclarationData extends IdentityObject<Long> {
 	public void setOktmo(String oktmo) {
 		this.oktmo = oktmo;
 	}
+
+    public Long getDocState() {
+        return docState;
+    }
+
+    public void setDocState(Long docState) {
+        this.docState = docState;
+    }
 }

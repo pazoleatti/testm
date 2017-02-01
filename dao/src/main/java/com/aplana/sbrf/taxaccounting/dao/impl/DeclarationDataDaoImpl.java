@@ -57,6 +57,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
             d.setFileName(rs.getString("file_name"));
             d.setState(State.fromId(SqlUtils.getInteger(rs, "state")));
+            d.setDocState(SqlUtils.getLong(rs, "doc_state_id"));
             return d;
         }
     }
@@ -66,7 +67,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.file_name," +
+                            "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id," +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and dd.id = ?",
@@ -91,7 +92,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.file_name, " +
+                            "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and drp.id = ?" +
@@ -126,7 +127,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().query(
                 "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                        "dd.department_report_period_id, dd.asnu_id, dd.file_name, " +
+                        "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
                         "drp.report_period_id, drp.department_id " +
                         "from declaration_data dd, department_report_period drp " +
                         "where drp.id = dd.department_report_period_id and drp.id = ?" +
@@ -213,17 +214,20 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         int countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +
                 " AND department_report_period_id = ? and (? is null or tax_organ_code = ?) AND (? is null or kpp = ?)" +
-                " AND (? is null or oktmo = ?) AND (? is null or asnu_id = ?) AND (? is null or file_name = ?)",
+                " AND (? is null or oktmo = ?) AND (? is null or asnu_id = ?) AND (? is null or file_name = ?) AND (? is null or doc_state_id = ?)",
                 new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(),
                         declarationData.getTaxOrganCode(), declarationData.getTaxOrganCode(),
                         declarationData.getKpp(), declarationData.getKpp(), declarationData.getOktmo(), declarationData.getOktmo(),
 						declarationData.getAsnuId(), declarationData.getAsnuId(),
-                        declarationData.getFileName(), declarationData.getFileName() },
+                        declarationData.getFileName(), declarationData.getFileName(),
+                        declarationData.getDocState(), declarationData.getDocState()},
                 new int[]{Types.INTEGER, Types.INTEGER,
 						Types.VARCHAR, Types.VARCHAR,
 						Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
                         Types.INTEGER, Types.INTEGER,
-						Types.VARCHAR, Types.VARCHAR}, Integer.class);
+						Types.VARCHAR, Types.VARCHAR,
+                        Types.INTEGER, Types.INTEGER},
+                Integer.class);
 
         if (countOfExisted != 0) {
             throw new DaoException("Декларация с заданными параметрами уже существует!");
@@ -231,7 +235,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         id = generateId("seq_declaration_data", Long.class);
         jt.update(
-                "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, oktmo, asnu_id, file_name) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, oktmo, asnu_id, file_name, doc_state_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 declarationData.getDeclarationTemplateId(),
                 declarationData.getDepartmentReportPeriodId(),
@@ -240,7 +244,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 declarationData.getKpp(),
 				declarationData.getOktmo(),
                 declarationData.getAsnuId(),
-                declarationData.getFileName()
+                declarationData.getFileName(),
+                declarationData.getDocState()
         );
         declarationData.setId(id);
         return id.longValue();
@@ -341,14 +346,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             }
 
 			if (!StringUtils.isBlank(filter.getOktmo())) {
-				String[] codes = filter.getOktmo().split("; ");
-				for (int i = 0; i < codes.length; i++) {
-					codes[i] = "'" + codes[i].trim() + "'";
-				}
-				if (codes.length != 0) {
-					sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.oktmo", Arrays.asList(codes)));
-				}
-			}
+                sql.append(" AND lower(dec.oktmo) like lower(:oktmo)");
+                values.put("oktmo", "%"+filter.getOktmo()+"%");
+            }
+            if (!StringUtils.isBlank(filter.getNote())) {
+                sql.append(" AND lower(dec.note) like lower(:note)");
+                values.put("note", "%"+filter.getNote()+"%");
+            }
+            if (filter.getDocStateId() != null) {
+                sql.append(" AND dec.doc_state_id = ").append(filter.getDocStateId());
+            }
         }
     }
 
@@ -356,8 +363,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.state, dec.tax_organ_code, dec.kpp, dec.oktmo, ")
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
                 .append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
-                .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date," +
-                        " dec.asnu_id as asnu_id, dec.file_name as file_name, dectemplate.form_kind as form_kind, dectemplate.form_type as form_type");
+                .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date,")
+                .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id as doc_state, dec.note,")
+                .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type");
     }
 
     public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
@@ -391,6 +399,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 break;
             case FILE_NAME:
                 column = "dec.file_name";
+                break;
+            case NOTE:
+                column = "dec.note";
+                break;
+            case DOC_STATE:
+                column = "dec.doc_state_id";
                 break;
         }
 
@@ -462,7 +476,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getJdbcTemplate().queryForObject(
                     "select * from " +
                             "(select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.file_name, " +
+                            "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
                             "drp.report_period_id, drp.department_id, rownum " +
                             "from declaration_data dd, department_report_period drp, declaration_template dt " +
                             "where dd.department_report_period_id = drp.id " +
@@ -485,7 +499,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().query(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.file_name, " +
+                            "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp, declaration_template dt, declaration_type t " +
                             "where drp.id = dd.department_report_period_id and drp.report_period_id = ? and " +
@@ -544,7 +558,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append("SELECT dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, dd.department_report_period_id, dd.asnu_id, dd.file_name, drp.report_period_id, drp.department_id, rownum \n");
+            sb.append("SELECT dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, drp.report_period_id, drp.department_id, rownum \n");
             sb.append("FROM declaration_data dd, department_report_period drp, declaration_template dt \n");
             sb.append("WHERE dd.department_report_period_id = drp.id \n");
             sb.append("AND dt.id                            = dd.declaration_template_id \n");
