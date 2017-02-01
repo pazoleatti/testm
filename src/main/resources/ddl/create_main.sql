@@ -397,7 +397,7 @@ create table declaration_template (
   id                  number(9)           not null,
   status              number(1) default 0 not null,
   version             date                not null,
-  name                varchar2(1000)      not null,
+  name                varchar2(512 char)  not null,
   create_script       clob,
   jrxml               varchar2(36),
   declaration_type_id number(9) not null,
@@ -1937,7 +1937,8 @@ create table raschsv_pers_sv_strah_lic
    priz_oss           VARCHAR2(1 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   middle_name          VARCHAR2(60 CHAR)
+   middle_name        VARCHAR2(60 CHAR),
+   person_id          number(18)
 );
 create sequence seq_raschsv_pers_sv_strah_lic start with 1;
 comment on table raschsv_pers_sv_strah_lic is 'Персонифицированные сведения о застрахованных лицах (ПерсСвСтрахЛиц)';
@@ -1961,6 +1962,7 @@ comment on column raschsv_pers_sv_strah_lic.priz_oss is 'Признак заст
 comment on column raschsv_pers_sv_strah_lic.familia is 'Фамилия (Фамилия)';
 comment on column raschsv_pers_sv_strah_lic.imya is 'Имя (Имя)';
 comment on column raschsv_pers_sv_strah_lic.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_pers_sv_strah_lic.person_id is 'Ссылка на справочник физ. лиц';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_vypl
 (
@@ -2214,26 +2216,28 @@ comment on column ref_book_taxpayer_state.name is 'Наименование';
 
 create table ref_book_person
 (
-  id number(18) not null,
-  last_name varchar2(60 char) not null,
-  first_name varchar2(60 char) not null,
-  middle_name varchar2(60 char),
-  sex number(1),
-  inn varchar2(12 char),
-  inn_foreign varchar2(50 char),
-  snils varchar2(14 char),
+  id             number(18) not null,
+  last_name      varchar2(60 char) not null,
+  first_name     varchar2(60 char) not null,
+  middle_name    varchar2(60 char),
+  sex            number(1),
+  inn            varchar2(12 char),
+  inn_foreign    varchar2(50 char),
+  snils          varchar2(14 char),
   taxpayer_state number(18),
-  birth_date date not null,
-  birth_place varchar2(255 char),
-  citizenship number(18),
-  address number(18),
-  pension number(1) default 2 not null,
-  medical number(1) default 2 not null,
-  social number(1) default 2 not null,
-  employee number(1) default 2 not null,
-  record_id number(18) not null,
-  version date not null,
-  status number(1) default 0 not null
+  birth_date     date not null,
+  birth_place    varchar2(255 char),
+  citizenship    number(18),
+  address        number(18),
+  pension        number(1) default 2 not null,
+  medical        number(1) default 2 not null,
+  social         number(1) default 2 not null,
+  employee       number(1) default 2 not null,
+  record_id      number(18) not null,
+  version        date not null,
+  status         number(1) default 0 not null,
+  source_id      number(18),
+  dublicates     number(18)
 );
 
 comment on table ref_book_person is 'Физические лица';
@@ -2257,6 +2261,8 @@ comment on column ref_book_person.employee is 'Признак, показыва�
 comment on column ref_book_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
 comment on column ref_book_person.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_person.dublicates is 'Дублирует: ссылка на запись оригинал';
+comment on column ref_book_person.source_id is 'Система-источник: ссылка на справочник кодов АС НУ';
 
 create table ref_book_id_doc
 (

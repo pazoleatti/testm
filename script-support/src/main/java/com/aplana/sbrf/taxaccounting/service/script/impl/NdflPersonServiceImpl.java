@@ -38,6 +38,21 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId) {
+        return ndflPersonDao.findPersonIncome(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonDeduction(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonPrepayment(declarationDataId);
+    }
+
+    @Override
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters) {
         return ndflPersonDao.findNdflPersonByParameters(declarationDataId, subreportParameters, new PagingParams());
     }
