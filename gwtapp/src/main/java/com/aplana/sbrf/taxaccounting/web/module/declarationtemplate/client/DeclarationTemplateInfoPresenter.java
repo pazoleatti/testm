@@ -150,7 +150,7 @@ public class DeclarationTemplateInfoPresenter
 	@Override
 	protected void onBind() {
 		super.onBind();
-        addRegisteredHandler(UpdateTemplateEvent.getType(), this);
+        //addRegisteredHandler(UpdateTemplateEvent.getType(), this);
         addRegisteredHandler(DeclarationTemplateFlushEvent.getType(), this);
 
         ValueChangeHandler<String> vchJrxml = new ValueChangeHandler<String>() {
@@ -197,6 +197,7 @@ public class DeclarationTemplateInfoPresenter
         handlerRegistrations[6] = getView().addStartLoadHandlerJrxml(startLoadFileHandler);
     }
 
+    @ProxyEvent
     @Override
     public void onUpdateTemplate(UpdateTemplateEvent event) {
         getView().setDeclarationTemplate(declarationTemplateMainPresenter.getDeclarationTemplateExt());
