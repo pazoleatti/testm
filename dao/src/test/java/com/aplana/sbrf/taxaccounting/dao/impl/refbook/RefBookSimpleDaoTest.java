@@ -487,4 +487,36 @@ public class RefBookSimpleDaoTest {
 
         return records;
     }
+
+    @Test
+    public void getRecordVersionsReturnsVersions() throws Exception {
+        Date expectedDate1 = new GregorianCalendar(2010, 0, 1).getTime();
+        Date expectedDate2 = new GregorianCalendar(2011, 0, 1).getTime();
+
+        PagingResult<Map<String, RefBookValue>> recordVersions = dao.getRecordVersions(createRefBook(), 5L, null, null, null, true);
+
+        assertEquals(2, recordVersions.getTotalCount());
+        assertEquals(expectedDate1, recordVersions.get(0).get("record_version_from").getDateValue());
+        assertEquals(expectedDate2, recordVersions.get(1).get("record_version_from").getDateValue());
+    }
+
+    @Test
+    public void getRecordDataReturnsData() throws Exception {
+        Date expectedBirthday = new GregorianCalendar(1948,1,8).getTime();
+
+        Map<String, RefBookValue> recordData = dao.getRecordData(createRefBook(), 5L);
+
+        assertEquals(expectedBirthday, recordData.get("BIRTH_DATE").getDateValue());
+        assertEquals("Васильевич", recordData.get("MIDDLE_NAME").getStringValue());
+        assertEquals("Калуга", recordData.get("BIRTH_PLACE").getStringValue());
+    }
+
+    @Test
+    public void getRecordData2ReturnsData() throws Exception {
+        Map<Long, Map<String, RefBookValue>> recordData = dao.getRecordData(createRefBook(), new ArrayList<Long>(Arrays.asList(1L, 2L)));
+
+        assertEquals(2, recordData.size());
+        assertEquals("Федор", recordData.get(1L).get("FIRST_NAME").getStringValue());
+        assertEquals("Петр", recordData.get(2L).get("FIRST_NAME").getStringValue());
+    }
 }

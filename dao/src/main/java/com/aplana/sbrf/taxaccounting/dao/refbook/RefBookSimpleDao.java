@@ -28,6 +28,16 @@ public interface RefBookSimpleDao {
     PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
                                                        String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
+    Map<String, RefBookValue> getRecordData(RefBook refBook, Long id);
+
+    /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     *
+     * @param refBook справочник
+     * @param recordIds список кодов строк справочника
+     */
+    Map<Long, Map<String, RefBookValue>> getRecordData(@NotNull RefBook refBook, @NotNull List<Long> recordIds);
+
     /**
      * Загружает данные иерархического справочника на определенную дату актуальности
      * @param tableName название таблицы
@@ -91,6 +101,17 @@ public interface RefBookSimpleDao {
      * @return количество версий
      */
     int getRecordVersionsCount(String tableName, Long uniqueRecordId);
+
+    /**
+     * Возвращает все версии указанной записи справочника
+     * @param refBook идентификатор справочник
+     * @param uniqueRecordId уникальный идентификатор записи, все версии которой будут получены
+     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @return
+     */
+    PagingResult<Map<String, RefBookValue>> getRecordVersions(RefBook refBook, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
     /**
      * Возвращает идентификатор записи справочника без учета версий
@@ -198,4 +219,13 @@ public interface RefBookSimpleDao {
      */
     List<Long> createRecordVersion(@NotNull RefBook refBook, @NotNull Date version, @NotNull VersionedObjectStatus status,
                                    List<RefBookRecord> records);
+
+    /**
+     * Проверяет существует ли циклическая зависимость для указанных записей справочника
+     * Если среди дочерних элементов указанной записи существует указанный родительский элемент, то существует цикл
+     * @param uniqueRecordId идентификатор записи
+     * @param parentRecordId идентификатор родительской записи
+     * @return циклическая зависимость существует?
+     */
+    boolean hasLoops(Long uniqueRecordId, Long parentRecordId);
 }

@@ -16,10 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -590,6 +587,13 @@ public class RefBookSimpleQueryBuilderComponent {
         return sql;
     }
 
-
-
+    public PreparedStatementData psGetRecordData(RefBook refBook) {
+        PreparedStatementData sql = new PreparedStatementData("SELECT id ");
+        sql.append(RefBook.RECORD_ID_ALIAS);
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            sql.append(", ").append(attribute.getAlias());
+        }
+        sql.append(" FROM ").append(refBook.getTableName()).append(" WHERE id = :id");
+        return sql;
+    }
 }

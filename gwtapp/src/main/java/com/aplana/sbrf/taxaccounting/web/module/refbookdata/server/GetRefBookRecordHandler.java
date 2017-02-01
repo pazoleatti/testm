@@ -54,7 +54,8 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
             if (refBookPage.isEmpty()) {
                 recordId = null;
             } else {
-                recordId = refBookPage.get(refBookPage.getTotalCount()-1).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+                RefBookValue value = refBookPage.get(refBookPage.getTotalCount()-1).get(RefBook.RECORD_ID_ALIAS);
+				recordId = value.getNumberValue().longValue();
             }
 
             refBook.getAttributes().add(RefBook.getVersionFromAttribute());
