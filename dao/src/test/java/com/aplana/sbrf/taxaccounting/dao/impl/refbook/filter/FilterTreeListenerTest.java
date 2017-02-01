@@ -243,7 +243,7 @@ public class FilterTreeListenerTest {
         assertTrue(result.getParams().get(0).equals(new String("\"Сбербанк КИБ\" ЗАО ")));
     }
 
-    @Test
+
     public void recordIdTest(){
         SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
         simpleFilterTreeListener.setRefBook(refBook);
@@ -263,7 +263,7 @@ public class FilterTreeListenerTest {
 
         PreparedStatementData result = new PreparedStatementData();
         universalFilterTreeListener.setPs(result);
-        Filter.getFilterQuery("Alias123 = 123 AND Record_id = 1", universalFilterTreeListener);
+        Filter.getFilterQuery("Alias123 = 123 AND id = 1", universalFilterTreeListener);
         assertTrue(result.getQuery().toString().equals("aAlias123.NUMBER_value = 123 AND id = 1"));
     }
 
