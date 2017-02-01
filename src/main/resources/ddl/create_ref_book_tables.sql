@@ -216,6 +216,32 @@ comment on column ref_book_doc_state.id is 'Уникальный идентиф�
 comment on column ref_book_doc_state.knd is 'Код формы по КНД';
 comment on column ref_book_doc_state.name is 'Наименование состояния';
 
+--Виды дохода
+create table ref_book_income_kind
+(
+  id number(18) not null,
+  income_type_id number(18) not null,
+  mark varchar2(2 char) not null,
+  name varchar2(255)
+);
+comment on table ref_book_income_kind is 'Виды дохода';
+comment on column ref_book_income_kind.id is 'Уникальный идентификатор';
+comment on column ref_book_income_kind.income_type_id is 'Код вида дохода';
+comment on column ref_book_income_kind.mark is 'Признак вида дохода';
+comment on column ref_book_income_kind.name is 'Наименование';
+
+--Категории прикрепленных файлов
+create table ref_book_attach_file_type
+(
+  id number(18) not null,
+  code number(1) not null,
+  name varchar2(255 char) not null
+);
+comment on table ref_book_attach_file_type is 'Категории прикрепленных файлов';
+comment on column ref_book_attach_file_type.id is 'Уникальный иждентификатор';
+comment on column ref_book_attach_file_type.code is 'Код категории прикрепляемых файлов';
+comment on column ref_book_attach_file_type.name is 'Наименование';
+
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (

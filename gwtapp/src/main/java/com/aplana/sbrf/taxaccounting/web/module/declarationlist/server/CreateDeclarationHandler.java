@@ -49,8 +49,8 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
         int activeDeclarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId,
                 departmentReportPeriod.getReportPeriod().getId());
         long declarationId = declarationDataService.create(logger, activeDeclarationTemplateId,
-                securityService.currentUserInfo(), departmentReportPeriod, command.getTaxOrganCode(),
-                command.getTaxOrganKpp(), command.getOktmo(), null, null);
+                securityService.currentUserInfo(), departmentReportPeriod, null,
+                null, null, null, null);
         result.setDeclarationId(declarationId);
         if (!logger.getEntries().isEmpty()){
             result.setUuid(logEntryService.save(logger.getEntries()));
