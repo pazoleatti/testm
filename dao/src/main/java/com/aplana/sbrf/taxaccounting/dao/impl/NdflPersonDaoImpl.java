@@ -20,9 +20,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * @author Andrey Drunk
@@ -125,6 +125,57 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
+        String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
+                " WHERE npi.ndfl_person_id = :ndflPersonId" +
+                " AND (((npi.tax_date between :startDate AND :endDate) OR npi.tax_date IS NULL)" +
+                " OR (npi.payment_date between :startDate AND :endDate) OR npi.payment_date IS NULL)" +
+                " AND (npi.tax_date IS NOT NULL OR npi.payment_date IS NOT NULL)";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findDeductionsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
+        String sql = "SELECT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " FROM ndfl_person_deduction npd " +
+                " WHERE npd.ndfl_person_id = :ndflPersonId" +
+                " AND npd.PERIOD_CURR_DATE between :startDate AND :endDate";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonDeduction>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
+        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " FROM ndfl_person_prepayment npp " +
+                " WHERE npp.ndfl_person_id = :ndflPersonId" +
+                " AND npp.NOTIF_DATE between :startDate AND :endDate";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonPrepayment>();
+        }
+    }
+
+
+    @Override
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
         parameters.put("declarationDataId", declarationDataId);
         String query = buildQuery(parameters);
@@ -133,7 +184,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             long lastindex = pagingParams.getStartIndex() + pagingParams.getCount();
             totalQuery = "select * from \n (" +
                     "select rating.*, rownum rnum from \n (" +
-                    query + ") rating where rownum <" +
+                    query + ") rating where rownum < " +
                     lastindex +
                     ") where rnum >= " +
                     pagingParams.getStartIndex();

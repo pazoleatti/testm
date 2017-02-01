@@ -73,13 +73,40 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate);
 
     /**
+     * Найти данные о доходах ФЛ по идентификатору ФЛ
+     * @param ndflPersonId
+     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+
+    /**
+     * Найти данные о вычетах ФЛ по идентификатору ФЛ
+     * @param ndflPersonId
+     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @return
+     */
+    List<NdflPersonDeduction> findDeductionsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+
+    /**
+     * Найти данные о авансах ФЛ по идентификатору ФЛ
+     * @param ndflPersonId
+     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+
+    /**
      * Найти все NdflPerson по заданным параметрам
      * @param declarationDataId идентификатор декларации
-     * @param subreportParameters карта наименований параметров и значений
+     * @param parameters карта наименований параметров и значений
      * @param pagingParams параметры вывода результата
      * @return результат запроса
      */
-    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters, PagingParams pagingParams);
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
 
     /**
      *
@@ -109,5 +136,7 @@ public interface NdflPersonDao {
      * @return
      */
     List<NdflPersonPrepayment> findPrepayments(long ndflPersonId);
+
+
 
 }
