@@ -8,4 +8,6 @@ public interface DeclarationListUiHandlers extends UiHandlers {
     void onRangeChange(int start, int length);
 
     void onCreateClicked();
+
+    void onCreateReportsClicked();
 }

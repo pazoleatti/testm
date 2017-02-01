@@ -16,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
-import groovy.lang.Closure;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -27,7 +26,6 @@ import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
-import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,7 +44,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -278,12 +275,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger) {
+    public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
+    }
+
+    private void calculateDeclaration(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
 
         //2. проверяет состояние XML отчета экземпляра декларации
-        setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
+        setDeclarationBlobs(logger, declarationData, docDate, userInfo, exchangeParams, stateLogger);
 
         //3. обновляет записи о консолидации
         ArrayList<Long> declarationDataIds = new ArrayList<Long>();
@@ -728,9 +729,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     // расчет декларации
     private void setDeclarationBlobs(Logger logger,
-                                     DeclarationData declarationData, Date docDate, TAUserInfo userInfo, LockStateLogger stateLogger) {
-
-        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+                                     DeclarationData declarationData, Date docDate, TAUserInfo userInfo, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        if (exchangeParams == null) {
+            exchangeParams = new HashMap<String, Object>();
+        }
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
 
         File xmlFile = null;
@@ -1033,6 +1035,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public String generateAsyncTaskKey(int declarationTypeId, int reportPeriodId, int departmentId) {
+        return LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTypeId + "_" + reportPeriodId + "_" + departmentId;
+    }
+
+    @Override
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
         LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId(),
@@ -1208,7 +1215,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         if (ddReportType == null)
             return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                    declarationTemplate.getType().getTaxType() == TaxType.DEAL ? "Уведомление" : "Декларация",
+                    "Налоговая форма",
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriod.getCorrectionDate() != null
                             ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1220,6 +1227,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             : "",
                     declaration.getKpp() != null
                             ? ", КПП: \"" + declaration.getKpp() + "\""
+                            : "",
+                    declaration.getOktmo() != null
+                            ? ", ОКТМО: \"" + declaration.getOktmo() + "\""
                             : "");
 
         switch (ddReportType.getReportType()) {
@@ -1241,6 +1251,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "",
                         declaration.getKpp() != null
                                 ? ", КПП: \"" + declaration.getKpp() + "\""
+                                : "",
+                        declaration.getOktmo() != null
+                                ? ", ОКТМО: \"" + declaration.getOktmo() + "\""
                                 : "");
             case SPECIFIC_REPORT_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
@@ -1256,10 +1269,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "",
                         declaration.getKpp() != null
                                 ? ", КПП: \"" + declaration.getKpp() + "\""
+                                : "",
+                        declaration.getOktmo() != null
+                                ? ", ОКТМО: \"" + declaration.getOktmo() + "\""
                                 : "");
             default:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                        declarationTemplate.getType().getTaxType() == TaxType.DEAL ? "Уведомление" : "Декларация",
+                        "Налоговая форма",
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1271,6 +1287,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "",
                         declaration.getKpp() != null
                                 ? ", КПП: \"" + declaration.getKpp() + "\""
+                                : "",
+                        declaration.getOktmo() != null
+                                ? ", ОКТМО: \"" + declaration.getOktmo() + "\""
                                 : "");
         }
     }
@@ -1373,6 +1392,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", ddReportType.getReportType().getName());
         }
+    }
+
+    @Override
+    public String getTaskName(ReportType reportType, TaxType taxType, Map<String, Object> params) {
+        switch (reportType) {
+            case CREATE_FORMS_DEC:
+                return reportType.getDescription();
+        }
+        throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
     }
 
     @Override
@@ -1557,4 +1585,52 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED, noRollbackFor = Exception.class)
+    public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
+        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();
+        additionalParameters.put("formMap", formMap);
+        DeclarationData declarationDataTemp = new DeclarationData();
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.get(declarationTypeId, departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+        declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException("Обнаружены фатальные ошибки!");
+        }
+
+        int success = 0;
+        int fail = 0;
+        List<String> oktmoKppList = new ArrayList<String>();
+        for (Map.Entry<Long, Map<String, Object>> entry: formMap.entrySet()) {
+            Logger scriptLogger = new Logger();
+            try {
+                calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
+                validateDeclaration(userInfo, get(entry.getKey(), userInfo), scriptLogger, true, null, stateLogger);
+            } catch (Exception e) {
+                scriptLogger.error(e);
+            } finally {
+                if (scriptLogger.containsLevel(LogLevel.ERROR)) {
+                    fail++;
+                    DeclarationData declarationData = get(entry.getKey(), userInfo);
+                    oktmoKppList.add(String.format("ОКТМО: %s, КПП: %s.", declarationData.getOktmo(), declarationData.getKpp()));
+                    logger.error("Произошла непредвиденная ошибка при расчете для формы: " + getDeclarationFullName(entry.getKey(), null));
+                    logger.getEntries().addAll(scriptLogger.getEntries());
+                    declarationDataDao.delete(entry.getKey());
+                } else {
+                    success++;
+                    logger.info("Успешно выполнена расчет для формы: " + getDeclarationFullName(entry.getKey(), null));
+                    logger.getEntries().addAll(scriptLogger.getEntries());
+                    declarationDataDao.setStatus(entry.getKey(), State.ACCEPTED);
+                }
+            }
+        }
+        logger.info("Успешно созданных форм: %d. Не удалось создать форм: %d.", success, fail);
+        if (!oktmoKppList.isEmpty()) {
+            logger.info("Не удалось создать формы со следующими парметрами:");
+            for(String oktmoKpp: oktmoKppList) {
+                logger.warn(oktmoKpp);
+            }
+        }
+    }
 }

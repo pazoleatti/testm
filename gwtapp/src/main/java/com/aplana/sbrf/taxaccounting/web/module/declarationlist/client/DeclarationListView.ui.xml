@@ -53,6 +53,8 @@
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
                             <style:LinkButton ui:field="create" text="Создание налоговой формы..."
                                               img="resources/img/add.png" title="Создать налоговую форму"/>
+                            <style:LinkButton ui:field="createReports" text="Создание отчетности..."
+                                              img="resources/img/add.png" title="Создание отчетности"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

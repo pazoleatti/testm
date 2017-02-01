@@ -27,8 +27,13 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>core</artifactId>
 			<version>${project.version}</version>
-		</dependency>
+        </dependency>
 		<dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>dao</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>dynacache-spring</artifactId>
 			<version>${project.version}</version>
@@ -157,18 +162,6 @@
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>async-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- Общий функционал -->
-        <dependency>
-            <groupId>com.aplana.taxaccounting</groupId>
-            <artifactId>common-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.aplana.taxaccounting</groupId>
-            <artifactId>common-service</artifactId>
             <version>${project.version}</version>
         </dependency>
 

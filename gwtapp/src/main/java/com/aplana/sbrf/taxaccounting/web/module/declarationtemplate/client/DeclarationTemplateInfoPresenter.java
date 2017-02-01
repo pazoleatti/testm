@@ -150,7 +150,7 @@ public class DeclarationTemplateInfoPresenter
 	@Override
 	protected void onBind() {
 		super.onBind();
-        addRegisteredHandler(UpdateTemplateEvent.getType(), this);
+        //addRegisteredHandler(UpdateTemplateEvent.getType(), this);
         addRegisteredHandler(DeclarationTemplateFlushEvent.getType(), this);
 
         ValueChangeHandler<String> vchJrxml = new ValueChangeHandler<String>() {

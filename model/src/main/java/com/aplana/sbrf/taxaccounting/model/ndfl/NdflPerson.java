@@ -33,11 +33,14 @@ public class NdflPerson extends IdentityObject<Long> {
     private String firstName;
     private String middleName;
     private Date birthDay;
+    // Цифровой код гражданства
     private String citizenship;
     private String innNp;
     private String innForeign;
+    // Код вида документа
     private String idDocType;
     private String idDocNumber;
+    // Cтатус налогоплательщика
     private String status;
     private String postIndex;
     private String regionCode;

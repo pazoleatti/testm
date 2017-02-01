@@ -4,14 +4,17 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
+ * Стандартные, социальные и имущественные налоговые вычеты
  * @author Andrey Drunk
  */
 public class NdflPersonDeduction extends NdflPersonOperation {
 
+    // Код вида вычета
     private String typeCode;
     private String notifType;
     private Date notifDate;
     private String notifNum;
+    // Код налогового органа, выдавшего уведомление
     private String notifSource;
     private BigDecimal notifSumm;
     private Date incomeAccrued;

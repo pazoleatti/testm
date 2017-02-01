@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.LogDao;
 import com.aplana.sbrf.taxaccounting.dao.LogEntryDao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -23,28 +24,16 @@ public class LogEntryServiceImpl implements LogEntryService {
 
     @Autowired
     private LogEntryDao logEntryDao;
+
+    @Autowired
+    private LogDao logDao;
     
     @Autowired
     private TransactionHelper tx;
 
     @Override
     public PagingResult<LogEntry> get(String uuid, int offset, int length) {
-        PagingResult<LogEntry> logEntryPagingResult = new PagingResult<LogEntry>();
-        List<LogEntry> logEntries = logEntryDao.get(uuid);
-
-        if (logEntries == null || offset < 0 || length < 0) {
-            logEntryPagingResult.setTotalCount(0);
-            return logEntryPagingResult;
-        }
-
-        int size = logEntries.size();
-        if (size > offset + length) {
-            logEntryPagingResult.addAll(logEntries.subList(offset, offset + length));
-        } else if (size > offset) {
-            logEntryPagingResult.addAll(logEntries.subList(offset, size));
-        }
-        logEntryPagingResult.setTotalCount(size);
-        return logEntryPagingResult;
+        return logEntryDao.get(uuid, offset, length);
     }
 
     @Override
@@ -54,15 +43,20 @@ public class LogEntryServiceImpl implements LogEntryService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public String save(final List<LogEntry> logEntry) {
+    public String save(final List<LogEntry> logEntries) {
+
         return tx.executeInNewTransaction(new TransactionLogic<String>() {
             @Override
             public String execute() {
-                if (logEntry == null || logEntry.isEmpty()) {
+                if (logEntries == null || logEntries.isEmpty()) {
                     return null;
                 }
+
                 String uuid = UUID.randomUUID().toString().toLowerCase();
-                logEntryDao.save(logEntry, uuid);
+
+                logDao.save(uuid);
+                logEntryDao.save(logEntries, uuid);
+
                 return uuid;
             }
         });
@@ -112,13 +106,9 @@ public class LogEntryServiceImpl implements LogEntryService {
         if (uuid == null || uuid.isEmpty()) {
             return null;
         }
-        List<LogEntry> list = getAll(uuid);
-        if (first) {
-            list.addAll(0, logEntries);
-        } else {
-            list.addAll(logEntries);
-        }
-        logEntryDao.update(list, uuid);
+
+        logEntryDao.update(logEntries, uuid, first);
+
         return uuid;
     }
 }

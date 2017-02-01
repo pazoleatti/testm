@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.Date;
@@ -34,10 +32,27 @@ public interface NdflPersonService {
 
     /**
      * Найти все данные о доходах физ лица привязанные к декларации
-     *
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPerson> findNdflPerson(long declarationDataId);
+
+    /**
+     * Найти все "Сведения о доходах физического лица" привязанные к декларации
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
+
+    /**
+     * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId);
+
+    /**
+     * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
+     * @param declarationDataId идентификатор декларации
+     */
+    List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
 
     /**
      * Найти NdflPerson привязанные к декларации для построения отчета.  Если найдено больше 1 запись, метод выкидывает исключение ServiceExeption
@@ -71,4 +86,44 @@ public interface NdflPersonService {
      * @param declarationDataId
      */
     void deleteAll(long declarationDataId);
+
+    /**
+     * Найти данные о доходах ФЛ по идентификатору ФЛ
+     * @param ndflPersonId
+     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+
+    /**
+     * Найти данные о вычетах ФЛ по идентификатору ФЛ
+     * @param ndflPersonId
+     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @return
+     */
+    List<NdflPersonDeduction> findDeductionsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+
+    /**
+     * Найти данные о авансах ФЛ по идентификатору ФЛ
+     * @param ndflPersonId
+     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+
+
+    /**
+     * Найти все NdflPerson по заданным параметрам
+     * @param declarationDataId идентификатор декларации
+     * @param parameters карта наименований параметров и значений
+     * @startIndex - стартовый индекс
+     * @pageSize - размер страницы
+     * @return результат запроса
+     */
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize);
+
+
 }

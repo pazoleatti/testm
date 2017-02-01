@@ -538,7 +538,9 @@ alter table ref_book_address add constraint pk_ref_book_address primary key (id)
 
 alter table ref_book_person add constraint fk_ref_book_person_address foreign key (address) references ref_book_address(id);
 alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
--- alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_record(id);
+--alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_record(id);
+alter table ref_book_person add constraint fk_ref_book_person_dubl foreign key(dublicates) references ref_book_person(id);
+
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_doc_id foreign key (doc_id) references ref_book_record(id);
 --alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_record(id);
@@ -560,6 +562,8 @@ alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primar
 --alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
 
 --------------------------------------------------------------------------------------------------------------------------
+alter table raschsv_pers_sv_strah_lic add constraint fk_rsv_p_sv_strah_lic_person foreign key(person_id) references ref_book_person(id);
+--------------------------------------------------------------------------------------------------------------------------
 alter table state add constraint pk_state primary key(id);
 alter table state_change add constraint pk_state_change primary key(id);
 
@@ -574,5 +578,25 @@ alter table raschsv_itog_vypl add constraint fk_raschsv_itog_vypl_strah foreign 
 
 alter table raschsv_itog_vypl_dop add constraint pk_raschsv_itog_vypl_dop primary key(id);
 alter table raschsv_itog_vypl_dop add constraint fk_raschsv_itog_vypl_dop_strah foreign key(raschsv_itog_strah_lic_id) references raschsv_itog_strah_lic(id);
+
+--------------------------------------------------------------------------------------------------------------------------
+-- НДФЛ Реестр справок
+--------------------------------------------------------------------------------------------------------------------------
+alter table ndfl_references add constraint pk_ndfl_references primary key(id);
+alter table ndfl_references add constraint fk_ndfl_refers_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
+alter table ndfl_references add constraint fk_ndfl_refers_person foreign key(person_id) references ref_book_person(id);
+
+--------------------------------------------------------------------------------------------------------------------------
+-- Журналирование действий пользователей
+--------------------------------------------------------------------------------------------------------------------------
+alter table log add constraint pk_log primary key(id);
+alter table log add constraint fk_log_user foreign key(user_id) references sec_user(id);
+
+alter table log_entry add constraint pk_log_entry primary key(log_id,ord);
+alter table log_entry add constraint fk_log_entry_log foreign key(log_id) references log(id);
+alter table log_entry add constraint chk_log_entry_lev check(log_level in (0,1,2));
+
+alter table notification add constraint fk_notification_log foreign key(log_id) references log(id);
+alter table log_system add constraint fk_log_system_log foreign key(log_id) references log(id);
 --------------------------------------------------------------------------------------------------------------------------
 

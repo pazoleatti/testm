@@ -8,9 +8,6 @@ import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -21,6 +18,29 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Autowired
     NdflPersonDao ndflPersonDao;
+
+    @Override
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
+        return ndflPersonDao.findIncomesByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate);
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findDeductionsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
+        return ndflPersonDao.findDeductionsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate);
+    }
+
+    @Override
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize) {
+        if (parameters == null) {
+            parameters = new HashMap<String, Object>();
+        }
+        return ndflPersonDao.findNdflPersonByParameters(declarationDataId, parameters, new PagingParams(startIndex, pageSize));
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
+        return ndflPersonDao.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate);
+    }
 
     @Override
     public Long save(NdflPerson ndflPerson) {
@@ -35,6 +55,21 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPerson> findNdflPerson(long declarationDataId) {
         return ndflPersonDao.findPerson(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId) {
+        return ndflPersonDao.findPersonIncome(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonDeduction(declarationDataId);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId) {
+        return ndflPersonDao.findNdflPersonPrepayment(declarationDataId);
     }
 
     @Override

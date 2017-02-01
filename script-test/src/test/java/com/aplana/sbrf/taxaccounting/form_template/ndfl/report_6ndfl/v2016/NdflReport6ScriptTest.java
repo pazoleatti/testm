@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.report_6ndfl.v2016;
 
-import com.aplana.sbrf.taxaccounting.form_template.ndfl.report_2ndfl.v2016.SchemaSimpleTest;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.State;
@@ -22,14 +21,14 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.text.DateFormat;

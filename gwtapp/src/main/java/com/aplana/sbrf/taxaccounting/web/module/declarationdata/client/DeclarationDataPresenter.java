@@ -293,11 +293,6 @@ public class DeclarationDataPresenter
     }
 
     @Override
-    public void onPrintClicked(DeclarationSubreport subreport, boolean force) {
-
-    }
-
-    @Override
     public void onTimerSubsreport(final boolean isTimer) {
         TimerSubreportAction action = new TimerSubreportAction();
         action.setDeclarationDataId(declarationId);

@@ -139,7 +139,6 @@ create table ref_book_okved
   status    number(1) default 0 not null,
   code      varchar2(8 char) not null,
   name      varchar2(500 char) not null
-
 );
 
 comment on table ref_book_okved is 'Общероссийский классификатор видов экономической деятельности';
@@ -216,6 +215,51 @@ comment on table ref_book_doc_state is 'Состояние ЭД';
 comment on column ref_book_doc_state.id is 'Уникальный идентификатор';
 comment on column ref_book_doc_state.knd is 'Код формы по КНД';
 comment on column ref_book_doc_state.name is 'Наименование состояния';
+
+--Виды дохода
+create table ref_book_income_kind
+(
+  id number(18) not null,
+  income_type_id number(18) not null,
+  mark varchar2(2 char) not null,
+  name varchar2(255)
+);
+comment on table ref_book_income_kind is 'Виды дохода';
+comment on column ref_book_income_kind.id is 'Уникальный идентификатор';
+comment on column ref_book_income_kind.income_type_id is 'Код вида дохода';
+comment on column ref_book_income_kind.mark is 'Признак вида дохода';
+comment on column ref_book_income_kind.name is 'Наименование';
+
+--Категории прикрепленных файлов
+create table ref_book_attach_file_type
+(
+  id number(18) not null,
+  code number(1) not null,
+  name varchar2(255 char) not null
+);
+comment on table ref_book_attach_file_type is 'Категории прикрепленных файлов';
+comment on column ref_book_attach_file_type.id is 'Уникальный иждентификатор';
+comment on column ref_book_attach_file_type.code is 'Код категории прикрепляемых файлов';
+comment on column ref_book_attach_file_type.name is 'Наименование';
+
+--Налоговые инспекции
+create table ref_book_tax_inspection
+(
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
+  code      varchar2(4 char)    not null,
+  name      varchar2(250 char)  not null
+);
+
+comment on table ref_book_tax_inspection is 'Налоговые инспекции';
+comment on column ref_book_tax_inspection.id is 'Уникальный идентификатор';
+comment on column ref_book_tax_inspection.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_tax_inspection.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_tax_inspection.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_tax_inspection.code is 'Код налогового органа';
+comment on column ref_book_tax_inspection.name is 'Наименование налогового органа';
 
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
