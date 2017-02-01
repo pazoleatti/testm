@@ -1264,8 +1264,8 @@ create table ndfl_person_income
 comment on table ndfl_person_income is 'Сведения о доходах физического лица';
 comment on column ndfl_person_income.source_id is 'Cсылка на запись которая является источником при формирование консолидированной формы';
 comment on column ndfl_person_income.row_num is 'Порядковый номер строки';
-comment on column ndfl_person_income.income_code is 'Код дохода';
-comment on column ndfl_person_income.income_type is 'Признак дохода';
+comment on column ndfl_person_income.income_code is 'Код вида дохода';
+comment on column ndfl_person_income.income_type is 'Признак вида дохода';
 comment on column ndfl_person_income.operation_id is 'Номер операции';
 comment on column ndfl_person_income.oktmo is 'ОКТМО';
 comment on column ndfl_person_income.kpp is 'КПП';
