@@ -37,15 +37,4 @@ public class LogEntryServiceTest {
     public void getAllTest() {
         Assert.assertEquals(logEntryService.getAll(UUID).size(), SIZE);
     }
-
-    @Test
-    public void getLogCountTest() {
-        Assert.assertEquals(logEntryService.getLogCount(UUID).size(), 3);
-
-        Assert.assertEquals(logEntryService.getLogCount(UUID).get(LogLevel.ERROR).intValue(), 33);
-        Assert.assertEquals(logEntryService.getLogCount(UUID).get(LogLevel.WARNING).intValue(), 33);
-        Assert.assertEquals(logEntryService.getLogCount(UUID).get(LogLevel.INFO).intValue(), 34);
-
-        Assert.assertEquals(logEntryService.getLogCount("nonexistent").get(LogLevel.INFO).intValue(), 0);
-    }
 }
