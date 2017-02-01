@@ -113,7 +113,7 @@ public class RefBook implements Serializable {
 		TAXPAYER_STATUS(903),						// Статус налогоплательщика
 		INCOME_TYPE(922),							// Коды видов доходов
 		DEDUCTION_TYPE(921),						// Коды видов вычетов
-		NOTIF_SOURCE(935),						    // Коды налоговых органов
+		TAX_INSPECTION(935),						// Коды налоговых органов
 		OKATO(3);									// ОКАТО
 
         private final long id;

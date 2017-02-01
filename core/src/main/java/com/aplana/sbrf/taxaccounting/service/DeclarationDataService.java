@@ -31,11 +31,13 @@ public interface DeclarationDataService {
      * @param taxOrganCode налоговый орган (для налога на имущество)
      * @param taxOrganKpp КПП (для налога на имущество)
 	 * @param oktmo ОКТМО, для НДФЛ
+     * @param fileName
+     * @param note
      * @return идентификатор созданной декларации
      */
     Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo,
-                Long asunId, String guid);
+                Long asunId, String fileName, String note);
 
 	/**
 	 * Рассчитать декларацию

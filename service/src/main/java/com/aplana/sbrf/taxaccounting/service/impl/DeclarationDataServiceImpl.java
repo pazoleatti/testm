@@ -184,7 +184,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName) {
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -261,6 +261,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
 
                 long id = declarationDataDao.saveNew(newDeclaration);
+                declarationDataDao.updateNote(id, note);
 
                 logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
                 auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, null, "Декларация создана", null);
