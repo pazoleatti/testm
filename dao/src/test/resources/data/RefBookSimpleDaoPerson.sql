@@ -27,6 +27,7 @@ Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9055','904','Признак застрахованного лица в системе обязательного пенсионного страхования','PENSION','1','15',null,null,'1',null,'15','1','0',null,null,'0','1');
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9056','904','Признак застрахованного лица в системе обязательного медицинского страхования','MEDICAL','1','16',null,null,'1',null,'15','1','0',null,null,'0','1');
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9057','904','Признак застрахованного лица в системе обязательного социального страхования','SOCIAL','1','17',null,null,'1',null,'15','1','0',null,null,'0','1');
+Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9059','904','Идентификатор ФЛ','RECORD_ID','2','0',null,null,'1','0','18','1','1',null,null,'1','18');
 
 Insert into REF_BOOK_PERSON (ID,LAST_NAME,FIRST_NAME,MIDDLE_NAME,SEX,INN,INN_FOREIGN,SNILS,TAXPAYER_STATE,BIRTH_DATE,BIRTH_PLACE,CITIZENSHIP,ADDRESS,PENSION,MEDICAL,SOCIAL,EMPLOYEE,RECORD_ID,VERSION,STATUS) values ('1','Иванов','Федор','Семенович','1',012345678912,null,null,null,to_date('01.01.1972','DD.MM.YYYY'),'Москва','266174099',null,'2','2','2','2','1',to_date('09.01.2017','DD.MM.YYYY'),'0');
 Insert into REF_BOOK_PERSON (ID,LAST_NAME,FIRST_NAME,MIDDLE_NAME,SEX,INN,INN_FOREIGN,SNILS,TAXPAYER_STATE,BIRTH_DATE,BIRTH_PLACE,CITIZENSHIP,ADDRESS,PENSION,MEDICAL,SOCIAL,EMPLOYEE,RECORD_ID,VERSION,STATUS) values ('2','Иванов','Петр','Семенович','1',112345678912,null,null,null,to_date('01.01.1970','DD.MM.YYYY'),'Москва','266174099',null,'2','2','2','2','2',to_date('09.01.2017','DD.MM.YYYY'),'0');
@@ -55,10 +56,12 @@ Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,
   ('999992','1983','Имя','FIRST_NAME','1','2',null,null,'1',null,'25','1','0',null,null,'0','25');
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values
   ('999993','1983','Отчество','MIDDLE_NAME','1','3',null,null,'1',null,'25','1','0',null,null,'0','25');
+Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values
+  ('999994','1983','Имя родителя','PARENT_ID','4','4','1983','999992','1',null,'25','0','0',null,null,'0',null);
 
 Insert into ref_book_family (id, parent_id, last_name, first_name, middle_name, record_id, version, status) VALUES
-  ('1', null, 'Иванов', 'Иван', 'Аристархович', '1', to_date('01.01.2016','DD.MM.YYYY'), '0')
+  ('1', null, 'Иванов', 'Иван', 'Аристархович', '1', to_date('01.01.2016','DD.MM.YYYY'), '0');
 Insert into ref_book_family (id, parent_id, last_name, first_name, middle_name, record_id, version, status) VALUES
-  ('2', '1', 'Иванов', 'Василий', 'Иванович', '1', to_date('01.01.2016','DD.MM.YYYY'), '0')
+  ('2', '1', 'Иванов', 'Василий', 'Иванович', '2', to_date('01.01.2016','DD.MM.YYYY'), '0');
 Insert into ref_book_family (id, parent_id, last_name, first_name, middle_name, record_id, version, status) VALUES
-  ('3', '2', 'Иванов', 'Сергей', 'Иванович', '1', to_date('01.01.2016','DD.MM.YYYY'), '0')
+  ('3', '2', 'Иванов', 'Сергей', 'Иванович', '3', to_date('01.01.2016','DD.MM.YYYY'), '0');

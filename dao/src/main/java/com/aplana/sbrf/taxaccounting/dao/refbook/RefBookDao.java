@@ -88,7 +88,7 @@ public interface RefBookDao {
      * Получение row_num записи по заданным параметрам
      * @param refBookId код справочника
      * @param version дата актуальности
-     * @param recordId
+     * @param recordId уникальный идентификатор записи (ID в базе данных)
      * @param filter условие фильтрации строк. Может быть не задано
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return
@@ -293,6 +293,14 @@ public interface RefBookDao {
      * @return
      */
     Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(@NotNull Long refBookId, @NotNull Long recordId);
+
+    /**
+     * Возвращает атрибут по его коду
+     *
+     * @param attributeId
+     * @return атрибут справочника
+     */
+    RefBookAttribute getAttribute(@NotNull Long attributeId);
 
     /**
      * По коду справочника возвращает набор его атрибутов
@@ -635,7 +643,7 @@ public interface RefBookDao {
      */
     void updateVersionRelevancePeriod(String tableName, Long uniqueRecordId, Date version);
 
-    Map<String, RefBookValue> getRecordData(Long refBookId, String tableName, Long recordId);
+    Map<String, RefBookValue> getRecordData(Long refBookId, String tableName, Long id);
 
     /**
      * Формирует имя для записи справочника, основанное на уникальных атрибутах

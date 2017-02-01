@@ -15,7 +15,7 @@ public class RefBook implements Serializable {
 
 	private static final Long serialVersionUID = 1L;
 
-    public static final String RECORD_ID_ALIAS = "record_id";
+    public static final String RECORD_ID_ALIAS = "id";
 	public static final String RECORD_PARENT_ID_ALIAS = "PARENT_ID";
 	public static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
 
@@ -30,8 +30,7 @@ public class RefBook implements Serializable {
 	public static final String RECORD_HAS_CHILD_ALIAS = "HAS_CHILD";
 	public static final String RECORD_SORT_ALIAS = "row_number_over";
 
-	public static final List<String> SYSTEM_ALIASES = new ArrayList<String>(Arrays.asList("id", "version", "status",
-			RECORD_ID_ALIAS, RECORD_PARENT_ID_ALIAS));
+	public static final List<String> SYSTEM_ALIASES = Arrays.asList("record_id", "version", "status");
     /**
      * Соотношение основной и табличной части настроек подразделений с типом налога
      */
@@ -114,7 +113,8 @@ public class RefBook implements Serializable {
 		TAXPAYER_STATUS(903),						// Статус налогоплательщика
 		INCOME_TYPE(922),							// Коды видов доходов
 		DEDUCTION_TYPE(921),						// Коды видов вычетов
-		NOTIF_SOURCE(204);							// Коды налоговых органов
+		TAX_INSPECTION(935),						// Коды налоговых органов
+		OKATO(3);									// ОКАТО
 
         private final long id;
 

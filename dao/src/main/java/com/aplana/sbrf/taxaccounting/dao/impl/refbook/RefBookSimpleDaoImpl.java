@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.RefBookSimpleQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -24,6 +25,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -56,6 +58,33 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         result.setTotalCount(refBookDao.getRecordsCount(ps));
         return result;
+    }
+
+    @Override
+    public Map<String, RefBookValue> getRecordData(final RefBook refBook, final Long id) {
+        PreparedStatementData ps = queryBuilder.psGetRecordData(refBook);
+        ps.addNamedParam("id", id);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(ps.getQueryString(), ps.getNamedParams(), new RefBookValueMapper(refBook));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordData(RefBook refBook, List<Long> recordIds) {
+        PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, recordIds);
+        List<Map<String, RefBookValue>> recordsList;
+        try {
+            recordsList = getJdbcTemplate().query(ps.getQueryString(), new RefBookValueMapper(refBook));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+        Map<Long, Map<String, RefBookValue>> recordData = new HashMap<Long, Map<String, RefBookValue>>();
+        for (Map<String, RefBookValue> record : recordsList) {
+            recordData.put(record.get("id").getNumberValue().longValue(), record);
+        }
+        return recordData;
     }
 
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(String tableName, Long refBookId, Date version,
@@ -433,4 +462,41 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         return null;
     }
 
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordVersions(RefBook refBook, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        RefBook newRefBook = SerializationUtils.clone(refBook);
+        // получаем страницу с данными
+        PreparedStatementData ps = queryBuilder.psGetRecordsQuery(newRefBook, null, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, false);
+
+        //Добавляем атрибуты версии, т.к они не хранятся в бд
+        newRefBook.getAttributes().add(RefBook.getVersionFromAttribute());
+        newRefBook.getAttributes().add(RefBook.getVersionToAttribute());
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(newRefBook));
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        // получаем информацию о количестве версий
+        result.setTotalCount(getRecordVersionsCount(newRefBook.getTableName(), uniqueRecordId));
+        return result;
+    }
+
+    private static final String CHECK_LOOPS = "SELECT CASE WHEN EXISTS (\n" +
+            "  WITH value_hierarchy (id, parent_id) AS (\n" +
+            "    SELECT rbr.id,rbv.reference_value AS parent_id\n" +
+            "    FROM ref_book_record rbr\n" +
+            "    join ref_book_attribute rba ON rba.ref_book_id = rbr.ref_book_id AND rba.alias = 'PARENT_ID'\n" +
+            "    join ref_book_value rbv ON rbv.record_id = rbr.id AND rbv.attribute_id = rba.id\n" +
+            "  )\n" +
+            "  SELECT vh.*,LEVEL\n" +
+            "  FROM   value_hierarchy vh\n" +
+            "  WHERE  id = ?\n" +
+            "  START WITH id = ?\n" +
+            "  CONNECT BY parent_id = PRIOR id) \n" +
+            "  THEN 1 ELSE 0 END AS has_cycle \n" +
+            "FROM dual";
+
+    @Override
+    public boolean hasLoops(Long uniqueRecordId, Long parentRecordId) {
+        throw new UnsupportedOperationException();
+//        return getJdbcTemplate().queryForObject(CHECK_LOOPS, new Object[]{parentRecordId, uniqueRecordId}, Integer.class) == 1;
+    }
 }

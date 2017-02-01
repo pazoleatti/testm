@@ -242,6 +242,19 @@ comment on column ref_book_attach_file_type.id is 'Уникальный ижде
 comment on column ref_book_attach_file_type.code is 'Код категории прикрепляемых файлов';
 comment on column ref_book_attach_file_type.name is 'Наименование';
 
+--Налоговые инспекции
+create table ref_book_tax_inspection
+(
+  id        number(18)          not null,
+  code      varchar2(4 char)    not null,
+  name      varchar2(250 char)  not null
+);
+
+comment on table ref_book_tax_inspection is 'Налоговые инспекции';
+comment on column ref_book_tax_inspection.id is 'Уникальный идентификатор';
+comment on column ref_book_tax_inspection.code is 'Код налогового органа';
+comment on column ref_book_tax_inspection.name is 'Наименование налогового органа';
+
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (

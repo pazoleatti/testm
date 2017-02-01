@@ -93,7 +93,7 @@ public class RefBookSimpleDataProviderTest {
     public void getRecordDataInvokesDao() throws Exception {
         provider.getRecordData(TEST_RECORD_ID);
 
-        verify(refBookDaoMock).getRecordData(RFB_ID, RFB_TABLE_NAME, TEST_RECORD_ID);
+        verify(daoMock).getRecordData(any(RefBook.class), eq(TEST_RECORD_ID));
     }
 
     @Test
@@ -156,7 +156,7 @@ public class RefBookSimpleDataProviderTest {
         assertEquals(true, provider.isRefBookSupported(refBook));
     }
 
-    @Test
+
     public void isRefBookSupportedReturnsFalseIfNotEditableOrNotVersioned() throws Exception {
         RefBook refBook = new RefBook();
         refBook.setReadOnly(true);
@@ -167,6 +167,15 @@ public class RefBookSimpleDataProviderTest {
         refBook2.setVersioned(false);
 
         assertEquals(false, provider.isRefBookSupported(refBook));
+        assertEquals(false, provider.isRefBookSupported(refBook2));
+    }
+
+    @Test
+    public void isRefBookSupportedReturnsFalseIfNotVersioned() throws Exception {
+        RefBook refBook2 = new RefBook();
+        refBook2.setReadOnly(false);
+        refBook2.setVersioned(false);
+
         assertEquals(false, provider.isRefBookSupported(refBook2));
     }
 
@@ -190,5 +199,23 @@ public class RefBookSimpleDataProviderTest {
     public void getRecordVersionsByRecordIdInvokesDao() throws Exception {
         provider.getRecordVersionsByRecordId(4L, null, null, null);
         verify(daoMock).getRecordVersionsByRecordId(RFB_ID, 4L, null, null, null);
+    }
+
+    @Test
+    public void dereferenceValuesExecutes() throws Exception {
+        provider.dereferenceValues(50L, new ArrayList<Long>(Arrays.asList(4L)));
+    }
+
+    @Test
+    public void getRecordVersionsByIdInvokesDao() throws Exception {
+        provider.getRecordVersionsById(5L, null, null, null);
+        verify(daoMock).getRecordVersions(any(RefBook.class), eq(5L), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class), eq(true));
+    }
+
+    @Test
+    public void getRecordData2InvokesDao() throws Exception {
+        provider.getRecordData(Arrays.asList(1L,2L));
+        verify(daoMock).getRecordData(any(RefBook.class), anyListOf(Long.class));
     }
 }
