@@ -590,6 +590,10 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9332, 933,'Признак вида дохода','MARK',1,2,null,null,1,null,6,1,0,null,null,0,2);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9333, 933,'Наименование','NAME',1,3,null,null,1,null,15,1,0,null,null,0,255);
 
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (934,'Категории прикрепленных файлов',0,0,1,null,'REF_BOOK_ATTACH_FILE_TYPE',0);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9341, 934,'Код','CODE',2,1,null,null,1,0,6,1,0,null,null,0,1);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9342, 934,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,255);
+
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (950,'Параметры подразделения по НДФЛ',0,0,0,null,'REF_BOOK_NDFL');
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (951,'Параметры подразделения по НДФЛ (таблица)',0,0,0,null,'REF_BOOK_NDFL_DETAIL');
 
