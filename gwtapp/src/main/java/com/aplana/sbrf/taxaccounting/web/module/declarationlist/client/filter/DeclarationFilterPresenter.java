@@ -41,7 +41,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
         void setFormStateList(List<State> list);
 
-        void updateFilter(TaxType taxType);
+        void updateFilter(TaxType taxType, boolean isReports);
 
         void setCorrectionTagList(List<Boolean> list);
 

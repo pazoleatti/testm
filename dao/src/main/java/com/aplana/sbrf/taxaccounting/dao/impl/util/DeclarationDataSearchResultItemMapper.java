@@ -26,11 +26,12 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         result.setCorrectionDate(rs.getDate("correction_date"));
         result.setTaxOrganCode(rs.getString("tax_organ_code"));
         result.setTaxOrganKpp(rs.getString("kpp"));
+        result.setOktmo(rs.getString("oktmo"));
         result.setAsnuId(SqlUtils.getLong(rs,"asnu_id"));
         result.setFileName(rs.getString("file_name"));
         result.setDeclarationFormKind(DeclarationFormKind.fromId(SqlUtils.getLong(rs,"form_kind")));
         result.setNote(rs.getString("note"));
-        result.setDocState(rs.getString("doc_state"));
+        result.setDocStateId(SqlUtils.getLong(rs,"doc_state_id"));
         return result;
 	}
 }

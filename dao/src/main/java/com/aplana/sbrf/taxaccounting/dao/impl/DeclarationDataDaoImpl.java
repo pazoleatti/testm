@@ -364,7 +364,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
                 .append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
                 .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date,")
-                .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id as doc_state, dec.note,")
+                .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
                 .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type");
     }
 

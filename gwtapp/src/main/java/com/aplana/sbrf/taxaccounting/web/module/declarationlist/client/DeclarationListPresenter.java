@@ -30,12 +30,16 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DeclarationListPresenter extends
 		DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
 		DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterApplyEvent.DeclarationFilterApplyHandler {
+
+    private static final String TYPE = "nType";
+    public static final String REPORTS = "isReports";
 
     /**
      * Текущее состояние фильтров для всех типов деклараций.
@@ -47,6 +51,7 @@ public class DeclarationListPresenter extends
     private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
     private Long selectedItemId;
     private TaxType taxType;
+    private boolean isReports;
     private boolean ready = false;
 
     @ProxyEvent
@@ -95,8 +100,9 @@ public class DeclarationListPresenter extends
 			LogShowEvent.fire(this, false);
 			super.prepareFromRequest(request);
             TaxType taxTypeOld = taxType;
-			taxType = TaxType.valueOf(request.getParameter("nType", ""));
-            getView().initTable(taxType);
+			taxType = TaxType.valueOf(request.getParameter(TYPE, ""));
+            isReports = Boolean.parseBoolean(request.getParameter(REPORTS, "false"));
+            getView().initTable(taxType, isReports);
             if (taxTypeOld == null || !taxType.equals(taxTypeOld)) {
                 filterStates.clear();
                 getView().updateTitle(taxType);
@@ -110,7 +116,7 @@ public class DeclarationListPresenter extends
                 selectedItemId = null;
             }
 			filterPresenter.initFilter(taxType, filterStates.get(taxType));
-            filterPresenter.getView().updateFilter(taxType);
+            filterPresenter.getView().updateFilter(taxType, isReports);
             getView().updatePageSize(taxType);
             ready = false;
 		} catch (Exception e) {
@@ -146,6 +152,15 @@ public class DeclarationListPresenter extends
         filter.setStartIndex(start);
         filter.setAscSorting(getView().isAscSorting());
         filter.setSearchOrdering(getView().getSearchOrdering());
+        if (isReports) {
+            filter.setFormKindIds(Arrays.asList(DeclarationFormKind.REPORTS.getId()));
+        } else {
+            if (filter.getFormKindIds() != null && filter.getFormKindIds().isEmpty()) {
+                filter.getFormKindIds().remove(DeclarationFormKind.REPORTS.getId());
+            } else {
+                filter.setFormKindIds(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
+            }
+        }
         GetDeclarationList requestData = new GetDeclarationList();
         requestData.setDeclarationFilter(filter);
 
@@ -157,7 +172,8 @@ public class DeclarationListPresenter extends
                             getView().setPage(result.getPage());
                         } else {
                             getView().setTableData(start, result.getTotalCountOfRecords(),
-                                result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(), selectedItemId);
+                                result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(), result.getDocStateNames(),
+                                selectedItemId);
                             selectedItemId = null;
                         }
                     }

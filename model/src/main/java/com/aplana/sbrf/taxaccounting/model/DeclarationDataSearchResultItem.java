@@ -47,10 +47,12 @@ public class DeclarationDataSearchResultItem implements Serializable {
      * Идентификатор АСНУ
      */
     private Long asnuId;
+
     /**
-     * GUID
+     * Файл
      */
-    private String guid;
+    private String createDate;
+
     /**
      * Файл
      */
@@ -60,8 +62,19 @@ public class DeclarationDataSearchResultItem implements Serializable {
      */
     private DeclarationFormKind declarationFormKind;
 
-    private String docState;
+    /**
+     * Примечание
+     */
+    private String oktmo;
 
+    /**
+     * Статус документа
+     */
+    private Long docStateId;
+
+    /**
+     * Примечание
+     */
     private String note;
 
 	public Long getDeclarationDataId() {
@@ -184,14 +197,6 @@ public class DeclarationDataSearchResultItem implements Serializable {
         this.asnuId = asnuId;
     }
 
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
     public String getFileName() {
         return fileName;
     }
@@ -208,12 +213,28 @@ public class DeclarationDataSearchResultItem implements Serializable {
         this.declarationFormKind = declarationFormKind;
     }
 
-    public String getDocState() {
-        return docState;
+    public String getCreateDate() {
+        return createDate;
     }
 
-    public void setDocState(String docState) {
-        this.docState = docState;
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
+    }
+
+    public String getOktmo() {
+        return oktmo;
+    }
+
+    public void setOktmo(String oktmo) {
+        this.oktmo = oktmo;
+    }
+
+    public Long getDocStateId() {
+        return docStateId;
+    }
+
+    public void setDocStateId(Long docStateId) {
+        this.docStateId = docStateId;
     }
 
     public String getNote() {
