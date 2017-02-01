@@ -58,6 +58,10 @@ alter table ref_book_reorganization add constraint chk_ref_book_reorg_status che
 -- Состояния ЭД
 alter table ref_book_doc_state add constraint pk_ref_book_doc_state primary key (id);
 
+--Виды дохода
+alter table ref_book_income_kind add constraint pk_ref_book_income_kind primary key (id);
+--alter table ref_book_income_kind add constraint fk_ref_book_inckind_inctype foreign key (income_type_id) references ref_book_income_type(id);
+
 -- Параметры подразделения по НДФЛ
 alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
 alter table ref_book_ndfl_detail add constraint pk_ref_book_ndfl_detail primary key(id);
