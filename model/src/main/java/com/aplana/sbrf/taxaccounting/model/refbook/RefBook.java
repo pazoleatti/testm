@@ -111,8 +111,10 @@ public class RefBook implements Serializable {
 		COUNTRY(10), 								// Страны
 		DOCUMENT_CODES(360),						// Документы, удостоверяющие личность
 		TAXPAYER_STATUS(903),						// Статус налогоплательщика
-		INCOME_TYPE(922),							// Коды видов доходов
+		INCOME_CODE(922),							// Коды видов доходов
+		INCOME_KIND(933),							// Виды дохода
 		DEDUCTION_TYPE(921),						// Коды видов вычетов
+		ATTACH_FILE_TYPE(934),						// Категории прикрепленных файлов
 		TAX_INSPECTION(935),						// Коды налоговых органов
 		OKATO(3);									// ОКАТО
 

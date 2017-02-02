@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -64,32 +63,7 @@ public class LogEntryServiceImpl implements LogEntryService {
 
     @Override
     public Map<LogLevel, Integer> getLogCount(String uuid) {
-        Map<LogLevel, Integer> retMap = new HashMap<LogLevel, Integer>();
-        int error = 0;
-        int warn = 0;
-        int info = 0;
-
-        List<LogEntry> logEntries = getAll(uuid);
-        if (logEntries != null) {
-            for (LogEntry logEntry : logEntries) {
-                switch (logEntry.getLevel()) {
-                    case ERROR:
-                        error++;
-                        break;
-                    case WARNING:
-                        warn++;
-                        break;
-                    case INFO:
-                        info++;
-                }
-            }
-        }
-
-        retMap.put(LogLevel.ERROR, error);
-        retMap.put(LogLevel.WARNING, warn);
-        retMap.put(LogLevel.INFO, info);
-
-        return retMap;
+        return logEntryDao.countLogLevel(uuid);
     }
 
     @Override

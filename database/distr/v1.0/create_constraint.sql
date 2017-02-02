@@ -321,7 +321,7 @@ alter table declaration_data_file add constraint decl_data_file_fk_blob_data for
 
 alter table ndfl_person add constraint ndfl_person_pk primary key (id);
 alter table ndfl_person add constraint ndfl_person_fk_d foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
-alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (person_id) references ref_book_record(id);
+alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (person_id) references ref_book_person(id);
 
 alter table ndfl_person_income add constraint ndfl_person_i_pk primary key (id);
 alter table ndfl_person_income add constraint ndfl_person_i_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;

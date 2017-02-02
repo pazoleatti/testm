@@ -52,6 +52,20 @@ public class LogEntry implements Serializable {
         this.date = new Date();
     }
 
+    /**
+     * Конструктор копирования
+     * Используется при разбиение одного большого сообщения на маленькие
+     *
+     * @param logEntry запись из которой скопировать значения
+     */
+    public LogEntry(LogEntry logEntry) {
+        this.logId = logEntry.logId;
+        this.ord = logEntry.ord;
+        this.date = logEntry.date;
+        this.level = logEntry.level;
+        this.message = logEntry.message;
+    }
+
     public String getLogId() {
         return logId;
     }

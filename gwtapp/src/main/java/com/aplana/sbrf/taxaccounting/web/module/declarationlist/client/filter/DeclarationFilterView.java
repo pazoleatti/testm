@@ -48,7 +48,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private TextBox kppPicker;
 
+    private TextBox oktmoPicker;
+
     private TextBox fileNamePicker;
+
+    private RefBookPickerWidget docStatePicker;
 
     private ValueListBox<Boolean> correctionTag;
 
@@ -99,6 +103,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         asnuPicker.setPeriodDates(new Date(), new Date());
         asnuPicker.setManualUpdate(true);
 
+        docStatePicker = new RefBookPickerWidget(false, false);
+        docStatePicker.setVersionEnabled(false);
+        docStatePicker.setAttributeId(9292L);
+        docStatePicker.setWidth("100%");
+        docStatePicker.setPeriodDates(new Date(), new Date());
+        docStatePicker.setManualUpdate(true);
+
         correctionTag = new ListBoxWithTooltip<Boolean>(new AbstractRenderer<Boolean>() {
             @Override
             public String render(Boolean object) {
@@ -123,6 +134,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         kppPicker = new TextBox();
         kppPicker.setMaxLength(9);
         kppPicker.setTitle("Выбор КПП");
+
+        oktmoPicker = new TextBox();
+        oktmoPicker.setMaxLength(11);
+        oktmoPicker.setTitle("Выбор ОКТМО");
 
         fileNamePicker = new TextBox();
         fileNamePicker.setMaxLength(255);
@@ -216,7 +231,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         List<String> list = new ArrayList<String>(dataKinds.size());
 
         for (DeclarationFormKind kind : dataKinds) {
-            list.add("record_id = "+kind.getId());
+            list.add(RefBook.RECORD_ID_ALIAS + "=" + kind.getId());
         }
         declarationKindPicker.setFilter(StringUtils.join(list.toArray(), " or ", null));
     }
@@ -229,7 +244,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	}
 
     @Override
-    public void updateFilter(TaxType taxType) {
+    public void updateFilter(TaxType taxType, boolean isReports) {
         // http://conf.aplana.com/pages/viewpage.action?pageId=11383562
         panel.clear();
         // Верстка по-умолчанию
@@ -243,7 +258,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         switch (taxType) {
             case NDFL:
             case PFR:
-                fillNdflPfr(taxType);
+                fillNdflPfr(taxType, isReports);
                 break;
             default:
                 fillDefault();
@@ -441,7 +456,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         panel.add(horizontalPanel);
     }
 
-    private void fillNdflPfr(TaxType taxType) {
+    private void fillNdflPfr(TaxType taxType, boolean isReports) {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.setWidth("100%");
         VerticalPanel verticalPanel1 = new VerticalPanel();
@@ -479,15 +494,27 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel2.add(departmentPicker);
         verticalPanel3.add(correctionTag);
 
-        label = getLabel("Тид налоговой формы:");
-        //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel4.add(label);
+        if (!isReports) {
+            label = getLabel("Тид налоговой формы:");
+            //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel4.add(label);
+            verticalPanel5.add(declarationKindPicker);
+        }
         label = getLabel("Вид налоговой формы:");
         //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel4.add(label);
-
-        verticalPanel5.add(declarationKindPicker);
         verticalPanel5.add(declarationTypePicker);
+        if (isReports) {
+            label = getLabel("Состояние:");
+            //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel4.add(label);
+            verticalPanel5.add(formStatePicker);
+
+            label = getLabel("Состояние ЭД:");
+            //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel4.add(label);
+            verticalPanel5.add(docStatePicker);
+        }
 
         /*
         label = getLabel("АСНУ:");
@@ -495,12 +522,35 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel6.add(label);
         verticalPanel7.add(asnuPicker);*/
 
-        label = getLabel("Состояние:");
-        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel6.add(label);
-        verticalPanel7.add(formStatePicker);
-
+        if (!isReports) {
+            label = getLabel("Состояние:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel6.add(label);
+            verticalPanel7.add(formStatePicker);
+        }
         if (taxType.equals(TaxType.PFR)) {
+            label = getLabel("Файл:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel6.add(label);
+            verticalPanel7.add(fileNamePicker);
+        }
+
+        if (isReports) {
+            label = getLabel("КПП:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel6.add(label);
+            verticalPanel7.add(kppPicker);
+
+            label = getLabel("ОКТМО:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel6.add(label);
+            verticalPanel7.add(oktmoPicker);
+
+            label = getLabel("Код НО:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel6.add(label);
+            verticalPanel7.add(taxOrganisationPicker);
+
             label = getLabel("Файл:");
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel6.add(label);

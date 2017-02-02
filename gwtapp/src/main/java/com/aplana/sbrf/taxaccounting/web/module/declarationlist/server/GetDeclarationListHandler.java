@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.sql.Ref;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +96,9 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
         Map<Long, String> asnuNames = new HashMap<Long, String>();
-        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+        Map<Long, String> docStateNames = new HashMap<Long, String>();
+        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
+        RefBookDataProvider docStateProvider = rbFactory.getDataProvider(RefBook.Id.DOC_STATE.getId());
         for(DeclarationDataSearchResultItem item: page) {
             if (departmentFullNames.get(item.getDepartmentId()) == null) {
                 departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchyShortNames(item.getDepartmentId()));
@@ -103,10 +106,14 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
             if (item.getAsnuId() != null && !asnuNames.containsKey(item.getAsnuId())) {
                 asnuNames.put(item.getAsnuId(), asnuProvider.getRecordData(item.getAsnuId()).get("NAME").getStringValue());
             }
+            if (item.getDocStateId() != null && !docStateNames.containsKey(item.getDocStateId())) {
+                docStateNames.put(item.getDocStateId(), docStateProvider.getRecordData(item.getDocStateId()).get("NAME").getStringValue());
+            }
         }
 		result.setRecords(page);
         result.setDepartmentFullNames(departmentFullNames);
         result.setAsnuNames(asnuNames);
+        result.setDocStateNames(docStateNames);
         result.setTotalCountOfRecords(page.getTotalCount());
 		return result;
 	}

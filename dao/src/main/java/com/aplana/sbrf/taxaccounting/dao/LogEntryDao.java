@@ -2,9 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO для хранения списков LogEntry в таблице BLOB_DATA
@@ -61,4 +63,10 @@ public interface LogEntryDao {
      * @return порядковый номер
      */
     Integer maxOrder(@NotNull String logId);
+
+    /**
+     * Расчитывает количество сообщений на каждом уровне важности
+     * @param logId идентификатор группы логов
+     */
+    Map<LogLevel, Integer> countLogLevel(@NotNull String logId);
 }
