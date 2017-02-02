@@ -538,11 +538,11 @@ alter table ref_book_address add constraint pk_ref_book_address primary key (id)
 
 alter table ref_book_person add constraint fk_ref_book_person_address foreign key (address) references ref_book_address(id);
 alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
---alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_record(id);
+alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_record(id);
 alter table ref_book_person add constraint fk_ref_book_person_dubl foreign key(dublicates) references ref_book_person(id);
 
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_doc_id foreign key (doc_id) references ref_book_record(id);
---alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
+alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_record(id);
 -- create unique index unq_ref_book_id_doc_pers_inc1 on ref_book_id_doc (decode(inc_rep,1,person_id,null));
 
@@ -556,11 +556,12 @@ alter table ref_book_address add constraint chk_ref_book_address_type check (add
 alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0));
 alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));
 alter table ref_book_id_doc add constraint chk_ref_book_id_doc_rep check(inc_rep in (0,1));
+alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 
 alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primary key (id);
---alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
---alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
-
+alter table ref_book_id_tax_payer add constraint rb_tax_payer_chk_status check (status in (-1, 0, 1, 2));
+alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
+--alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_asnu (id);
 --------------------------------------------------------------------------------------------------------------------------
 alter table raschsv_pers_sv_strah_lic add constraint fk_rsv_p_sv_strah_lic_person foreign key(person_id) references ref_book_person(id);
 --------------------------------------------------------------------------------------------------------------------------

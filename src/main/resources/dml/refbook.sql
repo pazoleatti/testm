@@ -432,7 +432,7 @@ insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,
 -- с учетом изменений по задаче SBRFNDFL-132
 insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (901, 'Адреса физических лиц', 1, 0, 0, 'REF_BOOK_ADDRESS', 0);
 insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (902, 'Документы, удостоверяющие личность', 1, 0, 0, 'REF_BOOK_ID_DOC', 0);
-insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (903, 'Статусы налогоплательщика', 1, 0, 0, 'REF_BOOK_TAXPAYER_STATE', 0);
+insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (903, 'Статусы налогоплательщика', 1, 0, 1, 'REF_BOOK_TAXPAYER_STATE', 0);
 insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (904, 'Физические лица', 1, 0, 0, 'REF_BOOK_PERSON', 1);
 insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (905, 'Идентификаторы налогоплательщика', 0, 0, 0, 'REF_BOOK_ID_TAX_PAYER', 0);
 
@@ -446,13 +446,14 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9117, 901, 'Номер дома (владения)', 'HOUSE', 1, 9, null, null, 1, null, 15, 0, 0, null, null, 0, 20);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9118, 901, 'Номер корпуса (строения)', 'BUILD', 1, 10, null, null, 1, null, 15, 0, 0, null, null, 0, 20);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9119, 901, 'Номер квартиры', 'APPARTMENT', 1, 11, null, null, 1, null, 15, 0, 0, null, null, 0, 20);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9110, 901, 'Страна', 'COUNTRY', 4, 2, 10, 50, 1, null, 15, 0, 0, null, null, 0, null);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9110, 901, 'Страна', 'COUNTRY_ID', 4, 2, 10, 50, 1, null, 15, 0, 0, null, null, 0, null);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9021, 902, 'Код ДУЛ', 'DOC_ID', 4, 1, 360, 3601, 1, null, 15, 1, 0, null, null, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9022, 902, 'Серия и номер ДУЛ', 'DOC_NUMBER', 1, 2, null, null, 1, null, 15, 1, 0, null, null, 0, 25);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9023, 902, 'Кем выдан  ДУЛ', 'ISSUED_BY', 1, 3, null, null, 1, null, 15, 0, 0, null, null, 0, 255);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9024, 902, 'Дата выдачи документа ДУЛ', 'ISSUED_DATE', 3, 4, null, null, 1, null, 15, 0, 0, null, 1, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9025, 902, 'Включается в отчетность', 'INC_REP', 2, 5, null, null, 1, 0, 6, 0, 0, null, null, 0, 1);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9026, 902, 'Физ. лицо', 'PERSON_ID', 4, 6, 904, 9041, 1, null, 15, 1, 0, null, null, 0, null);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9031, 903, 'Код', 'CODE', 1, 1, null, null, 1, null, 1, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9032, 903, 'Наименование', 'NAME', 1, 2, null, null, 1, null, 15, 1, 0, null, null, 0, 1000);
@@ -479,6 +480,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9061, 905, 'ИНП', 'INP', 1, 1, null, null, 1, null, 15, 1, 1, null, null, 0, 14);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9062, 905, 'АС НУ', 'AS_NU', 4, 2, 900, 9002, 1, null, 15, 1, 0, null, null, 0, null);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9053, 905, 'Физ. лицо', 'PERSON_ID', 4, 3, 904, 9041, 1, null, 15, 1, 0, null, null, 0, null);
 
 -- Новые табличные справочники
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (921,'Коды видов вычетов',1,0,0,null,'REF_BOOK_DEDUCTION_TYPE');

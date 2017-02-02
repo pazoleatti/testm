@@ -2267,6 +2267,9 @@ comment on column ref_book_person.source_id is 'Система-источник:
 create table ref_book_id_doc
 (
   id number(18) not null,
+  record_id      number(18) not null,
+  version        date not null,
+  status         number(1) default 0 not null,
   person_id number(18),
   doc_id number(18) not null,
   doc_number varchar2(25 char) not null,
@@ -2277,6 +2280,9 @@ create table ref_book_id_doc
 
 comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';
 comment on column ref_book_id_doc.id is 'Уникальный идентификатор';
+comment on column ref_book_id_doc.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_id_doc.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_id_doc.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_id_doc.person_id is 'Физическое лицо';
 comment on column ref_book_id_doc.doc_id is 'Вид документа';
 comment on column ref_book_id_doc.doc_number is 'Серия и номер документа';
@@ -2288,7 +2294,7 @@ create table ref_book_address
 (
   id number(18) not null,
   address_type number(1) not null,
-  country number(18),
+  country_id number(18),
   region_code varchar2(2 char),
   postal_code varchar2(6 char),
   district varchar2(50 char),
@@ -2303,7 +2309,7 @@ create table ref_book_address
 comment on table ref_book_address is 'Адрес места жительства';
 comment on column ref_book_address.id is 'Уникальный идентификатор';
 comment on column ref_book_address.address_type is 'Тип адреса. Значения: 0 - в РФ 1 - вне РФ';
-comment on column ref_book_address.country is 'Страна';
+comment on column ref_book_address.country_id is 'Страна';
 comment on column ref_book_address.region_code is 'Код региона';
 comment on column ref_book_address.postal_code is 'Почтовый индекс';
 comment on column ref_book_address.district is 'Район';
@@ -2317,11 +2323,17 @@ comment on column ref_book_address.appartment is 'Номер квартиры';
 create table ref_book_id_tax_payer
 (
   id        number(18) not null,
+  record_id      number(18) not null,
+  version        date not null,
+  status         number(1) default 0 not null,
   person_id number(18) not null,
   inp       varchar2(14) not null,
   as_nu     number(18) not null
 );
 comment on table ref_book_id_tax_payer is 'Идентификатор налогоплательщика';
+comment on column ref_book_id_tax_payer.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_id_tax_payer.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_id_tax_payer.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_id_tax_payer.id is 'Уникальный идентификатор';
 comment on column ref_book_id_tax_payer.person_id is 'Ссылка на физическое лицо';
 comment on column ref_book_id_tax_payer.inp is 'Уникальный неизменяемый цифровой идентификатор налогоплательщика';
