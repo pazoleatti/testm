@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.sql.Ref;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +96,7 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
         Map<Long, String> asnuNames = new HashMap<Long, String>();
-        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
         for(DeclarationDataSearchResultItem item: page) {
             if (departmentFullNames.get(item.getDepartmentId()) == null) {
                 departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchyShortNames(item.getDepartmentId()));

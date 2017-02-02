@@ -266,6 +266,20 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
+    public void setFileName(long declarationDataId, String fileName) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("fileName", fileName);
+        values.put("declarationDataId", declarationDataId);
+        int count = getNamedParameterJdbcTemplate().update(
+                "update declaration_data set file_name = :fileName where id = :declarationDataId",
+                values
+        );
+        if (count == 0) {
+            throw new DaoException("Не удалось изменить имя налоговой формы с id = %d, так как она не существует.", declarationDataId);
+        }
+    }
+
+    @Override
     public int getCount(DeclarationDataFilter filter) {
         StringBuilder sql = new StringBuilder("select count(*)");
         HashMap<String, Object> values = new HashMap<String, Object>();
@@ -325,24 +339,14 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         if (filter.getTaxType() == TaxType.NDFL || filter.getTaxType() == TaxType.PFR) {
-            if (filter.getTaxOrganCode() != null && !filter.getTaxOrganCode().isEmpty()) {
-                String[] codes = filter.getTaxOrganCode().split("; ");
-                for (int i = 0; i < codes.length; i++) {
-                    codes[i] = "'" + codes[i].trim() + "'";
-                }
-                if (codes.length != 0) {
-                    sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.tax_organ_code", Arrays.asList(codes)));
-                }
+            if (!StringUtils.isBlank(filter.getTaxOrganCode())) {
+                sql.append(" AND lower(dec.tax_organ_code) like lower(:tax_organ_code)");
+                values.put("tax_organ_code", "%"+filter.getTaxOrganCode()+"%");
             }
 
             if (!StringUtils.isBlank(filter.getTaxOrganKpp())) {
-                String[] codes = filter.getTaxOrganKpp().split("; ");
-                for (int i = 0; i < codes.length; i++) {
-                    codes[i] = "'" + codes[i].trim() + "'";
-                }
-                if (codes.length != 0) {
-                    sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.kpp", Arrays.asList(codes)));
-                }
+                sql.append(" AND lower(dec.kpp) like lower(:kpp)");
+                values.put("kpp", "%"+filter.getTaxOrganKpp()+"%");
             }
 
 			if (!StringUtils.isBlank(filter.getOktmo())) {
@@ -353,6 +357,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 sql.append(" AND lower(dec.note) like lower(:note)");
                 values.put("note", "%"+filter.getNote()+"%");
             }
+
             if (filter.getDocStateId() != null) {
                 sql.append(" AND dec.doc_state_id = ").append(filter.getDocStateId());
             }
@@ -364,8 +369,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
                 .append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
                 .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date,")
-                .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id as doc_state, dec.note,")
-                .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type");
+                .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
+                .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type,")
+                .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
+                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state");
     }
 
     public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
@@ -403,8 +410,20 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             case NOTE:
                 column = "dec.note";
                 break;
+            case CREATE_DATE:
+                column = "creation_date";
+                break;
+            case KPP:
+                column = "dec.kpp";
+                break;
+            case TAX_ORGAN:
+                column = "dec.tax_organ_code";
+                break;
+            case OKTMO:
+                column = "dec.oktmo";
+                break;
             case DOC_STATE:
-                column = "dec.doc_state_id";
+                column = "doc_state";
                 break;
         }
 
