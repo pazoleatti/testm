@@ -200,7 +200,6 @@ public class DepartmentServiceImpl implements DepartmentService {
             if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERR_BANK) {
                 // поразделение пользователя
                 retList.add(tAUser.getDepartmentId());
-
             } else {
                 // подразделение с типом 2, являющееся родительским по отношению к подразделению пользователя
                 Department departmenTB = departmentDao.getDepartmentTB(tAUser.getDepartmentId());

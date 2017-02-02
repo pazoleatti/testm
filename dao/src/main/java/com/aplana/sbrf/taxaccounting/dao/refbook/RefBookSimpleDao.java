@@ -201,6 +201,15 @@ public interface RefBookSimpleDao {
     RefBookRecordVersion getNextVersion(@NotNull RefBook refBook, @NotNull Long recordId, @NotNull Date versionFrom);
 
     /**
+     * Возвращает данные о версии следующей до указанной
+     * @param refBook справочник
+     * @param recordId идентификатор записи справочника (без учета версий)
+     * @param versionFrom дата начала актуальности версии текущей версии, после которой будет выполняться поиск следующей версии
+     * @return данные версии
+     */
+    RefBookRecordVersion getPreviousVersion(@NotNull RefBook refBook, Long recordId, Date versionFrom);
+
+    /**
      * Создает фиктивную запись, являющуюся датой окончания периода актуальности какой то версии
      * @param refBook справочник
      * @param recordId идентификатор записи справочника без учета версий
@@ -228,4 +237,62 @@ public interface RefBookSimpleDao {
      * @return циклическая зависимость существует?
      */
     boolean hasLoops(Long uniqueRecordId, Long parentRecordId);
+
+    /**
+     * Значение справочника по Id записи и Id атрибута
+     * @param recordId
+     * @param attribute
+     * @return
+     */
+    RefBookValue getValue(@NotNull Long recordId, @NotNull RefBookAttribute attribute);
+
+    /**
+     * Возвращает уникальный идентификатор записи, удовлетворяющей указанным условиям
+     * @param refBook справочник
+     * @param recordId идентификатор записи справочника (без учета версий)
+     * @param version дата
+     * @return уникальный идентификатор записи, удовлетворяющей указанным условиям
+     */
+    Long findRecord(RefBook refBook, Long recordId, Date version);
+
+    /**
+     * Возвращает идентификаторы фиктивных версии, являющихся окончанием указанных версии.
+     * Без привязки ко входным параметрам, т.к метод используется просто для удаления по id
+     * @param refBook справочник
+     * @param uniqueRecordIds идентификаторы версии записи справочника
+     * @return идентификаторы фиктивных версии
+     */
+    List<Long> getRelatedVersions(@NotNull RefBook refBook, @NotNull List<Long> uniqueRecordIds);
+
+    /**
+     * Проверяет существование версий записи справочника
+     * @param refBook справочник
+     * @param recordIds идентификаторы записей справочника без учета версий
+     * @param version версия записи справочника
+     * @return
+     */
+    boolean isVersionsExist(@NotNull RefBook refBook, @NotNull List<Long> recordIds, @NotNull Date version);
+
+    /**
+     * Обновляет значения атрибутов у указанной версии
+     * @param refBook справочник
+     * @param uniqueRecordId уникальный идентификатор версии записи справочника
+     * @param records список значений атрибутов
+     */
+    void updateRecordVersion(@NotNull RefBook refBook, @NotNull Long uniqueRecordId, @NotNull Map<String, RefBookValue> records);
+
+    /**
+     * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
+     * @param refBook справочник
+     * @param uniqueRecordId идентификатор версии записи справочника
+     * @return
+     */
+    Long getFirstRecordId(@NotNull RefBook refBook, @NotNull Long uniqueRecordId);
+
+    /**
+     * Удаляет все версии записи из справочника
+     * @param refBook справочник
+     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены
+     */
+    void deleteAllRecordVersions(@NotNull RefBook refBook, @NotNull List<Long> uniqueRecordIds);
 }

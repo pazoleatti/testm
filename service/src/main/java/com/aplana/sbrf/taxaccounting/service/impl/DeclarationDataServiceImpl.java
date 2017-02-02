@@ -216,13 +216,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ) == null) {
             //Если блокировка успешно установлена
             try {
+                /*
                 DeclarationData declarationData = find(declarationTemplate.getType().getId(), departmentReportPeriod.getId(), taxOrganKpp, oktmo, taxOrganCode, asunId, fileName);
                 if (declarationData != null) {
                     String msg = (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ?
                             "Уведомление с заданными параметрами уже существует" :
                             "Налоговая форма с заданными параметрами уже существует");
                     throw new ServiceLoggerException(msg, null);
-                }
+                }*/
 
                 declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
                         FormDataEvent.CREATE, logger);
