@@ -104,6 +104,7 @@ public class RefBook implements Serializable {
 		AUDIT_FIELD(104), 							// Список полей для журнала аудита
 		EMAIL_CONFIG(400), 							// Настройки почтового клиента
 		ASYNC_CONFIG(401), 							// Настройки асинхронных задач
+		PERSON_ADDRESS(901),                        // Адреса физических лиц
 		ID_DOC(902),                                // Документ, удостоверяющий личность
 		REORGANIZATION(5),							// Коды форм реорганизации (ликвидации) организации
 		DOC_STATE(929),								// Состояние ЭД

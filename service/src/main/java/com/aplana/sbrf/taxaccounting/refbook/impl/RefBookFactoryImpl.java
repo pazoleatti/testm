@@ -60,7 +60,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			PERSON.getId(), NDFL.getId(), NDFL_DETAIL.getId(), FIAS_OPERSTAT.getId(),
 			FIAS_SOCRBASE.getId(), FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
 			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(), REORGANIZATION.getId(),
-			REGION.getId(), NDFL.getId(), NDFL_DETAIL.getId(), ID_DOC.getId(),
+			REGION.getId(), NDFL.getId(), NDFL_DETAIL.getId(), ID_DOC.getId(), PERSON_ADDRESS.getId(),
             OKATO.getId()
 	});
 
