@@ -2288,7 +2288,7 @@ create table ref_book_address
 (
   id number(18) not null,
   address_type number(1) not null,
-  country_id number(18),
+  country number(18),
   region_code varchar2(2 char),
   postal_code varchar2(6 char),
   district varchar2(50 char),
@@ -2303,7 +2303,7 @@ create table ref_book_address
 comment on table ref_book_address is 'Адрес места жительства';
 comment on column ref_book_address.id is 'Уникальный идентификатор';
 comment on column ref_book_address.address_type is 'Тип адреса. Значения: 0 - в РФ 1 - вне РФ';
-comment on column ref_book_address.country_id is 'Страна';
+comment on column ref_book_address.country is 'Страна';
 comment on column ref_book_address.region_code is 'Код региона';
 comment on column ref_book_address.postal_code is 'Почтовый индекс';
 comment on column ref_book_address.district is 'Район';
