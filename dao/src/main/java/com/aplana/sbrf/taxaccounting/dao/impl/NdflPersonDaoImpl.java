@@ -429,9 +429,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             NdflPerson person = new NdflPerson();
             person.setId(SqlUtils.getLong(rs, "id"));
-            person.setRowNum(rs.getInt("row_num"));
             person.setDeclarationDataId(SqlUtils.getLong(rs, "declaration_data_id"));
 
+            person.setRowNum(rs.getInt("row_num"));
             person.setPersonId(rs.getLong("person_id"));
             person.setInp(rs.getString("inp"));
             person.setSnils(rs.getString("snils"));
