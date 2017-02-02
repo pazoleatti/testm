@@ -255,6 +255,17 @@ comment on column ref_book_tax_inspection.id is 'Уникальный идент
 comment on column ref_book_tax_inspection.code is 'Код налогового органа';
 comment on column ref_book_tax_inspection.name is 'Наименование налогового органа';
 
+--Ставка НДФЛ
+create table ref_book_ndfl_rate
+(
+  id    number(18) not null,
+  rate  varchar2(255 char) not null
+);
+
+comment on table ref_book_ndfl_rate is 'Ставка НДФЛ';
+comment on column ref_book_ndfl_rate.id is 'Уникальный идентификатор';
+comment on column ref_book_ndfl_rate.rate is 'Процентная ставка';
+
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (

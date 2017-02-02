@@ -68,6 +68,9 @@ alter table ref_book_attach_file_type add constraint pk_ref_book_attach_file_typ
 --Налоговые инспекции
 alter table ref_book_tax_inspection add constraint pk_ref_book_tax_inspection primary key(id);
 
+--Ставка НДФЛ
+alter table ref_book_ndfl_rate add constraint pk_ref_book_ndfl_rate primary key(id);
+
 -- Параметры подразделения по НДФЛ
 alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
 alter table ref_book_ndfl_detail add constraint pk_ref_book_ndfl_detail primary key(id);
