@@ -798,6 +798,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 reportService.createDec(declarationData.getId(),
                         blobDataService.create(zipOutFile, decName + ".zip", decDate),
                         DeclarationDataReportType.XML_DEC);
+                declarationDataDao.setFileName(declarationData.getId(), decName);
             } finally {
                 if (zipOutFile != null && !zipOutFile.delete()) {
                     LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));

@@ -71,7 +71,6 @@ public class DeclarationListView extends
 
     private Map<Integer, String> departmentFullNames;
     private Map<Long, String> asnuNames;
-    private Map<Long, String> docStateNames;
 
     private SingleSelectionModel<DeclarationDataSearchResultItem> selectionModel;
 
@@ -257,13 +256,13 @@ public class DeclarationListView extends
         TextColumn<DeclarationDataSearchResultItem> declarationCreateDateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
-                return object.getCreateDate();
+                return object.getCreateDate() != null ? DATE_TIME_FORMAT.format(object.getCreateDate()) : null;
             }
         };
         TextColumn<DeclarationDataSearchResultItem> declarationDocStateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
-                return object.getDocStateId() != null ? docStateNames.get(object.getDocStateId()) : null;
+                return object.getDocState();
             }
         };
 
@@ -321,6 +320,7 @@ public class DeclarationListView extends
         declarationKppColumn.setSortable(true);
         declarationOktmoColumn.setSortable(true);
         declarationDocStateColumn.setSortable(true);
+        declarationCreateDateColumn.setSortable(true);
         declarationNoteColumn.setSortable(true);
         declarationAsnuColumn.setSortable(true);
         stateColumn.setSortable(true);
@@ -398,7 +398,7 @@ public class DeclarationListView extends
     }
 
     @Override
-    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, Map<Long, String> docStateNames, Long selectedItemId) {
+    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, Long selectedItemId) {
         declarationTable.setRowCount((int) totalCount);
         declarationTable.setRowData(start, records);
         this.departmentFullNames = departmentFullNames;
@@ -496,6 +496,18 @@ public class DeclarationListView extends
             this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_KIND_NAME;
         } else if(ASNU_TITLE.equals(sortByColumn)){
             this.sortByColumn = DeclarationDataSearchOrdering.ASNU;
+        } else if(OKTMO_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.OKTMO;
+        } else if(TAX_ORGAN_CODE_KPP_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.KPP;
+        } else if(TAX_ORGAN_CODE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.TAX_ORGAN;
+        } else if(CREATE_DATE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.CREATE_DATE;
+        } else if(DOC_STATE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.DOC_STATE;
+        } else if(NOTE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.NOTE;
         } else {
 			this.sortByColumn = DeclarationDataSearchOrdering.ID;
 		}

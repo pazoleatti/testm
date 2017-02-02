@@ -32,6 +32,8 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         result.setDeclarationFormKind(DeclarationFormKind.fromId(SqlUtils.getLong(rs,"form_kind")));
         result.setNote(rs.getString("note"));
         result.setDocStateId(SqlUtils.getLong(rs,"doc_state_id"));
+        result.setDocState(rs.getString("doc_state"));
+        result.setCreateDate(rs.getDate("creation_date"));
         return result;
 	}
 }

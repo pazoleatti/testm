@@ -49,9 +49,9 @@ public class DeclarationDataSearchResultItem implements Serializable {
     private Long asnuId;
 
     /**
-     * Файл
+     * Дата формирования файла
      */
-    private String createDate;
+    private Date createDate;
 
     /**
      * Файл
@@ -71,6 +71,10 @@ public class DeclarationDataSearchResultItem implements Serializable {
      * Статус документа
      */
     private Long docStateId;
+    /**
+     * Статус документа
+     */
+    private String docState;
 
     /**
      * Примечание
@@ -213,11 +217,11 @@ public class DeclarationDataSearchResultItem implements Serializable {
         this.declarationFormKind = declarationFormKind;
     }
 
-    public String getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
@@ -235,6 +239,14 @@ public class DeclarationDataSearchResultItem implements Serializable {
 
     public void setDocStateId(Long docStateId) {
         this.docStateId = docStateId;
+    }
+
+    public String getDocState() {
+        return docState;
+    }
+
+    public void setDocState(String docState) {
+        this.docState = docState;
     }
 
     public String getNote() {
