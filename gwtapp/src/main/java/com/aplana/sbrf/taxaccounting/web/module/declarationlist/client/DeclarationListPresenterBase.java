@@ -35,7 +35,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void updatePageSize(TaxType taxType);
 
-        void initTable(TaxType taxType);
+        void initTable(TaxType taxType, boolean isReports);
 
         void clearTable();
 

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,12 +24,15 @@ import java.util.*;
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class LogEntryDaoTest {
+    private static final int MAX_MESSAGE_SIZE = 2000;
+
     private static final String FILE_NAME = "c:\\test\\test.txt";
     private static final String UID_WITHOUT_LOG_ENTRY_1 = "1-1-1";
     private static final String UID_WITHOUT_LOG_ENTRY_2 = "2-2-2";
     private static final String UID_WITHOUT_LOG_ENTRY_3 = "3-3-3";
     private static final String UID_WITH_LOG_ENTRY_4 = "4-4-4";
     private static final String UID_WITH_LOG_ENTRY_5 = "5-5-5";
+    private static final String UID_WITH_LOG_ENTRY_6 = "6-6-6";
 
     @Autowired
     LogEntryDao logEntryDao;
@@ -126,6 +130,38 @@ public class LogEntryDaoTest {
         Assert.assertEquals(after.get(0).getMessage(), logEntries.get(7).getMessage());
         Assert.assertEquals(after.get(1).getMessage(), logEntries.get(8).getMessage());
         Assert.assertEquals(after.get(2).getMessage(), logEntries.get(9).getMessage());
+    }
+
+    @Test
+    public void testBigMessage() {
+        String largeMessage = "";
+
+        largeMessage += StringUtils.repeat(' ', MAX_MESSAGE_SIZE);
+        largeMessage += StringUtils.repeat('б', MAX_MESSAGE_SIZE);
+        largeMessage += StringUtils.repeat('z', MAX_MESSAGE_SIZE);
+        largeMessage += StringUtils.repeat('e', 10);
+
+        Logger logger = new Logger();
+        logger.error(largeMessage);
+
+        String uuid = UUID.randomUUID().toString().toLowerCase();
+        logDao.save(uuid);
+        logEntryDao.save(logger.getEntries(), uuid);
+
+        List<LogEntry> logEntries = logEntryDao.get(uuid);
+        Assert.assertEquals(4, logEntries.size());
+        Assert.assertEquals(StringUtils.repeat(' ', MAX_MESSAGE_SIZE), logEntries.get(0).getMessage());
+        Assert.assertEquals(StringUtils.repeat('б', MAX_MESSAGE_SIZE), logEntries.get(1).getMessage());
+        Assert.assertEquals(StringUtils.repeat('z', MAX_MESSAGE_SIZE), logEntries.get(2).getMessage());
+        Assert.assertEquals(StringUtils.repeat('e', 10), logEntries.get(3).getMessage());
+    }
+
+    @Test
+    public void testCountLogLevel() {
+        Map<LogLevel, Integer> countLogLevelMap = logEntryDao.countLogLevel(UID_WITH_LOG_ENTRY_6);
+        Assert.assertEquals(1, countLogLevelMap.get(LogLevel.INFO).intValue());
+        Assert.assertEquals(2, countLogLevelMap.get(LogLevel.WARNING).intValue());
+        Assert.assertEquals(3, countLogLevelMap.get(LogLevel.ERROR).intValue());
     }
 
     //@Test

@@ -14,10 +14,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.List;
+import java.util.*;
 
 @Repository
 public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
+
+    /**
+     * Максимальный размер сообщения
+     */
+    private static final int MAX_MESSAGE_SIZE = 2000;
 
     private static final class LogEntryMapper implements RowMapper<LogEntry> {
         @Override
@@ -26,7 +31,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
             result.setLogId(rs.getString("log_id"));
             result.setOrd(rs.getInt("ord"));
-            result.setDate(rs.getDate("creation_date"));
+            result.setDate(new Date(rs.getTimestamp("creation_date").getTime()));
             result.setLevel(LogLevel.fromId(rs.getInt("log_level")));
             result.setMessage(rs.getString("message"));
 
@@ -54,26 +59,67 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         saveShift(logEntries, logId, shift);
     }
 
-    private void saveShift(final List<LogEntry> logEntries, final String logId, final int shift) {
+    /**
+     * Проходит по всем сообщениями:
+     * сообщения больше {@link LogEntryDaoImpl#MAX_MESSAGE_SIZE} разбиваются на мелкие сообщения.
+     */
+    private List<LogEntry> splitBigMessage(List<LogEntry> logEntries) {
+        List<LogEntry> entryList = new ArrayList<LogEntry>(logEntries);
+        ListIterator<LogEntry> listIterator = entryList.listIterator();
+
+        while (listIterator.hasNext()) {
+            LogEntry logEntry = listIterator.next();
+
+            if (logEntry.getMessage().length() <= MAX_MESSAGE_SIZE) {
+                continue;
+            }
+
+            String[] messages = logEntry.getMessage().split("(?<=\\G.{" + MAX_MESSAGE_SIZE + "})");
+
+            listIterator.remove();
+
+            for (String message : messages) {
+                LogEntry newLogEntry = new LogEntry(logEntry);
+                newLogEntry.setMessage(message);
+
+                listIterator.add(newLogEntry);
+            }
+        }
+
+        return entryList;
+    }
+
+    /**
+     * Сохраняет список сообщений в базу.
+     * Большие сообщения разбиваются на мелкие.
+     * {@link LogEntry#ord} проставляется с учетом сдвига.
+     *
+     * @param logEntries список сообщений
+     * @param logId идентификатор группы сообщений
+     * @param shift сдвиг для {@link LogEntry#ord}
+     */
+    private void saveShift(List<LogEntry> logEntries, final String logId, final int shift) {
+        final List<LogEntry> splitLogEntries = splitBigMessage(logEntries);
+
         getJdbcTemplate().batchUpdate(
                 "insert into log_entry (log_id, ord, creation_date, log_level, message) values (?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        LogEntry logEntry = logEntries.get(i);
+                        LogEntry logEntry = splitLogEntries.get(i);
                         logEntry.setLogId(logId);
                         logEntry.setOrd(shift + i);
 
                         ps.setString(1, logEntry.getLogId());
                         ps.setInt(2, logEntry.getOrd());
-                        ps.setDate(3, new java.sql.Date(logEntry.getDate().getTime()));
+                        ps.setTimestamp(3, new java.sql.Timestamp(logEntry.getDate().getTime()));
                         ps.setInt(4, logEntry.getLevel().getId());
                         ps.setString(5, logEntry.getMessage());
                     }
 
                     @Override
                     public int getBatchSize() {
-                        return logEntries.size();
+                        return splitLogEntries.size();
                     }
                 });
     }
@@ -122,6 +168,31 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
                 new Object[]{logId},
                 new int[]{Types.VARCHAR},
                 Integer.class);
+    }
+
+    @Override
+    public Map<LogLevel, Integer> countLogLevel(@NotNull String logId) {
+        Map<String, Object> paramMap =  new HashMap<String, Object>();
+        paramMap.put("logId", logId);
+
+        Map<String, Object> countMap = getNamedParameterJdbcTemplate().queryForMap(
+                "select " +
+                    "count(case when l.log_level = 0 then 1 end) INFO, " +
+                    "count(case when l.log_level = 1 then 1 end) WARN, " +
+                    "count(case when l.log_level = 2 then 1 end) ERROR " +
+                "from " +
+                    "log_entry l " +
+                "where " +
+                    "log_id = :logId",
+                paramMap
+        );
+
+        Map<LogLevel, Integer> result = new HashMap<LogLevel, Integer>();
+        result.put(LogLevel.INFO, ((Number)countMap.get("INFO")).intValue());
+        result.put(LogLevel.WARNING, ((Number)countMap.get("WARN")).intValue());
+        result.put(LogLevel.ERROR, ((Number)countMap.get("ERROR")).intValue());
+
+        return result;
     }
 
     @Override

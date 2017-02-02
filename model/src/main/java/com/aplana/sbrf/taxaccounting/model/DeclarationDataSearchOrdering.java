@@ -42,9 +42,25 @@ public enum DeclarationDataSearchOrdering {
      */
     FILE_NAME,
     /**
+     * ОКТМО
+     */
+    OKTMO,
+    /**
+     * КПП
+     */
+    KPP,
+    /**
+     * Налоговый орган
+     */
+    TAX_ORGAN,
+    /**
      * Примечание
      */
     NOTE,
+    /**
+     * Дата формирования
+     */
+    CREATE_DATE,
     /**
      * Статус ЭД
      */
