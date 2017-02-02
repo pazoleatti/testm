@@ -218,6 +218,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         GetDeclarationDepartmentsAction action = new GetDeclarationDepartmentsAction();
         action.setTaxType(taxType);
         action.setReportPeriodId(getView().getSelectedReportPeriod().get(0));
+        action.setReports(declarationFormKind.equals(DeclarationFormKind.REPORTS));
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationDepartmentsResult>() {
             @Override
             public void onSuccess(GetDeclarationDepartmentsResult result) {

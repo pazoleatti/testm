@@ -299,7 +299,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public void delete(long declarationDataId) {
-        declarationDataDao.delete(declarationDataId);
+    public void delete(long declarationDataId, TAUserInfo userInfo) {
+        declarationDataDao.setStatus(declarationDataId, State.CREATED);
+        declarationDataService.delete(declarationDataId, userInfo);
     }
 }
