@@ -11,6 +11,7 @@ Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9114','901','Город','CITY','1','6',null,null,'1',null,'15','0','0',null,null,'0','50');
 
 Insert into REF_BOOK_RECORD (ID,RECORD_ID,REF_BOOK_ID,VERSION,STATUS) values ('266174099','243278461','504',to_date('29.09.14','DD.MM.RR'),'0');
+Insert into REF_BOOK_RECORD (ID,RECORD_ID,REF_BOOK_ID,VERSION,STATUS) values ('-1','-1','10',to_date('01.01.1970','DD.MM.YYYY'),'0');
 
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9041','904','Фамилия','LAST_NAME','1','1',null,null,'1',null,'15','1','0',null,null,'0','60');
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9042','904','Имя','FIRST_NAME','1','2',null,null,'1',null,'15','1','0',null,null,'0','60');
@@ -29,6 +30,7 @@ Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9057','904','Признак застрахованного лица в системе обязательного социального страхования','SOCIAL','2','17',null,null,'1','0','15','1','0',null,null,'0','1');
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('9059','904','Идентификатор ФЛ','RECORD_ID','2','0',null,null,'1','0','18','1','1',null,null,'1','18');
 
+Insert into REF_BOOK_PERSON (ID,LAST_NAME,FIRST_NAME,MIDDLE_NAME,SEX,INN,INN_FOREIGN,SNILS,TAXPAYER_STATE,BIRTH_DATE,BIRTH_PLACE,CITIZENSHIP,ADDRESS,PENSION,MEDICAL,SOCIAL,EMPLOYEE,RECORD_ID,VERSION,STATUS) values ('-1','-','-','-','1',null,null,null,null,to_date('01.01.1300','DD.MM.YYYY'),'Москва','-1',null,'2','2','2','2','1',to_date('09.01.1970','DD.MM.YYYY'),'2');
 Insert into REF_BOOK_PERSON (ID,LAST_NAME,FIRST_NAME,MIDDLE_NAME,SEX,INN,INN_FOREIGN,SNILS,TAXPAYER_STATE,BIRTH_DATE,BIRTH_PLACE,CITIZENSHIP,ADDRESS,PENSION,MEDICAL,SOCIAL,EMPLOYEE,RECORD_ID,VERSION,STATUS) values ('1','Иванов','Федор','Семенович','1',null,null,null,null,to_date('01.01.1972','DD.MM.YYYY'),'Москва','266174099',null,'2','2','2','2','1',to_date('09.01.2017','DD.MM.YYYY'),'0');
 Insert into REF_BOOK_PERSON (ID,LAST_NAME,FIRST_NAME,MIDDLE_NAME,SEX,INN,INN_FOREIGN,SNILS,TAXPAYER_STATE,BIRTH_DATE,BIRTH_PLACE,CITIZENSHIP,ADDRESS,PENSION,MEDICAL,SOCIAL,EMPLOYEE,RECORD_ID,VERSION,STATUS) values ('2','Иванов','Петр','Семенович','1',null,null,null,null,to_date('01.01.1970','DD.MM.YYYY'),'Москва','266174099',null,'2','2','2','2','2',to_date('09.01.2017','DD.MM.YYYY'),'0');
 Insert into REF_BOOK_PERSON (ID,LAST_NAME,FIRST_NAME,MIDDLE_NAME,SEX,INN,INN_FOREIGN,SNILS,TAXPAYER_STATE,BIRTH_DATE,BIRTH_PLACE,CITIZENSHIP,ADDRESS,PENSION,MEDICAL,SOCIAL,EMPLOYEE,RECORD_ID,VERSION,STATUS) values ('3','Иванов','Феофан','Семенович','1',null,null,null,null,to_date('08.02.1980','DD.MM.YYYY'),'Москва','266174099',null,'2','2','2','2','3',to_date('01.01.2012','DD.MM.YYYY'),'0');
@@ -59,6 +61,8 @@ Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,
 Insert into REF_BOOK_ATTRIBUTE (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values
   ('999994','1983','Имя родителя','PARENT_ID','4','4','1983','999992','1',null,'25','0','0',null,null,'0',null);
 
+Insert into ref_book_family (id, parent_id, last_name, first_name, middle_name, record_id, version, status) VALUES
+  ('-1', null, '-', '-', '-', '1', to_date('01.01.1970','DD.MM.YYYY'), '2');
 Insert into ref_book_family (id, parent_id, last_name, first_name, middle_name, record_id, version, status) VALUES
   ('1', null, 'Иванов', 'Иван', 'Аристархович', '1', to_date('01.01.2016','DD.MM.YYYY'), '0');
 Insert into ref_book_family (id, parent_id, last_name, first_name, middle_name, record_id, version, status) VALUES
