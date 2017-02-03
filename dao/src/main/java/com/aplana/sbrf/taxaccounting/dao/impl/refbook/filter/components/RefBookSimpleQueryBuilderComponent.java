@@ -292,7 +292,7 @@ public class RefBookSimpleQueryBuilderComponent {
         } else {
             ps.appendQuery(" WHERE ");
         }
-        ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id)");
+        ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
 
         if (sortAttribute != null) {
             ps.appendQuery(" ORDER BY ");
@@ -330,14 +330,14 @@ public class RefBookSimpleQueryBuilderComponent {
                                                                        @NotNull Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues) {
         List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupsUniqueAttributesValues.get(1);
 
-        PreparedStatementData sql = new PreparedStatementData("SELECT r.record_id as id, ");
+        PreparedStatementData sql = new PreparedStatementData("SELECT r.").append(RefBook.RECORD_ID_ALIAS).append(" as id, ");
         appendNameColumn(sql, uniqueAttributesValues);
         sql.append("FROM ").append(refBook.getTableName()).append(" r\n");
         sql.append("WHERE r.status = 0\nAND (\n");
         appendWhereCondition(record, sql, uniqueAttributesValues);
         sql.append(")");
         if (uniqueRecordId != null) {
-            sql.append("\nAND r.record_id != ").append(uniqueRecordId);
+            sql.append("\nAND r.").append(RefBook.RECORD_ID_ALIAS).append(" != ").append(uniqueRecordId);
         }
         return sql;
     }
@@ -347,7 +347,7 @@ public class RefBookSimpleQueryBuilderComponent {
             RefBookAttribute attribute = uniqueAttributesValues.get(j).getFirst();
 
             sql.append("'").append(attribute.getName()).append("'");
-            appendIfAttributeIsNotLast(sql, uniqueAttributesValues, j, "||','||");
+            appendIfAttributeIsNotLast(sql, uniqueAttributesValues, j, "||', '||");
         }
         sql.append(" as name\n");
     }
@@ -538,14 +538,7 @@ public class RefBookSimpleQueryBuilderComponent {
 
         switch (requiredAttribute.getAttributeType()) {
             case STRING:
-                if (requiredAttribute.getAlias().equals("SOCIAL") ||
-                        requiredAttribute.getAlias().equals("PENSION") ||
-                        requiredAttribute.getAlias().equals("MEDICAL")
-                        ) {
-                    sql.addNamedParam(requiredAttribute.getAlias(), 1);
-                } else {
-                    sql.addNamedParam(requiredAttribute.getAlias(), "-");
-                }
+                sql.addNamedParam(requiredAttribute.getAlias(), "-");
                 break;
             case NUMBER:
                 sql.addNamedParam(requiredAttribute.getAlias(), 1);
@@ -554,7 +547,7 @@ public class RefBookSimpleQueryBuilderComponent {
                 sql.addNamedParam(requiredAttribute.getAlias(), fakeDate);
                 break;
             case REFERENCE:
-                sql.addNamedParam(requiredAttribute.getAlias(), 42L);
+                sql.addNamedParam(requiredAttribute.getAlias(), -1L);
                 break;
         }
     }
@@ -573,17 +566,15 @@ public class RefBookSimpleQueryBuilderComponent {
         PreparedStatementData sql = new PreparedStatementData();
         List<RefBookAttribute> attributes = getNotSystemAttributes(refBook.getAttributes());
 
-        sql.append("insert into ").append(refBook.getTableName()).append(" (id, record_id, version, status");
+        sql.append("INSERT INTO ").append(refBook.getTableName()).append(" (id, record_id, version, status");
         for (RefBookAttribute attribute : attributes) {
             sql.append(", ").append(attribute.getAlias());
         }
-        sql.append(") values (:id, :recordId, :version, :status");
+        sql.append(") VALUES (:id, :recordId, :version, :status");
         for (RefBookAttribute attribute : attributes) {
             sql.append(", :").append(attribute.getAlias());
         }
         sql.append(")");
-
-
 
         return sql;
     }
@@ -608,5 +599,38 @@ public class RefBookSimpleQueryBuilderComponent {
         }
         sql.append(" FROM ").append(refBook.getTableName()).append(" WHERE ").append(inStatement);
         return sql;
+    }
+
+    /*
+    UPDATE <TABLENAME> SET
+    <COL> = :<COL>,
+    <COL> = :<COL>
+    WHERE id = <ID>
+     */
+    public PreparedStatementData psUpdateRecordVersion(RefBook refBook, Long uniqueRecordId, Map<String, RefBookValue> values) {
+        List<Pair<String, RefBookValue>> valuesPairs = convertMapToPairsList(values);
+
+        PreparedStatementData sql = new PreparedStatementData("UPDATE ").append(refBook.getTableName()).append(" SET\n");
+        for (Pair<String, RefBookValue> valuePair : valuesPairs) {
+            String columnName = valuePair.getFirst();
+            Object columnValue = valuePair.getSecond().getValue();
+
+            sql.append(columnName).append(" = :").append(columnName).append(",\n");
+            sql.addNamedParam(columnName, columnValue);
+        }
+        StringBuilder builder = sql.getQuery();
+        builder.delete(builder.lastIndexOf(",\n"), builder.length());
+        sql.append("\nWHERE id = ").append(uniqueRecordId);
+
+        return sql;
+    }
+
+    private <K,V> List<Pair<K, V>> convertMapToPairsList(Map<K,V> map) {
+        List<Pair<K, V>> pairsList = new ArrayList<Pair<K, V>>();
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            Pair<K,V> pair = new Pair<K, V>(entry.getKey(), entry.getValue());
+            pairsList.add(pair);
+        }
+        return pairsList;
     }
 }

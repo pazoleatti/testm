@@ -6,6 +6,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class GetDeclarationDepartmentsAction extends UnsecuredActionImpl<GetDeclarationDepartmentsResult> {
     private TaxType taxType;
     private int reportPeriodId;
+    private boolean isReports;
 
     public TaxType getTaxType() {
         return taxType;
@@ -21,5 +22,13 @@ public class GetDeclarationDepartmentsAction extends UnsecuredActionImpl<GetDecl
 
     public void setReportPeriodId(int reportPeriodId) {
         this.reportPeriodId = reportPeriodId;
+    }
+
+    public boolean isReports() {
+        return isReports;
+    }
+
+    public void setReports(boolean isReports) {
+        this.isReports = isReports;
     }
 }

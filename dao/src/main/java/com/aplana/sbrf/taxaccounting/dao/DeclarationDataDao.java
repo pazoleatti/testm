@@ -35,7 +35,16 @@ public interface DeclarationDataDao {
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
      */
     void setStatus(long declarationDataId, State state);
-	/**
+
+    /**
+     * Установить имя файла
+     * @param declarationDataId идентификатор налоговой формы
+     * @param fileName имя файла
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
+     */
+    void setFileName(long declarationDataId, String fileName);
+
+    /**
 	 * Удалить декларацию
 	 * @param declarationDataId идентификатор декларации
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует

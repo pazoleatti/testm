@@ -46,12 +46,23 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
             result.setDepartments(new ArrayList<Department>());
             result.setDepartmentIds(new HashSet<Integer>());
         } else {
-            Set<Integer> departmentIds = new HashSet<Integer>(departments);
-            result.setDepartments(new ArrayList<Department>(
-                    departmentService.getRequiredForTreeDepartments(departmentIds).values()));
-            result.setDepartmentIds(departmentIds);
-            if (result.getDepartmentIds().contains(userInfo.getUser().getDepartmentId())) {
-                result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
+            if (action.isReports()) {
+                Set<Integer> departmentIds = new HashSet<Integer>(departmentService.getTBDepartmentIds(userInfo.getUser()));
+                result.setDepartments(new ArrayList<Department>(
+                        departmentService.getRequiredForTreeDepartments(departmentIds).values()));
+                result.setDepartmentIds(departmentIds);
+                int userTBId = departmentService.getParentTB(userInfo.getUser().getDepartmentId()).getId();
+                if (result.getDepartmentIds().contains(userTBId)) {
+                    result.setDefaultDepartmentId(userTBId);
+                }
+            } else {
+                Set<Integer> departmentIds = new HashSet<Integer>(departments);
+                result.setDepartments(new ArrayList<Department>(
+                        departmentService.getRequiredForTreeDepartments(departmentIds).values()));
+                result.setDepartmentIds(departmentIds);
+                if (result.getDepartmentIds().contains(userInfo.getUser().getDepartmentId())) {
+                    result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
+                }
             }
         }
         return result;

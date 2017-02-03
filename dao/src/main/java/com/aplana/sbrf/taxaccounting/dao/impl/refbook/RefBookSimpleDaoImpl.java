@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -26,10 +27,14 @@ import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
+
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
 /**
  * Имплементация DAO для RefBookSimpleDataProvider, поддерживающая редактируемые версионируемые справочники.
@@ -403,6 +408,32 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         }
     }
 
+    private static final String GET_PREVIOUS_RECORD_VERSION =
+            "with previousVersion as (select r.id, r.record_id, r.status, r.version from %1$s r where r.record_id = :recordId and r.status = 0 and r.version  = \n" +
+            "\t(select max(version) from %1$s where record_id=r.record_id and status=0 and version < :versionFrom)),\n" +
+            "minNextVersion as (select r.record_id, min(r.version) version from %1$s r, previousVersion pv where r.version > pv.version and r.record_id= pv.record_id and r.status != -1 group by r.record_id),\n" +
+            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %1$s r where mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
+            "select pv.id as %2$s, pv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
+            "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
+            "from previousVersion pv \n" +
+            "left join nextVersionEnd nve on (nve.record_id= pv.record_id)";
+
+    @Override
+    public RefBookRecordVersion getPreviousVersion(RefBook refBook, Long recordId, Date versionFrom) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("recordId", recordId);
+        parameters.addValue("versionFrom", versionFrom);
+
+        String sql = String.format(GET_PREVIOUS_RECORD_VERSION, refBook.getTableName(), RefBook.RECORD_ID_ALIAS);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql,
+                    parameters,
+                    new RefBookUtils.RecordVersionMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
     @Override
     public void createFakeRecordVersion(RefBook refBook, Long recordId, Date version) {
 
@@ -462,7 +493,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         return null;
     }
 
-
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(RefBook refBook, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         RefBook newRefBook = SerializationUtils.clone(refBook);
@@ -479,24 +509,119 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         return result;
     }
 
-    private static final String CHECK_LOOPS = "SELECT CASE WHEN EXISTS (\n" +
-            "  WITH value_hierarchy (id, parent_id) AS (\n" +
-            "    SELECT rbr.id,rbv.reference_value AS parent_id\n" +
-            "    FROM ref_book_record rbr\n" +
-            "    join ref_book_attribute rba ON rba.ref_book_id = rbr.ref_book_id AND rba.alias = 'PARENT_ID'\n" +
-            "    join ref_book_value rbv ON rbv.record_id = rbr.id AND rbv.attribute_id = rba.id\n" +
-            "  )\n" +
-            "  SELECT vh.*,LEVEL\n" +
-            "  FROM   value_hierarchy vh\n" +
-            "  WHERE  id = ?\n" +
-            "  START WITH id = ?\n" +
-            "  CONNECT BY parent_id = PRIOR id) \n" +
-            "  THEN 1 ELSE 0 END AS has_cycle \n" +
-            "FROM dual";
-
     @Override
     public boolean hasLoops(Long uniqueRecordId, Long parentRecordId) {
         throw new UnsupportedOperationException();
-//        return getJdbcTemplate().queryForObject(CHECK_LOOPS, new Object[]{parentRecordId, uniqueRecordId}, Integer.class) == 1;
+    }
+
+    @Override
+    public RefBookValue getValue(Long recordId, final RefBookAttribute attribute) {
+        throw new UnsupportedOperationException();
+    }
+
+    private Object parseRefBookValue(ResultSet resultSet, String columnName, RefBookAttribute attribute) throws SQLException {
+        if (resultSet.getObject(columnName) != null) {
+            switch (attribute.getAttributeType()) {
+                case STRING: {
+                    return resultSet.getString(columnName);
+                }
+                case NUMBER: {
+                    return resultSet.getBigDecimal(columnName).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
+                }
+                case DATE: {
+                    return resultSet.getDate(columnName);
+                }
+                case REFERENCE: {
+                    return SqlUtils.getLong(resultSet, columnName);
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private final static String SQL_FIND_RECORD =
+            "select id from %s where record_id = :recordId and version = :version and status != -1";
+
+    @Override
+    public Long findRecord(RefBook refBook, Long recordId, Date version) {
+        String sql = String.format(SQL_FIND_RECORD, refBook.getTableName());
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("recordId", recordId);
+        parameters.addValue("version", version);
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql,
+                    parameters, Long.class);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    private static final String SQL_GET_RELATED_VERSIONS =
+            "with currentRecord as (select id, record_id from %1$s where %2$s),\n" +
+            "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(%3$s) rn from %1$s r, currentRecord cr where r.record_id=cr.record_id and r.status != -1) \n" +
+            "select rv2.ID from currentRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where cr.id=rv.id and rv2.status=%4$d";
+
+    private static final String SQL_GET_RELATED_VERSIONS_PARTITION = "partition by r.RECORD_ID order by r.version";
+
+    @Override
+    public List<Long> getRelatedVersions(RefBook refBook, List<Long> uniqueRecordIds) {
+        String partition = isSupportOver() ? SQL_GET_RELATED_VERSIONS_PARTITION : "";
+        String sql = String.format(SQL_GET_RELATED_VERSIONS,
+                refBook.getTableName(), transformToSqlInStatement("id", uniqueRecordIds), partition, VersionedObjectStatus.FAKE.getId());
+
+        try {
+            return getJdbcTemplate().queryForList(sql, Long.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
+        }
+    }
+
+    @Override
+    public boolean isVersionsExist(RefBook refBook, List<Long> recordIds, Date version) {
+        String sql = "select count(*) from %1$s where %2$s and version = trunc(:version, 'DD') and status != -1";
+        MapSqlParameterSource parameters = new MapSqlParameterSource("version", version);
+        return getNamedParameterJdbcTemplate().queryForObject(String.format(sql, refBook.getTableName(), transformToSqlInStatement("record_id", recordIds)),
+                parameters, Integer.class) != 0;
+    }
+
+    @Override
+    public void updateRecordVersion(RefBook refBook, Long uniqueRecordId, Map<String, RefBookValue> records) {
+        try {
+            if (records.isEmpty()) {
+                return;
+            }
+
+            PreparedStatementData ps = queryBuilder.psUpdateRecordVersion(refBook, uniqueRecordId, records);
+
+            getNamedParameterJdbcTemplate().update(ps.getQueryString(), ps.getNamedParams());
+        } catch (Exception ex) {
+            throw new DaoException("Не удалось обновить значения справочника", ex);
+        }
+    }
+
+    private final static String SQL_GET_FIRST_RECORD_ID =
+            "with allRecords as (select id, version from %1$s where record_id = (select record_id from %1$s where id = :id) and id != :id and status not in (-1, 2))\n" +
+            "select id from allRecords where version = (select min(version) from allRecords)";
+
+    @Override
+    public Long getFirstRecordId(RefBook refBook, Long uniqueRecordId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource("id", uniqueRecordId);
+        String query = String.format(SQL_GET_FIRST_RECORD_ID, refBook.getTableName());
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(query,
+                    parameters, Long.class);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    private static final String DELETE_ALL_VERSIONS = "update %1$s set status = -1 where record_id in (select record_id from %1$s where %2$s)";
+
+    @Override
+    public void deleteAllRecordVersions(RefBook refBook, List<Long> uniqueRecordIds) {
+        String sql = String.format(DELETE_ALL_VERSIONS, refBook.getTableName(), transformToSqlInStatement("id", uniqueRecordIds));
+        getJdbcTemplate().update(sql);
     }
 }

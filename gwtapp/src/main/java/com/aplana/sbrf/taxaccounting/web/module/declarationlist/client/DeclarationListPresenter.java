@@ -172,7 +172,7 @@ public class DeclarationListPresenter extends
                             getView().setPage(result.getPage());
                         } else {
                             getView().setTableData(start, result.getTotalCountOfRecords(),
-                                result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(), result.getDocStateNames(),
+                                result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(),
                                 selectedItemId);
                             selectedItemId = null;
                         }

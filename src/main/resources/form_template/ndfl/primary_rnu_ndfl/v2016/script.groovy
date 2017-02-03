@@ -458,25 +458,44 @@ def prepaymentAttr(personPrepayment) {
 @Field def personsCache = [:]
 @Field final long REF_BOOK_PERSON_ID = RefBook.Id.PERSON.id
 
-// Страны
-@Field def countryCodesCache = []
+// Мапа <ID_Данные о физическом лице - получателе дохода, Физическое лицо: <ФИО> ИНП:<ИНП>>
+@Field def ndflPersonFLMap = [:]
+@Field final TEMPLATE_PERSON_FL = "Физическое лицо: \"%s\", ИНП: \"%s\""
+
+// Страны Мапа <Идентификатор, Код>
+@Field def citizenshipCache = [:]
 @Field final long REF_BOOK_COUNTRY_ID = RefBook.Id.COUNTRY.id
 
-// Документы, удостоверяющие личность
-@Field def documentCodesCache = []
+// Виды документов, удостоверяющих личность Мапа <Идентификатор, Код>
+@Field def documentCodesCache = [:]
 @Field final long REF_BOOK_DOCUMENT_ID = RefBook.Id.DOCUMENT_CODES.id
 
-// Статус налогоплательщика
-@Field def taxpayerStatusCache = []
+// Статус налогоплательщика Мапа <Идентификатор, Код>
+@Field def taxpayerStatusCache = [:]
 @Field final long REF_BOOK_TAXPAYER_STATUS_ID = RefBook.Id.TAXPAYER_STATUS.id
 
-// Коды видов доходов
+// Адрес Мапа <Идентификатор, Адрес>
+@Field def addressCache = [:]
+@Field final long REF_BOOK_ADDRESS_ID = RefBook.Id.PERSON_ADDRESS.id
+
+// ИНП Мапа <person_id, массив_инп>
+@Field def inpCache = [:]
+@Field final long REF_BOOK_ID_TAX_PAYER_ID = RefBook.Id.ID_TAX_PAYER.id
+
+@Field def dulCache = [:]
+@Field final long REF_BOOK_ID_DOC_ID = RefBook.Id.ID_DOC.id
+
+// Коды видов доходов Мапа <Идентификатор, Код>
 @Field def incomeCodeCache = [:]
 @Field final long REF_BOOK_INCOME_CODE_ID = RefBook.Id.INCOME_CODE.id
 
-// Виды дохода
+// Виды дохода Мапа <Признак, Идентификатор_кода_вида_дохода>
 @Field def incomeKindCache = [:]
 @Field final long REF_BOOK_INCOME_KIND_ID = RefBook.Id.INCOME_KIND.id
+
+// Ставки
+@Field def rateCache = []
+@Field final long REF_BOOK_RATE_ID = RefBook.Id.NDFL_RATE.id
 
 // Коды видов вычетов
 @Field def deductionTypeCache = []
@@ -489,7 +508,8 @@ def prepaymentAttr(personPrepayment) {
 // Дата окончания отчетного периода
 @Field def reportPeriodEndDate = null
 
-@Field final MESSAGE_ERROR_NOT_FOUND = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". Текст ошибки: \"%s\" не соответствует справочнику \"%s\"."
+@Field final MESSAGE_ERROR_NOT_FOUND_REF = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: \"%s\" не соответствует справочнику \"%s\"."
+@Field final MESSAGE_ERROR_NOT_FOUND_PERSON = "Не удалось установить связь со справочником \"%s\" для Раздел: \"%s\". Строка: \"%s\", ИНП: \"%s\"."
 
 @Field final SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" размером %d."
 @Field final SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" в колличестве %d."
@@ -507,66 +527,295 @@ def prepaymentAttr(personPrepayment) {
 @Field final R_STATUS = "Статусы налогоплательщика"
 @Field final R_INCOME_CODE = "Коды видов доходов"
 @Field final R_INCOME_KIND = "Виды доходов"
+@Field final R_RATE = "Ставки"
 @Field final R_TYPE_CODE = "Коды видов вычетов"
 @Field final R_NOTIF_SOURCE = "Коды налоговых органов"
+@Field final R_ADDRESS = "Адреса"
+@Field final R_INP = "Идентификаторы налогоплательщиков"
+@Field final R_DUL = "Документы, удостоверяющий личность"
 
-// Поля
-@Field final F_CITIZENSHIP = "Гражданство (код страны)"
-@Field final F_ID_DOC_TYPE = "Код вида документа"
-@Field final F_STATUS = "Статус"
-@Field final F_INCOME_CODE = "Код вида дохода"
-@Field final F_INCOME_KIND = "Вид дохода"
-@Field final F_TYPE_CODE = "Код вычета"
-@Field final F_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление"
+// Комментарии к полям
+@Field final C_CITIZENSHIP = "Гражданство (код страны)"
+@Field final C_ID_DOC_TYPE = "Код вида документа"
+@Field final C_STATUS = "Статус"
+@Field final C_INCOME_CODE = "Код вида дохода"
+@Field final C_INCOME_KIND = "Вид дохода"
+@Field final C_RATE = "Ставка"
+@Field final C_TYPE_CODE = "Код вычета"
+@Field final C_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление"
+@Field final C_LAST_NAME = "Фамилия"
+@Field final C_FIRST_NAME = "Имя"
+@Field final C_MIDDLE_NAME = "Отчество"
+@Field final C_INP = "Уникальный код клиента"
+@Field final C_BIRTH_DATE = "Дата рождения"
+@Field final C_INN_NP = "ИНН  физического лица"
+@Field final C_INN_FOREIGN = "ИНН  иностранного гражданина"
+@Field final C_REGION_CODE = "Код Региона"
+@Field final C_AREA = "Район"
+@Field final C_CITY = "Город"
+@Field final C_LOCALITY = "Населенный пункт"
+@Field final C_STREET = "Улица"
+@Field final C_HOUSE = "Дом"
+@Field final C_BUILDING = "Корпус"
+@Field final C_FLAT = "Квартира"
 
+// Поля справочника Физические лица
+@Field final RF_LAST_NAME = "LAST_NAME"
+@Field final RF_FIRST_NAME = "FIRST_NAME"
+@Field final RF_MIDDLE_NAME = "MIDDLE_NAME"
+@Field final RF_BIRTH_DATE = "BIRTH_DATE"
+@Field final RF_CITIZENSHIP = "CITIZENSHIP"
+@Field final RF_INN = "INN"
+@Field final RF_INN_FOREIGN = "INN_FOREIGN"
+@Field final RF_SNILS = "SNILS"
+@Field final RF_TAXPAYER_STATE = "TAXPAYER_STATE"
+@Field final RF_ADDRESS = "ADDRESS"
+@Field final RF_RECORD_ID = "RECORD_ID"
+@Field final RF_COUNTRY = "COUNTRY"
+@Field final RF_REGION_CODE = "REGION_CODE"
+@Field final RF_DISTRICT = "DISTRICT"
+@Field final RF_CITY = "CITY"
+@Field final RF_LOCALITY = "LOCALITY"
+@Field final RF_STREET = "STREET"
+@Field final RF_HOUSE = "HOUSE"
+@Field final RF_BUILD = "BUILD"
+@Field final RF_APPARTMENT = "APPARTMENT"
+@Field final RF_DUBLICATES = "DUBLICATES"
+
+/**
+ * Проверки НДФЛ
+ * @return
+ */
 def checkData() {
-    // todo узнать какие поля (таблицы) являются обязательными для заполнения
+    // Проверки на соответствие справочникам
+    checkDataReference()
+}
 
+/**
+ * Проверки на соответствие справочникам
+ * @return
+ */
+def checkDataReference() {
     // Страны
-    def countryCodesList = getCountry()
-    logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, countryCodesList.size())
+    def citizenshipCodeMap = getCitizenship()
+    logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
 
-    // Документы, удостоверяющие личность
-    def documentCodesList = getDocument()
-    logger.info(SUCCESS_GET_REF_BOOK, R_ID_DOC_TYPE, documentCodesList.size())
+    // Виды документов, удостоверяющих личность
+    def documentCodesMap = getDocument()
+    logger.info(SUCCESS_GET_REF_BOOK, R_ID_DOC_TYPE, documentCodesMap.size())
 
     // Статус налогоплательщика
-    def taxpayerStatusList = getTaxpayerStatus()
-    logger.info(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusList.size())
+    def taxpayerStatusMap = getTaxpayerStatus()
+    logger.info(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
 
     ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
     logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
 
     // Физические лица
     def personIds = getPersonIds(ndflPersonList)
+    def personMap = [:]
+
+    // Адреса
+    def addressIds = []
+    def addressMap = [:]
+
+    // ИНП <person_id, массив_ИНП>
+    def inpMap = [:]
+
+    // ДУЛ <person_id, массив_ДУЛ>
+    def dulMap = [:]
+
     if (personIds.size() > 0) {
-        def personList = getPersons(personIds)
-        logger.info(SUCCESS_GET_TABLE, R_PERSON, personList.size())
+        // todo Сделать получение записей оригиналов, если текущая запись - дубликат
+        personMap = getPersons(personIds)
+        logger.info(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
+
+        // Получим мапу ИНП
+        inpMap = getINP(personIds)
+        logger.info(SUCCESS_GET_TABLE, R_INP, inpMap.size())
+
+        // Получим мапу ДУЛ
+        dulMap = getDul(personIds)
+        logger.info(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
+
+        personMap.each {personId, person ->
+            // Сохраним идентификаторы адресов в коллекцию
+            if (person.get(RF_ADDRESS).value != null) {
+                addressIds.add(person.get(RF_ADDRESS).value)
+            }
+        }
+
+        // Получим Мапу адресов
+        if (addressIds.size() > 0) {
+            addressMap = getAddress(addressIds)
+            logger.info(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
+        }
     }
 
     ndflPersonList.each { ndflPerson ->
-        // Гражданство
-        if (ndflPerson.citizenship != null && !countryCodesList.contains(ndflPerson.citizenship)) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND,
-                    T_PERSON, ndflPerson.rowNum, F_CITIZENSHIP, F_CITIZENSHIP, R_CITIZENSHIP);
+        def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
+        def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+        ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
+
+        // Спр2 Гражданство (Обязательное поле)
+        if (!citizenshipCodeMap.find{key, value -> value == ndflPerson.citizenship}) {
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON, ndflPerson.rowNum, C_CITIZENSHIP, fioAndInp, C_CITIZENSHIP, R_CITIZENSHIP);
         }
 
-        // Документ удостоверяющий личность
-        if (ndflPerson.idDocType != null && !documentCodesList.contains(ndflPerson.idDocType)) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND,
-                    T_PERSON, ndflPerson.rowNum, F_ID_DOC_TYPE, F_ID_DOC_TYPE, R_ID_DOC_TYPE);
+        // Спр3 Документ удостоверяющий личность (Обязательное поле)
+         if (!documentCodesMap.find{key, value -> value == ndflPerson.idDocType}) {
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON, ndflPerson.rowNum, C_ID_DOC_TYPE, fioAndInp, C_ID_DOC_TYPE, R_ID_DOC_TYPE);
         }
 
-        // Статусы налогоплательщиков
-        if (ndflPerson.status != null && !taxpayerStatusList.contains(ndflPerson.status)) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND,
-                    T_PERSON, ndflPerson.rowNum, F_STATUS, F_STATUS, R_STATUS);
+        // Спр4 Статусы налогоплательщиков (Обязательное поле)
+        if (!taxpayerStatusMap.find{key, value -> value == ndflPerson.status}) {
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON, ndflPerson.rowNum, C_STATUS, fioAndInp, C_STATUS, R_STATUS);
         }
 
-        // Наличие связи с "Физическое лицо"
-        if (ndflPerson.personId == null) {
-            logger.error("Не удалось установить связь со справочником \"Физические лица\" для Физическое лицо: \"%s\", ИНП: \"%s\"",
-                    ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName, ndflPerson.inp);
+        // Спр10 Наличие связи с "Физическое лицо"
+        // todo Почему в объект помещается 0 - ndflPerson.personId == 0
+        if (ndflPerson.personId == null || ndflPerson.personId == 0) {
+            logger.error(MESSAGE_ERROR_NOT_FOUND_PERSON,
+                    R_PERSON, T_PERSON, fio, ndflPerson.inp);
+        } else {
+            def person = personMap.get(ndflPerson.personId)
+
+            // Спр11 Фамилия (Обязательное поле)
+            if (!ndflPerson.lastName.equals(person.get(RF_LAST_NAME).value)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_LAST_NAME, fioAndInp, C_LAST_NAME, R_PERSON);
+            }
+
+            // Спр11 Имя (Обязательное поле)
+            if (!ndflPerson.firstName.equals(person.get(RF_FIRST_NAME).value)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_FIRST_NAME, fioAndInp, C_FIRST_NAME, R_PERSON);
+            }
+
+            // Спр11 Отчество (Необязательное поле)
+            if (ndflPerson.middleName != null && !ndflPerson.middleName.equals(person.get(RF_MIDDLE_NAME).value)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_MIDDLE_NAME, fioAndInp, C_MIDDLE_NAME, R_PERSON);
+            }
+
+            // Спр12 ИНП первичная (Обязательное поле)
+            def inpList = inpMap.get(ndflPerson.personId)
+            if (!ndflPerson.inp.equals(person.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_INP, fioAndInp, C_INP, R_INP);
+            }
+
+            // todo Спр12.1 ИНП консолидированная - Реализовать позже
+
+            // Спр13 Дата рождения (Обязательное поле)
+            if (!ndflPerson.birthDay.equals(person.get(RF_BIRTH_DATE).value)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_BIRTH_DATE, fioAndInp, C_BIRTH_DATE, R_PERSON);
+            }
+
+            // Спр14 Гражданство (Обязательное поле)
+            def citizenship = citizenshipCodeMap.get(person.get(RF_CITIZENSHIP).value)
+            if (!ndflPerson.citizenship.equals(citizenship)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_CITIZENSHIP, fioAndInp, C_CITIZENSHIP, R_PERSON);
+            }
+
+            // Спр15 ИНН (Необязательное поле)
+            if (ndflPerson.innNp != null && !ndflPerson.innNp.equals(person.get(RF_INN).value)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_INN_NP, fioAndInp, C_INN_NP, R_PERSON);
+            }
+
+            // Спр16 ИНН в стране Гражданства (Необязательное поле)
+            if (ndflPerson.innForeign != null && !ndflPerson.innForeign.equals(person.get(RF_INN_FOREIGN).value)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_INN_FOREIGN, fioAndInp, C_INN_FOREIGN, R_PERSON);
+            }
+
+            // Спр17 Документ удостоверяющий личность (Обязательное поле)
+
+
+            // todo Спр17.1 Документ удостоверяющий личность (Обязательное поле) - Реализовать позже
+
+            // Спр18 Статус налогоплательщика (Обязательное поле)
+            def taxpayerStatus = taxpayerStatusMap.get(person.get(RF_TAXPAYER_STATE).value)
+            if (!ndflPerson.status.equals(taxpayerStatus)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_STATUS, fioAndInp, C_STATUS, R_PERSON);
+            }
+
+            // Спр19 Адрес (Необязательное поле)
+            // Сравнение должны быть проведено даже с учетом пропусков
+            def address = addressMap.get(person.get(RF_ADDRESS).value)
+            def regionCode
+            def area
+            def city
+            def locality
+            def street
+            def house
+            def building
+            def flat
+            if (address != null) {
+                regionCode = address.get(RF_REGION_CODE).value
+                area = address.get(RF_DISTRICT).value
+                city = address.get(RF_CITY).value
+                locality = address.get(RF_LOCALITY).value
+                street = address.get(RF_STREET).value
+                house = address.get(RF_HOUSE).value
+                building = address.get(RF_BUILD).value
+                flat = address.get(RF_APPARTMENT).value
+            }
+
+            // Код Региона
+            if (!ndflPerson.regionCode.equals(regionCode)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_REGION_CODE, fioAndInp, C_REGION_CODE, R_PERSON);
+            }
+
+            // Район
+            if (!ndflPerson.area.equals(area)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_AREA, fioAndInp, C_AREA, R_PERSON);
+            }
+
+            // Город
+            if (!ndflPerson.city.equals(city)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_CITY, fioAndInp, C_CITY, R_PERSON);
+            }
+
+            // Населенный пункт
+            if (!ndflPerson.locality.equals(locality)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_LOCALITY, fioAndInp, C_LOCALITY, R_PERSON);
+            }
+
+            // Улица
+            if (!ndflPerson.street.equals(street)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_STREET, fioAndInp, C_STREET, R_PERSON);
+            }
+
+            // Дом
+            if (!ndflPerson.house.equals(house)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_HOUSE, fioAndInp, C_HOUSE, R_PERSON);
+            }
+
+            // Корпус
+            if (!ndflPerson.building.equals(building)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_BUILDING, fioAndInp, C_BUILDING, R_PERSON);
+            }
+
+            // Квартира
+            if (!ndflPerson.flat.equals(flat)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_FLAT, fioAndInp, C_FLAT, R_PERSON);
+            }
         }
     }
 
@@ -578,30 +827,40 @@ def checkData() {
     def incomeKindMap = getIncomeKind()
     logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_KIND, incomeKindMap.size())
 
+    // Ставки
+    def rateList = getRate()
+    logger.info(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
+
     ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
     logger.info(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
 
     ndflPersonIncomeList.each { ndflPersonIncome ->
-        // Код вида дохода
+        def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
+
+        // Спр5 Код вида дохода (Необязательное поле)
         if (ndflPersonIncome.incomeCode != null && !incomeCodeMap.find{key, value -> value == ndflPersonIncome.incomeCode}) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND,
-                    T_PERSON_INCOME, ndflPersonIncome.rowNum, F_INCOME_CODE, F_INCOME_CODE, R_INCOME_CODE);
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_CODE, fioAndInp, C_INCOME_CODE, R_INCOME_CODE);
         }
 
+        // Спр6 Вида дохода (Необязательное поле)
         // При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
         if (ndflPersonIncome.incomeType != null) {
             def idIncomeCode = incomeKindMap.get(ndflPersonIncome.incomeType)
             if (!idIncomeCode) {
-                logger.error(MESSAGE_ERROR_NOT_FOUND,
-                        T_PERSON_INCOME, ndflPersonIncome.rowNum, F_INCOME_KIND, F_INCOME_KIND, R_INCOME_KIND);
+                logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_KIND, fioAndInp, C_INCOME_KIND, R_INCOME_KIND);
             } else if (!incomeCodeMap.get(idIncomeCode.value)) {
-                logger.error(MESSAGE_ERROR_NOT_FOUND,
-                        T_PERSON_INCOME, ndflPersonIncome.rowNum, F_INCOME_KIND, F_INCOME_KIND, R_INCOME_KIND);
+                logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_KIND, fioAndInp, C_INCOME_KIND, R_INCOME_KIND);
             }
         }
 
-        // todo https://jira.aplana.com/browse/SBRFNDFL-289
-        // Спр7 Ставка
+        // Спр7 Ставка (Необязательное поле)
+        if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate)) {
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_RATE, fioAndInp, C_RATE, R_RATE);
+        }
     }
 
     // Коды видов вычетов
@@ -616,16 +875,18 @@ def checkData() {
     logger.info(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
 
     ndflPersonDeductionList.each { ndflPersonDeduction ->
-        // Код вычета
-        if (ndflPersonDeduction.typeCode != null && !deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND,
-                    T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, F_TYPE_CODE, F_TYPE_CODE, R_TYPE_CODE);
+        def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
+
+        // Спр8 Код вычета (Обязательное поле)
+        if (!deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_TYPE_CODE, fioAndInp, C_TYPE_CODE, R_TYPE_CODE);
         }
 
-        // Код налоговой иснпекции
+        // Спр9 Код налоговой иснпекции (Обязательное поле)
         if (ndflPersonDeduction.notifSource != null && !taxInspectionList.contains(ndflPersonDeduction.notifSource)) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND,
-                    T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, F_NOTIF_SOURCE, F_NOTIF_SOURCE, R_NOTIF_SOURCE);
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
         }
     }
 
@@ -633,21 +894,26 @@ def checkData() {
     logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
 
     ndflPersonPrepaymentList.each { ndflPersonPrepayment ->
-        // Код налоговой иснпекции
+        def fioAndInp = ndflPersonFLMap.get(ndflPersonPrepayment.ndflPersonId)
+
+        // Спр9 Код налоговой иснпекции (Обязательное поле)
         if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND,
-                    T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum, F_NOTIF_SOURCE, F_NOTIF_SOURCE, R_NOTIF_SOURCE);
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum, C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
         }
     }
 }
 
 /**
  * Получить коллекцию идентификаторов записей справочника "Физические лица"
+ * @param ndflPersonList
+ * @return
  */
 def getPersonIds(def ndflPersonList) {
     def personIds = []
     ndflPersonList.each { ndflPerson ->
-        if (ndflPerson.personId != null) {
+        // todo Почему ndflPerson.personId != 0
+        if (ndflPerson.personId != null && ndflPerson.personId != 0) {
             personIds.add(ndflPerson.personId)
         }
     }
@@ -655,16 +921,31 @@ def getPersonIds(def ndflPersonList) {
 }
 
 /**
- * Получить коллекцию физических лиц
+ * Получить "Физические лица"
  * @param personIds
  * @return
  */
 def getPersons(def personIds) {
     if (personsCache.size() == 0) {
         def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
-        refBookMap.each { refBook, i ->
-            personsCache.put(i, refBook)
+//        def dublMap = [:]
+//        def dublList = []
+        refBookMap.each { personId, person ->
+            personsCache.put(personId, person)
+
+            // Добавим дубликат в Мапу
+//            if (person.get(RF_DUBLICATES).value != null && !dublMap.get(person.get(RF_DUBLICATES).value)) {
+//                dublMap.put(person.get(RF_DUBLICATES).value, personId)
+//                dublList.add(person.get(RF_DUBLICATES).value)
+//            }
         }
+        // Получим оригинальные записи, если имеются дубликаты
+//        if (dublMap.size() > 0) {
+//            def refBookDublMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, dublList)
+//            refBookDublMap.each { originalPersonId, person ->
+//                dublPersonId = dublMap.get(originalPersonId).value
+//            }
+//        }
     }
     return personsCache;
 }
@@ -673,14 +954,14 @@ def getPersons(def personIds) {
  * Получить "Страны"
  * @return
  */
-def getCountry() {
-    if (countryCodesCache.size() == 0) {
-        def refBookList = getRefBook(REF_BOOK_COUNTRY_ID)
-        refBookList.each { refBook ->
-            countryCodesCache.add(refBook?.CODE?.stringValue)
+def getCitizenship() {
+    if (citizenshipCache.size() == 0) {
+        def refBookMap = getRefBook(REF_BOOK_COUNTRY_ID)
+        refBookMap.each { refBook ->
+            citizenshipCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
         }
     }
-    return countryCodesCache;
+    return citizenshipCache;
 }
 
 /**
@@ -691,7 +972,7 @@ def getDocument() {
     if (documentCodesCache.size() == 0) {
         def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
         refBookList.each { refBook ->
-            documentCodesCache.add(refBook?.CODE?.stringValue)
+            documentCodesCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
         }
     }
     return documentCodesCache;
@@ -703,12 +984,64 @@ def getDocument() {
  */
 def getTaxpayerStatus() {
     if (taxpayerStatusCache.size() == 0) {
-        def refBookList = getRefBook(REF_BOOK_TAXPAYER_STATUS_ID)
-        refBookList.each { refBook ->
-            taxpayerStatusCache.add(refBook?.CODE?.stringValue)
+        def refBookMap = getRefBook(REF_BOOK_TAXPAYER_STATUS_ID)
+        refBookMap.each { refBook ->
+            taxpayerStatusCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
         }
     }
     return taxpayerStatusCache;
+}
+
+/**
+ * Получить "Статусы налогоплательщика"
+ * @return
+ */
+def getAddress(def addressIds) {
+    if (addressCache.size() == 0) {
+        def refBookMap = getRefBookByRecordIds(REF_BOOK_ADDRESS_ID, addressIds)
+        refBookMap.each { addressId, address ->
+            addressCache.put(addressId, address)
+        }
+    }
+    return addressCache;
+}
+
+/**
+ * Получить "ИНП"
+ * todo Получение ИНП реализовано путем отдельных запросов для каждого personId, в будущем переделать на использование одного запроса
+ * @return
+ */
+def getINP(def personIds) {
+    if (inpCache.size() == 0) {
+        personIds.each { personId ->
+            def refBookMap = getRefBookByFilter(REF_BOOK_ID_TAX_PAYER_ID, "PERSON_ID = " + personId.toString())
+            def inpList = []
+            refBookMap.each { refBook ->
+                inpList.add(refBook?.INP?.stringValue)
+            }
+            inpCache.put(personId, inpList)
+        }
+    }
+    return inpCache;
+}
+
+/**
+ * Получить "Документ, удостоверяющий личность (ДУЛ)"
+ * todo Получение ДУЛ реализовано путем отдельных запросов для каждого personId, в будущем переделать на использование одного запроса
+ * @return
+ */
+def getDul(def personIds) {
+//    if (inpCache.size() == 0) {
+//        personIds.each { personId ->
+//            def refBookMap = getRefBookByFilter(REF_BOOK_ID_DOC_ID, "PERSON_ID = " + personId.toString())
+//            def inpList = []
+//            refBookMap.each { refBook ->
+//                inpList.add(refBook?.INP?.stringValue)
+//            }
+//            inpCache.put(personId, inpList)
+//        }
+//    }
+    return inpCache;
 }
 
 /**
@@ -717,8 +1050,8 @@ def getTaxpayerStatus() {
  */
 def getIncomeCode() {
     if (incomeCodeCache.size() == 0) {
-        def refBookList = getRefBook(REF_BOOK_INCOME_CODE_ID)
-        refBookList.each { refBook ->
+        def refBookMap = getRefBook(REF_BOOK_INCOME_CODE_ID)
+        refBookMap.each { refBook ->
             incomeCodeCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
         }
     }
@@ -733,12 +1066,26 @@ def getIncomeKind() {
     if (incomeKindCache.size() == 0) {
         def refBookList = getRefBook(REF_BOOK_INCOME_KIND_ID)
         refBookList.each { refBook ->
-            // Так refBook?.INCOME_TYPE_ID?.numberValue не работает
+            // todo Так refBook?.INCOME_TYPE_ID?.numberValue не работает
             def incomeTypeId = refBook.find{key, value -> key == "INCOME_TYPE_ID"}.value
             incomeKindCache.put(refBook?.MARK?.stringValue, incomeTypeId)
         }
     }
     return incomeKindCache;
+}
+
+/**
+ * Получить "Ставки"
+ * @return
+ */
+def getRate() {
+    if (rateCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_RATE_ID)
+        refBookList.each { refBook ->
+            rateCache.add(refBook?.RATE?.stringValue)
+        }
+    }
+    return rateCache;
 }
 
 /**
@@ -777,6 +1124,21 @@ def getNotifSource() {
 def getRefBook(def long refBookId) {
     // Передаем как аргумент только срок действия версии справочника
     def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, null, null)
+    if (refBookList == null || refBookList.size() == 0) {
+        throw new Exception("Ошибка при получении записей справочника " + refBookId)
+    }
+    return refBookList
+}
+
+/**
+ * Получить все записи справочника по его идентификатору и фильтру
+ * @param refBookId - идентификатор справочника
+ * @param filter - фильтр
+ * @return - возвращает лист
+ */
+def getRefBookByFilter(def long refBookId, def filter) {
+    // Передаем как аргумент только срок действия версии справочника
+    def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
     if (refBookList == null || refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
     }
