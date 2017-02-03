@@ -330,14 +330,14 @@ public class RefBookSimpleQueryBuilderComponent {
                                                                        @NotNull Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues) {
         List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupsUniqueAttributesValues.get(1);
 
-        PreparedStatementData sql = new PreparedStatementData("SELECT r.record_id as id, ");
+        PreparedStatementData sql = new PreparedStatementData("SELECT r.").append(RefBook.RECORD_ID_ALIAS).append(" as id, ");
         appendNameColumn(sql, uniqueAttributesValues);
         sql.append("FROM ").append(refBook.getTableName()).append(" r\n");
         sql.append("WHERE r.status = 0\nAND (\n");
         appendWhereCondition(record, sql, uniqueAttributesValues);
         sql.append(")");
         if (uniqueRecordId != null) {
-            sql.append("\nAND r.record_id != ").append(uniqueRecordId);
+            sql.append("\nAND r.").append(RefBook.RECORD_ID_ALIAS).append(" != ").append(uniqueRecordId);
         }
         return sql;
     }
@@ -347,7 +347,7 @@ public class RefBookSimpleQueryBuilderComponent {
             RefBookAttribute attribute = uniqueAttributesValues.get(j).getFirst();
 
             sql.append("'").append(attribute.getName()).append("'");
-            appendIfAttributeIsNotLast(sql, uniqueAttributesValues, j, "||','||");
+            appendIfAttributeIsNotLast(sql, uniqueAttributesValues, j, "||', '||");
         }
         sql.append(" as name\n");
     }
