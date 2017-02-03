@@ -12,7 +12,7 @@ public class NotificationTableRow implements Serializable {
     private Date date;
     private String msg;
     private Boolean canDelete;
-    private String blobDataId;
+    private String logId;
     private String reportId;
     private NotificationType notificationType = NotificationType.DEFAULT;
 
@@ -48,14 +48,6 @@ public class NotificationTableRow implements Serializable {
         this.canDelete = canDelete;
     }
 
-    public String getBlobDataId() {
-        return blobDataId;
-    }
-
-    public void setBlobDataId(String blobDataId) {
-        this.blobDataId = blobDataId;
-    }
-
     public String getReportId() {
         return reportId;
     }
@@ -70,5 +62,13 @@ public class NotificationTableRow implements Serializable {
 
     public void setNotificationType(NotificationType notificationType) {
         this.notificationType = notificationType;
+    }
+
+    public String getLogId() {
+        return logId;
+    }
+
+    public void setLogId(String logId) {
+        this.logId = logId;
     }
 }

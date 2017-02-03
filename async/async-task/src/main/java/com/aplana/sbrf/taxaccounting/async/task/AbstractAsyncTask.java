@@ -326,7 +326,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     notification.setUserId(userId);
                     notification.setCreateDate(new Date());
                     notification.setText(msg);
-                    notification.setBlobDataId(uuid);
+                    notification.setLogId(uuid);
                     notification.setReportId(reportId);
                     notification.setNotificationType(notificationType);
                     notifications.add(notification);

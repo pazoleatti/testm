@@ -289,7 +289,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 notification.setUserId(userId);
                 notification.setCreateDate(new Date());
                 notification.setText(msg);
-                notification.setBlobDataId(null);
+                notification.setLogId(null);
                 notifications.add(notification);
             }
             notificationService.saveList(notifications);

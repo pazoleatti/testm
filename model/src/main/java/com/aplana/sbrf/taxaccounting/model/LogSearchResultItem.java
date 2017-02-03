@@ -23,7 +23,7 @@ public class LogSearchResultItem implements Serializable {
 	private String note;
 	private String userDepartmentName;
     private String reportPeriodName;
-    private String blobDataId;
+    private String logId;
     private Integer formTypeId;
     private AuditFormType auditFormType;
     private Integer cnt;
@@ -152,12 +152,12 @@ public class LogSearchResultItem implements Serializable {
         this.userDepartmentName = userDepartmentName;
     }
 
-    public String getBlobDataId() {
-        return blobDataId;
+    public String getLogId() {
+        return logId;
     }
 
-    public void setBlobDataId(String blobDataId) {
-        this.blobDataId = blobDataId;
+    public void setLogId(String logId) {
+        this.logId = logId;
     }
 
     public AuditFormType getAuditFormType() {
