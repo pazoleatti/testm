@@ -11,6 +11,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static java.util.Arrays.asList;
 
 /**
@@ -29,7 +32,7 @@ public class ConfigurationDaoTest {
     @Test
 	public void getAllTest() {
         ConfigurationParamModel model = dao.getAll();
-        Assert.assertEquals(7, model.size());
+        Assert.assertEquals(9, model.size());
         Assert.assertTrue(model.containsKey(ConfigurationParam.KEY_FILE));
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_ERROR_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY));
@@ -37,6 +40,8 @@ public class ConfigurationDaoTest {
         Assert.assertTrue(model.containsKey(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_ARCHIVE_DIRECTORY));
+        Assert.assertTrue(model.containsKey(ConfigurationParam.NO_CODE));
+        Assert.assertTrue(model.containsKey(ConfigurationParam.SBERBANK_INN));
         Assert.assertEquals("test6", model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 1).get(0));
         Assert.assertEquals("test7", model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 2).get(0));
     }
@@ -77,5 +82,17 @@ public class ConfigurationDaoTest {
         model = dao.getAll();
         Assert.assertNull(model.get(ConfigurationParam.KEY_FILE));
         Assert.assertNull(model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY).get(1));
+    }
+
+    @Test
+    public void updateTest() {
+        Map<ConfigurationParam, String> updateData = new HashMap<ConfigurationParam, String>();
+        updateData.put(ConfigurationParam.NO_CODE, "33333");
+        updateData.put(ConfigurationParam.SBERBANK_INN, "44444");
+        dao.update(updateData, 1);
+
+        ConfigurationParamModel updateModel = dao.getAll();
+        Assert.assertEquals("33333", updateModel.getFullStringValue(ConfigurationParam.NO_CODE, 1));
+        Assert.assertEquals("44444", updateModel.getFullStringValue(ConfigurationParam.SBERBANK_INN, 1));
     }
 }

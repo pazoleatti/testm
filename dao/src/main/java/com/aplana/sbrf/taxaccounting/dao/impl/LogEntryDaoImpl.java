@@ -74,7 +74,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
                 continue;
             }
 
-            String[] messages = logEntry.getMessage().split("(?<=\\G.{" + MAX_MESSAGE_SIZE + "})");
+            String[] messages = logEntry.getMessage().split("(?s)(?<=\\G.{" + MAX_MESSAGE_SIZE + "})");
 
             listIterator.remove();
 

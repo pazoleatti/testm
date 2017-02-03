@@ -91,7 +91,7 @@ public class NotificationDaoTest {
         n.setSenderDepartmentId(2);
         n.setReportPeriodId(1);
         n.setCreateDate(new Date());
-        n.setBlobDataId("uuid_1");
+        n.setLogId("uuid_1");
         n.setReportId("uuid_2");
         n.setNotificationType(NotificationType.REF_BOOK_REPORT);
         Long id = notificationDao.save(n);

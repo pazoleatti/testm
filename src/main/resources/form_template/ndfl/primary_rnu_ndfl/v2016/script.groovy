@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+// com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
 import com.aplana.sbrf.taxaccounting.refbook.*
 import groovy.transform.Field
 import groovy.util.slurpersupport.NodeChild
@@ -537,6 +538,7 @@ def prepaymentAttr(personPrepayment) {
 // Комментарии к полям
 @Field final C_CITIZENSHIP = "Гражданство (код страны)"
 @Field final C_ID_DOC_TYPE = "Код вида документа"
+@Field final C_ID_DOC_NUMBER = "Серия и номер документа"
 @Field final C_STATUS = "Статус"
 @Field final C_INCOME_CODE = "Код вида дохода"
 @Field final C_INCOME_KIND = "Вид дохода"
@@ -581,6 +583,8 @@ def prepaymentAttr(personPrepayment) {
 @Field final RF_BUILD = "BUILD"
 @Field final RF_APPARTMENT = "APPARTMENT"
 @Field final RF_DUBLICATES = "DUBLICATES"
+@Field final RF_DOC_ID = "DOC_ID"
+@Field final RF_DOC_NUMBER = "DOC_NUMBER"
 
 /**
  * Проверки НДФЛ
@@ -597,15 +601,15 @@ def checkData() {
  */
 def checkDataReference() {
     // Страны
-    def citizenshipCodeMap = getCitizenship()
+    def citizenshipCodeMap = getRefCitizenship()
     logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
 
     // Виды документов, удостоверяющих личность
-    def documentCodesMap = getDocument()
-    logger.info(SUCCESS_GET_REF_BOOK, R_ID_DOC_TYPE, documentCodesMap.size())
+    def documentTypeMap = getRefDocument()
+    logger.info(SUCCESS_GET_REF_BOOK, R_ID_DOC_TYPE, documentTypeMap.size())
 
     // Статус налогоплательщика
-    def taxpayerStatusMap = getTaxpayerStatus()
+    def taxpayerStatusMap = getRefTaxpayerStatus()
     logger.info(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
 
     ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
@@ -615,39 +619,38 @@ def checkDataReference() {
     def personIds = getPersonIds(ndflPersonList)
     def personMap = [:]
 
-    // Адреса
-    def addressIds = []
-    def addressMap = [:]
-
     // ИНП <person_id, массив_ИНП>
     def inpMap = [:]
 
     // ДУЛ <person_id, массив_ДУЛ>
     def dulMap = [:]
 
+    // Адреса
+    def addressIds = []
+    def addressMap = [:]
+
     if (personIds.size() > 0) {
         // todo Сделать получение записей оригиналов, если текущая запись - дубликат
-        personMap = getPersons(personIds)
+        personMap = getRefPersons(personIds)
         logger.info(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
 
         // Получим мапу ИНП
-        inpMap = getINP(personIds)
+        inpMap = getRefINP(personIds)
         logger.info(SUCCESS_GET_TABLE, R_INP, inpMap.size())
 
         // Получим мапу ДУЛ
-        dulMap = getDul(personIds)
+        dulMap = getRefDul(personIds)
         logger.info(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
 
+        // Получим Мапу адресов
         personMap.each {personId, person ->
             // Сохраним идентификаторы адресов в коллекцию
             if (person.get(RF_ADDRESS).value != null) {
                 addressIds.add(person.get(RF_ADDRESS).value)
             }
         }
-
-        // Получим Мапу адресов
         if (addressIds.size() > 0) {
-            addressMap = getAddress(addressIds)
+            addressMap = getRefAddress(addressIds)
             logger.info(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
         }
     }
@@ -664,7 +667,7 @@ def checkDataReference() {
         }
 
         // Спр3 Документ удостоверяющий личность (Обязательное поле)
-         if (!documentCodesMap.find{key, value -> value == ndflPerson.idDocType}) {
+         if (!documentTypeMap.find{key, value -> value == ndflPerson.idDocType}) {
             logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON, ndflPerson.rowNum, C_ID_DOC_TYPE, fioAndInp, C_ID_DOC_TYPE, R_ID_DOC_TYPE);
         }
@@ -736,7 +739,23 @@ def checkDataReference() {
             }
 
             // Спр17 Документ удостоверяющий личность (Обязательное поле)
-
+            def dulList = dulMap.get(ndflPerson.personId)
+            // Вид документа
+            def idDocTypeList = []
+            // Серия и номер документа
+            def idDocNumberList = []
+            dulList.each { dul ->
+                idDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
+                idDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
+            }
+            if (!idDocTypeList.contains(ndflPerson.idDocType)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_ID_DOC_TYPE, fioAndInp, C_ID_DOC_TYPE, R_PERSON);
+            }
+            if (!idDocNumberList.contains(ndflPerson.idDocNumber)) {
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
+                        T_PERSON, ndflPerson.rowNum, C_ID_DOC_NUMBER, fioAndInp, C_ID_DOC_NUMBER, R_PERSON);
+            }
 
             // todo Спр17.1 Документ удостоверяющий личность (Обязательное поле) - Реализовать позже
 
@@ -820,15 +839,15 @@ def checkDataReference() {
     }
 
     // Коды видов доходов Мапа <Идентификатор, Код>
-    def incomeCodeMap = getIncomeCode()
+    def incomeCodeMap = getRefIncomeCode()
     logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
 
     // Виды доходов Мапа <Признак, Идентификатор_кода_вида_дохода>
-    def incomeKindMap = getIncomeKind()
+    def incomeKindMap = getRefIncomeKind()
     logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_KIND, incomeKindMap.size())
 
     // Ставки
-    def rateList = getRate()
+    def rateList = getRefRate()
     logger.info(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
 
     ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
@@ -864,11 +883,11 @@ def checkDataReference() {
     }
 
     // Коды видов вычетов
-    def deductionTypeList = getDeductionType()
+    def deductionTypeList = getRefDeductionType()
     logger.info(SUCCESS_GET_REF_BOOK, R_TYPE_CODE, deductionTypeList.size())
 
     // Коды налоговых органов
-    def taxInspectionList = getNotifSource()
+    def taxInspectionList = getRefNotifSource()
     logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
     ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
@@ -925,7 +944,8 @@ def getPersonIds(def ndflPersonList) {
  * @param personIds
  * @return
  */
-def getPersons(def personIds) {
+// todo добавить обработку дублей
+def getRefPersons(def personIds) {
     if (personsCache.size() == 0) {
         def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
 //        def dublMap = [:]
@@ -954,7 +974,7 @@ def getPersons(def personIds) {
  * Получить "Страны"
  * @return
  */
-def getCitizenship() {
+def getRefCitizenship() {
     if (citizenshipCache.size() == 0) {
         def refBookMap = getRefBook(REF_BOOK_COUNTRY_ID)
         refBookMap.each { refBook ->
@@ -968,7 +988,7 @@ def getCitizenship() {
  * Получить "Коды документов, удостоверяющих личность"
  * @return
  */
-def getDocument() {
+def getRefDocument() {
     if (documentCodesCache.size() == 0) {
         def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
         refBookList.each { refBook ->
@@ -982,7 +1002,7 @@ def getDocument() {
  * Получить "Статусы налогоплательщика"
  * @return
  */
-def getTaxpayerStatus() {
+def getRefTaxpayerStatus() {
     if (taxpayerStatusCache.size() == 0) {
         def refBookMap = getRefBook(REF_BOOK_TAXPAYER_STATUS_ID)
         refBookMap.each { refBook ->
@@ -996,7 +1016,7 @@ def getTaxpayerStatus() {
  * Получить "Статусы налогоплательщика"
  * @return
  */
-def getAddress(def addressIds) {
+def getRefAddress(def addressIds) {
     if (addressCache.size() == 0) {
         def refBookMap = getRefBookByRecordIds(REF_BOOK_ADDRESS_ID, addressIds)
         refBookMap.each { addressId, address ->
@@ -1011,7 +1031,7 @@ def getAddress(def addressIds) {
  * todo Получение ИНП реализовано путем отдельных запросов для каждого personId, в будущем переделать на использование одного запроса
  * @return
  */
-def getINP(def personIds) {
+def getRefINP(def personIds) {
     if (inpCache.size() == 0) {
         personIds.each { personId ->
             def refBookMap = getRefBookByFilter(REF_BOOK_ID_TAX_PAYER_ID, "PERSON_ID = " + personId.toString())
@@ -1030,25 +1050,25 @@ def getINP(def personIds) {
  * todo Получение ДУЛ реализовано путем отдельных запросов для каждого personId, в будущем переделать на использование одного запроса
  * @return
  */
-def getDul(def personIds) {
-//    if (inpCache.size() == 0) {
-//        personIds.each { personId ->
-//            def refBookMap = getRefBookByFilter(REF_BOOK_ID_DOC_ID, "PERSON_ID = " + personId.toString())
-//            def inpList = []
-//            refBookMap.each { refBook ->
-//                inpList.add(refBook?.INP?.stringValue)
-//            }
-//            inpCache.put(personId, inpList)
-//        }
-//    }
-    return inpCache;
+def getRefDul(def personIds) {
+    if (dulCache.size() == 0) {
+        personIds.each { personId ->
+            def refBookMap = getRefBookByFilter(REF_BOOK_ID_DOC_ID, "PERSON_ID = " + personId.toString())
+            def dulList = []
+            refBookMap.each { refBook ->
+                dulList.add(refBook)
+            }
+            dulCache.put(personId, dulList)
+        }
+    }
+    return dulCache;
 }
 
 /**
  * Получить "Коды видов доходов"
  * @return
  */
-def getIncomeCode() {
+def getRefIncomeCode() {
     if (incomeCodeCache.size() == 0) {
         def refBookMap = getRefBook(REF_BOOK_INCOME_CODE_ID)
         refBookMap.each { refBook ->
@@ -1062,7 +1082,7 @@ def getIncomeCode() {
  * Получить "Виды доходов"
  * @return
  */
-def getIncomeKind() {
+def getRefIncomeKind() {
     if (incomeKindCache.size() == 0) {
         def refBookList = getRefBook(REF_BOOK_INCOME_KIND_ID)
         refBookList.each { refBook ->
@@ -1078,7 +1098,7 @@ def getIncomeKind() {
  * Получить "Ставки"
  * @return
  */
-def getRate() {
+def getRefRate() {
     if (rateCache.size() == 0) {
         def refBookList = getRefBook(REF_BOOK_RATE_ID)
         refBookList.each { refBook ->
@@ -1092,7 +1112,7 @@ def getRate() {
  * Получить "Коды видов вычетов"
  * @return
  */
-def getDeductionType() {
+def getRefDeductionType() {
     if (deductionTypeCache.size() == 0) {
         def refBookList = getRefBook(REF_BOOK_DEDUCTION_TYPE_ID)
         refBookList.each { refBook ->
@@ -1106,7 +1126,7 @@ def getDeductionType() {
  * Получить "Коды налоговых органов"
  * @return
  */
-def getNotifSource() {
+def getRefNotifSource() {
     if (taxInspectionCache.size() == 0) {
         def refBookList = getRefBook(REF_TAX_INSPECTION_ID)
         refBookList.each { refBook ->
@@ -1131,7 +1151,7 @@ def getRefBook(def long refBookId) {
 }
 
 /**
- * Получить все записи справочника по его идентификатору и фильтру
+ * Получить все записи справочника по его идентификатору и фильтру (отсутствие значений не является ошибкой)
  * @param refBookId - идентификатор справочника
  * @param filter - фильтр
  * @return - возвращает лист
@@ -1139,9 +1159,6 @@ def getRefBook(def long refBookId) {
 def getRefBookByFilter(def long refBookId, def filter) {
     // Передаем как аргумент только срок действия версии справочника
     def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
-    if (refBookList == null || refBookList.size() == 0) {
-        throw new Exception("Ошибка при получении записей справочника " + refBookId)
-    }
     return refBookList
 }
 

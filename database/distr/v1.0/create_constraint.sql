@@ -223,7 +223,7 @@ alter table notification add constraint notification_fk_receiver foreign key (re
 alter table notification add constraint notification_fk_notify_user foreign key (user_id) references sec_user(id);
 alter table notification add constraint notification_fk_notify_role foreign key (role_id) references sec_role(id);
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
-alter table notification add constraint notification_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
+--alter table notification add constraint notification_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
 alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
 alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data (id) on delete set null;
 
@@ -250,7 +250,7 @@ alter table log_system add constraint log_system_chk_aft check (audit_form_type_
 
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
-alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
+--alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
 alter table log_system add constraint log_system_chk_is_error check (is_error in (0, 1));
 alter table log_system add constraint log_system_fk_audit_form_type foreign key (audit_form_type_id) references audit_form_type (id);
 
@@ -321,7 +321,7 @@ alter table declaration_data_file add constraint decl_data_file_fk_blob_data for
 
 alter table ndfl_person add constraint ndfl_person_pk primary key (id);
 alter table ndfl_person add constraint ndfl_person_fk_d foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
-alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (person_id) references ref_book_person(id);
+alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (person_id) references ref_book_record(id);
 
 alter table ndfl_person_income add constraint ndfl_person_i_pk primary key (id);
 alter table ndfl_person_income add constraint ndfl_person_i_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
@@ -351,11 +351,11 @@ create index i_decl_data_dep_rep_per_id on declaration_data (department_report_p
 create index i_ifrs_data_blob_data_id on ifrs_data(blob_data_id);
 create index i_form_data_rep_blob_data_id on form_data_report(blob_data_id);
 create index i_decl_report_blob_data_id on declaration_report(blob_data_id);
-create index i_log_system_blob_data_id on log_system(blob_data_id);
+--create index i_log_system_blob_data_id on log_system(blob_data_id);
 create index i_ref_book_script_id on ref_book(script_id);
 create index i_declaration_template_xsd on declaration_template(xsd);
 create index i_declaration_template_jrxml on declaration_template(jrxml);
-create index i_notification_blob_data_id on notification(blob_data_id);
+--create index i_notification_blob_data_id on notification(blob_data_id);
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
@@ -542,7 +542,7 @@ alter table ref_book_person add constraint fk_ref_book_person_citizenship foreig
 alter table ref_book_person add constraint fk_ref_book_person_dubl foreign key(dublicates) references ref_book_person(id);
 
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_doc_id foreign key (doc_id) references ref_book_record(id);
---alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
+alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_record(id);
 -- create unique index unq_ref_book_id_doc_pers_inc1 on ref_book_id_doc (decode(inc_rep,1,person_id,null));
 
@@ -555,12 +555,14 @@ alter table ref_book_person add constraint chk_ref_book_person_status check (sta
 alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
 alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0));
 alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));
+alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_doc add constraint chk_ref_book_id_doc_rep check(inc_rep in (0,1));
+alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 
 alter table ref_book_id_tax_payer add constraint pk_ref_book_id_tax_payer primary key (id);
---alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
---alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_record (id);
-
+alter table ref_book_id_tax_payer add constraint rb_tax_payer_chk_status check (status in (-1, 0, 1, 2));
+alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers foreign key (person_id) references ref_book_person (id);
+--alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_as_nu foreign key (as_nu) references ref_book_asnu (id);
 --------------------------------------------------------------------------------------------------------------------------
 alter table raschsv_pers_sv_strah_lic add constraint fk_rsv_p_sv_strah_lic_person foreign key(person_id) references ref_book_person(id);
 --------------------------------------------------------------------------------------------------------------------------
@@ -599,4 +601,4 @@ alter table log_entry add constraint chk_log_entry_lev check(log_level in (0,1,2
 alter table notification add constraint fk_notification_log foreign key(log_id) references log(id);
 alter table log_system add constraint fk_log_system_log foreign key(log_id) references log(id);
 --------------------------------------------------------------------------------------------------------------------------
-exit;
+

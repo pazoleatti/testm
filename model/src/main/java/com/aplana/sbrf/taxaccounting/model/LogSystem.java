@@ -23,7 +23,7 @@ public class LogSystem implements Serializable {
 	private String note;
     private String userDepartmentName;
     private Integer formDepartmentId;
-    private String blobDataId;
+    private String logId;
     private Integer formTypeId;
     private Integer auditFormTypeId;
     private String server;
@@ -140,12 +140,12 @@ public class LogSystem implements Serializable {
         this.formDepartmentId = formDepartmentId;
     }
 
-    public String getBlobDataId() {
-        return blobDataId;
+    public String getLogId() {
+        return logId;
     }
 
-    public void setBlobDataId(String blobDataId) {
-        this.blobDataId = blobDataId;
+    public void setLogId(String logId) {
+        this.logId = logId;
     }
 
     public Integer getAuditFormTypeId() {

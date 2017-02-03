@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+
+import java.util.Map;
 
 /**
  * ДАО для работы с параметрами приложения
@@ -22,4 +25,9 @@ public interface ConfigurationDao {
      * Если в модели нет какого-либо параметра, но он есть в БД, то параметр удаляется из БД.
      */
     void save(ConfigurationParamModel model);
+
+    /**
+     * Обновляет параметр в БД у конкретных параметров
+     */
+    void update(Map<ConfigurationParam, String> configurationParamMap, long departmentId);
 }
