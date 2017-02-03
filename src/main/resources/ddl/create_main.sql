@@ -2293,6 +2293,9 @@ comment on column ref_book_id_doc.inc_rep is 'Включается в отчет
 create table ref_book_address
 (
   id number(18) not null,
+  record_id number(18) not null,
+  version   date           not null,
+  status    number(1)      not null,
   address_type number(1) not null,
   country_id number(18),
   region_code varchar2(2 char),
@@ -2308,6 +2311,9 @@ create table ref_book_address
 
 comment on table ref_book_address is 'Адрес места жительства';
 comment on column ref_book_address.id is 'Уникальный идентификатор';
+comment on column ref_book_address.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_address.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_address.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 comment on column ref_book_address.address_type is 'Тип адреса. Значения: 0 - в РФ 1 - вне РФ';
 comment on column ref_book_address.country_id is 'Страна';
 comment on column ref_book_address.region_code is 'Код региона';

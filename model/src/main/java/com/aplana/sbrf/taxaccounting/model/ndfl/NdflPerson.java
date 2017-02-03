@@ -25,7 +25,7 @@ public class NdflPerson extends IdentityObject<Long> {
      * Ссылка на декларацию к которой относятся данные
      */
     private Long declarationDataId;
-
+    // Уникальный код клиента
     private String inp;
     private String snils;
     private String lastName;
