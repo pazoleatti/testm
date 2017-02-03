@@ -641,7 +641,6 @@ create table log_system (
   declaration_type_name varchar2(1000),
   form_type_name        varchar2(1000),
   form_department_id    number(9),
-  blob_data_id          varchar2(36),
   form_type_id          number(9, 0),
   is_error              number(1) default 0 not null,
   audit_form_type_id    number(9, 0),
@@ -663,7 +662,6 @@ comment on column log_system.user_department_name is 'Наименование �
 comment on column log_system.declaration_type_name is 'Вид декларации';
 comment on column log_system.form_type_name is 'Вид налоговой формы';
 comment on column log_system.form_department_id is 'Идентификатор подразделения налоговой формы/декларации';
-comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 comment on column log_system.is_error is 'Признак ошибки';
 comment on column log_system.audit_form_type_id is 'Тип формы';
@@ -723,7 +721,6 @@ create table notification (
   user_id                number(9)              null,
   role_id                number(9)              null,
   is_read                number(1) default 0    not null,
-  blob_data_id           varchar2(36),
   type                   number(2, 0) default 0 not null,
   report_id              varchar2(36),
   log_id                 varchar2(36)
@@ -740,7 +737,6 @@ comment on column notification.deadline is 'дата сдачи отчетнос
 comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
 comment on column notification.role_id is 'Идентификатор роли пользователя, который получит оповещение';
 comment on column notification.is_read is 'Признак прочтения';
-comment on column notification.blob_data_id is 'Ссылка на логи';
 comment on column notification.type is 'Тип оповещения (0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
 comment on column notification.report_id is 'Идентификатор отчета';
 comment on column notification.log_id is 'Ссылка на журнал действий пользователей';
