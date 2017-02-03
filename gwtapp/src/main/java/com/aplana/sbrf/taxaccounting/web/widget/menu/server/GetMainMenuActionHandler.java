@@ -144,8 +144,6 @@ public class GetMainMenuActionHandler extends
                 MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
                 menuItem.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
                 taxMenu.getSubMenu().add(menuItem);
-
-                taxMenu.getSubMenu().add(new MenuItem("Общие параметры", ""));
            }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
