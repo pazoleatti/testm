@@ -14,9 +14,9 @@ import org.springframework.stereotype.Repository;
 
 import java.io.InputStream;
 import java.sql.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Date;
 
 /**
  * User: avanteev
@@ -173,10 +173,8 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     "(select script_id id from ref_book " +
                     "union select xsd from declaration_template " +
                     "union select jrxml from declaration_template " +
-                    "union select blob_data_id from log_system " +
                     "union select blob_data_id from declaration_report " +
                     "union select blob_data_id from form_data_report " +
-                    "union select blob_data_id from notification " +
                     "union select blob_data_id from ifrs_data " +
                     "union select blob_data_id from form_data_file " +
                     "union select blob_data_id from declaration_data_file " +

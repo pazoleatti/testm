@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -12,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -26,6 +28,8 @@ import static java.util.Arrays.asList;
 @Service
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
+    private static final int INN_JUR_LENGTH = 10;
+    private static final int COMMON_PARAM_DEPARTMENT_ID = 0;
     private static final int MAX_LENGTH = 500;
     private static final int EMAIL_MAX_LENGTH = 200;
     private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
@@ -40,6 +44,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
     private static final String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
     private static final String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
+    private static final String NO_CODE_ERROR="«%s» не найден в справочнике";
+    private static final String INN_JUR_ERROR="Введен некорректные номер ИНН «%s»";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -52,6 +58,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Autowired
     private AuditService auditService;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
@@ -323,6 +332,26 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
+    @Override
+    public void checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger) {
+        String inn = configurationParamMap.get(ConfigurationParam.SBERBANK_INN);
+        if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
+            logger.error(INN_JUR_ERROR, inn);
+        }
+
+        String noCode = configurationParamMap.get(ConfigurationParam.NO_CODE);
+        RefBookDataProvider taxInspectionDataProvider = refBookFactory.getDataProvider(RefBook.Id.TAX_INSPECTION.getId());
+
+        if (taxInspectionDataProvider.getRecordsCount(new Date(), "code = '" + noCode + "'") == 0) {
+            logger.error(NO_CODE_ERROR, noCode);
+        }
+    }
+
+    @Override
+    public void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap) {
+        configurationDao.update(configurationParamMap, COMMON_PARAM_DEPARTMENT_ID);
+    }
+
     /**
      * Сохранить новые конфигурационные параметры и записать в ЖА
      *
@@ -339,6 +368,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         for (Map<String, String> config: getAsyncConfig()) {
             oldAsyncConfigMap.put(config.get("ID"), config);
         }
+        model.put(ConfigurationParam.NO_CODE, oldModel.get(ConfigurationParam.NO_CODE));
+        model.put(ConfigurationParam.SBERBANK_INN, oldModel.get(ConfigurationParam.SBERBANK_INN));
         configurationDao.save(model);
         for (ConfigurationParam param: ConfigurationParam.values()) {
             if (ConfigurationParamGroup.COMMON.equals(param.getGroup())) {

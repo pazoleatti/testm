@@ -7,7 +7,8 @@ public enum ConfigurationParamGroup {
     COMMON("Общие параметры", 0),
     FORM("Параметры загрузки налоговых форм", 1),
     EMAIL("Электронная почта", 2),
-    ASYNC("Параметры асинхронных заданий", 3);
+    ASYNC("Параметры асинхронных заданий", 3),
+    COMMON_PARAM("Общие параметры", 4);
 
     private String caption;
     private int index;

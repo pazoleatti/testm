@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Реализация ДАО для работа с параметрами приложения
@@ -131,6 +133,32 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         }
         if (!deleteParams.isEmpty()) {
             getJdbcTemplate().batchUpdate("DELETE FROM configuration WHERE code = ? AND department_id = ?", deleteParams);
+        }
+    }
+
+    @Override
+    public void update(Map<ConfigurationParam, String> configurationParamMap, long departmentId) {
+        List<Object[]> updateParams = new LinkedList<Object[]>();
+
+        for (Map.Entry<ConfigurationParam, String> entry : configurationParamMap.entrySet()) {
+            Object[] entity = new Object[] {
+                    entry.getKey().name(),
+                    entry.getValue(),
+                    departmentId
+            };
+
+            updateParams.add(entity);
+        }
+
+        if (!updateParams.isEmpty()) {
+            getJdbcTemplate().batchUpdate(
+                    "MERGE INTO configuration dest " +
+                    "USING (SELECT ? code, ? value, ? department_id FROM dual) src " +
+                    "ON (dest.code = src.code) " +
+                    "WHEN MATCHED THEN UPDATE SET dest.value = src.value " +
+                    "WHEN NOT MATCHED THEN INSERT(code, value, department_id) VALUES(src.code, src.value, src.department_id)",
+                    updateParams
+            );
         }
     }
 }

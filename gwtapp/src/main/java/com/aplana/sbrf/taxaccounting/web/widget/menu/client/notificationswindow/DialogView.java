@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -24,7 +24,10 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -128,7 +131,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
                         if (notificationTableRow == null) {
                             return;
                         }
-                        if (notificationTableRow.getBlobDataId() == null) {
+                        if (notificationTableRow.getLogId() == null) {
                             sb.appendHtmlConstant(notificationTableRow.getMsg());
                         } else {
                             sb.appendHtmlConstant("<div class=\"LinkDiv\">"
@@ -213,9 +216,9 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
             @Override
             public void onCellPreview(final CellPreviewEvent<NotificationTableRow> event) {
                 if (event.getColumn() == 2 && Event.getTypeInt(event.getNativeEvent().getType()) == Event.ONCLICK) {
-                    String blobDataId = event.getValue().getBlobDataId();
-                    if (blobDataId != null){
-                        getUiHandlers().onEventClick(blobDataId);
+                    String logId = event.getValue().getLogId();
+                    if (logId != null){
+                        getUiHandlers().onEventClick(logId);
                     }
                 } else if (event.getColumn() == 3 && Event.getTypeInt(event.getNativeEvent().getType()) == Event.ONCLICK) {
                     Long id = event.getValue().getId();

@@ -18,6 +18,10 @@ public final class StringUtils {
         }
     }
 
+    public static boolean equals(Object object1, Object object2) {
+        return object1 == object2 || ((object1 != null && object2 != null) && object1.equals(object2));
+    }
+
     public static String join(Object[] array, char separator){
         return join(array, String.valueOf(separator), null);
     }

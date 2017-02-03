@@ -33,6 +33,8 @@ alter table ref_book_present_place add constraint chk_ref_book_pres_place_st che
 alter table ref_book_asnu add constraint pk_ref_book_asnu primary key(id);
 alter table ref_book_asnu add constraint chk_ref_book_asnu_code check (code between '0000' and '9999');
 
+alter table ref_book_person add constraint fk_ref_book_person_source foreign key(source_id) references ref_book_asnu(id);
+
 -- Виды налоговых форм
 alter table ref_book_form_type add constraint pk_ref_book_form_type primary key(id);
 alter table ref_book_form_type add constraint chk_ref_book_form_type_taxkind check (tax_kind in ('F','N'));
@@ -55,6 +57,19 @@ alter table ref_book_reorganization add constraint chk_ref_book_reorg_status che
 
 -- Состояния ЭД
 alter table ref_book_doc_state add constraint pk_ref_book_doc_state primary key (id);
+
+--Виды дохода
+alter table ref_book_income_kind add constraint pk_ref_book_income_kind primary key (id);
+--alter table ref_book_income_kind add constraint fk_ref_book_inckind_inctype foreign key (income_type_id) references ref_book_income_type(id);
+
+--Категории прикрепленных файлов
+alter table ref_book_attach_file_type add constraint pk_ref_book_attach_file_type primary key(id);
+
+--Налоговые инспекции
+alter table ref_book_tax_inspection add constraint pk_ref_book_tax_inspection primary key(id);
+
+--Ставка НДФЛ
+alter table ref_book_ndfl_rate add constraint pk_ref_book_ndfl_rate primary key(id);
 
 -- Параметры подразделения по НДФЛ
 alter table ref_book_ndfl add constraint pk_ref_book_ndfl primary key(id);
@@ -96,7 +111,3 @@ alter table ref_book_fond_detail add constraint chk_ref_book_fond_det_status che
 alter table declaration_template add constraint fk_declaration_template_fkind foreign key(form_kind) references declaration_kind(id);
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
 alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);
-
-alter table ref_book_person add constraint fk_ref_book_person_source foreign key(source_id) references ref_book_asnu(id);
------------------------------------------------------------------------------------------------------------------------------
-exit;
