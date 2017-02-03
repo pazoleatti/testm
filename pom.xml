@@ -20,7 +20,6 @@
 		<module>test-utils</module>
 		<module>script-support</module>
 		<module>fonts</module>
-		<module>mdb</module>
 		<module>scheduler</module>
         <module>gwt-widget</module>
         <module>async</module>
