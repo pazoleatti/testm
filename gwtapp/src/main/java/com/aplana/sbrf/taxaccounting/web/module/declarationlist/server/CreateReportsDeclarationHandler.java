@@ -3,11 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateFormsDeclarationAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateFormsDeclarationResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateReportsDeclarationAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateReportsDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -16,15 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateFormsDeclarationAction, CreateFormsDeclarationResult> {
+public class CreateReportsDeclarationHandler extends AbstractActionHandler<CreateReportsDeclarationAction, CreateReportsDeclarationResult> {
 
-	public CreateFormsDeclarationHandler() {
-		super(CreateFormsDeclarationAction.class);
+	public CreateReportsDeclarationHandler() {
+		super(CreateReportsDeclarationAction.class);
 	}
 
 
@@ -47,16 +50,27 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
     private DepartmentReportPeriodService departmentReportPeriodService;
 
 	@Override
-	public CreateFormsDeclarationResult execute(final CreateFormsDeclarationAction action, ExecutionContext executionContext) throws ActionException {
-        final ReportType reportType = ReportType.CREATE_FORMS_DEC;
-        CreateFormsDeclarationResult result = new CreateFormsDeclarationResult();
+	public CreateReportsDeclarationResult execute(final CreateReportsDeclarationAction action, ExecutionContext executionContext) throws ActionException {
+        final ReportType reportType = ReportType.CREATE_REPORTS_DEC;
+        CreateReportsDeclarationResult result = new CreateReportsDeclarationResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(),
-                action.getReportPeriodId());
-        if (departmentReportPeriod == null) {
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(action.getDepartmentId()));
+        departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
+        departmentReportPeriodFilter.setTaxTypeList(Arrays.asList(action.getTaxType()));
+        if (action.getCorrectionDate() != null) {
+            departmentReportPeriodFilter.setCorrectionDate(action.getCorrectionDate());
+        } else {
+            departmentReportPeriodFilter.setIsCorrection(false);
+        }
+        List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
+
+        if (departmentReportPeriods == null || departmentReportPeriods.isEmpty() || departmentReportPeriods.size() > 1) {
             throw new ActionException("Не удалось определить налоговый период.");
         }
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriods.get(0);
 
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("declarationTypeId", action.getDeclarationTypeId());
@@ -104,7 +118,7 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
 	}
 
 	@Override
-	public void undo(CreateFormsDeclarationAction action, CreateFormsDeclarationResult result, ExecutionContext executionContext) throws ActionException {
+	public void undo(CreateReportsDeclarationAction action, CreateReportsDeclarationResult result, ExecutionContext executionContext) throws ActionException {
 		//Nothing
 	}
 }

@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
-public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
+public abstract class CreateReportsAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
@@ -61,18 +60,19 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
             throw new ServiceException("Не удалось определить налоговый период.");
         }
 
-        declarationDataService.createForms(logger, userInfo, departmentReportPeriod, declarationTypeId, new LockStateLogger() {
+        String uuid = declarationDataService.createReports(logger, userInfo, departmentReportPeriod, declarationTypeId, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 lockService.updateState(lock, lockDate, state);
             }
         });
-        return new TaskStatus(true, null);
+
+        return new TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
     }
 
     @Override
     protected String getAsyncTaskName() {
-        return "Создание отчетных форм";
+        return "Формирование отчетности";
     }
 
     @Override
@@ -92,7 +92,7 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
         }
 
-        return String.format("Выполнено создание отчетных форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
+        return String.format("Выполнено формирование отчетности форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
                 declarationTemplate.getName(),
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod,
                 department.getName());
@@ -115,7 +115,7 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
         }
 
-        return String.format("Произошла непредвиденная ошибка при создании отчетных форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
+        return String.format("Произошла непредвиденная ошибка при формирование отчетности форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
                 declarationTemplate.getName(),
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod,
                 department.getName());
