@@ -223,7 +223,7 @@ alter table notification add constraint notification_fk_receiver foreign key (re
 alter table notification add constraint notification_fk_notify_user foreign key (user_id) references sec_user(id);
 alter table notification add constraint notification_fk_notify_role foreign key (role_id) references sec_role(id);
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
-alter table notification add constraint notification_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
+--alter table notification add constraint notification_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
 alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
 alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data (id) on delete set null;
 
@@ -250,7 +250,7 @@ alter table log_system add constraint log_system_chk_aft check (audit_form_type_
 
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
-alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
+--alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
 alter table log_system add constraint log_system_chk_is_error check (is_error in (0, 1));
 alter table log_system add constraint log_system_fk_audit_form_type foreign key (audit_form_type_id) references audit_form_type (id);
 
