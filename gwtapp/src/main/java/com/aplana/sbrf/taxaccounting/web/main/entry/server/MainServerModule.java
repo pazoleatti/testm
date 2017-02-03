@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
 import com.aplana.sbrf.taxaccounting.web.module.audit.server.AuditFormServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.commonparameter.server.CommonParameterServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.server.ConfigurationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.DeclarationDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.DeclarationServerModule;
@@ -42,12 +43,13 @@ import org.springframework.context.annotation.Import;
         FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
         AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
-        HistoryServerModule.class, TemplateVersionListServerModule.class, MembersServerModule.class, ConfigurationServerModule.class,
-        AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class,
-        DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class,
+        HistoryServerModule.class, TemplateVersionListServerModule.class, MembersServerModule.class,
+        ConfigurationServerModule.class, AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class,
+        SourcesServerModule.class, DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, SchedulerServerModule.class,
         TestPageServerModule.class, DeclarationVersionListServerModule.class, VersionHistoryServerModule.class,
-        RefBookMultiPickerServerModule.class, ScriptExecutionServerModule.class, ScriptsImportServerModule.class, UploadTransportDataServerModule.class, IfrsServerModule.class, LockServerModule.class})
+        RefBookMultiPickerServerModule.class, ScriptExecutionServerModule.class, ScriptsImportServerModule.class,
+        UploadTransportDataServerModule.class, IfrsServerModule.class, LockServerModule.class, CommonParameterServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

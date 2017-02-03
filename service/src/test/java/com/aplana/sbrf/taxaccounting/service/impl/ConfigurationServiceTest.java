@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -122,6 +121,11 @@ public class ConfigurationServiceTest {
         ReflectionTestUtils.setField(service, "refBookFactory", refBookFactory);
 
         ReflectionTestUtils.setField(service, "auditService", auditService);
+
+        RefBookDataProvider providerTax = mock(RefBookDataProvider.class);
+        when(refBookFactory.getDataProvider(RefBook.Id.TAX_INSPECTION.getId())).thenReturn(providerTax);
+        when(providerTax.getRecordsCount(any(Date.class), eq("code = '0'"))).thenReturn(0);
+        when(providerTax.getRecordsCount(any(Date.class), eq("code = '1'"))).thenReturn(1);
     }
 
     // Нет прав на сохранение
@@ -526,6 +530,29 @@ public class ConfigurationServiceTest {
         verifyNoMoreInteractions(auditService);
     }
 
+    @Test
+    public void checkCommonConfigurationParamsValidTest() {
+        Map<ConfigurationParam, String> paramMap = new HashMap<ConfigurationParam, String>();
+        paramMap.put(ConfigurationParam.NO_CODE, "1");
+        paramMap.put(ConfigurationParam.SBERBANK_INN, "7707083893");
+
+        Logger logger = new Logger();
+        service.checkCommonConfigurationParams(paramMap, logger);
+
+        Assert.assertTrue(logger.getEntries().isEmpty());
+    }
+
+    @Test
+    public void checkCommonConfigurationParamsInvalidTest() {
+        Map<ConfigurationParam, String> paramMap = new HashMap<ConfigurationParam, String>();
+        paramMap.put(ConfigurationParam.NO_CODE, "2");
+        paramMap.put(ConfigurationParam.SBERBANK_INN, "7707083899");
+
+        Logger logger = new Logger();
+        service.checkCommonConfigurationParams(paramMap, logger);
+
+        Assert.assertEquals(2, logger.getEntries().size());
+    }
 
     /**
      * Пользователь с необходимыми полномочиями

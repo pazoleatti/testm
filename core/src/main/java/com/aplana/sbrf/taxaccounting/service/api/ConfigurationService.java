@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.api;
 
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -42,4 +44,14 @@ public interface ConfigurationService {
      * Проверка доступности путей в указанных конфигурационных параметрах (табл. CONFIGURATION)
      */
     void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
+
+    /**
+     * Проверка общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
+     */
+    void checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger);
+
+    /**
+     * Сохранение общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
+     */
+    void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap);
 }

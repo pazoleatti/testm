@@ -35,6 +35,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.UploadTransportData"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.ifrs.Ifrs"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.lock.Lock"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.commonparameter.CommonParameter"/>
 
     <replace-with class="com.google.gwt.user.cellview.client.CustomCellBasedWidgetImplTrident">
         <when-type-is class="com.google.gwt.user.cellview.client.CellBasedWidgetImpl"/>

@@ -8,3 +8,5 @@ insert into configuration (code, value, department_id) values ('FORM_UPLOAD_DIRE
 insert into configuration (code, value, department_id) values ('FORM_ARCHIVE_DIRECTORY', 'test8', 1);
 insert into configuration (code, value, department_id) values ('FORM_ERROR_DIRECTORY', 'test9', 1);
 insert into configuration (code, value, department_id) values ('FORM_ERROR_DIRECTORY', 'test10', 6);
+insert into configuration (code, value, department_id) values ('NO_CODE', 'test11', 1);
+insert into configuration (code, value, department_id) values ('SBERBANK_INN', 'test12', 1);

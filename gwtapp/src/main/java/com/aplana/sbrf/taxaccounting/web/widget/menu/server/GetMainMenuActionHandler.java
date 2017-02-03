@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
+import com.aplana.sbrf.taxaccounting.web.module.commonparameter.client.CommonParameterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
@@ -131,6 +132,11 @@ public class GetMainMenuActionHandler extends
                     || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
                 menuItem.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
+                taxMenu.getSubMenu().add(menuItem);
+            }
+
+            if (currentUser.hasRole(TARole.ROLE_ADMIN) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                MenuItem menuItem = new MenuItem("Общие параметры", NUMBER_SIGN + CommonParameterPresenter.TOKEN);
                 taxMenu.getSubMenu().add(menuItem);
             }
 
