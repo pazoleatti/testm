@@ -486,7 +486,6 @@ public class RefBookSimpleDaoTest {
     }
 
     @Test
-	@Ignore
     public void createFakeRecordVersionInsertsData() throws Exception {
         Date fakeVersion = new GregorianCalendar(2020,5,5).getTime();
         Date versionFrom = new GregorianCalendar(2010,5,5).getTime();
@@ -564,7 +563,6 @@ public class RefBookSimpleDaoTest {
     }
 
     @Test
-	@Ignore
     public void getRelatedVersionsReturnsId() throws Exception {
         Date fakeVersion = new GregorianCalendar(2020,5,5).getTime();
         dao.createFakeRecordVersion(createRefBook(), 4L, fakeVersion);
