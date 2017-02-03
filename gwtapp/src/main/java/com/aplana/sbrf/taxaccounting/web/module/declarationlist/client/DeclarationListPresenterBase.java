@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -50,17 +51,21 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final PlaceManager placeManager;
 	protected final DeclarationFilterPresenter filterPresenter;
 	protected final DeclarationCreationPresenter creationPresenter;
-	static final Object TYPE_filterPresenter = new Object();
+    protected final DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter;
+
+    static final Object TYPE_filterPresenter = new Object();
 
 	public DeclarationListPresenterBase(EventBus eventBus, MyView view, Proxy_ proxy,
 	                             PlaceManager placeManager, DispatchAsync dispatcher,
 	                             DeclarationFilterPresenter filterPresenter,
-								 DeclarationCreationPresenter creationPresenter) {
+								 DeclarationCreationPresenter creationPresenter,
+                                 DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
 		this.filterPresenter = filterPresenter;
 		this.creationPresenter = creationPresenter;
+        this.declarationDownloadReportsPresenter = declarationDownloadReportsPresenter;
 	}
 
 	@Override

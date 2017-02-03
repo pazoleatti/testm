@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
+package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
@@ -29,9 +29,9 @@ import java.util.Set;
 /**
  * Диалог создания декларации
  */
-public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCreationPresenter.MyView> implements DeclarationCreationUiHandlers {
+public class DeclarationDownloadReportsPresenter extends PresenterWidget<DeclarationDownloadReportsPresenter.MyView> implements DeclarationDownloadReportsUiHandlers {
 
-    public interface MyView extends PopupView, HasUiHandlers<DeclarationCreationUiHandlers> {
+    public interface MyView extends PopupView, HasUiHandlers<DeclarationDownloadReportsUiHandlers> {
 
         void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
         void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod);
@@ -41,11 +41,14 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         void setSelectedDeclarationType(Integer id);
         void setSelectedReportPeriod(List<Integer> periodIds);
         void setSelectedDepartment(List<Integer> departmentIds);
-        void setCorrectionDate(String correctionDate, DeclarationFormKind declarationFormKind);
+        void setCorrectionDate(List<DepartmentReportPeriod> departmentReportPeriods);
 
         Integer getSelectedDeclarationType();
         List<Integer> getSelectedReportPeriod();
         List<Integer> getSelectedDepartment();
+        Date getCorrectionDate();
+        boolean isCorrection();
+
         void setTaxType(TaxType taxType);
 
         void init();
@@ -57,11 +60,10 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     private PlaceManager placeManager;
 
     private TaxType taxType;
-    private DeclarationFormKind declarationFormKind;
 
     @Inject
-    public DeclarationCreationPresenter(final EventBus eventBus, final MyView view,
-                                        DispatchAsync dispatcher, PlaceManager placeManager) {
+    public DeclarationDownloadReportsPresenter(final EventBus eventBus, final MyView view,
+                                               DispatchAsync dispatcher, PlaceManager placeManager) {
         super(eventBus, view);
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
@@ -80,67 +82,40 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
         filter.setDepartmentIds(getView().getSelectedDepartment());
         filter.setReportPeriodIds(getView().getSelectedReportPeriod());
+
         if(isFilterDataCorrect(filter)){
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);
-            if (declarationFormKind.equals(DeclarationFormKind.REPORTS)) {
-                // создание отчетности
-                onCreateForms(filter, false);
-            } else {
-                CreateDeclaration command = new CreateDeclaration();
-                command.setDeclarationTypeId(filter.getDeclarationTypeIds().get(0).intValue());
-                command.setDepartmentId(filter.getDepartmentIds().iterator().next());
-                command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-                command.setTaxType(taxType);
-                dispatcher.execute(command, CallbackUtils
-                        .defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
-                            @Override
-                            public void onSuccess(CreateDeclarationResult result) {
-                                if (result.getDeclarationId() == null) {
-                                    LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-                                    String title = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Создание отчетности" : "Создание налоговой формы");
-                                    String msg = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Отчетности не созданы" : "Налоговоя форма не создана");
-                                    Dialog.infoMessage(title, msg);
-                                } else {
-                                    onHide();
-                                    placeManager
-                                            .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
-                                                    .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
-                                    LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-                                }
-                            }
-                        }, DeclarationCreationPresenter.this));
-
-            }
+            onCreateForms(false);
         }
     }
 
-    private void onCreateForms(final DeclarationDataFilter filter, final boolean force) {
-        CreateFormsDeclarationAction action = new CreateFormsDeclarationAction();
-        action.setDeclarationTypeId(filter.getDeclarationTypeIds().get(0).intValue());
-        action.setDepartmentId(filter.getDepartmentIds().iterator().next());
-        action.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+    private void onCreateForms(final boolean force) {
+        CreateReportsDeclarationAction action = new CreateReportsDeclarationAction();
+        action.setDeclarationTypeId(getView().getSelectedDeclarationType().intValue());
+        action.setDepartmentId(getView().getSelectedDepartment().iterator().next());
+        action.setReportPeriodId(getView().getSelectedReportPeriod().iterator().next());
         action.setTaxType(taxType);
-        action.setForce(force);
+        action.setCorrectionDate(getView().getCorrectionDate());
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<CreateFormsDeclarationResult>() {
+                .defaultCallback(new AbstractCallback<CreateReportsDeclarationResult>() {
                     @Override
-                    public void onSuccess(CreateFormsDeclarationResult result) {
-                        LogCleanEvent.fire(DeclarationCreationPresenter.this);
-                        LogShowEvent.fire(DeclarationCreationPresenter.this, false);
+                    public void onSuccess(CreateReportsDeclarationResult result) {
+                        LogCleanEvent.fire(DeclarationDownloadReportsPresenter.this);
+                        LogShowEvent.fire(DeclarationDownloadReportsPresenter.this, false);
                         if (!result.isStatus()) {
                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
-                                    onCreateForms(filter, true);
+                                    onCreateForms(true);
                                 }
                             });
                         } else {
                             onHide();
-                            LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                            LogAddEvent.fire(DeclarationDownloadReportsPresenter.this, result.getUuid());
                         }
                     }
-                }, DeclarationCreationPresenter.this));
+                }, DeclarationDownloadReportsPresenter.this));
     }
 
     @Override
@@ -150,19 +125,14 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         }
         GetDeclarationTypeAction action = new GetDeclarationTypeAction();
         action.setTaxType(taxType);
-        action.setDeclarationFormKind(declarationFormKind);
         action.setDepartmentId(getView().getSelectedDepartment().get(0));
+        action.setDeclarationFormKind(DeclarationFormKind.REPORTS);
         action.setReportPeriod(getView().getSelectedReportPeriod().get(0));
 
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationTypeResult>() {
             @Override
             public void onSuccess(GetDeclarationTypeResult result) {
                 getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
-                if (result.getCorrectionDate() != null) {
-                    getView().setCorrectionDate(DateTimeFormat.getFormat("dd.MM.yyyy").format(result.getCorrectionDate()), declarationFormKind);
-                } else {
-                    getView().setCorrectionDate(null, null);
-                }
                 getView().updateEnabled();
             }
         }, this) );
@@ -173,8 +143,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                 || (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty())
                 || (filter.getDeclarationTypeIds() == null)
         ){
-            String title = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Создание отчетности" : "Создание налоговой формы");
-            String msg = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Заполнены не все параметры отчетности" : "Заполнены не все параметры налоговой формы");
+            String title = "Выгрузка отчетности";
+            String msg = "Заполнены не все параметры отчетности";
             Dialog.errorMessage(title, msg);
             return false;
         }
@@ -187,20 +157,20 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         getView().setSelectedDepartment(null);
     }
 
-    public void initAndShowDialog(final DeclarationDataFilter dataFilter, DeclarationFormKind declarationFormKind, final HasPopupSlot popupSlot){
+    public void initAndShowDialog(final DeclarationDataFilter dataFilter, final HasPopupSlot popupSlot){
         this.taxType = dataFilter.getTaxType();
-        this.declarationFormKind = declarationFormKind;
         getView().setTaxType(this.taxType);
         GetReportPeriodsAction action = new GetReportPeriodsAction();
         action.setTaxType(dataFilter.getTaxType());
         action.setReportPeriodId(getView().getDefaultReportPeriodId());
+        action.setDownloadReports(true);
         getView().init();
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
             @Override
             public void onSuccess(GetReportPeriodsResult result) {
                 getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
                 onReportPeriodChange();
-                popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
+                popupSlot.addToPopupSlot(DeclarationDownloadReportsPresenter.this);
             }
         }, this));
     }
@@ -219,19 +189,15 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         GetDeclarationDepartmentsAction action = new GetDeclarationDepartmentsAction();
         action.setTaxType(taxType);
         action.setReportPeriodId(getView().getSelectedReportPeriod().get(0));
-        action.setReports(declarationFormKind.equals(DeclarationFormKind.REPORTS));
+        action.setReports(true);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationDepartmentsResult>() {
             @Override
             public void onSuccess(GetDeclarationDepartmentsResult result) {
                 getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
+                getView().setCorrectionDate(result.getDepartmentReportPeriods());
                 getView().updateEnabled();
                 onDepartmentChange();
             }
         }, this) );
-    }
-
-    @Override
-    public DeclarationFormKind getDeclarationFormKind() {
-        return declarationFormKind;
     }
 }

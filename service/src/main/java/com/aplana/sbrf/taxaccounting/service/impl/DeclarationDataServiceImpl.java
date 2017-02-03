@@ -1401,6 +1401,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public String getTaskName(ReportType reportType, TaxType taxType, Map<String, Object> params) {
         switch (reportType) {
             case CREATE_FORMS_DEC:
+            case CREATE_REPORTS_DEC:
                 return reportType.getDescription();
         }
         throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
@@ -1595,7 +1596,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();
         additionalParameters.put("formMap", formMap);
         DeclarationData declarationDataTemp = new DeclarationData();
-        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.get(declarationTypeId, departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
         declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -1635,5 +1636,45 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 logger.warn(oktmoKpp);
             }
         }
+    }
+
+    @Override
+    public String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
+        DeclarationData declarationDataTemp = new DeclarationData();
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
+        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+
+        File reportFile = null;
+        try {
+            reportFile = File.createTempFile("reports", ".dat");
+            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile));
+            Map<String, Object> scriptParams = new HashMap<String, Object>();
+            try {
+                Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                additionalParameters.put("scriptParams", scriptParams);
+                additionalParameters.put("outputStream", outputStream);
+                declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_REPORTS, logger, additionalParameters);
+            } finally {
+                IOUtils.closeQuietly(outputStream);
+            }
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceException("Обнаружены фатальные ошибки!");
+            }
+            String fileName = null;
+            if (scriptParams.containsKey("fileName") && scriptParams.get("fileName") != null) {
+                fileName = scriptParams.get("fileName").toString();
+            }
+            if (fileName == null && fileName.isEmpty()) {
+                fileName = "reports";
+            }
+            stateLogger.updateState("Сохранение отчета в базе данных");
+            return blobDataService.create(reportFile.getPath(), fileName);
+        } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            if (reportFile != null)
+                reportFile.delete();
+        }
+
     }
 }

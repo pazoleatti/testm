@@ -10,4 +10,6 @@ public interface DeclarationListUiHandlers extends UiHandlers {
     void onCreateClicked();
 
     void onCreateReportsClicked();
+
+    void onDownloadReportsClicked();
 }

@@ -364,4 +364,12 @@ public interface DeclarationDataService {
      * @param declarationTypeId идентификатор типа декларации
      */
     public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
+
+    /**
+     * Создание отчетности для выгрузки
+     * @param departmentReportPeriod - отчетный период
+     * @param declarationTypeId идентификатор типа декларации
+     */
+    public String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
+
 }

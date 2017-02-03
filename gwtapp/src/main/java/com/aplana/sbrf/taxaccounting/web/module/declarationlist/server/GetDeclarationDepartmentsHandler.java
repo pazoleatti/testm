@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationDepartmentsAction;
@@ -13,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -34,10 +33,19 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
+
     @Override
     public GetDeclarationDepartmentsResult execute(GetDeclarationDepartmentsAction action, ExecutionContext context) throws ActionException {
         GetDeclarationDepartmentsResult result = new GetDeclarationDepartmentsResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
+
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(departmentService.getBankDepartment().getId()));
+        departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
+        departmentReportPeriodFilter.setTaxTypeList(Arrays.asList(action.getTaxType()));
+        result.setDepartmentReportPeriods(departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter));
 
         // Доступные подразделения
         List<Integer> departments =

@@ -92,7 +92,7 @@ public class DeclarationListView extends
 	Label titleDesc;
 
     @UiField
-    LinkButton create, createReports;
+    LinkButton create, createReports, downloadReports;
 
     @UiField
     ResizeLayoutPanel tableWrapper;
@@ -143,9 +143,11 @@ public class DeclarationListView extends
         if (isReports) {
             create.setVisible(false);
             createReports.setVisible(true);
+            downloadReports.setVisible(true);
         } else {
             create.setVisible(true);
             createReports.setVisible(false);
+            downloadReports.setVisible(false);
         }
         Style tableStyle = tableWrapper.getElement().getStyle();
         tableStyle.setProperty("top", (isReports) ?
@@ -468,6 +470,13 @@ public class DeclarationListView extends
     void onCreateReportsButtonClicked(ClickEvent event){
         if (getUiHandlers() != null) {
             getUiHandlers().onCreateReportsClicked();
+        }
+    }
+
+    @UiHandler("downloadReports")
+    void onCreateDownloadButtonClicked(ClickEvent event){
+        if (getUiHandlers() != null) {
+            getUiHandlers().onDownloadReportsClicked();
         }
     }
 
