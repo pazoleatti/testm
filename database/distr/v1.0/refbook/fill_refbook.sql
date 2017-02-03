@@ -1,6 +1,11 @@
 prompt async_task_type
 @@async_task_type;
 
+prompt department_type
+@@depart_type;
+prompt departments
+@@departments;
+
 prompt fiction ref datas
 @@gen_fiction_datas;
 
