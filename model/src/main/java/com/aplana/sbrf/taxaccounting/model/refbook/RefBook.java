@@ -112,7 +112,7 @@ public class RefBook implements Serializable {
 		DOC_STATE(929),								// Состояние ЭД
 		USER(74),                                   // Пользователи
 		COUNTRY(10), 								// Страны
-		DOCUMENT_CODES(360),						// Документы, удостоверяющие личность
+		DOCUMENT_CODES(360),						// Виды документов, удостоверяющих личность
 		INCOME_CODE(922),							// Коды видов доходов
 		INCOME_KIND(933),							// Виды дохода
 		DEDUCTION_TYPE(921),						// Коды видов вычетов
