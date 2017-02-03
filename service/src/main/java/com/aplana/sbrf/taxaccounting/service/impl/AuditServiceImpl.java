@@ -15,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.aplana.sbrf.taxaccounting.dao.AuditDao.SAMPLE_NUMBER;
 
@@ -62,26 +60,26 @@ public class AuditServiceImpl implements AuditService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-                    String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId, Integer formTypeId) {
-        add(event, userInfo, departmentId, reportPeriodId, declarationTypeName, formTypeName, formKindId, note, blobDataId);
+                    String declarationTypeName, String formTypeName, Integer formKindId, String note, String logId, Integer formTypeId) {
+        add(event, userInfo, departmentId, reportPeriodId, declarationTypeName, formTypeName, formKindId, note, logId);
 	}
 
     @Override
     @Transactional(readOnly = false)
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String logId) {
         String rpName = null;
         if (reportPeriodId != null) {
             ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
             rpName = String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName());
         }
-        add(event, userInfo, rpName, departmentId, declarationTypeName, formTypeName, formKindId, note, null, blobDataId);
+        add(event, userInfo, rpName, departmentId, declarationTypeName, formTypeName, formKindId, note, null, logId);
     }
 
     @Override
     @Transactional(readOnly = false)
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final String reportPeriodName, final Integer departmentId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final AuditFormType formType, final String blobDataId) {
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final AuditFormType formType, final String logId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -95,7 +93,7 @@ public class AuditServiceImpl implements AuditService {
                         );
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                add(event, userInfo, departmentName, departmentId, reportPeriodName, declarationTypeName, formTypeName, formKindId, mnote, formType, blobDataId);
+                add(event, userInfo, departmentName, departmentId, reportPeriodName, declarationTypeName, formTypeName, formKindId, mnote, formType, logId);
                 return null;
             }
         });
@@ -104,7 +102,7 @@ public class AuditServiceImpl implements AuditService {
     @Override
     @Transactional(readOnly = false)
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final Date startDate, final Date endDate,
-                    final String declarationTemplateName, final String formTemplateName, final String note, final String blobDataId) {
+                    final String declarationTemplateName, final String formTemplateName, final String note, final String logId) {
         tx.executeInNewTransaction(new TransactionLogic() {
 
             @Override
@@ -118,14 +116,14 @@ public class AuditServiceImpl implements AuditService {
                 }
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, null, mnote, null, blobDataId);
+                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, null, mnote, null, logId);
 				return null;
             }
         });
     }
 
     @Override
-    public void add(final FormDataEvent event, final TAUserInfo userInfo, final DeclarationData declarationData, final FormData formData, final String note, final String blobDataId) {
+    public void add(final FormDataEvent event, final TAUserInfo userInfo, final DeclarationData declarationData, final FormData formData, final String note, final String logId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
@@ -155,7 +153,7 @@ public class AuditServiceImpl implements AuditService {
                     formKindId = formData.getKind().getId();
                 }
 
-                add(event, userInfo, departmentName, departmentId, rpName, decTypeName, ftName, formKindId, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, null, blobDataId);
+                add(event, userInfo, departmentName, departmentId, rpName, decTypeName, ftName, formKindId, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, null, logId);
                 return null;
             }
         });
@@ -262,7 +260,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     private void add(FormDataEvent event, TAUserInfo userInfo, String departmentName, Integer departmentId, String reportPeriodName,
-                     String declarationTypeName, String formTypeName, Integer formKindId, String note, AuditFormType formType, String blobDataId){
+                     String declarationTypeName, String formTypeName, Integer formKindId, String note, AuditFormType formType, String logId){
         LogSystem log = new LogSystem();
         log.setIp(userInfo.getIp());
         log.setEventId(event.getCode());
@@ -293,7 +291,7 @@ public class AuditServiceImpl implements AuditService {
         int userDepId = userInfo.getUser().getDepartmentId();
         String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
         log.setUserDepartmentName(userDepartmentName != null ? userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)):null);
-        log.setBlobDataId(blobDataId);
+        log.setLogId(logId);
         log.setServer(serverInfo.getServerName());
 
         auditDao.add(log);

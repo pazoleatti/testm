@@ -136,7 +136,7 @@ public class LogEntryDaoTest {
     public void testBigMessage() {
         String largeMessage = "";
 
-        largeMessage += StringUtils.repeat(' ', MAX_MESSAGE_SIZE);
+        largeMessage += StringUtils.repeat('\n', MAX_MESSAGE_SIZE);
         largeMessage += StringUtils.repeat('б', MAX_MESSAGE_SIZE);
         largeMessage += StringUtils.repeat('z', MAX_MESSAGE_SIZE);
         largeMessage += StringUtils.repeat('e', 10);
@@ -150,7 +150,7 @@ public class LogEntryDaoTest {
 
         List<LogEntry> logEntries = logEntryDao.get(uuid);
         Assert.assertEquals(4, logEntries.size());
-        Assert.assertEquals(StringUtils.repeat(' ', MAX_MESSAGE_SIZE), logEntries.get(0).getMessage());
+        Assert.assertEquals(StringUtils.repeat('\n', MAX_MESSAGE_SIZE), logEntries.get(0).getMessage());
         Assert.assertEquals(StringUtils.repeat('б', MAX_MESSAGE_SIZE), logEntries.get(1).getMessage());
         Assert.assertEquals(StringUtils.repeat('z', MAX_MESSAGE_SIZE), logEntries.get(2).getMessage());
         Assert.assertEquals(StringUtils.repeat('e', 10), logEntries.get(3).getMessage());

@@ -260,7 +260,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
                         if (logSearchResultItem == null) {
                             return;
                         }
-                        if (logSearchResultItem.getBlobDataId() == null) {
+                        if (logSearchResultItem.getLogId() == null) {
                             sb.appendHtmlConstant(logSearchResultItem.getEvent().getTitle());
                         } else {
                             sb.appendHtmlConstant("<div class=\"LinkDiv\">"
@@ -423,9 +423,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
             @Override
             public void onCellPreview(final CellPreviewEvent<LogSearchResultItem> event) {
                  if (event.getColumn() == 1 && Event.getTypeInt(event.getNativeEvent().getType()) == Event.ONCLICK) {
-                     String blobDataId = event.getValue().getBlobDataId();
-                     if (blobDataId != null){
-                         getUiHandlers().onEventClick(blobDataId);
+                     String logId = event.getValue().getLogId();
+                     if (logId != null){
+                         getUiHandlers().onEventClick(logId);
                      }
                  }
             }

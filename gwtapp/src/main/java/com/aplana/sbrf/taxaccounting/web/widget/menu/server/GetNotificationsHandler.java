@@ -54,7 +54,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
             row.setId(notification.getId());
 			row.setDate(notification.getCreateDate());
 			row.setMsg(notification.getText());
-            row.setBlobDataId(notification.getBlobDataId());
+            row.setLogId(notification.getLogId());
             row.setCanDelete(canDelete(notification, user));
             row.setReportId(notification.getReportId());
             row.setNotificationType(notification.getNotificationType());
