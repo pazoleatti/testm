@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.FiasRefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,11 +16,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Table;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+
+import java.util.*;
 
 /**
  * @author Andrey Drunk
@@ -37,25 +41,31 @@ public class FiasRefBookDaoTest {
     @Autowired
     RefBookDao refBookDao;
 
+
     @Test
     public void testOperstat() {
 
         //В скрипте создаем 17 записей
-        Assert.assertEquals(17, refBookDao.getRecordsCount(FiasRefBookDaoImpl.OPERSTAT_ID, FiasRefBookDaoImpl.OPERSTAT_TABLE_NAME, null));
+        Assert.assertEquals(17, refBookDao.getRecordsCount(Id.FIAS_OPERSTAT.getId(), Table.FIAS_OPERSTAT.getTable(), null));
 
-        fiasRefBookDao.insertRecordsBatch(FiasRefBookDaoImpl.OPERSTAT_TABLE_NAME, createOperstatRecords());
+        fiasRefBookDao.insertRecordsBatch(Table.FIAS_OPERSTAT.getTable(), createOperstatRecords());
 
-        Assert.assertEquals(20, refBookDao.getRecordsCount(FiasRefBookDaoImpl.OPERSTAT_ID, FiasRefBookDaoImpl.OPERSTAT_TABLE_NAME, null));
+        Assert.assertEquals(20, refBookDao.getRecordsCount(Id.FIAS_OPERSTAT.getId(), Table.FIAS_OPERSTAT.getTable(), null));
 
         //Удаление
         fiasRefBookDao.clearAll();
 
-        Assert.assertEquals(0, refBookDao.getRecordsCount(FiasRefBookDaoImpl.OPERSTAT_ID, FiasRefBookDaoImpl.OPERSTAT_TABLE_NAME, null));
-        Assert.assertEquals(0, refBookDao.getRecordsCount(FiasRefBookDaoImpl.SOCRBASE_ID, FiasRefBookDaoImpl.SOCRBASE_TABLE_NAME, null));
-        Assert.assertEquals(0, refBookDao.getRecordsCount(FiasRefBookDaoImpl.ADDR_OBJECT_ID, FiasRefBookDaoImpl.ADDR_OBJECT_TABLE_NAME, null));
-        Assert.assertEquals(0, refBookDao.getRecordsCount(FiasRefBookDaoImpl.HOUSE_ID, FiasRefBookDaoImpl.HOUSE_TABLE_NAME, null));
-        Assert.assertEquals(0, refBookDao.getRecordsCount(FiasRefBookDaoImpl.HOUSEINT_ID, FiasRefBookDaoImpl.HOUSEINT_TABLE_NAME, null));
-        Assert.assertEquals(0, refBookDao.getRecordsCount(FiasRefBookDaoImpl.ROOM_ID, FiasRefBookDaoImpl.ROOM_TABLE_NAME, null));
+        Assert.assertEquals(0, refBookDao.getRecordsCount(Id.FIAS_OPERSTAT.getId(), Table.FIAS_OPERSTAT.getTable(),
+                null));
+        Assert.assertEquals(0, refBookDao.getRecordsCount(Id.FIAS_SOCRBASE.getId(), Table.FIAS_SOCRBASE.getTable(),
+                null));
+        Assert.assertEquals(0, refBookDao.getRecordsCount(Id.FIAS_ADDR_OBJECT.getId(), Table
+                .FIAS_ADDR_OBJECT.getTable(), null));
+        Assert.assertEquals(0, refBookDao.getRecordsCount(Id.FIAS_HOUSE.getId(), Table.FIAS_HOUSE.getTable(),
+                null));
+        Assert.assertEquals(0, refBookDao.getRecordsCount(Id.FIAS_HOUSEINT.getId(), Table.FIAS_HOUSEINT.getTable(),
+                null));
+        Assert.assertEquals(0, refBookDao.getRecordsCount(Id.FIAS_ROOM.getId(), Table.FIAS_ROOM.getTable(), null));
     }
 
     private static List<Map<String, Object>> createOperstatRecords(){
