@@ -547,7 +547,7 @@ public class RefBookSimpleQueryBuilderComponent {
                 sql.addNamedParam(requiredAttribute.getAlias(), fakeDate);
                 break;
             case REFERENCE:
-                sql.addNamedParam(requiredAttribute.getAlias(), 42L);
+                sql.addNamedParam(requiredAttribute.getAlias(), -1L);
                 break;
         }
     }
