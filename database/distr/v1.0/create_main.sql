@@ -1360,6 +1360,9 @@ create sequence seq_ndfl_person_prepayment start with 1000;
 create table ndfl_references
 (
   id number(18) not null,
+  record_id number(18) not null,
+  version date not null,
+  status number(1) not null,
   declaration_data_id number(18)not null,
   person_id number(18) not null,
   num number(10) not null,
@@ -1372,6 +1375,9 @@ create table ndfl_references
 
 comment on table ndfl_references is 'Реестр справок';
 comment on column ndfl_references.id is 'Уникальный идентификатор';
+comment on column ndfl_references.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ndfl_references.version is 'Версия. Дата актуальности записи';
+comment on column ndfl_references.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ndfl_references.declaration_data_id is 'Идентификатор декларации к которой относятся данные';
 comment on column ndfl_references.person_id is 'Физическое лицо';
 comment on column ndfl_references.num is 'Номер справки';
@@ -1380,8 +1386,6 @@ comment on column ndfl_references.name is 'Имя';
 comment on column ndfl_references.lastname is 'Отчество';
 comment on column ndfl_references.birthday is 'Дата рождения ФЛ';
 comment on column ndfl_references.errtext is 'Текст ошибки от ФНС';
-
-create sequence seq_ndfl_references start with 1;
 
 ------------------------------------------------------------------------------------------------------
 --  Расчет по страховым взносам 1151111
