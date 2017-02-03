@@ -111,3 +111,11 @@ alter table ref_book_fond_detail add constraint chk_ref_book_fond_det_status che
 alter table declaration_template add constraint fk_declaration_template_fkind foreign key(form_kind) references declaration_kind(id);
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
 alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);
+--------------------------------------------------------------------------------------------------------------------------
+-- Отключение проверок
+alter table ref_book_region disable constraint chk_ref_book_region_oktmo_def;
+alter table ref_book_region disable constraint chk_ref_book_region_okato_def;
+
+alter table ref_book_form_type disable constraint chk_ref_book_form_type_taxkind;
+--------------------------------------------------------------------------------------------------------------------------
+

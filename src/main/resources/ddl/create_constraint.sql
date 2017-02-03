@@ -601,4 +601,21 @@ alter table log_entry add constraint chk_log_entry_lev check(log_level in (0,1,2
 alter table notification add constraint fk_notification_log foreign key(log_id) references log(id);
 alter table log_system add constraint fk_log_system_log foreign key(log_id) references log(id);
 --------------------------------------------------------------------------------------------------------------------------
+-- Отключение проверок
 
+alter table department disable constraint department_chk_sunr_use;
+alter table department disable constraint department_chk_garant_use;
+alter table department disable constraint department_chk_is_active;
+
+alter table ref_book_address disable constraint chk_ref_book_address_type;
+alter table ref_book_address disable constraint chk_ref_book_address_addr_rf;
+alter table ref_book_address disable constraint chk_ref_book_address_addr_n_rf;
+
+alter table ref_book_id_doc disable constraint chk_ref_book_id_doc_rep;
+
+alter table ref_book_person disable constraint chk_ref_book_person_employee;
+alter table ref_book_person disable constraint chk_ref_book_person_sex;
+alter table ref_book_person disable constraint chk_ref_book_person_medical;
+alter table ref_book_person disable constraint chk_ref_book_person_pension;
+alter table ref_book_person disable constraint chk_ref_book_person_social;
+--------------------------------------------------------------------------------------------------------------------------
