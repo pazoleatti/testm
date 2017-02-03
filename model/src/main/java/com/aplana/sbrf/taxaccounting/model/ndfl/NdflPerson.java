@@ -16,7 +16,6 @@ public class NdflPerson extends IdentityObject<Long> {
      */
     private Integer rowNum;
 
-
     /**
      * Ссылка на справочник физлиц
      */
@@ -26,7 +25,7 @@ public class NdflPerson extends IdentityObject<Long> {
      * Ссылка на декларацию к которой относятся данные
      */
     private Long declarationDataId;
-
+    // Уникальный код клиента
     private String inp;
     private String snils;
     private String lastName;
@@ -43,13 +42,21 @@ public class NdflPerson extends IdentityObject<Long> {
     // Cтатус налогоплательщика
     private String status;
     private String postIndex;
+    // Код Региона
     private String regionCode;
+    // Район
     private String area;
+    // Город
     private String city;
+    // Населенный пункт
     private String locality;
+    // Улица
     private String street;
+    // Дом
     private String house;
+    // Корпус
     private String building;
+    // Квартира
     private String flat;
     private String countryCode;
     private String address;
@@ -68,11 +75,11 @@ public class NdflPerson extends IdentityObject<Long> {
 
     public static final String TABLE_NAME = "ndfl_person";
     public static final String SEQ = "seq_ndfl_person";
-    public static final String[] COLUMNS = {"id", "declaration_data_id", "inp", "snils", "last_name", "first_name", "middle_name", "birth_day", "citizenship", "inn_np", "inn_foreign", "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city", "locality", "street", "house", "building", "flat", "country_code", "address", "additional_data"};
-    public static final String[] FIELDS = {"id", "declarationDataId", "inp", "snils", "lastName", "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber", "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat", "countryCode", "address", "additionalData"};
+    public static final String[] COLUMNS = {"id", "declaration_data_id", "person_id", "row_num", "inp", "snils", "last_name", "first_name", "middle_name", "birth_day", "citizenship", "inn_np", "inn_foreign", "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city", "locality", "street", "house", "building", "flat", "country_code", "address", "additional_data"};
+    public static final String[] FIELDS = {"id", "declarationDataId", "person_id", "row_num", "inp", "snils", "lastName", "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber", "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat", "countryCode", "address", "additionalData"};
 
     public Object[] createPreparedStatementArgs() {
-        return new Object[]{declarationDataId, inp, snils, lastName, firstName, middleName, birthDay, citizenship,
+        return new Object[]{declarationDataId, personId, rowNum, inp, snils, lastName, firstName, middleName, birthDay, citizenship,
                 innNp, innForeign, idDocType, idDocNumber, status, postIndex, regionCode, area, city,
                 locality, street, house, building, flat, countryCode, address, additionalData
         };
@@ -83,6 +90,8 @@ public class NdflPerson extends IdentityObject<Long> {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("id", "id");
         map.put("declarationDataId", "declaration_data_id");
+        map.put("personId", "person_id");
+        map.put("rowNum", "row_num");
         map.put("inp", "inp");
         map.put("snils", "snils");
         map.put("lastName", "last_name");
@@ -115,6 +124,8 @@ public class NdflPerson extends IdentityObject<Long> {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("id", "id");
         map.put("declarationDataId", "declaration_data_id");
+        map.put("personId", "person_id");
+        map.put("rowNum", "row_num");
         map.put("inp", "inp");
         map.put("snils", "snils");
         map.put("lastName", "last_name");
@@ -146,9 +157,22 @@ public class NdflPerson extends IdentityObject<Long> {
     public Long getDeclarationDataId() {
         return declarationDataId;
     }
-
     public void setDeclarationDataId(Long declarationDataId) {
         this.declarationDataId = declarationDataId;
+    }
+
+    public Integer getRowNum() {
+        return rowNum;
+    }
+    public void setRowNum(Integer rowNum) {
+        this.rowNum = rowNum;
+    }
+
+    public Long getPersonId() {
+        return personId;
+    }
+    public void setPersonId(Long personId) {
+        this.personId = personId;
     }
 
     public String getInp() {

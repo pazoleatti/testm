@@ -74,7 +74,7 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Создание экземпляров форм";
+        return "Создание отчетных форм";
     }
 
     @Override
@@ -82,8 +82,23 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        Integer declarationTypeId = (Integer)params.get("declarationTypeId");
+        Integer reportPeriodId = (Integer)params.get("reportPeriodId");
+        Integer departmentId = (Integer)params.get("departmentId");
 
-        return "Выполнено создание экземпляров форм";
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriodId);
+        Department department = departmentService.getDepartment(departmentId);
+        DeclarationTemplate declarationTemplate =  declarationTemplateService.get(declarationTemplateService.get(declarationTypeId, departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+
+        String strCorrPeriod = "";
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
+        }
+
+        return String.format("Выполнено создание отчетных форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
+                declarationTemplate.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod,
+                department.getName());
     }
 
     @Override
@@ -91,7 +106,22 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        Integer declarationTypeId = (Integer)params.get("declarationTypeId");
+        Integer reportPeriodId = (Integer)params.get("reportPeriodId");
+        Integer departmentId = (Integer)params.get("departmentId");
 
-        return "Произошла непредвиденная ошибка при создание экземпляров форм";
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriodId);
+        Department department = departmentService.getDepartment(departmentId);
+        DeclarationTemplate declarationTemplate =  declarationTemplateService.get(declarationTemplateService.get(declarationTypeId, departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+
+        String strCorrPeriod = "";
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
+        }
+
+        return String.format("Произошла непредвиденная ошибка при создании отчетных форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
+                declarationTemplate.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod,
+                department.getName());
     }
 }

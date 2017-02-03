@@ -23,7 +23,7 @@ public enum ReportType {
     ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие %s", 15L, 115L),
     IMPORT_TF_DEC(2, "IMPORT_TF_DECLARATION", "Импорт ТФ из каталога загрузки", 0L, 0L), //формально является задачей, блокирует форму при импорт из каталога загрузки
 
-    CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание экземпляров форм", 28L, 128L),
+    CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание отчетных форм", 28L, 128L),
 
     CONSOLIDATE_FD(0, "CONSOLIDATE_FORM_DATA", "Консолидация %s", 16L, 116L),
     CALCULATE_FD(1, "CALCULATE_FORM_DATA", "Расчет %s", 17L, 117L),

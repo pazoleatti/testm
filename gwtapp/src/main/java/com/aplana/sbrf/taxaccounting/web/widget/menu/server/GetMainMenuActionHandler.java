@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.client.CommonParameterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
@@ -123,6 +124,16 @@ public class GetMainMenuActionHandler extends
                                         NUMBER_SIGN + SourcesTokens.SOURCES + ";"
                                                 + TYPE + "=" + menu.getMeta()));
                     }
+                    if (currentUser.hasRole(TARole.ROLE_CONTROL)
+                            || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        if (menu.getMeta() != null && menu.getMeta().equals(TaxType.NDFL.name())) {
+                            menu.getSubMenu().add(new MenuItem("Отчетность", NUMBER_SIGN
+                                    + DeclarationListNameTokens.DECLARATION_LIST + ";"
+                                    + TYPE + "=" + menu.getMeta() + ";"
+                                    + DeclarationListPresenter.REPORTS + "=" + true));
+                        }
+                    }
                 }
             }
 
@@ -133,7 +144,9 @@ public class GetMainMenuActionHandler extends
                 MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
                 menuItem.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
                 taxMenu.getSubMenu().add(menuItem);
-            }
+
+                taxMenu.getSubMenu().add(new MenuItem("Общие параметры", ""));
+           }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 MenuItem menuItem = new MenuItem("Общие параметры", NUMBER_SIGN + CommonParameterPresenter.TOKEN);

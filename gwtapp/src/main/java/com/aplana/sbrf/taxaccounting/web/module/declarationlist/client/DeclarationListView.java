@@ -44,17 +44,19 @@ public class DeclarationListView extends
     public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
-    public static final String TAX_ORGAN_CODE_TITLE = "Налоговый орган";
-    public static final String TAX_ORGAN_CODE_TITLE_F = "Налоговый орган (кон.)";
-    public static final String TAX_ORGAN_CODE_TITLE_FF = "Код налогового органа (кон.)";
+    public static final String TAX_ORGAN_CODE_TITLE = "Код НО";
     public static final String TAX_ORGAN_CODE_KPP_TITLE = "КПП";
+    public static final String OKTMO_TITLE = "ОКТМО";
+    public static final String CREATE_DATE_TITLE = "Дата формирования";
+    public static final String DOC_STATE_TITLE = "Состояние ЭД";
+    public static final String NOTE_TITLE = "Примечание";
     public static final String ASNU_TITLE = "Наименование АСНУ";
     public static final String STATE_TITLE = "Состояние";
     public static final String FILE_NAME_TITLE = "Файл ТФ";
     public static final String PERIOD_TITLE = "Период";
 
-    private static final int TABLE_TOP1 = 41;
     private static final int TABLE_TOP2 = 75;
+    private static final int TABLE_TOP4 = 130;
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {}
 
@@ -137,10 +139,17 @@ public class DeclarationListView extends
     }
 
     @Override
-    public void initTable(TaxType taxType) {
+    public void initTable(TaxType taxType, boolean isReports) {
+        if (isReports) {
+            create.setVisible(false);
+            createReports.setVisible(true);
+        } else {
+            create.setVisible(true);
+            createReports.setVisible(false);
+        }
         Style tableStyle = tableWrapper.getElement().getStyle();
-        tableStyle.setProperty("top", (taxType == TaxType.PFR || taxType == TaxType.NDFL) ?
-                TABLE_TOP2 : TABLE_TOP1, Style.Unit.PX);
+        tableStyle.setProperty("top", (isReports) ?
+                TABLE_TOP4 : TABLE_TOP2, Style.Unit.PX);
 
         clearTable();
 
@@ -232,10 +241,28 @@ public class DeclarationListView extends
             }
         };
 
-        TextColumn<DeclarationDataSearchResultItem> declarationTaxOrganKppColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+        TextColumn<DeclarationDataSearchResultItem> declarationKppColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
                 return object.getTaxOrganKpp();
+            }
+        };
+        TextColumn<DeclarationDataSearchResultItem> declarationOktmoColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getOktmo();
+            }
+        };
+        TextColumn<DeclarationDataSearchResultItem> declarationCreateDateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getCreateDate() != null ? DATE_TIME_FORMAT.format(object.getCreateDate()) : null;
+            }
+        };
+        TextColumn<DeclarationDataSearchResultItem> declarationDocStateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getDocState();
             }
         };
 
@@ -243,13 +270,6 @@ public class DeclarationListView extends
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
                 return object.getAsnuId() != null ? asnuNames.get(object.getAsnuId()) : null;
-            }
-        };
-
-        TextColumn<DeclarationDataSearchResultItem> declarationGuidColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-            @Override
-            public String getValue(DeclarationDataSearchResultItem object) {
-                return object.getGuid();
             }
         };
 
@@ -283,32 +303,58 @@ public class DeclarationListView extends
                 return object;
             }
         };
+
+        TextColumn<DeclarationDataSearchResultItem> declarationNoteColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getNote();
+            }
+        };
+
         declarationKindColumn.setSortable(true);
         departmentColumn.setSortable(true);
         reportPeriodYearColumn.setSortable(true);
         reportPeriodColumn.setSortable(true);
         declarationTypeColumn.setSortable(true);
         declarationTaxOrganColumn.setSortable(true);
-        declarationTaxOrganKppColumn.setSortable(true);
+        declarationKppColumn.setSortable(true);
+        declarationOktmoColumn.setSortable(true);
+        declarationDocStateColumn.setSortable(true);
+        declarationCreateDateColumn.setSortable(true);
+        declarationNoteColumn.setSortable(true);
         declarationAsnuColumn.setSortable(true);
-        declarationGuidColumn.setSortable(true);
         stateColumn.setSortable(true);
         fileNameColumn.setSortable(true);
 
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
-        declarationTable.addColumn(declarationKindColumn, declarationTable.createResizableHeader(DECLARATION_KIND_TITLE, declarationKindColumn));
+        if (!isReports) {
+            declarationTable.addColumn(declarationKindColumn, declarationTable.createResizableHeader(DECLARATION_KIND_TITLE, declarationKindColumn));
+        }
         declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
         declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
         declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
         if (taxType == TaxType.NDFL || taxType == TaxType.PFR) {
-            declarationTable.addColumn(declarationAsnuColumn, declarationTable.createResizableHeader(ASNU_TITLE, declarationAsnuColumn));
-            //declarationTable.addColumn(declarationGuidColumn, declarationTable.createResizableHeader(GUID_TITLE, declarationGuidColumn));
+            if (!isReports) {
+                declarationTable.addColumn(declarationAsnuColumn, declarationTable.createResizableHeader(ASNU_TITLE, declarationAsnuColumn));
+            }
         }
 
         declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
         declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
-        declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
+
+        if (isReports && taxType == TaxType.NDFL) {
+            declarationTable.addColumn(declarationKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationKppColumn));
+            declarationTable.addColumn(declarationOktmoColumn, declarationTable.createResizableHeader(OKTMO_TITLE, declarationOktmoColumn));
+            declarationTable.addColumn(declarationTaxOrganColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
+            declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
+            declarationTable.addColumn(declarationCreateDateColumn, declarationTable.createResizableHeader(CREATE_DATE_TITLE, declarationCreateDateColumn));
+            declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
+            declarationTable.addColumn(declarationNoteColumn, declarationTable.createResizableHeader(NOTE_TITLE, declarationNoteColumn));
+        } else {
+            declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
+        }
+
     }
 
     @Override
@@ -450,6 +496,18 @@ public class DeclarationListView extends
             this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_KIND_NAME;
         } else if(ASNU_TITLE.equals(sortByColumn)){
             this.sortByColumn = DeclarationDataSearchOrdering.ASNU;
+        } else if(OKTMO_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.OKTMO;
+        } else if(TAX_ORGAN_CODE_KPP_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.KPP;
+        } else if(TAX_ORGAN_CODE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.TAX_ORGAN;
+        } else if(CREATE_DATE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.CREATE_DATE;
+        } else if(DOC_STATE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.DOC_STATE;
+        } else if(NOTE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.NOTE;
         } else {
 			this.sortByColumn = DeclarationDataSearchOrdering.ID;
 		}

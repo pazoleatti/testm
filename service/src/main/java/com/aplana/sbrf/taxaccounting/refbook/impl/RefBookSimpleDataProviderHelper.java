@@ -304,7 +304,7 @@ public class RefBookSimpleDataProviderHelper {
         }
     }
 
-    private void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
+    void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
         //Проверка использования
         if (refBook.isHierarchic()) {
             //Поиск среди дочерних элементов
@@ -382,7 +382,6 @@ public class RefBookSimpleDataProviderHelper {
         }
     }
 
-    // TODO использую в скрипте
     List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
         List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
