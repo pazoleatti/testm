@@ -29,7 +29,7 @@ public class SaveCommonParameterHandler extends AbstractActionHandler<SaveCommon
         SaveCommonParameterResult result = new SaveCommonParameterResult();
         Logger logger = new Logger();
 
-        configurationService.checkCommonConfigurationParams(action.getConfigurationParamMap(), logger);
+        result.setErrors(configurationService.checkCommonConfigurationParams(action.getConfigurationParamMap(), logger));
 
         if (!logger.getEntries().isEmpty()) {
             result.setUuid(logEntryService.save(logger.getEntries()));

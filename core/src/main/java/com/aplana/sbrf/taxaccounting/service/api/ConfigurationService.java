@@ -47,8 +47,10 @@ public interface ConfigurationService {
 
     /**
      * Проверка общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
+     *
+     * @return список параметров с ошибками
      */
-    void checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger);
+    List<ConfigurationParam> checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger);
 
     /**
      * Сохранение общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
