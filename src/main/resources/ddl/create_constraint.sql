@@ -351,11 +351,11 @@ create index i_decl_data_dep_rep_per_id on declaration_data (department_report_p
 create index i_ifrs_data_blob_data_id on ifrs_data(blob_data_id);
 create index i_form_data_rep_blob_data_id on form_data_report(blob_data_id);
 create index i_decl_report_blob_data_id on declaration_report(blob_data_id);
-create index i_log_system_blob_data_id on log_system(blob_data_id);
+--create index i_log_system_blob_data_id on log_system(blob_data_id);
 create index i_ref_book_script_id on ref_book(script_id);
 create index i_declaration_template_xsd on declaration_template(xsd);
 create index i_declaration_template_jrxml on declaration_template(jrxml);
-create index i_notification_blob_data_id on notification(blob_data_id);
+--create index i_notification_blob_data_id on notification(blob_data_id);
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
