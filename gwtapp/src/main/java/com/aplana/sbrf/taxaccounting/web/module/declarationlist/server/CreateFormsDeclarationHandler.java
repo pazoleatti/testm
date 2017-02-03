@@ -35,9 +35,6 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
     private DeclarationDataService declarationDataService;
 
     @Autowired
-    private ReportService reportService;
-
-    @Autowired
     private LockDataService lockDataService;
 
     @Autowired
@@ -45,9 +42,6 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
 
     @Autowired
     private AsyncTaskManagerService asyncTaskManagerService;
-
-    @Autowired
-    private DeclarationTemplateService declarationTemplateService;
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
@@ -66,8 +60,7 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
 
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("declarationTypeId", action.getDeclarationTypeId());
-        params.put("reportPeriodId", action.getReportPeriodId());
-        params.put("departmentId", action.getDepartmentId());
+        params.put("departmentReportPeriodId", departmentReportPeriod.getId());
 
         String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationTypeId(), action.getReportPeriodId(), action.getDepartmentId());
         Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(reportType, action.getTaxType(), params), userInfo, action.isForce(), logger);

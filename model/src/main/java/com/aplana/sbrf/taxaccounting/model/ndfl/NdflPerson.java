@@ -38,6 +38,7 @@ public class NdflPerson extends IdentityObject<Long> {
     private String innForeign;
     // Код вида документа
     private String idDocType;
+    // Серия и номер документа
     private String idDocNumber;
     // Cтатус налогоплательщика
     private String status;

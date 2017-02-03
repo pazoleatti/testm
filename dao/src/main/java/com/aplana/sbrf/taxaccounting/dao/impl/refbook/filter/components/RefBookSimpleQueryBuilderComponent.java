@@ -533,12 +533,12 @@ public class RefBookSimpleQueryBuilderComponent {
     }
 
     private void appendFakeAttributeValue(PreparedStatementData sql, RefBookAttribute requiredAttribute) {
-        Date fakeDate = new java.sql.Date(0);
+        Date fakeDate = new GregorianCalendar(2016, 0, 1).getTime();
         sql.append(":").append(requiredAttribute.getAlias());
 
         switch (requiredAttribute.getAttributeType()) {
             case STRING:
-                sql.addNamedParam(requiredAttribute.getAlias(), "-");
+                sql.addNamedParam(requiredAttribute.getAlias(), " ");
                 break;
             case NUMBER:
                 sql.addNamedParam(requiredAttribute.getAlias(), 1);

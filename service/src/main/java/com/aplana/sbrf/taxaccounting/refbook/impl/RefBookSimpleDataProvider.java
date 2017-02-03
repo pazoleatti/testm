@@ -203,6 +203,9 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     public List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
 
         try {
+            if (!getRefBook().isVersioned() && versionFrom == null) {
+                versionFrom = new Date(0);
+            }
             List<Long> excludedVersionEndRecords = new ArrayList<Long>();
             //Признак того, что для проверок дата окончания была изменена (была использована дата начала следующей версии)
             boolean dateToChangedForChecks = false;
@@ -218,24 +221,26 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
             //Проверка корректности
             helper.checkCorrectness(logger, getRefBook(), null, versionFrom, records);
 
-            for (RefBookRecord record : records) {
-                //Проверка пересечения версий
-                if (record.getRecordId() != null) {
-                    boolean needToCreateFakeVersion = helper.crossVersionsProcessing(dao.checkCrossVersions(getRefBook(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
-                            getRefBook(), versionFrom, record.getVersionTo(), logger);
-                    if (!needToCreateFakeVersion) {
-                        //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
-                        excludedVersionEndRecords.add(record.getRecordId());
+            if (getRefBook().isVersioned()) {
+                for (RefBookRecord record : records) {
+                    //Проверка пересечения версий
+                    if (record.getRecordId() != null) {
+                        boolean needToCreateFakeVersion = helper.crossVersionsProcessing(dao.checkCrossVersions(getRefBook(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
+                                getRefBook(), versionFrom, record.getVersionTo(), logger);
+                        if (!needToCreateFakeVersion) {
+                            //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
+                            excludedVersionEndRecords.add(record.getRecordId());
+                        }
                     }
                 }
-            }
 
-            //Создание настоящей и фиктивной версии
-            for (RefBookRecord record : records) {
-                if (dateToChangedForChecks) {
-                    //Возвращаем обратно пустую дату начала, т.к была установлена дата начала следующей версии для проверок
-                    record.setVersionTo(null);
-                    versionTo = null;
+                //Создание настоящей и фиктивной версии
+                for (RefBookRecord record : records) {
+                    if (dateToChangedForChecks) {
+                        //Возвращаем обратно пустую дату начала, т.к была установлена дата начала следующей версии для проверок
+                        record.setVersionTo(null);
+                        versionTo = null;
+                    }
                 }
             }
             return helper.createVersions(refBook, versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
@@ -251,7 +256,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public void updateRecordVersion(@NotNull Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
-
+        checkIfRefBookIsEditable();
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException(CURRENT_USER_NOT_SET);
         }
@@ -310,7 +315,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
-
+        checkIfRefBookIsEditable();
         try {
             boolean isJustNeedValuesUpdate = (versionFrom == null && versionTo == null);
 
@@ -382,7 +387,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
             }
 
             //Обновление периода актуальности
-            if (isRelevancePeriodChanged) {
+            if (getRefBook().isVersioned() && isRelevancePeriodChanged) {
                 if (!isValuesChanged) {
                     //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом, но которые действовали в старом
                     helper.checkUsages(getRefBook(), Arrays.asList(uniqueRecordId), versionFrom, versionTo, false, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
@@ -477,6 +482,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public void deleteAllRecords(@NotNull Logger logger, List<Long> uniqueRecordIds) {
+        checkIfRefBookIsEditable();
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException("Текущий пользователь не установлен!");
         }
@@ -502,8 +508,15 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
         }
     }
 
+    private void checkIfRefBookIsEditable() {
+        if (getRefBook().isReadOnly()) {
+            throw new ServiceException("Справочник " + getRefBook().getName() + " предназначен только для чтения");
+        }
+    }
+
     @Override
     public void deleteAllRecordsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
+        checkIfRefBookIsEditable();
         try {
             //Проверка использования
             if (refBook.isHierarchic()) {
@@ -526,6 +539,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public void deleteRecordVersions(@NotNull Logger logger, List<Long> uniqueRecordIds) {
+        checkIfRefBookIsEditable();
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException("Текущий пользователь не установлен!");
         }
@@ -556,6 +570,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
+        checkIfRefBookIsEditable();
         try {
             RefBook refBook = refBookDao.get(getRefBookId());
             //Проверка использования
@@ -598,6 +613,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 */
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds, boolean force) {
+        checkIfRefBookIsEditable();
         deleteRecordVersions(logger, uniqueRecordIds);
     }
 
@@ -623,21 +639,25 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        checkIfRefBookIsEditable();
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        checkIfRefBookIsEditable();
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        checkIfRefBookIsEditable();
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        checkIfRefBookIsEditable();
         throw new UnsupportedOperationException();
     }
 
@@ -659,9 +679,6 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     }
 
     public void setRefBook(RefBook refBook) {
-        if (!isRefBookSupported(refBook)) {
-            throw new IllegalArgumentException(String.format(MSG_REFBOOK_NOT_VERSIONED, refBook.getName(), refBook.getId()));
-        }
         this.refBook = refBook;
     }
 
@@ -671,9 +688,6 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     public void setRefBookId(long refBookId) {
         RefBook probableRefBook = refBookDao.get(refBookId);
-        if (!isRefBookSupported(probableRefBook)) {
-            throw new IllegalArgumentException(String.format(MSG_REFBOOK_NOT_VERSIONED, probableRefBook.getName(), probableRefBook.getId()));
-        }
         this.refBook = probableRefBook;
     }
 

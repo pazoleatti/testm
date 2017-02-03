@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <application version="5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd">
-    <description>АС "Учёт налогов"</description>
+    <description>АС "Учёт налогов" ФП "НДФЛ", ФП "СБОРЫ, ВЗНОСЫ"</description>
     <display-name>${releaseName}</display-name>
     <module>
         <web>
             <web-uri>gwtapp.war</web-uri>
             <context-root>/${releaseName}/gwtapp</context-root>
         </web>
-    </module>
-    <module>
-        <ejb>mdb.jar</ejb>
     </module>
     <module>
         <ejb>scheduler-task.jar</ejb>
@@ -23,12 +20,6 @@
     </module>
     <module>
         <ejb>async-task.jar</ejb>
-    </module>
-    <module>
-        <ejb>audit-ejb.jar</ejb>
-    </module>
-    <module>
-        <ejb>department-ejb.jar</ejb>
     </module>
     <security-role>
         <description>Все аутентифицированные пользователи</description>

@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
@@ -73,6 +74,11 @@ public class DeclarationListPresenter extends
         creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), DeclarationFormKind.REPORTS, this);
     }
 
+    @Override
+    public void onDownloadReportsClicked() {
+        declarationDownloadReportsPresenter.initAndShowDialog(filterPresenter.getFilterData(), this);
+    }
+
     @ProxyCodeSplit
 	@NameToken(DeclarationListNameTokens.DECLARATION_LIST)
 	public interface MyProxy extends ProxyPlace<DeclarationListPresenter>, Place {
@@ -81,8 +87,9 @@ public class DeclarationListPresenter extends
 	@Inject
 	public DeclarationListPresenter(EventBus eventBus, DeclarationListPresenterBase.MyView view, MyProxy proxy,
 	                         PlaceManager placeManager, DispatchAsync dispatcher,
-	                         DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter);
+	                         DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter,
+                             DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter);
 		getView().setUiHandlers(this);
         History.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override

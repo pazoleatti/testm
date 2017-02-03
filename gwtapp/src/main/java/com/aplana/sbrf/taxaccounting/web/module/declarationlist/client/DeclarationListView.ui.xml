@@ -55,6 +55,8 @@
                                               img="resources/img/add.png" title="Создать налоговую форму"/>
                             <style:LinkButton ui:field="createReports" text="Создание отчетности..."
                                               img="resources/img/add.png" title="Создание отчетности"/>
+                            <style:LinkButton ui:field="downloadReports" text="Выгрузить отчетность..."
+                                              img="resources/img/add.png" title="Выгрузка отчетности"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

@@ -641,7 +641,6 @@ create table log_system (
   declaration_type_name varchar2(1000),
   form_type_name        varchar2(1000),
   form_department_id    number(9),
-  blob_data_id          varchar2(36),
   form_type_id          number(9, 0),
   is_error              number(1) default 0 not null,
   audit_form_type_id    number(9, 0),
@@ -663,7 +662,6 @@ comment on column log_system.user_department_name is 'Наименование �
 comment on column log_system.declaration_type_name is 'Вид декларации';
 comment on column log_system.form_type_name is 'Вид налоговой формы';
 comment on column log_system.form_department_id is 'Идентификатор подразделения налоговой формы/декларации';
-comment on column log_system.blob_data_id is 'Ссылка на логи';
 comment on column log_system.form_type_id is 'Идентификатор вида НФ';
 comment on column log_system.is_error is 'Признак ошибки';
 comment on column log_system.audit_form_type_id is 'Тип формы';
@@ -723,7 +721,6 @@ create table notification (
   user_id                number(9)              null,
   role_id                number(9)              null,
   is_read                number(1) default 0    not null,
-  blob_data_id           varchar2(36),
   type                   number(2, 0) default 0 not null,
   report_id              varchar2(36),
   log_id                 varchar2(36)
@@ -740,7 +737,6 @@ comment on column notification.deadline is 'дата сдачи отчетнос
 comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
 comment on column notification.role_id is 'Идентификатор роли пользователя, который получит оповещение';
 comment on column notification.is_read is 'Признак прочтения';
-comment on column notification.blob_data_id is 'Ссылка на логи';
 comment on column notification.type is 'Тип оповещения (0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
 comment on column notification.report_id is 'Идентификатор отчета';
 comment on column notification.log_id is 'Ссылка на журнал действий пользователей';
@@ -1264,8 +1260,8 @@ create table ndfl_person_income
 comment on table ndfl_person_income is 'Сведения о доходах физического лица';
 comment on column ndfl_person_income.source_id is 'Cсылка на запись которая является источником при формирование консолидированной формы';
 comment on column ndfl_person_income.row_num is 'Порядковый номер строки';
-comment on column ndfl_person_income.income_code is 'Код дохода';
-comment on column ndfl_person_income.income_type is 'Признак дохода';
+comment on column ndfl_person_income.income_code is 'Код вида дохода';
+comment on column ndfl_person_income.income_type is 'Признак вида дохода';
 comment on column ndfl_person_income.operation_id is 'Номер операции';
 comment on column ndfl_person_income.oktmo is 'ОКТМО';
 comment on column ndfl_person_income.kpp is 'КПП';
@@ -1364,6 +1360,9 @@ create sequence seq_ndfl_person_prepayment start with 1000;
 create table ndfl_references
 (
   id number(18) not null,
+  record_id number(18) not null,
+  version date not null,
+  status number(1) not null,
   declaration_data_id number(18)not null,
   person_id number(18) not null,
   num number(10) not null,
@@ -1376,6 +1375,9 @@ create table ndfl_references
 
 comment on table ndfl_references is 'Реестр справок';
 comment on column ndfl_references.id is 'Уникальный идентификатор';
+comment on column ndfl_references.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ndfl_references.version is 'Версия. Дата актуальности записи';
+comment on column ndfl_references.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ndfl_references.declaration_data_id is 'Идентификатор декларации к которой относятся данные';
 comment on column ndfl_references.person_id is 'Физическое лицо';
 comment on column ndfl_references.num is 'Номер справки';
@@ -1384,8 +1386,6 @@ comment on column ndfl_references.name is 'Имя';
 comment on column ndfl_references.lastname is 'Отчество';
 comment on column ndfl_references.birthday is 'Дата рождения ФЛ';
 comment on column ndfl_references.errtext is 'Текст ошибки от ФНС';
-
-create sequence seq_ndfl_references start with 1;
 
 ------------------------------------------------------------------------------------------------------
 --  Расчет по страховым взносам 1151111
@@ -2267,6 +2267,9 @@ comment on column ref_book_person.source_id is 'Система-источник:
 create table ref_book_id_doc
 (
   id number(18) not null,
+  record_id      number(18) not null,
+  version        date not null,
+  status         number(1) default 0 not null,
   person_id number(18),
   doc_id number(18) not null,
   doc_number varchar2(25 char) not null,
@@ -2277,6 +2280,9 @@ create table ref_book_id_doc
 
 comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';
 comment on column ref_book_id_doc.id is 'Уникальный идентификатор';
+comment on column ref_book_id_doc.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_id_doc.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_id_doc.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_id_doc.person_id is 'Физическое лицо';
 comment on column ref_book_id_doc.doc_id is 'Вид документа';
 comment on column ref_book_id_doc.doc_number is 'Серия и номер документа';
@@ -2287,6 +2293,9 @@ comment on column ref_book_id_doc.inc_rep is 'Включается в отчет
 create table ref_book_address
 (
   id number(18) not null,
+  record_id number(18) not null,
+  version   date           not null,
+  status    number(1)      not null,
   address_type number(1) not null,
   country_id number(18),
   region_code varchar2(2 char),
@@ -2302,6 +2311,9 @@ create table ref_book_address
 
 comment on table ref_book_address is 'Адрес места жительства';
 comment on column ref_book_address.id is 'Уникальный идентификатор';
+comment on column ref_book_address.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_address.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_address.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 comment on column ref_book_address.address_type is 'Тип адреса. Значения: 0 - в РФ 1 - вне РФ';
 comment on column ref_book_address.country_id is 'Страна';
 comment on column ref_book_address.region_code is 'Код региона';
@@ -2317,11 +2329,17 @@ comment on column ref_book_address.appartment is 'Номер квартиры';
 create table ref_book_id_tax_payer
 (
   id        number(18) not null,
+  record_id      number(18) not null,
+  version        date not null,
+  status         number(1) default 0 not null,
   person_id number(18) not null,
   inp       varchar2(14) not null,
   as_nu     number(18) not null
 );
 comment on table ref_book_id_tax_payer is 'Идентификатор налогоплательщика';
+comment on column ref_book_id_tax_payer.record_id is 'Идентификатор строки. Может повторяться у разных версий';
+comment on column ref_book_id_tax_payer.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_id_tax_payer.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_id_tax_payer.id is 'Уникальный идентификатор';
 comment on column ref_book_id_tax_payer.person_id is 'Ссылка на физическое лицо';
 comment on column ref_book_id_tax_payer.inp is 'Уникальный неизменяемый цифровой идентификатор налогоплательщика';
@@ -2457,5 +2475,4 @@ comment on column log_entry.message is 'Текст сообщения';
 
 create sequence seq_log_entry start with 1;
 
----------------------------------------------------------------------------------------------------------------------------------------------
-exit;
+

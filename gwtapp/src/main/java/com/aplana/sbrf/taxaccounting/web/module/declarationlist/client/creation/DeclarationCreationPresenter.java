@@ -121,6 +121,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         action.setDepartmentId(filter.getDepartmentIds().iterator().next());
         action.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
         action.setTaxType(taxType);
+        action.setForce(force);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateFormsDeclarationResult>() {
                     @Override

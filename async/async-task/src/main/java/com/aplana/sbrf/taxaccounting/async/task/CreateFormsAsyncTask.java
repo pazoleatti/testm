@@ -37,7 +37,7 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected ReportType getReportType() {
-        return ReportType.XML_DEC;
+        return ReportType.CREATE_FORMS_DEC;
     }
 
     @Override
@@ -48,16 +48,14 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
     @Override
     protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
         Integer declarationTypeId = (Integer)params.get("declarationTypeId");
-        Integer reportPeriodId = (Integer)params.get("reportPeriodId");
-        Integer departmentId = (Integer)params.get("departmentId");
+        Integer departmentReportPeriodId = (Integer)params.get("departmentReportPeriodId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId,
-                reportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
 
         if (departmentReportPeriod == null) {
             throw new ServiceException("Не удалось определить налоговый период.");
@@ -83,12 +81,11 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
         Integer declarationTypeId = (Integer)params.get("declarationTypeId");
-        Integer reportPeriodId = (Integer)params.get("reportPeriodId");
-        Integer departmentId = (Integer)params.get("departmentId");
+        Integer departmentReportPeriodId = (Integer)params.get("departmentReportPeriodId");
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriodId);
-        Department department = departmentService.getDepartment(departmentId);
-        DeclarationTemplate declarationTemplate =  declarationTemplateService.get(declarationTemplateService.get(declarationTypeId, departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
 
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
@@ -107,12 +104,11 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
         Integer declarationTypeId = (Integer)params.get("declarationTypeId");
-        Integer reportPeriodId = (Integer)params.get("reportPeriodId");
-        Integer departmentId = (Integer)params.get("departmentId");
+        Integer departmentReportPeriodId = (Integer)params.get("departmentReportPeriodId");
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriodId);
-        Department department = departmentService.getDepartment(departmentId);
-        DeclarationTemplate declarationTemplate =  declarationTemplateService.get(declarationTemplateService.get(declarationTypeId, departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()));
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
 
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
