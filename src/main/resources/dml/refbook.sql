@@ -434,7 +434,7 @@ insert into ref_book (id, name, visible, type, read_only, table_name, is_version
 insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (902, 'Документы, удостоверяющие личность', 1, 0, 0, 'REF_BOOK_ID_DOC', 0);
 insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (903, 'Статусы налогоплательщика', 1, 0, 1, 'REF_BOOK_TAXPAYER_STATE', 0);
 insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (904, 'Физические лица', 1, 0, 0, 'REF_BOOK_PERSON', 1);
-insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (905, 'Идентификаторы налогоплательщика', 0, 0, 0, 'REF_BOOK_ID_TAX_PAYER', 0);
+insert into ref_book (id, name, visible, type, read_only, table_name, is_versioned) values (905, 'Идентификаторы налогоплательщика', 0, 0, 0, 'REF_BOOK_ID_TAX_PAYER', 1);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9120, 901, 'Тип адреса', 'ADDRESS_TYPE', 2, 1, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9111, 901, 'Код региона', 'REGION_CODE', 1, 3, null, null, 1, null, 15, 0, 0, null, null, 0, 2);
