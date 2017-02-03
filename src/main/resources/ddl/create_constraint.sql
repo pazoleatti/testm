@@ -555,6 +555,7 @@ alter table ref_book_person add constraint chk_ref_book_person_status check (sta
 alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
 alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0));
 alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));
+alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_doc add constraint chk_ref_book_id_doc_rep check(inc_rep in (0,1));
 alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 
