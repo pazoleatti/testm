@@ -56,9 +56,6 @@ def createSpecificReport() {
         throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + params);
     }
 
-    if (pagingResult.isEmpty()) {
-        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + params);
-    }
 
     if (pagingResult.size() > 1) {
         pagingResult.getRecords().each() { ndflPerson ->
@@ -75,9 +72,11 @@ def createSpecificReport() {
         throw new ServiceException("Найдено " + pagingResult.getTotalCount() + " записей. Отображено записей " + pagingResult.size() + ". Уточните критерии поиска.");
     }
 
+    def ndflPerson = ndflPersonService.get(pagingResult.get(0).id);
+
     //формирование отчета
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-        calculateReportData(it, pagingResult.get(0))
+        calculateReportData(it, ndflPerson)
     });
 
     declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
