@@ -1,28 +1,15 @@
-package com.aplana.sbrf.taxaccounting.dao.refbook;
+package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- * DAO для работы со справочниками ФИАС
- *
  * @author Andrey Drunk
  */
-public interface FiasRefBookDao {
-
-    /**
-     * Пакетное добавление строк справочника ФИАС
-     * @param tableName имя таблицы справочника
-     * @param records пакет строк, количество строк в пакете определяется в скрипте загрузки
-     */
-    void insertRecordsBatch(String tableName, List<Map<String, Object>> records);
-
-    /**
-     * Удалить данныее из всех таблиц ФИАС
-     */
-    void clearAll();
+@ScriptExposed
+public interface FiasRefBookService {
 
     /**
      * Найти адресообразующий объект
@@ -41,5 +28,6 @@ public interface FiasRefBookDao {
      * @return адресообразующий объект справочника
      */
     AddressObject findRegionByCode(String regionCode);
+
 
 }
