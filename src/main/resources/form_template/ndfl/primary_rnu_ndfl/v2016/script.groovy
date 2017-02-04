@@ -511,100 +511,159 @@ def prepaymentAttr(personPrepayment) {
 @Field def taxInspectionCache = []
 @Field final long REF_TAX_INSPECTION_ID = RefBook.Id.TAX_INSPECTION.id
 
+// Дата начала отчетного периода
+@Field def reportPeriodStartDate = null
+
 // Дата окончания отчетного периода
 @Field def reportPeriodEndDate = null
 
-@Field final MESSAGE_ERROR_NOT_FOUND_REF = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: \"%s\" не соответствует справочнику \"%s\"."
-@Field final MESSAGE_ERROR_NOT_FOUND_PERSON = "Не удалось установить связь со справочником \"%s\" для Раздел: \"%s\". Строка: \"%s\", ИНП: \"%s\"."
+@Field final String MESSAGE_ERROR_NOT_FOUND_REF = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: \"%s\" не соответствует справочнику \"%s\"."
+@Field final String MESSAGE_ERROR_VALUE = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: %s."
+@Field final String MESSAGE_ERROR_INN = "Некорректный ИНН"
+@Field final String MESSAGE_ERROR_BIRTHDAY = "Дата рождения налогоплательщика превышает дату отчетного периода"
+@Field final String MESSAGE_ERROR_DATE = "Дата не входит в отчетный период формы"
+@Field final String MESSAGE_ERROR_NOT_MATCH_RULE = "Значение не соответствует правилу: "
+@Field final String MESSAGE_ERROR_MUST_FILL = "Поле \"%s\" должно быть заполнено, если %s"
+@Field final String MESSAGE_ERROR_NOT_FILL = "Поле \"%s\" не заполнено. Должны быть заполнены либо все поля %s, либо не заполнено ни одно из полей."
+@Field final String MESSAGE_ERROR_NOT_MUST_FILL = "Поле \"%s\" не должно быть заполнено, если %s"
+@Field final String MESSAGE_ERROR_NOT_FOUND_PERSON = "Не удалось установить связь со справочником \"%s\" для Раздел: \"%s\". Строка: \"%s\", ИНП: \"%s\"."
+@Field final String MESSAGE_ERROR_DUBL_OR_ABSENT = "В ТФ имеются пропуски или повторы в нумерации строк"
+@Field final String MESSAGE_ERROR_DUBL = ". Повторяются строки: "
+@Field final String MESSAGE_ERROR_ABSENT = ". Отсутсвуют строки: "
 
-@Field final SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" размером %d."
-@Field final SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" в колличестве %d."
+@Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" размером %d."
+@Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" в колличестве %d."
 
 // Таблицы
-@Field final T_PERSON = "Данные о физическом лице - получателе дохода"
-@Field final T_PERSON_INCOME = "Сведения о доходах физического лица"
-@Field final T_PERSON_DEDUCTION = "Стандартные, социальные и имущественные налоговые вычеты"
-@Field final T_PERSON_PREPAYMENT = "Cведения о доходах в виде авансовых платежей"
+@Field final String T_PERSON = "Реквизиты"
+@Field final String T_PERSON_INCOME = "Сведения о доходах и НДФЛ"
+@Field final String T_PERSON_DEDUCTION = "Сведения о вычетах"
+@Field final String T_PERSON_PREPAYMENT = "Сведения о доходах в виде авансовых платежей"
 
 // Справочники
-@Field final R_PERSON = "Физические лица"
-@Field final R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
-@Field final R_ID_DOC_TYPE = "Коды документов"
-@Field final R_STATUS = "Статусы налогоплательщика"
-@Field final R_INCOME_CODE = "Коды видов доходов"
-@Field final R_INCOME_KIND = "Виды доходов"
-@Field final R_RATE = "Ставки"
-@Field final R_TYPE_CODE = "Коды видов вычетов"
-@Field final R_NOTIF_SOURCE = "Коды налоговых органов"
-@Field final R_ADDRESS = "Адреса"
-@Field final R_INP = "Идентификаторы налогоплательщиков"
-@Field final R_DUL = "Документы, удостоверяющий личность"
+@Field final String R_PERSON = "Физические лица"
+@Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
+@Field final String R_ID_DOC_TYPE = "Коды документов"
+@Field final String R_STATUS = "Статусы налогоплательщика"
+@Field final String R_INCOME_CODE = "Коды видов доходов"
+@Field final String R_INCOME_KIND = "Виды доходов"
+@Field final String R_RATE = "Ставки"
+@Field final String R_TYPE_CODE = "Коды видов вычетов"
+@Field final String R_NOTIF_SOURCE = "Коды налоговых органов"
+@Field final String R_ADDRESS = "Адреса"
+@Field final String R_INP = "Идентификаторы налогоплательщиков"
+@Field final String R_DUL = "Документы, удостоверяющий личность"
 
-// Комментарии к полям
-@Field final C_CITIZENSHIP = "Гражданство (код страны)"
-@Field final C_ID_DOC_TYPE = "Код вида документа"
-@Field final C_ID_DOC_NUMBER = "Серия и номер документа"
-@Field final C_STATUS = "Статус"
-@Field final C_INCOME_CODE = "Код вида дохода"
-@Field final C_INCOME_KIND = "Вид дохода"
-@Field final C_RATE = "Ставка"
-@Field final C_TYPE_CODE = "Код вычета"
-@Field final C_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление"
-@Field final C_LAST_NAME = "Фамилия"
-@Field final C_FIRST_NAME = "Имя"
-@Field final C_MIDDLE_NAME = "Отчество"
-@Field final C_INP = "Уникальный код клиента"
-@Field final C_BIRTH_DATE = "Дата рождения"
-@Field final C_INN_NP = "ИНН  физического лица"
-@Field final C_INN_FOREIGN = "ИНН  иностранного гражданина"
-@Field final C_REGION_CODE = "Код Региона"
-@Field final C_AREA = "Район"
-@Field final C_CITY = "Город"
-@Field final C_LOCALITY = "Населенный пункт"
-@Field final C_STREET = "Улица"
-@Field final C_HOUSE = "Дом"
-@Field final C_BUILDING = "Корпус"
-@Field final C_FLAT = "Квартира"
+// Реквизиты
+@Field final String C_CITIZENSHIP = "Гражданство (код страны)"
+@Field final String C_ID_DOC_TYPE = "Код вида документа"
+@Field final String C_ID_DOC_NUMBER = "Серия и номер документа"
+@Field final String C_STATUS = "Статус"
+@Field final String C_INCOME_CODE = "Код вида дохода"
+@Field final String C_INCOME_KIND = "Вид дохода"
+@Field final String C_RATE = "Ставка"
+@Field final String C_TYPE_CODE = "Код вычета"
+@Field final String C_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление"
+@Field final String C_LAST_NAME = "Фамилия"
+@Field final String C_FIRST_NAME = "Имя"
+@Field final String C_MIDDLE_NAME = "Отчество"
+@Field final String C_INP = "Уникальный код клиента"
+@Field final String C_BIRTH_DATE = "Дата рождения"
+@Field final String C_INN_NP = "ИНН  физического лица"
+@Field final String C_INN_FOREIGN = "ИНН  иностранного гражданина"
+@Field final String C_REGION_CODE = "Код Региона"
+@Field final String C_AREA = "Район"
+@Field final String C_CITY = "Город"
+@Field final String C_LOCALITY = "Населенный пункт"
+@Field final String C_STREET = "Улица"
+@Field final String C_HOUSE = "Дом"
+@Field final String C_BUILDING = "Корпус"
+@Field final String C_FLAT = "Квартира"
+
+// Сведения о доходах и НДФЛ
+@Field final String C_INCOME_TYPE = "Признак вида дохода"
+@Field final String C_INCOME_ACCRUED_DATE = "Дата начисления дохода"
+@Field final String C_INCOME_PAYOUT_DATE = "Дата выплаты дохода"
+@Field final String C_INCOME_ACCRUED_SUMM = "Сумма начисленного дохода"
+@Field final String C_INCOME_PAYOUT_SUMM = "Сумма выплаченного дохода"
+@Field final String C_TOTAL_DEDUCTIONS_SUMM = "Общая сумма вычетов"
+@Field final String C_TAX_BASE = "Налоговая база"
+@Field final String C_TAX_RATE = "Ставка налога"
+@Field final String C_TAX_DATE = "Дата налога"
+@Field final String C_CALCULATED_TAX = "Сумма налога исчисленная"
+@Field final String C_WITHHOLDING_TAX = "Сумма налога удержанная"
+@Field final String C_NOT_HOLDING_TAX = "Сумма налога, не удержанная налоговым агентом"
+@Field final String C_OVERHOLDING_TAX = "Сумма налога, излишне удержанная налоговым агентом"
+@Field final String C_REFOUND_TAX = "Сумма возвращенного налога"
+@Field final String C_TAX_TRANSFER_DATE = "Срок (дата) перечисления налога"
+@Field final String C_PAYMENT_DATE = "Дата платежного поручения"
+@Field final String C_PAYMENT_NUMBER = "Номер платежного поручения перечисления налога в бюджет"
+@Field final String C_TAX_SUMM = "Сумма налога перечисленная"
+
+// Сведения о вычетах
+@Field final String C_NOTIF_DATE = "Дата выдачи уведомления"
+@Field final String C_INCOME_ACCRUED = "Дата начисления дохода"
+@Field final String C_PERIOD_PREV_DATE = "Дата применения вычета в предыдущем периоде"
+@Field final String C_PERIOD_CURR_DATE = "Дата применения вычета в текущем периоде"
 
 // Поля справочника Физические лица
-@Field final RF_LAST_NAME = "LAST_NAME"
-@Field final RF_FIRST_NAME = "FIRST_NAME"
-@Field final RF_MIDDLE_NAME = "MIDDLE_NAME"
-@Field final RF_BIRTH_DATE = "BIRTH_DATE"
-@Field final RF_CITIZENSHIP = "CITIZENSHIP"
-@Field final RF_INN = "INN"
-@Field final RF_INN_FOREIGN = "INN_FOREIGN"
-@Field final RF_SNILS = "SNILS"
-@Field final RF_TAXPAYER_STATE = "TAXPAYER_STATE"
-@Field final RF_ADDRESS = "ADDRESS"
-@Field final RF_RECORD_ID = "RECORD_ID"
-@Field final RF_COUNTRY = "COUNTRY"
-@Field final RF_REGION_CODE = "REGION_CODE"
-@Field final RF_DISTRICT = "DISTRICT"
-@Field final RF_CITY = "CITY"
-@Field final RF_LOCALITY = "LOCALITY"
-@Field final RF_STREET = "STREET"
-@Field final RF_HOUSE = "HOUSE"
-@Field final RF_BUILD = "BUILD"
-@Field final RF_APPARTMENT = "APPARTMENT"
-@Field final RF_DUBLICATES = "DUBLICATES"
-@Field final RF_DOC_ID = "DOC_ID"
-@Field final RF_DOC_NUMBER = "DOC_NUMBER"
+@Field final String RF_LAST_NAME = "LAST_NAME"
+@Field final String RF_FIRST_NAME = "FIRST_NAME"
+@Field final String RF_MIDDLE_NAME = "MIDDLE_NAME"
+@Field final String RF_BIRTH_DATE = "BIRTH_DATE"
+@Field final String RF_CITIZENSHIP = "CITIZENSHIP"
+@Field final String RF_INN = "INN"
+@Field final String RF_INN_FOREIGN = "INN_FOREIGN"
+@Field final String RF_SNILS = "SNILS"
+@Field final String RF_TAXPAYER_STATE = "TAXPAYER_STATE"
+@Field final String RF_ADDRESS = "ADDRESS"
+@Field final String RF_RECORD_ID = "RECORD_ID"
+@Field final String RF_COUNTRY = "COUNTRY"
+@Field final String RF_REGION_CODE = "REGION_CODE"
+@Field final String RF_DISTRICT = "DISTRICT"
+@Field final String RF_CITY = "CITY"
+@Field final String RF_LOCALITY = "LOCALITY"
+@Field final String RF_STREET = "STREET"
+@Field final String RF_HOUSE = "HOUSE"
+@Field final String RF_BUILD = "BUILD"
+@Field final String RF_APPARTMENT = "APPARTMENT"
+@Field final String RF_DUBLICATES = "DUBLICATES"
+@Field final String RF_DOC_ID = "DOC_ID"
+@Field final String RF_DOC_NUMBER = "DOC_NUMBER"
 
 /**
  * Проверки НДФЛ
  * @return
  */
 def checkData() {
+    // Реквизиты
+    ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
+
+    // Сведения о доходах и НДФЛ
+    ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
+
+    // Сведения о вычетах
+    ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
+
+    // Сведения о доходах в виде авансовых платежей
+    ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
+
     // Проверки на соответствие справочникам
-    checkDataReference()
+    checkDataReference(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+    // Общие проверки
+    checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 }
 
 /**
  * Проверки на соответствие справочникам
  * @return
  */
-def checkDataReference() {
+def checkDataReference(def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
     // Страны
     def citizenshipCodeMap = getRefCitizenship()
     logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
@@ -617,8 +676,25 @@ def checkDataReference() {
     def taxpayerStatusMap = getRefTaxpayerStatus()
     logger.info(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
 
-    ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
-    logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
+    // Коды видов доходов Мапа <Идентификатор, Код>
+    def incomeCodeMap = getRefIncomeCode()
+    logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
+
+    // Виды доходов Мапа <Признак, Идентификатор_кода_вида_дохода>
+    def incomeKindMap = getRefIncomeKind()
+    logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_KIND, incomeKindMap.size())
+
+    // Ставки
+    def rateList = getRefRate()
+    logger.info(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
+
+    // Коды видов вычетов
+    def deductionTypeList = getRefDeductionType()
+    logger.info(SUCCESS_GET_REF_BOOK, R_TYPE_CODE, deductionTypeList.size())
+
+    // Коды налоговых органов
+    def taxInspectionList = getRefNotifSource()
+    logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
     // Физические лица
     def personIds = getPersonIds(ndflPersonList)
@@ -762,7 +838,7 @@ def checkDataReference() {
                         T_PERSON, ndflPerson.rowNum, C_ID_DOC_NUMBER, fioAndInp, C_ID_DOC_NUMBER, R_PERSON);
             }
 
-            // todo Спр17.1 Документ удостоверяющий личность (Обязательное поле) - Реализовать позже
+            // todo Спр17.1 Документ удостоверяющий личность (консолидированная) (Обязательное поле) - Реализовать позже
 
             // Спр18 Статус налогоплательщика (Обязательное поле)
             def taxpayerStatus = taxpayerStatusMap.get(person.get(RF_TAXPAYER_STATE).value)
@@ -843,21 +919,6 @@ def checkDataReference() {
         }
     }
 
-    // Коды видов доходов Мапа <Идентификатор, Код>
-    def incomeCodeMap = getRefIncomeCode()
-    logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
-
-    // Виды доходов Мапа <Признак, Идентификатор_кода_вида_дохода>
-    def incomeKindMap = getRefIncomeKind()
-    logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_KIND, incomeKindMap.size())
-
-    // Ставки
-    def rateList = getRefRate()
-    logger.info(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
-
-    ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
-    logger.info(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
-
     ndflPersonIncomeList.each { ndflPersonIncome ->
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
 
@@ -887,17 +948,6 @@ def checkDataReference() {
         }
     }
 
-    // Коды видов вычетов
-    def deductionTypeList = getRefDeductionType()
-    logger.info(SUCCESS_GET_REF_BOOK, R_TYPE_CODE, deductionTypeList.size())
-
-    // Коды налоговых органов
-    def taxInspectionList = getRefNotifSource()
-    logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
-
-    ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
-    logger.info(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
-
     ndflPersonDeductionList.each { ndflPersonDeduction ->
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
@@ -914,9 +964,6 @@ def checkDataReference() {
         }
     }
 
-    ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
-    logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
-
     ndflPersonPrepaymentList.each { ndflPersonPrepayment ->
         def fioAndInp = ndflPersonFLMap.get(ndflPersonPrepayment.ndflPersonId)
 
@@ -925,6 +972,335 @@ def checkDataReference() {
             logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum, C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
         }
+    }
+}
+
+/**
+ * Общие проверки
+ */
+def checkDataCommon(def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
+
+    // Порядковые номера строк в "Реквизиты"
+    def rowNumPersonList = []
+
+    // Порядковые номера строк в "Сведения о доходах и НДФЛ"
+    def rowNumPersonIncomeList = []
+
+    // Порядковые номера строк в "Сведения о вычетах"
+    def rowNumPersonDeductionList = []
+
+    // Порядковые номера строк в "Сведения о доходах в виде авансовых платежей"
+    def rowNumPersonPrepaymentList = []
+
+    ndflPersonList.each { ndflPerson ->
+        def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
+        def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+        ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
+
+        rowNumPersonList.add(ndflPerson.rowNum)
+
+        // Общ1 ИНН (Необязательное поле)
+        if (ndflPerson.innNp != null && !ScriptUtils.checkControlSumInn(ndflPerson.innNp)) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON, ndflPerson.rowNum, C_INN_NP, fioAndInp, MESSAGE_ERROR_INN);
+        }
+
+        // Общ4 Дата рождения (Обязательное поле)
+        if (ndflPerson.birthDay > getReportPeriodEndDate()) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON, ndflPerson.rowNum, C_BIRTH_DATE, fioAndInp, MESSAGE_ERROR_BIRTHDAY);
+        }
+    }
+
+    ndflPersonIncomeList.each { ndflPersonIncome ->
+        def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
+
+        rowNumPersonIncomeList.add(ndflPersonIncome.rowNum)
+
+        // Общ5 Даты доходов
+        // Дата начисления дохода (Необязательное поле)
+        if (ndflPersonIncome.incomeAccruedDate != null &&
+                (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate()
+                        || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_ACCRUED_DATE, fioAndInp, MESSAGE_ERROR_DATE);
+        }
+        // Дата выплаты дохода (Необязательное поле)
+        if (ndflPersonIncome.incomePayoutDate != null &&
+                (ndflPersonIncome.incomePayoutDate < getReportPeriodStartDate()
+                        || ndflPersonIncome.incomePayoutDate > getReportPeriodEndDate())) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_PAYOUT_DATE, fioAndInp, MESSAGE_ERROR_DATE);
+        }
+        // Дата налога (Необязательное поле)
+        if (ndflPersonIncome.taxDate != null &&
+                (ndflPersonIncome.taxDate < getReportPeriodStartDate()
+                        || ndflPersonIncome.taxDate > getReportPeriodEndDate())) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_DATE, fioAndInp, MESSAGE_ERROR_DATE);
+        }
+        // Срок (дата) перечисления налога (Необязательное поле)
+        if (ndflPersonIncome.taxTransferDate != null &&
+                (ndflPersonIncome.taxTransferDate < getReportPeriodStartDate()
+                        || ndflPersonIncome.taxTransferDate > getReportPeriodEndDate())) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_DATE);
+        }
+
+        // Общ7 Заполненность полей
+        if (ndflPersonIncome.paymentDate == null &&
+                ndflPersonIncome.paymentNumber == null &&
+                ndflPersonIncome.taxSumm == null) {
+            // если не заполнены Раздел 2. Графы 22-24
+            def emptyField = "не заполнены " + getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
+
+            // если не заполнена Раздел 2. Графа 21
+            if (ndflPersonIncome.taxTransferDate == null) {
+                emptyField += ", \"" + C_TAX_TRANSFER_DATE + "\""
+
+                // Раздел 2. Графа 4 "Код вида дохода" должна быть заполнена
+                if (ndflPersonIncome.incomeCode == null) {
+                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_CODE, emptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_CODE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                }
+                // Раздел 2. Графа 5 "Признак вида дохода" должна быть заполнена
+                if (ndflPersonIncome.incomeType == null) {
+                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_TYPE, emptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_TYPE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                }
+            }
+
+            // если не заполнены Раздел 2. Графы 7 и 11
+            if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.incomePayoutSumm != null) {
+                emptyField += ", \"" + C_INCOME_PAYOUT_DATE + "\", \"" + C_INCOME_PAYOUT_SUMM + "\""
+
+                // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть НЕ заполнена
+                if (ndflPersonIncome.taxTransferDate != null) {
+                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_TRANSFER_DATE, emptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                }
+            }
+
+            // 	Раздел 2. Графа 13 "Налоговая база" должна быть заполнена
+            if (ndflPersonIncome.taxBase == null) {
+                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_BASE, emptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            }
+            // 	Раздел 2. Графа 14 "Ставка налога" должна быть заполнена
+            if (ndflPersonIncome.taxRate == null) {
+                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_RATE, emptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            }
+            // 	Раздел 2. Графа 15 "Дата налога" должна быть заполнена
+            if (ndflPersonIncome.taxDate == null) {
+                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_DATE, emptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            }
+        } else {
+            // если заполнены Раздел 2. Графы 22-24
+            def notEmptyField = "заполнены " + getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
+
+            // Раздел 2. Графа 12 "Общая сумма вычетов" должна быть НЕ заполнена
+            if (ndflPersonIncome.totalDeductionsSumm != null) {
+                def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TOTAL_DEDUCTIONS_SUMM, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+            }
+            // 	Раздел 2. Графа 13 "Налоговая база" должна быть НЕ заполнена
+            if (ndflPersonIncome.taxBase != null) {
+                def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_BASE, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+            }
+            // 	Раздел 2. Графа 14 "Ставка налога" должна быть НЕ заполнена
+            if (ndflPersonIncome.taxRate != null) {
+                def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_RATE, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+            }
+            // 	Раздел 2. Графа 15 "Дата налога" должна быть НЕ заполнена
+            if (ndflPersonIncome.taxDate != null) {
+                def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_DATE, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+            }
+            // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть заполнена
+            if (ndflPersonIncome.taxTransferDate == null) {
+                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_TRANSFER_DATE, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            }
+        }
+
+        // если заполнена Раздел 2. Графа 6 "Дата начисления дохода"
+        if (ndflPersonIncome.incomeAccruedDate != null) {
+            def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_ACCRUED_DATE])
+
+            // Раздел 2. Графа 10 "Сумма начисленного дохода" должна быть заполнена
+            if (ndflPersonIncome.incomeAccruedSumm != null) {
+                notEmptyField = "заполнены " + getQuotedFields([C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM])
+
+                // Раздел 2. Графа 16 "Сумма налога исчисленная" должна быть заполнена
+                if (ndflPersonIncome.calculatedTax == null) {
+                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_CALCULATED_TAX, notEmptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_CALCULATED_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                }
+                // Раздел 2. Графа 18 "Сумма налога, не удержанная налоговым агентом" должна быть заполнена
+                if (ndflPersonIncome.notHoldingTax == null) {
+                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_NOT_HOLDING_TAX, notEmptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_NOT_HOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                }
+                // Раздел 2. Графа 19 "Сумма налога, излишне удержанная налоговым агентом" должна быть заполнена
+                if (ndflPersonIncome.overholdingTax == null) {
+                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_OVERHOLDING_TAX, notEmptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OVERHOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                }
+            } else {
+                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_ACCRUED_SUMM, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_ACCRUED_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            }
+        } else {
+            // если заполнена Раздел 2. Графа 10 "Сумма начисленного дохода"
+            if (ndflPersonIncome.incomeAccruedSumm != null) {
+                def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_ACCRUED_SUMM])
+
+                // Раздел 2. Графа 6 "Дата начисления дохода" должна быть заполнена
+                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_ACCRUED_DATE, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_ACCRUED_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            } else {
+                def emptyField = "не заполнены " + getQuotedFields([C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM])
+
+                // Раздел 2. Графа 16 "Сумма налога исчисленная" должна быть НЕ заполнена
+                if (ndflPersonIncome.calculatedTax != null) {
+                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_CALCULATED_TAX, emptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_CALCULATED_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                }
+                // Раздел 2. Графа 18 "Сумма налога, не удержанная налоговым агентом" должна быть НЕ заполнена
+                if (ndflPersonIncome.notHoldingTax != null) {
+                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_NOT_HOLDING_TAX, emptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_NOT_HOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                }
+                // Раздел 2. Графа 19 "Сумма налога, излишне удержанная налоговым агентом" должна быть НЕ заполнена
+                if (ndflPersonIncome.overholdingTax != null) {
+                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_OVERHOLDING_TAX, emptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OVERHOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                }
+            }
+        }
+
+        // если заполнена Раздел 2. Графа 7 "Дата выплаты дохода"
+        if (ndflPersonIncome.incomePayoutDate != null) {
+            def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_DATE])
+            // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода" должна быть заполнена
+            if (ndflPersonIncome.incomePayoutSumm != null) {
+                notEmptyField = "заполнены " + getQuotedFields([C_INCOME_PAYOUT_DATE, C_INCOME_PAYOUT_SUMM])
+
+                // Раздел 2. Графа 17 "Сумма налога удержанная" должна быть заполнена
+                if (ndflPersonIncome.withholdingTax == null) {
+                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_WITHHOLDING_TAX, notEmptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_WITHHOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                }
+
+                // Раздел 2. Графа 20 "Сумма возвращенного налога" должна быть заполнена
+                if (ndflPersonIncome.refoundTax == null) {
+                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_REFOUND_TAX, notEmptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_REFOUND_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                }
+
+                // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть заполнена
+                if (ndflPersonIncome.taxTransferDate == null) {
+                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_TRANSFER_DATE, notEmptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                }
+            } else {
+                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_PAYOUT_SUMM, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_PAYOUT_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            }
+        } else {
+            // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода"
+            if (ndflPersonIncome.incomePayoutSumm != null) {
+                def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_SUMM])
+
+                // Раздел 2. Графа 7 "Дата выплаты дохода" должна быть заполнена
+                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_PAYOUT_DATE, notEmptyField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_PAYOUT_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            }
+        }
+
+        // Раздел 2. Графа 22, 23, 24 Должны быть либо заполнены все 3 Графы, либо ни одна их них
+        if (ndflPersonIncome.paymentDate != null || ndflPersonIncome.paymentNumber != null || ndflPersonIncome.taxSumm != null) {
+            def allField = getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
+            // Раздел 2. Графа 22 "Дата платежного поручения"
+            if (ndflPersonIncome.paymentDate == null) {
+                def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_PAYMENT_DATE, allField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_PAYMENT_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
+            }
+            // Раздел 2. Графа 23 "Номер платежного поручения перечисления налога в бюджет"
+            if (ndflPersonIncome.paymentNumber == null) {
+                def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_PAYMENT_NUMBER, allField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_PAYMENT_NUMBER, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
+            }
+            // Раздел 2. Графа 24 "Сумма налога перечисленная"
+            if (ndflPersonIncome.taxSumm == null) {
+                def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_TAX_SUMM, allField])
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
+            }
+        }
+    }
+
+    ndflPersonDeductionList.each { ndflPersonDeduction ->
+        def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
+
+        rowNumPersonDeductionList.add(ndflPersonDeduction.rowNum)
+
+        // Общ6 Даты налоговых вычетов
+        // Дата выдачи уведомления (Обязательное поле)
+        if (ndflPersonDeduction.notifDate < getReportPeriodStartDate() || ndflPersonDeduction.notifDate > getReportPeriodEndDate()) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_NOTIF_DATE, fioAndInp, MESSAGE_ERROR_DATE);
+        }
+        // Дата начисления дохода (Обязательное поле)
+        if (ndflPersonDeduction.incomeAccrued < getReportPeriodStartDate() || ndflPersonDeduction.incomeAccrued > getReportPeriodEndDate()) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_INCOME_ACCRUED, fioAndInp, MESSAGE_ERROR_DATE);
+        }
+        // Дата применения вычета в предыдущем периоде (Необязательное поле)
+        if (ndflPersonDeduction.periodPrevDate != null &&
+                (ndflPersonDeduction.periodPrevDate < getReportPeriodStartDate() || ndflPersonDeduction.periodPrevDate > getReportPeriodEndDate())) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_PERIOD_PREV_DATE, fioAndInp, MESSAGE_ERROR_DATE);
+        }
+        // Дата применения вычета в текущем периоде (Обязательное поле)
+        if (ndflPersonDeduction.periodCurrDate < getReportPeriodStartDate() || ndflPersonDeduction.periodCurrDate > getReportPeriodEndDate()) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_PERIOD_CURR_DATE, fioAndInp, MESSAGE_ERROR_DATE);
+        }
+    }
+
+    ndflPersonPrepaymentList.each { ndflPersonPrepayment ->
+        rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
     }
 }
 
@@ -1194,7 +1570,18 @@ def getProvider(def long providerId) {
 }
 
 /**
- * Получить окончание отчетного периода
+ * Получить дату начала отчетного периода
+ * @return
+ */
+def getReportPeriodStartDate() {
+    if (reportPeriodStartDate == null) {
+        reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodStartDate
+}
+
+/**
+ * Получить дату окончания отчетного периода
  * @return
  */
 def getReportPeriodEndDate() {
@@ -1202,4 +1589,61 @@ def getReportPeriodEndDate() {
         reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
     }
     return reportPeriodEndDate
+}
+
+/**
+ * Преобразование массива имен полей в строку с помещением каждого имени в кавычки
+ * @param fieldNameList
+ */
+def getQuotedFields(def fieldNameList) {
+    def result = ""
+    fieldNameList.each { fieldName ->
+        if (result != "") {
+            result += ", "
+        }
+        result += "\"" + fieldName + "\""
+    }
+    return result
+}
+
+/**
+ * Формирование сообщения с повторяющимися номерами
+ * @param inputList
+ * @param tableName
+ * @return
+ */
+def getErrorMsgDubl(def inputList, def tableName) {
+    def resultMsg = ""
+    def dublList = inputList.findAll{inputList.count(it)>1}.unique()
+    if (dublList.size() > 0) {
+        resultMsg = "Раздел \"" + tableName + "\"" + dublList.sort().join(", ") + "."
+    }
+    return resultMsg
+}
+
+/**
+ * Формирование сообщения с пропущенными номерами
+ * @param inputList
+ * @param tableName
+ * @return
+ */
+def getErrorMsgAbsent(def inputList, def tableName) {
+    def absentList = []
+    def sortList = inputList.unique().sort()
+    def i
+    if (sortList.size() > 0) {
+        i = sortList.get(0)
+    }
+    sortList.each { item ->
+        if (item != i) {
+            absentList.add(i)
+        }
+        i++
+    }
+
+    def resultMsg = ""
+    if (absentList.size() > 0) {
+        resultMsg = "Раздел \"" + tableName + "\"" + absentList.sort().join(", ") + "."
+    }
+    return resultMsg
 }

@@ -212,7 +212,10 @@ def getPeriod(def departmentParamIncomeRow, def periodCode) {
     }
 }
 
-
+/**
+ * Получить дату окончания отчетного периода
+ * @return
+ */
 def getReportPeriodEndDate() {
     if (reportPeriodEndDate == null) {
         reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time

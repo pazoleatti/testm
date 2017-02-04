@@ -1840,6 +1840,21 @@ public final class ScriptUtils {
     }
 
     /**
+     * Проверка контрольной суммы ИНН
+     * @param value значение ИНН
+     * @return
+     */
+    public static boolean checkControlSumInn(String value) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        if (!RefBookUtils.checkControlSumInn(value)){
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Проверка диапазона даты (от 1991 до 2099)
      * @param logger логер для записи сообщения
      * @param row строка НФ
