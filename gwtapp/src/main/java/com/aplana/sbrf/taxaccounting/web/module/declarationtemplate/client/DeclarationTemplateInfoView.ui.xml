@@ -59,7 +59,7 @@
                 <r:RefBookPickerWidget ui:field="formKindPicker" width="100%" searchEnabled="false"
                                        versionEnabled="false" manualUpdate="false"
                                        attributeIdInt="9321" isHierarchical="false" multiSelect="false"
-                                       filter="record_id = 2 or record_id = 3 or record_id = 7"
+                                       filter="id = 2 or id = 3 or id = 7"
                                        title="Выбор типа налоговой формы"/>
             </g:HorizontalPanel>
             <g:HorizontalPanel verticalAlignment="middle" height="26px">

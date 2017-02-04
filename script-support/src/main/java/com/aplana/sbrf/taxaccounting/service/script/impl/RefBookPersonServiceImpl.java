@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,9 +18,6 @@ import java.util.List;
  */
 @Service("refBookPersonService")
 public class RefBookPersonServiceImpl implements RefBookPersonService {
-
-    @Autowired
-    private RefBookFactory refBookFactory;
 
     @Autowired
     private RefBookPersonDao refBookPersonDao;

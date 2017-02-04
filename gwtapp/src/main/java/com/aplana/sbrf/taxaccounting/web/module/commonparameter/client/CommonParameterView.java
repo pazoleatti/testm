@@ -150,4 +150,17 @@ public class CommonParameterView extends ViewWithUiHandlers<CommonParameterUiHan
     public DataRow<Cell> getSelectedObject() {
         return singleSelectionModel.getSelectedObject();
     }
+
+    private void updateStyle(int rowIndex, boolean valid) {
+        if (valid) {
+            commonTable.getRowElement(rowIndex).getCells().getItem(1).removeClassName("alert-cell");
+        } else {
+            commonTable.getRowElement(rowIndex).getCells().getItem(1).addClassName("alert-cell");
+        }
+    }
+
+    @Override
+    public void updateStyle(ConfigurationParam configurationParam, boolean valid) {
+        updateStyle(ConfigurationParam.SBERBANK_INN.equals(configurationParam) ? 0 : 1, valid);
+    }
 }

@@ -67,6 +67,8 @@ public class CommonParameterPresenter extends Presenter<CommonParameterPresenter
         void setConfigData(List<DataRow<Cell>> rowsData);
 
         void refreshGrid(List<DataRow<Cell>> rowsData);
+
+        void updateStyle(ConfigurationParam configurationParam, boolean valid);
     }
 
     private final DispatchAsync dispatcher;
@@ -211,6 +213,14 @@ public class CommonParameterPresenter extends Presenter<CommonParameterPresenter
                 if (result.getUuid() != null) {
                     LogAddEvent.fire(CommonParameterPresenter.this, result.getUuid());
                     LogShowEvent.fire(CommonParameterPresenter.this, true);
+
+                    for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
+                        getView().updateStyle(configurationParam, true);
+                    }
+
+                    for (ConfigurationParam configurationParam : result.getErrors()) {
+                        getView().updateStyle(configurationParam, false);
+                    }
                 }
             }
         }, this));

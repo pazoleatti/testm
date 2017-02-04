@@ -8,6 +8,7 @@ public class GetReportPeriodsAction extends UnsecuredActionImpl<GetReportPeriods
 	private TaxType taxType;
     private Integer reportPeriodId;
     private Integer departmentId;
+    private boolean isDownloadReports;
 
     public TaxType getTaxType() {
         return taxType;
@@ -31,5 +32,13 @@ public class GetReportPeriodsAction extends UnsecuredActionImpl<GetReportPeriods
 
     public void setDepartmentId(Integer departmentId) {
         this.departmentId = departmentId;
+    }
+
+    public boolean isDownloadReports() {
+        return isDownloadReports;
+    }
+
+    public void setDownloadReports(boolean isDownloadReports) {
+        this.isDownloadReports = isDownloadReports;
     }
 }

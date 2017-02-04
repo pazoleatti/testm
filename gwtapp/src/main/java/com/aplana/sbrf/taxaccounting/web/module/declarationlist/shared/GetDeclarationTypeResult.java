@@ -10,10 +10,10 @@ import java.util.List;
 public class GetDeclarationTypeResult implements Result {
     private static final long serialVersionUID = 6048433881484626479L;
 
-    List<DeclarationType> declarationTypes;
-    Date correctionDate;
-    TaxType taxType;
-    Date version;
+    private List<DeclarationType> declarationTypes;
+    private Date correctionDate;
+    private TaxType taxType;
+    private Date version;
 
     private String filter;
 

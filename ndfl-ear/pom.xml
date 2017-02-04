@@ -15,14 +15,6 @@
     <profiles>
         <profile>
             <id>development</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>mdb</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -50,31 +42,6 @@
         <profile>
             <id>production</id>
             <dependencies>
-                <dependency>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>mdb</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                    <classifier>jar-with-dependencies</classifier>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>service</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>service-support</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>dao</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>core</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
                 <dependency>
                     <groupId>com.aplana.taxaccounting</groupId>
                     <artifactId>scheduler-task</artifactId>
@@ -117,32 +84,6 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
-                <dependency>
-                    <groupId>com.aplana.taxaccounting</groupId>
-                    <artifactId>audit-ejb</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                    <classifier>jar-with-dependencies</classifier>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>service</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-                <dependency>
-                    <groupId>com.aplana.taxaccounting</groupId>
-                    <artifactId>department-ejb</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                    <classifier>jar-with-dependencies</classifier>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>service</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
 
                 <!-- Дополнительные ависимости исключенные вместе с другими -->
                 <dependency>
@@ -177,12 +118,6 @@
                                 </webModule>
                                 <ejbModule>
                                     <groupId>${project.groupId}</groupId>
-                                    <artifactId>mdb</artifactId>
-                                    <bundleFileName>mdb.jar</bundleFileName>
-                                    <classifier>jar-with-dependencies</classifier>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
                                     <artifactId>scheduler-task</artifactId>
                                     <bundleFileName>scheduler-task.jar</bundleFileName>
                                     <classifier>jar-with-dependencies</classifier>
@@ -201,16 +136,6 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>async-task</artifactId>
                                     <bundleFileName>async-task.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>audit-ejb</artifactId>
-                                    <bundleFileName>audit-ejb.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>department-ejb</artifactId>
-                                    <bundleFileName>department-ejb.jar</bundleFileName>
                                 </ejbModule>
                             </modules>
                         </configuration>

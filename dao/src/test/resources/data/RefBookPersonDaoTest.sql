@@ -1,4 +1,22 @@
 --------------------------------------------------------
+--  Типы документов
+--------------------------------------------------------
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (360,'Коды документов',1,0,0,null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3601, 360,'Код','CODE',1,1,null,null,1,null,6,1,1,null,null,0,2);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3602, 360,'Наименование документа','NAME',1,2,null,null,1,null,50,1,0,null,null,0,2000);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3603, 360,'Приоритет','PRIORITY',2,3,null,null,1,0,6,1,0,null,null,0,2);
+--------------------------------------------------------
+--  Страны мира
+--------------------------------------------------------
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (10,'ОК 025-2001 (Общероссийский классификатор стран мира)',1,0,0,null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (50,10,'Код','CODE',1,0,null,null,1,null,3,1,1,null,null,0,3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (51,10,'Код (2-х букв.)','CODE_2',1,1,null,null,1,null,10,1,2,null,null,0,2);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (52,10,'Код (3-х букв.)','CODE_3',1,2,null,null,1,null,10,1,3,null,null,0,3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (53,10,'Краткое наименование','NAME',1,3,null,null,1,null,30,1,4,null,null,0,500);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (54,10,'Полное наименование','FULLNAME',1,4,null,null,1,null,50,1,5,null,null,0,500);
+--------------------------------------------------------
 --  REF_BOOK_ASNU
 --------------------------------------------------------
 insert into ref_book (id,name,visible,type,read_only,region_attribute_id,table_name,is_versioned) values (900,'АСНУ',1,0,1,null,'REF_BOOK_ASNU',0);
@@ -40,7 +58,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9117, 901, 'Номер дома (владения)', 'HOUSE', 1, 9, null, null, 1, null, 15, 0, 0, null, null, 0, 20);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9118, 901, 'Номер корпуса (строения)', 'BUILD', 1, 10, null, null, 1, null, 15, 0, 0, null, null, 0, 20);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9119, 901, 'Номер квартиры', 'APPARTMENT', 1, 11, null, null, 1, null, 15, 0, 0, null, null, 0, 20);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9110, 901, 'Страна', 'COUNTRY', 4, 2, 10, 50, 1, null, 15, 0, 0, null, null, 0, null);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9110, 901, 'Страна', 'COUNTRY_ID', 4, 2, 10, 50, 1, null, 15, 0, 0, null, null, 0, null);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9021, 902, 'Код ДУЛ', 'DOC_ID', 4, 1, 360, 3601, 1, null, 15, 1, 0, null, null, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9022, 902, 'Серия и номер ДУЛ', 'DOC_NUMBER', 1, 2, null, null, 1, null, 15, 1, 0, null, null, 0, 25);

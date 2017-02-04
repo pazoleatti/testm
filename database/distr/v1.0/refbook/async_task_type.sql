@@ -1,1 +1,2 @@
 insert into async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (28, 'Создание экземпляров форм', 'ejb/ndfl/async-task.jar/CreateFormsAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', null, 0);
+insert into async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (29, 'Формирование отчетности', 'ejb/ndfl/async-task.jar/CreateReportsAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', null, 0);

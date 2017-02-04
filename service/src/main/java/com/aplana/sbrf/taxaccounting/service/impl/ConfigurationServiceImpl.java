@@ -333,10 +333,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public void checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger) {
+    public List<ConfigurationParam> checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger) {
+        List<ConfigurationParam> result = new ArrayList<ConfigurationParam>();
+
         String inn = configurationParamMap.get(ConfigurationParam.SBERBANK_INN);
         if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
             logger.error(INN_JUR_ERROR, inn);
+            result.add(ConfigurationParam.SBERBANK_INN);
         }
 
         String noCode = configurationParamMap.get(ConfigurationParam.NO_CODE);
@@ -344,7 +347,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         if (taxInspectionDataProvider.getRecordsCount(new Date(), "code = '" + noCode + "'") == 0) {
             logger.error(NO_CODE_ERROR, noCode);
+            result.add(ConfigurationParam.NO_CODE);
         }
+
+        return result;
     }
 
     @Override
