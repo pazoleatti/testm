@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.*;
 
@@ -76,8 +78,15 @@ public class NdflPerson extends IdentityObject<Long> {
 
     public static final String TABLE_NAME = "ndfl_person";
     public static final String SEQ = "seq_ndfl_person";
+
+
+
     public static final String[] COLUMNS = {"id", "declaration_data_id", "person_id", "row_num", "inp", "snils", "last_name", "first_name", "middle_name", "birth_day", "citizenship", "inn_np", "inn_foreign", "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city", "locality", "street", "house", "building", "flat", "country_code", "address", "additional_data"};
-    public static final String[] FIELDS = {"id", "declarationDataId", "person_id", "row_num", "inp", "snils", "lastName", "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber", "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat", "countryCode", "address", "additionalData"};
+
+    /**
+     * Список полей бина значения которых передаются в запрос. Порядок соответсвует порядку наименований столбцов в COLUMNS
+     */
+    public static final String[] FIELDS = {"id", "declarationDataId", "personId", "rowNum", "inp", "snils", "lastName", "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber", "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat", "countryCode", "address", "additionalData"};
 
     public Object[] createPreparedStatementArgs() {
         return new Object[]{declarationDataId, personId, rowNum, inp, snils, lastName, firstName, middleName, birthDay, citizenship,
@@ -85,75 +94,6 @@ public class NdflPerson extends IdentityObject<Long> {
                 locality, street, house, building, flat, countryCode, address, additionalData
         };
     }
-
-
-    public Map<String, String> getSqlParameterSource() {
-        Map<String, String> map = new LinkedHashMap<String, String>();
-        map.put("id", "id");
-        map.put("declarationDataId", "declaration_data_id");
-        map.put("personId", "person_id");
-        map.put("rowNum", "row_num");
-        map.put("inp", "inp");
-        map.put("snils", "snils");
-        map.put("lastName", "last_name");
-        map.put("firstName", "first_name");
-        map.put("middleName", "middle_name");
-        map.put("birthDay", "birth_day");
-        map.put("citizenship", "citizenship");
-        map.put("innNp", "inn_np");
-        map.put("innForeign", "inn_foreign");
-        map.put("idDocType", "id_doc_type");
-        map.put("idDocNumber", "id_doc_number");
-        map.put("status", "status");
-        map.put("postIndex", "post_index");
-        map.put("regionCode", "region_code");
-        map.put("area", "area");
-        map.put("city", "city");
-        map.put("locality", "locality");
-        map.put("street", "street");
-        map.put("house", "house");
-        map.put("building", "building");
-        map.put("flat", "flat");
-        map.put("countryCode", "country_code");
-        map.put("address", "address");
-        map.put("additionalData", "additional_data");
-        return map;
-    }
-
-
-    public Map<String, String> getColumns() {
-        Map<String, String> map = new LinkedHashMap<String, String>();
-        map.put("id", "id");
-        map.put("declarationDataId", "declaration_data_id");
-        map.put("personId", "person_id");
-        map.put("rowNum", "row_num");
-        map.put("inp", "inp");
-        map.put("snils", "snils");
-        map.put("lastName", "last_name");
-        map.put("firstName", "first_name");
-        map.put("middleName", "middle_name");
-        map.put("birthDay", "birth_day");
-        map.put("citizenship", "citizenship");
-        map.put("innNp", "inn_np");
-        map.put("innForeign", "inn_foreign");
-        map.put("idDocType", "id_doc_type");
-        map.put("idDocNumber", "id_doc_number");
-        map.put("status", "status");
-        map.put("postIndex", "post_index");
-        map.put("regionCode", "region_code");
-        map.put("area", "area");
-        map.put("city", "city");
-        map.put("locality", "locality");
-        map.put("street", "street");
-        map.put("house", "house");
-        map.put("building", "building");
-        map.put("flat", "flat");
-        map.put("countryCode", "country_code");
-        map.put("address", "address");
-        map.put("additionalData", "additional_data");
-        return map;
-    }
-
 
     public Long getDeclarationDataId() {
         return declarationDataId;
@@ -390,5 +330,38 @@ public class NdflPerson extends IdentityObject<Long> {
 
     public void setPrepayments(List<NdflPersonPrepayment> prepayments) {
         this.prepayments = prepayments;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.NO_FIELD_NAMES_STYLE).append("id", id)
+                .append("rowNum", rowNum)
+                .append("personId", personId)
+                .append("declarationDataId", declarationDataId)
+                .append("inp", inp)
+                .append("snils", snils)
+                .append("lastName", lastName)
+                .append("firstName", firstName)
+                .append("middleName", middleName)
+                .append("birthDay", birthDay)
+                .append("citizenship", citizenship)
+                .append("innNp", innNp)
+                .append("innForeign", innForeign)
+                .append("idDocType", idDocType)
+                .append("idDocNumber", idDocNumber)
+                .append("status", status)
+                .append("postIndex", postIndex)
+                .append("regionCode", regionCode)
+                .append("area", area)
+                .append("city", city)
+                .append("locality", locality)
+                .append("street", street)
+                .append("house", house)
+                .append("building", building)
+                .append("flat", flat)
+                .append("countryCode", countryCode)
+                .append("address", address)
+                .append("additionalData", additionalData)
+                .toString();
     }
 }

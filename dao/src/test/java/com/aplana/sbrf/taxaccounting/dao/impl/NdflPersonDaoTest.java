@@ -13,7 +13,7 @@ import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Assert;
-import org.junit.Ignore;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -99,7 +99,6 @@ public class NdflPersonDaoTest {
         Assert.assertEquals(3, result.size());
     }
 
-	@Ignore
     @Test
     public void testGoodSave() {
 

@@ -74,12 +74,18 @@ def createSpecificReport() {
 
     def ndflPerson = ndflPersonService.get(pagingResult.get(0).id);
 
-    //формирование отчета
-    def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-        calculateReportData(it, ndflPerson)
-    });
+    if (ndflPerson != null) {
 
-    declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+        //формирование отчета
+        def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
+            calculateReportData(it, ndflPerson)
+        });
+
+        declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    } else {
+        throw new ServiceException("Не найдены данные для формирования отчета!");
+    }
+
 }
 
 void calculateReportData(writer, ndflPerson) {

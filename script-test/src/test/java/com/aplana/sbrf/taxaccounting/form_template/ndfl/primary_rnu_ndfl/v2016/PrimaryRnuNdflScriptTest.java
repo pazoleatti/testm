@@ -103,7 +103,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     }
 
     @Test
-	@Ignore
 	public void importDataTest() throws IOException {
 
         final List<NdflPerson> importedData = new ArrayList<NdflPerson>();
@@ -112,7 +111,9 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             public Long answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
                 NdflPerson ndflPerson = (NdflPerson) args[0];
+
                 //System.out.println(ndflPerson + " [" + ndflPerson.getFirstName() + "," + ndflPerson.getLastName() + "]");
+
                 importedData.add(ndflPerson);
                 return (long) importedData.size();
             }
@@ -161,11 +162,9 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     /**
      * Тест создания спецотчета "Спецотчет РНУ НДФЛ по физическому лицу"
-     *
      * @throws IOException
      */
     @Test
-	@Ignore
     public void createSpecificReportTest() throws Exception {
 
         ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
@@ -177,6 +176,8 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         PagingResult pagingResult = new PagingResult<NdflPerson>(result, 1);
 
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), anyMap())).thenReturn(pagingResult);
+
+        when(testHelper.getNdflPersonService().get(anyLong())).thenReturn(result.get(0));
 
         doAnswer(new Answer<JasperPrint>() {
             @Override
@@ -222,6 +223,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
         //Что-то сформировали
         Assert.assertTrue(outputStream.toByteArray().length > 0);
+
 
         //writeToFileAndOpen(outputStream, "person_report.pdf");
 

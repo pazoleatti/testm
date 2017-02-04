@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -341,8 +342,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String insert = createInsert(table, seq, columns, fields);
         NamedParameterJdbcTemplate jdbcTemplate = getNamedParameterJdbcTemplate();
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(insert, prepareParameters(identityObject, fields), keyHolder, new String[]{"ID"});
+
+        MapSqlParameterSource sqlParameterSource = prepareParameters(identityObject, fields);
+
+        jdbcTemplate.update(insert, sqlParameterSource, keyHolder, new String[]{"ID"});
         identityObject.setId(keyHolder.getKey().longValue());
+
+
+
     }
 
     @Override
@@ -428,11 +435,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         public NdflPerson mapRow(ResultSet rs, int index) throws SQLException {
 
             NdflPerson person = new NdflPerson();
+
             person.setId(SqlUtils.getLong(rs, "id"));
             person.setDeclarationDataId(SqlUtils.getLong(rs, "declaration_data_id"));
+            person.setRowNum(SqlUtils.getInteger(rs, "row_num"));
+            person.setPersonId(SqlUtils.getLong(rs, "person_id"));
 
-            person.setRowNum(rs.getInt("row_num"));
-            person.setPersonId(rs.getLong("person_id"));
             person.setInp(rs.getString("inp"));
             person.setSnils(rs.getString("snils"));
             person.setLastName(rs.getString("last_name"));

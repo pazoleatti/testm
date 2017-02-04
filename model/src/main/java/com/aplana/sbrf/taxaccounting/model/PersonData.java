@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
 
@@ -311,23 +312,35 @@ public class PersonData {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("PersonData{");
-        sb.append("id=").append(id);
-        sb.append(", recordId=").append(recordId);
-        sb.append(", lastName='").append(lastName).append('\'');
-        sb.append(", firstName='").append(firstName).append('\'');
-        sb.append(", middleName='").append(middleName).append('\'');
-        sb.append(", inn='").append(inn).append('\'');
-        sb.append(", innForeign='").append(innForeign).append('\'');
-        sb.append(", snils='").append(snils).append('\'');
-        sb.append(", birthDate=").append(birthDate);
-        sb.append(", inp='").append(inp).append('\'');
-        sb.append(", asnu='").append(asnu).append('\'');
-        sb.append(", asnuId=").append(asnuId);
-        sb.append(", documentType='").append(documentType).append('\'');
-        sb.append(", documentNumber='").append(documentNumber).append('\'');
-        sb.append(", weigth=").append(weigth);
-        sb.append('}');
-        return sb.toString();
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("recordId", recordId)
+                .append("lastName", lastName)
+                .append("firstName", firstName)
+                .append("middleName", middleName)
+                .append("sex", sex)
+                .append("inn", inn)
+                .append("innForeign", innForeign)
+                .append("snils", snils)
+                .append("birthDate", birthDate)
+                .append("birthPlace", birthPlace)
+                .append("taxPayerStatusId", taxPayerStatusId)
+                .append("citizenshipId", citizenshipId)
+                .append("addressId", addressId)
+                .append("pension", pension)
+                .append("medical", medical)
+                .append("social", social)
+                .append("employee", employee)
+                .append("sourceId", sourceId)
+                .append("citizenship", citizenship)
+                .append("version", version)
+                .append("status", status)
+                .append("inp", inp)
+                .append("asnu", asnu)
+                .append("asnuId", asnuId)
+                .append("documentType", documentType)
+                .append("documentNumber", documentNumber)
+                .append("weigth", weigth)
+                .toString();
     }
 }
