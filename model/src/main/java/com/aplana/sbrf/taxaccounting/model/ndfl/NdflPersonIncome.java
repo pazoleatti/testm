@@ -17,6 +17,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private String kpp;
     // Дата начисления дохода
     private Date incomeAccruedDate;
+    // Дата выплаты дохода
     private Date incomePayoutDate;
     // Сумма начисленного дохода
     private BigDecimal incomeAccruedSumm;
@@ -24,10 +25,16 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private BigDecimal incomePayoutSumm;
     // Общая сумма вычетов
     private BigDecimal totalDeductionsSumm;
+    // Налоговая база
     private BigDecimal taxBase;
     // Ставка
     private Integer taxRate;
-    // Дата удержания налога
+
+    /**
+     * Дата налога
+     * Если заполнено поле "Сумма налога исчисленная", то это "Дата исчисления"
+     * Если заполнено поле "Сумма налога удержанная", то это "Дата удержания"
+     */
     private Date taxDate;
     // Сумма налога исчисленная
     private Long calculatedTax;
@@ -35,6 +42,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Long withholdingTax;
     // Сумма налога, не удержанная налоговым агентом
     private Long notHoldingTax;
+    // Сумма налога, излишне удержанная налоговым агентом
     private Long overholdingTax;
     // Сумма возвращенного налога
     private Long refoundTax;
@@ -42,7 +50,9 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Date taxTransferDate;
     // Дата платежного поручения
     private Date paymentDate;
+    // Номер платежного поручения перечисления налога в бюджет
     private String paymentNumber;
+    // Сумма налога перечисленная
     private Integer taxSumm;
 
     public static final String TABLE_NAME = "ndfl_person_income";

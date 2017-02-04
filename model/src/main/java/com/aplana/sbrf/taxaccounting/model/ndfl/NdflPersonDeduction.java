@@ -12,16 +12,20 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     // Код вида вычета
     private String typeCode;
     private String notifType;
+    // Дата выдачи уведомления
     private Date notifDate;
     private String notifNum;
     // Код налогового органа, выдавшего уведомление
     private String notifSource;
     private BigDecimal notifSumm;
+    // Дата начисления дохода
     private Date incomeAccrued;
     private String incomeCode;
     private BigDecimal incomeSumm;
+    // Дата применения вычета в предыдущем периоде
     private Date periodPrevDate;
     private BigDecimal periodPrevSumm;
+    // Дата применения вычета в текущем периоде
     private Date periodCurrDate;
     private BigDecimal periodCurrSumm;
 
