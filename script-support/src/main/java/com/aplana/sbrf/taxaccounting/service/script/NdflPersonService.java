@@ -144,4 +144,19 @@ public interface NdflPersonService {
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize);
 
 
+    /**
+     * Возвращает количество Физлиц для декларации
+     * @param declarationDataId
+     * @return
+     */
+    public int getCountNdflPerson(long declarationDataId);
+
+    /**
+     * Найти NdflPerson строки данных о доходах которых соответствуют паре кпп и октмо
+     * @param declarationDataId
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo);
 }

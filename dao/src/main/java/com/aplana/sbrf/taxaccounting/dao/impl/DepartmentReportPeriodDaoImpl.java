@@ -371,6 +371,29 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
+    public DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId) {
+        try {
+            return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
+                            "drp.is_active, drp.is_balance_period, drp.correction_date " +
+                            "from " +
+                            "department_report_period drp, " +
+                            "(select max(correction_date) as correction_date, department_id, report_period_id " +
+                            "from department_report_period " +
+                            "where department_id = ? and report_period_id = ? " +
+                            "and correction_date not in " +
+                            "(select max(correction_date) from department_report_period)" +
+                            "group by department_id, report_period_id) m " +
+                            "where drp.department_id = m.department_id " +
+                            "and drp.report_period_id = m.report_period_id " +
+                            "and (drp.correction_date = m.correction_date or (m.correction_date is null " +
+                            "and drp.correction_date is null))",
+                    new Object[]{departmentId, reportPeriodId}, mapper);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
     public DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId) {
         try {
             return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
@@ -467,6 +490,21 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         } catch (DataAccessException e) {
 			LOG.error("", e);
             throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId) {
+        String query = "select drp.id from DEPARTMENT_REPORT_PERIOD drp " +
+                "where drp.DEPARTMENT_ID in (select id from department where type = :departmentType) " +
+                "and drp.REPORT_PERIOD_ID = :reportPeriodId ";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("departmentType", departmentTypeCode);
+        params.addValue("reportPeriodId", reportPeriodId);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(query, params, Integer.class);
+        } catch (EmptyResultDataAccessException ex){
+            return new ArrayList<Integer>();
         }
     }
 }

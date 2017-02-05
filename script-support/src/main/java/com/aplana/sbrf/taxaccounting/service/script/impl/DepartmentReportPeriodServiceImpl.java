@@ -37,4 +37,14 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     public List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
         return departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
     }
+
+    @Override
+    public DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId) {
+        return departmentReportPeriodDao.getPrevLast(departmentId, reportPeriodId);
+    }
+
+    @Override
+    public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId) {
+        return departmentReportPeriodDao.getIdsByDepartmentTypeAndReportPeriod(departmentTypeCode, reportPeriodId);
+    }
 }

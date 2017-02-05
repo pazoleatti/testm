@@ -286,6 +286,25 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
+        String sql = "SELECT DISTINCT " + createColumns(NdflPerson.COLUMNS, "np") + " FROM ndfl_person np " +
+                "INNER JOIN ndfl_person_income npi " +
+                "ON np.id = npi.ndfl_person_id " +
+                "WHERE (npi.kpp = :kpp or npi.kpp is null) " +
+                "AND (npi.oktmo = :oktmo or npi.oktmo is null) " +
+                "AND np.DECLARATION_DATA_ID in (select id from DECLARATION_DATA where id = :declarationDataId)";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("declarationDataId", declarationDataId)
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonRowMapper());
+        } catch (EmptyResultDataAccessException ex) {
+            return new ArrayList<NdflPerson>();
+        }
+    }
+
+    @Override
     public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId) {
         String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " FROM ndfl_person_prepayment npi " +
                 " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +

@@ -89,6 +89,11 @@ public interface DepartmentReportPeriodDao {
     DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId);
 
     /**
+     * Предпоследний отчетный период подразделения для комбинации отчетный период-подразделение
+     */
+    DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId);
+
+    /**
      * Номер корректирующего периода
      */
     Integer getCorrectionNumber(int id);
@@ -104,4 +109,13 @@ public interface DepartmentReportPeriodDao {
      * Список закрытых отчетных периодов подразделений, в которых есть экремляры НФ узазанного шаблона
      */
     List<DepartmentReportPeriod> getClosedForFormTemplate(int formTemplateId);
+
+
+    /**
+     * Найти id отчетных периодов подразделений для определенного типа подразделения и отчетного периода
+     * @param departmentTypeCode
+     * @param reportPeriodId
+     * @return
+     */
+    List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId);
 }
