@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.PersonData
 // com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
 import com.aplana.sbrf.taxaccounting.refbook.*
 import groovy.transform.Field
@@ -36,7 +37,42 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         checkData();
         break
+    case FormDataEvent.CALCULATE:
+        calculate();
+        break
 }
+
+
+//------------------ Calculate ----------------------
+
+/**
+ * Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
+ */
+@Field
+def SIMILARITY_THRESHOLD = 900;
+
+def calculate(){
+
+    List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+
+    Map<Long, Long> referenceMap = new HashMap<>()
+
+    ndflPersonList.each { ndflPerson ->
+        //заполняем параметры по которым можно идентифицировать физлицо
+        PersonData personData = PersonData.mapValueFromNdflPerson(ndflPerson);
+        personData.asnuId = declarationData.asnuId;
+
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD)
+
+        if (refBookPersonId != null){
+            referenceMap.put(ndflPerson.getId(), refBookPersonId);
+        } else {
+            throw new ServiceException("Ошибка идентификации физического лица");
+        }
+    }
+    ndflPersonService.updatePersonRefBookReferences(referenceMap);
+}
+
 
 //------------------ Create Report ----------------------
 
@@ -188,7 +224,7 @@ def findReportPeriodCode(reportPeriod) {
     return refBookValueMap.get("CODE").getStringValue();
 }
 
-//------------------Import Data ----------------------
+//------------------ Import Data ----------------------
 
 void importData() {
 

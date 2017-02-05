@@ -23,41 +23,60 @@ public interface NdflPersonDao {
      */
     NdflPerson get(long ndflPersonId);
 
+    /**
+     * Пакетное обновление ссылок NdflPerson.personId на справочник физлиц
+     *
+     * @param referenceMap карта [NdflPerson.id, RefBookPerson.id]
+     */
+    int[] updatePersonRefBookReferences(Map<Long, Long> referenceMap);
 
+    /**
+     * Создание новой записи ndflPerson, также создаются все потомки (incomes, deductions, prepayments)
+     *
+     * @param ndflPerson
+     * @return идентификатор созданной записи
+     */
     Long save(NdflPerson ndflPerson);
 
     /**
      * Удалить данные по указанному ФЛ из декларации, каскадное удаление
+     *
      * @param ndflPersonId
      */
     void delete(Long ndflPersonId);
 
     /**
-     * Найти все данные НДВЛ физ лица привязанные к декларации
+     * Найти все данные НДФЛ физ лица привязанные к декларации
+     *
      * @param declarationDataId идентификатор декларации
+     * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON, incomes, deductions и prepayments в этом методе не заполняются
      */
     List<NdflPerson> findPerson(long declarationDataId);
 
     /**
      * Найти все "Сведения о доходах физического лица" привязанные к декларации
+     *
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonIncome> findPersonIncome(long declarationDataId);
 
     /**
      * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
+     *
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId);
 
     /**
      * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
+     *
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
 
     /**
      * Найти данные о доходах ФЛ
+     *
      * @param ndflPersonId
      * @return
      */
@@ -65,51 +84,55 @@ public interface NdflPersonDao {
 
     /**
      * Найти данные о доходах ФЛ по идентификатору декларации
+     *
      * @param declarationDataId
-     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param startDate         - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate           - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
     List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate);
 
     /**
      * Найти данные о доходах ФЛ по идентификатору ФЛ
+     *
      * @param ndflPersonId
-     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
 
     /**
      * Найти данные о вычетах ФЛ по идентификатору ФЛ
+     *
      * @param ndflPersonId
-     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
     List<NdflPersonDeduction> findDeductionsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
 
     /**
      * Найти данные о авансах ФЛ по идентификатору ФЛ
+     *
      * @param ndflPersonId
-     * @param startDate - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
     List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
 
     /**
      * Найти все NdflPerson по заданным параметрам
+     *
      * @param declarationDataId идентификатор декларации
-     * @param parameters карта наименований параметров и значений
-     * @param pagingParams параметры вывода результата
+     * @param parameters        карта наименований параметров и значений
+     * @param pagingParams      параметры вывода результата
      * @return результат запроса
      */
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
 
     /**
-     *
      * @param sqlQuery
      * @param parameters
      * @return
@@ -118,6 +141,7 @@ public interface NdflPersonDao {
 
     /**
      * Данные об авансах ФЛ по идентификатору декларации
+     *
      * @param declarationDataId
      * @return
      */
@@ -125,6 +149,7 @@ public interface NdflPersonDao {
 
     /**
      * Найти данный о вычетах
+     *
      * @param ndflPersonId
      * @return
      */
@@ -132,11 +157,11 @@ public interface NdflPersonDao {
 
     /**
      * Найти данные о авансовых платежах
+     *
      * @param ndflPersonId
      * @return
      */
     List<NdflPersonPrepayment> findPrepayments(long ndflPersonId);
-
 
 
 }

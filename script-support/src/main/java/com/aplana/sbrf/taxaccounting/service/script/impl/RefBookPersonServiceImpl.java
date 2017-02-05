@@ -31,7 +31,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         return identificatePerson(personData, tresholdValue, new PersonDataWeigthCalculator(getComporatorList()));
     }
 
-
     public Long identificatePerson(PersonData personData, int tresholdValue, WeigthCalculator<PersonData>
             weigthComporators) {
 
@@ -40,11 +39,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         List<PersonData> personDataList = refBookPersonDao.findPersonByPersonData(personData);
 
         if (personDataList != null && !personDataList.isEmpty()) {
-
             calculateWeigth(personData, personDataList, weigthComporators);
 
             PersonData identificatedPerson = Collections.max(personDataList, new PersonDataComparator());
-
             if (identificatedPerson.getWeigth() > treshold) {
                 return identificatedPerson.getRecordId();
             } else {
@@ -56,6 +53,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         }
 
     }
+
 
     private static void calculateWeigth(PersonData searchPersonData, List<PersonData> personDataList, WeigthCalculator<PersonData> weigthComporators) {
 

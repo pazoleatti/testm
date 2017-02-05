@@ -270,6 +270,16 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     @Override
+    public RefBookPersonService mockRefBookPersonService() {
+        return mock(RefBookPersonService.class);
+    }
+
+    @Override
+    public FiasRefBookService mockFiasRefBookService() {
+        return mock(FiasRefBookService.class);
+    }
+
+    @Override
     public DepartmentFormTypeService mockDepartmentFormTypeService() {
         return mock(DepartmentFormTypeService.class);
     }

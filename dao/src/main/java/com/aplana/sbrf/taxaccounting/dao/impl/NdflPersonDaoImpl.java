@@ -9,8 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -21,9 +22,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.Date;
 
 /**
  * @author Andrey Drunk
@@ -297,6 +299,42 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
 
     @Override
+    public int[] updatePersonRefBookReferences(Map<Long, Long> referenceMap) {
+        String updateSql = "UPDATE ndfl_person SET person_id = ? WHERE id = ?";
+        try {
+            int[] result = getJdbcTemplate().batchUpdate(updateSql, new UpdateNdflPersonBatch(referenceMap));
+            return result;
+        } catch (DataAccessException e) {
+            throw new DaoException("Ошибка при обновлении идентификаторов физлиц", e);
+        }
+    }
+
+    class UpdateNdflPersonBatch implements BatchPreparedStatementSetter {
+
+        final Map<Long, Long> referenceMap;
+
+        final List<Long> rowIdList;
+
+        public UpdateNdflPersonBatch(Map<Long, Long> referenceMap) {
+            this.rowIdList = new ArrayList<Long>(referenceMap.keySet());
+            this.referenceMap = referenceMap;
+        }
+
+        @Override
+        public void setValues(PreparedStatement ps, int i) throws SQLException {
+            Long ndflPersonId = rowIdList.get(i);
+            ps.setLong(1, referenceMap.get(ndflPersonId));
+            ps.setLong(2, ndflPersonId);
+        }
+
+        @Override
+        public int getBatchSize() {
+            return rowIdList.size();
+        }
+
+    }
+
+    @Override
     public Long save(final NdflPerson ndflPerson) {
 
         saveNewObject(ndflPerson, NdflPerson.TABLE_NAME, NdflPerson.SEQ, NdflPerson.COLUMNS, NdflPerson.FIELDS);
@@ -347,7 +385,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         jdbcTemplate.update(insert, sqlParameterSource, keyHolder, new String[]{"ID"});
         identityObject.setId(keyHolder.getKey().longValue());
-
 
 
     }

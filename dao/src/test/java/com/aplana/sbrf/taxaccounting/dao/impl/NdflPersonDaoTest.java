@@ -13,12 +13,12 @@ import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Assert;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -27,15 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Andrey Drunk
@@ -52,6 +46,9 @@ public class NdflPersonDaoTest {
 
     @Autowired
     private NdflPersonDao ndflPersonDao;
+
+    @Autowired
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Test
     public void buildQueryTest() {
@@ -89,14 +86,47 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testGet() {
-        NdflPerson ndflPerson = ndflPersonDao.get(1);
-        assertNotNull(ndflPerson);
+        NdflPerson person = ndflPersonDao.get(101);
+        assertNotNull(person);
+        Assert.assertEquals(2, person.getIncomes().size());
     }
 
     @Test
     public void testFindNdflPerson() {
         List<NdflPerson> result = ndflPersonDao.findPerson(1);
+
+        for (NdflPerson person : result) {
+            Assert.assertNotNull(person.getIncomes());
+            Assert.assertNotNull(person.getDeductions());
+            Assert.assertNotNull(person.getPrepayments());
+
+            Assert.assertEquals(0, person.getIncomes().size());
+            Assert.assertEquals(0, person.getDeductions().size());
+            Assert.assertEquals(0, person.getPrepayments().size());
+        }
+
         Assert.assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testUpdatePersonRefBookReferences() {
+        Map<Long, Long> referenceMap = new HashMap<Long, Long>();
+        List<NdflPerson> ndflPersonList = ndflPersonDao.findPerson(2);
+        assertEquals(10, ndflPersonList.size());
+
+        for (NdflPerson person : ndflPersonList) {
+            referenceMap.put(person.getId(), Long.valueOf(new Random().nextInt(1000)));
+        }
+
+        ndflPersonDao.updatePersonRefBookReferences(referenceMap);
+
+        List<NdflPerson> updatedList = ndflPersonDao.findPerson(2);
+        assertEquals(10, updatedList.size());
+
+        for (NdflPerson person : updatedList) {
+            Long personId = referenceMap.get(person.getId());
+            assertEquals(person.getPersonId(), personId);
+        }
     }
 
     @Test

@@ -1,12 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder;
-import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
@@ -23,38 +17,27 @@ import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.util.TestUtils.toDate;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Andrey Drunk
@@ -103,7 +86,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     }
 
     @Test
-	public void importDataTest() throws IOException {
+    public void importDataTest() throws IOException {
 
         final List<NdflPerson> importedData = new ArrayList<NdflPerson>();
         when(testHelper.getNdflPersonService().save(any(NdflPerson.class))).thenAnswer(new Answer<Long>() {
@@ -111,9 +94,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             public Long answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
                 NdflPerson ndflPerson = (NdflPerson) args[0];
-
                 //System.out.println(ndflPerson + " [" + ndflPerson.getFirstName() + "," + ndflPerson.getLastName() + "]");
-
                 importedData.add(ndflPerson);
                 return (long) importedData.size();
             }
@@ -124,7 +105,42 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     }
 
     /**
+     * Тест рассчета данных декларации
+     *
+     * @throws IOException
+     */
+    @Test
+    public void calculateTest() throws IOException {
+        final int ndflPersonSize = 5;
+        final Map<Long, NdflPerson> ndflPersonMap = mockFindNdflPerson(ndflPersonSize);
+        when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenReturn(new ArrayList<NdflPerson>(ndflPersonMap.values()));
+        when(testHelper.getRefBookPersonService().identificatePerson(any(PersonData.class), anyInt())).thenReturn(Long.valueOf(new Random().nextInt(1000)));
+        when(testHelper.getNdflPersonService().updatePersonRefBookReferences(anyMap())).thenAnswer(new Answer<int[]>() {
+            @Override
+            public int[] answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                Map<Long, Long> personData = (Map<Long, Long>) args[0];
+                Assert.assertFalse(personData.values().contains(null));
+                Assert.assertTrue(CollectionUtils.isEqualCollection(ndflPersonMap.keySet(), personData.keySet()));
+                return new int[]{};
+            }
+        });
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkLogger();
+    }
+
+    private Map<Long, NdflPerson> mockFindNdflPerson(int size) {
+        Map<Long, NdflPerson> result = new HashMap<Long, NdflPerson>();
+        for (int i = 0; i < size; i++) {
+            result.put(Long.valueOf(i), createGoodNdflPerson(Long.valueOf(i)));
+        }
+        return result;
+    }
+
+
+    /**
      * Тестирование проверок НДФЛ
+     *
      * @throws IOException
      */
 //    @Test
@@ -162,6 +178,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     /**
      * Тест создания спецотчета "Спецотчет РНУ НДФЛ по физическому лицу"
+     *
      * @throws IOException
      */
     @Test
@@ -266,16 +283,15 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         Assert.assertEquals(ndflPerson.getAdditionalData(), xpath(xml, ndflPersonPath + "/@ДопИнф"));
 
 
-
-
-
     }
 
-    public Date parseDate(String xmlDate) throws ParseException {
-        return new java.text.SimpleDateFormat("dd.MM.yyyy").parse(xmlDate);
+    public Date parseDate(String xmlDate) {
+        try {
+            return new java.text.SimpleDateFormat("dd.MM.yyyy").parse(xmlDate);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
-
-
 
 
     /**
@@ -295,11 +311,9 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         Desktop.getDesktop().open(file);
     }
 
-
-    private NdflPerson createGoodNdflPerson() throws Exception {
-
+    private NdflPerson createGoodNdflPerson(Long id) {
         NdflPerson person = new NdflPerson();
-        person.setId(null);
+        person.setId(id);
         person.setDeclarationDataId(1L);
         person.setInp("000-000-000-00");
         person.setSnils("123-321-111-11");
@@ -360,14 +374,18 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         return person;
     }
 
-    private NdflPersonIncome createNdflPersonIncomes(int row, long operationId) throws Exception {
+    private NdflPerson createGoodNdflPerson() throws Exception {
+        return createGoodNdflPerson(null);
+    }
+
+    private NdflPersonIncome createNdflPersonIncomes(int row, long operationId) {
         NdflPersonIncome personIncome = new NdflPersonIncome();
         personIncome.setRowNum(row);
         personIncome.setOperationId(11111L);
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
         personIncome.setIncomeAccruedDate(parseDate("01.01.2017"));
-        personIncome.setPaymentNumber("aaaaaaaa"+row);
+        personIncome.setPaymentNumber("aaaaaaaa" + row);
         personIncome.setTaxSumm(122222);
         personIncome.setOperationId(operationId);
         return personIncome;
@@ -409,5 +427,11 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         return personPrepayment;
     }
 
+
+//    class NdflPersonDataFactory {
+//        public NdflPerson getNdflPerson(){
+//            return ...;
+//        }
+//    }
 
 }

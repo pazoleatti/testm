@@ -58,6 +58,8 @@ public class DeclarationTestScriptHelper {
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
     private DeclarationService declarationService;
+    private RefBookPersonService refBookPersonService;
+    private FiasRefBookService fiasRefBookService;
     private TransactionHelper transactionHelper;
     private NdflPersonService ndflPersonService;
 
@@ -89,6 +91,18 @@ public class DeclarationTestScriptHelper {
     private final ScriptTestMockHelper mockHelper;
 
     private StringWriter xmlStringWriter;
+
+    public RefBookPersonService getRefBookPersonService() {
+        return refBookPersonService;
+    }
+
+    public FiasRefBookService getFiasRefBookService() {
+        return fiasRefBookService;
+    }
+
+    public InputStream getImportFileInputStream() {
+        return importFileInputStream;
+    }
 
     public NdflPersonService getNdflPersonService() {
         return ndflPersonService;
@@ -144,6 +158,8 @@ public class DeclarationTestScriptHelper {
         refBookService = mockHelper.mockRefBookService();
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
+        refBookPersonService = mockHelper.mockRefBookPersonService();
+        fiasRefBookService = mockHelper.mockFiasRefBookService();
         declarationService = mockHelper.mockDeclarationService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
@@ -171,6 +187,9 @@ public class DeclarationTestScriptHelper {
         bindings.put("refBookDataProvider", refBookDataProvider);
         bindings.put("declarationService", declarationService);
         bindings.put("ndflPersonService", ndflPersonService);
+
+        bindings.put("refBookPersonService", refBookPersonService);
+        bindings.put("fiasRefBookService", fiasRefBookService);
 
         bindings.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
 

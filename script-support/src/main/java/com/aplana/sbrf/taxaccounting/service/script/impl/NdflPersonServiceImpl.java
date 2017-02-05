@@ -43,6 +43,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public int[] updatePersonRefBookReferences(Map<Long, Long> referenceMap) {
+        return ndflPersonDao.updatePersonRefBookReferences(referenceMap);
+    }
+
+    @Override
     public Long save(NdflPerson ndflPerson) {
         return ndflPersonDao.save(ndflPerson);
     }
@@ -167,12 +172,12 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         // Перечень объектов с просуммироваными доходами и авансами в рамках СТАВКИ
         List<NdflPersonIncomeByRate> ndflPersonIncomeByRateList = new ArrayList<NdflPersonIncomeByRate>();
 
-        for (Map.Entry<Integer, Map> iterTaxRate: mapTaxRate.entrySet()) {
+        for (Map.Entry<Integer, Map> iterTaxRate : mapTaxRate.entrySet()) {
             Map<Long, NdflPersonIncomeByRate> mapO = iterTaxRate.getValue();
             // Объект для хранения просуммированых доходов и авансов в рамках СТАВКИ
             NdflPersonIncomeByRate ndflPersonIncomeByRate = new NdflPersonIncomeByRate();
             ndflPersonIncomeByRate.setTaxRate(iterTaxRate.getKey());
-            for (Map.Entry<Long, NdflPersonIncomeByRate> iterOperation  : mapO.entrySet()) {
+            for (Map.Entry<Long, NdflPersonIncomeByRate> iterOperation : mapO.entrySet()) {
                 NdflPersonIncomeByRate sbr = iterOperation.getValue();
 
                 // Получим Аванс для конкретной операции

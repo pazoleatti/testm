@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 
 import java.util.Date;
 
@@ -11,7 +10,6 @@ import java.util.Date;
  * @author Andrey Drunk
  */
 public class PersonData {
-
 
     private Long id;
     private Long recordId;
@@ -310,8 +308,56 @@ public class PersonData {
         this.weigth = weigth;
     }
 
-    @Override
-    public String toString() {
+
+    public static PersonData mapValueFromNdflPerson(NdflPerson person){
+
+        PersonData personData = new PersonData();
+        //personData.id = person.getPersonId();
+
+        personData.lastName = person.getLastName();
+        personData.firstName = person.getFirstName();
+        personData.middleName = person.getMiddleName();
+
+        personData.inn = person.getInnNp();
+        personData.innForeign = person.getInnForeign();
+        personData.snils = person.getSnils();
+        personData.birthDate = person.getBirthDay();
+
+        //Коды из справочников
+        personData.citizenship = person.getCitizenship();
+        personData.inp = person.getInp();
+        personData.documentType = person.getIdDocType();
+        personData.documentNumber = person.getIdDocNumber();
+
+        //personData.recordId = person.getRecordId();
+        //personData.sex = person.getSex();
+        //personData.birthPlace = person.getBirthPlace();
+        //personData.pension = person.getPension();
+        //personData.medical = person.getMedical();
+        //personData.social = person.getSocial();
+        //personData.employee = person.getEmployee();
+
+        //personData.weigth = person.getweigth();
+
+        //personData.asnu = person.getAsnu();
+
+        //Идентификаторы справочников
+        //personData.asnuId = person.getasnuId();
+        //personData.addressId = person.getaddressId();
+        //personData.taxPayerStatusId = person.getTaxPayerStatusId();
+        //personData.citizenshipId = person.getcitizenshipId();
+        //personData.sourceId = person.getsourceId();
+        //personData.version = person.getversion();
+
+        return personData;
+    }
+
+
+
+
+
+    /*@Override
+   public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
                 .append("recordId", recordId)
@@ -342,5 +388,5 @@ public class PersonData {
                 .append("documentNumber", documentNumber)
                 .append("weigth", weigth)
                 .toString();
-    }
+    }*/
 }
