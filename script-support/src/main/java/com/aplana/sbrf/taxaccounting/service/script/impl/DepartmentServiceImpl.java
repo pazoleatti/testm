@@ -47,5 +47,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Department getBankDepartment() {
         return departmentService.getBankDepartment();
     }
+
+    @Override
+    public List<Integer> getDepartmentIdsByType(int type) {
+        return departmentDao.getDepartmentIdsByType(type);
+    }
 }
 

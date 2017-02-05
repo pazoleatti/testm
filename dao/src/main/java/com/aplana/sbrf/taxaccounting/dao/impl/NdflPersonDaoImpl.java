@@ -21,9 +21,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.Date;
 
 /**
  * @author Andrey Drunk
@@ -280,6 +280,25 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " from ndfl_person_prepayment npi where npi.ndfl_person_id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonPrepayment>();
+        }
+    }
+
+    @Override
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
+        String sql = "SELECT DISTINCT " + createColumns(NdflPerson.COLUMNS, "np") + " FROM ndfl_person np " +
+                "INNER JOIN ndfl_person_income npi " +
+                "ON np.id = npi.ndfl_person_id " +
+                "WHERE (npi.kpp = :kpp or npi.kpp is null) " +
+                "AND (npi.oktmo = :oktmo or npi.oktmo is null) " +
+                "AND np.DECLARATION_DATA_ID in (select id from DECLARATION_DATA where id = :declarationDataId)";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("declarationDataId", declarationDataId)
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonRowMapper());
+        } catch (EmptyResultDataAccessException ex) {
+            return new ArrayList<NdflPerson>();
         }
     }
 

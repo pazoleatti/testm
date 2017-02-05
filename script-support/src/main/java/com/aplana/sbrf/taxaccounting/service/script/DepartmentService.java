@@ -31,4 +31,11 @@ public interface DepartmentService {
     Integer getParentTBId(int departmentId);
 
     Department getBankDepartment();
+
+    /**
+     * Получение идентификаторов подразделений по типу
+     * @param type тип подразделения
+     * @return список идентификаторов подразделений
+     */
+    List<Integer> getDepartmentIdsByType(int type);
 }

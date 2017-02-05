@@ -38,6 +38,19 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public int getCountNdflPerson(long declarationDataId) {
+        String query = "select np.id from ndfl_person np where declaration_data_id = :declarationDataId";
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("declarationDataId", declarationDataId);
+        return ndflPersonDao.getCount(query, parameters);
+    }
+
+    @Override
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
+        return ndflPersonDao.findNdflPersonByPairKppOktmo(declarationDataId, kpp, oktmo);
+    }
+
+    @Override
     public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
         return ndflPersonDao.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate);
     }

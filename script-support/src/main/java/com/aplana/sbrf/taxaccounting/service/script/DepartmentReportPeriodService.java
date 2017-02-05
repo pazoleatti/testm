@@ -16,4 +16,17 @@ public interface DepartmentReportPeriodService {
     Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(Collection<Integer> reportPeriodIds);
 
     List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
+
+    /**
+     * Предпоследний отчетный период подразделения для комбинации отчетный период-подразделение
+     */
+    DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId);
+
+    /**
+     * Найти id отчетных периодов подразделений для определенного типа подразделения и отчетного периода
+     * @param departmentTypeCode
+     * @param reportPeriodId
+     * @return
+     */
+    List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId);
 }
