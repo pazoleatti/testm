@@ -37,7 +37,7 @@ insert into blob_data (id, name, data, creation_date) values ('uuid_4', 'file_4'
 insert into blob_data (id, name, data, creation_date) values ('uuid_5', 'file_5', 'b5', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_6', 'file_6', 'b6', sysdate);
 
-insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note) values ('uuid_1', 1, 'name1', 'dep1', null);
-insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note) values ('uuid_2', 1, 'name2', 'dep2', 'str');
-insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note) values ('uuid_3', 2, 'name3', 'подр3', null);
-insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note) values ('uuid_4', 2, 'name3', 'подр3', 'test');
+insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note, file_type_id) values ('uuid_1', 1, 'name1', 'dep1', null, 1);
+insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note, file_type_id) values ('uuid_2', 1, 'name2', 'dep2', 'str', 2);
+insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note, file_type_id) values ('uuid_3', 2, 'name3', 'подр3', null, 3);
+insert into declaration_data_file (blob_data_id, declaration_data_id, user_name, user_department_name, note, file_type_id) values ('uuid_4', 2, 'name3', 'подр3', 'test', 4);

@@ -18,6 +18,8 @@ public class DeclarationDataFile implements Serializable {
     private String userName;
     private String userDepartmentName;
     private String note;
+    private long fileTypeId;
+    private String fileTypeName;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -75,4 +77,19 @@ public class DeclarationDataFile implements Serializable {
         this.note = note;
     }
 
+    public long getFileTypeId() {
+        return fileTypeId;
+    }
+
+    public void setFileTypeId(long fileTypeId) {
+        this.fileTypeId = fileTypeId;
+    }
+
+    public String getFileTypeName() {
+        return fileTypeName;
+    }
+
+    public void setFileTypeName(String fileTypeName) {
+        this.fileTypeName = fileTypeName;
+    }
 }

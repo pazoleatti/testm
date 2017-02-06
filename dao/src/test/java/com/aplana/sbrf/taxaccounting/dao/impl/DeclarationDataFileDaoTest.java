@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationDataFileDaoTest.xml"})
 @Transactional
@@ -39,11 +37,16 @@ public class DeclarationDataFileDaoTest {
         assertEquals("dep1", files.get(0).getUserDepartmentName());
         assertNull(files.get(0).getNote());
         assertEquals(1, files.get(1).getDeclarationDataId());
+        assertEquals(1, files.get(0).getFileTypeId());
+        assertEquals("ТФ", files.get(0).getFileTypeName());
+
         assertEquals("uuid_2", files.get(1).getUuid());
         assertEquals("file_2", files.get(1).getFileName());
         assertEquals("name2", files.get(1).getUserName());
         assertEquals("dep2", files.get(1).getUserDepartmentName());
         assertEquals("str", files.get(1).getNote());
+        assertEquals(2, files.get(1).getFileTypeId());
+        assertEquals("Исходящий в ФНС", files.get(1).getFileTypeName());
     }
 
 	@Test
@@ -102,6 +105,7 @@ public class DeclarationDataFileDaoTest {
         newFile.setUserName("Контролер");
         newFile.setUserDepartmentName("Банк");
         newFile.setNote("");
+        newFile.setFileTypeId(4);
         files.add(newFile);
 
         //проверка добавления и удаления файла, изменения комментария к файлу
@@ -123,6 +127,8 @@ public class DeclarationDataFileDaoTest {
                 assertEquals("Контролер", file.getUserName());
                 assertEquals("Банк", file.getUserDepartmentName());
                 assertEquals("", file.getNote());
+                assertEquals(4, file.getFileTypeId());
+                assertEquals("Отчет", file.getFileTypeName());
             } else {
                 assert false;
             }
@@ -137,6 +143,7 @@ public class DeclarationDataFileDaoTest {
         newFile.setUserName("Контролер");
         newFile.setUserDepartmentName("Банк");
         newFile.setNote("прим");
+        newFile.setFileTypeId(3);
         files.add(newFile);
         declarationDataFileDao.saveFiles(3, files);
 
@@ -149,5 +156,7 @@ public class DeclarationDataFileDaoTest {
         assertEquals("Контролер", file.getUserName());
         assertEquals("Банк", file.getUserDepartmentName());
         assertEquals("прим", file.getNote());
+        assertEquals(3, file.getFileTypeId());
+        assertEquals("Входящий из ФНС", file.getFileTypeName());
     }
 }
