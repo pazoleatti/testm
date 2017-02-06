@@ -22,7 +22,7 @@ import java.util.*;
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
 /**
- * Компонент для построения SQL запросов для DAO {@link com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDaoImpl}
+ * Компонент для построения SQL запросов для DAO {@link com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDao}
  *
  */
 @Component
@@ -339,6 +339,9 @@ public class RefBookSimpleQueryBuilderComponent {
         if (uniqueRecordId != null) {
             sql.append("\nAND r.").append(RefBook.RECORD_ID_ALIAS).append(" != ").append(uniqueRecordId);
         }
+        if (record.getRecordId() != null) {
+            sql.append("\nAND r.record_id != ").append(record.getRecordId());
+        }
         return sql;
     }
 
@@ -349,7 +352,7 @@ public class RefBookSimpleQueryBuilderComponent {
             sql.append("'").append(attribute.getName()).append("'");
             appendIfAttributeIsNotLast(sql, uniqueAttributesValues, j, "||', '||");
         }
-        sql.append(" as name\n");
+        sql.append(" AS name\n");
     }
 
     private void appendWhereCondition(RefBookRecord record, PreparedStatementData sql,
@@ -476,13 +479,13 @@ public class RefBookSimpleQueryBuilderComponent {
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
 
         PreparedStatementData sql = new PreparedStatementData();
-        sql.appendQuery("select min(frb.version) as version\n");
+        sql.appendQuery("SELECT MIN(frb.version) AS version\n");
         sql.appendQuery(getFromStatementForGetNextVersion(refBook, filterPS).toString());
-        sql.appendQuery("where\n frb.version > :version\n and status <> -1\n");
+        sql.appendQuery("WHERE\n frb.version > :version\n AND status <> -1\n");
         sql.addNamedParam("version", version);
 
         if (filterPS.getQuery().length() > 0) {
-            sql.appendQuery(" and\n (");
+            sql.appendQuery(" AND\n (");
             sql.appendQuery(filterPS.getQuery().toString());
             sql.appendQuery(")\n");
         }
@@ -491,7 +494,7 @@ public class RefBookSimpleQueryBuilderComponent {
 
     private StringBuilder getFromStatementForGetNextVersion(RefBook refBook, PreparedStatementData filterPS) {
         StringBuilder fromSql = new StringBuilder();
-        fromSql.append("from ");
+        fromSql.append("FROM ");
         fromSql.append(refBook.getTableName());
         fromSql.append(" frb\n");
 
@@ -501,6 +504,10 @@ public class RefBookSimpleQueryBuilderComponent {
         return fromSql;
     }
 
+    /*
+    INSERT INTO <ref_book_table_name> (id, record_id, version, status, <attribute1>, <attributeN>)
+    VALUES (seq_ref_book_record.nextval, <attribute1_value>, <attributeN_value>)
+     */
     public PreparedStatementData psCreateFakeRecordVersion(RefBook refBook, Long recordId, Date version) {
         PreparedStatementData sql = new PreparedStatementData();
         List<RefBookAttribute> allRequiredAttributes = getRequiredAttributesListFromBook(refBook);
@@ -509,11 +516,11 @@ public class RefBookSimpleQueryBuilderComponent {
         sql.addNamedParam("recordId", recordId);
         sql.addNamedParam("version", new java.sql.Date(version.getTime()));
 
-        sql.append("insert into ").append(refBook.getTableName()).append(" (id, record_id, version, status");
+        sql.append("INSERT INTO ").append(refBook.getTableName()).append(" (id, record_id, version, status");
         for (RefBookAttribute requiredAttribute : requiredAttributes) {
             sql.append(", ").append(requiredAttribute.getAlias());
         }
-        sql.append(")\n values (seq_ref_book_record.nextval, :recordId, :version, 2");
+        sql.append(")\nVALUES (seq_ref_book_record.nextval, :recordId, :version, 2");
         for (RefBookAttribute requiredAttribute : requiredAttributes) {
             sql.append(", ");
             appendFakeAttributeValue(sql, requiredAttribute);
@@ -562,6 +569,10 @@ public class RefBookSimpleQueryBuilderComponent {
         return requiredAttributes;
     }
 
+    /*
+    INSERT INTO <ref_book_table_name> (id, record_id, version, status, <attribute1>, <attributeN>)
+    VALUES (<id>, <record_id>, <version>, <status>, <attribute1_value>, <attributeN_value>))
+     */
     public PreparedStatementData psCreateRecordVersion(final RefBook refBook) {
         PreparedStatementData sql = new PreparedStatementData();
         List<RefBookAttribute> attributes = getNotSystemAttributes(refBook.getAttributes());
@@ -570,7 +581,7 @@ public class RefBookSimpleQueryBuilderComponent {
         for (RefBookAttribute attribute : attributes) {
             sql.append(", ").append(attribute.getAlias());
         }
-        sql.append(") VALUES (:id, :recordId, :version, :status");
+        sql.append(")\nVALUES (:id, :recordId, :version, :status");
         for (RefBookAttribute attribute : attributes) {
             sql.append(", :").append(attribute.getAlias());
         }
@@ -579,16 +590,26 @@ public class RefBookSimpleQueryBuilderComponent {
         return sql;
     }
 
+    /*
+    SELECT id <id_alias>, <attribute1>, <attributeN>
+    FROM <ref_book_table_name>
+    WHERE id = <id>
+     */
     public PreparedStatementData psGetRecordData(RefBook refBook) {
         PreparedStatementData sql = new PreparedStatementData("SELECT id ");
         sql.append(RefBook.RECORD_ID_ALIAS);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             sql.append(", ").append(attribute.getAlias());
         }
-        sql.append(" FROM ").append(refBook.getTableName()).append(" WHERE id = :id");
+        sql.append("\nFROM ").append(refBook.getTableName()).append("\nWHERE id = :id");
         return sql;
     }
 
+    /*
+    SELECT id <id_alias>, <attribute1>, <attributeN>
+    FROM <ref_book_table_name>
+    WHERE id in (<id1>,<id2>)
+     */
     public PreparedStatementData psGetRecordsData(RefBook refBook, List<Long> recordIds) {
         String inStatement = SqlUtils.transformToSqlInStatement("id", recordIds);
 
@@ -597,15 +618,15 @@ public class RefBookSimpleQueryBuilderComponent {
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             sql.append(", ").append(attribute.getAlias());
         }
-        sql.append(" FROM ").append(refBook.getTableName()).append(" WHERE ").append(inStatement);
+        sql.append("\nFROM ").append(refBook.getTableName()).append("\nWHERE ").append(inStatement);
         return sql;
     }
 
     /*
-    UPDATE <TABLENAME> SET
-    <COL> = :<COL>,
-    <COL> = :<COL>
-    WHERE id = <ID>
+    UPDATE <ref_book_table_name> SET
+    <col> = :<col>,
+    <col> = :<col>
+    WHERE id = <id>
      */
     public PreparedStatementData psUpdateRecordVersion(RefBook refBook, Long uniqueRecordId, Map<String, RefBookValue> values) {
         List<Pair<String, RefBookValue>> valuesPairs = convertMapToPairsList(values);
