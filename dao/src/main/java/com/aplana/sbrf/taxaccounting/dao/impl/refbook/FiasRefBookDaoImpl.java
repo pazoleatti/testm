@@ -54,7 +54,7 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
     private static String buidFindAddress() {
         StringBuilder sb = new StringBuilder();
         sb.append("WITH parent_to_child AS \n");
-        sb.append("  (SELECT DISTINCT fa.id, fa.parentguid AS pid, fa.regioncode, fa.formalname AS fname, level AS aolevel, connect_by_isleaf AS isleaf, fa.currstatus AS status, sys_connect_by_path(fa.formalname, '\\') AS aopath \n");
+        sb.append("  (SELECT DISTINCT fa.id, fa.parentguid AS pid, fa.regioncode, fa.formalname AS fname, level AS aolevel, connect_by_isleaf AS isleaf, fa.currstatus AS status, sys_connect_by_path(fa.formalname, '\\\\') AS aopath \n");
         sb.append("  FROM fias_addrobj fa \n");
         sb.append("  WHERE REPLACE(lower(fa.formalname), ' ', '') = :formalName \n");
         sb.append("    START WITH fa.parentguid                  IS NULL \n");
