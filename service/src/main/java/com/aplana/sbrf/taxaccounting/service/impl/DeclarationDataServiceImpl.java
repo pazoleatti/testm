@@ -1664,7 +1664,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (scriptParams.containsKey("fileName") && scriptParams.get("fileName") != null) {
                 fileName = scriptParams.get("fileName").toString();
             }
-            if (fileName == null && fileName.isEmpty()) {
+            if (fileName == null || fileName.isEmpty()) {
                 fileName = "reports";
             }
             stateLogger.updateState("Сохранение отчета в базе данных");

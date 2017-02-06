@@ -314,7 +314,7 @@ alter table department_change add constraint dep_change_chk_sunr_use check (sunr
 alter table declaration_data_file add constraint decl_data_file_pk primary key (blob_data_id, declaration_data_id);
 alter table declaration_data_file add constraint decl_data_file_fk_decl_data foreign key (declaration_data_id) references declaration_data(id);
 alter table declaration_data_file add constraint decl_data_file_fk_blob_data foreign key (blob_data_id) references blob_data(id);
-
+alter table declaration_data_file add constraint fk_decl_data_file_type_id foreign key (file_type_id) references ref_book_attach_file_type(id);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);
@@ -343,6 +343,8 @@ create index i_notification_report_id on notification (report_id);
 create index i_dep_rep_per_report_period_id on department_report_period (report_period_id);
 create unique index i_search_data_result on form_search_data_result (session_id, id, ord) /*local*/;
 create index i_form_search_result_formdata on form_search_result(form_data_id);
+
+create index fk_decl_data_file_type_id on declaration_data_file(file_type_id);
 
 ------------------------------------------------------------------------------------------------------
 --      Расчет по страховым взносам 1151111
