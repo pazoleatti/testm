@@ -58,6 +58,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private RefBookPickerWidget asnuPicker;
 
+    private TextBox notePicker;
+
     @Inject
 	@UiConstructor
     public DeclarationFilterView(final MyBinder binder) {
@@ -143,6 +145,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         fileNamePicker.setMaxLength(255);
         fileNamePicker.setTitle("Файл");
 
+        notePicker = new TextBox();
+        notePicker.setMaxLength(255);
+        notePicker.setTitle("Примечание");
+
         initWidget(binder.createAndBindUi(this));
     }
 
@@ -185,6 +191,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         formDataFilter.setTaxOrganCode(taxOrganisationPicker.getValue());
         formDataFilter.setTaxOrganKpp(kppPicker.getValue());
         formDataFilter.setCorrectionTag(correctionTag.getValue());
+        formDataFilter.setNote(notePicker.getValue());
         List<Long> asnuPickerValues = asnuPicker.getValue();
         if (asnuPickerValues != null && !asnuPickerValues.isEmpty()) {
             formDataFilter.setAsnuId(asnuPickerValues.get(0));
@@ -514,6 +521,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel4.add(label);
             verticalPanel5.add(docStatePicker);
+
+            label = getLabel("Примечание:");
+            verticalPanel4.add(label);
+            verticalPanel5.add(notePicker);
         }
 
         /*
