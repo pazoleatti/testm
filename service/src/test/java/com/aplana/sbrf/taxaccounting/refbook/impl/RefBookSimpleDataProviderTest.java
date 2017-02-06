@@ -1,17 +1,19 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -73,11 +75,12 @@ public class RefBookSimpleDataProviderTest {
                 anyString(), any(RefBookAttribute.class), eq(true));
     }
 
-//    @Test
+    @Test
+    @Ignore
     public void getChildrenRecordsInvokesDao() throws Exception {
         provider.getChildrenRecords(1L, null, null, null, null);
 
-        verify(daoMock, atLeastOnce()).getChildrenRecords(eq(RFB_TABLE_NAME), eq(RFB_ID),
+        verify(daoMock, atLeastOnce()).getChildrenRecords(any(RefBook.class),
                 any(Date.class), anyLong(), any(PagingParams.class), anyString(), any(RefBookAttribute.class));
     }
 
@@ -85,7 +88,7 @@ public class RefBookSimpleDataProviderTest {
     public void getRowNumInvokesDao() throws Exception {
         provider.getRowNum(null, TEST_RECORD_ID, null, null, true);
 
-        verify(daoMock, atLeastOnce()).getRowNum(eq(RFB_ID), any(Date.class), anyLong(), anyString(),
+        verify(daoMock, atLeastOnce()).getRowNum(any(RefBook.class), any(Date.class), anyLong(), anyString(),
                 any(RefBookAttribute.class), anyBoolean());
     }
 
@@ -102,7 +105,7 @@ public class RefBookSimpleDataProviderTest {
         String filter = "FILTER";
         provider.getUniqueRecordIds(version, filter);
 
-        verify(daoMock).getUniqueRecordIds(RFB_ID, RFB_TABLE_NAME, version, filter);
+        verify(daoMock).getUniqueRecordIds(any(RefBook.class), eq(version), eq(filter));
     }
 
     @Test
@@ -128,7 +131,7 @@ public class RefBookSimpleDataProviderTest {
     public void getRecordVersionInfoInvokesDao() throws Exception {
         provider.getRecordVersionInfo(3L);
 
-        verify(daoMock).getRecordVersionInfo(RFB_TABLE_NAME, 3L);
+        verify(daoMock).getRecordVersionInfo(any(RefBook.class), eq(3L));
     }
 
     @Test
@@ -137,14 +140,14 @@ public class RefBookSimpleDataProviderTest {
         Date versionEnd = new Date();
         provider.getVersions(versionStart, versionEnd);
 
-        verify(daoMock).getVersions(RFB_TABLE_NAME, versionStart, versionEnd);
+        verify(daoMock).getVersions(any(RefBook.class), eq(versionStart), eq(versionEnd));
     }
 
     @Test
     public void getRecordVersionsCountInvokesDao() throws Exception {
         provider.getRecordVersionsCount(4L);
 
-        verify(daoMock).getRecordVersionsCount(RFB_TABLE_NAME, 4L);
+        verify(daoMock).getRecordVersionsCount(any(RefBook.class), eq(4L));
     }
 
     @Test
@@ -156,27 +159,9 @@ public class RefBookSimpleDataProviderTest {
         assertEquals(true, provider.isRefBookSupported(refBook));
     }
 
-
-    public void isRefBookSupportedReturnsFalseIfNotEditableOrNotVersioned() throws Exception {
-        RefBook refBook = new RefBook();
-        refBook.setReadOnly(true);
-        refBook.setVersioned(true);
-
-        RefBook refBook2 = new RefBook();
-        refBook2.setReadOnly(false);
-        refBook2.setVersioned(false);
-
-        assertEquals(false, provider.isRefBookSupported(refBook));
-        assertEquals(false, provider.isRefBookSupported(refBook2));
-    }
-
     @Test
-    public void isRefBookSupportedReturnsFalseIfNotVersioned() throws Exception {
-        RefBook refBook2 = new RefBook();
-        refBook2.setReadOnly(false);
-        refBook2.setVersioned(false);
-
-        assertEquals(false, provider.isRefBookSupported(refBook2));
+    public void isRefBookSupportedReturnsTrue() throws Exception {
+        assertEquals(true, provider.isRefBookSupported(new RefBook()));
     }
 
     @Test
@@ -185,20 +170,15 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void isRefBookSupportedByIdReturnsFalse() throws Exception {
-        assertEquals(false, provider.isRefBookSupported(RFB_NOT_VERSIONED_ID));
-    }
-
-    @Test
     public void getRecordIdInvokesDao() throws Exception {
         provider.getRecordId(5L);
-        verify(daoMock).getRecordId(RFB_TABLE_NAME, 5L);
+        verify(daoMock).getRecordId(any(RefBook.class), eq(5L));
     }
 
     @Test
     public void getRecordVersionsByRecordIdInvokesDao() throws Exception {
         provider.getRecordVersionsByRecordId(4L, null, null, null);
-        verify(daoMock).getRecordVersionsByRecordId(RFB_ID, 4L, null, null, null);
+        verify(daoMock).getRecordVersionsByRecordId(any(RefBook.class), eq(4L), any(PagingParams.class), anyString(), any(RefBookAttribute.class));
     }
 
     @Test
@@ -217,5 +197,242 @@ public class RefBookSimpleDataProviderTest {
     public void getRecordData2InvokesDao() throws Exception {
         provider.getRecordData(Arrays.asList(1L,2L));
         verify(daoMock).getRecordData(any(RefBook.class), anyListOf(Long.class));
+    }
+
+    @Test
+    public void getRecords() throws Exception {
+
+    }
+
+    @Test
+    public void getRecords1() throws Exception {
+
+    }
+
+    @Test
+    public void getChildrenRecords() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordIdPairs() throws Exception {
+
+    }
+
+    @Test
+    public void getNextVersion() throws Exception {
+
+    }
+
+    @Test
+    public void getEndVersion() throws Exception {
+
+    }
+
+    @Test
+    public void getUniqueRecordIds() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordsCount() throws Exception {
+
+    }
+
+    @Test
+    public void checkRecordExistence() throws Exception {
+
+    }
+
+    @Test
+    public void isRecordsExist() throws Exception {
+
+    }
+
+    @Test
+    public void getRowNum() throws Exception {
+
+    }
+
+    @Test
+    public void getParentsHierarchy() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordData() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordData1() throws Exception {
+
+    }
+
+    @Test
+    public void getValue() throws Exception {
+
+    }
+
+    @Test
+    public void getVersions() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordVersionsById() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordVersionsByRecordId() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordVersionInfo() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordsVersionStart() throws Exception {
+
+    }
+
+    @Test
+    public void getRecordVersionsCount() throws Exception {
+
+    }
+
+    @Test
+    public void createRecordVersion() throws Exception {
+
+    }
+
+    @Test
+    public void createRecordVersionWithoutLock() throws Exception {
+
+    }
+
+    @Test
+    public void getUniqueAttributeValues() throws Exception {
+
+    }
+
+    @Test
+    public void updateRecordVersion() throws Exception {
+
+    }
+
+    @Test
+    public void updateRecordVersionWithoutLock() throws Exception {
+
+    }
+
+    @Test
+    public void updateRecordsVersionEnd() throws Exception {
+
+    }
+
+    @Test
+    public void updateRecordsVersionEndWithoutLock() throws Exception {
+
+    }
+
+    @Test
+    public void deleteAllRecords() throws Exception {
+
+    }
+
+    @Test
+    public void deleteAllRecordsWithoutLock() throws Exception {
+
+    }
+
+    @Test
+    public void deleteRecordVersions() throws Exception {
+
+    }
+
+    @Test
+    public void deleteRecordVersionsWithoutLock() throws Exception {
+
+    }
+
+    @Test
+    public void deleteRecordVersions1() throws Exception {
+
+    }
+
+    @Test
+    public void getFirstRecordIdInvokesDao() throws Exception {
+        provider.getFirstRecordId(5L);
+
+        verify(daoMock).getFirstRecordId(any(RefBook.class), eq(5L));
+    }
+
+    @Test
+    public void getRecordId() throws Exception {
+
+    }
+
+    @Test
+    public void getAttributesValues() throws Exception {
+
+    }
+
+    @Test
+    public void getInactiveRecordsInPeriod() throws Exception {
+
+    }
+
+    @Test
+    public void insertRecords() throws Exception {
+
+    }
+
+    @Test
+    public void insertRecordsWithoutLock() throws Exception {
+
+    }
+
+    @Test
+    public void updateRecords() throws Exception {
+
+    }
+
+    @Test
+    public void updateRecordsWithoutLock() throws Exception {
+
+    }
+
+    @Test
+    public void dereferenceValues() throws Exception {
+
+    }
+
+    @Test
+    public void getMatchedRecords() throws Exception {
+
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getRefBookThrowsExceptionOnNullRefBook() throws Exception {
+        provider.setRefBook(null);
+        provider.getRefBook();
+    }
+
+    @Test
+    public void setRefBook() throws Exception {
+        provider.setRefBook(getRefBookStub());
+
+        assertNotNull(provider.getRefBook());
+    }
+
+    @Test
+    public void getRefBookId() throws Exception {
+        provider.setRefBook(getRefBookStub());
+
+        assertEquals(Long.class, provider.getRefBookId().getClass());
     }
 }

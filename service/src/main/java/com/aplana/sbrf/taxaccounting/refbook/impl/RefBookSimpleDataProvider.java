@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -30,10 +30,9 @@ import java.util.*;
 @Transactional
 public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
-    private static final String MSG_REFBOOK_NOT_VERSIONED = "Справочник %s (ID=%d) не поддерживает версионирование";
     public static final String CURRENT_USER_NOT_SET = "Текущий пользователь не установлен!";
-
     private static final String CROSS_ERROR_MSG = "Обнаружено пересечение указанного срока актуальности с существующей версией!";
+    private static final String MSG_REFBOOK_NOT_SUPPORTED = "Справочник %s (id=%d) не поддерживается провайдером";
 
     @Autowired
     private LockDataService lockService;
@@ -88,12 +87,12 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
-        return dao.getUniqueRecordIds(getRefBook().getId(), getRefBook().getTableName(), version, filter);
+        return dao.getUniqueRecordIds(getRefBook(), version, filter);
     }
 
     @Override
     public int getRecordsCount(Date version, String filter) {
-        return dao.getRecordsCount(getRefBook().getId(), getRefBook().getTableName(), version, filter);
+        return dao.getRecordsCount(getRefBook(), version, filter);
     }
 
     @Override
@@ -108,7 +107,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public Long getRowNum(Date version, Long recordId, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return dao.getRowNum(getRefBook().getId(), version, recordId, filter, sortAttribute, isSortAscending);
+        return dao.getRowNum(getRefBook(), version, recordId, filter, sortAttribute, isSortAscending);
     }
 
     @Override
@@ -134,7 +133,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         if (getRefBook().isVersioned()) {
-            return dao.getVersions(getRefBook().getTableName(), startDate, endDate);
+            return dao.getVersions(getRefBook(), startDate, endDate);
         } else {
             return readOnlyProvider.getVersions(startDate, endDate);
         }
@@ -147,12 +146,12 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return dao.getRecordVersionsByRecordId(getRefBook().getId(), recordId, pagingParams, filter, sortAttribute);
+        return dao.getRecordVersionsByRecordId(getRefBook(), recordId, pagingParams, filter, sortAttribute);
     }
 
     @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
-        return dao.getRecordVersionInfo(getRefBook().getTableName(), uniqueRecordId);
+        return dao.getRecordVersionInfo(getRefBook(), uniqueRecordId);
     }
 
     @Override
@@ -162,11 +161,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public int getRecordVersionsCount(Long uniqueRecordId) {
-        return dao.getRecordVersionsCount(getRefBook().getTableName(), uniqueRecordId);
-    }
-
-    private void throwUnsupportedOperation(){
-        throw new UnsupportedOperationException();
+        return dao.getRecordVersionsCount(getRefBook(), uniqueRecordId);
     }
 
     @Override
@@ -320,9 +315,9 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
             boolean isJustNeedValuesUpdate = (versionFrom == null && versionTo == null);
 
             //Получаем идентификатор записи справочника без учета версий
-            Long recordId = dao.getRecordId(getRefBook().getTableName(), uniqueRecordId);
+            Long recordId = dao.getRecordId(getRefBook(), uniqueRecordId);
             //Получаем еще неотредактированную версию
-            RefBookRecordVersion oldVersionPeriod = dao.getRecordVersionInfo(getRefBook().getTableName(), uniqueRecordId);
+            RefBookRecordVersion oldVersionPeriod = dao.getRecordVersionInfo(getRefBook(), uniqueRecordId);
 
             RefBookRecord refBookRecord = new RefBookRecord();
             refBookRecord.setUniqueRecordId(uniqueRecordId);
@@ -624,7 +619,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public Long getRecordId(@NotNull Long uniqueRecordId) {
-        return dao.getRecordId(getRefBook().getTableName(), uniqueRecordId);
+        return dao.getRecordId(getRefBook(), uniqueRecordId);
     }
 
     @Override
@@ -679,6 +674,9 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     }
 
     public void setRefBook(RefBook refBook) {
+        if (!isRefBookSupported(refBook)) {
+            throw new IllegalArgumentException(String.format(MSG_REFBOOK_NOT_SUPPORTED, refBook.getName(), refBook.getId()));
+        }
         this.refBook = refBook;
     }
 
@@ -688,6 +686,9 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     public void setRefBookId(long refBookId) {
         RefBook probableRefBook = refBookDao.get(refBookId);
+        if (!isRefBookSupported(probableRefBook)) {
+            throw new IllegalArgumentException(String.format(MSG_REFBOOK_NOT_SUPPORTED, probableRefBook.getName(), probableRefBook.getId()));
+        }
         this.refBook = probableRefBook;
     }
 
@@ -695,12 +696,8 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 		setRefBookId(id.getId());
 	}
 
-	public void setRefBookId(RefBook refBook) {
-		this.refBook = refBook;
-	}
-
     public boolean isRefBookSupported(RefBook refBook) {
-        return refBook.isVersioned();
+        return true;
     }
 
     public boolean isRefBookSupported(long refBookId) {

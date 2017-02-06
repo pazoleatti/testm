@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
@@ -14,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,7 +135,7 @@ public class RefBookSimpleDaoTest {
 
     @Test
     public void getChildrenRecordsReturnsAll() throws Exception {
-        PagingResult<Map<String, RefBookValue>> data = dao.getChildrenRecords(FAMILY_TABLE, FAMILY_ID, null,
+        PagingResult<Map<String, RefBookValue>> data = dao.getChildrenRecords(createHierarchyRefBook(), null,
                 null, null, null, null);
         assertEquals(1, data.size());
         assertEquals(1, data.getTotalCount());
@@ -146,7 +144,7 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getChildrenRecordsThrowsAnExceptionOnNotHierarchicalRefBook() throws Exception {
         try {
-            dao.getChildrenRecords(REF_BOOK_TABLE_NAME, REF_BOOK_ID, null, null, null, null, null);
+            dao.getChildrenRecords(createRefBook(), null, null, null, null, null);
         } catch (IllegalArgumentException ex) {
             assertEquals("Справочник \"Физические лица\" (id=904) не является иерархичным", ex.getMessage());
         }
@@ -154,7 +152,7 @@ public class RefBookSimpleDaoTest {
 
 //    @Test
     public void getChildrenRecordsReturnsSome() throws Exception {
-        PagingResult<Map<String, RefBookValue>> data = dao.getChildrenRecords(FAMILY_TABLE, FAMILY_ID, null,
+        PagingResult<Map<String, RefBookValue>> data = dao.getChildrenRecords(createHierarchyRefBook(), null,
                 1L, null, null, null);
         assertEquals(2, data.size());
         assertEquals(2, data.getTotalCount());
@@ -163,14 +161,14 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getRowNumReturnsNum() throws Exception {
         Date version = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime();
-        Long rowNum = dao.getRowNum(REF_BOOK_ID, version, 3L, null, null, true);
+        Long rowNum = dao.getRowNum(createRefBook(), version, 3L, null, null, true);
 
         assertEquals((Long) 1L, rowNum);
     }
 
     @Test
     public void getUniqueRecordIdsReturnsIds() throws Exception {
-        List<Long> ids = dao.getUniqueRecordIds(REF_BOOK_ID, REF_BOOK_TABLE_NAME, null, null);
+        List<Long> ids = dao.getUniqueRecordIds(createRefBook(), null, null);
 
         assertEquals(TABLE_TOTAL_RECORDS, ids.size());
     }
@@ -178,14 +176,14 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getUniqueRecordIdsReturnsIdsWithVersionSet() throws Exception {
         Date version = new GregorianCalendar(2015, Calendar.JANUARY, 1).getTime();
-        List<Long> ids = dao.getUniqueRecordIds(REF_BOOK_ID, REF_BOOK_TABLE_NAME, version, null);
+        List<Long> ids = dao.getUniqueRecordIds(createRefBook(), version, null);
 
         assertEquals(2, ids.size());
     }
 
     @Test
     public void getRecordsCountReturnsAllRecordsCount() throws Exception {
-        int result = dao.getRecordsCount(REF_BOOK_ID, REF_BOOK_TABLE_NAME, null, null);
+        int result = dao.getRecordsCount(createRefBook(), null, null);
 
         assertEquals(TABLE_TOTAL_RECORDS, result);
     }
@@ -193,7 +191,7 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getRecordsCountReturnsVersionedRecordsCount() throws Exception {
         Date version = new GregorianCalendar(2018, Calendar.JANUARY, 1).getTime();
-        int result = dao.getRecordsCount(REF_BOOK_ID, REF_BOOK_TABLE_NAME, version, null);
+        int result = dao.getRecordsCount(createRefBook(), version, null);
 
         assertEquals(4, result);
     }
@@ -203,7 +201,7 @@ public class RefBookSimpleDaoTest {
         Date expectedVersionStart = new GregorianCalendar(2010, Calendar.JANUARY, 1).getTime();
         Date expectedVersionEnd = new GregorianCalendar(2010, Calendar.DECEMBER, 31).getTime();
 
-        RefBookRecordVersion versionInfo = dao.getRecordVersionInfo(REF_BOOK_TABLE_NAME, 4L);
+        RefBookRecordVersion versionInfo = dao.getRecordVersionInfo(createRefBook(), 4L);
 
         assertEquals((Long) 4L, versionInfo.getRecordId());
         assertEquals(expectedVersionStart, versionInfo.getVersionStart());
@@ -219,7 +217,7 @@ public class RefBookSimpleDaoTest {
         Date expectedDate1 = versionStart;
         Date expectedDate2 = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime();
 
-        List<Date> versions = dao.getVersions(REF_BOOK_TABLE_NAME, versionStart, versionEnd);
+        List<Date> versions = dao.getVersions(createRefBook(), versionStart, versionEnd);
 
         assertTrue(versions.contains(expectedDate1));
         assertTrue(versions.contains(expectedDate2));
@@ -227,15 +225,15 @@ public class RefBookSimpleDaoTest {
 
     @Test
     public void getRecordVersionsCountReturnsCount() throws Exception {
-        int count = dao.getRecordVersionsCount(REF_BOOK_TABLE_NAME, 4L);
+        int count = dao.getRecordVersionsCount(createRefBook(), 4L);
 
         assertEquals(2, count);
     }
 
     @Test
     public void getRecordIdReturnsId() throws Exception {
-        Long expect3 = dao.getRecordId(REF_BOOK_TABLE_NAME, 3L);
-        Long expect4 = dao.getRecordId(REF_BOOK_TABLE_NAME, 5L);
+        Long expect3 = dao.getRecordId(createRefBook(), 3L);
+        Long expect4 = dao.getRecordId(createRefBook(), 5L);
 
         assertEquals((Long) 3L, expect3);
         assertEquals((Long) 4L, expect4);
@@ -243,7 +241,7 @@ public class RefBookSimpleDaoTest {
 
     @Test(expected = DaoException.class)
     public void getRecordThrowsIfNotFound() throws Exception {
-        dao.getRecordId(REF_BOOK_TABLE_NAME, 99L);
+        dao.getRecordId(createRefBook(), 99L);
     }
 
     @Test
@@ -254,7 +252,7 @@ public class RefBookSimpleDaoTest {
         dates.add(d1946);
         dates.add(d1948);
 
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecordVersionsByRecordId(REF_BOOK_ID, 4L, null, null, null);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecordVersionsByRecordId(createRefBook(), 4L, null, null, null);
 
         assertEquals(2, data.size());
         for (Map<String, RefBookValue> refBook : data) {
@@ -266,7 +264,7 @@ public class RefBookSimpleDaoTest {
     public void getRecordVersionsByRecordIdReturnsFiltered() throws Exception {
         Date d1948 = new GregorianCalendar(1948, Calendar.FEBRUARY, 8).getTime();
 
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecordVersionsByRecordId(REF_BOOK_ID, 4L, null, "BIRTH_PLACE = 'Калуга'", null);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecordVersionsByRecordId(createRefBook(), 4L, null, "BIRTH_PLACE = 'Калуга'", null);
 
         assertEquals(1, data.size());
         assertEquals(d1948, data.get(0).get("BIRTH_DATE").getDateValue());
@@ -307,6 +305,7 @@ public class RefBookSimpleDaoTest {
         refBook.setId(REF_BOOK_ID);
         refBook.setVersioned(true);
         refBook.setReadOnly(false);
+        refBook.setName("Физические лица");
 
         refBook.setAttributes(createAttributes());
 
@@ -416,6 +415,7 @@ public class RefBookSimpleDaoTest {
         refBook.setType(1);
         refBook.setReadOnly(false);
         refBook.setVersioned(true);
+        refBook.setAttributes(refBookDao.getAttributes(1983L));
         return refBook;
     }
 
@@ -494,7 +494,7 @@ public class RefBookSimpleDaoTest {
 
         dao.createFakeRecordVersion(refBook, 4L, fakeVersion);
 
-        PagingResult<Map<String, RefBookValue>> records = dao.getRecordVersionsByRecordId(refBook.getId(), 4L, null, null, null);
+        PagingResult<Map<String, RefBookValue>> records = dao.getRecordVersionsByRecordId(refBook, 4L, null, null, null);
         RefBookRecordVersion nextVersion = dao.getNextVersion(refBook, 4L, versionFrom);
         assertEquals(2, records.getTotalCount());
         assertEquals(expectedVersionEnd, nextVersion.getVersionEnd());
@@ -506,8 +506,8 @@ public class RefBookSimpleDaoTest {
         RefBook refBook = createRefBook();
 
         dao.createRecordVersion(refBook, version, VersionedObjectStatus.NORMAL, createRecordsForCreateRecordsVersion());
-        PagingResult<Map<String, RefBookValue>> result1 = dao.getRecordVersionsByRecordId(refBook.getId(), 1L, null, null, null);
-        PagingResult<Map<String, RefBookValue>> result2 = dao.getRecordVersionsByRecordId(refBook.getId(), 4L, null, null, null);
+        PagingResult<Map<String, RefBookValue>> result1 = dao.getRecordVersionsByRecordId(refBook, 1L, null, null, null);
+        PagingResult<Map<String, RefBookValue>> result2 = dao.getRecordVersionsByRecordId(refBook, 4L, null, null, null);
 
         assertEquals(2, result1.size());
         assertEquals(3, result2.size());
