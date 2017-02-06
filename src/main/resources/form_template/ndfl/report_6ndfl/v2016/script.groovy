@@ -5,6 +5,10 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 switch (formDataEvent) {
+    case FormDataEvent.CREATE_FORMS: // создание экземпляра
+        println "!CREATE_FORMS!"
+        createForm()
+        break
     case FormDataEvent.CALCULATE:
         buildXml()
         break
@@ -74,7 +78,7 @@ def buildXml() {
             if (departmentParamIncomeRow.PHONE && !departmentParamIncomeRow.PHONE.empty) {
                 svNP.put("Тлф", departmentParamIncomeRow.PHONE)
             }
-            СвНП(svNP){
+            СвНП(svNP) {
                 НПЮЛ(
                         НаимОрг: departmentParamIncomeRow.NAME,
                         ИННЮЛ: departmentParam.INN,
@@ -83,7 +87,7 @@ def buildXml() {
             }
             Подписант(
                     ПрПодп: signatoryId
-            ){
+            ) {
                 // Узел ФИО необязателен
                 if (departmentParamIncomeRow.SIGNATORY_SURNAME && !departmentParamIncomeRow.SIGNATORY_SURNAME.empty) {
                     def fio = ["Фамилия": departmentParamIncomeRow.SIGNATORY_SURNAME, "Имя": departmentParamIncomeRow.SIGNATORY_FIRSTNAME]
@@ -91,17 +95,17 @@ def buildXml() {
                     if (departmentParamIncomeRow.SIGNATORY_LASTNAME && !departmentParamIncomeRow.SIGNATORY_LASTNAME.empty) {
                         fio.put("Отчество", departmentParamIncomeRow.SIGNATORY_LASTNAME)
                     }
-                    ФИО(fio){}
+                    ФИО(fio) {}
                 }
                 if (signatoryId == 2) {
                     def svPred = ["НаимДок": departmentParamIncomeRow.APPROVE_DOC_NAME]
                     if (departmentParamIncomeRow.APPROVE_ORG_NAME && !departmentParamIncomeRow.APPROVE_ORG_NAME.empty) {
                         svPred.put("НаимОрг", departmentParamIncomeRow.APPROVE_ORG_NAME)
                     }
-                    СвПред(svPred){}
+                    СвПред(svPred) {}
                 }
             }
-            НДФЛ6(){
+            НДФЛ6() {
                 ОбобщПоказ(
                         КолФЛДоход: ndflPersonIncomeCommonValue?.countPerson?.value,
                         УдержНалИт: ndflPersonIncomeCommonValue?.withholdingTax?.value,
@@ -127,14 +131,14 @@ def buildXml() {
                         if (ndflPersonIncomeByRate.prepaymentSum == null) {
                             ndflPersonIncomeByRate.prepaymentSum = 0
                         }
-                        СумСтавка (
-                            Ставка: ndflPersonIncomeByRate.taxRate,
-                            НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 2),
-                            НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 2),
-                            ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
-                            ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
-                            ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
-                            АвансПлат: ndflPersonIncomeByRate.prepaymentSum
+                        СумСтавка(
+                                Ставка: ndflPersonIncomeByRate.taxRate,
+                                НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 2),
+                                НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 2),
+                                ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
+                                ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
+                                ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
+                                АвансПлат: ndflPersonIncomeByRate.prepaymentSum
                         ) {}
                     }
                 }
@@ -273,4 +277,153 @@ def getProvider(def long providerId) {
  */
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+/************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
+
+@Field
+final int RNU_NDFL_DECLARATION_TYPE = 101
+
+@Field
+final int REF_BOOK_NDFL_DETAIL_ID = 951
+
+@Field
+def departmentParamTableList = null;
+
+@Field
+final int REF_BOOK_NDFL_ID = 950
+
+def createForm() {
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    def korrPeriod = isCorrectionPeriod()
+    def pairKppOktmoList = []
+
+    def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    def declarationTypeId = currDeclarationTemplate.type.id
+    // step 2
+    if (korrPeriod) {
+        def prevDepartmentPeriodReport = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
+        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
+        def declarationsForRemove = []
+        declarations.each { declaration ->
+            def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
+            if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.state == State.ACCEPTED)) {
+                declarationsForRemove << declaration
+            }
+        }
+        declarations.removeAll(declarationsForRemove)
+        declarations.each { declaration ->
+            pairKppOktmoList << new PairKppOktmo(Integer.valueOf(declaration.kpp), declaration.oktmo)
+        }
+        formType = getFormType(currDeclarationTemplate)
+        if (definePriznakF() != "0") {
+            //TODO реализовать работу с реестром справок
+        }
+    } else {
+        // step 5
+        departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
+        departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
+        departmentParamTableList.each { dep ->
+            pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, dep.OKTMO?.value, dep?.TAX_ORGAN_CODE?.value)
+        }
+    }
+    // step 3 и step 4
+    // получить id всех ТБ для данного отчетного периода
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    // список форм рну-ндфл для отчетного периода всех ТБ
+    def allDeclarationData = []
+    allDepartmentReportPeriodIds.each {
+        allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
+    }
+    // удаление форм не со статусом принята
+    def declarationsForRemove = []
+    allDeclarationData.each { declaration ->
+        if (declaration.state != State.ACCEPTED) {
+            declarationsForRemove << declaration
+        }
+    }
+    allDeclarationData.removeAll(declarationsForRemove)
+    // TODO реализовать работу с реестром справок для шага 6
+
+    // step 7
+    // Список физлиц для каждой пары КПП и ОКТМО
+    def ndflPersonsGroupedByKppOktmo = [:]
+    allDeclarationData.each { declaration ->
+        pairKppOktmoList.each { np ->
+            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
+            if (ndflPersons != null && ndflPersons.size != 0) {
+                ndflPersonsGroupedByKppOktmo[np] = ndflPersons
+            }
+        }
+    }
+
+    ndflPersonsGroupedByKppOktmo.each { npGroup ->
+        def oktmo = npGroup.key.oktmo
+        def kpp = npGroup.key.kpp
+        def taxOrganCode = npGroup.key.taxOrganCode
+        Map<String, Object> params
+        Long ddId
+        params = new HashMap<String, Object>()
+        ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
+                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo, null, null)
+        formMap.put(ddId, params)
+    }
+    declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
+        declarationService.delete(it.id, userInfo)
+    }
+}
+
+
+
+
+/************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
+
+// Получить список детали подразделения из справочника для некорректировочного периода
+def getDepartmentParamTableList(def departmentParamId, def reportPeriodId) {
+    if (departmentParamTableList == null) {
+        def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
+        departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
+        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+        }
+    }
+    return departmentParamTableList
+}
+
+def getDepartmentParam(def departmentId, def reportPeriodId) {
+    if (departmentParam == null) {
+        def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, "DEPARTMENT_ID = $departmentId", null)
+
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
+}
+
+def isCorrectionPeriod() {
+    def nomKorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
+    if (nomKorr != 0) {
+        return true
+    }
+}
+
+def getReportPeriodEndDate(def reportPeriodId) {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
+}
+
+class PairKppOktmo {
+    def kpp
+    def oktmo
+    def taxOrganCode
+
+    PairKppOktmo(def kpp, def oktmo, def taxOrganCode) {
+        this.kpp = kpp
+        this.oktmo = oktmo
+        this.taxOrganCode = taxOrganCode
+    }
 }
