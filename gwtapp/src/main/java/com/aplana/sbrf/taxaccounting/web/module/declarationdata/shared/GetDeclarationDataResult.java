@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.Result;
@@ -16,15 +17,14 @@ public class GetDeclarationDataResult implements Result {
     private Integer reportPeriodYear;
 	private String declarationType;
 	private Date docDate;
-    private String taxOrganCode;
-    private String kpp;
+    private String stateEDName;
     private String asnuName;
     private String fileName;
     private String uuid;
     private List<DeclarationSubreport> subreports;
     private boolean isVisiblePDF;
     private DeclarationData declarationData;
-    private String declarationFormKind;
+    private DeclarationFormKind declarationFormKind;
     /**
      * Тип формы, пока не используем
      */
@@ -106,20 +106,12 @@ public class GetDeclarationDataResult implements Result {
         this.reportPeriodYear = reportPeriodYear;
     }
 
-    public String getTaxOrganCode() {
-        return taxOrganCode;
+    public String getStateEDName() {
+        return stateEDName;
     }
 
-    public void setTaxOrganCode(String taxOrganCode) {
-        this.taxOrganCode = taxOrganCode;
-    }
-
-    public String getKpp() {
-        return kpp;
-    }
-
-    public void setKpp(String kpp) {
-        this.kpp = kpp;
+    public void setStateEDName(String stateEDName) {
+        this.stateEDName = stateEDName;
     }
 
     public String getFileName() {
@@ -186,11 +178,11 @@ public class GetDeclarationDataResult implements Result {
         this.declarationFormType = declarationFormType;
     }
 
-    public String getDeclarationFormKind() {
+    public DeclarationFormKind getDeclarationFormKind() {
         return declarationFormKind;
     }
 
-    public void setDeclarationFormKind(String declarationFormKind) {
+    public void setDeclarationFormKind(DeclarationFormKind declarationFormKind) {
         this.declarationFormKind = declarationFormKind;
     }
 }
