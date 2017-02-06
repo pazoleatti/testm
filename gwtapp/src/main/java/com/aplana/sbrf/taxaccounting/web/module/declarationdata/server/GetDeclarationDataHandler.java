@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -76,8 +77,7 @@ public class GetDeclarationDataHandler
         result.setTaxType(taxType);
 
         result.setDeclarationType(declarationTemplate.getType().getName());
-        result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
-        //result.setDeclarationFormType(declarationTemplate.getDeclarationFormType().getName());
+        result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind());
         result.setSubreports(declarationTemplate.getSubreports());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));
@@ -90,13 +90,15 @@ public class GetDeclarationDataHandler
 
         result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
-        result.setTaxOrganCode(declaration.getTaxOrganCode());
-        result.setKpp(declaration.getKpp());
-
         result.setFileName(declaration.getFileName());
 
+        if (declaration.getDocState() != null) {
+            RefBookDataProvider stateEDProvider = rbFactory.getDataProvider(RefBook.Id.DOC_STATE.getId());
+            result.setStateEDName(stateEDProvider.getRecordData(declaration.getDocState()).get("NAME").getStringValue());
+        }
+
         if (declaration.getAsnuId() != null) {
-            RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+            RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
             result.setAsnuName(asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
         }
         result.setVisiblePDF(declarationDataService.isVisiblePDF(declaration, userInfo));
