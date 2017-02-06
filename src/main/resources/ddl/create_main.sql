@@ -2348,11 +2348,12 @@ comment on column ref_book_id_tax_payer.as_nu is 'Ссылка на запись
 --------------------------------------------------------------------------------------------------------------------------
 create table declaration_data_file
 (
-   declaration_data_id number(18) not null,
-   blob_data_id varchar2(36) not null,
-   user_name varchar2(512) not null,
-   user_department_name varchar2(4000) not null,
-   note varchar2(512)
+   declaration_data_id  number(18)      not null,
+   blob_data_id         varchar2(36)    not null,
+   user_name            varchar2(512)   not null,
+   user_department_name varchar2(4000)  not null,
+   note                 varchar2(512),
+   file_type_id         number(18)      not null
 );
 
 comment on table declaration_data_file is 'Файлы налоговой формы';
@@ -2361,6 +2362,7 @@ comment on column declaration_data_file.blob_data_id is 'Файл налогов
 comment on column declaration_data_file.user_name is 'Полное имя пользователя, прикрепившего файл';
 comment on column declaration_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
 comment on column declaration_data_file.note is 'Комментарий к файлу';
+comment on column declaration_data_file.file_type_id is 'Тип файла';
 --------------------------------------------------------------------------------------------------------------------------
 create table state
 (
