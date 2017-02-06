@@ -119,7 +119,8 @@ public class RefBook implements Serializable {
 		ATTACH_FILE_TYPE(934),						// Категории прикрепленных файлов
 		TAX_INSPECTION(935),						// Коды налоговых органов
 		NDFL_RATE(936),								// Ставка НДФЛ
-		OKATO(3);									// ОКАТО
+		OKATO(3),									// ОКАТО
+        NDFL_REFERENCES(964);                       // Реестр справок
 
         private final long id;
 
