@@ -1054,9 +1054,8 @@ def checkDataCommon(def ndflPersonList, def ndflPersonIncomeList, def ndflPerson
     def mapTerBank = getTerBank()
 
     // Параметры подразделения
-    // todo проверить
-//    def departmentParam = getDepartmentParam()
-//    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
+    def departmentParam = getDepartmentParam()
+    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
 
     ndflPersonList.each { ndflPerson ->
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
@@ -1336,18 +1335,17 @@ def checkDataCommon(def ndflPersonList, def ndflPersonIncomeList, def ndflPerson
         }
 
         // Общ10 Соответствие КПП и ОКТМО Тербанку
-        // todo проверить
-//        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
-//        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
-//        if (kppList == null) {
-//            logger.error(MESSAGE_ERROR_VALUE,
-//                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
-//        } else {
-//            if (!kppList.contains(ndflPersonIncome.kpp)) {
-//                logger.error(MESSAGE_ERROR_VALUE,
-//                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
-//            }
-//        }
+        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
+        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
+        if (kppList == null) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
+        } else {
+            if (!kppList.contains(ndflPersonIncome.kpp)) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
+            }
+        }
     }
 
     ndflPersonDeductionList.each { ndflPersonDeduction ->
@@ -1598,7 +1596,6 @@ def getRefIncomeKind() {
     if (incomeKindCache.size() == 0) {
         def refBookList = getRefBook(REF_BOOK_INCOME_KIND_ID)
         refBookList.each { refBook ->
-            // todo Так refBook?.INCOME_TYPE_ID?.numberValue не работает
             def incomeTypeId = refBook.find{key, value -> key == "INCOME_TYPE_ID"}.value
             incomeKindCache.put(refBook?.MARK?.stringValue, incomeTypeId)
         }
@@ -1729,9 +1726,9 @@ def getReportPeriodEndDate() {
 def getDepartmentParam() {
     def departmentId = declarationData.departmentId
     def departmentParamList = getProvider(REF_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
-//    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-//        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-//    }
+    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+    }
     return departmentParamList?.get(0)
 }
 
@@ -1744,9 +1741,9 @@ def getOktmoAndKpp(def departmentParamId) {
     def mapNdflDetail = [:]
     def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
     def departmentParamTableList = getProvider(REF_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
-//    if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-//        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-//    }
+    if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+    }
     def kppList = []
     departmentParamTableList.each { departmentParamTable ->
         kppList = mapNdflDetail.get(departmentParamTable?.OKTMO?.stringValue)
