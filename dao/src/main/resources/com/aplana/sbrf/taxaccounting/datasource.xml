@@ -11,8 +11,13 @@
 
     <import resource="classpath:/spring/tx-context.xml"/>
 
-    <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
+    <jee:remote-slsb id="dsHolder"
+                     jndi-name="ejblocal:${releaseName}/scheduler-task.jar/DataSourceHolderBean#com.aplana.sbrf.taxaccounting.service.DataSourceHolderServiceLocal"
+                     business-interface="com.aplana.sbrf.taxaccounting.service.DataSourceHolderService"/>
 
+    <bean id="dataSource" class="com.aplana.sbrf.taxaccounting.dao.datasource.ApplicationDataSource" factory-method="getDataSource">
+        <constructor-arg ref="dsHolder"/>
+    </bean>
     <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
         <constructor-arg index="0" ref="dataSource"/>
     </bean>
