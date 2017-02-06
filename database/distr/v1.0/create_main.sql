@@ -2328,13 +2328,13 @@ comment on column ref_book_address.appartment is 'Номер квартиры';
 
 create table ref_book_id_tax_payer
 (
-  id        number(18) not null,
-  record_id      number(18) not null,
-  version        date not null,
-  status         number(1) default 0 not null,
-  person_id number(18) not null,
-  inp       varchar2(14) not null,
-  as_nu     number(18) not null
+  id            number(18)          not null,
+  record_id     number(18)          not null,
+  version       date                not null,
+  status        number(1) default 0 not null,
+  person_id     number(18)          not null,
+  inp           varchar2(14 char)   not null,
+  as_nu         number(18)          not null
 );
 comment on table ref_book_id_tax_payer is 'Идентификатор налогоплательщика';
 comment on column ref_book_id_tax_payer.record_id is 'Идентификатор строки. Может повторяться у разных версий';
