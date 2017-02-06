@@ -2362,7 +2362,7 @@ comment on column declaration_data_file.blob_data_id is 'Файл налогов
 comment on column declaration_data_file.user_name is 'Полное имя пользователя, прикрепившего файл';
 comment on column declaration_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
 comment on column declaration_data_file.note is 'Комментарий к файлу';
-comment on column declaration_data_file.file_type_id is 'Тип файла';
+comment on column declaration_data_file.file_type_id is 'Категория файла';
 --------------------------------------------------------------------------------------------------------------------------
 create table state
 (
