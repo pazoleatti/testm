@@ -90,7 +90,7 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
             throw new IllegalArgumentException("Не задан обязательный параметр код региона!");
         }
         String formalName = getLeaf(area, city, locality, street);
-        String formalPath = getLeaf(area, city, locality, street);
+        String formalPath = createPath(area, city, locality, street);
         if (formalName != null && formalPath != null) {
             MapSqlParameterSource param = new MapSqlParameterSource();
             param.addValue("regionCode", regionCode);
