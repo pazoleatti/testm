@@ -195,6 +195,7 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
 
     private void initColumns() {
         table.removeAllColumns();
+        factory.setReadOnly(isReadOnlyMode());
 
         Column<DataRow<Cell>, Boolean> checkColumn = new Column<DataRow<Cell>, Boolean> (
                 new CheckboxCell(true, false)) {
