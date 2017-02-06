@@ -97,9 +97,9 @@ alter table department_type add constraint department_type_pk primary key (id);
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
 alter table department add constraint department_fk_type foreign key(type) references department_type(id);
-alter table department add constraint department_chk_is_active check (is_active in (0, 1));
-alter table department add constraint department_chk_garant_use check (garant_use in (0, 1));
-ALTER TABLE department ADD CONSTRAINT department_chk_sunr_use check (sunr_use in (0, 1));
+--alter table department add constraint department_chk_is_active check (is_active in (0, 1));
+--alter table department add constraint department_chk_garant_use check (garant_use in (0, 1));
+--ALTER TABLE department ADD CONSTRAINT department_chk_sunr_use check (sunr_use in (0, 1));
 
 alter table configuration add constraint configuration_pk primary key (code, department_id);
 alter table configuration add constraint configuration_fk foreign key (department_id) references department(id) on delete cascade;
@@ -314,27 +314,6 @@ alter table department_change add constraint dep_change_chk_sunr_use check (sunr
 alter table declaration_data_file add constraint decl_data_file_pk primary key (blob_data_id, declaration_data_id);
 alter table declaration_data_file add constraint decl_data_file_fk_decl_data foreign key (declaration_data_id) references declaration_data(id);
 alter table declaration_data_file add constraint decl_data_file_fk_blob_data foreign key (blob_data_id) references blob_data(id);
-
---------------------------------------------------------------------------------------------------------
---                                      ФП "НДФЛ"
---------------------------------------------------------------------------------------------------------
-
-alter table ndfl_person add constraint ndfl_person_pk primary key (id);
-alter table ndfl_person add constraint ndfl_person_fk_d foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
-alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (person_id) references ref_book_record(id);
-
-alter table ndfl_person_income add constraint ndfl_person_i_pk primary key (id);
-alter table ndfl_person_income add constraint ndfl_person_i_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
-alter table ndfl_person_income add constraint ndfl_person_i_fk_s foreign key (source_id) references ndfl_person_income(id);
-
-alter table ndfl_person_deduction add constraint ndfl_pd_pk primary key (id);
-alter table ndfl_person_deduction add constraint ndfl_pd_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
-alter table ndfl_person_deduction add constraint ndfl_pd_fk_s foreign key (source_id) references ndfl_person_deduction(id);
-
-alter table ndfl_person_prepayment add constraint ndfl_pp_pk primary key (id);
-alter table ndfl_person_prepayment add constraint ndfl_pp_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
-alter table ndfl_person_prepayment add constraint ndfl_pp_fk_s foreign key (source_id) references ndfl_person_prepayment(id);
-
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);
@@ -363,6 +342,8 @@ create index i_notification_report_id on notification (report_id);
 create index i_dep_rep_per_report_period_id on department_report_period (report_period_id);
 create unique index i_search_data_result on form_search_data_result (session_id, id, ord) /*local*/;
 create index i_form_search_result_formdata on form_search_result(form_data_id);
+
+create index fk_decl_data_file_type_id on declaration_data_file(file_type_id);
 
 ------------------------------------------------------------------------------------------------------
 --      Расчет по страховым взносам 1151111
@@ -546,16 +527,16 @@ alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_record(id);
 -- create unique index unq_ref_book_id_doc_pers_inc1 on ref_book_id_doc (decode(inc_rep,1,person_id,null));
 
-alter table ref_book_person add constraint chk_ref_book_person_pension check (pension in (1,2));
-alter table ref_book_person add constraint chk_ref_book_person_medical check (medical in(1,2));
-alter table ref_book_person add constraint chk_ref_book_person_social check (social in (1,2));
-alter table ref_book_person add constraint chk_ref_book_person_sex check (sex in (1,2));
-alter table ref_book_person add constraint chk_ref_book_person_employee check (employee in (1,2));
+--alter table ref_book_person add constraint chk_ref_book_person_pension check (pension in (1,2));
+--alter table ref_book_person add constraint chk_ref_book_person_medical check (medical in(1,2));
+--alter table ref_book_person add constraint chk_ref_book_person_social check (social in (1,2));
+--alter table ref_book_person add constraint chk_ref_book_person_sex check (sex in (1,2));
+--alter table ref_book_person add constraint chk_ref_book_person_employee check (employee in (1,2));
 alter table ref_book_person add constraint chk_ref_book_person_status check (status between -1 and 2);
-alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
-alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0));
-alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));
-alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
+--alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
+--alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0));
+--alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1));
+--alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_doc add constraint chk_ref_book_id_doc_rep check(inc_rep in (0,1));
 alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 
@@ -581,6 +562,25 @@ alter table raschsv_itog_vypl add constraint fk_raschsv_itog_vypl_strah foreign 
 alter table raschsv_itog_vypl_dop add constraint pk_raschsv_itog_vypl_dop primary key(id);
 alter table raschsv_itog_vypl_dop add constraint fk_raschsv_itog_vypl_dop_strah foreign key(raschsv_itog_strah_lic_id) references raschsv_itog_strah_lic(id);
 
+--------------------------------------------------------------------------------------------------------
+--                                      ФП "НДФЛ"
+--------------------------------------------------------------------------------------------------------
+alter table ndfl_person add constraint ndfl_person_pk primary key (id);
+alter table ndfl_person add constraint ndfl_person_fk_d foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
+alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (person_id) references ref_book_person(id);
+
+alter table ndfl_person_income add constraint ndfl_person_i_pk primary key (id);
+alter table ndfl_person_income add constraint ndfl_person_i_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+alter table ndfl_person_income add constraint ndfl_person_i_fk_s foreign key (source_id) references ndfl_person_income(id);
+
+alter table ndfl_person_deduction add constraint ndfl_pd_pk primary key (id);
+alter table ndfl_person_deduction add constraint ndfl_pd_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+alter table ndfl_person_deduction add constraint ndfl_pd_fk_s foreign key (source_id) references ndfl_person_deduction(id);
+
+alter table ndfl_person_prepayment add constraint ndfl_pp_pk primary key (id);
+alter table ndfl_person_prepayment add constraint ndfl_pp_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
+alter table ndfl_person_prepayment add constraint ndfl_pp_fk_s foreign key (source_id) references ndfl_person_prepayment(id);
+
 --------------------------------------------------------------------------------------------------------------------------
 -- НДФЛ Реестр справок
 --------------------------------------------------------------------------------------------------------------------------
@@ -601,21 +601,4 @@ alter table log_entry add constraint chk_log_entry_lev check(log_level in (0,1,2
 alter table notification add constraint fk_notification_log foreign key(log_id) references log(id);
 alter table log_system add constraint fk_log_system_log foreign key(log_id) references log(id);
 --------------------------------------------------------------------------------------------------------------------------
--- Отключение проверок
 
-alter table department disable constraint department_chk_sunr_use;
-alter table department disable constraint department_chk_garant_use;
-alter table department disable constraint department_chk_is_active;
-
-alter table ref_book_address disable constraint chk_ref_book_address_type;
-alter table ref_book_address disable constraint chk_ref_book_address_addr_rf;
-alter table ref_book_address disable constraint chk_ref_book_address_addr_n_rf;
-
-alter table ref_book_id_doc disable constraint chk_ref_book_id_doc_rep;
-
-alter table ref_book_person disable constraint chk_ref_book_person_employee;
-alter table ref_book_person disable constraint chk_ref_book_person_sex;
-alter table ref_book_person disable constraint chk_ref_book_person_medical;
-alter table ref_book_person disable constraint chk_ref_book_person_pension;
-alter table ref_book_person disable constraint chk_ref_book_person_social;
---------------------------------------------------------------------------------------------------------------------------
