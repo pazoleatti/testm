@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -28,6 +29,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     public static final String DATE_BOX_TITLE = "Дата формирования налоговой формы";
     public static final String DATE_BOX_TITLE_D = "Дата формирования уведомления";
+    private static final int TABLE_TOP2 = 103;
+    private static final int TABLE_TOP3 = 108;
+    private static final int TABLE_TOP4 = 125;
 
 	@UiField
 	Button recalculateButton;
@@ -37,10 +41,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button cancelButton;
     @UiField
     Button viewPdf;
-	//@UiField
-	//Anchor downloadExcelButton;
-	//@UiField
-	//Anchor downloadXmlButton;
 	@UiField
 	Button deleteButton;
 	@UiField
@@ -72,13 +72,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
     HorizontalPanel propertyBlock;
     @UiField
-    Label taxOrganCode;
+    Label kpp, oktmo, taxOrganCode, stateED, asnu;
     @UiField
-    Label kpp, asnu, guid;
-    @UiField
-    Label taxOrganCodeLabel;
-    @UiField
-    Label kppLabel, asnuLabel, guidLabel;
+    Label kppLabel, oktmoLabel, taxOrganCodeLabel, stateEDLabel, asnuLabel;
 
 	@UiField
 	PdfViewerView pdfViewer;
@@ -242,8 +238,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	public void setTitle(String title, boolean isTaxTypeDeal) {
 		this.title.setText(title);
 		this.title.setTitle(title);
-//        formType.setVisible(false);
-//        formTypeLabel.setVisible(false);
         if (!isTaxTypeDeal) {
             dateBoxLabel.setText(DATE_BOX_TITLE + ":");
             dateBoxLabel.setTitle(DATE_BOX_TITLE);
@@ -260,21 +254,32 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
     @Override
-    public void setTaxOrganCode(String taxOrganCode) {
-        this.taxOrganCode.setText(taxOrganCode);
-        this.taxOrganCode.setTitle(taxOrganCode);
-    }
-
-    @Override
     public void setKpp(String kpp) {
         this.kpp.setText(kpp);
         this.kpp.setTitle(kpp);
     }
 
     @Override
+    public void setOktmo(String oktmo) {
+        this.oktmo.setText(oktmo);
+        this.oktmo.setTitle(oktmo);
+    }
+
+    @Override
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode.setText(taxOrganCode);
+        this.taxOrganCode.setTitle(taxOrganCode);
+    }
+
+    @Override
+    public void setStateED(String stateED) {
+        this.stateED.setText(stateED);
+        this.stateED.setTitle(stateED);
+
+    }
+
+    @Override
     public void setFileName(String guid) {
-        this.guid.setText(guid);
-        this.guid.setTitle(guid);
     }
 
     @Override
@@ -284,19 +289,27 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, boolean isVisibleAsnu, TaxType taxType) {
-        taxOrganCode.setVisible(isVisibleTaxOrgan);
-        taxOrganCodeLabel.setVisible(isVisibleTaxOrgan);
-
+    public void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, TaxType taxType) {
         kpp.setVisible(isVisibleKpp);
         kppLabel.setVisible(isVisibleKpp);
 
+        oktmo.setVisible(isVisibleOktmo);
+        oktmoLabel.setVisible(isVisibleOktmo);
+
+        taxOrganCode.setVisible(isVisibleTaxOrgan);
+        taxOrganCodeLabel.setVisible(isVisibleTaxOrgan);
+
+        stateED.setVisible(isVisibleStateED);
+        stateEDLabel.setVisible(isVisibleStateED);
+
         asnu.setVisible(isVisibleAsnu);
         asnuLabel.setVisible(isVisibleAsnu);
-        guid.setVisible(isVisibleAsnu);
-        guidLabel.setVisible(isVisibleAsnu);
 
-		taxOrganCodeLabel.setText("Налоговый орган:");
+        int num = (isVisibleKpp?1:0) + (isVisibleOktmo?1:0) + (isVisibleTaxOrgan?1:0) + (isVisibleStateED?1:0) + (isVisibleAsnu?1:0);
+        int top = (num == 4) ?
+                TABLE_TOP4 : ((num == 3) ? TABLE_TOP3 : TABLE_TOP2);
+        noPdfPanel.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
+        viewPdf.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
     }
 
     @Override

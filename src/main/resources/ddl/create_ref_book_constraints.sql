@@ -65,6 +65,8 @@ alter table ref_book_income_kind add constraint pk_ref_book_income_kind primary 
 --Категории прикрепленных файлов
 alter table ref_book_attach_file_type add constraint pk_ref_book_attach_file_type primary key(id);
 
+alter table declaration_data_file add constraint fk_decl_data_file_type_id foreign key (file_type_id) references ref_book_attach_file_type(id);
+
 --Налоговые инспекции
 alter table ref_book_tax_inspection add constraint pk_ref_book_tax_inspection primary key(id);
 
