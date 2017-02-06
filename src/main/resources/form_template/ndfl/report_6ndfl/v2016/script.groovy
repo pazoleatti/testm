@@ -18,10 +18,10 @@ switch (formDataEvent) {
 // Кэш провайдеров
 @Field def providerCache = [:]
 
-// значение подразделения из справочника 33
+// значение подразделения из справочника
 @Field def departmentParam = null
 
-// значение подразделения из справочника 330 (таблица)
+// значение подразделения из справочника
 @Field def departmentParamTable = null
 
 // Дата окончания отчетного периода
@@ -224,7 +224,7 @@ def getReportPeriodEndDate() {
 }
 
 /**
- *
+ * Получить параметры для конкретного тербанка
  * @return
  */
 def getDepartmentParam() {
