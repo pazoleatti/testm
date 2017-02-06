@@ -520,6 +520,10 @@ def prepaymentAttr(personPrepayment) {
 @Field def addressCache = [:]
 @Field final long REF_BOOK_ADDRESS_ID = RefBook.Id.PERSON_ADDRESS.id
 
+// Тербанки Мапа <id, наименование>
+@Field def terBankCache = [:]
+@Field final long REF_DEPARTMENT_ID = RefBook.Id.DEPARTMENT.id
+
 // ИНП Мапа <person_id, массив_инп>
 @Field def inpCache = [:]
 @Field final long REF_BOOK_ID_TAX_PAYER_ID = RefBook.Id.ID_TAX_PAYER.id
@@ -553,6 +557,10 @@ def prepaymentAttr(personPrepayment) {
 // Дата окончания отчетного периода
 @Field def reportPeriodEndDate = null
 
+// Параметры для подразделения Мапа <ОКТМО, Лист_КПП>
+@Field final long REF_NDFL_ID = RefBook.Id.NDFL.id
+@Field final long REF_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
+
 @Field final String MESSAGE_ERROR_NOT_FOUND_REF = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: \"%s\" не соответствует справочнику \"%s\"."
 @Field final String MESSAGE_ERROR_VALUE = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: %s."
 @Field final String MESSAGE_ERROR_INN = "Некорректный ИНН"
@@ -563,9 +571,10 @@ def prepaymentAttr(personPrepayment) {
 @Field final String MESSAGE_ERROR_NOT_FILL = "Поле \"%s\" не заполнено. Должны быть заполнены либо все поля %s, либо не заполнено ни одно из полей."
 @Field final String MESSAGE_ERROR_NOT_MUST_FILL = "Поле \"%s\" не должно быть заполнено, если %s"
 @Field final String MESSAGE_ERROR_NOT_FOUND_PERSON = "Не удалось установить связь со справочником \"%s\" для Раздел: \"%s\". Строка: \"%s\", ИНП: \"%s\"."
-@Field final String MESSAGE_ERROR_DUBL_OR_ABSENT = "В ТФ имеются пропуски или повторы в нумерации строк"
-@Field final String MESSAGE_ERROR_DUBL = ". Повторяются строки: "
-@Field final String MESSAGE_ERROR_ABSENT = ". Отсутсвуют строки: "
+@Field final String MESSAGE_ERROR_DUBL_OR_ABSENT = "В ТФ имеются пропуски или повторы в нумерации строк."
+@Field final String MESSAGE_ERROR_DUBL = " Повторяются строки:"
+@Field final String MESSAGE_ERROR_ABSENT = " Отсутсвуют строки:"
+@Field final String MESSAGE_ERROR_NOT_FOUND_PARAM = "Указанные значения не найдены в Справочнике \"Настройки подразделений\" для \"%s\""
 
 @Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" размером %d."
 @Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" в колличестве %d."
@@ -577,6 +586,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String T_PERSON_PREPAYMENT = "Сведения о доходах в виде авансовых платежей"
 
 // Справочники
+@Field final String R_FIAS = "ФИАС"
 @Field final String R_PERSON = "Физические лица"
 @Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
 @Field final String R_ID_DOC_TYPE = "Коды документов"
@@ -591,6 +601,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String R_DUL = "Документы, удостоверяющий личность"
 
 // Реквизиты
+@Field final String C_ADDRESS = "Адрес регистрации в Российской Федерации "
 @Field final String C_CITIZENSHIP = "Гражданство (код страны)"
 @Field final String C_ID_DOC_TYPE = "Код вида документа"
 @Field final String C_ID_DOC_NUMBER = "Серия и номер документа"
@@ -635,6 +646,8 @@ def prepaymentAttr(personPrepayment) {
 @Field final String C_PAYMENT_DATE = "Дата платежного поручения"
 @Field final String C_PAYMENT_NUMBER = "Номер платежного поручения перечисления налога в бюджет"
 @Field final String C_TAX_SUMM = "Сумма налога перечисленная"
+@Field final String C_OKTMO = "ОКТМО"
+@Field final String C_KPP = "КПП"
 
 // Сведения о вычетах
 @Field final String C_NOTIF_DATE = "Дата выдачи уведомления"
@@ -693,6 +706,9 @@ def checkData() {
 
     // Общие проверки
     checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+    // Проверки сведений о доходах
+    checkDataIncome(ndflPersonList, ndflPersonIncomeList)
 }
 
 /**
@@ -776,6 +792,12 @@ def checkDataReference(def ndflPersonList, def ndflPersonIncomeList, def ndflPer
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
+
+        // Спр1 ФИАС
+        if (!findAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
+            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+                    T_PERSON, ndflPerson.rowNum, C_ADDRESS, fioAndInp, C_ADDRESS, R_FIAS);
+        }
 
         // Спр2 Гражданство (Обязательное поле)
         if (!citizenshipCodeMap.find{key, value -> value == ndflPerson.citizenship}) {
@@ -1027,6 +1049,14 @@ def checkDataCommon(def ndflPersonList, def ndflPersonIncomeList, def ndflPerson
 
     // Порядковые номера строк в "Сведения о доходах в виде авансовых платежей"
     def rowNumPersonPrepaymentList = []
+
+    // Тербанки
+    def mapTerBank = getTerBank()
+
+    // Параметры подразделения
+    // todo проверить
+//    def departmentParam = getDepartmentParam()
+//    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
 
     ndflPersonList.each { ndflPerson ->
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
@@ -1304,6 +1334,20 @@ def checkDataCommon(def ndflPersonList, def ndflPersonIncomeList, def ndflPerson
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
             }
         }
+
+        // Общ10 Соответствие КПП и ОКТМО Тербанку
+        // todo проверить
+//        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
+//        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
+//        if (kppList == null) {
+//            logger.error(MESSAGE_ERROR_VALUE,
+//                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
+//        } else {
+//            if (!kppList.contains(ndflPersonIncome.kpp)) {
+//                logger.error(MESSAGE_ERROR_VALUE,
+//                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
+//            }
+//        }
     }
 
     ndflPersonDeductionList.each { ndflPersonDeduction ->
@@ -1337,6 +1381,44 @@ def checkDataCommon(def ndflPersonList, def ndflPersonIncomeList, def ndflPerson
 
     ndflPersonPrepaymentList.each { ndflPersonPrepayment ->
         rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
+    }
+
+    // Общ8 Отсутствие пропусков и повторений
+    def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
+    msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeList, T_PERSON_INCOME)
+    msgErrDubl += getErrorMsgDubl(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
+    msgErrDubl += getErrorMsgDubl(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
+    msgErrDubl = msgErrDubl == "" ? "" : MESSAGE_ERROR_DUBL + msgErrDubl
+    def msgErrAbsent = getErrorMsgAbsent(rowNumPersonList, T_PERSON)
+    msgErrAbsent += getErrorMsgAbsent(rowNumPersonIncomeList, T_PERSON_INCOME)
+    msgErrAbsent += getErrorMsgAbsent(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
+    msgErrAbsent += getErrorMsgAbsent(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
+    msgErrAbsent = msgErrAbsent == "" ? "" : MESSAGE_ERROR_ABSENT + msgErrAbsent
+    if (msgErrDubl != "" || msgErrAbsent != "") {
+        logger.warn(MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent);
+    }
+
+    // Общ9 ИНП - проверка должна осуществляться в процессе загрузки
+    // todo https://jira.aplana.com/browse/SBRFNDFL-307
+}
+
+/**
+ * Проверки сведений о доходах
+ * @param ndflPersonList
+ * @param ndflPersonIncomeList
+ */
+def checkDataIncome(ndflPersonList, ndflPersonIncomeList) {
+
+    ndflPersonList.each { ndflPerson ->
+        def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
+        def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+        ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
+    }
+
+    ndflPersonIncomeList.each { ndflPersonIncome ->
+        def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
+
+        // СведДох1 Дата начисления дохода
     }
 }
 
@@ -1441,6 +1523,19 @@ def getRefAddress(def addressIds) {
         }
     }
     return addressCache;
+}
+
+/**
+ * Получить набор тербанков
+ */
+def getTerBank() {
+    if (terBankCache.size() == 0) {
+        def refBookMap = getRefBookByFilter(REF_DEPARTMENT_ID, "PARENT_ID = 0")
+        refBookMap.each { refBook ->
+            terBankCache.put(refBook?.id?.numberValue, refBook?.NAME?.stringValue)
+        }
+    }
+    return terBankCache
 }
 
 /**
@@ -1628,6 +1723,71 @@ def getReportPeriodEndDate() {
 }
 
 /**
+ * Получить параметры для конкретного тербанка
+ * @return
+ */
+def getDepartmentParam() {
+    def departmentId = declarationData.departmentId
+    def departmentParamList = getProvider(REF_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+//    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+//        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+//    }
+    return departmentParamList?.get(0)
+}
+
+/**
+ * Получить параметры подразделения
+ * @param departmentParamId
+ * @return
+ */
+def getOktmoAndKpp(def departmentParamId) {
+    def mapNdflDetail = [:]
+    def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
+    def departmentParamTableList = getProvider(REF_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+//    if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+//        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+//    }
+    def kppList = []
+    departmentParamTableList.each { departmentParamTable ->
+        kppList = mapNdflDetail.get(departmentParamTable?.OKTMO?.stringValue)
+        if (kppList == null) {
+            kppList = []
+            kppList.add(departmentParamTable?.KPP?.stringValue)
+            mapNdflDetail.put(departmentParamTable?.OKTMO?.stringValue, kppList)
+        } else if (!kppList.contains(departmentParamTable?.KPP?.stringValue)) {
+            kppList.add(departmentParamTable?.KPP?.stringValue)
+            mapNdflDetail.put(departmentParamTable?.OKTMO?.stringValue, kppList)
+        }
+    }
+    return mapNdflDetail
+}
+
+/**
+ * Найти адресообразующий объект
+ * @param regionCode код региона (обязательный параметр)
+ * @param area район
+ * @param city город
+ * @param locality населенный пункт
+ * @param street улица
+ * @return адресообразующий объект справочника
+ */
+def findAddress(def regionCode, def area, def city, def locality, def street) {
+    def addressObjectList = fiasRefBookService.findAddress(regionCode, area, city, locality, street)
+    def res = false
+    if (addressObjectList != null) {
+        if (addressObjectList.size() == 1) {
+            addressObjectList.each { addressObject ->
+                // Если объект адреса листовой
+                if (addressObject.isLeaaf == true) {
+                    res = true
+                }
+            }
+        }
+    }
+    return res;
+}
+
+/**
  * Преобразование массива имен полей в строку с помещением каждого имени в кавычки
  * @param fieldNameList
  */
@@ -1652,7 +1812,7 @@ def getErrorMsgDubl(def inputList, def tableName) {
     def resultMsg = ""
     def dublList = inputList.findAll{inputList.count(it)>1}.unique()
     if (dublList.size() > 0) {
-        resultMsg = "Раздел \"" + tableName + "\"" + dublList.sort().join(", ") + "."
+        resultMsg = " Раздел \"" + tableName + "\" № " + dublList.sort().join(", ") + "."
     }
     return resultMsg
 }
@@ -1666,20 +1826,20 @@ def getErrorMsgDubl(def inputList, def tableName) {
 def getErrorMsgAbsent(def inputList, def tableName) {
     def absentList = []
     def sortList = inputList.unique().sort()
-    def i
-    if (sortList.size() > 0) {
-        i = sortList.get(0)
-    }
-    sortList.each { item ->
-        if (item != i) {
-            absentList.add(i)
+    if (sortList != null && sortList.size() > 0) {
+        def i = sortList.get(0) == null ? 0 : sortList.get(0)
+        sortList.each { item ->
+            if (item != null) {
+                if (item != i) {
+                    absentList.add(i)
+                }
+                i++
+            }
         }
-        i++
     }
-
     def resultMsg = ""
     if (absentList.size() > 0) {
-        resultMsg = "Раздел \"" + tableName + "\"" + absentList.sort().join(", ") + "."
+        resultMsg = " Раздел \"" + tableName + "\" № " + absentList.sort().join(", ") + "."
     }
     return resultMsg
 }
