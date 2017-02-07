@@ -266,6 +266,59 @@ comment on table ref_book_ndfl_rate is 'Ставка НДФЛ';
 comment on column ref_book_ndfl_rate.id is 'Уникальный идентификатор';
 comment on column ref_book_ndfl_rate.rate is 'Процентная ставка';
 
+--Основания заполнения сумм страховых взносов
+create table ref_book_fill_base
+(
+  id number(18) not null,
+  code varchar2(1 char) not null,
+  name varchar2(2000 char) not null
+);
+
+comment on table ref_book_fill_base is 'Основания заполнения сумм страховых взносов';
+comment on column ref_book_fill_base.id is 'Уникальный идентификатор';
+comment on column ref_book_fill_base.code is 'Код основания заполнения';
+comment on column ref_book_fill_base.name is 'Название основания заполнения';
+
+--Коды тарифа плательщика
+create table ref_book_tariff_payer
+(
+  id number(18) not null,
+  code varchar2(2 char) not null,
+  name varchar2(2000 char) not null
+);
+
+comment on table ref_book_tariff_payer is 'Коды тарифа плательщика';
+comment on column ref_book_tariff_payer.id is 'Уникальный идентификатор';
+comment on column ref_book_tariff_payer.code is 'Код тарифа плательщика';
+comment on column ref_book_tariff_payer.name is 'Название тарифа плательщика';
+
+--Коды классов условий труда
+create table ref_book_hard_work
+(
+  id number(18) not null,
+  code varchar2(1 char) not null,
+  name varchar2(2000 char) not null
+);
+
+comment on table ref_book_hard_work is 'Коды классов условий труда';
+comment on column ref_book_hard_work.id is 'Уникальный идентификатор';
+comment on column ref_book_hard_work.code is 'Код класса условий труда';
+comment on column ref_book_hard_work.name is 'Название класса условий труда';
+
+--Классификатор доходов бюджетов Российской Федерации
+create table ref_book_budget_income
+(
+  id number(18) not null,
+  code varchar2(20 char) not null,
+  name varchar2(1000 char) not null,
+  lev varchar2(1 char) not null
+);
+comment on table ref_book_budget_income is 'Классификатор доходов бюджетов Российской Федерации';
+comment on column ref_book_budget_income.id is 'Уникальный идентификатор';
+comment on column ref_book_budget_income.code is 'Код бюджетной классификации';
+comment on column ref_book_budget_income.name is 'Наименование дохода бюджета Российской Федерации';
+comment on column ref_book_budget_income.lev is 'Уровень кода. Служит для определения уровней агрегирования кодов классификации доходов бюджетов. В рамках вида и подвида доходов код с большим значением уровня агрегируется на вышестоящий код с меньшим значением уровня';
+
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (
