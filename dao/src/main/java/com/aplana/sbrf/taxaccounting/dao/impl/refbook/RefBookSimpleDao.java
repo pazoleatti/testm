@@ -47,7 +47,7 @@ public class RefBookSimpleDao extends AbstractDao {
 
     /**
      * Загружает данные справочника из отдельной таблицы на определенную дату актуальности
-     * @param refBookId код справочника
+     * @param refBook справочник
      * @param version дата актуальности
      * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
      * @param filter условие фильтрации строк. Может быть не задано
@@ -55,9 +55,8 @@ public class RefBookSimpleDao extends AbstractDao {
      * @param isSortAscending признак сортировки по возрастанию
      * @return список записей
      */
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+    public PagingResult<Map<String, RefBookValue>> getRecords(RefBook refBook, Date version, PagingParams pagingParams,
                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        RefBook refBook = refBookDao.get(refBookId);
         PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, false);
 
         List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
@@ -126,7 +125,7 @@ public class RefBookSimpleDao extends AbstractDao {
 
         if (refBook.isHierarchic() && parentRecordId == null && filter == null) {
             String fullFilter = RefBook.RECORD_PARENT_ID_ALIAS + " is null";
-            return getRecords(refBook.getId(), version, pagingParams, fullFilter, sortAttribute, true);
+            return getRecords(refBook, version, pagingParams, fullFilter, sortAttribute, true);
         } else if (!refBook.isHierarchic()){
             throw new IllegalArgumentException(String.format(RefBookDaoImpl.NOT_HIERARCHICAL_REF_BOOK_ERROR, refBook.getName(), refBook.getId()));
         }

@@ -55,7 +55,7 @@ public class RefBookSimpleDaoTest {
 
     @Test
     public void getRecordsReturnsAllRecords() throws Exception {
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, null, null, null, null, true);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), null, null, null, null, true);
 
         assertEquals(TABLE_TOTAL_RECORDS, data.getTotalCount());
         assertEquals(TABLE_TOTAL_RECORDS, data.size());
@@ -64,7 +64,7 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getRecordsReturnsVersion1() throws Exception {
         Date version = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime();
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, version, null, null, null, true);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), version, null, null, null, true);
 
         assertEquals(2, data.size());
     }
@@ -72,7 +72,7 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getRecordsReturnsVersion2() throws Exception {
         Date version = new GregorianCalendar(2018, Calendar.JANUARY, 1).getTime();
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, version, null, null, null, true);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), version, null, null, null, true);
 
         assertEquals(4, data.size());
     }
@@ -81,7 +81,7 @@ public class RefBookSimpleDaoTest {
     public void getRecordsReturnsLastVersion() throws Exception {
         Date version = new GregorianCalendar(2011, Calendar.JULY, 1).getTime();
 
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, version, null, null, null, true);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), version, null, null, null, true);
 
         assertEquals(1, data.size());
         Date expectedBirthday = new GregorianCalendar(1948, 1, 8).getTime();
@@ -91,7 +91,7 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getRecordsReturnsPaginated0Count3() throws Exception {
         PagingParams pagingParams = new PagingParams(0, 3);
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, null, pagingParams, null, null, true);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), null, pagingParams, null, null, true);
 
         assertEquals(3, data.size());
     }
@@ -99,7 +99,7 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getRecordsReturnsPaginated2Count2() throws Exception {
         PagingParams pagingParams = new PagingParams(2, 2);
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, null, pagingParams, null, null, true);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), null, pagingParams, null, null, true);
 
         assertEquals(2, data.size());
     }
@@ -107,7 +107,7 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getRecordsReturnsEmptyOnWrongPageParams() throws Exception {
         PagingParams pagingParams = new PagingParams(99, 9);
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, null, pagingParams, null, null, true);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), null, pagingParams, null, null, true);
 
         assertEquals(0, data.size());
     }
@@ -115,7 +115,7 @@ public class RefBookSimpleDaoTest {
     @Test
     public void getRecordsReturnsFiltered() throws Exception {
         String filter = "MIDDLE_NAME = 'Васильевич'";
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, null, null, filter, null, true);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), null, null, filter, null, true);
 
         assertEquals(2, data.size());
         assertEquals("Васильевич", data.get(0).get("MIDDLE_NAME").getStringValue());
@@ -126,8 +126,8 @@ public class RefBookSimpleDaoTest {
     public void getRecordsReturnsSorted() throws Exception {
         RefBookAttribute sortAttribute = new RefBookAttribute();
         sortAttribute.setAlias("FIRST_NAME");
-        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(REF_BOOK_ID, null, null, null, sortAttribute, true);
-        PagingResult<Map<String, RefBookValue>> dataDescending = dao.getRecords(REF_BOOK_ID, null, null, null, sortAttribute, false);
+        PagingResult<Map<String, RefBookValue>> data = dao.getRecords(createRefBook(), null, null, null, sortAttribute, true);
+        PagingResult<Map<String, RefBookValue>> dataDescending = dao.getRecords(createRefBook(), null, null, null, sortAttribute, false);
 
         assertEquals("Петр", data.get(0).get("FIRST_NAME").getStringValue());
         assertEquals("Феофан", dataDescending.get(0).get("FIRST_NAME").getStringValue());
@@ -318,7 +318,7 @@ public class RefBookSimpleDaoTest {
     }
 
     private List<RefBookRecord> createRecords(){
-        PagingResult<Map<String, RefBookValue>> existingRecordsValues = dao.getRecords(REF_BOOK_ID, null, null, null, null, true);
+        PagingResult<Map<String, RefBookValue>> existingRecordsValues = dao.getRecords(createRefBook(), null, null, null, null, true);
 
         RefBookRecord record = new RefBookRecord();
         record.setVersionTo(new Date());
@@ -630,7 +630,7 @@ public class RefBookSimpleDaoTest {
     public void deleteAllRecordVersionsDeletes1Record() throws Exception {
         dao.deleteAllRecordVersions(createRefBook(), Arrays.asList(4L));
 
-        PagingResult<Map<String, RefBookValue>> records = dao.getRecords(createRefBook().getId(), null, null, null, null, false);
+        PagingResult<Map<String, RefBookValue>> records = dao.getRecords(createRefBook(), null, null, null, null, false);
         assertEquals(3, records.getTotalCount());
     }
 
@@ -638,7 +638,7 @@ public class RefBookSimpleDaoTest {
     public void deleteAllRecordVersionsDeletes2Records() throws Exception {
         dao.deleteAllRecordVersions(createRefBook(), Arrays.asList(3L, 4L));
 
-        PagingResult<Map<String, RefBookValue>> records = dao.getRecords(createRefBook().getId(), null, null, null, null, false);
+        PagingResult<Map<String, RefBookValue>> records = dao.getRecords(createRefBook(), null, null, null, null, false);
         assertEquals(2, records.getTotalCount());
     }
 }

@@ -71,7 +71,7 @@ public class RefBookSimpleDataProviderTest {
         provider.getRecords(version, null, null, null);
 
         verify(daoMock, atLeastOnce()).getRecords(
-                eq(RFB_ID), eq(version), any(PagingParams.class),
+                any(RefBook.class), eq(version), any(PagingParams.class),
                 anyString(), any(RefBookAttribute.class), eq(true));
     }
 

@@ -52,7 +52,7 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Date version, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return dao.getRecords(getRefBook().getId(), version, pagingParams, filter, sortAttribute, isSortAscending);
+        return dao.getRecords(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);
     }
 
     @Override
