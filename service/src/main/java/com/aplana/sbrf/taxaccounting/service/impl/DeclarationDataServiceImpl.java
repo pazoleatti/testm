@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -81,6 +82,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String CALCULATION_NOT_TOPICAL = "Декларация / Уведомление содержит неактуальные консолидированные данные  " +
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
             "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
+    private static final int DEFAULT_TF_FILE_TYPE_CODE = 1;
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
@@ -130,6 +132,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationDataFileDao declarationDataFileDao;
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private TAUserService userService;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -207,9 +213,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 						oktmo != null
 								? ", ОКТМО: \"" + oktmo + "\""
 								: "",
-                        asunId != null
-                                ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
-                                : "",
                         fileName != null
                                 ? ", Имя файла: \"" + fileName + "\""
                                 : "")
@@ -242,7 +245,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setTaxOrganCode(taxOrganCode);
                 newDeclaration.setKpp(taxOrganKpp);
 				newDeclaration.setOktmo(oktmo);
-                newDeclaration.setAsnuId(asunId);
                 newDeclaration.setFileName(fileName);
 
                 // Вызываем событие скрипта CREATE
@@ -1487,10 +1489,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     stateLogger.updateState("Сохранение XML-файла в базе данных");
                 }
 
+                String uuid = blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", new Date());
+
                 reportService.deleteDec(declarationData.getId());
-                reportService.createDec(declarationData.getId(),
-                        blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", new Date()),
-                        DeclarationDataReportType.XML_DEC);
+                reportService.createDec(declarationData.getId(), uuid, DeclarationDataReportType.XML_DEC);
+
+                TAUser user = userService.getSystemUserInfo().getUser();
+                RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
+                Long defaultFileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + DEFAULT_TF_FILE_TYPE_CODE + "").get(0);
+
+                DeclarationDataFile declarationDataFile = new DeclarationDataFile();
+                declarationDataFile.setDeclarationDataId(declarationData.getId());
+                declarationDataFile.setUuid(uuid);
+                declarationDataFile.setUserName(user.getName());
+                declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
+                declarationDataFile.setFileTypeId(defaultFileTypeId);
+                declarationDataFileDao.saveFile(declarationDataFile);
             } finally {
                 if (zipOutFile != null && !zipOutFile.delete()) {
                     LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
