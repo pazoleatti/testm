@@ -118,12 +118,12 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                 List<NdflPersonIncomeByRate> ndflPersonIncomeByRateList = new ArrayList<NdflPersonIncomeByRate>();
                 NdflPersonIncomeByRate ndflPersonIncomeByRate1 = new NdflPersonIncomeByRate();
                 ndflPersonIncomeByRate1.setTaxRate(13);
-                ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(5555.55));
+                ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(7777.77));
                 ndflPersonIncomeByRate1.setIncomeAccruedSummDiv(new BigDecimal(6666.66));
-                ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(7777.77));
-                ndflPersonIncomeByRate1.setCalculatedTax(8888L);
+                ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(5555.55));
+                ndflPersonIncomeByRate1.setCalculatedTax(288L);
                 ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
-                ndflPersonIncomeByRate1.setPrepaymentSum(1111L);
+                ndflPersonIncomeByRate1.setPrepaymentSum(280L);
                 ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
 
                 ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);
