@@ -164,18 +164,20 @@
                         <g:HorizontalPanel ui:field="propertyBlock" height="58px" addStyleNames="{style.centerBlock}">
                             <g:cell>
                                 <g:VerticalPanel spacing="2" horizontalAlignment="right" width="140px">
-                                    <g:Label ui:field="taxOrganCodeLabel" text="Налоговый орган:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label ui:field="kppLabel" text="КПП:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="oktmoLabel" text="ОКТМО:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="taxOrganCodeLabel" text="Код НО:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="stateEDLabel" text="Состояние ЭД:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label ui:field="asnuLabel" text="АСНУ:" addStyleNames="{style.headerAttrName}"/>
-                                    <g:Label ui:field="guidLabel" text="GUID:" addStyleNames="{style.headerAttrName}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                             <g:cell>
                                 <g:VerticalPanel spacing="2" addStyleNames="{style.infoValuesBlock}">
-                                    <g:Label ui:field="taxOrganCode" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                     <g:Label ui:field="kpp" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                    <g:Label ui:field="oktmo" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                    <g:Label ui:field="taxOrganCode" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                    <g:Label ui:field="stateED" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                     <g:Label ui:field="asnu" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
-                                    <g:Label ui:field="guid" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                         </g:HorizontalPanel>

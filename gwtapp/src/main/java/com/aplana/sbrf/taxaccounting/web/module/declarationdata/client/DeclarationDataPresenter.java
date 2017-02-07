@@ -20,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreport
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.google.gwt.core.client.GWT;
@@ -89,15 +90,19 @@ public class DeclarationDataPresenter
 
 		void setDocDate(Date date);
 
+        void setKpp(String kpp);
+
+        void setOktmo(String oktmo);
+
         void setTaxOrganCode(String taxOrganCode);
 
-        void setKpp(String kpp);
+        void setStateED(String stateED);
 
         void setAsnuName(String asnuName);
 
         void setFileName(String guid);
 
-        void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, boolean isVisibleAsnu, TaxType taxType);
+        void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, TaxType taxType);
 
         void startTimerReport(DeclarationDataReportType type);
 
@@ -180,7 +185,7 @@ public class DeclarationDataPresenter
                                 taxType = result.getTaxType();
                                 //sourcesPresenter.setTaxType(taxType);
                                 getView().setType(result.getDeclarationFormType());
-                                getView().setFormKind(result.getDeclarationFormKind());
+                                getView().setFormKind(result.getDeclarationFormKind().getTitle());
                                 String periodStr = result.getReportPeriodYear() + ", " + result.getReportPeriod();
                                 if (result.getCorrectionDate() != null) {
                                     periodStr += ", корр. (" + DATE_TIME_FORMAT.format(result.getCorrectionDate()) + ")";
@@ -192,22 +197,31 @@ public class DeclarationDataPresenter
                                 subreports = result.getSubreports();
                                 getView().setSubreports(result.getSubreports());
                                 if (taxType.equals(TaxType.NDFL)){
-                                    if (result.getAsnuName() != null && !result.getAsnuName().isEmpty()) {
-                                        getView().setPropertyBlockVisible(false, false, true, taxType);
-                                        getView().setAsnuName(result.getAsnuName());
-                                        getView().setFileName(result.getFileName());
+                                    if (DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind())) {
+                                        getView().setPropertyBlockVisible(true, true, true, result.getStateEDName() != null, false, taxType);
+                                        getView().setKpp(declarationData.getKpp());
+                                        getView().setOktmo(declarationData.getOktmo());
+                                        getView().setTaxOrganCode(declarationData.getTaxOrganCode());
+                                        getView().setStateED(result.getStateEDName());
                                     } else {
-                                        getView().setPropertyBlockVisible(false, false, false, taxType);
+                                        if (result.getAsnuName() != null && !result.getAsnuName().isEmpty()) {
+                                            getView().setPropertyBlockVisible(false, false, false, false, true, taxType);
+                                            getView().setAsnuName(result.getAsnuName());
+                                            getView().setFileName(result.getFileName());
+                                        } else {
+                                            getView().setPropertyBlockVisible(false, false, false, false, false, taxType);
+                                        }
                                     }
                                 } else {
-                                    getView().setPropertyBlockVisible(false, false, false, taxType);
+                                    getView().setPropertyBlockVisible(false, false, false, false, false, taxType);
                                 }
 								getView()
 										.setBackButton(
 												"#"
 														+ DeclarationListNameTokens.DECLARATION_LIST
 														+ ";nType="
-														+ result.getTaxType(), result.getTaxType()
+														+ result.getTaxType()
+                                                        + (DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind())?(";"+ DeclarationListPresenter.REPORTS + "=" + true):""), result.getTaxType()
                                         .getName());
 								getView().setTitle(result.getDeclarationType(), result.getTaxType().equals(TaxType.DEAL));
 								updateTitle(result.getDeclarationType());

@@ -3,6 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -16,7 +20,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Хандлер обрабатывает событие добавления файлов в НФ
@@ -25,8 +31,10 @@ import java.util.List;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class AddDeclarationFilesHandler extends
-		AbstractActionHandler<AddDeclarationFileAction, AddDeclarationFileResult> {
+public class AddDeclarationFilesHandler extends AbstractActionHandler<AddDeclarationFileAction, AddDeclarationFileResult> {
+
+    private final static int DEFAULT_FILE_TYPE_CODE = 6;
+    private final static String ATTRIBUTE_NAME = "NAME";
 
 	@Autowired
 	private BlobDataService blobDataService;
@@ -37,18 +45,25 @@ public class AddDeclarationFilesHandler extends
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private RefBookFactory refBookFactory;
+
 	public AddDeclarationFilesHandler() {
 		super(AddDeclarationFileAction.class);
 	}
 
 	@Override
-	public AddDeclarationFileResult execute(AddDeclarationFileAction action, ExecutionContext context)
-		throws ActionException {
+	public AddDeclarationFileResult execute(AddDeclarationFileAction action, ExecutionContext context) throws ActionException {
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
+        Long defaultFileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + DEFAULT_FILE_TYPE_CODE + "").get(0);
+        Map<String, RefBookValue> recordData = provider.getRecordData(defaultFileTypeId);
+
         AddDeclarationFileResult result = new AddDeclarationFileResult();
         TAUser user = securityService.currentUserInfo().getUser();
         String userName = user.getName();
         String userDepartmentName = departmentService.getParentsHierarchyShortNames(user.getDepartmentId());
         List<DeclarationDataFile> files = new ArrayList<DeclarationDataFile>();
+
         for(String uuid: action.getUuid().split(",")) {
             BlobData blobData = blobDataService.get(uuid);
             DeclarationDataFile declarationDataFile = new DeclarationDataFile();
@@ -58,6 +73,8 @@ public class AddDeclarationFilesHandler extends
             declarationDataFile.setUserName(userName);
             declarationDataFile.setUserDepartmentName(userDepartmentName);
             declarationDataFile.setNote("");
+            declarationDataFile.setFileTypeId(defaultFileTypeId.intValue());
+            declarationDataFile.setFileTypeName(recordData.get(ATTRIBUTE_NAME).getStringValue());
             files.add(declarationDataFile);
         }
         result.setFiles(files);
