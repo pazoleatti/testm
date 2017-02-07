@@ -52,6 +52,15 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
 
     /**
+     *  Найти данные о доходах по КПП и ОКТМО для Физлица
+     * @param ndflPersonId
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo);
+
+    /**
      * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
      *
      * @param declarationDataId идентификатор декларации
@@ -64,6 +73,22 @@ public interface NdflPersonService {
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
+
+    /**
+     * Найти данный о вычетах
+     *
+     * @param ndflPersonId
+     * @return
+     */
+    List<NdflPersonDeduction> findDeductions(long ndflPersonId);
+
+    /**
+     * Найти данные о авансовых платежах
+     *
+     * @param ndflPersonId
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepayments(long ndflPersonId);
 
     /**
      * Найти NdflPerson привязанные к декларации для построения отчета.  Если найдено больше 1 запись, метод выкидывает исключение ServiceExeption

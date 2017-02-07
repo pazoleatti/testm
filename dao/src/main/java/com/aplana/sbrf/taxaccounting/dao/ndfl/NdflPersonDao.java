@@ -93,6 +93,15 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate);
 
     /**
+     *  Найти данные о доходах по КПП и ОКТМО для Физлица
+     * @param ndflPersonId
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo);
+
+    /**
      * Найти данные о доходах ФЛ по идентификатору ФЛ
      *
      * @param ndflPersonId
