@@ -9456,7 +9456,7 @@
 				<text><![CDATA[Сумма исчисленного налога]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="1243548e-6d3b-4d3a-9a7d-e80061c0f665" x="507" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="1243548e-6d3b-4d3a-9a7d-e80061c0f665" x="515" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9484,7 +9484,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="f609993f-252a-460e-aee5-636752119ad8" x="326" y="182" width="15" height="19" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="f609993f-252a-460e-aee5-636752119ad8" x="335" y="182" width="15" height="19" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9512,7 +9512,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(11)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="04792ba9-b0bf-4296-b7e6-6959d370b4b4" x="372" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="04792ba9-b0bf-4296-b7e6-6959d370b4b4" x="380" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9526,7 +9526,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="5ae0b906-b8db-41e3-839a-2980ddfaa29a" x="416" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="5ae0b906-b8db-41e3-839a-2980ddfaa29a" x="425" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9548,7 +9548,7 @@
 				<text><![CDATA[Сумма налоговых вычетов]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="d164911f-e147-4a3d-92b2-b0f86d5d0104" x="476" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="d164911f-e147-4a3d-92b2-b0f86d5d0104" x="485" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9604,7 +9604,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="a6c39fd2-3e27-412e-a0ac-1790682f4a9a" x="386" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="a6c39fd2-3e27-412e-a0ac-1790682f4a9a" x="395" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9646,7 +9646,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(5)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="dd457f67-42f9-45ca-a433-55f5933c75ca" x="357" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="dd457f67-42f9-45ca-a433-55f5933c75ca" x="365" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9703,7 +9703,7 @@
 				<text><![CDATA[.]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="1373ecce-bcfd-46e9-b47a-f162cc137ff1" x="341" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="1373ecce-bcfd-46e9-b47a-f162cc137ff1" x="350" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9745,7 +9745,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(8)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="1e6a8750-7bf2-4145-a09c-383f03322a1b" x="537" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="1e6a8750-7bf2-4145-a09c-383f03322a1b" x="545" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9759,7 +9759,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(14)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="2629353d-ad78-44cd-a73d-8858928e1a4d" x="431" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="2629353d-ad78-44cd-a73d-8858928e1a4d" x="440" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9773,7 +9773,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(7)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="37c80b3b-954e-48b4-9f49-04f16ccfbb02" x="491" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="37c80b3b-954e-48b4-9f49-04f16ccfbb02" x="500" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9787,7 +9787,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(11)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="03609558-4135-448e-b923-412040c76c79" x="401" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="03609558-4135-448e-b923-412040c76c79" x="410" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9801,7 +9801,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(5)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="764eca38-885f-4d41-82e8-617635b11f60" x="461" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="764eca38-885f-4d41-82e8-617635b11f60" x="470" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9857,7 +9857,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="05145549-fac1-411f-86bc-c46e77d9d702" x="522" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="05145549-fac1-411f-86bc-c46e77d9d702" x="530" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9871,7 +9871,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(13)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="e026796c-2de5-467c-8f62-891c24135f2e" x="446" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="e026796c-2de5-467c-8f62-891c24135f2e" x="455" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9969,7 +9969,7 @@
 				<textFieldExpression><![CDATA[$V{АвансПлат}.charAt(11)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="88bdaeeb-f054-403c-9c21-6623db7d9fae" x="362" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="88bdaeeb-f054-403c-9c21-6623db7d9fae" x="361" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -10081,7 +10081,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНалДив}.charAt(10)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="a1a73c7b-5633-43d9-b45b-dfb72747e155" x="377" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="a1a73c7b-5633-43d9-b45b-dfb72747e155" x="376" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -10102,7 +10102,7 @@
 				<text><![CDATA[050]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="385dd0b6-1c2e-4382-a1fd-f5e2cf468f81" x="527" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="385dd0b6-1c2e-4382-a1fd-f5e2cf468f81" x="526" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -10193,7 +10193,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНалДив}.charAt(13)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="b1ddac72-b895-4ff2-b22f-dae47d05c0db" x="542" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="b1ddac72-b895-4ff2-b22f-dae47d05c0db" x="541" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -10328,7 +10328,7 @@
 				<textFieldExpression><![CDATA[$V{АвансПлат}.charAt(9)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="abce8d21-fc31-467d-b843-a69535333e42" x="512" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="abce8d21-fc31-467d-b843-a69535333e42" x="511" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
