@@ -49,7 +49,7 @@ public class RefBookSimpleDaoTest {
     public static final long FAMILY_ID = 1983L;
 
     @Autowired
-    private RefBookSimpleDao dao;
+    private RefBookSimpleDaoImpl dao;
     @Autowired
     private RefBookDao refBookDao;
 

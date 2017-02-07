@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -82,7 +82,16 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public Date getEndVersion(Long recordId, Date versionFrom) {
-        throw new UnsupportedOperationException();
+        //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
+        RefBookRecordVersion nextVersion = dao.getNextVersion(refBook, recordId, versionFrom);
+        if (nextVersion != null) {
+            Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
+            if (versionEnd != null && versionFrom.after(versionEnd)) {
+                throw new ServiceException("Дата окончания получена некорректно");
+            }
+            return versionEnd;
+        }
+        return null;
     }
 
     @Override
@@ -97,12 +106,12 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
-        throw new UnsupportedOperationException();
+        return dao.getRecordIdPairs(refBook.getTableName(), refBook.getId(), version, true, filter);
     }
 
     @Override
     public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
+        return refBookDao.isRecordsExist(refBook.getTableName(), new HashSet<Long>(uniqueRecordIds));
     }
 
     @Override
@@ -392,13 +401,13 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
                 if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
                     //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется
                     Long previousVersionEnd = dao.findRecord(getRefBook(), recordId, versionFrom);
-                    refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(previousVersionEnd), false);
+                    refBookDao.deleteRecordVersions(getRefBook().getTableName(), Arrays.asList(previousVersionEnd), false);
                 }
 
                 boolean delayedUpdate = false;
                 if (oldVersionPeriod.getVersionEnd() != null && versionFrom.equals(oldVersionPeriod.getVersionEnd())) {
                     //Обновляем дату начала актуальности, если не совпадает с датой окончания
-                    refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
+                    refBookDao.updateVersionRelevancePeriod(getRefBook().getTableName(), uniqueRecordId, versionFrom);
                 } else {
                     delayedUpdate = true;
                 }
@@ -419,22 +428,22 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
                     if (!relatedVersions.isEmpty() && !oldVersionPeriod.getVersionEnd().equals(versionTo)) {
                         if (!isVersionEndAlreadyExists) {
                             //Изменяем существующую дату окончания
-                            refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
+                            refBookDao.updateVersionRelevancePeriod(getRefBook().getTableName(), relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                         } else {
                             //Удаляем дату окончания. Теперь дата окончания задается началом следующей версии
-                            refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions, false);
+                            refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, false);
                         }
                     }
                 }
 
                 if (!relatedVersions.isEmpty() && versionTo == null) {
                     //Удаляем фиктивную запись - теперь у версии нет конца
-                    refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, relatedVersions, false);
+                    refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, false);
                 }
 
                 if (delayedUpdate) {
                     //Обновляем дату начала актуальности, если ранее это было отложено т.к она совпадала с датой окончания (теперь она изменена)
-                    refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, uniqueRecordId, versionFrom);
+                    refBookDao.updateVersionRelevancePeriod(getRefBook().getTableName(), uniqueRecordId, versionFrom);
                 }
 
             }
@@ -467,7 +476,14 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
+        for (Long uniqueRecordId : uniqueRecordIds) {
+            List<Long> relatedVersions = dao.getRelatedVersions(getRefBook(), uniqueRecordIds);
+            if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
+                refBookDao.deleteRecordVersions(getRefBook().getTableName(), relatedVersions, false);
+            }
+            Long recordId = dao.getRecordId(getRefBook(), uniqueRecordId);
+            dao.createFakeRecordVersion(getRefBook(), recordId, SimpleDateUtils.addDayToDate(versionEnd, 1));
+        }
     }
 
     @Override

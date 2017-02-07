@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.FormLink;
@@ -45,15 +45,13 @@ public class RefBookSimpleDataProviderHelper {
     @Autowired
     private RefBookHelper refBookHelper;
     @Autowired
-    private FormDataService formDataService;
-    @Autowired
     private LogEntryService logEntryService;
     @Autowired
     private BDUtils dbUtils;
     @Autowired
     private RefBookDao refBookDao;
     @Autowired
-    private RefBookSimpleDao dao;
+    private RefBookSimpleDaoImpl dao;
 
     /**
      * Проверка корректности
