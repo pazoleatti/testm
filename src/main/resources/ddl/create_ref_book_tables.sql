@@ -319,6 +319,83 @@ comment on column ref_book_budget_income.code is 'Код бюджетной кл
 comment on column ref_book_budget_income.name is 'Наименование дохода бюджета Российской Федерации';
 comment on column ref_book_budget_income.lev is 'Уровень кода. Служит для определения уровней агрегирования кодов классификации доходов бюджетов. В рамках вида и подвида доходов код с большим значением уровня агрегируется на вышестоящий код с меньшим значением уровня';
 
+--Коды, определяющие налоговый (отчётный) период
+create table report_period_type
+(
+  id number(18) not null,
+  code varchar2(2 char) not null,
+  name varchar2(255 char) not null,
+  ndfl number(1),
+  fond number(1),
+  start_date date,
+  end_date date,
+  calendar_start_date date
+);
+comment on table report_period_type is 'Коды, определяющие налоговый (отчётный) период';
+comment on column report_period_type.id is 'Уникальный идентификатор';
+comment on column report_period_type.code is 'Код';
+comment on column report_period_type.name is 'Наименование';
+comment on column report_period_type.ndfl is 'Признак принадлежности к НДФЛ';
+comment on column report_period_type.fond is 'Признак принадлежности к Страховым сборам, взносам';
+comment on column report_period_type.start_date is 'Дата начала периода';
+comment on column report_period_type.end_date is 'Дата окончания периода';
+comment on column report_period_type.calendar_start_date is 'Календарная дата начала периода';
+
+--Список полей для Журнала аудита
+create table log_system_fields
+(
+    id number(18) not null,
+    name varchar2(2000 char)
+);
+
+comment on table log_system_fields is 'Список полей для Журнала аудита';
+comment on column log_system_fields.id is 'Уникальный идентификатор';
+comment on column log_system_fields.name is 'Наименование';
+
+--Общероссийский классификатор стран мира
+create table ref_book_country
+(
+    id number(18) not null,
+    record_id number(18) not null,
+    status number(1) default 0 not null,
+    version date not null,
+    code varchar2(3 char) not null,
+    code_2 varchar2(2 char) not null,
+    code_3 varchar2(3 char) not null,
+    name varchar2(500 char) not null,
+    fullname varchar2(500 char)
+);
+comment on table ref_book_country is 'Общероссийский классификатор стран мира';
+comment on column ref_book_country.id is 'Уникальный идентификатор';
+comment on column ref_book_country.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_country.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_country.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_country.code is 'Код';
+comment on column ref_book_country.code_2 is 'Код (2-х букв.)';
+comment on column ref_book_country.code_3 is 'Код (3-х букв.)';
+comment on column ref_book_country.name is 'Краткое наименование';
+comment on column ref_book_country.fullname is 'Полное наименование';
+
+--Коды документов
+create table ref_book_doc_type
+(
+    id number(18) not null,
+    record_id number(18) not null,
+    status number(1) default 0 not null,
+    version date not null,
+    code varchar2(2 char) not null,
+    name varchar2(2000 char) not null,
+    priority number(2)
+);
+comment on table ref_book_doc_type is 'Коды документов';
+comment on column ref_book_doc_type.id is 'Уникальный идентификатор';
+comment on column ref_book_doc_type.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_doc_type.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_doc_type.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_doc_type.code is 'Код';
+comment on column ref_book_doc_type.name is 'Наименование документа';
+comment on column ref_book_doc_type.priority is 'Приоритет';
+
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
 (
