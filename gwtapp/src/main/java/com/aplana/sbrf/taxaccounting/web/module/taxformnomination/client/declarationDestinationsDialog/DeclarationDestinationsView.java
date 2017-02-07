@@ -31,7 +31,7 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 	public interface Binder extends UiBinder<PopupPanel, DeclarationDestinationsView> {
     }
 
-    public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
+    public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String MODAL_WINDOW_TITLE = "Создание назначения декларации";
     public static final String MODAL_WINDOW_TITLE_D = "Создание назначения уведомления";

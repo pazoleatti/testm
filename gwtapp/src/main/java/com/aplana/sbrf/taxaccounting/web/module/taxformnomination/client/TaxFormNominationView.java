@@ -326,12 +326,12 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	private void initView(boolean isForm) {
 		receiverSourcesKindTitle.setTitle(taxType.isTax() ? "Тип налоговой формы" : "Тип формы");
 		receiverSourcesTypeTitle.setTitle(taxType.isTax() ? "Вид налоговой формы" : "Вид формы");
-		declarationTypeHeader.setTitle("Вид декларации");
+		declarationTypeHeader.setTitle("Вид налоговой формы");
 		formGrid.redrawHeaders();
 		decGrid.redrawHeaders();
 
 		// левая ссылка
-		switchMode.setVisible(true);
+		switchMode.setVisible(false);
 		switchMode.setText("Назначение налоговых форм");
 		// средний лейбл
 		formHeader.setText("Назначение налоговых форм");
