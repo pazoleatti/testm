@@ -139,4 +139,15 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
         }
 	}
 
+    @Override
+    public void saveFile(DeclarationDataFile file) {
+        getJdbcTemplate().update(
+                "insert into declaration_data_file (declaration_data_id, blob_data_id, user_name, user_department_name, note, file_type_id) values (?, ?, ?, ?, ?, ?)",
+                file.getDeclarationDataId(),
+                file.getUuid(),
+                file.getUserName(),
+                file.getUserDepartmentName(),
+                file.getNote(),
+                file.getFileTypeId());
+    }
 }
