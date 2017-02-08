@@ -17,12 +17,10 @@ INSERT INTO tax_period(id, tax_type, year) VALUES (11, 'N', 2012);
 INSERT INTO tax_period(id, tax_type, year) VALUES (21, 'F', 2013);
 
 INSERT INTO ref_book(id, name) VALUES (8, 'Коды, определяющие налоговый (отчётный) период');
-INSERT INTO ref_book_record(id, record_id, ref_book_id, version, status) VALUES (21, 1, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
-INSERT INTO ref_book_record(id, record_id, ref_book_id, version, status) VALUES (22, 2, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
-
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) VALUES
   (25, 8, 'Код', 'CODE', 1, 0, NULL, NULL, 1, NULL, 2, 1, 1, 100);
-INSERT INTO ref_book_value(record_id, attribute_id, string_value) VALUES (21, 25, '99');
+INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (21, '99', 'первый квартал', DATE '1970-01-01', DATE '1970-03-31', DATE '1970-01-11');
+INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (22, '22', 'второй квартал', DATE '1970-04-01', DATE '1970-06-30', DATE '1970-04-04');
 
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (1, 'Transport report period 1', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (2, 'Transport report period 2', 1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');

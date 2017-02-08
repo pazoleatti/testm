@@ -1,6 +1,3 @@
-insert into ref_book (id, name) values (-1, ' ');
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values(-1,-1,-1,to_date('2016-01-01', 'YYYY-MM-DD'),2);
-
 insert into DEPARTMENT_TYPE(id) values(-1);
 insert into DEPARTMENT(id,code,name,type,parent_id) values(-1,0,' ',-1,0);
 
@@ -23,10 +20,10 @@ insert into REF_BOOK_TAX_INSPECTION(id,code,name) values(-1,' ',' ');
 insert into REF_BOOK_NDFL_RATE(id,rate) values(-1,0);
 insert into REF_BOOK_OKTMO(id,record_id,status,version,code,name) values(-1,-1,2,to_date('01.01.2016','dd.mm.yyyy'),' ',' ');
 
-insert into REF_BOOK_ADDRESS(id,record_id,status,version,address_type,region_code) values(-1,-1,2,to_date('01.01.2016','dd.mm.yyyy'),0,' ');
+insert into REF_BOOK_ADDRESS(id,address_type,region_code) values(-1,0,' ');
 insert into REF_BOOK_PERSON(id,record_id,version,status,last_name,first_name,birth_date) values(-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,' ',' ',to_date('01.01.2016','dd.mm.yyyy'));
-insert into REF_BOOK_ID_DOC(id,record_id,status,version,person_id,doc_id,doc_number) values(-1,-1,2,to_date('01.01.2016','dd.mm.yyyy'),-1,-1,' ');
-insert into REF_BOOK_ID_TAX_PAYER(id,record_id,status,version,person_id,inp,as_nu) values(-1,-1,2,to_date('01.01.2016','dd.mm.yyyy'),-1,' ',-1);
+insert into REF_BOOK_ID_DOC(id,person_id,doc_id,doc_number) values(-1,-1,-1,' ');
+insert into REF_BOOK_ID_TAX_PAYER(id,person_id,inp,as_nu) values(-1,-1,' ',-1);
 
 insert into REF_BOOK_NDFL(id,department_id,record_id,version,status) values(-1,-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2);
 insert into REF_BOOK_NDFL_DETAIL(id,ref_book_ndfl_id,record_id,version,status,row_ord,department_id) values(-1,-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,0,-1);

@@ -897,8 +897,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT ");
-        ps.appendQuery("id, RECORD_ID ");
-        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery("id, RECORD_ID");
         ps.appendQuery(" FROM ");
         ps.appendQuery(tableName);
         ps.appendQuery(" frb");
@@ -915,6 +914,16 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             if (!filterPS.getParams().isEmpty()) {
                 ps.addParam(filterPS.getParams());
             }
+        }
+
+        if (version != null && needAccurateVersion) {
+            if (filterPS.getQuery().length() > 0) {
+                ps.appendQuery(" AND ");
+            } else {
+                ps.appendQuery(" WHERE ");
+            }
+            ps.appendQuery(" version = ?");
+            ps.addParam(version);
         }
 
         try {

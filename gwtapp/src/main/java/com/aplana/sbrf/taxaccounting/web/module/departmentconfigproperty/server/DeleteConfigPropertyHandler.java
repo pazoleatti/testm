@@ -2,8 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -70,11 +72,17 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
             deleteList.add(recordVersion.getRecordId());
 
             RefBookDataProvider providerSlave = rbFactory.getDataProvider(action.getSlaveRefBookId());
-            String filterSlave = "REF_BOOK_NDFL_ID = " + recordVersion.getRecordId();
+            String filterSlave = "LINK  = " + recordVersion.getRecordId();
+            if (action.getTaxType() == TaxType.NDFL) {
+                filterSlave = "REF_BOOK_NDFL_ID = " + recordVersion.getRecordId();
+            } else if (action.getTaxType() == TaxType.PFR) {
+                filterSlave = "REF_BOOK_FOND_ID = " + recordVersion.getRecordId();
+            }
+
             PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(period.getCalendarStartDate(), null, filterSlave, null);
 
             for (Map<String, RefBookValue> r : paramsSlave) {
-                deleteList.add(r.get("record_id").getNumberValue().longValue());
+                deleteList.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
             }
 
             if (period.getCalendarStartDate().equals(recordVersion.getVersionStart())) {

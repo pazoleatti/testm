@@ -579,4 +579,15 @@ public interface SourceService {
      */
     List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction,
                                              TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Возвращает список нф-приемников для указанной декларации (включая несозданные)
+     * @param declaration декларациz-приемник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные источники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
+     * @return список нф-источников
+     */
+
+    List<Relation> getDeclarationDestinationsInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, State stateRestriction, TAUserInfo userInfo, Logger logger);
 }

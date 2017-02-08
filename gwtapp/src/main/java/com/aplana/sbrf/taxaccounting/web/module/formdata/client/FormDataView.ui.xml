@@ -170,7 +170,7 @@
                                      addStyleNames="{style.editMode}, {style.marginRight5}"/>
                             <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px"/>
                             <style:DropdownButton ui:field="printAnchor" text="Формирование отчетов" img="resources/img/printer-16.png"
-                                              title="Формирование отчето" panelStyleName="{style.printAnchor}"/>
+                                              title="Формирование отчетов" panelStyleName="{style.printAnchor}"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

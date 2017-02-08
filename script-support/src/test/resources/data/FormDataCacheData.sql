@@ -90,8 +90,7 @@ INSERT INTO form_type (id, name, tax_type) VALUES (1, 'FormType - Transport', 'T
 INSERT INTO tax_period(id, tax_type, year) VALUES (1, 'T', 2013);
 
 -- dict_tax_period_id
-INSERT INTO ref_book(id, name) VALUES (8, 'Коды, определяющие налоговый (отчётный) период');
-INSERT INTO ref_book_record(id, record_id, ref_book_id, version, status) VALUES (21, 1, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
+INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (21, '21', 'первый квартал', DATE '1970-01-01', DATE '1970-03-31', DATE '1970-01-11');
 
 -- ReportPeriod
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (1, 'Transport report period 1', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');

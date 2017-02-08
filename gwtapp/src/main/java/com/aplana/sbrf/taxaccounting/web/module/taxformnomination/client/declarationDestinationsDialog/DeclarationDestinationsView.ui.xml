@@ -56,9 +56,9 @@
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
-                    <g:Label ui:field="declarationTypeTitle" text="Вид декларации" addStyleNames="{style.labels}"/>
+                    <g:Label ui:field="declarationTypeTitle" text="Вид налоговой формы" addStyleNames="{style.labels}"/>
                     <r:RefBookPickerWidget ui:field="declarationTypeId" attributeIdInt="2071" searchEnabled="false" versionEnabled="false"
-                                           isHierarchical="false" multiSelect="true" width="250px" title="Выбор вида декларации"/>
+                                           isHierarchical="false" multiSelect="true" width="250px" title="Выбор налоговой формы"/>
                 </g:HorizontalPanel>
 
             </g:VerticalPanel>

@@ -3,8 +3,18 @@ prompt async_task_type
 
 prompt department_type
 @@depart_type;
+prompt ref_book_country
+@@ref_book_country;
+
+prompt ref_book_doc_type
+@@ref_book_doc_type;
+
+prompt report_period_type
+@@report_period_type;
+
 prompt departments
 @@departments;
+
 
 prompt fiction ref datas
 @@gen_fiction_datas;
@@ -38,7 +48,7 @@ prompt ref_book_region
 prompt ref_book_ndfl_rate
 @@ref_book_ndfl_rate;
 prompt ref_book_tax_inspection
-@@ref_tax_inspection;
+@@ref_book_tax_inspection;
 prompt ref_book_taxpayer_state
 @@ref_taxpayer_state;
 prompt ref_book_attach_file_type

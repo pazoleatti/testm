@@ -106,7 +106,8 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
     @Test
     public void buildXmlTest() throws IOException, SAXException {
         // СумСтавка
-        when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class), any(Date.class), any(Date.class))).thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
+        when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
+                .thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
             @Override
             public NdflPersonIncomeCommonValue answer(InvocationOnMock invocationOnMock) throws Throwable {
                 NdflPersonIncomeCommonValue ndflPersonIncomeCommonValue = new NdflPersonIncomeCommonValue();
@@ -118,12 +119,12 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                 List<NdflPersonIncomeByRate> ndflPersonIncomeByRateList = new ArrayList<NdflPersonIncomeByRate>();
                 NdflPersonIncomeByRate ndflPersonIncomeByRate1 = new NdflPersonIncomeByRate();
                 ndflPersonIncomeByRate1.setTaxRate(13);
-                ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(5555.55));
+                ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(7777.77));
                 ndflPersonIncomeByRate1.setIncomeAccruedSummDiv(new BigDecimal(6666.66));
-                ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(7777.77));
-                ndflPersonIncomeByRate1.setCalculatedTax(8888L);
+                ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(5555.55));
+                ndflPersonIncomeByRate1.setCalculatedTax(288L);
                 ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
-                ndflPersonIncomeByRate1.setPrepaymentSum(1111L);
+                ndflPersonIncomeByRate1.setPrepaymentSum(280L);
                 ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
 
                 ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);
@@ -133,7 +134,8 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         });
 
         // СумДата
-        when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class), any(Date.class), any(Date.class))).thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
+        when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
+                .thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
             @Override
             public List<NdflPersonIncomeByDate> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 DateFormat format = new SimpleDateFormat("dd.MM.yyyy");

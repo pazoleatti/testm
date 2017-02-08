@@ -105,9 +105,11 @@ public interface NdflPersonService {
      * @param declarationDataId - идентификатор декларации
      * @param startDate         - "Дата удержания налога" и "Дата платежного поручения" должны быть >= даты начала отчетного периода
      * @param endDate           - "Дата удержания налога" и "Дата платежного поручения" должны быть <= даты окончания отчетного периода
+     * @param kpp
+     * @param oktmo
      * @return
      */
-    NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId, Date startDate, Date endDate);
+    NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo);
 
     /**
      * Найти данные о доходах физ лиц в разрезе дат
@@ -115,9 +117,11 @@ public interface NdflPersonService {
      * @param declarationDataId - идентификатор декларации
      * @param calendarStartDate - "Дата удержания налога" и "Дата платежного поручения" должны быть >= даты начала последнего квартала отчетного периода
      * @param endDate           - "Дата удержания налога" и "Дата платежного поручения" <= даты окончания последнего квартала отчетного периода
+     * @param kpp
+     * @param oktmo
      * @return
      */
-    List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId, Date calendarStartDate, Date endDate);
+    List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId, Date calendarStartDate, Date endDate, String kpp, String oktmo);
 
     /**
      * Удаляет все данные о физлицах из декларации

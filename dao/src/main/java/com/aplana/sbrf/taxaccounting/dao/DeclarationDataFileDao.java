@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
+
 import java.util.List;
 
 /**
@@ -20,4 +21,9 @@ public interface DeclarationDataFileDao {
      * @param files
      */
     void saveFiles(final long declarationDataId, List<DeclarationDataFile> files);
+
+    /**
+     * Сохраняет отдельный файл
+     */
+    void saveFile(DeclarationDataFile file);
 }

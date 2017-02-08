@@ -106,7 +106,6 @@ alter table configuration add constraint configuration_fk foreign key (departmen
 
 alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period(id);
-alter table report_period add constraint report_period_fk_dtp_id foreign key (dict_tax_period_id) references ref_book_record(id);
 alter table report_period add constraint report_period_uniq_tax_dict unique (tax_period_id, dict_tax_period_id);
 alter table report_period add constraint report_period_chk_date check (end_date >= start_date);
 

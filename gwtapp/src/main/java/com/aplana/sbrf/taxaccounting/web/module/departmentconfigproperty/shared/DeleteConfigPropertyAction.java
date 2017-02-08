@@ -1,18 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.List;
 import java.util.Map;
 
 public class DeleteConfigPropertyAction extends UnsecuredActionImpl<DeleteConfigPropertyResult> {
-    List<Map<String, TableCell>> rows;
-    Long recordId;
-    Integer reportPeriodId;
-    Integer departmentId;
-    Map<String, TableCell> notTableParams;
-    Long refBookId;
-    Long slaveRefBookId;
+    private List<Map<String, TableCell>> rows;
+    private Long recordId;
+    private Integer reportPeriodId;
+    private Integer departmentId;
+    private Map<String, TableCell> notTableParams;
+    private Long refBookId;
+    private Long slaveRefBookId;
+    private TaxType taxType;
 
     public List<Map<String, TableCell>> getRows() {
         return rows;
@@ -68,5 +70,13 @@ public class DeleteConfigPropertyAction extends UnsecuredActionImpl<DeleteConfig
 
     public void setSlaveRefBookId(Long slaveRefBookId) {
         this.slaveRefBookId = slaveRefBookId;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
     }
 }

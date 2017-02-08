@@ -212,7 +212,7 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
         declarationDataIdColumn.setName("declarationDataId");
 
         fileTypeColumn.setAlias("fileType");
-        fileTypeColumn.setName("fileType");
+        fileTypeColumn.setName("Тип файла");
         fileTypeColumn.setId(1);
         fileTypeColumn.setNameAttributeId(9342L);
         fileTypeColumn.setRefBookAttributeId(9342L);

@@ -111,8 +111,9 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId, Date startDate, Date endDate) {
+    public NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo) {
         /*
+        todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-288 - НДФЛ. Перенести логику формирования 6-НДФЛ из сервисного класса в Groovy
         Одним из полей Обобщенных показателей о доходах является перечень просуммированых доходов и авансов для каждой ставки.
         В рамках одной ставки может быть несколько операций.
         Доходы одной операции имеют одну и только одну ставку.
@@ -135,7 +136,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         // 1. Суммируем Авансы в рамках операции
         // Мапа <Идентификатор_операции, Сумма_аванса>
         Map<Long, Long> mapSumPrepayment = new HashMap<Long, Long>();
-        List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonDao.findPrepaymentsByDeclarationDataId(declarationDataId);
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonDao.findPrepaymentsByDeclarationDataId(declarationDataId, kpp, oktmo);
         for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
             Long summPrepayment = mapSumPrepayment.get(ndflPersonPrepayment.getOperationId());
             if (summPrepayment == null) {
@@ -150,7 +151,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         // Мапа <Ставка, Мапа>
         Map<Integer, Map> mapTaxRate = new HashMap<Integer, Map>();
 
-        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, startDate, endDate);
+        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, startDate, endDate, kpp, oktmo);
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
             // Обобщенные показатели о доходах
@@ -226,7 +227,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId, Date calendarStartDate, Date endDate) {
+    public List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId, Date calendarStartDate, Date endDate, String kpp, String oktmo) {
         /*
         Для заполнения СумДата будем учитывать только записи, в которых выполнены условия:
         "Дата удержания налога" или "Дата платежного поручения" должно быть заполнено и то что заполнено >= даты начала последнего квартала отчетного периода.
@@ -247,7 +248,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
          */
         // Мапа <Идентификатор_операции, Суммы_по_датам>
         Map<Long, NdflPersonIncomeByDate> mapNdflPersonIncome = new HashMap<Long, NdflPersonIncomeByDate>();
-        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, calendarStartDate, endDate);
+        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, calendarStartDate, endDate, kpp, oktmo);
 
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
             // Учитываем только те записи, у которых заполнено либо "Дата начисления дохода", либо "Сумма налога удержанная"

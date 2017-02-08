@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,5 +159,28 @@ public class DeclarationDataFileDaoTest {
         assertEquals("прим", file.getNote());
         assertEquals(3, file.getFileTypeId());
         assertEquals("Входящий из ФНС", file.getFileTypeName());
+    }
+
+    @Test
+    public void saveSingle() {
+        DeclarationDataFile newFile = new DeclarationDataFile();
+        newFile.setDeclarationDataId(4);
+        newFile.setUuid("uuid_7");
+        newFile.setUserName("Контролер");
+        newFile.setUserDepartmentName("Банк");
+        newFile.setNote(null);
+        newFile.setFileTypeId(6);
+        declarationDataFileDao.saveFile(newFile);
+
+        List<DeclarationDataFile> files = declarationDataFileDao.getFiles(4);
+        Assert.assertEquals(1, files.size());
+        DeclarationDataFile file = files.get(0);
+        assertEquals(4, file.getDeclarationDataId());
+        assertEquals("uuid_7", file.getUuid());
+        assertEquals("file_7", file.getFileName());
+        assertEquals("Контролер", file.getUserName());
+        assertEquals("Банк", file.getUserDepartmentName());
+        assertNull(file.getNote());
+        assertEquals(6, file.getFileTypeId());
     }
 }
