@@ -344,17 +344,6 @@ comment on column report_period_type.start_date is 'Дата начала пер
 comment on column report_period_type.end_date is 'Дата окончания периода';
 comment on column report_period_type.calendar_start_date is 'Календарная дата начала периода';
 
---Список полей для Журнала аудита
-create table log_system_fields
-(
-    id number(18) not null,
-    name varchar2(2000 char)
-);
-
-comment on table log_system_fields is 'Список полей для Журнала аудита';
-comment on column log_system_fields.id is 'Уникальный идентификатор';
-comment on column log_system_fields.name is 'Наименование';
-
 --Общероссийский классификатор стран мира
 create table ref_book_country
 (
