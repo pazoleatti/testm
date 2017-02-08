@@ -1,8 +1,7 @@
 INSERT INTO tax_type (id, name) VALUES ('T', 'Транспортный');
 insert into form_kind (id, name) values (1, 'Первичная');
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
-insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
-insert into ref_book_record(id, record_id, ref_book_id, version, status) values (21, 1, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
+INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (21, '21', 'первый квартал', DATE '1970-01-01', DATE '1970-03-31', DATE '1970-01-11');
 
 INSERT INTO department_type (id, name) VALUES (1, 'Банк');
 insert into department (id, name, parent_id, type, code) values (1, 'А - департамент', null, 1, 1);

@@ -106,7 +106,8 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
     @Test
     public void buildXmlTest() throws IOException, SAXException {
         // СумСтавка
-        when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class), any(Date.class), any(Date.class))).thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
+        when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
+                .thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
             @Override
             public NdflPersonIncomeCommonValue answer(InvocationOnMock invocationOnMock) throws Throwable {
                 NdflPersonIncomeCommonValue ndflPersonIncomeCommonValue = new NdflPersonIncomeCommonValue();
@@ -133,7 +134,8 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         });
 
         // СумДата
-        when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class), any(Date.class), any(Date.class))).thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
+        when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
+                .thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
             @Override
             public List<NdflPersonIncomeByDate> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
