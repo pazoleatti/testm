@@ -243,7 +243,7 @@ alter table log_system add constraint log_system_chk_rp check (event_id in (7, 1
 alter table log_system add constraint log_system_chk_aft check (audit_form_type_id = 1 and not event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is not null or audit_form_type_id = 2 and not event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is not null or audit_form_type_id = 3 and event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is null or audit_form_type_id = 4 and event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is null or audit_form_type_id in (5,6) and event_id in (7) and form_type_name is null and declaration_type_name is null or audit_form_type_id is null or event_id in (402));
 
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
-alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
+--alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
 --alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
 alter table log_system add constraint log_system_chk_is_error check (is_error in (0, 1));
 alter table log_system add constraint log_system_fk_audit_form_type foreign key (audit_form_type_id) references audit_form_type (id);
