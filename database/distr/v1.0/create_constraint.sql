@@ -316,7 +316,6 @@ create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
-create index i_ref_book_oktmo_code on ref_book_oktmo (code);
 create index i_form_style_form_template_id on form_style(form_template_id);
 create index i_form_column_form_template_id on form_column(form_template_id);
 create index i_decl_data_dep_rep_per_id on declaration_data (department_report_period_id);

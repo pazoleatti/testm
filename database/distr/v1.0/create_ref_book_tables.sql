@@ -1,6 +1,29 @@
 -----------------------------------------------------------------------------------------------------------------------------
 -- Создание таблиц для справочников
 -----------------------------------------------------------------------------------------------------------------------------
+-- ОКТМО
+create table ref_book_oktmo (
+  id        number(18)     not null,
+  code      varchar2(4000) not null,
+  name      varchar2(4000) not null,
+  version   date           not null,
+  status    number(1)      not null,
+  record_id number(9)      not null,
+  razd      number(1)
+);
+comment on table ref_book_oktmo is 'ОКТМО';
+comment on column ref_book_oktmo.id is 'Идентификатор записи';
+comment on column ref_book_oktmo.code is 'Код';
+comment on column ref_book_oktmo.name is 'Наименование';
+comment on column ref_book_oktmo.parent_id is 'Идентификатор родительской записи';
+comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
+comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_oktmo.razd is 'Раздел. Может быть 1 или 2';
+
+create sequence seq_ref_book_oktmo start with 300000 increment by 100;
+create sequence seq_ref_book_oktmo_record_id start with 1000000;
+
 -- Коды видов дохода
 create table ref_book_income_type
 (
