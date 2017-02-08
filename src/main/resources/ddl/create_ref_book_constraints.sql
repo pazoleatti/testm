@@ -89,3 +89,5 @@ alter table ref_book_doc_type add constraint chk_ref_book_doc_type_st check (sta
 --unique
 --create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
 --------------------------------------------------------------------------------------------------------------------------
+--indexes
+create index i_ref_book_oktmo_code on ref_book_oktmo (code);
