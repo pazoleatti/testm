@@ -3,6 +3,9 @@ package form_template.ndfl.report_6ndfl.v2016
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
+import org.apache.commons.io.IOUtils;
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверки
@@ -544,7 +547,7 @@ def createForm() {
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
-    // step 2
+
     if (korrPeriod) {
         def prevDepartmentPeriodReport = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
@@ -561,17 +564,17 @@ def createForm() {
         }
         formType = getFormType(currDeclarationTemplate)
         if (definePriznakF() != "0") {
-            //TODO реализовать работу с реестром справок
+
         }
     } else {
-        // step 5
+
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList.each { dep ->
             pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, dep.OKTMO?.value, dep?.TAX_ORGAN_CODE?.value)
         }
     }
-    // step 3 и step 4
+
     // получить id всех ТБ для данного отчетного периода
     def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
     // список форм рну-ндфл для отчетного периода всех ТБ
@@ -587,39 +590,121 @@ def createForm() {
         }
     }
     allDeclarationData.removeAll(declarationsForRemove)
-    // TODO реализовать работу с реестром справок для шага 6
 
-    // step 7
+
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
     allDeclarationData.each { declaration ->
         pairKppOktmoList.each { np ->
             def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
             if (ndflPersons != null && ndflPersons.size != 0) {
+                if (isCorrectionPeriod()) {
+                    def ndflPersonsPicked = []
+                    ndflReferencesWithError.each { reference ->
+                        ndflPersons.each { person ->
+                            if (reference.PERSON_ID?.value == person.id) {
+                                ndflPersonsPicked << person
+                            }
+                        }
+                    }
+                    ndflPersons = ndflPersonsPicked
+                }
                 ndflPersonsGroupedByKppOktmo[np] = ndflPersons
             }
         }
     }
 
-    ndflPersonsGroupedByKppOktmo.each { npGroup ->
-        def oktmo = npGroup.key.oktmo
-        def kpp = npGroup.key.kpp
-        def taxOrganCode = npGroup.key.taxOrganCode
-        Map<String, Object> params
-        Long ddId
-        params = new HashMap<String, Object>()
-        ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo, null, null)
-        formMap.put(ddId, params)
-    }
+    initNdflPersons(ndflPersonsGroupedByKppOktmo)
+
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
         declarationService.delete(it.id, userInfo)
     }
+
+    ndflPersonsGroupedByKppOktmo.each { npGroup ->
+        Map<String, Object> params
+        def oktmo = npGroup.key.oktmo
+        def kpp = npGroup.key.kpp
+        def taxOrganCode = npGroup.key.taxOrganCode
+        Long ddId
+        params = new HashMap<String, Object>()
+        ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
+                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo, null, null, null)
+        formMap.put(ddId, params)
+        appendNdflPersonsToForm(ddId, npGroup.value)
+    }
+
+}
+
+def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
+    ndflPersonsGroupedByKppOktmo.each { npGroup ->
+        def oktmo = npGroup.key.oktmo
+        def kpp = npGroup.key.kpp
+        npGroup.value.each {
+            def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp, oktmo)
+            println incomes
+            resetId(incomes)
+            def deductions = ndflPersonService.findDeductions(it.id)
+            resetId(deductions)
+            def prepayments = ndflPersonService.findPrepayments(it.id)
+            resetId(prepayments)
+            it.setIncomes(incomes)
+            it.setDeductions(deductions)
+            it.setPrepayments(prepayments)
+        }
+    }
+}
+
+def appendNdflPersonsToForm (def declarationDataId, def ndflPersons){
+    //TODO сделать batch insert
+    ndflPersons.each {
+        it.setId(null)
+        it.setDeclarationDataId(declarationDataId)
+        println it.incomes
+        ndflPersonService.save(it)
+    }
+
 }
 
 
+def resetId(def list) {
+    list.each {
+        it.setId(null)
+    }
+}
 
-
+def createReports() {
+    ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
+    scriptParams.put("fileName", "reports.zip")
+    try {
+        Department department = departmentService.get(declarationData.departmentId);
+        DeclarationTemplate declarationTemplate =  declarationService.getTemplate(declarationData.declarationTemplateId);
+        println declarationTemplate
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
+        println departmentReportPeriod
+        String strCorrPeriod = "";
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
+        }
+        String path = String.format("Отчетность %s, %s, %s, %s%s",
+                declarationTemplate.getName(),
+                department.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod);
+        println path
+        def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
+        declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
+            if (it.fileName == null) {
+                return
+            }
+            ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName);
+            zos.putArchiveEntry(ze);
+            println "${declarationService.getXmlStream(it.id)}"
+            IOUtils.copy(declarationService.getXmlStream(it.id), zos)
+            zos.closeArchiveEntry();
+        }
+    } finally {
+        IOUtils.closeQuietly(zos);
+    }
+}
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
 // Получить список детали подразделения из справочника для некорректировочного периода
