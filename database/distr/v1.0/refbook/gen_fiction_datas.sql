@@ -1,5 +1,4 @@
-insert into DEPARTMENT_TYPE(id) values(-1);
-insert into DEPARTMENT(id,code,name,type,parent_id) values(-1,0,' ',-1,0);
+insert into DEPARTMENT(id,code,name,type,parent_id) values(-1,0,' ',5,0);
 
 insert into REF_BOOK_TAXPAYER_STATE(id,code,name) values(-1,' ',' ');
 insert into REF_BOOK_ASNU(id,code,name,type) values(-1,'0000',' ',' ');

@@ -157,11 +157,6 @@ alter table form_data add constraint form_data_chk_accruing check (accruing in (
 alter table form_data add constraint form_data_chk_edited check (edited in (0, 1));
 alter table form_data add constraint form_data_chk_sorted_backup check (sorted_backup in (0, 1));
 
-alter table ref_book_vzl_history add constraint ref_book_vzl_hist_pk primary key (id);
-alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_form_data foreign key (form_data_id) references form_data(id) on delete cascade;
-alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_ref_jur foreign key (jur_person) references ref_book_record(id);
-alter table ref_book_vzl_history add constraint ref_book_vzl_hist_fk_ref_cat foreign key (category) references ref_book_record(id);
-
 alter table form_data_file add constraint form_data_file_pk primary key (blob_data_id, form_data_id);
 alter table form_data_file add constraint form_data_file_fk_form_data foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_file add constraint form_data_file_fk_blob_data foreign key (blob_data_id) references blob_data(id);
@@ -321,8 +316,6 @@ create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
-create index i_ref_book_oktmo_code on ref_book_oktmo (code);
-create index i_ref_book_oktmo_parent_id on ref_book_oktmo (parent_id);
 create index i_form_style_form_template_id on form_style(form_template_id);
 create index i_form_column_form_template_id on form_column(form_template_id);
 create index i_decl_data_dep_rep_per_id on declaration_data (department_report_period_id);
@@ -518,12 +511,9 @@ alter table ref_book_address add constraint pk_ref_book_address primary key (id)
 
 alter table ref_book_person add constraint fk_ref_book_person_address foreign key (address) references ref_book_address(id);
 alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreign key (taxpayer_state) references ref_book_taxpayer_state(id);
-alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_record(id);
 alter table ref_book_person add constraint fk_ref_book_person_dubl foreign key(dublicates) references ref_book_person(id);
 
-alter table ref_book_id_doc add constraint fk_ref_book_id_doc_doc_id foreign key (doc_id) references ref_book_record(id);
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
-alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_record(id);
 -- create unique index unq_ref_book_id_doc_pers_inc1 on ref_book_id_doc (decode(inc_rep,1,person_id,null));
 
 --alter table ref_book_person add constraint chk_ref_book_person_pension check (pension in (1,2));

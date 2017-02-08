@@ -27,7 +27,7 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     private String prizOss;
     private String familia;
     private String imya;
-    private String middleName;
+    private String otchestvo;
 
     // СвВыпл
     private RaschsvSvVypl raschsvSvVypl;
@@ -56,11 +56,11 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String COL_PRIZ_OSS = "priz_oss";
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
-    public static final String COL_MIDDLE_NAME = "middle_name";
+    public static final String COL_OTCHESTVO = "otchestvo";
 
     public static final String[] COLUMNS = {COL_ID, COL_DECLARATION_DATA_ID, COL_NOM_KORR, COL_PERIOD, COL_OTCHET_GOD,
             COL_NOMER, COL_SV_DATA, COL_INNFL, COL_SNILS, COL_DATA_ROZD, COL_GRAZD, COL_POL, COL_KOD_VID_DOC, COL_SER_NOM_DOC,
-            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME
+            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_OTCHESTVO
     };
 
     public Long getDeclarationDataId() { return declarationDataId; }
@@ -117,8 +117,8 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public String getImya() { return imya; }
     public void setImya(String imya) { this.imya = imya; }
 
-    public String getMiddleName() { return middleName; }
-    public void setMiddleName(String middleName) { this.middleName = middleName; }
+    public String getOtchestvo() { return otchestvo; }
+    public void setOtchestvo(String otchestvo) { this.otchestvo = otchestvo; }
 
     public RaschsvSvVypl getRaschsvSvVypl() {
         return raschsvSvVypl;

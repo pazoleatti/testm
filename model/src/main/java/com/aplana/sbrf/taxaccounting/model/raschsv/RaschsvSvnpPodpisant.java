@@ -18,7 +18,7 @@ public class RaschsvSvnpPodpisant extends IdentityObject<Long> {
     private String svnpSvReorgKpp;
     private String familia;
     private String imya;
-    private String middleName;
+    private String otchestvo;
     private String podpisantPrPodp;
     private String podpisantNaimDoc;
     private String podpisantNaimOrg;
@@ -37,14 +37,14 @@ public class RaschsvSvnpPodpisant extends IdentityObject<Long> {
     public static final String COL_SVNP_SV_REORG_KPP = "svnp_sv_reorg_kpp";
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
-    public static final String COL_MIDDLE_NAME = "middle_name";
+    public static final String COL_OTCHESTVO = "otchestvo";
     public static final String COL_PODPISANT_PR_PODP = "podpisant_pr_podp";
     public static final String COL_PODPISANT_NAIM_DOC = "podpisant_naim_doc";
     public static final String COL_PODPISANT_NAIM_ORG = "podpisant_naim_org";
 
     public static final String[] COLUMNS = {COL_ID, COL_DECLARATION_DATA_ID, COL_SVNP_OKVED, COL_SVNP_TLPH, COL_SVNP_NAIM_ORG,
             COL_SVNP_INNYL, COL_SVNP_KPP, COL_SVNP_SV_REORG_FORM, COL_SVNP_SV_REORG_INNYL, COL_SVNP_SV_REORG_KPP,
-            COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME, COL_PODPISANT_PR_PODP, COL_PODPISANT_NAIM_DOC, COL_PODPISANT_NAIM_ORG};
+            COL_FAMILIA, COL_IMYA, COL_OTCHESTVO, COL_PODPISANT_PR_PODP, COL_PODPISANT_NAIM_DOC, COL_PODPISANT_NAIM_ORG};
 
     public Long getDeclarationDataId() {
         return declarationDataId;
@@ -123,11 +123,11 @@ public class RaschsvSvnpPodpisant extends IdentityObject<Long> {
         this.imya = imya;
     }
 
-    public String getMiddleName() {
-        return middleName;
+    public String getOtchestvo() {
+        return otchestvo;
     }
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
+    public void setOtchestvo(String otchestvo) {
+        this.otchestvo = otchestvo;
     }
 
     public String getPodpisantPrPodp() {

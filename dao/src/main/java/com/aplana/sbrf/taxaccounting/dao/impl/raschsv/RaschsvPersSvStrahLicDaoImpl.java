@@ -144,8 +144,8 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                         query += " AND " + RaschsvPersSvStrahLic.COL_IMYA + " = :" + RaschsvPersSvStrahLic.COL_IMYA;
                         sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, (String) paramValue);
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_OTCHESTVO_ALIAS)) {
-                        query += " AND " + RaschsvPersSvStrahLic.COL_MIDDLE_NAME + " = :" + RaschsvPersSvStrahLic.COL_MIDDLE_NAME;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_MIDDLE_NAME, (String) paramValue);
+                        query += " AND " + RaschsvPersSvStrahLic.COL_OTCHESTVO + " = :" + RaschsvPersSvStrahLic.COL_OTCHESTVO;
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, (String) paramValue);
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_SNILS_ALIAS)) {
                         query += " AND " + RaschsvPersSvStrahLic.COL_SNILS + " = :" + RaschsvPersSvStrahLic.COL_SNILS;
                         sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, (String) paramValue);
@@ -290,7 +290,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                             .addValue(RaschsvPersSvStrahLic.COL_PRIZ_OSS, raschsvPersSvStrahLic.getPrizOss())
                             .addValue(RaschsvPersSvStrahLic.COL_FAMILIA, raschsvPersSvStrahLic.getFamilia())
                             .addValue(RaschsvPersSvStrahLic.COL_IMYA, raschsvPersSvStrahLic.getImya())
-                            .addValue(RaschsvPersSvStrahLic.COL_MIDDLE_NAME, raschsvPersSvStrahLic.getMiddleName())
+                            .addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, raschsvPersSvStrahLic.getOtchestvo())
                             .getValues());
         }
         int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_PERS_SV_STRAH_LIC,
@@ -471,7 +471,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             raschsvPersSvStrahLic.setPrizOss(rs.getString(RaschsvPersSvStrahLic.COL_PRIZ_OSS));
             raschsvPersSvStrahLic.setFamilia(rs.getString(RaschsvPersSvStrahLic.COL_FAMILIA));
             raschsvPersSvStrahLic.setImya(rs.getString(RaschsvPersSvStrahLic.COL_IMYA));
-            raschsvPersSvStrahLic.setMiddleName(rs.getString(RaschsvPersSvStrahLic.COL_MIDDLE_NAME));
+            raschsvPersSvStrahLic.setOtchestvo(rs.getString(RaschsvPersSvStrahLic.COL_OTCHESTVO));
 
             return raschsvPersSvStrahLic;
         }

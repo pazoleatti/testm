@@ -487,7 +487,7 @@ public class RaschsvDaoTest {
         raschsvRashOssZakRash1.setNodeName("NodeName");
         raschsvRashOssZakRash1.setChislSluch(1);
         raschsvRashOssZakRash1.setKolVypl(1);
-        raschsvRashOssZakRash1.setPashVsego(new BigDecimal(1.1));
+        raschsvRashOssZakRash1.setRashVsego(new BigDecimal(1.1));
         raschsvRashOssZakRash1.setRashFinFb(new BigDecimal(1.1));
         raschsvRashOssZakRashList.add(raschsvRashOssZakRash1);
 
@@ -635,7 +635,7 @@ public class RaschsvDaoTest {
         raschsvSvInoGrazd.setGrazd("1");
         raschsvSvInoGrazd.setFamilia("Familia");
         raschsvSvInoGrazd.setImya("Imya");
-        raschsvSvInoGrazd.setMiddleName("MiddleName");
+        raschsvSvInoGrazd.setOtchestvo("MiddleName");
         raschsvSvInoGrazdList.add(raschsvSvInoGrazd);
 
         RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425 = new RaschsvSvPrimTarif22425();
@@ -673,7 +673,7 @@ public class RaschsvDaoTest {
         raschsvSvedObuch1.setUnikNomer("Uni");
         raschsvSvedObuch1.setFamilia("Familia");
         raschsvSvedObuch1.setImya("Imya");
-        raschsvSvedObuch1.setMiddleName("MiddleName");
+        raschsvSvedObuch1.setOtchestvo("MiddleName");
         raschsvSvedObuch1.setSpravNomer("SpravNomer");
         raschsvSvedObuch1.setSpravData(new Date());
         raschsvSvedObuch1.setSpravNodeName("SpravNodeName");
@@ -705,7 +705,7 @@ public class RaschsvDaoTest {
         raschsvSvnpPodpisant.setSvnpSvReorgKpp("1");
         raschsvSvnpPodpisant.setFamilia("1");
         raschsvSvnpPodpisant.setImya("1");
-        raschsvSvnpPodpisant.setMiddleName("1");
+        raschsvSvnpPodpisant.setOtchestvo("1");
         raschsvSvnpPodpisant.setPodpisantPrPodp("1");
         raschsvSvnpPodpisant.setPodpisantNaimDoc("1");
         raschsvSvnpPodpisant.setPodpisantNaimOrg("1");

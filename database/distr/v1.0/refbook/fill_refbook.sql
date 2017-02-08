@@ -33,8 +33,6 @@ prompt ref_book_deduction_type
 @@ref_deduction_type;
 prompt ref_book_income_type
 @@ref_income_type;
-prompt ref_book_okato
-@@ref_okato;
 prompt ref_book_oktmo
 @@ref_oktmo;
 prompt ref_book_okved

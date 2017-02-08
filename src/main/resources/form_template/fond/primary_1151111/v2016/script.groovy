@@ -275,7 +275,7 @@ def fillCellsOfRaschsvPersSvStrahLicRow(final RaschsvPersSvStrahLic raschsvPersS
     cell6.setCellValue(raschsvPersSvStrahLic.getImya())
     def cell7 = row.createCell(7)
     cell7.setCellStyle(defaultStyle)
-    cell7.setCellValue(raschsvPersSvStrahLic.getMiddleName())
+    cell7.setCellValue(raschsvPersSvStrahLic.getOtchestvo())
     def cell8 = row.createCell(8)
     cell8.setCellStyle(defaultStyle)
     cell8.setCellValue(raschsvPersSvStrahLic.getInnfl())
@@ -662,7 +662,7 @@ class TestDataHolder {
         FL_DATA.otchetGod = "2016"
         FL_DATA.familia = "Иванов"
         FL_DATA.imya = "Егор"
-        FL_DATA.middleName = "Семенович"
+        FL_DATA.otchestvo = "Семенович"
         FL_DATA.innfl = "111222333444"
         FL_DATA.snils = "123-456"
         FL_DATA.dataRozd = new Date(1970, Calendar.JANUARY, 1)
@@ -737,7 +737,7 @@ class TestDataHolder {
         PODPISANT.setSvnpSvReorgKpp("reorgKpp_test")
         PODPISANT.setFamilia("familia_test")
         PODPISANT.setImya("imya_test")
-        PODPISANT.setMiddleName("otchestvo_test")
+        PODPISANT.setOtchestvo("otchestvo_test")
         PODPISANT.setPodpisantPrPodp("pravoPodpis_test")
         PODPISANT.setPodpisantNaimDoc("docName_test")
         PODPISANT.setPodpisantNaimOrg("orgName_test")
@@ -904,7 +904,7 @@ class TestDataHolder {
 // Атрибуты узла ФИО
 @Field final FIO_FAMILIA = 'Фамилия'
 @Field final FIO_IMYA = 'Имя'
-@Field final FIO_MIDDLE_NAME = 'Отчество'
+@Field final FIO_OTCHESTVO_NAME = 'Отчество'
 
 // Атрибуты узла СвВыпл
 @Field final SV_VYPL_SUM_VYPL_VS3 = "СумВыплВс3"
@@ -1216,7 +1216,7 @@ RaschsvSvnpPodpisant parsePodpisant(Object podpisantNode, RaschsvSvnpPodpisant r
             // Разбор узла ФИО
             raschsvSvnpPodpisant.familia = podpisantChildNode.attributes()[FIO_FAMILIA]
             raschsvSvnpPodpisant.imya = podpisantChildNode.attributes()[FIO_IMYA]
-            raschsvSvnpPodpisant.middleName = podpisantChildNode.attributes()[FIO_MIDDLE_NAME]
+            raschsvSvnpPodpisant.otchestvo = podpisantChildNode.attributes()[FIO_OTCHESTVO_NAME]
         } else if (podpisantChildNode.name == NODE_NAME_SV_PRED) {
             // Разбор узла СвПред
             raschsvSvnpPodpisant.podpisantNaimDoc = podpisantChildNode.attributes()[SV_PRED_NAIM_DOC]
@@ -1519,7 +1519,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                 raschsvRashOssZakRash.nodeName = raschOssZakChildNode.name
                 raschsvRashOssZakRash.chislSluch = getInteger(raschOssZakChildNode.attributes()[RASH_OSS_TIP_CHISL_SLUCH])
                 raschsvRashOssZakRash.kolVypl = getInteger(raschOssZakChildNode.attributes()[RASH_OSS_TIP_KOL_VYPL])
-                raschsvRashOssZakRash.pashVsego = getDouble(raschOssZakChildNode.attributes()[RASH_OSS_TIP_RASH_VSEGO])
+                raschsvRashOssZakRash.rashVsego = getDouble(raschOssZakChildNode.attributes()[RASH_OSS_TIP_RASH_VSEGO])
                 raschsvRashOssZakRash.rashFinFb = getDouble(raschOssZakChildNode.attributes()[RASH_OSS_TIP_RASH_FIN_FB])
 
                 raschsvRashOssZakRashList.add(raschsvRashOssZakRash)
@@ -1698,7 +1698,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                             // Разбор узла ФИО
                             raschsvSvInoGrazd.familia = svPrimTarif22425ChildChildNode.attributes()[FIO_FAMILIA]
                             raschsvSvInoGrazd.imya = svPrimTarif22425ChildChildNode.attributes()[FIO_IMYA]
-                            raschsvSvInoGrazd.middleName = svPrimTarif22425ChildChildNode.attributes()[FIO_MIDDLE_NAME]
+                            raschsvSvInoGrazd.otchestvo = svPrimTarif22425ChildChildNode.attributes()[FIO_OTCHESTVO_NAME]
                         }
                     }
                     raschsvSvInoGrazdList.add(raschsvSvInoGrazd)
@@ -1745,7 +1745,7 @@ Long parseRaschsvObyazPlatSv(Object obyazPlatSvNode, Long declarationDataId) {
                             // Разбор узла ФИО
                             raschsvSvedObuch.familia = svPrimTarif13422ChildChildNode.attributes()[FIO_FAMILIA]
                             raschsvSvedObuch.imya = svPrimTarif13422ChildChildNode.attributes()[FIO_IMYA]
-                            raschsvSvedObuch.middleName = svPrimTarif13422ChildChildNode.attributes()[FIO_MIDDLE_NAME]
+                            raschsvSvedObuch.otchestvo = svPrimTarif13422ChildChildNode.attributes()[FIO_OTCHESTVO_NAME]
                         } else if (svPrimTarif13422ChildChildNode.name == NODE_NAME_SPRAV_STUD_OTRYAD ||
                                 svPrimTarif13422ChildChildNode.name == NODE_NAME_SPRAV_FORM_OBUCH) {
                             // Разбор узлов СправСтудОтряд и СправФормОбуч
@@ -1869,7 +1869,7 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
                     // Разбор узла ФИО
                     raschsvPersSvStrahLic.familia = fioNode.attributes()[FIO_FAMILIA]
                     raschsvPersSvStrahLic.imya = fioNode.attributes()[FIO_IMYA]
-                    raschsvPersSvStrahLic.middleName = fioNode.attributes()[FIO_MIDDLE_NAME]
+                    raschsvPersSvStrahLic.otchestvo = fioNode.attributes()[FIO_OTCHESTVO_NAME]
                 }
             }
         } else if (persSvStrahLicChildNode.name == NODE_NAME_SV_VYPL_SVOPS) {
