@@ -124,24 +124,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             return result;
         }
 
-        Map<Pair<String, String>, Integer> counter = new HashMap<Pair<String, String>, Integer>();
-        for (Map<String, TableCell> row : action.getRows()) {
-            Pair<String, String> p = new Pair<String, String>(row.get("KPP").getStringValue(), row.get("TAX_ORGAN_CODE").getStringValue());
-            if (!counter.containsKey(p)) {
-                counter.put(p, 0);
-            }
-            counter.put(p, counter.get(p) + 1);
-        }
-
-        for (Integer count : counter.values()) {
-            if (count > 1) {
-                logger.error("Поля \"" + slaveRefBook.getAttribute("TAX_ORGAN_CODE").getName() + "\" и \"" + slaveRefBook.getAttribute("KPP").getName() + "\" таблицы должны быть уникальны");
-                result.setHasFatalError(true);
-                result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.HAS_DUPLICATES);
-                break;
-            }
-        }
-
         if (result.isHasFatalError()) {
             prepareResult(result, logger, action);
             return result;
