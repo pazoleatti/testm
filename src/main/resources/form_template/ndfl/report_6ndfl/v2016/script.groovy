@@ -5,16 +5,82 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 switch (formDataEvent) {
+    case FormDataEvent.CHECK: //Проверки
+        println "!CHECK!"
+        break
+    case FormDataEvent.CALCULATE: //формирование xml
+        println "!CALCULATE!"
+        buildXml()
+        break
+    case FormDataEvent.COMPOSE: // Консолидирование
+        println "!COMPOSE!"
+        break
+    case FormDataEvent.GET_SOURCES: //формирование списка источников
+        println "!GET_SOURCES!"
+        break
+    case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
+        println "!CREATE_SPECIFIC_REPORT!"
+        break
     case FormDataEvent.CREATE_FORMS: // создание экземпляра
         println "!CREATE_FORMS!"
         createForm()
         break
-    case FormDataEvent.CALCULATE:
-        buildXml()
-        break
-    default:
+    case FormDataEvent.CREATE_REPORTS:
+        println "!CREATE_REPORTS!"
+        createReports()
         break
 }
+
+// Коды, определяющие налоговый (отчётный) период
+@Field final long REF_BOOK_PERIOD_CODE_ID = RefBook.Id.PERIOD_CODE.id
+
+// Коды представления налоговой декларации по месту нахождения (учёта)
+@Field final long REF_BOOK_TAX_PLACE_TYPE_CODE_ID = RefBook.Id.TAX_PLACE_TYPE_CODE.id
+
+// Признак лица, подписавшего документ
+@Field final long REF_BOOK_MARK_SIGNATORY_CODE_ID = RefBook.Id.MARK_SIGNATORY_CODE.id
+
+// Настройки подразделений по НДФЛ
+@Field final long REF_BOOK_NDFL_ID = RefBook.Id.NDFL.id
+
+// Настройки подразделений по НДФЛ (таблица)
+@Field final long REF_BOOK_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
+
+@Field final FORM_NAME_NDFL6 = "НДФЛ6"
+@Field final FORM_NAME_NDFL2 = "НДФЛ2"
+@Field final int DECLARATION_TYPE_RNU_NDFL_ID = 101
+@Field final int DECLARATION_TYPE_NDFL2_ID = 102
+
+// Узлы 6 НДФЛ
+@Field final NODE_NAME_SUM_STAVKA6 = "СумСтавка"
+@Field final NODE_NAME_OBOBSH_POKAZ6 = "ОбобщПоказ"
+@Field final NODE_NAME_SUM_DATA6 = "СумДата"
+
+// Узлы 2 НДФЛ
+@Field final NODE_NAME_DOCUMNET2 = "Документ"
+@Field final NODE_NAME_SVED_DOH2 = "СведДох"
+@Field final NODE_NAME_SUM_IT_NAL_PER2 = "СумИтНалПер"
+@Field final NODE_NAME_SV_SUM_DOH2 = "СвСумДох"
+
+// Общие атрибуты
+@Field final ATTR_RATE = "Ставка"
+@Field final int RATE_THIRTEEN = 13
+
+// Атрибуты 6 НДФЛ
+@Field final ATTR_NACHISL_DOH6 = "НачислДох"
+@Field final ATTR_NACHISL_DOH_DIV6 = "НачислДохДив"
+@Field final ATTR_VICHET_NAL6 = "ВычетНал"
+@Field final ATTR_ISCHISL_NAL6 = "ИсчислНал"
+@Field final ATTR_NE_UDERZ_NAL_IT6 = "НеУдержНалИт"
+@Field final ATTR_KOL_FL_DOHOD6 = "КолФЛДоход"
+@Field final ATTR_AVANS_PLAT6 = "АвансПлат"
+
+// Атрибуты 2 НДФЛ
+@Field final ATTR_SUM_DOH_OBSH2 = "СумДохОбщ"
+@Field final ATTR_NAL_ISCHISL2 = "НалИсчисл"
+@Field final ATTR_NAL_NE_UDERZ2 = "НалНеУдерж"
+@Field final ATTR_KOD_DOHOD2 = "КодДоход"
+@Field final ATTR_SUM_DOHOD2 = "СумДоход"
 
 @Field final String DATE_FORMAT_UNDERLINE = "yyyy_MM_dd"
 @Field final String DATE_FORMAT_DOT = "dd.MM.yyyy"
@@ -34,11 +100,12 @@ switch (formDataEvent) {
 // Кэш для справочников
 @Field def refBookCache = [:]
 
+/************************************* СОЗДАНИЕ XML *****************************************************************/
 def buildXml() {
 
     // Параметры подразделения
     def departmentParam = getDepartmentParam()
-    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam.record_id.value)
+    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam?.id.value)
 
     // Отчетный период
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
@@ -285,13 +352,11 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 final int RNU_NDFL_DECLARATION_TYPE = 101
 
 @Field
-final int REF_BOOK_NDFL_DETAIL_ID = 951
+final int REF_BOOK_NDFL_DETAIL_ID_ID = 951
 
 @Field
 def departmentParamTableList = null;
 
-@Field
-final int REF_BOOK_NDFL_ID = 950
 
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
@@ -365,7 +430,7 @@ def createForm() {
         Long ddId
         params = new HashMap<String, Object>()
         ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo, null, null)
+                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo, null, null, null)
         formMap.put(ddId, params)
     }
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
@@ -382,7 +447,7 @@ def createForm() {
 def getDepartmentParamTableList(def departmentParamId, def reportPeriodId) {
     if (departmentParamTableList == null) {
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
-        departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
+        departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID_ID).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
