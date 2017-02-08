@@ -131,7 +131,7 @@ public class RaschsvSvPrimTarif22425DaoImpl extends AbstractDao implements Rasch
                             .addValue(RaschsvSvInoGrazd.COL_GRAZD, raschsvSvInoGrazd.getGrazd())
                             .addValue(RaschsvSvInoGrazd.COL_FAMILIA, raschsvSvInoGrazd.getFamilia())
                             .addValue(RaschsvSvInoGrazd.COL_IMYA, raschsvSvInoGrazd.getImya())
-                            .addValue(RaschsvSvInoGrazd.COL_MIDDLE_NAME, raschsvSvInoGrazd.getMiddleName())
+                            .addValue(RaschsvSvInoGrazd.COL_OTCHESTVO, raschsvSvInoGrazd.getOtchestvo())
                             .getValues());
         }
         int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_SV_INO_GRAZD,
@@ -262,7 +262,7 @@ public class RaschsvSvPrimTarif22425DaoImpl extends AbstractDao implements Rasch
             raschsvSvInoGrazd.setGrazd(rs.getString(RaschsvSvInoGrazd.COL_GRAZD));
             raschsvSvInoGrazd.setFamilia(rs.getString(RaschsvSvInoGrazd.COL_FAMILIA));
             raschsvSvInoGrazd.setImya(rs.getString(RaschsvSvInoGrazd.COL_IMYA));
-            raschsvSvInoGrazd.setMiddleName(rs.getString(RaschsvSvInoGrazd.COL_MIDDLE_NAME));
+            raschsvSvInoGrazd.setOtchestvo(rs.getString(RaschsvSvInoGrazd.COL_OTCHESTVO));
             return raschsvSvInoGrazd;
         }
     }

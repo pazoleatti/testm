@@ -44,7 +44,7 @@ public class RaschsvSvnpPodpisantDaoImpl extends AbstractDao implements RaschsvS
                 .addValue(RaschsvSvnpPodpisant.COL_SVNP_SV_REORG_KPP, raschsvSvnpPodpisant.getSvnpSvReorgKpp())
                 .addValue(RaschsvSvnpPodpisant.COL_FAMILIA, raschsvSvnpPodpisant.getFamilia())
                 .addValue(RaschsvSvnpPodpisant.COL_IMYA, raschsvSvnpPodpisant.getImya())
-                .addValue(RaschsvSvnpPodpisant.COL_MIDDLE_NAME, raschsvSvnpPodpisant.getMiddleName())
+                .addValue(RaschsvSvnpPodpisant.COL_OTCHESTVO, raschsvSvnpPodpisant.getOtchestvo())
                 .addValue(RaschsvSvnpPodpisant.COL_PODPISANT_PR_PODP, raschsvSvnpPodpisant.getPodpisantPrPodp())
                 .addValue(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_DOC, raschsvSvnpPodpisant.getPodpisantNaimDoc())
                 .addValue(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_ORG, raschsvSvnpPodpisant.getPodpisantNaimOrg());
@@ -82,7 +82,7 @@ public class RaschsvSvnpPodpisantDaoImpl extends AbstractDao implements RaschsvS
             raschsvSvnpPodpisant.setSvnpSvReorgKpp(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_SV_REORG_KPP));
             raschsvSvnpPodpisant.setFamilia(rs.getNString(RaschsvSvnpPodpisant.COL_FAMILIA));
             raschsvSvnpPodpisant.setImya(rs.getNString(RaschsvSvnpPodpisant.COL_IMYA));
-            raschsvSvnpPodpisant.setMiddleName(rs.getNString(RaschsvSvnpPodpisant.COL_MIDDLE_NAME));
+            raschsvSvnpPodpisant.setOtchestvo(rs.getNString(RaschsvSvnpPodpisant.COL_OTCHESTVO));
             raschsvSvnpPodpisant.setPodpisantPrPodp(rs.getNString(RaschsvSvnpPodpisant.COL_PODPISANT_PR_PODP));
             raschsvSvnpPodpisant.setPodpisantNaimDoc(rs.getNString(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_DOC));
             raschsvSvnpPodpisant.setPodpisantNaimOrg(rs.getNString(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_ORG));
