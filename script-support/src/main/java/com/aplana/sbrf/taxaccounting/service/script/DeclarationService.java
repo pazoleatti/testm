@@ -203,7 +203,7 @@ public interface DeclarationService {
      * @param declarationData
      * @param userInfo
      * @param logger
-     * @param dataFile
+     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
      */
     void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile);
 }

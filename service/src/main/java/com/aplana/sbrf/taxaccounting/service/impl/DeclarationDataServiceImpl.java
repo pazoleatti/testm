@@ -302,7 +302,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Декларация обновлена", null);
-
     }
 
     @Override
@@ -310,22 +309,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LOG.info(String.format("Проверка данных декларации/уведомления %s", id));
         DeclarationData dd = declarationDataDao.get(id);
         Logger scriptLogger = new Logger();
-        Logger validateLogger = new Logger();
         try {
             lockStateLogger.updateState("Проверка форм-источников");
             checkSources(dd, logger, userInfo);
-            lockStateLogger.updateState("Проверка данных декларации/уведомления");
+            lockStateLogger.updateState("Проверка данных налоговой формы");
             declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, scriptLogger, null);
         } finally {
             logger.getEntries().addAll(scriptLogger.getEntries());
-        }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException();
-        }
-        try {
-            validateDeclaration(userInfo, dd, validateLogger, true, FormDataEvent.CHECK, lockStateLogger);
-        } finally {
-            logger.getEntries().addAll(validateLogger.getEntries());
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceException();
@@ -395,7 +385,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationData declarationData = declarationDataDao.get(id);
 
         Logger scriptLogger = new Logger();
-        Logger validateLogger = new Logger();
         try {
             lockStateLogger.updateState("Проверка форм-источников");
             checkSources(declarationData, logger, userInfo);
@@ -403,14 +392,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , scriptLogger, null);
         } finally {
             logger.getEntries().addAll(scriptLogger.getEntries());
-        }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException();
-        }
-        try {
-            validateDeclaration(userInfo, declarationData, validateLogger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , lockStateLogger);
-        } finally {
-            logger.getEntries().addAll(validateLogger.getEntries());
         }
         if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceException();
@@ -430,7 +411,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional(readOnly = false)
     public void cancel(Logger logger, long id, TAUserInfo userInfo) {
         DeclarationData declarationData = declarationDataDao.get(id);
-        /*checkSources(declarationData, logger);*/
 
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 
@@ -438,16 +418,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-        }
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-        if (declarationTemplate.getType().getIsIfrs() &&
-                departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
-            IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
-            if (ifrsData != null && ifrsData.getBlobDataId() != null) {
-                ifrsDataService.deleteReport(declarationData, userInfo);
-            } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
-                ifrsDataService.cancelTask(declarationData, userInfo);
-            }
         }
 
         declarationData.setState(State.CREATED);
@@ -1622,7 +1592,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Logger scriptLogger = new Logger();
             try {
                 calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
-                validateDeclaration(userInfo, get(entry.getKey(), userInfo), scriptLogger, true, null, stateLogger);
+                //check(scriptLogger, entry.getKey(), userInfo, stateLogger);
             } catch (Exception e) {
                 scriptLogger.error(e);
             } finally {
