@@ -45,13 +45,13 @@ comment on column ref_book_income_type.name is 'Наименование дох�
 -- Коды видов вычетов
 create table ref_book_deduction_type
 (
-  id number(18) not null, 
-	record_id number(9) not null, 
-	version date not null, 
-	status number(1) default 0 not null, 
-	code varchar2(3 char) not null, 
-	name varchar2(2000 char) not null,
-    deduction_mark number(9) not null
+    id             number(18)           not null, 
+	record_id      number(9)            not null, 
+	version        date                 not null, 
+	status         number(1) default 0  not null, 
+	code           varchar2(3 char)     not null, 
+	name           varchar2(2000 char)  not null,
+    deduction_mark number(9)            not null
 );
 
 comment on table ref_book_deduction_type is 'Коды видов вычетов';
