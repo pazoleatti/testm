@@ -20,19 +20,17 @@ public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPer
 
     // TODO Левыкин: А почему берем только первую попавшуюся запись? Должен учитываться год.
     // TODO Левыкин: На входе dictTaxPeriodId (ссылка на значение справочника), а в запросе сравнивается с ref_book_value.string_value!
+	private static final String GET_BY_TAX_PERIOD_AND_TYPE_SQL =
+			"SELECT id FROM (" +
+					"    SELECT rp.id "+
+					"    FROM report_period rp JOIN report_period_type rpt ON rp.dict_tax_period_id = rpt.id " +
+					"    WHERE rp.tax_period_id = ? AND rpt.code = ? " +
+					") WHERE ROWNUM = 1";
     @Override
     public Integer getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
-        StringBuilder sql = new StringBuilder("select * from ( ");
-        sql.append("select rp.id ");
-        sql.append("from report_period rp, ref_book_record rfr, ref_book_value rfv ");
-        sql.append("where rp.dict_tax_period_id = rfr.id AND rfv.record_id = rp.dict_tax_period_id ");
-        sql.append("AND rfv.attribute_id = 25 AND rfr.ref_book_id = 8 ");
-        sql.append("AND rp.tax_period_id = ? AND rfv.string_value = ? ");
-        sql.append("order by rfr.version desc ");
-        sql.append(") where rownum = 1");
         try {
             return getJdbcTemplate().queryForObject(
-                    sql.toString(),
+					GET_BY_TAX_PERIOD_AND_TYPE_SQL,
                     new Object[]{taxPeriodId, dictTaxPeriodId},
                     new int[]{Types.NUMERIC, Types.NUMERIC},
 					Integer.class
@@ -42,10 +40,12 @@ public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPer
         }
     }
 
+	private static final String GET_TAX_PERIOD_BY_DATE_SQL =
+			"SELECT id FROM tax_period WHERE tax_type = ? AND year = ?";
     @Override
     public Integer getTaxPeriodByDate(String year) {
         try {
-            return getJdbcTemplate().queryForObject("select id from tax_period where tax_type = ? and year = ?",
+            return getJdbcTemplate().queryForObject(GET_TAX_PERIOD_BY_DATE_SQL,
 					new Object[]{TaxType.INCOME.getCode(), year},
 					new int[]{Types.VARCHAR, Types.NUMERIC}, Integer.class);
         } catch (EmptyResultDataAccessException e) {
