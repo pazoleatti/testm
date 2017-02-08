@@ -53,9 +53,7 @@ def buildXml() {
 
     // Параметры подразделения
     def departmentParam = getDepartmentParam()
-    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam.record_id.value)
-    def departmentParam = getDepartmentParam(declarationData.departmentId)
-
+    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam?.id.value)
 
     // Отчетный период
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
