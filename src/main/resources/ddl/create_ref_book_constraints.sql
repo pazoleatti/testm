@@ -28,7 +28,6 @@ alter table ref_book_budget_income add constraint pk_ref_book_budget_income prim
 alter table ref_book_hard_work add constraint pk_ref_book_hard_work primary key (id);
 alter table ref_book_tariff_payer add constraint pk_ref_book_tariff_payer primary key (id);
 alter table report_period_type add constraint pk_report_period_type primary key (id);
-alter table log_system_fields add constraint pk_log_system_fields primary key(id);
 alter table ref_book_country add constraint pk_ref_book_country primary key (id);
 alter table ref_book_doc_type add constraint pk_ref_book_doc_type primary key (id);
 
