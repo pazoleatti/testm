@@ -9,7 +9,6 @@ import net.sf.jasperreports.engine.util.JRSwapFile;
 
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -185,25 +184,4 @@ public interface DeclarationService {
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note);
 
     void delete(long declarationDataId, TAUserInfo userInfo);
-
-    /**
-     * Удаляет все отчеты налоговой формы
-     * @param declarationDataId
-     */
-    void deleteReport(long declarationDataId);
-
-    /**
-     * Удаляет отчеты заданных типов
-     * @param declarationDataId
-     */
-    void deleteReport(long declarationDataId, List<DeclarationDataReportType> declarationDataReportTypeList);
-
-    /**
-     * Метод передающий управление на проверку декларации сторонней утилите
-     * @param declarationData
-     * @param userInfo
-     * @param logger
-     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
-     */
-    void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile);
 }

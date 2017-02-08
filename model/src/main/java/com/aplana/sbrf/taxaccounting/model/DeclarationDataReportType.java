@@ -18,7 +18,6 @@ public class DeclarationDataReportType implements Serializable {
     public static final DeclarationDataReportType CHECK_DEC = new DeclarationDataReportType(ReportType.CHECK_DEC, null);
     public static final DeclarationDataReportType IMPORT_TF_DEC = new DeclarationDataReportType(ReportType.IMPORT_TF_DEC, null);
     public static final DeclarationDataReportType EDIT_FILE_COMMENT_DEC = new DeclarationDataReportType(ReportType.EDIT_FILE_COMMENT_DEC, null);
-    public static final DeclarationDataReportType SPECIFIC_REPORT_DEC = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, new DeclarationSubreport()); //фиктивный тип отчета
 
     /**
      * Тип задачи

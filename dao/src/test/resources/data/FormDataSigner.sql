@@ -19,6 +19,7 @@ insert into form_template (id, type_id, data_rows, version, fixed_rows, name, fu
   values (2, 2, null, date '2013-01-01', 1, 'name', 'fullname', 'header');
 
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
+insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (21, '21', 'первый квартал', DATE '1970-01-01', DATE '1970-03-31', DATE '1970-01-11');
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (22, '22', 'второй квартал', DATE '1970-04-01', DATE '1970-06-30', DATE '1970-04-04');
 
