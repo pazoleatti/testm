@@ -16,9 +16,6 @@ INSERT INTO tax_period(id, tax_type, year) VALUES (1, 'N', 2013);
 INSERT INTO tax_period(id, tax_type, year) VALUES (11, 'N', 2012);
 INSERT INTO tax_period(id, tax_type, year) VALUES (21, 'F', 2013);
 
-INSERT INTO ref_book(id, name) VALUES (8, 'Коды, определяющие налоговый (отчётный) период');
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) VALUES
-  (25, 8, 'Код', 'CODE', 1, 0, NULL, NULL, 1, NULL, 2, 1, 1, 100);
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (21, '99', 'первый квартал', DATE '1970-01-01', DATE '1970-03-31', DATE '1970-01-11');
 INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_date) VALUES (22, '22', 'второй квартал', DATE '1970-04-01', DATE '1970-06-30', DATE '1970-04-04');
 

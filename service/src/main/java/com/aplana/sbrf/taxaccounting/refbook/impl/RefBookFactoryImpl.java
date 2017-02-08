@@ -51,22 +51,18 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
 	// Список простых нередактируемых справочников
 	private static final List<Long> simpleReadOnlyRefBooks = Arrays.asList(new Long[]{
-			USER.getId(), SEC_ROLE.getId(), DEPARTMENT_TYPE.getId(), ASNU.getId(),
-			DECLARATION_DATA_KIND_REF_BOOK.getId(), DECLARATION_DATA_TYPE_REF_BOOK.getId(),
-            DECLARATION_TEMPLATE.getId(), DOC_STATE.getId(), TAX_INSPECTION.getId(),
-			TAXPAYER_STATUS.getId(), NDFL_RATE.getId()
+			USER.getId(), SEC_ROLE.getId(), DEPARTMENT_TYPE.getId(), ASNU.getId(), DECLARATION_DATA_KIND_REF_BOOK.getId(),
+			DECLARATION_DATA_TYPE_REF_BOOK.getId(), DECLARATION_TEMPLATE.getId(), DOC_STATE.getId(), TAX_INSPECTION.getId(), TAXPAYER_STATUS.getId(),
+			NDFL_RATE.getId(), PERIOD_CODE.getId(), DEDUCTION_MARK.getId(), INCOME_KIND.getId(), ATTACH_FILE_TYPE.getId()
 	});
 	// Список простых редактируемых версионируемых справочников
 	private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
-			NDFL.getId(), NDFL_DETAIL.getId(),
-            FOND.getId(), FOND_DETAIL.getId(),
-            FIAS_OPERSTAT.getId(), FIAS_SOCRBASE.getId(),
-            FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
-			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(), REORGANIZATION.getId(),
-			REGION.getId(), NDFL.getId(), NDFL_DETAIL.getId(),
-			PERSON.getId(), ID_DOC.getId(), PERSON_ADDRESS.getId(), ID_TAX_PAYER.getId(),
-
-            OKATO.getId()
+			NDFL.getId(), NDFL_DETAIL.getId(), FOND.getId(), FOND_DETAIL.getId(), FIAS_OPERSTAT.getId(),
+			FIAS_SOCRBASE.getId(), FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(), FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(),
+			REORGANIZATION.getId(), REGION.getId(), NDFL_REFERENCES.getId(), OKVED.getId(), PRESENT_PLACE.getId(),
+			DEDUCTION_TYPE.getId(), INCOME_CODE.getId(), DOCUMENT_CODES.getId(), OKTMO.getId(), COUNTRY.getId(),
+			FILL_BASE.getId(), TARIFF_PAYER.getId(), HARD_WORK.getId(), BUDGET_INCOME.getId(), PERSON.getId(),
+			ID_DOC.getId(), PERSON_ADDRESS.getId(), ID_TAX_PAYER.getId(), TAX_PLACE_TYPE_CODE.getId(), MARK_SIGNATORY_CODE.getId()
 	});
 
     @Autowired
@@ -112,12 +108,12 @@ public class RefBookFactoryImpl implements RefBookFactory {
         if (DEPARTMENT.getId() == refBookId) {
             return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
         }
-		if(RefBookOktmoProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
+		/*if(RefBookOktmoProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
             RefBookOktmoProvider dataProvider = (RefBookOktmoProvider) applicationContext.getBean("RefBookOktmoProvider", RefBookDataProvider.class);
             dataProvider.setRefBookId(refBookId);
 			dataProvider.setTableName(RefBookOktmoProvider.OKTMO_TABLE_NAME);
             return dataProvider;
-		}
+		}*/
 		if (CONFIGURATION_PARAM.getId() == refBookId) {
             RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
             dataProvider.setRefBook(refBook);
@@ -134,7 +130,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 		if (ASYNC_CONFIG.getId() == refBookId) {
             return applicationContext.getBean("refBookAsyncConfigProvider", RefBookAsyncConfigProvider.class);
         }
-        if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(refBook.getTableName())) {
             RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
             dataProvider.setRefBook(refBook);
             return dataProvider;
