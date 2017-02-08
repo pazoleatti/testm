@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -29,7 +29,7 @@ public class RefBookSimpleDataProviderTest {
     private static final Long RFB_NOT_VERSIONED_ID = 100L;
 
     private RefBookSimpleDataProvider provider;
-    private RefBookSimpleDao daoMock;
+    private RefBookSimpleDaoImpl daoMock;
     private RefBookDao refBookDaoMock;
     private RefBookSimpleReadOnly SimpleReadOnlyMock;
 
@@ -37,7 +37,7 @@ public class RefBookSimpleDataProviderTest {
     public void setUp() throws Exception {
         provider = new RefBookSimpleDataProvider();
 
-        daoMock = mock(RefBookSimpleDao.class);
+        daoMock = mock(RefBookSimpleDaoImpl.class);
         refBookDaoMock = mock(RefBookDao.class);
         SimpleReadOnlyMock = mock(RefBookSimpleReadOnly.class);
         when(refBookDaoMock.get(anyLong())).thenReturn(getRefBookStub());
@@ -71,7 +71,7 @@ public class RefBookSimpleDataProviderTest {
         provider.getRecords(version, null, null, null);
 
         verify(daoMock, atLeastOnce()).getRecords(
-                eq(RFB_ID), eq(version), any(PagingParams.class),
+                any(RefBook.class), eq(version), any(PagingParams.class),
                 anyString(), any(RefBookAttribute.class), eq(true));
     }
 

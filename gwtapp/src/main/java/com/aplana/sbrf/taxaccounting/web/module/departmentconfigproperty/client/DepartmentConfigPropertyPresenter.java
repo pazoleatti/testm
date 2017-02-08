@@ -265,6 +265,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                 action.setRows(convert(getView().getTableRows()));
                                                 action.setRecordId(recordId);
                                                 action.setNotTableParams(getView().getNonTableParams());
+                                                action.setTaxType(getView().getTaxType());
                                                 dispatcher.execute(action, CallbackUtils
                                                         .defaultCallback(new AbstractCallback<DeleteConfigPropertyResult>() {
                                                             @Override

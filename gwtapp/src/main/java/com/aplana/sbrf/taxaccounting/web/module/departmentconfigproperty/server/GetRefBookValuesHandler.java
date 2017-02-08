@@ -76,7 +76,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         }
 
         RefBookDataProvider providerSlave = rbFactory.getDataProvider(action.getSlaveRefBookId());
-        String filterSlave = "";
+        String filterSlave = "LINK  = " + result.getRecordId();
         if (action.getTaxType() == TaxType.NDFL) {
             filterSlave = "REF_BOOK_NDFL_ID = " + result.getRecordId();
         } else if (action.getTaxType() == TaxType.PFR) {
@@ -118,9 +118,6 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
     private void checkReferenceValues(RefBook refBook, List<Map<String, TableCell>> rows, Date versionFrom, Date versionTo, Logger logger) {
         Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
 
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
-        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
-
         int i = 1;
         for (Map<String, TableCell> row : rows) {
             for (Map.Entry<String, TableCell> e : row.entrySet()) {
@@ -132,7 +129,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
                         && !e.getKey().equals("DEPARTMENT_ID")) { //Подразделения не версионируются и их нет смысла проверять
                     if (cell.getRefValue() != null) {
                         //Собираем ссылки на справочники и группируем их по провайдеру, обрабатывающему справочники
-                        RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
+                        RefBookDataProvider linkProvider = rbFactory.getDataProvider(refBook.getAttribute(e.getKey()).getRefBookId());
                         if (!references.containsKey(linkProvider)) {
                             references.put(linkProvider, new ArrayList<RefBookLinkModel>());
                         }

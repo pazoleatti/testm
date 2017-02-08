@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -292,13 +293,17 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     @Override
     public ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year) {
         try {
-            return getJdbcTemplate().queryForObject(
-                    "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date  " +
-                            "from report_period where dict_tax_period_id = (select record_id from ref_book_value " +
-                            "where attribute_id = 25 and string_value = ?) and tax_period_id in (select id from " +
-                            "tax_period where year = ? and tax_type = ?)",
-                    new Object[]{code, year, String.valueOf(taxType.getCode())},
-                    new int[]{Types.VARCHAR, Types.NUMERIC, Types.CHAR},
+			MapSqlParameterSource params = new MapSqlParameterSource();
+			params.addValue("code", code);
+			params.addValue("year", year);
+			params.addValue("tax", String.valueOf(taxType.getCode()));
+
+            return getNamedParameterJdbcTemplate().queryForObject(
+					"SELECT rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, rp.calendar_start_date  " +
+                        "FROM report_period rp  " +
+							"JOIN report_period_type rpt ON (rpt.id = rp.dict_tax_period_id AND rpt.code = :code)" +
+							"JOIN tax_period tp ON (tp.id = rp.tax_period_id AND tp.year = :year AND tp.tax_type = :tax)",
+                    params,
                     new ReportPeriodMapper()
             );
         } catch (EmptyResultDataAccessException e) {
@@ -306,4 +311,3 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         }
     }
 }
-

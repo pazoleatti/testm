@@ -157,7 +157,7 @@ public class RaschsvSvPrimTarif13422DaoImpl extends AbstractDao implements Rasch
                             .addValue(RaschsvSvedObuch.COL_UNIK_NOMER, raschsvSvedObuch.getUnikNomer())
                             .addValue(RaschsvSvedObuch.COL_FAMILIA, raschsvSvedObuch.getFamilia())
                             .addValue(RaschsvSvedObuch.COL_IMYA, raschsvSvedObuch.getImya())
-                            .addValue(RaschsvSvedObuch.COL_MIDDLE_NAME, raschsvSvedObuch.getMiddleName())
+                            .addValue(RaschsvSvedObuch.COL_OTCHESTVO, raschsvSvedObuch.getOtchestvo())
                             .addValue(RaschsvSvedObuch.COL_SPRAV_NOMER, raschsvSvedObuch.getSpravNomer())
                             .addValue(RaschsvSvedObuch.COL_SPRAV_DATA, raschsvSvedObuch.getSpravData())
                             .addValue(RaschsvSvedObuch.COL_SPRAV_NODE_NAME, raschsvSvedObuch.getSpravNodeName())
@@ -334,7 +334,7 @@ public class RaschsvSvPrimTarif13422DaoImpl extends AbstractDao implements Rasch
             raschsvSvedObuch.setUnikNomer(rs.getString(RaschsvSvedObuch.COL_RASCHSV_SV_SUM1_TIP_ID));
             raschsvSvedObuch.setFamilia(rs.getString(RaschsvSvedObuch.COL_FAMILIA));
             raschsvSvedObuch.setImya(rs.getString(RaschsvSvedObuch.COL_IMYA));
-            raschsvSvedObuch.setMiddleName(rs.getString(RaschsvSvedObuch.COL_MIDDLE_NAME));
+            raschsvSvedObuch.setOtchestvo(rs.getString(RaschsvSvedObuch.COL_OTCHESTVO));
             raschsvSvedObuch.setSpravNomer(rs.getString(RaschsvSvedObuch.COL_SPRAV_NOMER));
             raschsvSvedObuch.setSpravData(rs.getDate(RaschsvSvedObuch.COL_SPRAV_DATA));
             raschsvSvedObuch.setSpravNodeName(rs.getString(RaschsvSvedObuch.COL_SPRAV_NODE_NAME));

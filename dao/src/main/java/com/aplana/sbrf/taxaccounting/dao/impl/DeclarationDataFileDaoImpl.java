@@ -29,6 +29,8 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
             result.setUserName(rs.getString("user_name"));
             result.setUserDepartmentName(rs.getString("user_department_name"));
             result.setNote(rs.getString("note"));
+            result.setFileTypeName(rs.getString("file_type_name"));
+            result.setFileTypeId(rs.getLong("file_type_id"));
             return result;
 		}
 	}
@@ -36,10 +38,13 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
 	@Override
 	public List<DeclarationDataFile> getFiles(long declarationDataId) {
 		return getJdbcTemplate().query(
-				"select declaration_data_id, blob_data_id, user_name, user_department_name, note, bd.creation_date file_creation_date, bd.name file_name " +
-                    "from declaration_data_file " +
-                    "left join blob_data bd on bd.id=declaration_data_file.blob_data_id " +
-                    "where declaration_data_id = ?",
+				"select " +
+                        "declaration_data_id, blob_data_id, user_name, user_department_name, note, " +
+                        "bd.creation_date file_creation_date, bd.name file_name, ft.name file_type_name, ft.id file_type_id " +
+                "from declaration_data_file " +
+                "left join blob_data bd on (bd.id = declaration_data_file.blob_data_id) " +
+                "left join ref_book_attach_file_type ft on (ft.id = declaration_data_file.file_type_id) " +
+                "where declaration_data_id = ?",
 				new Object[]{declarationDataId},
 				new int[]{Types.NUMERIC},
 				new DeclarationDataFilesMapper()
@@ -90,8 +95,8 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
         // create new
         if (!newFiles.isEmpty()) {
             getJdbcTemplate().batchUpdate(
-                    "insert into declaration_data_file (declaration_data_id, blob_data_id, user_name, user_department_name, note) " +
-                            "values (?, ?, ?, ?, ?)",
+                    "insert into declaration_data_file (declaration_data_id, blob_data_id, user_name, user_department_name, note, file_type_id) " +
+                            "values (?, ?, ?, ?, ?, ?)",
                     new BatchPreparedStatementSetter() {
                         @Override
                         public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -101,6 +106,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
                             ps.setString(3, file.getUserName());
                             ps.setString(4, file.getUserDepartmentName());
                             ps.setString(5, file.getNote());
+                            ps.setLong(6, file.getFileTypeId());
                         }
 
                         @Override
@@ -113,14 +119,15 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
         // update old
         if (!oldFiles.isEmpty()) {
             getJdbcTemplate().batchUpdate(
-                    "update declaration_data_file set note = ? " +
+                    "update declaration_data_file set note = ?, file_type_id = ? " +
                             "where blob_data_id = ?",
                     new BatchPreparedStatementSetter() {
                         @Override
                         public void setValues(PreparedStatement ps, int index) throws SQLException {
                             DeclarationDataFile file = oldFiles.get(index);
                             ps.setString(1, file.getNote());
-                            ps.setString(2, file.getUuid());
+                            ps.setLong(2, file.getFileTypeId());
+                            ps.setString(3, file.getUuid());
                         }
 
                         @Override
@@ -132,4 +139,15 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
         }
 	}
 
+    @Override
+    public void saveFile(DeclarationDataFile file) {
+        getJdbcTemplate().update(
+                "insert into declaration_data_file (declaration_data_id, blob_data_id, user_name, user_department_name, note, file_type_id) values (?, ?, ?, ?, ?, ?)",
+                file.getDeclarationDataId(),
+                file.getUuid(),
+                file.getUserName(),
+                file.getUserDepartmentName(),
+                file.getNote(),
+                file.getFileTypeId());
+    }
 }

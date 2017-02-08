@@ -11,7 +11,7 @@ public class RaschsvSvInoGrazd {
     private String grazd;
     private String familia;
     private String imya;
-    private String middleName;
+    private String otchestvo;
     private Long raschsvSvSum1TipId;
 
     // СвСум1Тип
@@ -25,10 +25,10 @@ public class RaschsvSvInoGrazd {
     public static final String COL_GRAZD = "grazd";
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
-    public static final String COL_MIDDLE_NAME = "middle_name";
+    public static final String COL_OTCHESTVO = "otchestvo";
 
     public static final String[] COLUMNS = {COL_RASCHSV_SV_PRIM_TARIF2_425_ID, COL_RASCHSV_SV_SUM1_TIP_ID, COL_INNFL,
-            COL_SNILS, COL_GRAZD, COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME};
+            COL_SNILS, COL_GRAZD, COL_FAMILIA, COL_IMYA, COL_OTCHESTVO};
 
     public Long getRaschsvSvPrimTarif2425Id() {
         return raschsvSvPrimTarif2425Id;
@@ -72,11 +72,11 @@ public class RaschsvSvInoGrazd {
         this.imya = imya;
     }
 
-    public String getMiddleName() {
-        return middleName;
+    public String getOtchestvo() {
+        return otchestvo;
     }
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
+    public void setOtchestvo(String otchestvo) {
+        this.otchestvo = otchestvo;
     }
 
     public RaschsvSvSum1Tip getRaschsvSvSum1Tip() {

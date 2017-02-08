@@ -477,7 +477,13 @@ public class RefBookHelperImpl implements RefBookHelper {
         recordVersion = provider.getRecordVersionInfo(uniqueRecordId);
 
         /** Сохраняем табличную часть */
-        String filterSlave = "LINK = " + uniqueRecordId;
+        String linkAlias = "LINK";
+        if (refBookId == RefBook.WithTable.NDFL.getRefBookId()) {
+            linkAlias = "REF_BOOK_NDFL_ID";
+        } else if (refBookId == RefBook.WithTable.FOND.getRefBookId()) {
+            linkAlias = "REF_BOOK_FOND_ID";
+        }
+        String filterSlave = linkAlias + " = " + uniqueRecordId;
         RefBookAttribute sortAttr = slaveRefBook.getAttribute("ROW_ORD");
 
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(rp.getCalendarStartDate(), null, filterSlave, sortAttr);
@@ -493,9 +499,9 @@ public class RefBookHelperImpl implements RefBookHelper {
                 if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromServer.get("TAX_ORGAN_CODE").getStringValue())
                         && rowFromClient.get("KPP").getStringValue().equals(rowFromServer.get("KPP").getStringValue())) {
                     contains = true;
-                    rowFromClient.put("LINK",new RefBookValue(RefBookAttributeType.REFERENCE, uniqueRecordId));
+                    rowFromClient.put(linkAlias,new RefBookValue(RefBookAttributeType.REFERENCE, uniqueRecordId));
                     rowFromClient.put("ROW_ORD",rowFromServer.get("ROW_ORD"));
-                    rowFromClient.put("record_id",rowFromServer.get("record_id"));
+                    rowFromClient.put(RefBook.RECORD_ID_ALIAS,rowFromServer.get(RefBook.RECORD_ID_ALIAS));
                     rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
                     toUpdate.add(rowFromClient);
                     break;
@@ -508,7 +514,7 @@ public class RefBookHelperImpl implements RefBookHelper {
                 }
             }
             if (!contains) {
-                rowFromClient.put("LINK", new RefBookValue(RefBookAttributeType.REFERENCE, uniqueRecordId));
+                rowFromClient.put(linkAlias, new RefBookValue(RefBookAttributeType.REFERENCE, uniqueRecordId));
                 rowFromClient.put("ROW_ORD", new RefBookValue(RefBookAttributeType.NUMBER, ++maxRowOrd));
                 rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
                 toAdd.add(rowFromClient);
@@ -522,7 +528,6 @@ public class RefBookHelperImpl implements RefBookHelper {
             slaveRecord.setRecordId(null);
             recordsToAdd.add(slaveRecord);
         }
-
 
         for (Map<String, RefBookValue> rowFromServer : paramsSlave) {
             boolean notFound = true;
@@ -540,7 +545,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         List<Long> deleteIds = new ArrayList<Long>();
         for (Map<String, RefBookValue> del : toDelete) {
-            deleteIds.add(del.get("record_id").getNumberValue().longValue());
+            deleteIds.add(del.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
         }
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -549,7 +554,7 @@ public class RefBookHelperImpl implements RefBookHelper {
             }
 
             for (Map<String, RefBookValue> up : toUpdate) {
-                providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), rp.getCalendarStartDate(), recordVersion.getVersionEnd(), up);
+                providerSlave.updateRecordVersion(logger, up.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), rp.getCalendarStartDate(), recordVersion.getVersionEnd(), up);
             }
 
             if (!deleteIds.isEmpty()) {

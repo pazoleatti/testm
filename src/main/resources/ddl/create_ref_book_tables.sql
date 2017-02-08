@@ -1,6 +1,29 @@
 -----------------------------------------------------------------------------------------------------------------------------
 -- Создание таблиц для справочников
 -----------------------------------------------------------------------------------------------------------------------------
+-- ОКТМО
+create table ref_book_oktmo (
+  id        number(18)     not null,
+  code      varchar2(4000) not null,
+  name      varchar2(4000) not null,
+  version   date           not null,
+  status    number(1)      not null,
+  record_id number(9)      not null,
+  razd      number(1)
+);
+comment on table ref_book_oktmo is 'ОКТМО';
+comment on column ref_book_oktmo.id is 'Идентификатор записи';
+comment on column ref_book_oktmo.code is 'Код';
+comment on column ref_book_oktmo.name is 'Наименование';
+comment on column ref_book_oktmo.parent_id is 'Идентификатор родительской записи';
+comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
+comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_oktmo.razd is 'Раздел. Может быть 1 или 2';
+
+create sequence seq_ref_book_oktmo start with 300000 increment by 100;
+create sequence seq_ref_book_oktmo_record_id start with 1000000;
+
 -- Коды видов дохода
 create table ref_book_income_type
 (
@@ -51,7 +74,6 @@ create table ref_book_region
   code      varchar2(2 char) not null,
   name      varchar2(255 char) not null,
   okato_definition varchar2(11 char),
-  okato     number(18), 
   oktmo     number(18),
   oktmo_definition varchar2(11 char)
 );
@@ -63,7 +85,6 @@ comment on column ref_book_region.version is 'Версия. Дата актуа�
 comment on column ref_book_region.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_region.code is 'Код';
 comment on column ref_book_region.name is 'Наименование';
-comment on column ref_book_region.okato is 'Ссылка на код ОКАТО';
 comment on column ref_book_region.okato_definition is 'Определяющая часть кода ОКАТО';
 comment on column ref_book_region.oktmo is 'Ссылка на код ОКТМО';
 comment on column ref_book_region.oktmo_definition is 'Определяющая часть кода ОКТМО';
@@ -148,24 +169,6 @@ comment on column ref_book_okved.version is 'Версия. Дата актуал
 comment on column ref_book_okved.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_okved.code is 'Код ОКВЭД';
 comment on column ref_book_okved.name is 'Наименование';
-
--- ОКАТО
-create table ref_book_okato 
-(
-  id        number(18)          not null,
-  record_id number(9)           not null,
-  version   date                not null,
-  status    number(1) default 0 not null,
-  okato     varchar2(11 char)   not null,
-  name      varchar2(255)       not null
-);
-comment on table ref_book_okato is 'Коды ОКАТО';
-comment on column ref_book_okato.id is 'Уникальный идентификатор';
-comment on column ref_book_okato.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
-comment on column ref_book_okato.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_okato.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
-comment on column ref_book_okato.okato is 'Код ОКАТО';
-comment on column ref_book_okato.name is 'Наименование';
 
 -- Признак кода вычета
 create table ref_book_deduction_mark
@@ -265,6 +268,125 @@ create table ref_book_ndfl_rate
 comment on table ref_book_ndfl_rate is 'Ставка НДФЛ';
 comment on column ref_book_ndfl_rate.id is 'Уникальный идентификатор';
 comment on column ref_book_ndfl_rate.rate is 'Процентная ставка';
+
+--Основания заполнения сумм страховых взносов
+create table ref_book_fill_base
+(
+  id number(18) not null,
+  code varchar2(1 char) not null,
+  name varchar2(2000 char) not null
+);
+
+comment on table ref_book_fill_base is 'Основания заполнения сумм страховых взносов';
+comment on column ref_book_fill_base.id is 'Уникальный идентификатор';
+comment on column ref_book_fill_base.code is 'Код основания заполнения';
+comment on column ref_book_fill_base.name is 'Название основания заполнения';
+
+--Коды тарифа плательщика
+create table ref_book_tariff_payer
+(
+  id number(18) not null,
+  code varchar2(2 char) not null,
+  name varchar2(2000 char) not null
+);
+
+comment on table ref_book_tariff_payer is 'Коды тарифа плательщика';
+comment on column ref_book_tariff_payer.id is 'Уникальный идентификатор';
+comment on column ref_book_tariff_payer.code is 'Код тарифа плательщика';
+comment on column ref_book_tariff_payer.name is 'Название тарифа плательщика';
+
+--Коды классов условий труда
+create table ref_book_hard_work
+(
+  id number(18) not null,
+  code varchar2(1 char) not null,
+  name varchar2(2000 char) not null
+);
+
+comment on table ref_book_hard_work is 'Коды классов условий труда';
+comment on column ref_book_hard_work.id is 'Уникальный идентификатор';
+comment on column ref_book_hard_work.code is 'Код класса условий труда';
+comment on column ref_book_hard_work.name is 'Название класса условий труда';
+
+--Классификатор доходов бюджетов Российской Федерации
+create table ref_book_budget_income
+(
+  id number(18) not null,
+  code varchar2(20 char) not null,
+  name varchar2(1000 char) not null,
+  lev varchar2(1 char) not null
+);
+comment on table ref_book_budget_income is 'Классификатор доходов бюджетов Российской Федерации';
+comment on column ref_book_budget_income.id is 'Уникальный идентификатор';
+comment on column ref_book_budget_income.code is 'Код бюджетной классификации';
+comment on column ref_book_budget_income.name is 'Наименование дохода бюджета Российской Федерации';
+comment on column ref_book_budget_income.lev is 'Уровень кода. Служит для определения уровней агрегирования кодов классификации доходов бюджетов. В рамках вида и подвида доходов код с большим значением уровня агрегируется на вышестоящий код с меньшим значением уровня';
+
+--Коды, определяющие налоговый (отчётный) период
+create table report_period_type
+(
+  id number(18) not null,
+  code varchar2(2 char) not null,
+  name varchar2(255 char) not null,
+  ndfl number(1),
+  fond number(1),
+  start_date date,
+  end_date date,
+  calendar_start_date date
+);
+comment on table report_period_type is 'Коды, определяющие налоговый (отчётный) период';
+comment on column report_period_type.id is 'Уникальный идентификатор';
+comment on column report_period_type.code is 'Код';
+comment on column report_period_type.name is 'Наименование';
+comment on column report_period_type.ndfl is 'Признак принадлежности к НДФЛ';
+comment on column report_period_type.fond is 'Признак принадлежности к Страховым сборам, взносам';
+comment on column report_period_type.start_date is 'Дата начала периода';
+comment on column report_period_type.end_date is 'Дата окончания периода';
+comment on column report_period_type.calendar_start_date is 'Календарная дата начала периода';
+
+--Общероссийский классификатор стран мира
+create table ref_book_country
+(
+    id number(18) not null,
+    record_id number(18) not null,
+    status number(1) default 0 not null,
+    version date not null,
+    code varchar2(3 char) not null,
+    code_2 varchar2(2 char) not null,
+    code_3 varchar2(3 char) not null,
+    name varchar2(500 char) not null,
+    fullname varchar2(500 char)
+);
+comment on table ref_book_country is 'Общероссийский классификатор стран мира';
+comment on column ref_book_country.id is 'Уникальный идентификатор';
+comment on column ref_book_country.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_country.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_country.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_country.code is 'Код';
+comment on column ref_book_country.code_2 is 'Код (2-х букв.)';
+comment on column ref_book_country.code_3 is 'Код (3-х букв.)';
+comment on column ref_book_country.name is 'Краткое наименование';
+comment on column ref_book_country.fullname is 'Полное наименование';
+
+--Коды документов
+create table ref_book_doc_type
+(
+    id number(18) not null,
+    record_id number(18) not null,
+    status number(1) default 0 not null,
+    version date not null,
+    code varchar2(2 char) not null,
+    name varchar2(2000 char) not null,
+    priority number(2)
+);
+comment on table ref_book_doc_type is 'Коды документов';
+comment on column ref_book_doc_type.id is 'Уникальный идентификатор';
+comment on column ref_book_doc_type.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_doc_type.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_doc_type.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_doc_type.code is 'Код';
+comment on column ref_book_doc_type.name is 'Наименование документа';
+comment on column ref_book_doc_type.priority is 'Приоритет';
 
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl

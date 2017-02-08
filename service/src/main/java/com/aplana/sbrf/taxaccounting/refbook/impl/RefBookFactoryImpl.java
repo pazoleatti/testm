@@ -58,8 +58,10 @@ public class RefBookFactoryImpl implements RefBookFactory {
 	});
 	// Список простых редактируемых версионируемых справочников
 	private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
-			NDFL.getId(), NDFL_DETAIL.getId(), FIAS_OPERSTAT.getId(),
-			FIAS_SOCRBASE.getId(), FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
+			NDFL.getId(), NDFL_DETAIL.getId(),
+            FOND.getId(), FOND_DETAIL.getId(),
+            FIAS_OPERSTAT.getId(), FIAS_SOCRBASE.getId(),
+            FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
 			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(), REORGANIZATION.getId(),
 			REGION.getId(), NDFL.getId(), NDFL_DETAIL.getId(),
 			PERSON.getId(), ID_DOC.getId(), PERSON_ADDRESS.getId(), ID_TAX_PAYER.getId(),

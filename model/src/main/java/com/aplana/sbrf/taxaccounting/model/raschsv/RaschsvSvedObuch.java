@@ -15,7 +15,7 @@ public class RaschsvSvedObuch extends IdentityObject<Long> {
     private String unikNomer;
     private String familia;
     private String imya;
-    private String middleName;
+    private String otchestvo;
     private String spravNomer;
     private Date spravData;
     private String spravNodeName;
@@ -40,13 +40,13 @@ public class RaschsvSvedObuch extends IdentityObject<Long> {
     public static final String COL_UNIK_NOMER = "unik_nomer";
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
-    public static final String COL_MIDDLE_NAME = "middle_name";
+    public static final String COL_OTCHESTVO = "otchestvo";
     public static final String COL_SPRAV_NOMER = "sprav_nomer";
     public static final String COL_SPRAV_DATA = "sprav_data";
     public static final String COL_SPRAV_NODE_NAME = "sprav_node_name";
 
     public static final String[] COLUMNS = {COL_ID, COL_RASCHSV_SV_PRIM_TARIF1_422_ID, COL_RASCHSV_SV_SUM1_TIP_ID,
-            COL_UNIK_NOMER, COL_FAMILIA, COL_IMYA, COL_MIDDLE_NAME, COL_SPRAV_NOMER, COL_SPRAV_DATA, COL_SPRAV_NODE_NAME};
+            COL_UNIK_NOMER, COL_FAMILIA, COL_IMYA, COL_OTCHESTVO, COL_SPRAV_NOMER, COL_SPRAV_DATA, COL_SPRAV_NODE_NAME};
 
     public Long getRaschsvSvPrimTarif1422Id() {
         return raschsvSvPrimTarif1422Id;
@@ -76,11 +76,11 @@ public class RaschsvSvedObuch extends IdentityObject<Long> {
         this.imya = imya;
     }
 
-    public String getMiddleName() {
-        return middleName;
+    public String getOtchestvo() {
+        return otchestvo;
     }
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
+    public void setOtchestvo(String otchestvo) {
+        this.otchestvo = otchestvo;
     }
 
     public String getSpravNomer() {

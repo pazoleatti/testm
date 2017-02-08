@@ -81,7 +81,7 @@ public class RaschsvRashOssZakDaoImpl extends AbstractDao implements RaschsvRash
                             .addValue(RaschsvRashOssZakRash.COL_NODE_NAME, raschsvRashOssZakRash.getNodeName())
                             .addValue(RaschsvRashOssZakRash.COL_CHISL_SLUCH, raschsvRashOssZakRash.getChislSluch())
                             .addValue(RaschsvRashOssZakRash.COL_KOL_VYPL, raschsvRashOssZakRash.getKolVypl())
-                            .addValue(RaschsvRashOssZakRash.COL_PASH_VSEGO, raschsvRashOssZakRash.getPashVsego())
+                            .addValue(RaschsvRashOssZakRash.COL_RASH_VSEGO, raschsvRashOssZakRash.getRashVsego())
                             .addValue(RaschsvRashOssZakRash.COL_RASH_FIN_FB, raschsvRashOssZakRash.getRashFinFb())
                             .getValues());
         }
@@ -144,7 +144,7 @@ public class RaschsvRashOssZakDaoImpl extends AbstractDao implements RaschsvRash
             raschsvRashOssZakRash.setNodeName(rs.getString(RaschsvRashOssZakRash.COL_NODE_NAME));
             raschsvRashOssZakRash.setChislSluch(rs.getInt(RaschsvRashOssZakRash.COL_CHISL_SLUCH));
             raschsvRashOssZakRash.setKolVypl(rs.getInt(RaschsvRashOssZakRash.COL_KOL_VYPL));
-            raschsvRashOssZakRash.setPashVsego(rs.getBigDecimal(RaschsvRashOssZakRash.COL_PASH_VSEGO));
+            raschsvRashOssZakRash.setRashVsego(rs.getBigDecimal(RaschsvRashOssZakRash.COL_RASH_VSEGO));
             raschsvRashOssZakRash.setRashFinFb(rs.getBigDecimal(RaschsvRashOssZakRash.COL_RASH_FIN_FB));
 
             return raschsvRashOssZakRash;

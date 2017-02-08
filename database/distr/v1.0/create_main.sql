@@ -6,27 +6,6 @@ comment on table form_kind is 'Тип налоговой формы';
 comment on column form_kind.id is 'Идентификатор записи';
 comment on column form_kind.name is 'Наименование';
 --------------------------------------------------------------------------------------------------------------
-create table ref_book_oktmo (
-  id        number(18)     not null,
-  code      varchar2(4000) not null,
-  name      varchar2(4000) not null,
-  parent_id number(18),
-  version   date           not null,
-  status    number(1)      not null,
-  record_id number(9)      not null
-);
-comment on table ref_book_oktmo is 'ОКТМО';
-comment on column ref_book_oktmo.id is 'Идентификатор записи';
-comment on column ref_book_oktmo.code is 'Код';
-comment on column ref_book_oktmo.name is 'Наименование';
-comment on column ref_book_oktmo.parent_id is 'Идентификатор родительской записи';
-comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
-comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
-
-create sequence seq_ref_book_oktmo start with 300000 increment by 100;
-create sequence seq_ref_book_oktmo_record_id start with 1000000;
---------------------------------------------------------------------------------------------------------------
 create table configuration (
   code          varchar2(50) not null,
   value         clob,
@@ -1058,26 +1037,6 @@ comment on table department_form_type_performer is 'Назначения нес�
 comment on column department_form_type_performer.department_form_type_id is 'Идентификатор связи подразделения с формой';
 comment on column department_form_type_performer.performer_dep_id is 'Исполнитель';
 --------------------------------------------------------------------------------------------------------
-create table ref_book_vzl_history
-(
-  id           number(18) not null,
-  jur_person   number(18) not null,
-  category     number(18) not null,
-  form_data_id number(18) not null,
-  change_date  date       not null,
-  state        number(9)  not null
-);
-
-comment on table ref_book_vzl_history is 'История изменения категории ВЗЛ';
-comment on column ref_book_vzl_history.id is 'Идентификатор записи';
-comment on column ref_book_vzl_history.jur_person is 'ВЗЛ';
-comment on column ref_book_vzl_history.category is 'Категория ВЗЛ';
-comment on column ref_book_vzl_history.form_data_id is 'Код формы';
-comment on column ref_book_vzl_history.change_date is 'Дата изменения';
-comment on column ref_book_vzl_history.state is 'Код состояния';
-
-create sequence seq_ref_book_vzl_history start with 1;
---------------------------------------------------------------------------------------------------------
 create table form_search_result
 (
   "ID"           number(9, 0) primary key,
@@ -1404,7 +1363,7 @@ create table raschsv_svnp_podpisant
    svnp_sv_reorg_kpp  VARCHAR2(9 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   middle_name        VARCHAR2(60 CHAR),
+   otchestvo        VARCHAR2(60 CHAR),
    podpisant_pr_podp  VARCHAR2(1 CHAR),
    podpisant_naim_doc VARCHAR2(120 CHAR),
    podpisant_naim_org VARCHAR2(1000 CHAR)
@@ -1423,7 +1382,7 @@ comment on column raschsv_svnp_podpisant.svnp_sv_reorg_innyl is 'ИНН орга
 comment on column raschsv_svnp_podpisant.svnp_sv_reorg_kpp is 'КПП (КПП)';
 comment on column raschsv_svnp_podpisant.familia is 'Фамилия (Фамилия)';
 comment on column raschsv_svnp_podpisant.imya is 'Имя (Имя)';
-comment on column raschsv_svnp_podpisant.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_svnp_podpisant.otchestvo is 'Отчество (Отчество)';
 comment on column raschsv_svnp_podpisant.podpisant_pr_podp is 'Признак лица, подписавшего документ (ПрПодп)';
 comment on column raschsv_svnp_podpisant.podpisant_naim_doc is 'Наименование документа, подтверждающего полномочия представителя (НаимДок)';
 comment on column raschsv_svnp_podpisant.podpisant_naim_org is 'Наименование организации - представителя плательщика (НаимОрг)';
@@ -1649,7 +1608,7 @@ create table raschsv_rash_oss_zak_rash
    node_name          VARCHAR2(20 CHAR)    not null,
    chisl_sluch        NUMBER(7),
    kol_vypl           NUMBER(7),
-   pash_vsego         NUMBER(17,2),
+   rash_vsego         NUMBER(17,2),
    rash_fin_fb        NUMBER(17,2)
 );
 create sequence seq_raschsv_rash_oss_zak_rash start with 1;
@@ -1658,7 +1617,7 @@ comment on column raschsv_rash_oss_zak_rash.id is 'Идентификатор';
 comment on column raschsv_rash_oss_zak_rash.node_name is 'Имя узла';
 comment on column raschsv_rash_oss_zak_rash.chisl_sluch is 'Число случаев (получателей) (ЧислСлуч)';
 comment on column raschsv_rash_oss_zak_rash.kol_vypl is 'Количество дней, выплат, пособий (КолВыпл)';
-comment on column raschsv_rash_oss_zak_rash.pash_vsego is 'Расходы, всего (РасхВсего)';
+comment on column raschsv_rash_oss_zak_rash.rash_vsego is 'Расходы, всего (РасхВсего)';
 comment on column raschsv_rash_oss_zak_rash.rash_fin_fb is 'Расходы за счет средств, финансируемых из федерального бюджета (РасхФинФБ)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_vypl_fin_fb
@@ -1843,7 +1802,7 @@ create table raschsv_sv_ino_grazd
    grazd              VARCHAR2(3 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   middle_name          VARCHAR2(60 CHAR)
+   otchestvo          VARCHAR2(60 CHAR)
 );
 comment on table raschsv_sv_ino_grazd is 'Сведения об иностранных гражданах, лицах без гражданства (СвИноГражд)';
 comment on column raschsv_sv_ino_grazd.raschsv_sv_prim_tarif2_425_id is 'Внешний ключ на Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425';
@@ -1853,7 +1812,7 @@ comment on column raschsv_sv_ino_grazd.snils is 'СНИЛС (СНИЛС)';
 comment on column raschsv_sv_ino_grazd.grazd is 'Гражданство (код страны) (Гражд)';
 comment on column raschsv_sv_ino_grazd.familia is 'Фамилия (Фамилия)';
 comment on column raschsv_sv_ino_grazd.imya is 'Имя (Имя)';
-comment on column raschsv_sv_ino_grazd.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_sv_ino_grazd.otchestvo is 'Отчество (Отчество)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_prim_tarif1_3_422
 (
@@ -1873,7 +1832,7 @@ create table raschsv_sved_obuch
    unik_nomer         VARCHAR2(3 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   middle_name          VARCHAR2(60 CHAR),
+   otchestvo          VARCHAR2(60 CHAR),
    sprav_nomer        VARCHAR2(10 CHAR),
    sprav_data         DATE,
    sprav_node_name    VARCHAR2(20 CHAR)
@@ -1886,7 +1845,7 @@ comment on column raschsv_sved_obuch.raschsv_sv_sum1_tip_id is 'Внешний �
 comment on column raschsv_sved_obuch.unik_nomer is 'Уникальный номер (УникНомер)';
 comment on column raschsv_sved_obuch.familia is 'Фамилия (Фамилия)';
 comment on column raschsv_sved_obuch.imya is 'Имя (Имя)';
-comment on column raschsv_sved_obuch.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_sved_obuch.otchestvo is 'Отчество (Отчество)';
 comment on column raschsv_sved_obuch.sprav_nomer is 'Номер (Номер)';
 comment on column raschsv_sved_obuch.sprav_data is 'Дата (Дата)';
 comment on column raschsv_sved_obuch.sprav_node_name is 'Имя узла (СправСтудОтряд или СправФормОбуч)';
@@ -1937,7 +1896,7 @@ create table raschsv_pers_sv_strah_lic
    priz_oss           VARCHAR2(1 CHAR),
    familia            VARCHAR2(60 CHAR),
    imya               VARCHAR2(60 CHAR),
-   middle_name        VARCHAR2(60 CHAR),
+   otchestvo        VARCHAR2(60 CHAR),
    person_id          number(18)
 );
 create sequence seq_raschsv_pers_sv_strah_lic start with 1;
@@ -1961,7 +1920,7 @@ comment on column raschsv_pers_sv_strah_lic.priz_oms is 'Признак заст
 comment on column raschsv_pers_sv_strah_lic.priz_oss is 'Признак застрахованного лица в системе обязательного социального страхования (ПризОСС)';
 comment on column raschsv_pers_sv_strah_lic.familia is 'Фамилия (Фамилия)';
 comment on column raschsv_pers_sv_strah_lic.imya is 'Имя (Имя)';
-comment on column raschsv_pers_sv_strah_lic.middle_name is 'Отчество (Отчество)';
+comment on column raschsv_pers_sv_strah_lic.otchestvo is 'Отчество (Отчество)';
 comment on column raschsv_pers_sv_strah_lic.person_id is 'Ссылка на справочник физ. лиц';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_sv_vypl

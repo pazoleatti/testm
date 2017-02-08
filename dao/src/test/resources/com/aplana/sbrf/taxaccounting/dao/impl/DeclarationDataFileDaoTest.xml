@@ -7,6 +7,7 @@
     <import resource="classpath:testDaoContext.xml"/>
     <jdbc:initialize-database>
         <jdbc:script location="classpath:data/State.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/RefBookAttachFileType.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationDataFile.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

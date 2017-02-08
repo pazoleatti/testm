@@ -88,9 +88,20 @@ public interface NdflPersonDao {
      * @param declarationDataId
      * @param startDate         - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate           - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param kpp
+     * @param oktmo
      * @return
      */
-    List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate);
+    List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo);
+
+    /**
+     *  Найти данные о доходах по КПП и ОКТМО для Физлица
+     * @param ndflPersonId
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo);
 
     /**
      * Найти данные о доходах ФЛ по идентификатору ФЛ
@@ -143,9 +154,11 @@ public interface NdflPersonDao {
      * Данные об авансах ФЛ по идентификатору декларации
      *
      * @param declarationDataId
+     * @param kpp
+     * @param oktmo
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId);
+    List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo);
 
     /**
      * Найти данный о вычетах

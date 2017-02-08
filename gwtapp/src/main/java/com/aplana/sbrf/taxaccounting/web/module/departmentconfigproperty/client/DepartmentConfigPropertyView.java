@@ -445,26 +445,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         innCell.setType(RefBookAttributeType.STRING);
         innCell.setStringValue(inn.getValue());
         params.put("INN", innCell);
-
-        if (taxType != TaxType.LAND) {
-            TableCell formatVersionCell = new TableCell();
-            formatVersionCell.setType(RefBookAttributeType.STRING);
-            formatVersionCell.setStringValue(formatVersion.getValue());
-            params.put("FORMAT_VERSION", formatVersionCell);
-        }
-
-        if (taxType == TaxType.PROPERTY) {
-            TableCell versionCell = new TableCell();
-            versionCell.setType(RefBookAttributeType.STRING);
-            versionCell.setStringValue(version.getValue());
-            params.put("PREPAYMENT_VERSION", versionCell);
-        } else if (taxType == TaxType.NDFL) {
-            TableCell taxRateCell = new TableCell();
-            taxRateCell.setType(RefBookAttributeType.NUMBER);
-            taxRateCell.setNumberValue(taxRate.getValue());
-            params.put("TAX_RATE", taxRateCell);
-        }
-
         return params;
     }
 
@@ -475,14 +455,11 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         initTable(taxType);
         versionBlock.setVisible(false);
         taxRateBlock.setVisible(false);
-        formatVersionBlock.setVisible(true);
-        otherDetails.setVisible(true);
+        formatVersionBlock.setVisible(false);
+        otherDetails.setVisible(false);
         if (taxType == TaxType.NDFL) {
             taxTypeLbl.setText("НДФЛ");
         } else if (taxType == TaxType.PFR) {
-            otherDetails.setVisible(false);
-            taxRateBlock.setVisible(false);
-            formatVersionBlock.setVisible(false);
             taxTypeLbl.setText("Страховые сборы, взносы");
         }
     }

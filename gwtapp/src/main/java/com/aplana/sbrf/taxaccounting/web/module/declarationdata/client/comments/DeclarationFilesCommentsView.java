@@ -3,7 +3,14 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.comments
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -35,7 +42,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -61,7 +67,7 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
     @UiField
     ModalWindow modalWindow;
     @UiField
-    GenericDataGrid<DeclarationDataFile> table;
+    GenericDataGrid<DataRow<Cell>> table;
     @UiField
     com.google.gwt.user.client.ui.TextArea note;
     @UiField
@@ -75,15 +81,26 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
 
     private boolean readOnlyMode;
 
-    private List<DeclarationDataFile> oldFiles = null;
+    private List<DataRow<Cell>> oldFiles = null;
     private String oldNote = null;
 
-    private ListDataProvider<DeclarationDataFile> dataProvider = new ListDataProvider<DeclarationDataFile>();
-    private MultiSelectionModel<DeclarationDataFile> selectionModel = new MultiSelectionModel<DeclarationDataFile>();
+    private ListDataProvider<DataRow<Cell>> dataProvider = new ListDataProvider<DataRow<Cell>>();
+    private MultiSelectionModel<DataRow<Cell>> selectionModel = new MultiSelectionModel<DataRow<Cell>>();
     private CheckBoxHeader checkBoxHeader = new CheckBoxHeader();
-    private DefaultSelectionEventManager<DeclarationDataFile> multiSelectManager = createCustomManager(
-            new DefaultSelectionEventManager.CheckboxEventTranslator<DeclarationDataFile>()
+    private DefaultSelectionEventManager<DataRow<Cell>> multiSelectManager = createCustomManager(
+            new DefaultSelectionEventManager.CheckboxEventTranslator<DataRow<Cell>>()
     );
+
+    private DataRowColumnFactory factory = new DataRowColumnFactory();
+
+    private NumericColumn declarationDataIdColumn = new NumericColumn();
+    private StringColumn uuidColumn = new StringColumn();
+    private StringColumn fileNameColumn = new StringColumn();
+    private RefBookColumn fileTypeColumn = new RefBookColumn();
+    private StringColumn noteColumn = new StringColumn();
+    private StringColumn dateColumn = new StringColumn();
+    private StringColumn userColumn = new StringColumn();
+    private StringColumn departmentColumn = new StringColumn();
 
     @Inject
     public DeclarationFilesCommentsView(Binder uiBinder, EventBus eventBus) {
@@ -104,7 +121,7 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
         checkBoxHeader.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                for (DeclarationDataFile row: table.getVisibleItems()) {
+                for (DataRow<Cell> row: table.getVisibleItems()) {
                     selectionModel.setSelected(row, event.getValue());
                 }
             }
@@ -119,7 +136,7 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
         Dialog.confirmMessage("Подтверждение удаления файлов", "Вы уверены, что хотите удалить выбранные файлы?", new DialogHandler() {
             @Override
             public void yes() {
-                for (DeclarationDataFile row : selectionModel.getSelectedSet()) {
+                for (DataRow<Cell> row : selectionModel.getSelectedSet()) {
                     dataProvider.getList().remove(row);
                 }
                 table.redraw();
@@ -178,26 +195,52 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
 
     private void initColumns() {
         table.removeAllColumns();
+        factory.setReadOnly(isReadOnlyMode());
 
-        Column<DeclarationDataFile, Boolean> checkColumn = new Column<DeclarationDataFile, Boolean>(
+        Column<DataRow<Cell>, Boolean> checkColumn = new Column<DataRow<Cell>, Boolean> (
                 new CheckboxCell(true, false)) {
             @Override
-            public Boolean getValue(DeclarationDataFile object) {
+            public Boolean getValue(DataRow<Cell> object) {
                 return selectionModel.isSelected(object);
             }
         };
 
-        Column<DeclarationDataFile, String> fileColumn = new Column<DeclarationDataFile, String>(new ClickableTextCell()){
+        uuidColumn.setAlias("uuid");
+        uuidColumn.setName("uuid");
 
+        declarationDataIdColumn.setAlias("declarationDataId");
+        declarationDataIdColumn.setName("declarationDataId");
+
+        fileTypeColumn.setAlias("fileType");
+        fileTypeColumn.setName("Тип файла");
+        fileTypeColumn.setId(1);
+        fileTypeColumn.setNameAttributeId(9342L);
+        fileTypeColumn.setRefBookAttributeId(9342L);
+        fileTypeColumn.setRefBookAttribute(new RefBookAttribute(){{setAttributeType(RefBookAttributeType.STRING);}});
+        fileTypeColumn.setSearchEnabled(false);
+        fileTypeColumn.setVersioned(false);
+        Column<DataRow<Cell>, ?> fileTypeColumnUI = factory.createTableColumn(fileTypeColumn, table);
+        ((DataRowColumn<?>) fileTypeColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
             @Override
-            public void render(Cell.Context context, DeclarationDataFile object, SafeHtmlBuilder sb) {
-                String link = "<a href=\"" + GWT.getHostPageBaseURL() + "download/downloadBlobController/DeclarationDataFile/" + object.getUuid() + "\">" + object.getFileName() + "</a>";
+            public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                if (getUiHandlers() != null) {
+                    table.redraw();
+                }
+            }
+        });
+
+        fileNameColumn.setAlias("fileName");
+        fileNameColumn.setName("Имя файла");
+        DataRowColumn<String> fileNameColumnUI = new DataRowColumn<String>(new ClickableTextCell(), fileNameColumn) {
+            @Override
+            public void render(com.google.gwt.cell.client.Cell.Context context, DataRow<Cell> object, SafeHtmlBuilder sb) {
+                String link = "<a href=\"" + GWT.getHostPageBaseURL() + "download/downloadBlobController/DeclarationDataFile/" + object.getCell(uuidColumn.getAlias()).getStringValue() + "\">" + object.getCell(fileNameColumn.getAlias()).getStringValue() + "</a>";
                 sb.appendHtmlConstant(link);
             }
 
             @Override
-            public String getValue(DeclarationDataFile object) {
-                return object.getFileName();
+            public String getValue(DataRow<Cell> object) {
+                return object.getCell(fileTypeColumn.getAlias()).getStringValue();
             }
         };
 
@@ -208,42 +251,51 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
             noteCell = new EditTextCell();
         }
 
-        Column<DeclarationDataFile, String> noteColumn = new Column<DeclarationDataFile, String>(noteCell) {
+        noteColumn.setAlias("note");
+        noteColumn.setName("Комментарий");
+        DataRowColumn<String> noteColumnUI = new DataRowColumn<String>(noteCell, fileNameColumn) {
             @Override
-            public String getValue(DeclarationDataFile object) {
-                return object.getNote()!=null?object.getNote():"";
+            public String getValue(DataRow<Cell> object) {
+                String note = object.getCell(noteColumn.getAlias()).getStringValue();
+                return note != null ? note : "";
             }
         };
-        noteColumn.setFieldUpdater(new FieldUpdater<DeclarationDataFile, String>() {
+        noteColumnUI.setFieldUpdater(new FieldUpdater<DataRow<Cell>, String>() {
             @Override
-            public void update(int index, DeclarationDataFile object, String value) {
+            public void update(int index, DataRow<Cell> object, String value) {
                 if (value.length() <= NOTE_MAX_LENGTH) {
-                    object.setNote(value);
+                    object.getCell(noteColumn.getAlias()).setStringValue(value);
                 } else {
-                    object.setNote(value.substring(0, NOTE_MAX_LENGTH));
+                    object.getCell(noteColumn.getAlias()).setStringValue(value.substring(0, NOTE_MAX_LENGTH));
                     Dialog.warningMessage("Количество символов для комментария превысило допустимое значение " + NOTE_MAX_LENGTH + ".");
                 }
             }
         });
 
-        TextColumn<DeclarationDataFile> dateColumn = new TextColumn<DeclarationDataFile>() {
+        dateColumn.setAlias("date");
+        dateColumn.setName("Дата-время");
+        DataRowColumn<String> dateColumnUI = new DataRowColumn<String>(new TextCell(), fileNameColumn) {
             @Override
-            public String getValue(DeclarationDataFile object) {
-                return format.format(object.getDate());
+            public String getValue(DataRow<Cell> object) {
+                return format.format(object.getCell(dateColumn.getAlias()).getDateValue());
             }
         };
 
-        TextColumn<DeclarationDataFile> userColumn = new TextColumn<DeclarationDataFile>() {
+        userColumn.setAlias("userName");
+        userColumn.setName("Пользователь");
+        DataRowColumn<String> userColumnUI = new DataRowColumn<String>(new TextCell(), fileNameColumn) {
             @Override
-            public String getValue(DeclarationDataFile object) {
-                return object.getUserName();
+            public String getValue(DataRow<Cell> object) {
+                return object.getCell(userColumn.getAlias()).getStringValue();
             }
         };
 
-        TextColumn<DeclarationDataFile> departmentColumn = new TextColumn<DeclarationDataFile>() {
+        departmentColumn.setAlias("userDepartmentName");
+        departmentColumn.setName("Подразделение пользователя");
+        DataRowColumn<String> departmentColumnUI = new DataRowColumn<String>(new TextCell(), fileNameColumn) {
             @Override
-            public String getValue(DeclarationDataFile object) {
-                return object.getUserDepartmentName();
+            public String getValue(DataRow<Cell> object) {
+                return object.getCell(departmentColumn.getAlias()).getStringValue();
             }
         };
 
@@ -252,24 +304,31 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
             table.setColumnWidth(checkColumn, 2, Style.Unit.EM);
         } else {
             //фиктивная колонка для правильной работы таблицы
-            TextColumn<DeclarationDataFile> fixColumn = new TextColumn<DeclarationDataFile>() {
+            TextColumn<DataRow<Cell>> fixColumn = new TextColumn<DataRow<Cell>>() {
                 @Override
-                public String getValue(DeclarationDataFile object) {
+                public String getValue(DataRow<Cell> object) {
                     return "";
                 }
             };
             table.addColumn(fixColumn, "");
             table.setColumnWidth(fixColumn, 0, Style.Unit.EM);
         }
-        table.addColumn(fileColumn, "Файл");
-        table.setColumnWidth(fileColumn, 13, Style.Unit.EM);
-        table.addColumn(noteColumn, "Комментарий");
-        table.addColumn(dateColumn, "Дата-время");
-        table.setColumnWidth(dateColumn, 8.5, Style.Unit.EM);
-        table.addColumn(userColumn, "Пользователь");
-        table.setColumnWidth(userColumn, 10, Style.Unit.EM);
-        table.addColumn(departmentColumn, "Подразделение пользователя");
-        table.setColumnWidth(departmentColumn, 12, Style.Unit.EM);
+        table.addColumn(fileNameColumnUI, fileNameColumn.getName());
+        table.setColumnWidth(fileNameColumnUI, 13, Style.Unit.EM);
+
+        table.addColumn(fileTypeColumnUI, fileTypeColumn.getName());
+        table.setColumnWidth(fileNameColumnUI, 10, Style.Unit.EM);
+
+        table.addColumn(noteColumnUI, noteColumn.getName());
+
+        table.addColumn(dateColumnUI, dateColumn.getName());
+        table.setColumnWidth(dateColumnUI, 8.5, Style.Unit.EM);
+
+        table.addColumn(userColumnUI, userColumn.getName());
+        table.setColumnWidth(userColumnUI, 10, Style.Unit.EM);
+
+        table.addColumn(departmentColumnUI, departmentColumn.getName());
+        table.setColumnWidth(departmentColumnUI, 12, Style.Unit.EM);
     }
 
     private boolean isModify() {
@@ -278,15 +337,24 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
         }
         if (oldFiles != null && dataProvider.getList() != null && oldFiles.size() == dataProvider.getList().size()) {
             for(int i = 0; i < oldFiles.size(); i++) {
-                if (!dataProvider.getList().get(i).getUuid().equals(oldFiles.get(i).getUuid()) ||
-                        !((dataProvider.getList().get(i).getNote() == null || dataProvider.getList().get(i).getNote().isEmpty()) && oldFiles.get(i).getNote() == null
-                                || dataProvider.getList().get(i).getNote().equals(oldFiles.get(i).getNote()))) {
+                DataRow<Cell> row = dataProvider.getList().get(i);
+                String uuid = row.getCell(uuidColumn.getAlias()).getStringValue();
+                String note = row.getCell(noteColumn.getAlias()).getStringValue();
+
+                DataRow<Cell> oldRow = oldFiles.get(i);
+                String oldUuid = oldRow.getCell(uuidColumn.getAlias()).getStringValue();
+                String oldNote = oldRow.getCell(noteColumn.getAlias()).getStringValue();
+
+                if (!uuid.equals(oldUuid)
+                    || !((note == null || note.isEmpty()) && oldNote == null || (note != null && note.equals(oldNote)))
+                ) {
                     return true;
                 }
             }
         } else if ((dataProvider.getList() != null ? dataProvider.getList().size() : 0) != 0) {
             return true;
         }
+
         return false;
     }
 
@@ -300,21 +368,10 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
         addFile.addValueChangeHandler(changeHandler);
     }
 
-    private List<DeclarationDataFile> copyFiles(List<DeclarationDataFile> from) {
-        List<DeclarationDataFile> to = new ArrayList<DeclarationDataFile>();
-        for (DeclarationDataFile file : from) {
-            DeclarationDataFile clonedFile = new DeclarationDataFile();
-            clonedFile.setUuid(file.getUuid());
-            clonedFile.setNote(file.getNote());
-            to.add(clonedFile);
-        }
-        return to;
-    }
-
     @Override
-    public void setTableData(List<DeclarationDataFile> result) {
+    public void setTableData(List<DataRow<Cell>> result) {
         sort(result);
-        oldFiles = copyFiles(result);
+        oldFiles = getUiHandlers().copyFiles(result);
         dataProvider.setList(result);
         selectionModel.clear();
         onSelection();
@@ -348,21 +405,24 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
     }
 
     @Override
-    public void addFile(List<DeclarationDataFile> files) {
+    public void addFile(List<DataRow<Cell>> files) {
         checkBoxHeader.setValue(false);
         dataProvider.getList().addAll(0, files);
         sort(dataProvider.getList());
         table.redraw();
     }
 
-    private void sort(List<DeclarationDataFile> files) {
-        Collections.sort(files, new Comparator<DeclarationDataFile>() {
+    private void sort(List<DataRow<Cell>> files) {
+        Collections.sort(files, new Comparator<DataRow<Cell>>() {
             @Override
-            public int compare(DeclarationDataFile o1, DeclarationDataFile o2) {
-                int compareFileName = o1.getFileName().compareTo(o2.getFileName());
-                if (compareFileName != 0)
+            public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                int compareFileName = o1.getCell(fileNameColumn.getAlias()).getStringValue().compareTo(o2.getCell(fileNameColumn.getAlias()).getStringValue());
+
+                if (compareFileName != 0) {
                     return compareFileName;
-                return -o1.getDate().compareTo(o2.getDate());
+                }
+
+                return -o1.getCell(dateColumn.getAlias()).getDateValue().compareTo(o2.getCell(dateColumn.getAlias()).getDateValue());
             }
         });
     }
@@ -374,5 +434,41 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
     @Override
     public HandlerRegistration addStartLoadFileHandler(EndLoadFileEvent.EndLoadFileHandler handler) {
         return addFile.addEndLoadHandler(handler);
+    }
+
+    public CheckBoxHeader getCheckBoxHeader() {
+        return checkBoxHeader;
+    }
+
+    public StringColumn getFileNameColumn() {
+        return fileNameColumn;
+    }
+
+    public StringColumn getDateColumn() {
+        return dateColumn;
+    }
+
+    public StringColumn getUserColumn() {
+        return userColumn;
+    }
+
+    public StringColumn getDepartmentColumn() {
+        return departmentColumn;
+    }
+
+    public StringColumn getNoteColumn() {
+        return noteColumn;
+    }
+
+    public StringColumn getUuidColumn() {
+        return uuidColumn;
+    }
+
+    public NumericColumn getDeclarationDataIdColumn() {
+        return declarationDataIdColumn;
+    }
+
+    public RefBookColumn getFileTypeColumn() {
+        return fileTypeColumn;
     }
 }

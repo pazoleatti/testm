@@ -109,17 +109,36 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate) {
+    public List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo) {
+        String sql = "select " +createColumns(NdflPersonIncome.COLUMNS, "npi") +
+                " from NDFL_PERSON_INCOME npi where " +
+                "npi.NDFL_PERSON_ID = :ndflPersonId and (npi.OKTMO is null or npi.OKTMO = :oktmo) and npi.KPP = :kpp";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("oktmo", oktmo)
+                .addValue("kpp", kpp);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo) {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
                 " WHERE np.declaration_data_id = :declaration_data_id" +
                 " AND ((npi.tax_date >= :startDate AND npi.tax_date <= :endDate) OR npi.tax_date IS NULL)" +
                 " AND ((npi.payment_date >= :startDate AND npi.payment_date <= :endDate) OR npi.payment_date IS NULL)" +
-                " AND (npi.tax_date IS NOT NULL OR npi.payment_date IS NOT NULL)";
+                " AND (npi.tax_date IS NOT NULL OR npi.payment_date IS NOT NULL) " +
+                " AND (npi.kpp = :kpp or npi.kpp is null) AND (npi.oktmo = :oktmo or npi.oktmo is null)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declaration_data_id", declarationDataId)
                 .addValue("startDate", startDate)
-                .addValue("endDate", endDate);
+                .addValue("endDate", endDate)
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -305,12 +324,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId) {
+    public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo) {
         String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " FROM ndfl_person_prepayment npi " +
                 " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
-                " WHERE np.declaration_data_id = ?";
+                " INNER JOIN ndfl_person_income npi ON np.id = npi.ndfl_person_id " +
+                " WHERE np.declaration_data_id = :declarationDataId " +
+                " AND (npi.kpp = :kpp or npi.kpp is null) AND (npi.oktmo = :oktmo or npi.oktmo is null)";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("declarationDataId", declarationDataId)
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo);
         try {
-            return getJdbcTemplate().query(sql, new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonPrepayment>();
         }
