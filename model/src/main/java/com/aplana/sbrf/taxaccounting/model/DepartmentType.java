@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+
 import java.io.Serializable;
 
 /**
@@ -28,6 +30,9 @@ public enum DepartmentType implements Serializable {
 	}
 
 	public static DepartmentType fromCode(int code) {
+		if (RefBook.FAKE_ID == code) {
+			return null;
+		}
 		for (DepartmentType t: values()) {
 			if (t.code == code) {
 				return t;
