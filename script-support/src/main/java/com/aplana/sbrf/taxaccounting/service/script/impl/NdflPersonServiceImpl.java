@@ -113,6 +113,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId, Date startDate, Date endDate) {
         /*
+        todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-288 - НДФЛ. Перенести логику формирования 6-НДФЛ из сервисного класса в Groovy
         Одним из полей Обобщенных показателей о доходах является перечень просуммированых доходов и авансов для каждой ставки.
         В рамках одной ставки может быть несколько операций.
         Доходы одной операции имеют одну и только одну ставку.
