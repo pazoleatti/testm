@@ -47,6 +47,7 @@ alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id
 alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
 alter table ref_book add constraint ref_book_chk_read_only check (read_only in (0, 1));
 alter table ref_book add constraint ref_book_chk_versioned check (is_versioned in (0, 1));
+create unique index unq_ref_book_table_name on ref_book(table_name);
 
 alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));

@@ -325,21 +325,21 @@ comment on column ref_book_budget_income.lev is 'Уровень кода. Слу
 --Коды, определяющие налоговый (отчётный) период
 create table report_period_type
 (
-  id number(18) not null,
-  code varchar2(2 char) not null,
-  name varchar2(255 char) not null,
-  ndfl number(1),
-  fond number(1),
-  start_date date,
-  end_date date,
+  id                  number(18) not null,
+  code                varchar2(2 char) not null,
+  name                varchar2(255 char) not null,
+  n                   number(1),
+  f                   number(1),
+  start_date          date,
+  end_date            date,
   calendar_start_date date
 );
 comment on table report_period_type is 'Коды, определяющие налоговый (отчётный) период';
 comment on column report_period_type.id is 'Уникальный идентификатор';
 comment on column report_period_type.code is 'Код';
 comment on column report_period_type.name is 'Наименование';
-comment on column report_period_type.ndfl is 'Признак принадлежности к НДФЛ';
-comment on column report_period_type.fond is 'Признак принадлежности к Страховым сборам, взносам';
+comment on column report_period_type.n is 'Признак принадлежности к НДФЛ';
+comment on column report_period_type.f is 'Признак принадлежности к Страховым сборам, взносам';
 comment on column report_period_type.start_date is 'Дата начала периода';
 comment on column report_period_type.end_date is 'Дата окончания периода';
 comment on column report_period_type.calendar_start_date is 'Календарная дата начала периода';
