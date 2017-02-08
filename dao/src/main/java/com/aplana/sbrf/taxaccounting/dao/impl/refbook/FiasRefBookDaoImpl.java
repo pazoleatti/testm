@@ -52,20 +52,20 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
     public static String FIND_ADDRESS_SQL = buidFindAddress();
 
     private static String buidFindAddress() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("WITH parent_to_child AS \n");
-        sb.append("  (SELECT DISTINCT fa.id, fa.parentguid AS pid, fa.regioncode, fa.formalname AS fname, level AS aolevel, connect_by_isleaf AS isleaf, fa.currstatus AS status, sys_connect_by_path(fa.formalname, '\\\\') AS aopath \n");
-        sb.append("  FROM fias_addrobj fa \n");
-        sb.append("  WHERE REPLACE(lower(fa.formalname), ' ', '') = :formalName \n");
-        sb.append("    START WITH fa.parentguid                  IS NULL \n");
-        sb.append("  AND fa.regioncode                            = :regionCode \n");
-        sb.append("    CONNECT BY prior fa.id                     = fa.parentguid \n");
-        sb.append("  ) \n");
-        sb.append("SELECT ptc.id, ptc.pid, ptc.regioncode, ptc.fname, ptc.aolevel, ptc.isleaf, ptc.aopath \n");
-        sb.append("FROM parent_to_child ptc \n");
-        sb.append("WHERE REPLACE(lower(ptc.aopath), ' ', '') = :formalPath \n");
-        sb.append("AND ptc.status                            = 0");
-        return sb.toString();
+        StringBuilder SQL = new StringBuilder();
+        SQL.append("WITH parent_to_child AS \n");
+        SQL.append("  (SELECT DISTINCT fa.id, fa.parentguid AS pid, fa.regioncode, fa.formalname AS fname, level AS aolevel, connect_by_isleaf AS isleaf, fa.currstatus AS status, connect_by_root fa.formalname AS ancestor, sys_connect_by_path(fa.formalname, '\\') AS aopath \n");
+        SQL.append("  FROM fias_addrobj fa \n");
+        SQL.append("  WHERE REPLACE(lower(fa.formalname), ' ', '') = REPLACE(lower(:formalName), ' ', '') \n");
+        SQL.append("    START WITH fa.parentguid                  IS NULL \n");
+        SQL.append("  AND fa.regioncode                            = :regionCode \n");
+        SQL.append("    CONNECT BY prior fa.id                     = fa.parentguid \n");
+        SQL.append("  ) \n");
+        SQL.append("SELECT ptc.id, ptc.pid, ptc.regioncode, ptc.fname, ptc.aolevel, ptc.isleaf, ptc.aopath, ptc.ancestor \n");
+        SQL.append("FROM parent_to_child ptc \n");
+        SQL.append("WHERE REPLACE(lower(ptc.aopath), ' ', '') = REPLACE(lower(concat(concat('\\', ptc.ancestor), :formalPath)), ' ', '') \n");
+        SQL.append("AND ptc.status                            = 0");
+        return SQL.toString();
     }
 
     class AddressObjectRowMapper implements RowMapper<AddressObject> {
