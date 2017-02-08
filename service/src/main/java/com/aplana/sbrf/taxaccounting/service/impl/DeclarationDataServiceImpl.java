@@ -738,7 +738,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             exchangeParams = new HashMap<String, Object>();
         }
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
-
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(DeclarationDataScriptParams.NOT_REPLACE_XML, false);
+        exchangeParams.put("calculateParams", params);
         File xmlFile = null;
         Writer fileWriter = null;
 
@@ -764,47 +766,54 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 IOUtils.closeQuietly(fileWriter);
             }
 
-            //Получение имени файла записанного в xml
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            SAXHandler handler = new SAXHandler(new HashMap<String, String>(){{
-                put(TAG_FILE, ATTR_FILE_ID);
-                put(TAG_DOCUMENT, ATTR_DOC_DATE);
-            }});
-            saxParser.parse(xmlFile, handler);
-            String decName = handler.getValues().get(TAG_FILE);
-            Date decDate = getFormattedDate(handler.getValues().get(TAG_DOCUMENT));
-            if (decDate == null)
-                decDate = docDate;
+            boolean notReplaceXml = false;
+            if (params.containsKey(DeclarationDataScriptParams.NOT_REPLACE_XML) && params.get(DeclarationDataScriptParams.NOT_REPLACE_XML) != null) {
+                notReplaceXml = (Boolean)params.get(DeclarationDataScriptParams.NOT_REPLACE_XML);
+            }
+            if (!notReplaceXml) {
+                //Получение имени файла записанного в xml
+                SAXParserFactory factory = SAXParserFactory.newInstance();
+                SAXParser saxParser = factory.newSAXParser();
+                SAXHandler handler = new SAXHandler(new HashMap<String, String>() {{
+                    put(TAG_FILE, ATTR_FILE_ID);
+                    put(TAG_DOCUMENT, ATTR_DOC_DATE);
+                }});
+                saxParser.parse(xmlFile, handler);
+                String decName = handler.getValues().get(TAG_FILE);
+                Date decDate = getFormattedDate(handler.getValues().get(TAG_DOCUMENT));
+                if (decDate == null)
+                    decDate = docDate;
 
-            //Архивирование перед сохраннеием в базу
-            File zipOutFile = null;
-            try {
-                zipOutFile = File.createTempFile("xml", ".zip");
-                FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
-                ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-                ZipEntry zipEntry = new ZipEntry(decName+".xml");
-                zos.putNextEntry(zipEntry);
-                FileInputStream fi = new FileInputStream(xmlFile);
-
+                //Архивирование перед сохраннеием в базу
+                File zipOutFile = null;
                 try {
-                    IOUtils.copy(fi, zos);
+                    zipOutFile = File.createTempFile("xml", ".zip");
+                    FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+                    ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+                    ZipEntry zipEntry = new ZipEntry(decName + ".xml");
+                    zos.putNextEntry(zipEntry);
+                    FileInputStream fi = new FileInputStream(xmlFile);
+
+                    try {
+                        IOUtils.copy(fi, zos);
+                    } finally {
+                        IOUtils.closeQuietly(fi);
+                        IOUtils.closeQuietly(zos);
+                        IOUtils.closeQuietly(fileOutputStream);
+                    }
+
+                    LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
+                    stateLogger.updateState("Сохранение XML-файла в базе данных");
+
+                    reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.XML_DEC));
+                    reportService.createDec(declarationData.getId(),
+                            blobDataService.create(zipOutFile, decName + ".zip", decDate),
+                            DeclarationDataReportType.XML_DEC);
+                    declarationDataDao.setFileName(declarationData.getId(), decName);
                 } finally {
-                    IOUtils.closeQuietly(fi);
-                    IOUtils.closeQuietly(zos);
-                    IOUtils.closeQuietly(fileOutputStream);
-                }
-
-                LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Сохранение XML-файла в базе данных");
-
-                reportService.createDec(declarationData.getId(),
-                        blobDataService.create(zipOutFile, decName + ".zip", decDate),
-                        DeclarationDataReportType.XML_DEC);
-                declarationDataDao.setFileName(declarationData.getId(), decName);
-            } finally {
-                if (zipOutFile != null && !zipOutFile.delete()) {
-                    LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                    if (zipOutFile != null && !zipOutFile.delete()) {
+                        LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                    }
                 }
             }
         } catch (IOException e) {
@@ -840,7 +849,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param isErrorFatal true-если ошибки при проверке фатальные
      * @param xmlFile файл декларации
      */
-    private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+    public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                                      FormDataEvent operation, File xmlFile, LockStateLogger stateLogger) {
         Locale oldLocale = Locale.getDefault();
         LOG.info(String.format("Получение данных декларации %s", declarationData.getId()));
@@ -1179,9 +1188,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             }
         }
-        if (DeclarationDataReportType.XML_DEC.getReportType().equals(reportType)) {
-            reportService.deleteDec(declarationDataId);
-        }
     }
 
     @Override
@@ -1458,14 +1464,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
             DeclarationData declarationData = get(declarationDataId, userInfo);
 
-            // проверка по xsd
-            validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, new LockStateLogger() {
-                @Override
-                public void updateState(String state) {
-                    // ничего не делаем
-                }
-            });
-
             //Архивирование перед сохраннеием в базу
             File zipOutFile = null;
             try {
@@ -1516,6 +1514,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 Map<String, Object> additionalParameters = new HashMap<String, Object>();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
+                additionalParameters.put("dataFile", dataFile);
                 if (stateLogger != null) {
                     stateLogger.updateState("Импорт файла");
                 }
@@ -1576,7 +1575,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException("Ошибка при попытке получить соединение с БД!", e);
         }
     }
-
 
     @Override
     public JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> parameters) {
