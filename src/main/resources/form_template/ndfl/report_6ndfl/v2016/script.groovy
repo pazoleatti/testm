@@ -5,6 +5,9 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 switch (formDataEvent) {
+    case FormDataEvent.CALCULATE:
+        buildXml()
+        break
     case FormDataEvent.CHECK:
         checkXml()
         break
@@ -12,31 +15,29 @@ switch (formDataEvent) {
         println "!CREATE_FORMS!"
         createForm()
         break
-    case FormDataEvent.CALCULATE:
-        buildXml()
-        break
     default:
         break
 }
 
 // Коды, определяющие налоговый (отчётный) период
-@Field final long REF_PERIOD_CODE_ID = RefBook.Id.PERIOD_CODE.id
+@Field final long REF_BOOK_PERIOD_CODE_ID = RefBook.Id.PERIOD_CODE.id
 
 // Коды представления налоговой декларации по месту нахождения (учёта)
-@Field final long REF_TAX_PLACE_TYPE_CODE_ID = RefBook.Id.TAX_PLACE_TYPE_CODE.id
+@Field final long REF_BOOK_TAX_PLACE_TYPE_CODE_ID = RefBook.Id.TAX_PLACE_TYPE_CODE.id
 
 // Признак лица, подписавшего документ
-@Field final long REF_MARK_SIGNATORY_CODE_ID = RefBook.Id.MARK_SIGNATORY_CODE.id
+@Field final long REF_BOOK_MARK_SIGNATORY_CODE_ID = RefBook.Id.MARK_SIGNATORY_CODE.id
 
 // Настройки подразделений по НДФЛ
-@Field final long REF_NDFL_ID = RefBook.Id.NDFL.id
+@Field final long REF_BOOK_NDFL_ID = RefBook.Id.NDFL.id
 
 // Настройки подразделений по НДФЛ (таблица)
-@Field final long REF_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
+@Field final long REF_BOOK_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
 
 @Field final FORM_NAME_NDFL6 = "НДФЛ6"
 @Field final FORM_NAME_NDFL2 = "НДФЛ2"
-@Field final DECLARATION_TYPE_NDFL2_ID = 102
+@Field final int DECLARATION_TYPE_RNU_NDFL_ID = 101
+@Field final int DECLARATION_TYPE_NDFL2_ID = 102
 
 // Узлы 6 НДФЛ
 @Field final NODE_NAME_SUM_STAVKA6 = "СумСтавка"
@@ -98,19 +99,19 @@ def buildXml() {
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
     // Код периода
-    def periodCode = getRefBookValue(REF_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+    def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
 
     // Коды представления налоговой декларации по месту нахождения (учёта)
-    def taxPlaceTypeCode = getRefBookValue(REF_TAX_PLACE_TYPE_CODE_ID, departmentParamIncomeRow?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue
+    def taxPlaceTypeCode = getRefBookValue(REF_BOOK_TAX_PLACE_TYPE_CODE_ID, departmentParamIncomeRow?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue
 
     // Признак лица, подписавшего документ
-    def signatoryId = getRefBookValue(REF_MARK_SIGNATORY_CODE_ID, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
+    def signatoryId = getRefBookValue(REF_BOOK_MARK_SIGNATORY_CODE_ID, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
 
     // Учитывать будем только информацию о доходах/налогах только за отчетный период
-    def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id, reportPeriod.startDate, reportPeriod.endDate);
+    def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id, reportPeriod.startDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
     def ndflPersonIncomeByRateList = ndflPersonIncomeCommonValue?.ndflPersonIncomeByRateList
     // Учитывать будем только информацию о доходах/налогах за последний квартал отчетного периода
-    def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate)
+    def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
@@ -271,7 +272,7 @@ def checkXml() {
 
     // Код отчетного периода
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    def periodCode = getRefBookValue(REF_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+    def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
 
     if (["34", "90"].contains(periodCode)) {
         def ndfl2DeclarationDataIds = getNdfl2DeclarationDataId(reportPeriod.taxPeriod.year)
@@ -291,7 +292,7 @@ def getNdfl2DeclarationDataId(def taxPeriodYear) {
     def declarationDataList = declarationService.find(DECLARATION_TYPE_NDFL2_ID, declarationData.reportPeriodId)
     for (DeclarationData dd : declarationDataList) {
         def reportPeriod = reportPeriodService.get(dd.reportPeriodId)
-        def periodCode = getRefBookValue(REF_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+        def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
         if (reportPeriod.taxPeriod.year == taxPeriodYear
                 && periodCode == "34"
                 && dd.kpp == declarationData.kpp
@@ -514,7 +515,7 @@ def getReportPeriodEndDate() {
  */
 def getDepartmentParam(def departmentId) {
     if (departmentParam == null) {
-        def departmentParamList = getProvider(REF_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения")
         }
@@ -531,7 +532,7 @@ def getDepartmentParam(def departmentId) {
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamTable == null) {
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
-        def departmentParamTableList = getProvider(REF_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+        def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения")
         }
@@ -562,16 +563,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
 
 @Field
-final int RNU_NDFL_DECLARATION_TYPE = 101
-
-@Field
-final int REF_BOOK_NDFL_DETAIL_ID = 951
-
-@Field
 def departmentParamTableList = null;
-
-@Field
-final int REF_BOOK_NDFL_ID = 950
 
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
@@ -613,7 +605,7 @@ def createForm() {
     // список форм рну-ндфл для отчетного периода всех ТБ
     def allDeclarationData = []
     allDepartmentReportPeriodIds.each {
-        allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
+        allDeclarationData.addAll(declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, it))
     }
     // удаление форм не со статусом принята
     def declarationsForRemove = []
