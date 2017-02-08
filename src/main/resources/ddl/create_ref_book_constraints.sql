@@ -28,6 +28,10 @@ alter table ref_book_fill_base add constraint pk_ref_book_fill_base primary key 
 alter table ref_book_budget_income add constraint pk_ref_book_budget_income primary key (id);
 alter table ref_book_hard_work add constraint pk_ref_book_hard_work primary key (id);
 alter table ref_book_tariff_payer add constraint pk_ref_book_tariff_payer primary key (id);
+alter table report_period_type add constraint pk_report_period_type primary key (id);
+alter table log_system_fields add constraint pk_log_system_fields primary key(id);
+alter table ref_book_country add constraint pk_ref_book_country primary key (id);
+alter table ref_book_doc_type add constraint pk_ref_book_doc_type primary key (id);
 
 -- foreign keys
 --alter table ref_book_oktmo add constraint ref_book_oktmo_fk_parent_id foreign key (parent_id) references ref_book_oktmo(id);
@@ -58,6 +62,7 @@ alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_signatory f
 alter table declaration_template add constraint fk_declaration_template_fkind foreign key(form_kind) references declaration_kind(id);
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
 alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);
+alter table report_period add constraint report_period_fk_dtp_id foreign key(dict_tax_period_id) references report_period_type(id);
 
 -- checks
 alter table ref_book_oktmo add constraint ref_book_oktmo_chk_status check (status in (0,-1,1,2));
@@ -77,6 +82,8 @@ alter table ref_book_ndfl add constraint chk_ref_book_ndfl_status check (status 
 alter table ref_book_ndfl_detail add constraint chk_ref_book_ndfl_det_status check (status in (-1,0,1,2));
 alter table ref_book_fond add constraint chk_ref_book_fond_status check (status in (-1,0,1,2));
 alter table ref_book_fond_detail add constraint chk_ref_book_fond_det_status check (status in (-1,0,1,2));
+alter table ref_book_country add constraint chk_ref_book_countr_st check (status between -1 and 2);
+alter table ref_book_doc_type add constraint chk_ref_book_doc_type_st check (status between -1 and 2);
 
 --unique
 --create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);

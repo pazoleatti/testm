@@ -1,6 +1,3 @@
-insert into ref_book (id, name) values (-1, ' ');
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values(-1,-1,-1,to_date('2016-01-01', 'YYYY-MM-DD'),2);
-
 insert into DEPARTMENT_TYPE(id) values(-1);
 insert into DEPARTMENT(id,code,name,type,parent_id) values(-1,0,' ',-1,0);
 
