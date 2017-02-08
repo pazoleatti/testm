@@ -15,7 +15,6 @@ comment on table ref_book_oktmo is 'ОКТМО';
 comment on column ref_book_oktmo.id is 'Идентификатор записи';
 comment on column ref_book_oktmo.code is 'Код';
 comment on column ref_book_oktmo.name is 'Наименование';
-comment on column ref_book_oktmo.parent_id is 'Идентификатор родительской записи';
 comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';

@@ -188,10 +188,10 @@ insert into ref_book_value(record_id, attribute_id, string_value, number_value, 
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (18, 16, null, null, '2013-01-01 13:12:12', null);
 -- Справочник ОКТМО
-INSERT INTO ref_book_oktmo(ID, CODE, NAME, PARENT_ID, VERSION, STATUS, RECORD_ID) VALUES (1,'1','Почтовское',null,to_date('01.09.2014', 'DD.MM.YYYY'),1,1);
-INSERT INTO ref_book_oktmo(ID, CODE, NAME, PARENT_ID, VERSION, STATUS, RECORD_ID) VALUES (2,'2','Ароматненское',null,to_date('01.09.2014', 'DD.MM.YYYY'),1,2);
-INSERT INTO ref_book_oktmo(ID, CODE, NAME, PARENT_ID, VERSION, STATUS, RECORD_ID) VALUES (3,'3','Верхореченское',null,to_date('01.09.2014', 'DD.MM.YYYY'),1,3);
-INSERT INTO ref_book_oktmo(ID, CODE, NAME, PARENT_ID, VERSION, STATUS, RECORD_ID) VALUES (4,'4','Вилинское',null,to_date('01.09.2014', 'DD.MM.YYYY'),1,4);
-INSERT INTO ref_book_oktmo(ID, CODE, NAME, PARENT_ID, VERSION, STATUS, RECORD_ID) VALUES (5,'5','Голубинское',null,to_date('01.09.2014', 'DD.MM.YYYY'),1,5);
-INSERT INTO ref_book_oktmo(ID, CODE, NAME, PARENT_ID, VERSION, STATUS, RECORD_ID) VALUES (6,'6','Долинненское',null,to_date('01.09.2014', 'DD.MM.YYYY'),1,6);
-INSERT INTO ref_book_oktmo(ID, CODE, NAME, PARENT_ID, VERSION, STATUS, RECORD_ID) VALUES (7,'7','Тест',null,to_date('01.09.2014', 'DD.MM.YYYY'),1,7);
+INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (1,'1','Почтовское',to_date('01.09.2014', 'DD.MM.YYYY'),1,1);
+INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (2,'2','Ароматненское',to_date('01.09.2014', 'DD.MM.YYYY'),1,2);
+INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (3,'3','Верхореченское',to_date('01.09.2014', 'DD.MM.YYYY'),1,3);
+INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (4,'4','Вилинское',to_date('01.09.2014', 'DD.MM.YYYY'),1,4);
+INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (5,'5','Голубинское',to_date('01.09.2014', 'DD.MM.YYYY'),1,5);
+INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (6,'6','Долинненское',to_date('01.09.2014', 'DD.MM.YYYY'),1,6);
+INSERT INTO ref_book_oktmo(id, code, name, version, status, record_id) VALUES (7,'7','Тест',to_date('01.09.2014', 'DD.MM.YYYY'),1,7);
