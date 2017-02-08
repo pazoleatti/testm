@@ -1,14 +1,16 @@
 prompt async_task_type
 @@async_task_type;
 
+prompt ref_book_tax_place_type
+@@ref_book_tax_place_type;
+prompt ref_book_signatory_mark
+@@ref_book_signatory_mark;
 prompt department_type
 @@depart_type;
 prompt ref_book_country
 @@ref_book_country;
-
 prompt ref_book_doc_type
 @@ref_book_doc_type;
-
 prompt report_period_type
 @@report_period_type;
 
@@ -33,8 +35,8 @@ prompt ref_book_deduction_type
 @@ref_deduction_type;
 prompt ref_book_income_type
 @@ref_income_type;
-prompt ref_book_oktmo
-@@ref_oktmo;
+--prompt ref_book_oktmo
+--@@ref_oktmo;
 prompt ref_book_okved
 @@ref_okved;
 prompt ref_book_present_place

@@ -6,7 +6,7 @@ ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_reference_id;
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (0,'Тест',0,0,0,null);
 
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (2,'Коды представления налоговой декларации по месту нахождения (учёта)',1,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (2,'Коды представления налоговой декларации по месту нахождения (учёта)',1,0,0,null,'REF_BOOK_TAX_PLACE_TYPE');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (4,'Коды субъектов Российской Федерации',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (8,'Коды, определяющие налоговый (отчётный) период',1,0,1,null,'REPORT_PERIOD_TYPE');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (10,'ОК 025-2001 (Общероссийский классификатор стран мира)',1,0,0,null,'REF_BOOK_COUNTRY');
@@ -29,7 +29,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (30,'Подразделения',1,1,0,null, 'DEPARTMENT');
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (34,'Общероссийский классификатор видов экономической деятельности',1,0,0,null);
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (35,'Признак лица, подписавшего документ',1,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (35,'Признак лица, подписавшего документ',1,0,0,null,'REF_BOOK_SIGNATORY_MARK');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (36,'Признак сделки, совершенной в РПС',1,0,0,null);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (60,'Части сделок',1,0,0,null);
@@ -679,6 +679,3 @@ ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_ref_book_id;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_reference_id;
-
-commit;
-exit;

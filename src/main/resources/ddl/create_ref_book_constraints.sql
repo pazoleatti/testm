@@ -30,6 +30,8 @@ alter table ref_book_tariff_payer add constraint pk_ref_book_tariff_payer primar
 alter table report_period_type add constraint pk_report_period_type primary key (id);
 alter table ref_book_country add constraint pk_ref_book_country primary key (id);
 alter table ref_book_doc_type add constraint pk_ref_book_doc_type primary key (id);
+alter table ref_book_tax_place_type add constraint pk_ref_book_tax_place_type primary key (id);
+alter table ref_book_signatory_mark add constraint pk_ref_book_signatory_mark primary key (id);
 
 -- foreign keys
 --alter table ref_book_oktmo add constraint ref_book_oktmo_fk_parent_id foreign key (parent_id) references ref_book_oktmo(id);
@@ -45,7 +47,7 @@ alter table ref_book_ndfl add constraint fk_ref_book_ndfl_depart foreign key(dep
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_oblig foreign key(obligation) references ref_book_record(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_type foreign key(type) references ref_book_record(id);
 --alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_re_code foreign key(reorg_form_code) references ref_book_record(id);
-alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_signatory foreign key(signatory_id) references ref_book_record(id);
+alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_signatory foreign key(signatory_id) references ref_book_signatory_mark(id);
 alter table ref_book_fond add constraint fk_ref_book_fond_depart foreign key(department_id) references department(id);
 --alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_parent foreign key(ref_book_fond_id) references ref_book_fond(id);
 --alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
@@ -54,7 +56,7 @@ alter table ref_book_fond add constraint fk_ref_book_fond_depart foreign key(dep
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_oblig foreign key(obligation) references ref_book_record(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_type foreign key(type) references ref_book_record(id);
 --alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_re_code foreign key(reorg_form_code) references ref_book_reorganization(id);
-alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_signatory foreign key(signatory_id) references ref_book_record(id);
+alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_signatory foreign key(signatory_id) references ref_book_signatory_mark(id);
 --alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
 alter table declaration_template add constraint fk_declaration_template_fkind foreign key(form_kind) references declaration_kind(id);
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
@@ -84,6 +86,8 @@ alter table ref_book_fond add constraint chk_ref_book_fond_status check (status 
 alter table ref_book_fond_detail add constraint chk_ref_book_fond_det_status check (status in (-1,0,1,2));
 alter table ref_book_country add constraint chk_ref_book_countr_st check (status between -1 and 2);
 alter table ref_book_doc_type add constraint chk_ref_book_doc_type_st check (status between -1 and 2);
+alter table ref_book_tax_place_type add constraint chk_ref_tax_place_type_status check(status between -1 and 2);
+alter table ref_book_signatory_mark add constraint chk_ref_signatory_mark check(status between -1 and 2);
 
 --unique
 --create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);

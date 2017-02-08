@@ -15,7 +15,6 @@ comment on table ref_book_oktmo is 'ОКТМО';
 comment on column ref_book_oktmo.id is 'Идентификатор записи';
 comment on column ref_book_oktmo.code is 'Код';
 comment on column ref_book_oktmo.name is 'Наименование';
-comment on column ref_book_oktmo.parent_id is 'Идентификатор родительской записи';
 comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
@@ -387,6 +386,43 @@ comment on column ref_book_doc_type.version is 'Версия. Дата акту�
 comment on column ref_book_doc_type.code is 'Код';
 comment on column ref_book_doc_type.name is 'Наименование документа';
 comment on column ref_book_doc_type.priority is 'Приоритет';
+
+--Коды представления налоговой декларации по месту нахождения (учёта)
+create table ref_book_tax_place_type
+(
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  status    number(1) default 0 not null,
+  version   date                not null,
+  code      varchar2(3 char)    not null,
+  name      varchar2(255 char)  not null
+);
+comment on table ref_book_tax_place_type is 'Коды представления налоговой декларации по месту нахождения (учёта)';
+comment on column ref_book_tax_place_type.id is 'Уникальный идентификатор';
+comment on column ref_book_tax_place_type.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_tax_place_type.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_tax_place_type.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_tax_place_type.code is 'Код';
+comment on column ref_book_tax_place_type.name is 'Наименование';
+
+--Признак лица, подписавшего документ
+create table ref_book_signatory_mark
+(
+  id        number(18)          not null,
+  record_id number(9)           not null,
+  status    number(1) default 0 not null,
+  version   date                not null,
+  code      number(1)           not null,
+  name      varchar2(50 char)   not null
+);
+comment on table ref_book_signatory_mark is 'Признак лица, подписавшего документ';
+comment on column ref_book_signatory_mark.id is 'Уникальный идентификатор';
+comment on column ref_book_signatory_mark.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_signatory_mark.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_signatory_mark.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_signatory_mark.code is 'Код';
+comment on column ref_book_signatory_mark.name is 'Наименование';
+
 
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
