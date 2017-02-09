@@ -110,7 +110,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo) {
-        String sql = "select " +createColumns(NdflPersonIncome.COLUMNS, "npi") +
+        String sql = "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
                 " from NDFL_PERSON_INCOME npi where " +
                 "npi.NDFL_PERSON_ID = :ndflPersonId and (npi.OKTMO is null or npi.OKTMO = :oktmo) and npi.KPP = :kpp";
         SqlParameterSource params = new MapSqlParameterSource()
@@ -343,10 +343,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
 
     @Override
-    public int[] updatePersonRefBookReferences(Map<Long, Long> referenceMap) {
+    public int[] updatePersonRefBookReferences(List<NdflPerson> ndflPersonList) {
         String updateSql = "UPDATE ndfl_person SET person_id = ? WHERE id = ?";
         try {
-            int[] result = getJdbcTemplate().batchUpdate(updateSql, new UpdateNdflPersonBatch(referenceMap));
+            int[] result = getJdbcTemplate().batchUpdate(updateSql, new UpdateNdflPersonBatch(ndflPersonList));
             return result;
         } catch (DataAccessException e) {
             throw new DaoException("Ошибка при обновлении идентификаторов физлиц", e);
@@ -355,25 +355,22 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     class UpdateNdflPersonBatch implements BatchPreparedStatementSetter {
 
-        final Map<Long, Long> referenceMap;
+        final List<NdflPerson> ndflPersonList;
 
-        final List<Long> rowIdList;
-
-        public UpdateNdflPersonBatch(Map<Long, Long> referenceMap) {
-            this.rowIdList = new ArrayList<Long>(referenceMap.keySet());
-            this.referenceMap = referenceMap;
+        public UpdateNdflPersonBatch(List<NdflPerson> ndflPersonList) {
+            this.ndflPersonList = ndflPersonList;
         }
 
         @Override
         public void setValues(PreparedStatement ps, int i) throws SQLException {
-            Long ndflPersonId = rowIdList.get(i);
-            ps.setLong(1, referenceMap.get(ndflPersonId));
-            ps.setLong(2, ndflPersonId);
+            NdflPerson ndflPerson = ndflPersonList.get(i);
+            ps.setLong(1, ndflPerson.getPersonId());
+            ps.setLong(2, ndflPerson.getId());
         }
 
         @Override
         public int getBatchSize() {
-            return rowIdList.size();
+            return ndflPersonList.size();
         }
 
     }

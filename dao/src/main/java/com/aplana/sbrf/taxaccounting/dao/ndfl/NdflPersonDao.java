@@ -26,9 +26,9 @@ public interface NdflPersonDao {
     /**
      * Пакетное обновление ссылок NdflPerson.personId на справочник физлиц
      *
-     * @param referenceMap карта [NdflPerson.id, RefBookPerson.id]
+     * @param ndflPersonList список объектов для обновления
      */
-    int[] updatePersonRefBookReferences(Map<Long, Long> referenceMap);
+    int[] updatePersonRefBookReferences(List<NdflPerson> ndflPersonList);
 
     /**
      * Создание новой записи ndflPerson, также создаются все потомки (incomes, deductions, prepayments)

@@ -23,48 +23,43 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     private RefBookPersonDao refBookPersonDao;
 
     @Override
-    public Long identificatePerson(PersonData personData) {
-        return identificatePerson(personData, 900);
-    }
-
     public Long identificatePerson(PersonData personData, int tresholdValue) {
-        return identificatePerson(personData, tresholdValue, new PersonDataWeigthCalculator(getComporatorList()));
+        return identificatePerson(personData, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()));
     }
 
-    public Long identificatePerson(PersonData personData, int tresholdValue, WeigthCalculator<PersonData>
-            weigthComporators) {
+    public Long identificatePerson(PersonData personData, int tresholdValue, WeigthCalculator<PersonData> weigthComporators) {
 
         double treshold = tresholdValue / 1000D;
-
         List<PersonData> personDataList = refBookPersonDao.findPersonByPersonData(personData);
-
         if (personDataList != null && !personDataList.isEmpty()) {
             calculateWeigth(personData, personDataList, weigthComporators);
-
+            //Выбор из найденных записей одной записи с максимальной Степенью соответствия критериям
             PersonData identificatedPerson = Collections.max(personDataList, new PersonDataComparator());
             if (identificatedPerson.getWeigth() > treshold) {
-                return identificatedPerson.getRecordId();
+                //Если Степень соответствия записи выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
+                return identificatedPerson.getId();
             } else {
-                return refBookPersonDao.createPerson(personData);
+                return null;
             }
-
         } else {
-            return refBookPersonDao.createPerson(personData);
+            return null;
         }
 
     }
 
-
     private static void calculateWeigth(PersonData searchPersonData, List<PersonData> personDataList, WeigthCalculator<PersonData> weigthComporators) {
-
         for (PersonData personData : personDataList) {
             double weigth = weigthComporators.calc(searchPersonData, personData);
             personData.setWeigth(weigth);
         }
-
     }
 
-    public List<BaseWeigthCalculator> getComporatorList() {
+    /**
+     * Метод формирует список по которому будет рассчитывается схожесть записи
+     *
+     * @return
+     */
+    public List<BaseWeigthCalculator> getBaseCalculateList() {
 
         List<BaseWeigthCalculator> result = new ArrayList<BaseWeigthCalculator>();
 
@@ -85,7 +80,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Отчество
-        result.add(new BaseWeigthCalculator<PersonData>(0.5) {
+        result.add(new BaseWeigthCalculator<PersonData>(5) {
             @Override
             public double calc(PersonData a, PersonData b) {
                 return compareString(a.getMiddleName(), b.getMiddleName());
@@ -216,42 +211,5 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             return summWeigth / summParameterWeigt;
         }
     }
-
-
-  /*  public Map<String, Long> getAsnuCodeIds() {
-        RefBookDataProvider dataProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
-        PagingResult<Map<String, RefBookValue>> refBookRecords = refBookDao.getRecords(RefBook.Id.ASNU.getId(), RefBook.Table.ASNU.getTable(), null, null, null, null);
-        Map<String, Long> result = new HashMap<String, Long>();
-        for (Map<String, RefBookValue> refbookRecord : refBookRecords) {
-            String code = refbookRecord.get("CODE").getStringValue();
-            long id = refbookRecord.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-            result.put(code, id);
-        }
-        return result;
-    }
-
-
-    public Map<String, Long> getCountryCodeIds() {
-        PagingResult<Map<String, RefBookValue>> refBookRecords = refBookDao.getRecords(RefBook.Id.COUNTRY.getId(), new Date(), null, null, null);
-        Map<String, Long> result = new HashMap<String, Long>();
-        for (Map<String, RefBookValue> refbookRecord : refBookRecords) {
-            String code = refbookRecord.get("CODE").getStringValue();
-            long id = refbookRecord.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-            result.put(code, id);
-        }
-        return result;
-    }
-
-    public Map<String, Long> getTaxpayerStatusCodeIds() {
-        PagingResult<Map<String, RefBookValue>> refBookRecords = refBookDao.getRecords(RefBook.Id.TAXPAYER_STATUS.getId(), new Date(), null, null, null);
-        Map<String, Long> result = new HashMap<String, Long>();
-        for (Map<String, RefBookValue> refbookRecord : refBookRecords) {
-            String code = refbookRecord.get("CODE").getStringValue();
-            long id = refbookRecord.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-            result.put(code, id);
-        }
-        return result;
-    }*/
-
 
 }

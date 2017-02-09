@@ -11,6 +11,9 @@ import java.util.Date;
  */
 public class PersonData {
 
+    /**
+     * Идентификатор записи в справочнике физлиц
+     */
     private Long id;
     private Long recordId;
     private String lastName;
@@ -54,16 +57,6 @@ public class PersonData {
      */
     private String citizenship;
 
-    /**
-     * Версия записи
-     */
-    private Date version;
-
-    /**
-     * Статус записи
-     */
-    private VersionedObjectStatus status;
-
     //----------------------- Дополнительные параметры используются при идентификации -----------------------
     /**
      * Код из справочника
@@ -71,6 +64,11 @@ public class PersonData {
     private String inp;
     private String asnu;
     private Long asnuId;
+
+    /**
+     * Ссылка на справочник Виды документов
+     */
+    private String documentTypeId;
     /**
      * Код документа
      */
@@ -81,7 +79,47 @@ public class PersonData {
      */
     private Double weigth;
 
+    //----------------------address------------------------
+
+//    person.id             as person_id,
+//    person.record_id      as person_record_id,
+//    person.last_name      as last_name,
+//    person.first_name     as first_name,
+//    person.middle_name    as middle_name,
+//    person.sex            as sex,
+//    person.birth_date     as birth_date,
+//    person.inn            as inn,
+//    person.inn_foreign    as inn_foreign,
+//    person.snils          as snils,
+//    person_doc.doc_number as document_number,
+//    person.pension        as pension,
+//    person.medical        as midical,
+//    person.social         as social,
+//    taxpayer_id.inp       as inp,
+//    person_doc.doc_id     as document_kind_ref_id,
+//    person.citizenship    as citizenship_ref_id,
+//    taxpayer_id.as_nu     as asnu_ref_id,
+//    person.taxpayer_state as status_ref_id,
+//    addr.id               as addr_id,
+//    addr.address_type,
+//    addr.country_id,
+//    addr.region_code,
+//    addr.postal_code,
+//    addr.district,
+//    addr.city,
+//    addr.locality,
+//    addr.street,
+//    addr.house,
+//    addr.build,
+//    addr.appartment,
+//    addr.status,
+//    addr.record_id
+
+
+
     //----------------------------------------------
+
+
 
     public String getLastName() {
         return lastName;
@@ -129,6 +167,14 @@ public class PersonData {
 
     public void setAsnuId(Long asnuId) {
         this.asnuId = asnuId;
+    }
+
+    public String getDocumentTypeId() {
+        return documentTypeId;
+    }
+
+    public void setDocumentTypeId(String documentTypeId) {
+        this.documentTypeId = documentTypeId;
     }
 
     public String getDocumentType() {
@@ -284,22 +330,6 @@ public class PersonData {
         this.citizenship = citizenship;
     }
 
-    public Date getVersion() {
-        return version;
-    }
-
-    public void setVersion(Date version) {
-        this.version = version;
-    }
-
-    public VersionedObjectStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(VersionedObjectStatus status) {
-        this.status = status;
-    }
-
     public Double getWeigth() {
         return weigth;
     }
@@ -307,52 +337,6 @@ public class PersonData {
     public void setWeigth(Double weigth) {
         this.weigth = weigth;
     }
-
-
-    public static PersonData mapValueFromNdflPerson(NdflPerson person){
-
-        PersonData personData = new PersonData();
-        //personData.id = person.getPersonId();
-
-        personData.lastName = person.getLastName();
-        personData.firstName = person.getFirstName();
-        personData.middleName = person.getMiddleName();
-
-        personData.inn = person.getInnNp();
-        personData.innForeign = person.getInnForeign();
-        personData.snils = person.getSnils();
-        personData.birthDate = person.getBirthDay();
-
-        //Коды из справочников
-        personData.citizenship = person.getCitizenship();
-        personData.inp = person.getInp();
-        personData.documentType = person.getIdDocType();
-        personData.documentNumber = person.getIdDocNumber();
-
-        //personData.recordId = person.getRecordId();
-        //personData.sex = person.getSex();
-        //personData.birthPlace = person.getBirthPlace();
-        //personData.pension = person.getPension();
-        //personData.medical = person.getMedical();
-        //personData.social = person.getSocial();
-        //personData.employee = person.getEmployee();
-
-        //personData.weigth = person.getweigth();
-
-        //personData.asnu = person.getAsnu();
-
-        //Идентификаторы справочников
-        //personData.asnuId = person.getasnuId();
-        //personData.addressId = person.getaddressId();
-        //personData.taxPayerStatusId = person.getTaxPayerStatusId();
-        //personData.citizenshipId = person.getcitizenshipId();
-        //personData.sourceId = person.getsourceId();
-        //personData.version = person.getversion();
-
-        return personData;
-    }
-
-
 
 
 
