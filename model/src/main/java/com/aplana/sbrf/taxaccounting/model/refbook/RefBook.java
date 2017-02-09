@@ -120,9 +120,11 @@ public class RefBook implements Serializable {
 		INCOME_CODE(922),							// Коды видов доходов
 		INCOME_KIND(933),							// Виды дохода
 		DEDUCTION_TYPE(921),						// Коды видов вычетов
+		OKVED(925),									// Общероссийский классификатор видов экономической деятельности
 		ATTACH_FILE_TYPE(934),						// Категории прикрепленных файлов
 		TAX_INSPECTION(935),						// Коды налоговых органов
 		NDFL_RATE(936),								// Ставка НДФЛ
+		TARIFF_PAYER(938),							// Коды тарифа плательщика
 		OKATO(3),									// ОКАТО
         NDFL_REFERENCES(964);                       // Реестр справок
 

@@ -100,6 +100,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         parseRaschsv()
         break
+    case FormDataEvent.CHECK:
+        checkRaschsv()
+        break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         def writer = scriptSpecificReportHolder.getFileOutputStream()
         def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
@@ -119,6 +122,27 @@ switch (formDataEvent) {
     default:
         break
 }
+
+// Общероссийский классификатор видов экономической деятельности
+@Field final long REF_BOOK_OKVED_ID = RefBook.Id.OKVED.id
+
+// Параметры подразделения по сборам, взносам
+@Field final long REF_BOOK_FOND_ID = RefBook.Id.FOND.id
+
+// Параметры подразделения по сборам, взносам (таблица)
+@Field final long REF_BOOK_FOND_DETAIL_ID = RefBook.Id.FOND_DETAIL.id
+
+// Кэш провайдеров
+@Field def providerCache = [:]
+
+// значение подразделения из справочника
+@Field def departmentParam = null
+
+// значение подразделения из справочника
+@Field def departmentParamTable = null
+
+// Дата окончания отчетного периода
+@Field def reportPeriodEndDate = null
 
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
@@ -1930,6 +1954,111 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
     }
 
     return raschsvPersSvStrahLic
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+// Обработка события CHECK
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+def checkRaschsv() {
+
+    // ------------Проверки по плательщику страховых взносов RASCHSV_SVNP_PODPISANT
+
+    RaschsvSvnpPodpisant raschsvSvnpPodpisant = raschsvSvnpPodpisantService.findRaschsvSvnpPodpisant(declarationData.id)
+    println(raschsvSvnpPodpisant.svnpOkved)
+
+    // todo добавить сохранение поля ПоМесту в raschsv_svnp_podpisant
+    // Соответствие кода места настройкам подразделения
+    // Актуальность кода места
+
+    // Соответствие ОКВЭД настройкам подразделения
+
+    // Актуальность ОКВЭД
+
+    // todo как получить общие параметры?
+    // Соответсвие ИНН ЮЛ Общим параметрам REF_BOOK_NDFL
+
+    // Соответсвие КПП ЮЛ настройкам подразделения
+
+    // Соответствие формы реорганизации настройкам подразделения
+
+    // Соответствие ИНН реорганизованной организации настройкам подразделения
+
+    // Соответствие КПП реорганизованной организации настройкам подразделения
+
+    // ------------Сводные данные об обязательствах плательщика
+
+    // Соответствие кода ОКТМО настройкам подразделения
+
+    // Актуальность ОКТМО
+    // todo почему В <Настройки подразделения>.ОКТМО указана ссылка на актуальную запись справочника
+    // todo а не Файл.Документ.РасчетСВ.ОбязПлатСВ.OKTMO указана ссылка на актуальную запись справочника
+
+    // Соответствие кода тарифа плательщика справочнику
+    // todo нет поля "Коды тарифа плательщика.Используется в ОПС и ОМС"
+    // todo нет версионируемости
+}
+
+/************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
+
+/**
+ * Получить Параметры подразделения по сборам, взносам
+ * @return
+ */
+def getDepartmentParam(def departmentId) {
+    if (departmentParam == null) {
+        def departmentParamList = getProvider(REF_BOOK_FOND_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
+}
+
+/**
+ * Получить Параметры подразделения по сборам, взносам (таблица)
+ * @param departmentParamId
+ * @return
+ */
+def getDepartmentParamTable(def departmentParamId) {
+    if (departmentParamTable == null) {
+        def filter = "REF_BOOK_FOND_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
+        def departmentParamTableList = getProvider(REF_BOOK_FOND_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParamTable = departmentParamTableList.get(0)
+    }
+    return departmentParamTable
+}
+
+/**
+ * Получить дату окончания отчетного периода
+ * @return
+ */
+def getReportPeriodEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
+}
+
+/**
+ * Получение провайдера с использованием кеширования.
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
 }
 
 Date getDate(String val) {

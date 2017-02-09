@@ -732,7 +732,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
 }
 
 /**
- * Получить параметры для конкретного тербанка
+ * Получить настройки подразделения
  * @return
  */
 def getDepartmentParam(def departmentId) {
@@ -747,7 +747,7 @@ def getDepartmentParam(def departmentId) {
 }
 
 /**
- * Получить параметры подразделения (из справочника 951)
+ * Получить параметры подразделения
  * @param departmentParamId
  * @return
  */
