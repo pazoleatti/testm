@@ -21,7 +21,9 @@ import groovy.xml.MarkupBuilder
 import javax.script.ScriptException
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.events.Attribute
 import javax.xml.stream.events.Characters
+import javax.xml.stream.events.Namespace
 import javax.xml.stream.events.XMLEvent
 
 /**
@@ -131,7 +133,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к обновлению данных по физлицам ("+personList.size()+" записей)");
+    logger.info("Подготовка к обновлению данных по физлицам (" + personList.size() + " записей)");
 
     Date versionFrom = getVersionFrom();
 
@@ -186,7 +188,7 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
  */
 def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к созданию данных по физ.лицам ("+personList.size()+" записей)");
+    logger.info("Подготовка к созданию данных по физ.лицам (" + personList.size() + " записей)");
 
     List<RefBookRecord> addressRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
@@ -196,7 +198,7 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
     }
 
     List<Long> addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, addressRecords)
-    logger.info("В справочнике 'Адреса физических лиц' создано записей: "+addressIds.size());
+    logger.info("В справочнике 'Адреса физических лиц' создано записей: " + addressIds.size());
 
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
@@ -209,7 +211,7 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
     //сгенерированные идентификаторы справочника физлиц
     List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, personRecords)
-    logger.info("В справочнике 'Физические лица' создано записей: "+personIds.size());
+    logger.info("В справочнике 'Физические лица' создано записей: " + personIds.size());
 
     //создание записей справочников документы и идентфикаторы физлиц
     List<RefBookRecord> documentsRecords = new ArrayList<RefBookRecord>()
@@ -226,8 +228,8 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
     List<Long> taxIds = getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, taxpayerIdsRecords)
 
-    logger.info("В справочнике 'Документы физических лиц' создано записей: "+docIds.size());
-    logger.info("В справочнике 'Идентификаторы физических лиц' создано записей: "+taxIds.size());
+    logger.info("В справочнике 'Документы физических лиц' создано записей: " + docIds.size());
+    logger.info("В справочнике 'Идентификаторы физических лиц' создано записей: " + taxIds.size());
 
 }
 
@@ -240,6 +242,7 @@ RefBookRecord creatAddressRecord(NdflPerson person) {
     RefBookRecord record = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
     fillAddressAttr(values, person)
+    record.setValues(values);
     return record;
 }
 
@@ -296,17 +299,17 @@ def updatePersonRecord(Map<String, RefBookValue> values, NdflPerson person, Long
 }
 
 /**
- * Заполнени аттрибутов справочника физлиц
+ * Заполнение аттрибутов справочника физлиц
  * @param values карта для хранения значений атрибутов
  * @param person класс предоставляющий данные для заполнения справочника
  * @param asnuId ссылка на справочник АСНУ
- * @param addressId ссылка на справочник адресса физлиц
+ * @param addressId ссылка на справочник адреса физлиц
  * @return
  */
 def fillNdflPersonAttr(Map<String, RefBookValue> values, NdflPerson person, Long asnuId, Long addressId) {
 
-    def citizenshipCodeMap = getRefCitizenship();
-    def taxpayerStatusMap = getRefTaxpayerStatus();
+    Long countryId = findCountryId(person.getCitizenship());
+    Long statusId = findTaxpayerStatusByCode(person.getStatus());
 
     putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName());
     putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName());
@@ -323,12 +326,8 @@ def fillNdflPersonAttr(Map<String, RefBookValue> values, NdflPerson person, Long
     putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, 2);
     putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, 2);
     putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, 2);
-    putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, citizenshipCodeMap.find {
-        it.value == person.getCitizenship()
-    }?.key);
-    putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, taxpayerStatusMap.find {
-        it.value == person.getStatus()
-    }?.key);
+    putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, countryId);
+    putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, statusId);
     putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, asnuId);
     putOrUpdate(values, "DUBLICATES", RefBookAttributeType.REFERENCE, null);
 }
@@ -503,7 +502,6 @@ def findTaxpayerStatusByCode(code) {
     }?.key
 }
 
-
 /**
  * Получить дату которая используется в качестве версии записей справочника
  * @return дата используемая в качестве даты версии справочника
@@ -535,7 +533,6 @@ def findCountryId(countryCode) {
         it.value == countryCode
     }?.key : null;
 }
-
 
 //------------------ Create Report ----------------------
 
@@ -688,7 +685,31 @@ def findReportPeriodCode(reportPeriod) {
 
 //------------------ Import Data ----------------------
 
-void importData() {
+
+void importData(){
+
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+
+    //TODЩ временно вернул, из-за проблем с sax-парсером на стенде
+    def root = new XmlSlurper().parse(ImportInputStream);
+
+    if (root == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+
+    def servicePart = root.'СлЧасть'
+
+    def infoParts = root.'ИнфЧасть'
+
+    infoParts.each {
+        processInfoPart(it)
+    }
+
+}
+
+/*void importData() {
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
@@ -703,6 +724,7 @@ void importData() {
     xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
     def reader = xmlFactory.createXMLEventReader(ImportInputStream)
 
+    xmlFactory.createXMLStreamReader()
 
     def sb;
     try {
@@ -722,7 +744,11 @@ void importData() {
                 sb = new StringBuilder()
             }
 
-            sb?.append(event.toString())
+            def eventStr = toString(event);
+
+            sb?.append(eventStr)
+
+            println("Event: "+eventStr);
 
             if (event.isEndElement() && event.getName().equals(infoPartName)) {
                 def infoPart = new XmlSlurper().parseText(sb.toString())
@@ -732,7 +758,8 @@ void importData() {
     } finally {
         reader?.close()
     }
-}
+}*/
+
 
 void processInfoPart(infoPart) {
 
