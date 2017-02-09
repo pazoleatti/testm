@@ -1,22 +1,59 @@
 package form_template.fond.primary_1151111.v2016
 
+import java.awt.Color
+import java.text.SimpleDateFormat
+
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.util.CellRangeAddress
+import org.apache.poi.xssf.usermodel.XSSFColor
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFRow
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMk
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPer
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOms
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRasch
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschSum
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschKol
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvSum1Tip
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvKolLicTip
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmSum
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmKol
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplSvPrev
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZakRash
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplPrichina
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif31427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif51427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif71427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif91427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt427
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedPatent
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif22425
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt425
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvInoGrazd
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif13422
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt422
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedObuch
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvReestrMdo
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvnpPodpisant
 import groovy.transform.Field
 import groovy.transform.Memoized
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.xssf.usermodel.XSSFCellStyle
-import org.apache.poi.xssf.usermodel.XSSFColor
-import org.apache.poi.xssf.usermodel.XSSFRow
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-
-import java.awt.*
-import java.text.SimpleDateFormat
-import java.util.List
 
 //----------------------------------------------------------------------------------------------------------------------
 // Счетчик для проверки соответствия числа узлов
@@ -1274,16 +1311,101 @@ void checkRaschsvFileName(fileNode) {
  *
  * @param fileNode корневой узел XML
  */
-void checkPayment(fileNode) {
-    def documentOkved = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."@ОКВЭД" as String
-    def documentInn = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."$NODE_NAME_NPYL"?."@ИННЮЛ" as String
-    def documentKpp = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."$NODE_NAME_NPYL"?."@КПП" as String
-    def documentReorgForm = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@ФормРеорг" as String
-    def documentReorgInn = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@ИННЮЛ" as String
-    def documentReorgKpp = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@КПП" as String
-    def documentIpInn = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."$NODE_NAME_NPIP"?."@ИННФЛ" as String
-    def documentFlInn = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."$NODE_NAME_NPFL"?."$NODE_NAME_NPFL_INNFL" as String
-    def documentFlAddr = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"?."$NODE_NAME_NPFL"?."$NODE_NAME_NPFL_SVNPFL"?."$NODE_NAME_NPFL_SVNPFL_ADDRMJRF"
+def checkPayment(fileNode) {
+    def documentSvNP = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"
+    def documentOkved = documentSvNP?."@ОКВЭД" as String
+    def documentInn = documentSvNP?."$NODE_NAME_NPYL"?."@ИННЮЛ" as String
+    def documentKpp = documentSvNP?."$NODE_NAME_NPYL"?."@КПП" as String
+
+    def documentReorgForm = documentSvNP?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@ФормРеорг" as String
+    def documentReorgInn = documentSvNP?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@ИННЮЛ" as String
+    def documentReorgKpp = documentSvNP?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@КПП" as String
+
+    def documentIpInn = documentSvNP?."$NODE_NAME_NPIP"?."@ИННФЛ" as String
+
+    def documentFlInn = documentSvNP?."$NODE_NAME_NPFL"?."$NODE_NAME_NPFL_INNFL" as String
+    def documentFlAddr = documentSvNP?."$NODE_NAME_NPFL"?."$NODE_NAME_NPFL_SVNPFL"?."$NODE_NAME_NPFL_SVNPFL_ADDRMJRF"
+    def documentFlAddrRegion = documentFlAddr?.'@КодРегион' as String
+    def documentFlAddrArea = documentFlAddr?.'@Район' as String
+    def documentFlAddrCity = documentFlAddr?.'@Город' as String
+    def documentFlAddrLocality = documentFlAddr?.'@НаселПункт' as String
+    def documentFlAddrStreet = documentFlAddr?.'@Улица' as String
+
+    // 1.2.1 Поиск ОКВЭД в справочнике
+    if (!isExistsOkved(documentOkved)) {
+        logger.error(CHECK_PAYMENT_OKVED_NOT_FOUND, documentOkved)
+    }
+
+    // 1.2.2 Корректность ИНН ЮЛ
+    if (INN_JUR_LENGTH != documentInn.length() || !RefBookUtils.checkControlSumInn(documentInn)) {
+        logger.error(CHECK_PAYMENT_INN, documentInn, UploadFileName)
+    }
+
+    // 1.2.3 Корректность КПП ЮЛ
+    // TODO
+    if (false) {
+        logger.error(CHECK_PAYMENT_KPP, documentKpp, documentInn)
+    }
+
+    // 1.2.4, 1.2.5
+    if (['1', '2', '3', '4', '5', '6', '7'].contains(documentReorgForm)) {
+        // 1.2.4 Наличие ИНН реорганизованной организации
+        if (!documentReorgInn) {
+            logger.error(CHECK_PAYMENT_REORG_INN, documentInn)
+        }
+        // 1.2.5 Наличие КПП реорганизованной организации
+        if (!documentReorgKpp) {
+            logger.error(CHECK_PAYMENT_REORG_KPP, documentInn)
+        }
+    }
+
+    // 1.2.6 Корректность ИНН реорганизованной организации
+    if (INN_JUR_LENGTH != documentReorgInn.length() || !RefBookUtils.checkControlSumInn(documentReorgInn)) {
+        logger.error(CHECK_PAYMENT_REORG_INN_VALUE, documentReorgInn, documentInn)
+    }
+
+    // 1.2.7 Корректность КПП реорганизованной организации
+    // TODO
+    if (false) {
+        logger.error(CHECK_PAYMENT_REORG_KPP_VALUE, documentReorgKpp, documentInn)
+    }
+
+    // 1.2.8 Корректность ИНН плательщика страховых взносов (ИП)
+    if (documentIpInn && (INN_IP_LENGTH != documentIpInn.length() || !RefBookUtils.checkControlSumInn(documentIpInn))) {
+        logger.error(CHECK_PAYMENT_IP_INN_VALUE, documentIpInn, UploadFileName)
+    }
+
+    // 1.2.9 Корректность ИНН плательщика страховых взносов (ФЛ)
+    if (documentFlInn && (INN_IP_LENGTH != documentFlInn.length() || !RefBookUtils.checkControlSumInn(documentFlInn))) {
+        logger.error(CHECK_PAYMENT_FL_INN_VALUE, documentFlInn, UploadFileName)
+    }
+
+    // 1.2.10 Соответствие адреса ФЛ (плательщика страховых взносов) ФИАС
+    if (!isExistsAddress(documentFlAddrRegion, documentFlAddrArea, documentFlAddrCity, documentFlAddrLocality, documentFlAddrStreet)) {
+        logger.error(CHECK_PAYMENT_FL_ADDR,
+                documentFlAddrRegion, documentFlAddrArea, documentFlAddrCity, documentFlAddrLocality, documentFlAddrStreet,
+                documentInn
+        )
+    }
+}
+
+/**
+ * Проверки 1.2 для НПЮЛ
+ */
+def checkPaymentJL() {
+    def documentSvNP = fileNode?."$NODE_NAME_DOCUMENT"?."$NODE_NAME_SV_NP"
+    def documentOkved = documentSvNP?."@ОКВЭД" as String
+    def documentInn = documentSvNP?."$NODE_NAME_NPYL"?."@ИННЮЛ" as String
+    def documentKpp = documentSvNP?."$NODE_NAME_NPYL"?."@КПП" as String
+
+    def documentReorgForm = documentSvNP?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@ФормРеорг" as String
+    def documentReorgInn = documentSvNP?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@ИННЮЛ" as String
+    def documentReorgKpp = documentSvNP?."$NODE_NAME_NPYL"?."$NODE_NAME_SV_REORG_YL"?."@КПП" as String
+
+    def documentIpInn = documentSvNP?."$NODE_NAME_NPIP"?."@ИННФЛ" as String
+
+    def documentFlInn = documentSvNP?."$NODE_NAME_NPFL"?."$NODE_NAME_NPFL_INNFL" as String
+    def documentFlAddr = documentSvNP?."$NODE_NAME_NPFL"?."$NODE_NAME_NPFL_SVNPFL"?."$NODE_NAME_NPFL_SVNPFL_ADDRMJRF"
     def documentFlAddrRegion = documentFlAddr?.'@КодРегион' as String
     def documentFlAddrArea = documentFlAddr?.'@Район' as String
     def documentFlAddrCity = documentFlAddr?.'@Город' as String
@@ -1348,6 +1470,7 @@ void checkPayment(fileNode) {
         )
     }
 }
+
 
 /**
  * Разбор узла СвНП
