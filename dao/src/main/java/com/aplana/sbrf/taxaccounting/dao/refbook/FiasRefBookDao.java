@@ -36,6 +36,14 @@ public interface FiasRefBookDao {
     List<AddressObject> findAddress(String regionCode, String area, String city, String locality, String street);
 
     /**
+     * Найти все адресообразующийе обекты у которых код региона и наименование потомка совпадают
+     * @param regionCode код региона
+     * @param descendantName наименование потомка
+     * @return список подходящих объектов
+     */
+    List<AddressObject> findAllAddress(String regionCode, String descendantName);
+
+    /**
      * Найти регион по коду
      * @param regionCode код региона
      * @return адресообразующий объект справочника
