@@ -13,6 +13,4 @@ public interface RefBookPersonDao {
 
     List<PersonData> findPersonByPersonData(PersonData personData);
 
-    Long createPerson(PersonData personData);
-
 }

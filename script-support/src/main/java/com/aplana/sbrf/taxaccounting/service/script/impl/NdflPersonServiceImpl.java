@@ -56,8 +56,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public int[] updatePersonRefBookReferences(Map<Long, Long> referenceMap) {
-        return ndflPersonDao.updatePersonRefBookReferences(referenceMap);
+    public int[] updatePersonRefBookReferences(List<NdflPerson> ndflPersonList) {
+        return ndflPersonDao.updatePersonRefBookReferences(ndflPersonList);
     }
 
     @Override

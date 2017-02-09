@@ -57,7 +57,7 @@ public class RefBookPersonServiceTest {
     @Test
     public void identificatePersonTest() {
         PersonData person = createPersonData("888", "2", "", "23", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Long result = personService.identificatePerson(person);
+        Long result = personService.identificatePerson(person, 900);
         assertEquals(Long.valueOf(6L), result);
 
     }
