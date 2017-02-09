@@ -196,7 +196,7 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
     }
 
     List<Long> addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, addressRecords)
-    logger.info("В справочнике 'Адреса физических лиц' создано записей: "+docIds.size());
+    logger.info("В справочнике 'Адреса физических лиц' создано записей: "+addressIds.size());
 
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
