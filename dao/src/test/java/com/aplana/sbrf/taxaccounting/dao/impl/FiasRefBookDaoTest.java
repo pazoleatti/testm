@@ -74,7 +74,7 @@ public class FiasRefBookDaoTest {
         Assert.assertEquals(Long.valueOf(1), result.getId());
     }
 
-    @Test
+    //@Test
     public void findAddressUtils(){
         Assert.assertEquals("\\\\foo\\\\bar\\\\baz", FiasRefBookDaoImpl.createPath("foo", "bar", "baz"));
         Assert.assertEquals("\\\\foo\\\\bar", FiasRefBookDaoImpl.createPath("foo", null, "bar", null));

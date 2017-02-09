@@ -271,11 +271,15 @@ def checkXml() {
         // ВнДок2 Исчисленный налог
         if (((nachislDoh - vichetNal) / 100 * stavka > ischislNal + mathError) ||
                 ((nachislDoh - vichetNal) / 100 * stavka < ischislNal - mathError)) {
+            logger.info(((nachislDoh - vichetNal) / 100 * stavka).toString())
+            logger.info((ischislNal - mathError).toString())
+            logger.info((ischislNal + mathError).toString())
             logger.error(msgError + " неверно рассчитана сумма исчисленного налога.")
         }
 
         // ВнДок3 Авансовый платеж
         if (avansPlat > ischislNal) {
+            logger.info("3")
             logger.error(msgError + " завышена сумма фиксированного авансового платежа.")
         }
     }
@@ -290,7 +294,7 @@ def checkXml() {
     if (["34", "90"].contains(periodCode)) {
         def ndfl2DeclarationDataIds = getNdfl2DeclarationDataId(reportPeriod.taxPeriod.year)
         if (ndfl2DeclarationDataIds.size() > 0) {
-            checkBetweenDocumentXml(ndfl2DeclarationDataIds)
+            checkBetweenDocumentXml(ndfl6Stream, ndfl2DeclarationDataIds)
         }
     }
 }
@@ -321,7 +325,7 @@ def getNdfl2DeclarationDataId(def taxPeriodYear) {
  * Междокументные проверки
  * @return
  */
-def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
+def checkBetweenDocumentXml(def ndfl6Stream, def ndfl2DeclarationDataIds) {
 
     def msgError = "%s КПП: \"%s\" ОКТМО: \"%s\" не соответствуют форме %s КПП: \"%s\" ОКТМО: \"%s\""
     msgError = "Контрольные соотношения по %s формы " + sprintf(msgError, FORM_NAME_NDFL6, declarationData.kpp, declarationData.oktmo, FORM_NAME_NDFL2, declarationData.kpp, declarationData.oktmo)
@@ -354,7 +358,6 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     def kolFl6 = 0
     def kolFl2 = 0
 
-    def ndfl6Stream = declarationService.getXmlStream(declarationData.id)
     def fileNode6Ndfl = new XmlSlurper().parse(ndfl6Stream);
     def sumStavkaNodes6 = fileNode6Ndfl.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
     sumStavkaNodes6.each { sumStavkaNode6 ->
@@ -729,7 +732,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
 }
 
 /**
- * Получить параметры для конкретного тербанка
+ * Получить настройки подразделения
  * @return
  */
 def getDepartmentParam(def departmentId) {
@@ -744,7 +747,7 @@ def getDepartmentParam(def departmentId) {
 }
 
 /**
- * Получить параметры подразделения (из справочника 951)
+ * Получить параметры подразделения
  * @param departmentParamId
  * @return
  */
