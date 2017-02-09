@@ -100,7 +100,8 @@ public class TestScriptHelper {
     private RaschsvSvPrimTarif13422Service raschsvSvPrimTarif13422Service;
     // Сервис "Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ"
     private RaschsvSvnpPodpisantService raschsvSvnpPodpisantService;
-
+    // Сервис "ФИАС адресов"
+    private FiasRefBookService fiasRefBookService;
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
 
@@ -173,6 +174,7 @@ public class TestScriptHelper {
         declarationService = mockHelper.mockDeclarationService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
+        fiasRefBookService = mockHelper.mockFiasRefBookService();
         raschsvPersSvStrahLicService = mockHelper.mockRaschsvPersSvStrahLicService();
         raschsvObyazPlatSvService = mockHelper.mockRaschsvObyazPlatSvService();
         raschsvUplPerService = mockHelper.mockRaschsvUplPerService();
@@ -337,9 +339,10 @@ public class TestScriptHelper {
         bindings.put("raschsvSvPrimTarif13422Service", raschsvSvPrimTarif13422Service);
         // Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ
         bindings.put("raschsvSvnpPodpisantService", raschsvSvnpPodpisantService);
-
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);
+        // Фиас адреса
+        bindings.put("fiasRefBookService", fiasRefBookService);
 
 
         for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
@@ -468,6 +471,10 @@ public class TestScriptHelper {
      */
     public RefBookDataProvider getRefBookDataProvider() {
         return refBookDataProvider;
+    }
+
+    public FiasRefBookService getFiasRefBookService() {
+        return fiasRefBookService;
     }
 
     public DepartmentReportPeriodService getDepartmentReportPeriodService() {

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.mock.DefaultScriptTestMockHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -182,5 +183,15 @@ public abstract class ScriptTestBase {
 
         testHelper.execute(FormDataEvent.CHECK_SCRIPT);
         checkLogger();
+    }
+
+    public boolean containLog(String text) {
+        for (LogEntry logEntry : testHelper.getLogger().getEntries()) {
+            if (logEntry.getMessage().contains(text)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
