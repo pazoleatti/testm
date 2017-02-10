@@ -126,26 +126,23 @@ switch (formDataEvent) {
         break
 }
 
-// Общероссийский классификатор видов экономической деятельности
-@Field final long REF_BOOK_OKVED_ID = RefBook.Id.OKVED.id
-
 // Параметры подразделения по сборам, взносам
 @Field final long REF_BOOK_FOND_ID = RefBook.Id.FOND.id
 
 // Параметры подразделения по сборам, взносам (таблица)
 @Field final long REF_BOOK_FOND_DETAIL_ID = RefBook.Id.FOND_DETAIL.id
 
-// Кэш провайдеров
-@Field def providerCache = [:]
+// Коды ОКВЭД
+@Field final long REF_BOOK_OKVED_ID = RefBook.Id.OKVED.id
 
-// значение подразделения из справочника
-@Field def departmentParam = null
+// Коды форм реорганизации (ликвидации) организации
+@Field final long REF_BOOK_REORGANIZATION_ID = RefBook.Id.REORGANIZATION.id
 
-// значение подразделения из справочника
-@Field def departmentParamTable = null
+// Коды мест предоставления документа
+@Field final long REF_BOOK_PRESENT_PLACE_ID = RefBook.Id.PRESENT_PLACE.id
 
-// Дата окончания отчетного периода
-@Field def reportPeriodEndDate = null
+// Общие параметры
+@Field final long REF_BOOK_CONFIGURATION_PARAM_ID = RefBook.Id.CONFIGURATION_PARAM.id
 
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
@@ -814,6 +811,7 @@ class TestDataHolder {
 @Field final MAX_COUNT_SV_OPS_OMS = 1000
 
 // Узлы
+@Field final NODE_NAME_FILE = "Файл"
 @Field final NODE_NAME_DOCUMENT = "Документ"
 
 @Field final NODE_NAME_SV_NP = "СвНП"
@@ -892,6 +890,9 @@ class TestDataHolder {
 @Field final NODE_NAME_SV_REESTR_MDO = "СвРеестрМДО"
 @Field final NODE_NAME_SPRAV_STUD_OTRYAD = "СправСтудОтряд"
 @Field final NODE_NAME_SPRAV_FORM_OBUCH = "СправФормОбуч"
+
+// Атрибуты узла Документ
+@Field final DOCUMENT_PO_MESTU = "ПоМесту"
 
 // Атрибуты узла СвНП
 @Field final SV_NP_OKVED = "ОКВЭД"
@@ -2235,43 +2236,174 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
+// Кэш провайдеров
+@Field def providerCache = [:]
+
+// значение подразделения из справочника
+@Field def departmentParam = null
+
+// значение подразделения из справочника
+@Field def departmentParamTable = null
+
+// Дата окончания отчетного периода
+@Field def reportPeriodEndDate = null
+
+// Коды ОКВЭД
+@Field def okvedCodeCache = [:]
+
+// Коды формы реорганизации и ликвидации
+@Field def reorgFormCodeCache = [:]
+
+// Коды мест предоставления документа
+@Field def presentPlaceCodeCache = [:]
+
+// Общие параметры
+@Field def configurationParamCache = [:]
+
+//// Поля справочников
+//@Field final String RF_CODE = "CODE"
+
 def checkRaschsv() {
+
+    def xmlText = '''
+<Файл ВерсПрог="a" ИдФайл="a" ВерсФорм="5.01">
+\t<Документ ПоМесту="350" ОтчетГод="2001" Период="90" НомКорр="123" ДатаДок="31.12.2000" КодНО="1234" КНД="1151111">
+\t\t<СвНП Тлф="a" ОКВЭД="74.5">
+\t\t\t<НПЮЛ ИННЮЛ="7707083893" НаимОрг="a" КПП="123456789">
+\t\t\t\t<СвРеоргЮЛ ФормРеорг="2" ИННЮЛ="7723643863" КПП="123456789"/>
+\t\t\t</НПЮЛ>
+\t\t\t<НПИП ИННФЛ="500100732259">
+\t\t\t\t<ФИОИП Фамилия="Фам" Имя="Им"/>
+\t\t\t</НПИП>
+\t\t\t<НПФЛ>
+\t\t\t\t<ФИО Фамилия="Фа" Имя="И"/>
+\t\t\t\t<ИННФЛ>500100732259</ИННФЛ>
+\t\t\t\t<СвНПФЛ ДатаРожд="01.01.1970" МестоРожд="Хз" Гражд="РФ">
+\t\t\t\t\t<УдЛичнФЛ КодВидДок="1" СерНомДок="2" ВыдДок="3" ДатаДок="4"/>
+\t\t\t\t\t<АдрМЖРФ КодРегион="590" Район="590" Город="590" НаселПункт="590" Улица="590"/>
+\t\t\t\t</СвНПФЛ>
+\t\t\t</НПФЛ>
+\t\t</СвНП>
+\t</Документ>
+</Файл>
+'''
+    def msgErrNotEquals = "Не совпадает значение \"%s\" = \"%s\" плательщика страховых взносов \"%s\"."
+
+    // Параметры подразделения
+    def departmentParam = getDepartmentParam(declarationData.departmentId)
+    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam?.id.value)
+
+    // Коды ОКВЭД
+    def mapOkvedCode = getRefOkvedCode()
+
+    // Коды форм реорганизации и ликвидации
+    def mapReorgFormCode = getRefReorgFormCode()
+
+    // Коды мест предоставления документа
+    def mapPresentPlaceCode = getRefPresentPlaceCode()
+
+    // Общие параметры
+    def mapConfigurationParam = getConfigurationParam()
+
+    def xmlStream = declarationService.getXmlStream(declarationData.id)
+//    def fileNode = new XmlSlurper().parse(xmlStream);
+    def fileNode = new XmlSlurper().parseText(xmlText);
 
     // ------------Проверки по плательщику страховых взносов RASCHSV_SVNP_PODPISANT
 
-    RaschsvSvnpPodpisant raschsvSvnpPodpisant = raschsvSvnpPodpisantService.findRaschsvSvnpPodpisant(declarationData.id)
-    println(raschsvSvnpPodpisant.svnpOkved)
+    fileNode.childNodes().each { documentNode ->
+        // Документ
+        if (documentNode.name == NODE_NAME_DOCUMENT) {
 
-    // todo добавить сохранение поля ПоМесту в raschsv_svnp_podpisant
-    // Соответствие кода места настройкам подразделения
-    // Актуальность кода места
+            // 2.1.1 Соответствие кода места настройкам подразделения
+            def poMestuXml = documentNode.attributes()[DOCUMENT_PO_MESTU]
+            def poMestuParam = mapPresentPlaceCode.get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
+            if (poMestuXml != poMestuParam) {
+                def pathPoMestu = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, DOCUMENT_PO_MESTU].join(".")
+                logger.error("Код места, по которому предоставляется документ " + pathPoMestu + " = \"" + poMestuXml + "\" не совпадает с настройками подразделения.")
+            }
 
-    // Соответствие ОКВЭД настройкам подразделения
+            // 2.1.2 Актуальность кода места
+            // todo мы получили только актуальные значение справочника - эта проверка не требуется!
 
-    // Актуальность ОКВЭД
+            documentNode.childNodes().each { documentChildNode ->
 
-    // todo как получить общие параметры?
-    // Соответсвие ИНН ЮЛ Общим параметрам REF_BOOK_NDFL
+                // СвНП
+                if (documentChildNode.name == NODE_NAME_SV_NP) {
 
-    // Соответсвие КПП ЮЛ настройкам подразделения
+                    // НПЮЛ
+                    def sberbankInnXml = ""
+                    def kppXml = ""
+                    def sVReorgYLFormXml = ""
+                    def sVReorgYLInnXml = ""
+                    def sVReorgYLKppXml = ""
+                    documentChildNode.childNodes().each { NPYLNode ->
+                        if (NPYLNode.name == NODE_NAME_NPYL) {
+                            sberbankInnXml = NPYLNode.attributes()[NPYL_INNYL]
+                            kppXml = NPYLNode.attributes()[NPYL_KPP]
 
-    // Соответствие формы реорганизации настройкам подразделения
+                            // СвРеоргЮЛ
+                            NPYLNode.childNodes().each { sVReorgYLNode ->
+                                if (sVReorgYLNode.name == NODE_NAME_SV_REORG_YL) {
+                                    sVReorgYLFormXml = sVReorgYLNode.attributes()[SV_REORG_YL_FORM_REORG]
+                                    sVReorgYLInnXml = sVReorgYLNode.attributes()[SV_REORG_YL_INNYL]
+                                    sVReorgYLKppXml = sVReorgYLNode.attributes()[SV_REORG_YL_KPP]
+                                }
+                            }
+                        }
+                    }
 
-    // Соответствие ИНН реорганизованной организации настройкам подразделения
+                    // 2.1.3 Соответствие ОКВЭД настройкам подразделения
+                    def okvedCodeXml = documentChildNode.attributes()[SV_NP_OKVED]
+                    def okvedCodeParam = mapOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
+                    if (okvedCodeXml != okvedCodeParam) {
+                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, SV_NP_OKVED].join(".")
+                        logger.error(sprintf(msgErrNotEquals, pathAttr, okvedCodeXml, "КПП " + kppXml))
+                    }
 
-    // Соответствие КПП реорганизованной организации настройкам подразделения
+                    // 2.1.4 Актуальность ОКВЭД
+                    // todo мы получили только актуальные значение справочника - эта проверка не требуется!
+
+                    // 2.1.5 Соответсвие ИНН ЮЛ Общим параметрам
+                    def sberbankInnParam = mapConfigurationParam.get("SBERBANK_INN")
+                    if (sberbankInnXml != sberbankInnParam) {
+                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_NPYL, NPYL_INNYL].join(".")
+                        logger.error("Не совпадает " + pathAttr + " = \"" + sberbankInnXml + "\" для организации - плательщика страховых взносов с настройками подразделения.")
+                    }
+
+                    // 2.1.6 Соответсвие КПП ЮЛ настройкам подразделения
+                    def kppParam = departmentParamIncomeRow?.KPP?.stringValue
+                    if (kppXml != kppParam) {
+                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NPYL_KPP].join(".")
+                        logger.error(sprintf(msgErrNotEquals, pathAttr, kppXml, "ИНН " + sberbankInnXml))
+                    }
+
+                    // 2.1.7 Соответствие формы реорганизации
+                    def sVReorgYLFormParam = mapReorgFormCode.get(departmentParamIncomeRow?.REORG_FORM_CODE?.referenceValue)
+                    if (sVReorgYLFormXml != sVReorgYLFormParam) {
+                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_FORM_REORG].join(".")
+                        logger.error(sprintf(msgErrNotEquals, pathAttr, sVReorgYLFormXml, "КПП " + kppXml))
+                    }
+
+                    // 2.1.8 Соответствие ИНН реорганизованной организации
+                    def sVReorgYLInnParam = departmentParamIncomeRow?.REORG_INN?.stringValue
+                    if (sVReorgYLInnXml != sVReorgYLInnParam) {
+                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_INNYL].join(".")
+                        logger.error(sprintf(msgErrNotEquals, pathAttr, sVReorgYLInnXml, "КПП " + kppXml))
+                    }
+
+                    // 2.1.9 Соответствие КПП реорганизованной организации
+                    def sVReorgYLKppParam = departmentParamIncomeRow?.REORG_KPP?.stringValue
+                    if (sVReorgYLKppXml != sVReorgYLKppParam) {
+                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_KPP].join(".")
+                        logger.error(sprintf(msgErrNotEquals, pathAttr, sVReorgYLKppXml, "КПП " + kppXml))
+                    }
+                }
+            }
+        }
+    }
 
     // ------------Сводные данные об обязательствах плательщика
-
-    // Соответствие кода ОКТМО настройкам подразделения
-
-    // Актуальность ОКТМО
-    // todo почему В <Настройки подразделения>.ОКТМО указана ссылка на актуальную запись справочника
-    // todo а не Файл.Документ.РасчетСВ.ОбязПлатСВ.OKTMO указана ссылка на актуальную запись справочника
-
-    // Соответствие кода тарифа плательщика справочнику
-    // todo нет поля "Коды тарифа плательщика.Используется в ОПС и ОМС"
-    // todo нет версионируемости
 }
 
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
@@ -2331,6 +2463,13 @@ def getProvider(def long providerId) {
     return providerCache.get(providerId)
 }
 
+/**
+ * Разыменование записи справочника
+ */
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 Date getDate(String val) {
     if (val != null) {
         if (val != "") {
@@ -2365,4 +2504,74 @@ Double getDouble(String val) {
         }
     }
     return null
+}
+
+/**
+ * Получить все записи справочника по его идентификатору
+ * @param refBookId - идентификатор справочника
+ * @return - возвращает лист
+ */
+def getRefBook(def long refBookId) {
+    // Передаем как аргумент только срок действия версии справочника
+    def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, null, null)
+    if (refBookList == null || refBookList.size() == 0) {
+        throw new Exception("Ошибка при получении записей справочника " + refBookId)
+    }
+    return refBookList
+}
+
+/**
+ * Получить "Коды видов доходов"
+ * @return
+ */
+def getRefOkvedCode() {
+    if (okvedCodeCache.size() == 0) {
+        def refBookMap = getRefBook(REF_BOOK_OKVED_ID)
+        refBookMap.each { refBook ->
+            okvedCodeCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+        }
+    }
+    return okvedCodeCache;
+}
+
+/**
+ * Получить "Коды форм реорганизации и ликвидации"
+ * @return
+ */
+def getRefReorgFormCode() {
+    if (reorgFormCodeCache.size() == 0) {
+        def refBookMap = getRefBook(REF_BOOK_REORGANIZATION_ID)
+        refBookMap.each { refBook ->
+            reorgFormCodeCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+        }
+    }
+    return reorgFormCodeCache;
+}
+
+/**
+ * Получить "Коды мест предоставления документа"
+ * @return
+ */
+def getRefPresentPlaceCode() {
+    if (presentPlaceCodeCache.size() == 0) {
+        def refBookMap = getRefBook(REF_BOOK_PRESENT_PLACE_ID)
+        refBookMap.each { refBook ->
+            presentPlaceCodeCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+        }
+    }
+    return presentPlaceCodeCache
+}
+
+/**
+ * Получить "Общие параметры"
+ * @return
+ */
+def getConfigurationParam() {
+    if (configurationParamCache.size() == 0) {
+        def refBookMap = getRefBook(REF_BOOK_CONFIGURATION_PARAM_ID)
+        refBookMap.each { refBook ->
+            configurationParamCache.put(refBook?.CODE?.stringValue, refBook?.VALUE?.stringValue)
+        }
+    }
+    return configurationParamCache
 }
