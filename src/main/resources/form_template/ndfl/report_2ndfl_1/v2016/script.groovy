@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils;
@@ -23,8 +24,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE: //формирование xml
         println "!CALCULATE!"
-        println declarationData.id
-        buildXml()
+        buildXml(xml)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -36,6 +36,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
         println "!CREATE_SPECIFIC_REPORT!"
+        createSpecificReport()
         break
     case FormDataEvent.CREATE_FORMS: // создание экземпляра
         println "!CREATE_FORMS!"
@@ -204,10 +205,18 @@ final REF_BOOK_VERSION_VALUE = null
 def recordIdCounter = 1
 
 
-def buildXml() {
+def buildXml(def writer) {
+    buildXml(writer, false)
+}
 
-    if (hasProperty(PART_NUMBER)) {
-        pageNumber = PART_NUMBER
+def buildXmlForSpecificReport(def writer) {
+    buildXml(writer, true)
+}
+
+def buildXml(def writer, boolean isForSpecificReport) {
+    println formMap
+    if (hasProperty("formMap")) {
+        pageNumber = formMap[PART_NUMBER]
     }
     //Текущая страница представляющая порядковый номер файла
     def currentPageNumber = pageNumber
@@ -250,6 +259,7 @@ def buildXml() {
     // 	Данные для Файл.Документ.ПолучДох-(Данные о физическом лице - получателе дохода)
     def listKnf = ndflPersons
 
+    // Порядковый номер физического лица
     def nomSpr = (currentPageNumber - 1) * NUMBER_OF_PERSONS + 1
 
     def dateDoc = Calendar.getInstance().getTime()?.format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
@@ -361,7 +371,6 @@ def buildXml() {
                                             }
                                         }
                                     }
-
                                 }
                             }
                         }
@@ -1080,4 +1089,15 @@ class PairKppOktmo {
         this.oktmo = oktmo
         this.taxOrganCode = taxOrganCode
     }
+}
+
+def createSpecificReport() {
+    def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
+
+    def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
+        buildXmlForSpecificReport(it)
+    });
+
+    declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".pdf")
 }

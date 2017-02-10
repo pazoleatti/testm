@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.report_6ndfl.v2016;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder;
-import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByRate;
@@ -22,6 +19,7 @@ import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.*;
+import org.custommonkey.xmlunit.Diff;
 import org.junit.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -307,5 +305,17 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
             foutputStream.close();
         }
         Desktop.getDesktop().open(file);
+    }
+
+    @Override
+    protected DeclarationSubreport createDeclarationSubreport() {
+        DeclarationSubreport result = new DeclarationSubreport();
+        result.setId(1L);
+        result.setAlias("report_6ndfl");
+        result.setName("report_6ndfl");
+        result.setBlobDataId("100500");
+        result.setOrder(1);
+        result.setDeclarationSubreportParams(Collections.EMPTY_LIST);
+        return result;
     }
 }
