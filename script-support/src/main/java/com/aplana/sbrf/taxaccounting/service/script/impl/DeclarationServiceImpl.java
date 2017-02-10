@@ -9,10 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -71,6 +68,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
+    @Autowired
+    private LoadDeclarationDataService loadDeclarationDataService;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -83,8 +82,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String guid) {
-        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, oktmo, taxOrganCode, asnuId, guid);
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, oktmo, taxOrganCode, asnuId, fileName);
     }
 
     @Override
@@ -253,6 +252,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public DeclarationType getTemplateType(int declarationTypeId) {
+        return declarationTypeDao.get(declarationTypeId);
+    }
+
+    @Override
     public JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params) {
         return declarationDataService.createJasperReport(xmlIn, jrxml, jrSwapFile, params);
     }
@@ -298,6 +302,31 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public void delete(long declarationDataId, TAUserInfo userInfo) {
         declarationDataDao.setStatus(declarationDataId, State.CREATED);
         declarationDataService.delete(declarationDataId, userInfo);
+    }
+
+    @Override
+    public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
+        return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
+    }
+
+    @Override
+    public String getDeclarationTemplateScript(int declarationTemplateId) {
+        return declarationTemplateDao.getDeclarationTemplateScript(declarationTemplateId);
+    }
+
+    @Override
+    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
+        return sourceService.getDDTByDepartment(departmentId, taxType, periodStart, periodEnd);
+    }
+
+    @Override
+    public List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc) {
+        return declarationDataSearchService.getDeclarationIds(declarationFilter, ordering, asc);
+    }
+
+    @Override
+    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream, String fileName, File dataFile, AttachFileType attachFileType) {
+        loadDeclarationDataService.importDeclarationData(logger, userInfo, declarationData, inputStream, fileName, dataFile, attachFileType);
     }
 
     @Override

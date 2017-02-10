@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.ImportCounter;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TransportFileInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -16,21 +15,25 @@ import java.util.Map;
  */
 public interface LoadDeclarationDataService {
     /**
-     * Загрузка ТФ ТБ (FORM_UPLOAD_DIRECTORY)
-     * Все ТБ
+     * Загрузка файла
+     * @param logger
+     * @param userInfo
+     * @param fileName
+     * @param inputStream
+     * @param lock
      */
-    ImportCounter importDeclaration(TAUserInfo userInfo, Logger logger, String lock, boolean isAsync);
+    void uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, String lock);
 
     /**
-     * Загрузка ТФ НФ ТБ (FORM_UPLOAD_DIRECTORY)
-     * Указанные ТБ и список имен файлов
+     *
+     * @param logger
+     * @param userInfo
+     * @param declarationData
+     * @param inputStream
+     * @param fileName
+     * @param dataFile
+     * @param attachFileType
      */
-    ImportCounter importDeclaration(TAUserInfo userInfo, Map<Integer, List<TaxType>> departmentTaxMap, Logger logger, String lock, boolean isAsync);
-
-    //List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, Logger logger);
-
-    /**
-     * Карта: Доступные ТБ -> доступные виды налогов
-     */
-   // Map<Integer, List<TaxType>> getTB(TAUserInfo userInfo, Logger logger);
+    void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
+                               String fileName, File dataFile, AttachFileType attachFileType);
 }
