@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 /**
  * Тестирование разбора xml-файла Расчета по страховым взносам
  */
+@Ignore
 public class RaschsvParseTest extends ScriptTestBase {
 
     /**
@@ -158,6 +160,31 @@ public class RaschsvParseTest extends ScriptTestBase {
 
         when(testHelper.getFiasRefBookService().findAddress(anyString(), anyString(),anyString(), anyString(), anyString())).thenReturn(new ArrayList<AddressObject>());
         when(testHelper.getFiasRefBookService().findAddress(eq("590"), eq("590"), eq("590"), eq("590"), eq("590"))).thenReturn(Arrays.asList(new AddressObject()));
+
+        RefBookDataProvider oksmDataRovider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.COUNTRY.getId()))).thenReturn(oksmDataRovider);
+        when(oksmDataRovider.getRecordsCount(any(Date.class), eq("CODE = '643'"))).thenReturn(1);
+        when(oksmDataRovider.getRecordsCount(any(Date.class), eq("CODE = '644'"))).thenReturn(0);
+
+        RefBookDataProvider documentCodesProvider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.DOCUMENT_CODES.getId()))).thenReturn(documentCodesProvider);
+        when(documentCodesProvider.getRecordsCount(any(Date.class), eq("CODE = '21'"))).thenReturn(1);
+        when(documentCodesProvider.getRecordsCount(any(Date.class), eq("CODE = '20'"))).thenReturn(0);
+
+        RefBookDataProvider oktmoProvider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.OKTMO.getId()))).thenReturn(oktmoProvider);
+        when(oktmoProvider.getRecordsCount(any(Date.class), eq("CODE = '57701000'"))).thenReturn(1);
+        when(oktmoProvider.getRecordsCount(any(Date.class), eq("CODE = '57701001'"))).thenReturn(0);
+
+        RefBookDataProvider kbkProvider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.KBK.getId()))).thenReturn(kbkProvider);
+        when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000110'"))).thenReturn(1);
+        when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000111'"))).thenReturn(0);
+        when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000112'"))).thenReturn(0);
+        when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000113'"))).thenReturn(0);
+        when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000114'"))).thenReturn(0);
+        when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000115'"))).thenReturn(0);
+        when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000116'"))).thenReturn(0);
     }
 
     @Test
@@ -179,7 +206,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         checkLogger();
     }
 
-//    @Test
+    @Test
     public void checkRaschsvInvalid() {
         initMock();
 
@@ -206,7 +233,21 @@ public class RaschsvParseTest extends ScriptTestBase {
         Assert.assertTrue(containLog("Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП реорганизованной организации для организации плательщика страховых взносов с ИНН 7723643860"));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ = \"\" реорганизованной организации для организации плательщика страховых взносов с ИНН 7723643860"));
         //TODO Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП
+        Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПИП.ИННФЛ = \"500100732250\" индивидуального предпринимателя - плательщика страховых взносов в транспортном файле \""+ FILE_NAME + "\""));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПФЛ.ИННФЛ = \"500100732250\" физического лица - плательщика страховых взносов в транспортном файле \"" + FILE_NAME + "\""));
         Assert.assertTrue(containLog("В справочнике отсутствует Файл.Документ.СвНП.НПФЛ.СвНПФЛ.АдрМЖРФ = \"'590'/'591'/'592'/'593'/'594'\" для ФЛ с ИНН \"7723643860\""));
+        Assert.assertTrue(containLog("В справочнике отсутствует Файл.Документ.СвНП.НПФЛ.СвНПФЛ.АдрМЖРФ = \"'590'/'591'/'592'/'593'/'594'\" для ФЛ с ИНН \"7723643860\""));
+        Assert.assertTrue(containLog("Не заполнено Файл.Документ.Подписант.ФИО=\"''/'z'\" в транспортном файле \""+ FILE_NAME + "\""));
+        Assert.assertTrue(containLog("Не заполнено Файл.Документ.Подписант.СвПред.НаимДок = \"\" в транспортном файле \""+ FILE_NAME + "\""));
+        Assert.assertTrue(containLog("Файл.Документ.СвНП.НПИП.СвНПФЛ.Гражд = \"644\" ФЛ с ИНН \"500100732250\" не найден в справочнике ОКСМ"));
+        Assert.assertTrue(containLog("Файл.Документ.СвНП.НПФЛ.СвНПФЛ.УдЛичнФЛ.КодВидДок = \"20\" ФЛ с ИНН 500100732250 не найден в справочнике \"Коды документов, удостоверяющих личность\""));
+        Assert.assertTrue(containLog("Не заполнены Файл.Документ.РасчетСВ.ОбязПлатСВ в транспортном файле \""+ FILE_NAME + "\""));
+        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.OKTMO = \"57701001\" транспортного файла \""+ FILE_NAME + "\" не найден в справочнике"));
+        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС = \"10302330010000111\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""));
+        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС = \"10302330010000112\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""));
+        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОМС = \"10302330010000113\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""));
+        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПСДоп = \"10302330010000114\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""));
+        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерДСО = \"10302330010000115\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""));
+        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС = \"10302330010000116\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""));
     }
 }

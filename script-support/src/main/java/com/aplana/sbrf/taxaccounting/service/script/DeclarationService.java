@@ -184,4 +184,17 @@ public interface DeclarationService {
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note);
 
     void delete(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Найти декларацию НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
+     * @param declarationTypeId
+     * @param departmentReportPeriodId
+     * @param departmentId
+     * @param reportPeriod
+     * @param oktmo
+     * @param kpp
+     * @return
+     */
+
+    DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
 }

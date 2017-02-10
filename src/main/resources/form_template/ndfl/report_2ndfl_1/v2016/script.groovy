@@ -8,6 +8,15 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils;
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
+import com.aplana.sbrf.taxaccounting.model.Relation
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверки
@@ -15,16 +24,18 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE: //формирование xml
         println "!CALCULATE!"
-        buildXml()
+        buildXml(xml)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
         break
     case FormDataEvent.GET_SOURCES: //формирование списка источников
         println "!GET_SOURCES!"
+        getSources()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
         println "!CREATE_SPECIFIC_REPORT!"
+        createSpecificReport()
         break
     case FormDataEvent.CREATE_FORMS: // создание экземпляра
         println "!CREATE_FORMS!"
@@ -151,17 +162,49 @@ final String PART_NUMBER = "partNumber"
 final String PART_TOTAL = "partTotal"
 
 @Field
-final String NDFL_PERSONS = "ndflPersons"
+def ndflReferencess = []
 
-def buildXml() {
-    println formMap
-    if (hasProperty("formMap")) {
+@Field
+final NDFL_REFERENCES_DECLARATION_DATA_ID = "DECLARATION_DATA_ID"
+
+@Field
+final NDFL_REFERENCES_PERSON_ID = "PERSON_ID"
+
+@Field
+final NDFL_REFERENCES_NUM = "NUM"
+
+@Field
+final NDFL_REFERENCES_SURNAME = "SURNAME"
+
+@Field
+final NDFL_REFERENCES_NAME = "NAME"
+
+@Field
+final NDFL_REFERENCES_LASTNAME = "LASTNAME"
+
+@Field
+final NDFL_REFERENCES_BIRTHDAY = "BIRTHDAY"
+
+@Field
+final NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
+
+
+def buildXml(def writer) {
+    buildXml(writer, false)
+}
+
+def buildXmlForSpecificReport(def writer) {
+    buildXml(writer, true)
+}
+
+def buildXml(def writer, boolean isForSpecificReport) {
+    if (hasProperty(PART_NUMBER)) {
         pageNumber = formMap[PART_NUMBER]
     }
     //Текущая страница представляющая порядковый номер файла
     def currentPageNumber = pageNumber
 
-    ndflPersons = getKnfData()
+    ndflPersons = getNdflPersons()
 
     // инициализация данных о подразделении
     departmentParam = getDepartmentParam(declarationData.departmentId, declarationData.reportPeriodId)
@@ -220,7 +263,11 @@ def buildXml() {
             СвЮЛ(ИННЮЛ: INN_YUR,
                     КПП: kpp) {}
         }
-        listKnf.each { knfRow ->
+        listKnf.each { np ->
+            // Порядковый номер физического лица
+            if (isCorrectionPeriod()) {
+                nomspr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, "PERSON_ID = ${np.personId}", null).get(0).num
+            }
             Документ(КНД: KND,
                     ДатаДок: dateDoc,
                     НомСпр: nomSpr++,
@@ -243,33 +290,33 @@ def buildXml() {
                             ИННЮЛ: INN_YUR,
                             КПП: kpp)
                 }
-                ПолучДох(ИННФЛ: knfRow.innNp,
-                        ИННИно: knfRow.innForeign,
-                        Статус: knfRow.status,
-                        ДатаРожд: knfRow.birthDay.format(DATE_FORMAT_DOTTED),
-                        Гражд: knfRow.citizenship) {
-                    ФИО(Фамилия: knfRow.lastName,
-                            Имя: knfRow.firstName,
-                            Отчество: knfRow.middleName)
-                    УдЛичнФЛ(КодУдЛичн: knfRow.idDocType,
-                            СерНомДок: knfRow.idDocNumber)
-                    АдрМЖРФ(Индекс: knfRow.postIndex,
-                            КодРегион: knfRow.regionCode,
-                            Район: knfRow.area,
-                            Город: knfRow.city,
-                            НаселПункт: knfRow.locality,
-                            Улица: knfRow.street,
-                            Дом: knfRow.house,
-                            Корпус: knfRow.building,
-                            Кварт: knfRow.flat)
-                    АдрИНО(КодСтр: knfRow.countryCode,
-                            АдрТекст: knfRow.address)
+                ПолучДох(ИННФЛ: np.innNp,
+                        ИННИно: np.innForeign,
+                        Статус: np.status,
+                        ДатаРожд: np.birthDay.format(DATE_FORMAT_DOTTED),
+                        Гражд: np.citizenship) {
+                    ФИО(Фамилия: np.lastName,
+                            Имя: np.firstName,
+                            Отчество: np.middleName)
+                    УдЛичнФЛ(КодУдЛичн: np.idDocType,
+                            СерНомДок: np.idDocNumber)
+                    АдрМЖРФ(Индекс: np.postIndex,
+                            КодРегион: np.regionCode,
+                            Район: np.area,
+                            Город: np.city,
+                            НаселПункт: np.locality,
+                            Улица: np.street,
+                            Дом: np.house,
+                            Корпус: np.building,
+                            Кварт: np.flat)
+                    АдрИНО(КодСтр: np.countryCode,
+                            АдрТекст: np.address)
                 }
 
                 // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
-                def ndflPersonIncomes = findIncomes(knfRow.id, priznakF, startDate, endDate)
+                def ndflPersonIncomes = findIncomes(np.id, priznakF, startDate, endDate)
                 // Сведения о вычетах
-                def ndflPersonDeductions = findDeductions(knfRow.id, startDate, endDate, ndflPersonIncomes)
+                def ndflPersonDeductions = findDeductions(np.id, startDate, endDate, ndflPersonIncomes)
                 // Сведения о доходах сгруппированные по ставке
                 def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomes)
                 // Сведения о доходах сгруппированные по коду дохода
@@ -284,25 +331,26 @@ def buildXml() {
                 def deductionsSelectedForDeductionsSum = selectDeductionsForDeductionsSum(ndflPersonDeductions)
                 def deductionsSelectedGroupedByDeductionTypeCode = groupByDeductionTypeCode(deductionsSelectedForDeductionsSum)
 
-                def ndflPersonPrepayments = findPrepayments(knfRow.id, startDate, endDate, ndflPersonIncomes)
+                def ndflPersonPrepayments = findPrepayments(np.id, startDate, endDate, ndflPersonIncomes)
                 ndflPersonIncomesGroupedByTaxRate.each { taxRateGroup ->
                     СведДох(Ставка: taxRateGroup.head()?.taxRate) {
 
                         taxRateGroup.each { ndflPersonIncome ->
                             ДохВыч() {
-                                def month = ndflPersonIncome.taxDate?.format(DATE_FORMAT_MONTH)
                                 ndflPersonIncomesGroupedByIncomeCode.each { incomeCodeGroup ->
                                     def sortedIncomeCodeGroup = incomeCodeGroup.toSorted { item1, item2 -> item1.taxDate <=> item2.taxDate }
                                     def incomeCode = sortedIncomeCodeGroup.get(0)?.incomeCode
-                                    СвСумДох(Месяц: month,
-                                            КодДоход: incomeCode,
-                                            СумДоход: ScriptUtils.round(getSumDohod(incomeCodeGroup), 2)) {
+                                                   incomeCodeGroup.each { incomeCodeNdflPersonIncome ->
+                                                         СвСумДох(Месяц: incomeCodeNdflPersonIncome.taxDate?.format(DATE_FORMAT_MONTH),
+                                                КодДоход: incomeCode,
+                                                СумДоход: ScriptUtils.round(getSumDohod(incomeCodeGroup), 2)) {
 
-                                        deductionsGroupedByTypeCodeForDeductionsInfo.each { deductionByTypeCodeGroup ->
-                                            def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionByTypeCodeGroup)
+                                            deductionsGroupedByTypeCodeForDeductionsInfo.each { deductionByTypeCodeGroup ->
+                                                def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionByTypeCodeGroup)
 
-                                            СвСумВыч(КодВычет: deductionsFilteredByIncomeCode.get(0)?.typeCode,
-                                                    СумВычет: ScriptUtils.round(deductionsFilteredByIncomeCode.sum().periodCurrSumm, 2)) {
+                                                СвСумВыч(КодВычет: deductionsFilteredByIncomeCode.get(0)?.typeCode,
+                                                        СумВычет: ScriptUtils.round(deductionsFilteredByIncomeCode.sum().periodCurrSumm, 2)) {
+                                                }
                                             }
                                         }
                                     }
@@ -341,7 +389,7 @@ def buildXml() {
                                 НалУдержЛиш: getNalUderzhLish(priznakF, ndflPersonIncomes),
                                 НалНеУдерж: getNalNeUderzh(ndflPersonIncomes)) {
 
-                            if (knfRow.status == "6") {
+                            if (np.status == "6") {
                                 ndflPersonPrepayments.each { prepayment ->
                                     УведФиксПлат(НомерУвед: prepayment.notifNum,
                                             ДатаУвед: prepayment.notifDate?.format(DATE_FORMAT_DOTTED),
@@ -354,9 +402,34 @@ def buildXml() {
                     }
                 }
             }
+
+            ndflReferencess << createRefBookAttributesForNdflReference(np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
+
         }
     }
+    saveNdflRefences()
     //println(xml)
+}
+
+def saveNdflRefences() {
+    logger.setTaUserInfo(userInfo)
+    getProvider(NDFL_REFERENCES).createRecordVersion(logger, new Date(), null, ndflReferencess)
+}
+
+def createRefBookAttributesForNdflReference(
+        def personId, def nomSpr, def lastName, def firstName, def middleName, def birthDay) {
+    Map<String, RefBookValue> row = new HashMap<String, RefBookValue>();
+    row.put(NDFL_REFERENCES_DECLARATION_DATA_ID, new RefBookValue(RefBookAttributeType.NUMBER, declarationData.id))
+    row.put(NDFL_REFERENCES_PERSON_ID, new RefBookValue(RefBookAttributeType.REFERENCE, personId))
+    row.put(NDFL_REFERENCES_NUM, new RefBookValue(RefBookAttributeType.NUMBER, nomSpr))
+    row.put(NDFL_REFERENCES_SURNAME, new RefBookValue(RefBookAttributeType.STRING, lastName))
+    row.put(NDFL_REFERENCES_NAME, new RefBookValue(RefBookAttributeType.STRING, firstName))
+    row.put(NDFL_REFERENCES_LASTNAME, new RefBookValue(RefBookAttributeType.STRING, middleName))
+    row.put(NDFL_REFERENCES_BIRTHDAY, new RefBookValue(RefBookAttributeType.DATE, birthDay))
+    row.put(NDFL_REFERENCES_ERRTEXT, new RefBookValue(RefBookAttributeType.STRING, null))
+    RefBookRecord record = new RefBookRecord()
+    record.setValues(row)
+    return record
 }
 
 // Генерация имени файла
@@ -379,14 +452,8 @@ def generateXmlFileId() {
 }
 
 // Получение данных
-def getKnfData() {
-    def toReturn = null
-    if (hasProperty("formMap")) {
-        toReturn = formMap.get(NDFL_PERSONS)
-    } else {
-        toReturn = ndflPersonService.findNdflPersonByParameters(declarationData.id, null, pageNumber * 3000 - 2999, NUMBER_OF_PERSONS)
-    }
-    return toReturn
+def getNdflPersons() {
+    ndflPersonService.findNdflPersonByParameters(declarationData.id, null, pageNumber * 3000 - 2999, NUMBER_OF_PERSONS)
 }
 
 // Получить доходы
@@ -556,7 +623,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
 def getDepartmentParamTable(def departmentParamId, def reportPeriodId) {
     if (departmentParamRow == null) {
         def filter = null
-        if (declarationData.oktmo != "null") {
+        if (declarationData.oktmo != null) {
             filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}' and OKTMO = ${declarationData.oktmo}"
         } else {
             filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
@@ -658,6 +725,8 @@ final int RNU_NDFL_DECLARATION_TYPE = 101
 @Field
 def departmentParamTableList = null;
 
+@Field
+def departmentReportPeriodMap = [:]
 
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
@@ -666,7 +735,8 @@ def createForm() {
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
-    // step 2
+    def ndflReferencesWithError = null
+
     if (korrPeriod) {
         def prevDepartmentPeriodReport = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
@@ -683,45 +753,45 @@ def createForm() {
         }
         formType = getFormType(currDeclarationTemplate)
         if (definePriznakF() != "0") {
-            //TODO реализовать работу с реестром справок
+            ndflReferencesWithError = getNdflReferencesWithError()
+
         }
     } else {
-        // step 5
+
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList.each { dep ->
             pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, dep.OKTMO?.value, dep?.TAX_ORGAN_CODE?.value)
         }
     }
-    // step 3 и step 4
-    // получить id всех ТБ для данного отчетного периода
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
-    // список форм рну-ндфл для отчетного периода всех ТБ
-    def allDeclarationData = []
-    allDepartmentReportPeriodIds.each {
-        allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
-    }
-    // удаление форм не со статусом принята
-    def declarationsForRemove = []
-    allDeclarationData.each { declaration ->
-        if (declaration.state != State.ACCEPTED) {
-            declarationsForRemove << declaration
-        }
-    }
-    allDeclarationData.removeAll(declarationsForRemove)
-    // TODO реализовать работу с реестром справок для шага 6
 
-    // step 7
+    def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
+
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
+
     allDeclarationData.each { declaration ->
         pairKppOktmoList.each { np ->
             def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
             if (ndflPersons != null && ndflPersons.size != 0) {
+                if (isCorrectionPeriod()) {
+                    def ndflPersonsPicked = []
+                    ndflReferencesWithError.each { reference ->
+                        ndflPersons.each { person ->
+                            if (reference.PERSON_ID?.value == person.id) {
+                                ndflPersonsPicked << person
+                            }
+                        }
+                    }
+                    ndflPersons = ndflPersonsPicked
+                }
                 ndflPersonsGroupedByKppOktmo[np] = ndflPersons
             }
         }
     }
+
+    initNdflPersons(ndflPersonsGroupedByKppOktmo)
+
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
         declarationService.delete(it.id, userInfo)
     }
@@ -741,26 +811,75 @@ def createForm() {
             params = new HashMap<String, Object>()
             ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
                     departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo, null, null, note)
+            appendNdflPersonsToForm(ddId, part)
             params.put(PART_NUMBER, indexFrom1)
             params.put(PART_TOTAL, partTotal)
-            params.put(NDFL_PERSONS, part)
             formMap.put(ddId, params)
         }
     }
+}
 
+def findAllTerBankDeclarationData(def departmentReportPeriod) {
+    // получить id всех ТБ для данного отчетного периода
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDeclarationData = []
+    allDepartmentReportPeriodIds.each {
+        allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
+    }
+    // удаление форм не со статусом принята
+    def declarationsForRemove = []
+    allDeclarationData.each { declaration ->
+        if (declaration.state != State.ACCEPTED) {
+            declarationsForRemove << declaration
+        }
+    }
+    allDeclarationData.removeAll(declarationsForRemove)
+    return allDeclarationData
+}
+
+def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
+    ndflPersonsGroupedByKppOktmo.each { npGroup ->
+        def oktmo = npGroup.key.oktmo
+        def kpp = npGroup.key.kpp
+        npGroup.value.each {
+            def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp, oktmo)
+            resetId(incomes)
+            def deductions = ndflPersonService.findDeductions(it.id)
+            resetId(deductions)
+            def prepayments = ndflPersonService.findPrepayments(it.id)
+            resetId(prepayments)
+            it.setIncomes(incomes)
+            it.setDeductions(deductions)
+            it.setPrepayments(prepayments)
+        }
+    }
+}
+
+def appendNdflPersonsToForm(def declarationDataId, def ndflPersons) {
+    ndflPersons.each {
+        it.setId(null)
+        it.setDeclarationDataId(declarationDataId)
+        ndflPersonService.save(it)
+    }
 
 }
 
+
+def resetId(def list) {
+    list.each {
+        it.setId(null)
+    }
+}
+
+/************************************* ВЫГРУЗКА ***********************************************************************/
 
 def createReports() {
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
     scriptParams.put("fileName", "reports.zip")
     try {
         Department department = departmentService.get(declarationData.departmentId);
-        DeclarationTemplate declarationTemplate =  declarationService.getTemplate(declarationData.declarationTemplateId);
-        println declarationTemplate
+        DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
-        println departmentReportPeriod
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
@@ -769,7 +888,6 @@ def createReports() {
                 declarationTemplate.getName(),
                 department.getName(),
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod);
-        println path
         def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
         declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
             if (it.fileName == null) {
@@ -777,13 +895,132 @@ def createReports() {
             }
             ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName);
             zos.putArchiveEntry(ze);
-            println "${declarationService.getXmlStream(it.id)}"
             IOUtils.copy(declarationService.getXmlStream(it.id), zos)
             zos.closeArchiveEntry();
         }
     } finally {
         IOUtils.closeQuietly(zos);
     }
+}
+/*********************************ПОЛУЧИТЬ ИСТОЧНИКИ*******************************************************************/
+@Field
+def sourceReportPeriod = null
+
+def getReportPeriod() {
+    if (sourceReportPeriod == null) {
+        sourceReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return sourceReportPeriod
+}
+
+/** Получить результат для события FormDataEvent.GET_SOURCES. */
+void getSources() {
+    if (!(needSources)) {
+        // формы-приемники, декларации-истчоники, декларации-приемники не переопределять
+        return
+    }
+    def reportPeriod = getReportPeriod()
+    def sourceTypeId = 101
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def tmpDeclarationDataList = []
+    allDepartmentReportPeriodIds.each {
+        tmpDepartmentReportPeriod = departmentReportPeriodService.get(it)
+        tmpDeclaration = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, it, tmpDepartmentReportPeriod.departmentId, tmpDepartmentReportPeriod.reportPeriod.id, declarationData.kpp, declarationData.oktmo)
+        if (tmpDeclaration != null) {
+            tmpDeclarationDataList << tmpDeclaration
+        }
+   }
+    def declarationsForRemove = []
+    tmpDeclarationDataList.each { declaration ->
+        if (declaration.state != State.ACCEPTED) {
+            declarationsForRemove << declaration
+        }
+    }
+    tmpDeclarationDataList.removeAll(declarationsForRemove)
+    tmpDeclarationDataList.each { tmpDeclarationData ->
+        def department = departmentService.get(tmpDeclarationData.departmentId)
+        def relation = getRelation(tmpDeclarationData, department, reportPeriod, sourceTypeId)
+        if (relation) {
+            sources.sourceList.add(relation)
+        }
+    }
+    sources.sourcesProcessedByScript = true
+}
+
+/**
+ * Получить запись для источника-приемника.
+ *
+ * @param tmpDeclarationData нф
+ * @param department подразделение
+ * @param period период нф
+ * @param monthOrder номер месяца (для ежемесячной формы)
+ */
+def getRelation(DeclarationData tmpDeclarationData, Department department, ReportPeriod period, def sourceTypeId) {
+    // boolean excludeIfNotExist - исключить несозданные источники
+
+    if (excludeIfNotExist && tmpDeclarationData == null) {
+        return null
+    }
+    // WorkflowState stateRestriction - ограничение по состоянию для созданных экземпляров
+    if (stateRestriction && tmpDeclarationData != null && stateRestriction != tmpDeclarationData.state) {
+        return null
+    }
+    Relation relation = new Relation()
+    def isSource = sourceTypeId != 101
+
+    DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpDeclarationData?.departmentReportPeriodId) as DepartmentReportPeriod
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(sourceTypeId)
+
+    // boolean light - заполняются только текстовые данные для GUI и сообщений
+    if (light) {
+        /**************  Параметры для легкой версии ***************/
+        /** Идентификатор подразделения */
+        relation.departmentId = department.id
+        /** полное название подразделения */
+        relation.fullDepartmentName = getDepartmentFullName(department.id)
+        /** Дата корректировки */
+        relation.correctionDate = departmentReportPeriod?.correctionDate
+        /** Вид нф */
+        relation.declarationTypeName = declarationTemplate?.name
+        /** Год налогового периода */
+        relation.year = period.taxPeriod.year
+        /** Название периода */
+        relation.periodName = period.name
+    }
+    /**************  Общие параметры ***************/
+    /** подразделение */
+    relation.department = department
+    /** Период */
+    relation.departmentReportPeriod = departmentReportPeriod
+    /** Статус ЖЦ */
+    relation.declarationState = tmpDeclarationData?.state
+    /** форма/декларация создана/не создана */
+    relation.created = (tmpDeclarationData != null)
+    /** является ли форма источников, в противном случае приемник*/
+    relation.source = isSource
+    /** Введена/выведена в/из действие(-ия) */
+    relation.status = declarationTemplate.status == VersionedObjectStatus.NORMAL
+    /** Налог */
+    relation.taxType = TaxType.NDFL
+    /**************  Параметры НФ ***************/
+    /** Идентификатор созданной формы */
+    relation.declarationDataId = tmpDeclarationData?.id
+    /** Вид НФ */
+    relation.declarationTemplate = declarationTemplate
+    /** Тип НФ */
+    //relation.formDataKind = tmpDeclarationData.kind
+
+    return relation
+}
+
+
+
+def getDepartmentReportPeriodById(def id) {
+    if (id != null && departmentReportPeriodMap[id] == null) {
+        departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
+    }
+    return departmentReportPeriodMap[id]
 }
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
@@ -799,12 +1036,31 @@ def getDepartmentParamTableList(def departmentParamId, def reportPeriodId) {
     return departmentParamTableList
 }
 
+// Получить список из реестра справок с ошибкой ФНС
+def getNdflReferencesWithError() {
+    def filter = "DECLARATION_DATA_ID = ${declarationData.id} AND ERRTEXT IS NOT NULL"
+    getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
+}
+
 def isCorrectionPeriod() {
     def nomKorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
     if (nomKorr != 0) {
         return true
     }
 }
+
+// Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
+@Field
+def departmentFullNameMap = [:]
+
+/** Получить полное название подразделения по id подразделения. */
+def getDepartmentFullName(def id) {
+    if (departmentFullNameMap[id] == null) {
+        departmentFullNameMap[id] = departmentService.getParentsHierarchy(id)
+    }
+    return departmentFullNameMap[id]
+}
+
 
 class PairKppOktmo {
     def kpp
@@ -816,4 +1072,15 @@ class PairKppOktmo {
         this.oktmo = oktmo
         this.taxOrganCode = taxOrganCode
     }
+}
+
+def createSpecificReport() {
+    def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
+
+    def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
+        buildXmlForSpecificReport(it)
+    });
+
+    declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".pdf")
 }
