@@ -99,4 +99,10 @@ public interface ReportPeriodService {
      */
     @SuppressWarnings("unused")
     Integer getCorrectionNumber(int departmentReportPeriodId);
+
+    /**
+     * Отчетный период по коду и году
+     */
+    ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
+
 }

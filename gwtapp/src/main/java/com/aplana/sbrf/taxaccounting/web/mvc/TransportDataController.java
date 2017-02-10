@@ -1,12 +1,22 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Controller
 public class TransportDataController {
@@ -33,7 +46,16 @@ public class TransportDataController {
     private SecurityService securityService;
 
     @Autowired
-    private UploadTransportDataService uploadTransportDataService;
+    private BlobDataService blobDataService;
+
+    @Autowired
+    private LockDataService lockDataService;
+
+    @Autowired
+    private AsyncManager asyncManager;
+
+    public static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
+
 
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
     public void upload(@RequestParam(value = "uploader", required = true) MultipartFile file,
@@ -52,28 +74,44 @@ public class TransportDataController {
         }
 
         TAUserInfo userInfo = securityService.currentUserInfo();
+        String uuid = blobDataService.create(file.getInputStream(), fileName);
 
-        // Загрузка в каталог
-        //UploadResult uploadResult =
-		uploadTransportDataService.uploadFile(userInfo, fileName, file.getInputStream(), logger);
+        int userId = userInfo.getUser().getId();
+        String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+        BalancingVariants balancingVariant = BalancingVariants.SHORT;
+        LockData lockData = lockDataService.lock(key, userId,
+                LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
+                LockData.State.IN_QUEUE.getText());
+        if (lockData == null) {
+            try {
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
+                params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                params.put("blobDataId", uuid);
 
-        // Загрузка из каталога
-        /*if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
-            // Diasoft
-            loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
+                lockData = lockDataService.getLock(key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                try {
+                    lockDataService.addUserWaitingForLock(key, userId);
+                    asyncManager.executeAsync(
+                            PropertyLoader.isProductionMode() ? ReportType.LOAD_ALL_TF.getAsyncTaskTypeId() : ReportType.LOAD_ALL_TF.getDevModeAsyncTaskTypeId(),
+                            params, balancingVariant);
+                    LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
+                    lockDataService.updateQueue(key, lockData.getDateLock(), queue);
+                    logger.info(String.format(CREATE_TASK, "Загрузки файла"));
+                } catch (AsyncTaskException e) {
+                    lockDataService.unlock(key, userId);
+                    logger.error("Ошибка при постановке в очередь задачи загрузки ТФ.");
+                }
+            } catch(Exception e) {
+                logger.error(e);
+                try {
+                    lockDataService.unlock(key, userId);
+                } catch (ServiceException e2) {
+                    logger.error(e2);
+                }
+            }
         }
-        if (!uploadResult.getAvgCostFileNameList().isEmpty()) {
-            loadRefBookDataService.importRefBookAvgCost(userInfo, uploadResult.getAvgCostFileNameList(), logger);
-        }
-
-        if (!uploadResult.getFormDataFileNameList().isEmpty()) {
-            // НФ
-            // Пересечение списка доступных приложений и списка загруженных приложений
-            List<Integer> departmentList = new ArrayList(CollectionUtils.intersection(
-                    loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
-
-            loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger);
-        }*/
 
         if (!logger.getEntries().isEmpty()) {
             response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));

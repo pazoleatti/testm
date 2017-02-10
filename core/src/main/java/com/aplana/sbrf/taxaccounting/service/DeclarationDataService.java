@@ -9,6 +9,7 @@ import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -341,7 +342,7 @@ public interface DeclarationDataService {
      * Импорт ТФ Декларации
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
-                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, String lock);
+                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile, AttachFileType fileType);
 
     /**
      * Получение данных по файлам для формы "Файлы и комментарии"

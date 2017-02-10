@@ -1133,6 +1133,6 @@ def createSpecificReport() {
         buildXmlForSpecificReport(it)
     });
 
-    declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".pdf")
+    declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
 }

@@ -1,15 +1,9 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.LoadDeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
-import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -33,7 +27,7 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     private LockDataService lockDataService;
 
     @Autowired
-    private LoadFormDataService loadFormDataService;
+    BlobDataService blobDataService;
 
     @Autowired
     private LoadRefBookDataService loadRefBookDataService;
@@ -59,19 +53,22 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
-        String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        lockDataService.lock(key, userInfo.getUser().getId(),
-                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
-        try {
-            logger.info("Номер загрузки: %s", lock);
-            // Справочники
-            loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate, true);
-
-            // Налоговые формы
-            lockDataService.updateState(lock, lockDate, "Импорт налоговых форм");
-            loadDeclarationDataService.importDeclaration(userInfo, loadFormDataService.getTB(userInfo, logger), logger, lock, true);
-        } finally {
-            lockDataService.unlock(key, userInfo.getUser().getId());
+        if (params.containsKey("blobDataId")) {
+            final String blobDataId = (String) params.get("blobDataId");
+            BlobData blobData = blobDataService.get(blobDataId);
+            lockDataService.updateState(lock, lockDate, "Загрузка файлов");
+            loadDeclarationDataService.uploadFile(logger, userInfo, blobData.getName(), blobData.getInputStream(), lock);
+        } else {
+            String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+            lockDataService.lock(key, userInfo.getUser().getId(),
+                    LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
+            try {
+                logger.info("Номер загрузки: %s", lock);
+                // Справочники
+                loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate, true);
+            } finally {
+                lockDataService.unlock(key, userInfo.getUser().getId());
+            }
         }
         return new TaskStatus(true, null);
     }
