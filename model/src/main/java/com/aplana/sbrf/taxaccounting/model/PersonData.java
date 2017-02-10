@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.util.Date;
 
@@ -68,7 +69,7 @@ public class PersonData {
     /**
      * Ссылка на справочник Виды документов
      */
-    private String documentTypeId;
+    private Long documentTypeId;
     /**
      * Код документа
      */
@@ -169,11 +170,11 @@ public class PersonData {
         this.asnuId = asnuId;
     }
 
-    public String getDocumentTypeId() {
+    public Long getDocumentTypeId() {
         return documentTypeId;
     }
 
-    public void setDocumentTypeId(String documentTypeId) {
+    public void setDocumentTypeId(Long documentTypeId) {
         this.documentTypeId = documentTypeId;
     }
 
@@ -182,6 +183,7 @@ public class PersonData {
     }
 
     public void setDocumentType(String documentCode) {
+
         this.documentType = documentCode;
     }
 

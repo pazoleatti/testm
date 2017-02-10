@@ -120,6 +120,7 @@ public class RefBook implements Serializable {
 		INCOME_CODE(922),							// Коды видов доходов
 		INCOME_KIND(933),							// Виды дохода
 		DEDUCTION_TYPE(921),						// Коды видов вычетов
+		PRESENT_PLACE(924),							// Коды места представления расчета
 		OKVED(925),									// Общероссийский классификатор видов экономической деятельности
 		ATTACH_FILE_TYPE(934),						// Категории прикрепленных файлов
 		TAX_INSPECTION(935),						// Коды налоговых органов

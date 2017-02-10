@@ -1,25 +1,24 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import groovy.lang.Closure;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.design.JasperDesign;
-import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRSwapFile;
-import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +30,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.zip.ZipInputStream;
 
@@ -302,5 +298,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public void delete(long declarationDataId, TAUserInfo userInfo) {
         declarationDataDao.setStatus(declarationDataId, State.CREATED);
         declarationDataService.delete(declarationDataId, userInfo);
+    }
+
+    @Override
+    public DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriodId, String kpp, String oktmo) {
+        return declarationDataDao.findDeclarationDataByKppOktmoOfNdflPersonIncomes(declarationTypeId, departmentReportPeriodId, departmentId, reportPeriodId, kpp, oktmo);
     }
 }

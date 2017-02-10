@@ -27,33 +27,33 @@ public interface DeclarationDataDao {
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если передана декларация с непустым id
 	 */
 	long saveNew(DeclarationData declarationData);
-	
-    /**
-     * Установить статус налоговой формы
-     * @param declarationDataId идентификатор налоговой формы
-     * @param state статус налоговой формы
-     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
-     */
-    void setStatus(long declarationDataId, State state);
 
-    /**
-     * Установить имя файла
-     * @param declarationDataId идентификатор налоговой формы
-     * @param fileName имя файла
-     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
-     */
-    void setFileName(long declarationDataId, String fileName);
+	/**
+	 * Установить статус налоговой формы
+	 * @param declarationDataId идентификатор налоговой формы
+	 * @param state статус налоговой формы
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
+	 */
+	void setStatus(long declarationDataId, State state);
 
-    /**
+	/**
+	 * Установить имя файла
+	 * @param declarationDataId идентификатор налоговой формы
+	 * @param fileName имя файла
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
+	 */
+	void setFileName(long declarationDataId, String fileName);
+
+	/**
 	 * Удалить декларацию
 	 * @param declarationDataId идентификатор декларации
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
 	 */
 	void delete(long declarationDataId);
 
-    Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, long declarationDataId);
+	Long getRowNumByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, boolean ascSorting, long declarationDataId);
 
-    /**
+	/**
 	 * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает список идентификаторов данных
 	 * по декларациям, соответствующие критериям поиска
 	 * @param declarationDataFilter - фильтр, по которому происходит поиск
@@ -63,19 +63,19 @@ public interface DeclarationDataDao {
 	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска
 	 */
 	PagingResult<DeclarationDataSearchResultItem> findPage(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering,
-	                                          boolean ascSorting, PagingParams paginatedSearchParams);
+														   boolean ascSorting, PagingParams paginatedSearchParams);
 
-    List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
+	List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
-    /**
-     * Декларация по типу и отчетному периоду подразделения
-     */
-    List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
+	/**
+	 * Декларация по типу и отчетному периоду подразделения
+	 */
+	List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
 
-    /**
-     * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган» + АСНУ + GUID
-     */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
+	/**
+	 * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган» + АСНУ + GUID
+	 */
+	DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
 	/**
 	 * Получить количество записей, удовлетворяющих запросу
@@ -84,53 +84,66 @@ public interface DeclarationDataDao {
 	 */
 	int getCount(DeclarationDataFilter filter);
 
-    List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate);
+	List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate);
 
-    /**
-     * Получить список id деклараций
-     * @param declarationTypeId тип декларации
-     * @param departmentId подразделение
-     * @return список id деклараций
-     */
-    List<Long> getDeclarationIds(int declarationTypeId, int departmentId);
+	/**
+	 * Получить список id деклараций
+	 * @param declarationTypeId тип декларации
+	 * @param departmentId подразделение
+	 * @return список id деклараций
+	 */
+	List<Long> getDeclarationIds(int declarationTypeId, int departmentId);
 
-    /**
-     * Декларация созданная в последнем отчетном периоде подразделения
-     */
-    DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId);
+	/**
+	 * Декларация созданная в последнем отчетном периоде подразделения
+	 */
+	DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId);
 
-    /**
-     * Поиск декларации необходимых для формирования отчетности для МСФО
-     * @param reportPeriodId
-     * @return
-     */
-    List<DeclarationData> getIfrs(int reportPeriodId);
+	/**
+	 * Поиск декларации необходимых для формирования отчетности для МСФО
+	 * @param reportPeriodId
+	 * @return
+	 */
+	List<DeclarationData> getIfrs(int reportPeriodId);
 
-    /**
-     * Находим декларации, относящиеся к отчетным периодам, с которыми новый период актуальности версии макета не пересекается
-     * @param decTemplateId идентификатор версии макета НФ
-     * @param startDate дата, начиная с которой искать пересечения
-     * @param endDate дата, до которой искать
-     * @return идентификаторы
-     */
-    List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate);
+	/**
+	 * Находим декларации, относящиеся к отчетным периодам, с которыми новый период актуальности версии макета не пересекается
+	 * @param decTemplateId идентификатор версии макета НФ
+	 * @param startDate дата, начиная с которой искать пересечения
+	 * @param endDate дата, до которой искать
+	 * @return идентификаторы
+	 */
+	List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate);
 
-    /**
-     * Обновления комментария НФ
-     * @param declarationDataId
-     * @param note
-     */
-    void updateNote(long declarationDataId, String note);
+	/**
+	 * Обновления комментария НФ
+	 * @param declarationDataId
+	 * @param note
+	 */
+	void updateNote(long declarationDataId, String note);
 
-    /**
-     * Получение комментария НФ
-     * @param declarationDataId
-     * @return
-     */
-    String getNote(long declarationDataId);
+	/**
+	 * Получение комментария НФ
+	 * @param declarationDataId
+	 * @return
+	 */
+	String getNote(long declarationDataId);
 
 	/**
 	 * Найти все формы созданные в отчетном периоде
-     */
+	 */
 	List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
+
+	/**
+	 * Найти декларацию НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
+	 * @param declarationTypeId
+	 * @param departmentReportPeriodId
+	 * @param departmentId
+	 * @param reportPeriod
+	 * @param oktmo
+	 * @param kpp
+	 * @return
+	 */
+
+	DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
 }
