@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
@@ -70,6 +71,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     private LoadDeclarationDataService loadDeclarationDataService;
+    @Autowired
+    private ReportService reportService;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -302,6 +305,27 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public void delete(long declarationDataId, TAUserInfo userInfo) {
         declarationDataDao.setStatus(declarationDataId, State.CREATED);
         declarationDataService.delete(declarationDataId, userInfo);
+    }
+
+
+    @Override
+    public void deleteReport(long declarationDataId) {
+        reportService.deleteDec(declarationDataId);
+    }
+
+    @Override
+    public void deleteReport(long declarationDataId, List<DeclarationDataReportType> declarationDataReportTypeList) {
+        reportService.deleteDec(Arrays.asList(declarationDataId), declarationDataReportTypeList);
+    }
+
+    @Override
+    public void validateDeclaration (DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile) {
+        declarationDataService.validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+                // ничего не делаем
+            }
+        });
     }
 
     @Override

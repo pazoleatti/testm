@@ -189,6 +189,28 @@ public interface DeclarationService {
 
     void delete(long declarationDataId, TAUserInfo userInfo);
 
+
+    /**
+     * Удаляет все отчеты налоговой формы
+     * @param declarationDataId
+     */
+    void deleteReport(long declarationDataId);
+
+    /**
+     * Удаляет отчеты заданных типов
+     * @param declarationDataId
+     */
+    void deleteReport(long declarationDataId, List<DeclarationDataReportType> declarationDataReportTypeList);
+
+    /**
+     * Метод передающий управление на проверку декларации сторонней утилите
+     * @param declarationData
+     * @param userInfo
+     * @param logger
+     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
+     */
+    void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile);
+
     /**
      * Возвращает идентификатор действующего {@link DeclarationTemplate описания декларации} по виду декларации
      * Такое описание для каждого вида декларации в любой момент времени может быть только одно
