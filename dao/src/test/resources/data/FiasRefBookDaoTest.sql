@@ -73,3 +73,17 @@ insert into fias_room(POSTALCODE, REGIONCODE, ROOMTYPEID, FLATNUMBER, ID, ROOMNU
 insert into fias_room(POSTALCODE, REGIONCODE, ROOMTYPEID, FLATNUMBER, ID, ROOMNUMBER, HOUSEGUID, LIVESTATUS, FLATTYPE) VALUES ('777444', '11', null, '10', 3, 'a8', 1, 0, 0);
 insert into fias_room(POSTALCODE, REGIONCODE, ROOMTYPEID, FLATNUMBER, ID, ROOMNUMBER, HOUSEGUID, LIVESTATUS, FLATTYPE) VALUES ('111222', '22', null, '1', 4, '4a', 4, 0, 0);
 insert into fias_room(POSTALCODE, REGIONCODE, ROOMTYPEID, FLATNUMBER, ID, ROOMNUMBER, HOUSEGUID, LIVESTATUS, FLATTYPE) VALUES ('111222', 'aa', null, '5', 5, '8', 4, 0, 0);
+
+-- Запрос в com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao.findAddress
+-- WITH parent_to_child AS
+--   (SELECT DISTINCT fa.id, fa.parentguid AS pid, fa.regioncode, fa.formalname AS fname, level AS aolevel, connect_by_isleaf AS isleaf, fa.currstatus AS status, connect_by_root fa.formalname AS ancestor, sys_connect_by_path(fa.formalname, '#') AS aopath
+--   FROM fias_addrobj fa
+--   WHERE REPLACE(lower(fa.formalname), ' ', '') = REPLACE(lower(:formalName), ' ', '')
+--     START WITH fa.parentguid                  IS NULL
+--   AND fa.regioncode                            = :regionCode
+--     CONNECT BY prior fa.id                     = fa.parentguid
+--   )
+-- SELECT ptc.id, ptc.pid, ptc.regioncode, ptc.fname, ptc.aolevel, ptc.isleaf, ptc.aopath, ptc.ancestor
+-- FROM parent_to_child ptc
+-- WHERE REPLACE(lower(ptc.aopath), ' ', '') = REPLACE(lower(concat(concat('#', ptc.ancestor), :formalPath)), ' ', '')
+-- AND ptc.status                            = 0

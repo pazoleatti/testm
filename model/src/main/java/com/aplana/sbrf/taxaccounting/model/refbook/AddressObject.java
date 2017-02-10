@@ -40,6 +40,10 @@ public class AddressObject extends IdentityObject<Long> {
      */
     private String regionCode;
 
+    /**
+     * Наименование региона
+     */
+    private String regionName;
 
     public Long getParentId() {
         return parentId;
@@ -89,6 +93,14 @@ public class AddressObject extends IdentityObject<Long> {
         this.regionCode = regionCode;
     }
 
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -98,6 +110,7 @@ public class AddressObject extends IdentityObject<Long> {
                 .append("isLeaaf", isLeaaf)
                 .append("addressPath", addressPath)
                 .append("regionCode", regionCode)
+                .append("regionName", regionName)
                 .append("leaaf", isLeaaf())
                 .toString();
     }

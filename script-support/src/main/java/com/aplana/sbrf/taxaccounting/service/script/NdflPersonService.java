@@ -16,10 +16,8 @@ public interface NdflPersonService {
 
     /**
      * Пакетное обновление ссылок NdflPerson.personId на справочник физлиц
-     *
-     * @param referenceMap карта [NdflPerson.id, RefBookPerson.id]
      */
-    int[] updatePersonRefBookReferences(Map<Long, Long> referenceMap);
+    int[] updatePersonRefBookReferences(List<NdflPerson> ndflPersonList);
 
     /**
      * Создает новую запись о доходах ФЛ привязанную к ПНФ
@@ -52,7 +50,8 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findNdflPersonIncome(long declarationDataId);
 
     /**
-     *  Найти данные о доходах по КПП и ОКТМО для Физлица
+     * Найти данные о доходах по КПП и ОКТМО для Физлица
+     *
      * @param ndflPersonId
      * @param kpp
      * @param oktmo
@@ -175,6 +174,7 @@ public interface NdflPersonService {
 
     /**
      * Возвращает количество Физлиц для декларации
+     *
      * @param declarationDataId
      * @return
      */
@@ -182,6 +182,7 @@ public interface NdflPersonService {
 
     /**
      * Найти NdflPerson строки данных о доходах которых соответствуют паре кпп и октмо
+     *
      * @param declarationDataId
      * @param kpp
      * @param oktmo

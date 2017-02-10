@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.io.IOUtils;
 
@@ -63,6 +64,22 @@ public class DeclarationTestScriptHelper {
     private TransactionHelper transactionHelper;
     private NdflPersonService ndflPersonService;
 
+    private RaschsvObyazPlatSvService raschsvObyazPlatSvService;
+    private RaschsvOssVnmService raschsvOssVnmService;
+    private RaschsvPersSvStrahLicService raschsvPersSvStrahLicService;
+    private RaschsvPravTarif31427Service raschsvPravTarif31427Service;
+    private RaschsvPravTarif51427Service raschsvPravTarif51427Service;
+    private RaschsvPravTarif71427Service raschsvPravTarif71427Service;
+    private RaschsvRashOssZakService raschsvRashOssZakService;
+    private RaschsvSvnpPodpisantService raschsvSvnpPodpisantService;
+    private RaschsvSvOpsOmsService raschsvSvOpsOmsService;
+    private RaschsvSvPrimTarif13422Service raschsvSvPrimTarif13422Service;
+    private RaschsvSvPrimTarif22425Service raschsvSvPrimTarif22425Service;
+    private RaschsvSvPrimTarif91427Service raschsvSvPrimTarif91427Service;
+    private RaschsvUplPerService raschsvUplPerService;
+    private RaschsvUplPrevOssService raschsvUplPrevOssService;
+    private RaschsvVyplFinFbService raschsvVyplFinFbService;
+
     // Задаются из конкретного теста
 
     private InputStream importFileInputStream;
@@ -106,6 +123,52 @@ public class DeclarationTestScriptHelper {
 
     public NdflPersonService getNdflPersonService() {
         return ndflPersonService;
+    }
+
+    public RaschsvObyazPlatSvService getRaschsvObyazPlatSvService() {
+        return raschsvObyazPlatSvService;
+    }
+    public RaschsvOssVnmService getRaschsvOssVnmService() {
+        return raschsvOssVnmService;
+    }
+    public RaschsvPersSvStrahLicService getRaschsvPersSvStrahLicService() {
+        return raschsvPersSvStrahLicService;
+    }
+    public RaschsvPravTarif31427Service getRaschsvPravTarif31427Service() {
+        return raschsvPravTarif31427Service;
+    }
+    public RaschsvPravTarif51427Service getRaschsvPravTarif51427Service() {
+        return raschsvPravTarif51427Service;
+    }
+    public RaschsvPravTarif71427Service getRaschsvPravTarif71427Service() {
+        return raschsvPravTarif71427Service;
+    }
+    public RaschsvRashOssZakService getRaschsvRashOssZakService() {
+        return raschsvRashOssZakService;
+    }
+    public RaschsvSvnpPodpisantService getRaschsvSvnpPodpisantService() {
+        return raschsvSvnpPodpisantService;
+    }
+    public RaschsvSvOpsOmsService getRaschsvSvOpsOmsService() {
+        return raschsvSvOpsOmsService;
+    }
+    public RaschsvSvPrimTarif13422Service getRaschsvSvPrimTarif13422Service() {
+        return raschsvSvPrimTarif13422Service;
+    }
+    public RaschsvSvPrimTarif22425Service getRaschsvSvPrimTarif22425Service() {
+        return raschsvSvPrimTarif22425Service;
+    }
+    public RaschsvSvPrimTarif91427Service getRaschsvSvPrimTarif91427Service() {
+        return raschsvSvPrimTarif91427Service;
+    }
+    public RaschsvUplPerService getRaschsvUplPerService() {
+        return raschsvUplPerService;
+    }
+    public RaschsvUplPrevOssService getRaschsvUplPrevOssService() {
+        return raschsvUplPrevOssService;
+    }
+    public RaschsvVyplFinFbService getRaschsvVyplFinFbService() {
+        return raschsvVyplFinFbService;
     }
 
     public void setImportFileInputStream(InputStream importFileInputStream) {
@@ -163,6 +226,22 @@ public class DeclarationTestScriptHelper {
         declarationService = mockHelper.mockDeclarationService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
+
+        raschsvObyazPlatSvService = mockHelper.mockRaschsvObyazPlatSvService();
+        raschsvOssVnmService = mockHelper.mockRaschsvOssVnmService();
+        raschsvPersSvStrahLicService = mockHelper.mockRaschsvPersSvStrahLicService();
+        raschsvPravTarif31427Service = mockHelper.mockRaschsvPravTarif31427Service();
+        raschsvPravTarif51427Service = mockHelper.mockRaschsvPravTarif51427Service();
+        raschsvPravTarif71427Service = mockHelper.mockRaschsvPravTarif71427Service();
+        raschsvRashOssZakService = mockHelper.mockRaschsvRashOssZakService();
+        raschsvSvnpPodpisantService = mockHelper.mockRaschsvSvnpPodpisantService();
+        raschsvSvOpsOmsService = mockHelper.mockRaschsvSvOpsOmsService();
+        raschsvSvPrimTarif13422Service = mockHelper.mockRaschsvSvPrimTarif13422Service();
+        raschsvSvPrimTarif22425Service = mockHelper.mockRaschsvSvPrimTarif22425Service();
+        raschsvSvPrimTarif91427Service = mockHelper.mockRaschsvSvPrimTarif91427Service();
+        raschsvUplPerService = mockHelper.mockRaschsvUplPerService();
+        raschsvUplPrevOssService = mockHelper.mockRaschsvUplPrevOssService();
+        raschsvVyplFinFbService = mockHelper.mockRaschsvVyplFinFbService();
     }
 
     /**
@@ -187,6 +266,22 @@ public class DeclarationTestScriptHelper {
         bindings.put("refBookDataProvider", refBookDataProvider);
         bindings.put("declarationService", declarationService);
         bindings.put("ndflPersonService", ndflPersonService);
+
+        bindings.put("raschsvObyazPlatSvService", raschsvObyazPlatSvService);
+        bindings.put("raschsvOssVnmService", raschsvOssVnmService);
+        bindings.put("raschsvPersSvStrahLicService", raschsvPersSvStrahLicService);
+        bindings.put("raschsvPravTarif31427Service", raschsvPravTarif31427Service);
+        bindings.put("raschsvPravTarif51427Service", raschsvPravTarif51427Service);
+        bindings.put("raschsvPravTarif71427Service", raschsvPravTarif71427Service);
+        bindings.put("raschsvRashOssZakService", raschsvRashOssZakService);
+        bindings.put("raschsvSvnpPodpisantService", raschsvSvnpPodpisantService);
+        bindings.put("raschsvSvOpsOmsService", raschsvSvOpsOmsService);
+        bindings.put("raschsvSvPrimTarif13422Service", raschsvSvPrimTarif13422Service);
+        bindings.put("raschsvSvPrimTarif22425Service", raschsvSvPrimTarif22425Service);
+        bindings.put("raschsvSvPrimTarif91427Service", raschsvSvPrimTarif91427Service);
+        bindings.put("raschsvUplPerService", raschsvUplPerService);
+        bindings.put("raschsvUplPrevOssService", raschsvUplPrevOssService);
+        bindings.put("raschsvVyplFinFbService", raschsvVyplFinFbService);
 
         bindings.put("refBookPersonService", refBookPersonService);
         bindings.put("fiasRefBookService", fiasRefBookService);

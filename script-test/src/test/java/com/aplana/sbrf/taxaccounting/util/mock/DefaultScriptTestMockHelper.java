@@ -459,10 +459,16 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     // "Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ"
+    @Override
     public RaschsvSvnpPodpisantService mockRaschsvSvnpPodpisantService() {
         RaschsvSvnpPodpisantService raschsvSvnpPodpisantService = mock(RaschsvSvnpPodpisantService.class);
         when(raschsvSvnpPodpisantService.insertRaschsvSvnpPodpisant(any(RaschsvSvnpPodpisant.class))).thenReturn(1L);
         return raschsvSvnpPodpisantService;
+    }
+
+    @Override
+    public FiasRefBookService fiasRefBookService() {
+        return mock(FiasRefBookService.class);
     }
 
     /**

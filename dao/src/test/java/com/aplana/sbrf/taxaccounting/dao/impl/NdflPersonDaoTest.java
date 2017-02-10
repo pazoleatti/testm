@@ -110,22 +110,21 @@ public class NdflPersonDaoTest {
 
     @Test
     public void testUpdatePersonRefBookReferences() {
-        Map<Long, Long> referenceMap = new HashMap<Long, Long>();
+
         List<NdflPerson> ndflPersonList = ndflPersonDao.findPerson(2);
         assertEquals(10, ndflPersonList.size());
 
         for (NdflPerson person : ndflPersonList) {
-            referenceMap.put(person.getId(), Long.valueOf(new Random().nextInt(1000)));
+            person.setPersonId(Long.valueOf(new Random().nextInt(1000)));
         }
 
-        ndflPersonDao.updatePersonRefBookReferences(referenceMap);
+        ndflPersonDao.updatePersonRefBookReferences(ndflPersonList);
 
         List<NdflPerson> updatedList = ndflPersonDao.findPerson(2);
         assertEquals(10, updatedList.size());
 
         for (NdflPerson person : updatedList) {
-            Long personId = referenceMap.get(person.getId());
-            assertEquals(person.getPersonId(), personId);
+            assertNotNull(person.getPersonId());
         }
     }
 

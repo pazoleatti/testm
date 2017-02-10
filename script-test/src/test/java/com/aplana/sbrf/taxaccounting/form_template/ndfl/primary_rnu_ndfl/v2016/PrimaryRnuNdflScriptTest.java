@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -17,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
-import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -37,6 +38,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
+import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.*;
 
 /**
@@ -104,6 +106,24 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         checkLogger();
     }
 
+
+    private Map<Long, Map<String, RefBookValue>> createRefBook() {
+        Map<Long, Map<String, RefBookValue>> map = new HashMap<Long, Map<String, RefBookValue>>();
+        for (int i = 0; i < 5; i++) {
+            map.put(Long.valueOf(i), createRefBookMock(i));
+        }
+        return map;
+    }
+
+    private Map<String, RefBookValue> createRefBookMock(long id) {
+        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+        result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+        result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "foo"));
+        result.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(new Random().nextInt(1000))));
+
+        return result;
+    }
+
     /**
      * Тест рассчета данных декларации
      *
@@ -112,19 +132,46 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     @Test
     public void calculateTest() throws IOException {
         final int ndflPersonSize = 5;
+
         final Map<Long, NdflPerson> ndflPersonMap = mockFindNdflPerson(ndflPersonSize);
         when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenReturn(new ArrayList<NdflPerson>(ndflPersonMap.values()));
-        when(testHelper.getRefBookPersonService().identificatePerson(any(PersonData.class), anyInt())).thenReturn(Long.valueOf(new Random().nextInt(1000)));
-        when(testHelper.getNdflPersonService().updatePersonRefBookReferences(anyMap())).thenAnswer(new Answer<int[]>() {
+
+        when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
+
+        when(testHelper.getRefBookPersonService().identificatePerson(any(PersonData.class), anyInt())).thenReturn(null).thenReturn(null).thenReturn(1L).thenReturn(2L).thenReturn(3L);
+
+        doAnswer(new Answer<Void>() {
+            public Void answer(InvocationOnMock invocation) {
+                Object[] args = invocation.getArguments();
+                //System.out.println("UPDATE REF BOOK " + args);
+                return null;
+            }
+        }).when(testHelper.getRefBookDataProvider()).updateRecordVersionWithoutLock(any(Logger.class), anyLong(), any(Date.class), any(Date.class), anyMap());
+
+
+        when(testHelper.getRefBookDataProvider().createRecordVersionWithoutLock(any(Logger.class), any(Date.class), any(Date.class), anyList())).thenAnswer(new Answer<List<Long>>() {
+            @Override
+            public List<Long> answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                //System.out.println("SAVE REF BOOK " + args);
+                return new ArrayList<Long>(ndflPersonMap.keySet());
+            }
+        });
+
+
+        when(testHelper.getNdflPersonService().updatePersonRefBookReferences(anyList())).thenAnswer(new Answer<int[]>() {
             @Override
             public int[] answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                Map<Long, Long> personData = (Map<Long, Long>) args[0];
-                Assert.assertFalse(personData.values().contains(null));
-                Assert.assertTrue(CollectionUtils.isEqualCollection(ndflPersonMap.keySet(), personData.keySet()));
+                List<NdflPerson> personData = (List<NdflPerson>) args[0];
+                for (NdflPerson person : personData) {
+                    Assert.assertNotNull(person.getPersonId());
+                }
                 return new int[]{};
             }
         });
+
+
         testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
     }

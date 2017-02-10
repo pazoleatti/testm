@@ -76,9 +76,9 @@ public class FiasRefBookDaoTest {
 
     @Test
     public void findAddressUtils(){
-        Assert.assertEquals("\\\\foo\\\\bar\\\\baz", FiasRefBookDaoImpl.createPath("foo", "bar", "baz"));
-        Assert.assertEquals("\\\\foo\\\\bar", FiasRefBookDaoImpl.createPath("foo", null, "bar", null));
-        Assert.assertEquals("\\\\foo", FiasRefBookDaoImpl.createPath("foo"));
+        Assert.assertEquals("#foo#bar#baz", FiasRefBookDaoImpl.createPath("foo", "bar", "baz"));
+        Assert.assertEquals("#foo#bar", FiasRefBookDaoImpl.createPath("foo", null, "bar", null));
+        Assert.assertEquals("#foo", FiasRefBookDaoImpl.createPath("foo"));
         Assert.assertEquals(null, FiasRefBookDaoImpl.createPath(""));
         Assert.assertEquals(null, FiasRefBookDaoImpl.createPath(null));
         Assert.assertEquals(null, FiasRefBookDaoImpl.createPath());

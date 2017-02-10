@@ -54,7 +54,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			USER.getId(), SEC_ROLE.getId(), DEPARTMENT_TYPE.getId(), ASNU.getId(),
 			DECLARATION_DATA_KIND_REF_BOOK.getId(), DECLARATION_DATA_TYPE_REF_BOOK.getId(),
             DECLARATION_TEMPLATE.getId(), DOC_STATE.getId(), TAX_INSPECTION.getId(),
-			TAXPAYER_STATUS.getId(), NDFL_RATE.getId()
+			TAXPAYER_STATUS.getId(), NDFL_RATE.getId(), TARIFF_PAYER.getId()
 	});
 	// Список простых редактируемых версионируемых справочников
 	private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
@@ -65,6 +65,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(), REORGANIZATION.getId(),
 			REGION.getId(), NDFL.getId(), NDFL_DETAIL.getId(),
 			PERSON.getId(), ID_DOC.getId(), PERSON_ADDRESS.getId(), ID_TAX_PAYER.getId(),
+            OKVED.getId(),
 
             OKATO.getId()
 	});

@@ -56,49 +56,51 @@ public class RefBookUtils extends AbstractDao {
             Map<String, RefBookValue> values = record.getValues();
             for (RefBookAttribute a : attributes) {
                 RefBookValue value = values.get(a.getAlias());
-
-                //Проверка для иерархичных справочников
-                if (record.getUniqueRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
-                    Long parentId = value.getReferenceValue();
-                    if (record.getUniqueRecordId().equals(parentId)) {
-                        errors.add("Запись справочника не может быть родительской сама для себя!");
-                    }
-                }
-
-                if (a.getAttributeType().equals(RefBookAttributeType.STRING) && value.getStringValue() != null && a.getMaxLength() != null && value.getStringValue().length() > a.getMaxLength()) {
-                    errors.add("\"" + a.getName() + "\": значение атрибута превышает максимально допустимое " + a.getMaxLength() + "!");
-                }
-
-                if (a.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                    Number number = value.getNumberValue();
-                    if (number == null) {
-                        continue;
-                    }
-
-                    BigDecimal bigDecimal;
-                    if (number instanceof BigDecimal) {
-                        bigDecimal = (BigDecimal) (value.getNumberValue());
-                        String valStr = bigDecimal.toPlainString();
-                        if (valStr.contains(".")) {
-                            bigDecimal = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
+                if (value != null) {
+                    //Проверка для иерархичных справочников
+                    if (record.getUniqueRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
+                        Long parentId = value.getReferenceValue();
+                        if (record.getUniqueRecordId().equals(parentId)) {
+                            errors.add("Запись справочника не может быть родительской сама для себя!");
                         }
-                    } else {
-                        bigDecimal = new BigDecimal(number.toString());
                     }
 
-                    int fractionalPart = bigDecimal.scale();
-                    int integerPart = bigDecimal.precision();
-                    integerPart = fractionalPart < integerPart ? (integerPart - fractionalPart) : 0;
-                    fractionalPart = fractionalPart < 0 ? 0 : fractionalPart;
+                    if (a.getAttributeType().equals(RefBookAttributeType.STRING) && value.getStringValue() != null && a.getMaxLength() != null && value.getStringValue().length() > a.getMaxLength()) {
+                        errors.add("\"" + a.getName() + "\": значение атрибута превышает максимально допустимое " + a.getMaxLength() + "!");
+                    }
 
-                    Integer maxLength = a.getMaxLength();
-                    Integer precision = a.getPrecision();
+                    if (a.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                        Number number = value.getNumberValue();
+                        if (number == null) {
+                            continue;
+                        }
 
-                    // предполагается, что (maxLength - precision) <= 17
-                    if (fractionalPart > precision || integerPart > (maxLength - precision)) {
-                        errors.add("\"" + a.getName() + "\": значение атрибута не соответствует формату: максимальное количество цифр " + maxLength + ", максимальная точность " + precision);
+                        BigDecimal bigDecimal;
+                        if (number instanceof BigDecimal) {
+                            bigDecimal = (BigDecimal) (value.getNumberValue());
+                            String valStr = bigDecimal.toPlainString();
+                            if (valStr.contains(".")) {
+                                bigDecimal = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
+                            }
+                        } else {
+                            bigDecimal = new BigDecimal(number.toString());
+                        }
+
+                        int fractionalPart = bigDecimal.scale();
+                        int integerPart = bigDecimal.precision();
+                        integerPart = fractionalPart < integerPart ? (integerPart - fractionalPart) : 0;
+                        fractionalPart = fractionalPart < 0 ? 0 : fractionalPart;
+
+                        Integer maxLength = a.getMaxLength();
+                        Integer precision = a.getPrecision();
+
+                        // предполагается, что (maxLength - precision) <= 17
+                        if (fractionalPart > precision || integerPart > (maxLength - precision)) {
+                            errors.add("\"" + a.getName() + "\": значение атрибута не соответствует формату: максимальное количество цифр " + maxLength + ", максимальная точность " + precision);
+                        }
                     }
                 }
+
             }
         }
 
@@ -119,21 +121,23 @@ public class RefBookUtils extends AbstractDao {
         }
     }
 
-    public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
+public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
 
-        @Override
-        public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
-            RefBookRecordVersion result = new RefBookRecordVersion();
-            result.setRecordId(SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS));
-            result.setVersionStart(rs.getDate("versionStart"));
-            result.setVersionEnd(rs.getDate("versionEnd"));
-            result.setVersionEndFake(rs.getBoolean("endIsFake"));
-            return result;
-        }
+    @Override
+    public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
+        RefBookRecordVersion result = new RefBookRecordVersion();
+        result.setRecordId(SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS));
+        result.setVersionStart(rs.getDate("versionStart"));
+        result.setVersionEnd(rs.getDate("versionEnd"));
+        result.setVersionEndFake(rs.getBoolean("endIsFake"));
+        return result;
     }
+
+}
 
     /**
      * Проверка контрольной суммы ИНН (физлица или организации)
+     *
      * @param inn ИНН в виде строки
      * @return результат проверки (успешная или нет)
      */
@@ -145,19 +149,19 @@ public class RefBookUtils extends AbstractDao {
             int[] koefArray10 = new int[]{2, 4, 10, 3, 5, 9, 4, 6, 8};
             int sum10 = 0;
             for (int i = 0; i < 9; i++) {
-                if (!Character.isDigit(inn.charAt(i))){
+                if (!Character.isDigit(inn.charAt(i))) {
                     return false;
                 }
                 sum10 += koefArray10[i] * Character.getNumericValue(inn.charAt(i));
             }
             return (sum10 % 11) % 10 == Character.getNumericValue(inn.charAt(9));
-        } else if (inn.length() == 12){
+        } else if (inn.length() == 12) {
             int[] koefArray11 = new int[]{7, 2, 4, 10, 3, 5, 9, 4, 6, 8};
             int[] koefArray12 = new int[]{3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8};
             int sum11, sum12;
             sum11 = sum12 = 0;
             for (int i = 0; i < 10; i++) {
-                if (!Character.isDigit(inn.charAt(i))){
+                if (!Character.isDigit(inn.charAt(i))) {
                     return false;
                 }
                 sum11 += koefArray11[i] * Character.getNumericValue(inn.charAt(i));

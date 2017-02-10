@@ -81,4 +81,6 @@ public interface ScriptTestMockHelper {
     RaschsvSvPrimTarif13422Service mockRaschsvSvPrimTarif13422Service();
 
     RaschsvSvnpPodpisantService mockRaschsvSvnpPodpisantService();
+
+    FiasRefBookService fiasRefBookService();
 }

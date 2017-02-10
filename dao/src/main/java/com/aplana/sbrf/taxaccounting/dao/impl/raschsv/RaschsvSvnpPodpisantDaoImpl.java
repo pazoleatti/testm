@@ -25,7 +25,7 @@ public class RaschsvSvnpPodpisantDaoImpl extends AbstractDao implements RaschsvS
     private static final String SQL_INSERT = "INSERT INTO " + RaschsvSvnpPodpisant.TABLE_NAME +
             " (" + SVNP_PODPISANT_COLS + ") VALUES (" + SVNP_PODPISANT_FIELDS + ")";
 
-    private static final String SQL_SELECT_PERSONS = "SELECT " + SVNP_PODPISANT_COLS + " FROM " + RaschsvSvnpPodpisant.TABLE_NAME +
+    private static final String SQL_SELECT = "SELECT " + SVNP_PODPISANT_COLS + " FROM " + RaschsvSvnpPodpisant.TABLE_NAME +
             " WHERE " + RaschsvSvnpPodpisant.COL_DECLARATION_DATA_ID + " = :" + RaschsvSvnpPodpisant.COL_DECLARATION_DATA_ID;
 
     public Long insertRaschsvSvnpPodpisant(RaschsvSvnpPodpisant raschsvSvnpPodpisant) {
@@ -57,7 +57,7 @@ public class RaschsvSvnpPodpisantDaoImpl extends AbstractDao implements RaschsvS
         try {
             SqlParameterSource params = new MapSqlParameterSource()
                     .addValue(RaschsvSvnpPodpisant.COL_DECLARATION_DATA_ID, declarationDataId);
-            return getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_PERSONS, params, new RaschsvSvnpPodpisantRowMapper());
+            return getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvSvnpPodpisantRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

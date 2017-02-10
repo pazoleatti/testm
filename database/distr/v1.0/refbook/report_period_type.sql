@@ -72,5 +72,5 @@ insert into report_period_type (id,code,name,start_date,end_date,calendar_start_
 insert into report_period_type (id,code,name,start_date,end_date,calendar_start_date) values (seq_ref_book_record.nextval,'84','второе полугодие',to_date('01.07.1970','dd.mm.yyyy'),to_date('31.12.1970','dd.mm.yyyy'),to_date('01.07.1970','dd.mm.yyyy'));
 insert into report_period_type (id,code,name,start_date,end_date,calendar_start_date) values (seq_ref_book_record.nextval,'90','год при реорганизации (ликвидации) организации',to_date('01.01.1970','dd.mm.yyyy'),to_date('31.12.1970','dd.mm.yyyy'),to_date('01.10.1970','dd.mm.yyyy'));
 
-update report_period_type set ndfl=1 where code in ('21','31','33','34','51','52','53','90');
-update report_period_type set fond=1 where code in ('21','31','33','34');
+update report_period_type set n=1 where code in ('21','31','33','34','51','52','53','90');
+update report_period_type set f=1 where code in ('21','31','33','34');
