@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 /**
  * Тестирование разбора xml-файла Расчета по страховым взносам
  */
+@Ignore
 public class RaschsvParseTest extends ScriptTestBase {
 
     /**
