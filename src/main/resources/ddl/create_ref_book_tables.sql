@@ -284,15 +284,17 @@ comment on column ref_book_fill_base.name is 'Название основани�
 --Коды тарифа плательщика
 create table ref_book_tariff_payer
 (
-  id number(18) not null,
-  code varchar2(2 char) not null,
-  name varchar2(2000 char) not null
+  id          number(18) not null,
+  code        varchar2(2 char) not null,
+  name        varchar2(2000 char) not null,
+  for_ops_oms number(1)
 );
 
 comment on table ref_book_tariff_payer is 'Коды тарифа плательщика';
 comment on column ref_book_tariff_payer.id is 'Уникальный идентификатор';
 comment on column ref_book_tariff_payer.code is 'Код тарифа плательщика';
 comment on column ref_book_tariff_payer.name is 'Название тарифа плательщика';
+comment on column ref_book_tariff_payer.for_ops_oms is 'Используется в ОПС и ОМС';
 
 --Коды классов условий труда
 create table ref_book_hard_work

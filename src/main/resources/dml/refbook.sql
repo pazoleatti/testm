@@ -593,6 +593,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (938,'Коды тарифа плательщика',1,0,0,null,'REF_BOOK_TARIFF_PAYER',0);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9381, 938,'Код','CODE',1,1,null,null,1,null,6,1,1,null,null,0,2);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9382, 938,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,2000);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9383, 938,'Используется в ОПС и ОМС','FOR_OPS_OMS',2,3,null,null,1,0,6,0,0,null,null,0,1);
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (939,'Коды классов условий труда',1,0,0,null,'REF_BOOK_HARD_WORK',0);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9391, 939,'Код','CODE',1,1,null,null,1,null,6,1,1,null,null,0,1);
