@@ -126,7 +126,9 @@ public class RefBook implements Serializable {
 		NDFL_RATE(936),								// Ставка НДФЛ
 		TARIFF_PAYER(938),							// Коды тарифа плательщика
 		OKATO(3),									// ОКАТО
-        NDFL_REFERENCES(964);                       // Реестр справок
+        NDFL_REFERENCES(964),                       // Реестр справок
+		OKTMO(96),                                  // Территорий муниципальных образований (ОКТМО)
+        KBK(940);                                   // Классификатор доходов бюджетов Российской Федерации
 
         private final long id;
 
