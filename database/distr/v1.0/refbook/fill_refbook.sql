@@ -50,8 +50,8 @@ prompt ref_book_deduction_type
 prompt ref_book_income_type
 @@ref_income_type;
 
---prompt ref_book_oktmo
---@@ref_oktmo;
+prompt ref_book_tariff_payer
+@@ref_book_tariff_payer;
 
 prompt ref_book_okved
 @@ref_okved;

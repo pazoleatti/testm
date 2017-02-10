@@ -90,7 +90,7 @@ alter table ref_book_tax_place_type add constraint chk_ref_tax_place_type_status
 alter table ref_book_signatory_mark add constraint chk_ref_signatory_mark check(status between -1 and 2);
 
 --unique
---create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
+create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
 --------------------------------------------------------------------------------------------------------------------------
 --indexes
 create index i_ref_book_oktmo_code on ref_book_oktmo (code);

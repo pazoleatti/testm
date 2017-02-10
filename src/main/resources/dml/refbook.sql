@@ -1,3 +1,4 @@
+
 ALTER TABLE ref_book DISABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_attribute_id;
 ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_ref_book_id;
@@ -64,7 +65,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (93,'Виды налоговых форм',0,0,1,null,'FORM_TYPE');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (94,'Типы налоговых форм',0,0,1,null,'FORM_KIND');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (95,'Системные роли',1,0,1,null, 'SEC_ROLE');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (96,'Общероссийский классификатор территорий муниципальных образований (ОКТМО)',1,1,1,null, 'REF_BOOK_OKTMO');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (96,'Общероссийский классификатор территорий муниципальных образований (ОКТМО)',1,0,1,null, 'REF_BOOK_OKTMO');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (97,'Типы акций',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (100,'Эмитенты',1,0,0,null);
 
