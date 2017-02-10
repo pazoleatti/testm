@@ -13,6 +13,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,7 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Transactional
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
 
-	private static final Log LOG = LogFactory.getLog(DeclarationDataDaoImpl.class);
+    private static final Log LOG = LogFactory.getLog(DeclarationDataDaoImpl.class);
     private static final String DECLARATION_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
     private final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -51,7 +52,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
             d.setTaxOrganCode(rs.getString("tax_organ_code"));
             d.setKpp(rs.getString("kpp"));
-			d.setOktmo(rs.getString("oktmo"));
+            d.setOktmo(rs.getString("oktmo"));
             d.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
             d.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
             d.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
@@ -98,13 +99,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                             "where drp.id = dd.department_report_period_id and drp.id = ?" +
                             "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
                             "and dt.declaration_type_id = ?) and (? is null or dd.kpp = ?) and (? is null or dd.oktmo = ?) " +
-							"and (? is null or dd.tax_organ_code = ?) " +
+                            "and (? is null or dd.tax_organ_code = ?) " +
                             "and (? is null or asnu_id = ?) and (? is null or file_name = ?)",
                     new Object[]{
                             departmentReportPeriodId,
                             declarationTypeId,
                             kpp, kpp,
-							oktmo, oktmo,
+                            oktmo, oktmo,
                             taxOrganCode, taxOrganCode,
                             asnuId, asnuId,
                             fileName, fileName
@@ -126,18 +127,18 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         try {
             return getJdbcTemplate().query(
-                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                        "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
-                        "drp.report_period_id, drp.department_id " +
-                        "from declaration_data dd, department_report_period drp " +
-                        "where drp.id = dd.department_report_period_id and drp.id = ?" +
-                        "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
-                        "and dt.declaration_type_id = ?)",
-                new Object[]{
-                        departmentReportPeriodId,
-                        declarationTypeId
-                },
-                new DeclarationDataRowMapper()
+                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                            "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
+                            "drp.report_period_id, drp.department_id " +
+                            "from declaration_data dd, department_report_period drp " +
+                            "where drp.id = dd.department_report_period_id and drp.id = ?" +
+                            "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
+                            "and dt.declaration_type_id = ?)",
+                    new Object[]{
+                            departmentReportPeriodId,
+                            declarationTypeId
+                    },
+                    new DeclarationDataRowMapper()
             );
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<DeclarationData>();
@@ -213,19 +214,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         int countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +
-                " AND department_report_period_id = ? and (? is null or tax_organ_code = ?) AND (? is null or kpp = ?)" +
-                " AND (? is null or oktmo = ?) AND (? is null or asnu_id = ?) AND (? is null or file_name = ?) AND (? is null or doc_state_id = ?)",
+                        " AND department_report_period_id = ? and (? is null or tax_organ_code = ?) AND (? is null or kpp = ?)" +
+                        " AND (? is null or oktmo = ?) AND (? is null or asnu_id = ?) AND (? is null or file_name = ?) AND (? is null or doc_state_id = ?)",
                 new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(),
                         declarationData.getTaxOrganCode(), declarationData.getTaxOrganCode(),
                         declarationData.getKpp(), declarationData.getKpp(), declarationData.getOktmo(), declarationData.getOktmo(),
-						declarationData.getAsnuId(), declarationData.getAsnuId(),
+                        declarationData.getAsnuId(), declarationData.getAsnuId(),
                         declarationData.getFileName(), declarationData.getFileName(),
                         declarationData.getDocState(), declarationData.getDocState()},
                 new int[]{Types.INTEGER, Types.INTEGER,
-						Types.VARCHAR, Types.VARCHAR,
-						Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                        Types.VARCHAR, Types.VARCHAR,
+                        Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
                         Types.INTEGER, Types.INTEGER,
-						Types.VARCHAR, Types.VARCHAR,
+                        Types.VARCHAR, Types.VARCHAR,
                         Types.INTEGER, Types.INTEGER},
                 Integer.class);
 
@@ -242,7 +243,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 declarationData.getState().getId(),
                 declarationData.getTaxOrganCode(),
                 declarationData.getKpp(),
-				declarationData.getOktmo(),
+                declarationData.getOktmo(),
                 declarationData.getAsnuId(),
                 declarationData.getFileName(),
                 declarationData.getDocState()
@@ -331,7 +332,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
         if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
             sql.append(" AND ")
-            .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));
+                    .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));
         }
         if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
             sql.append(" AND lower(dec.file_name) like lower(:fileName)");
@@ -349,7 +350,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 values.put("kpp", "%"+filter.getTaxOrganKpp()+"%");
             }
 
-			if (!StringUtils.isBlank(filter.getOktmo())) {
+            if (!StringUtils.isBlank(filter.getOktmo())) {
                 sql.append(" AND lower(dec.oktmo) like lower(:oktmo)");
                 values.put("oktmo", "%"+filter.getOktmo()+"%");
             }
@@ -456,7 +457,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         } catch (DataAccessException e) {
-			LOG.error(String.format("Ошибка поиска деклараций для заданного шаблона %d", templateId), e);
+            LOG.error(String.format("Ошибка поиска деклараций для заданного шаблона %d", templateId), e);
             throw new DaoException("Ошибка поиска деклараций для заданного шаблона %d", templateId);
         }
     }
@@ -484,7 +485,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return new ArrayList<Long>();
         } catch (DataAccessException e) {
             String errorMsg = String.format("Ошибка при поиске деклараций по заданному сочетанию параметров: declarationTypeId = %d, departmentId = %d", declarationTypeId, departmentId);
-			LOG.error(errorMsg, e);
+            LOG.error(errorMsg, e);
             throw new DaoException(errorMsg);
         }
     }
@@ -589,6 +590,31 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     new Object[]{declarationTypeId, departmentId, reportPeriodId},
                     new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
                     new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriodId, String kpp, String oktmo) {
+        String sql  = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, drp.report_period_id, drp.department_id " +
+                "from DEPARTMENT_REPORT_PERIOD drp, DECLARATION_DATA dd " +
+                "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId " +
+                "and drp.department_id = :departmentId and drp.REPORT_PERIOD_ID = :reportPeriodId " +
+                "and dd.DECLARATION_TEMPLATE_ID in " +
+                "(select dt.id from DECLARATION_TEMPLATE dt" +
+                " where dt.DECLARATION_TYPE_ID = :declarationTypeId) " +
+                "and dd.id in (select np.declaration_data_id from NDFL_PERSON np inner join declaration_data dd on dd.ID = np.DECLARATION_DATA_ID and np.id in (select npi.ndfl_person_id from NDFL_PERSON_INCOME npi inner join NDFL_PERSON np on np.id = npi.NDFL_PERSON_ID where npi.kpp = :kpp and npi.oktmo is null or npi.oktmo = :oktmo))";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTypeId", declarationTypeId)
+                .addValue("departmentReportPeriodId", departmentReportPeriodId)
+                .addValue("departmentId", departmentId)
+                .addValue("reportPeriodId", reportPeriodId)
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new DeclarationDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

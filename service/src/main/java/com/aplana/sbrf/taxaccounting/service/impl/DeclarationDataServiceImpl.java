@@ -293,7 +293,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         //3. обновляет записи о консолидации
         ArrayList<Long> declarationDataIds = new ArrayList<Long>();
         for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, State.ACCEPTED, userInfo, logger)){
-            declarationDataIds.add(relation.getFormDataId());
+            declarationDataIds.add(relation.getDeclarationDataId());
         }
 
         //Обновление информации о консолидации.
