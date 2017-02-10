@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.PersonData
 // com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
 import com.aplana.sbrf.taxaccounting.refbook.*
 import groovy.transform.Field
+import groovy.transform.Memoized
 import groovy.util.slurpersupport.NodeChild
 import groovy.xml.MarkupBuilder
 
@@ -1291,7 +1292,7 @@ def checkDataReference(
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
 
         // Спр1 ФИАС
-        if (!findAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
+        if (!isExistsAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
             logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON, ndflPerson.rowNum, C_ADDRESS, fioAndInp, C_ADDRESS, R_FIAS);
         }
@@ -2307,22 +2308,17 @@ def getOktmoAndKpp(def departmentParamId) {
  * @param city город
  * @param locality населенный пункт
  * @param street улица
- * @return адресообразующий объект справочника
  */
-def findAddress(def regionCode, def area, def city, def locality, def street) {
-    def addressObjectList = fiasRefBookService.findAddress(regionCode, area, city, locality, street)
-    def res = false
-    if (addressObjectList != null) {
-        if (addressObjectList.size() == 1) {
-            addressObjectList.each { addressObject ->
-                // Если объект адреса листовой
-                if (addressObject.isLeaaf == true) {
-                    res = true
-                }
-            }
-        }
+/**
+ * Существует ли адрес в справочнике адресов
+ */
+@Memoized
+boolean isExistsAddress(regionCode, area, city, locality, street) {
+    if (!regionCode || !area || !city || !locality || !street) {
+        return false
     }
-    return res;
+
+    return fiasRefBookService.findAddress(regionCode, area, city, locality, street).size() > 0
 }
 
 /**
