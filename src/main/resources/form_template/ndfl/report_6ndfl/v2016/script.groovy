@@ -14,7 +14,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE: //формирование xml
         println "!CALCULATE!"
-        buildXml()
+        buildXml(xml)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -24,6 +24,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
         println "!CREATE_SPECIFIC_REPORT!"
+        createSpecificReport()
         break
     case FormDataEvent.CREATE_FORMS: // создание экземпляра
         println "!CREATE_FORMS!"
@@ -106,7 +107,15 @@ switch (formDataEvent) {
 @Field def refBookCache = [:]
 
 /************************************* СОЗДАНИЕ XML *****************************************************************/
-def buildXml() {
+def buildXml(def writer) {
+    buildXml(writer, false)
+}
+
+def buildXmlForSpecificReport(def writer) {
+    buildXml(writer, true)
+}
+
+def buildXml(def writer, boolean isForSpecificReport) {
 
     // Параметры подразделения
     def departmentParam = getDepartmentParam(declarationData.departmentId)
@@ -130,7 +139,7 @@ def buildXml() {
     // Учитывать будем только информацию о доходах/налогах за последний квартал отчетного периода
     def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
 
-    def builder = new MarkupBuilder(xml)
+    def builder = new MarkupBuilder(writer)
     builder.Файл(
             ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, declarationData.kpp),
             ВерсПрог: applicationVersion,
@@ -184,7 +193,7 @@ def buildXml() {
                         НеУдержНалИт: ndflPersonIncomeCommonValue?.notHoldingTax?.value,
                         ВозврНалИт: ndflPersonIncomeCommonValue?.refoundTax?.value
                 ) {
-                    ndflPersonIncomeByRateList.each { ndflPersonIncomeByRate ->
+                    ndflPersonIncomeByRateList.eachWithIndex { ndflPersonIncomeByRate, index ->
                         if (ndflPersonIncomeByRate.incomeAccruedSumm == null) {
                             ndflPersonIncomeByRate.incomeAccruedSumm = 0
                         }
@@ -203,15 +212,28 @@ def buildXml() {
                         if (ndflPersonIncomeByRate.prepaymentSum == null) {
                             ndflPersonIncomeByRate.prepaymentSum = 0
                         }
-                        СумСтавка(
-                                Ставка: ndflPersonIncomeByRate.taxRate,
-                                НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 2),
-                                НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 2),
-                                ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
-                                ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
-                                ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
-                                АвансПлат: ndflPersonIncomeByRate.prepaymentSum
-                        ) {}
+                        if (isForSpecificReport) {
+                            СумСтавка(
+                                    Ставка: ndflPersonIncomeByRate.taxRate,
+                                    НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 2),
+                                    НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 2),
+                                    ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
+                                    ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
+                                    ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
+                                    АвансПлат: ndflPersonIncomeByRate.prepaymentSum,
+                                    НомСтр: index
+                            ) {}
+                        } else {
+                            СумСтавка(
+                                    Ставка: ndflPersonIncomeByRate.taxRate,
+                                    НачислДох: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSumm, 2),
+                                    НачислДохДив: ScriptUtils.round(ndflPersonIncomeByRate.incomeAccruedSummDiv, 2),
+                                    ВычетНал: ScriptUtils.round(ndflPersonIncomeByRate.totalDeductionsSumm, 2),
+                                    ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
+                                    ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
+                                    АвансПлат: ndflPersonIncomeByRate.prepaymentSum
+                            ) {}
+                        }
                     }
                 }
                 // Узел ДохНал необязателен
@@ -237,7 +259,7 @@ def buildXml() {
             }
         }
     }
-//    println(xml)
+//    println(writer)
 }
 
 /************************************* ПРОВЕРКА XML *****************************************************************/
@@ -798,4 +820,15 @@ class PairKppOktmo {
         this.oktmo = oktmo
         this.taxOrganCode = taxOrganCode
     }
+}
+
+def createSpecificReport() {
+    def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
+
+    def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
+        buildXmlForSpecificReport(it)
+    });
+
+    declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".pdf")
 }
