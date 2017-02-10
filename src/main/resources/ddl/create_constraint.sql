@@ -501,6 +501,12 @@ alter table fias_house add constraint chk_fias_house_strstatus check (strstatus 
 alter table fias_houseint add constraint chk_fias_houseint_intstatus check (intstatus between 0 and 3);
 
 alter table fias_room add constraint chk_fias_room_livestatus check (livestatus in (0,1));
+
+--индексы
+create index idx_f_fias_addrobj_formalname on fias_addrobj (replace(lower(formalname),' ',''));
+create index idx_fias_addrobj_parentguid on fias_addrobj (parentguid);
+create index idx_fias_addrobj_region_status on fias_addrobj (regioncode, currstatus);
+
 --------------------------------------------------------------------------------------------------------------------------
 -- Справочники физических лиц и статусов налогоплательщиков
 -- с учетом изменений по задаче SBRFNDFL-132
@@ -570,6 +576,8 @@ alter table ndfl_person_deduction add constraint ndfl_pd_fk_s foreign key (sourc
 alter table ndfl_person_prepayment add constraint ndfl_pp_pk primary key (id);
 alter table ndfl_person_prepayment add constraint ndfl_pp_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
 alter table ndfl_person_prepayment add constraint ndfl_pp_fk_s foreign key (source_id) references ndfl_person_prepayment(id);
+
+create index idx_ndfl_person_row_num on ndfl_person (row_num);
 
 --------------------------------------------------------------------------------------------------------------------------
 -- НДФЛ Реестр справок
