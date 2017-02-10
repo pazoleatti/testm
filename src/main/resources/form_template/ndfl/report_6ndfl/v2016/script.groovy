@@ -727,6 +727,136 @@ def createReports() {
         IOUtils.closeQuietly(zos);
     }
 }
+
+/*********************************ПОЛУЧИТЬ ИСТОЧНИКИ*******************************************************************/
+@Field
+def sourceReportPeriod = null
+
+def getReportPeriod() {
+    if (sourceReportPeriod == null) {
+        sourceReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return sourceReportPeriod
+}
+
+/** Получить результат для события FormDataEvent.GET_SOURCES. */
+void getSources() {
+    if (!(needSources)) {
+        // формы-приемники, декларации-истчоники, декларации-приемники не переопределять
+        return
+    }
+    def reportPeriod = getReportPeriod()
+    def sourceTypeId = 101
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    println "allDepartmentReportPeriodIds ${allDepartmentReportPeriodIds}"
+    def tmpDeclarationDataList = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, allDepartmentReportPeriodIds, [declarationData.kpp], [declarationData.oktmo])
+    tmpDeclarationDataList.each {
+        println it.id
+    }
+    def declarationsForRemove = []
+    tmpDeclarationDataList.each { declaration ->
+        if (declaration.state != State.ACCEPTED) {
+            declarationsForRemove << declaration
+        }
+    }
+    tmpDeclarationDataList.removeAll(declarationsForRemove)
+    tmpDeclarationDataList.each { tmpDeclarationData ->
+        def department = departmentService.get(tmpDeclarationData.departmentId)
+        def relation = getRelation(tmpDeclarationData, department, reportPeriod, sourceTypeId)
+        if (relation) {
+            sources.sourceList.add(relation)
+        }
+    }
+    sources.sourcesProcessedByScript = true
+}
+
+/**
+ * Получить запись для источника-приемника.
+ *
+ * @param tmpDeclarationData нф
+ * @param department подразделение
+ * @param period период нф
+ * @param monthOrder номер месяца (для ежемесячной формы)
+ */
+def getRelation(DeclarationData tmpDeclarationData, Department department, ReportPeriod period, def sourceTypeId) {
+    // boolean excludeIfNotExist - исключить несозданные источники
+
+    if (excludeIfNotExist && tmpDeclarationData == null) {
+        return null
+    }
+    // WorkflowState stateRestriction - ограничение по состоянию для созданных экземпляров
+    if (stateRestriction && tmpDeclarationData != null && stateRestriction != tmpDeclarationData.state) {
+        return null
+    }
+    Relation relation = new Relation()
+    def isSource = sourceTypeId != 101
+
+    DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpDeclarationData?.departmentReportPeriodId) as DepartmentReportPeriod
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(sourceTypeId)
+
+    // boolean light - заполняются только текстовые данные для GUI и сообщений
+    if (light) {
+        /**************  Параметры для легкой версии ***************/
+        /** Идентификатор подразделения */
+        relation.departmentId = department.id
+        /** полное название подразделения */
+        relation.fullDepartmentName = getDepartmentFullName(department.id)
+        /** Дата корректировки */
+        relation.correctionDate = new Date()
+        /** Вид нф */
+        relation.declarationTypeName = declarationTemplate?.name
+        /** Год налогового периода */
+        relation.year = period.taxPeriod.year
+        /** Название периода */
+        relation.periodName = period.name
+    }
+    /**************  Общие параметры ***************/
+    /** подразделение */
+    relation.department = department
+    /** Период */
+    relation.departmentReportPeriod = departmentReportPeriod
+    /** Статус ЖЦ */
+    relation.declarationState = tmpDeclarationData?.state
+    /** форма/декларация создана/не создана */
+    relation.created = (tmpDeclarationData != null)
+    /** является ли форма источников, в противном случае приемник*/
+    relation.source = isSource
+    /** Введена/выведена в/из действие(-ия) */
+    relation.status = declarationTemplate.status == VersionedObjectStatus.NORMAL
+    /** Налог */
+    relation.taxType = TaxType.NDFL
+    /**************  Параметры НФ ***************/
+    /** Идентификатор созданной формы */
+    relation.declarationDataId = tmpDeclarationData?.id
+    /** Вид НФ */
+    relation.declarationTemplate = declarationTemplate
+    /** Тип НФ */
+    //relation.formDataKind = tmpDeclarationData.kind
+
+    return relation
+}
+
+def getDeclarationDataTerBankList(def sourceTypeId, def allDepartmentReportPeriodIds) {
+    // Найти все доходы по декларации
+    def toReturn = []
+    def incomes = ndflPersonService.findNdflPersonIncome(declarationData.id)
+    def kppOktmoSet = [].toSet()
+    incomes.each { income ->
+        kppOktmoSet << new PairKppOktmo(income.kpp, income.oktmo, null)
+    }
+    for (reportPeriodId in allDepartmentReportPeriodIds) {
+        tmpDepartmentReportPeriod = departmentReportPeriodService.get(reportPeriodId)
+        for (kppOktmo in kppOktmoSet) {
+            def declarationData = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, it, tmpDepartmentReportPeriod.departmentId, tmpDepartmentReportPeriod.reportPeriod.id, kppOktmo.kpp, kppOktmo.oktmo)
+            if (declarationData != null) {
+                toReturn << declarationData
+                break
+            }
+        }
+    }
+    return toReturn
+}
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
 // Получить список детали подразделения из справочника для некорректировочного периода
@@ -819,6 +949,25 @@ class PairKppOktmo {
         this.kpp = kpp
         this.oktmo = oktmo
         this.taxOrganCode = taxOrganCode
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        PairKppOktmo that = (PairKppOktmo) o
+
+        if (kpp != that.kpp) return false
+        if (oktmo != that.oktmo) return false
+
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = (kpp != null ? kpp.hashCode() : 0)
+        result = 31 * result + (oktmo != null ? oktmo.hashCode() : 0)
+        return result
     }
 }
 
