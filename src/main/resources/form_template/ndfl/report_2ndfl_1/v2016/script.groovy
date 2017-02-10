@@ -31,7 +31,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.GET_SOURCES: //формирование списка источников
         println "!GET_SOURCES!"
-        println declarationData.id
         getSources()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
@@ -189,21 +188,6 @@ final NDFL_REFERENCES_BIRTHDAY = "BIRTHDAY"
 @Field
 final NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
 
-@Field
-final REF_BOOK_RECORD_ID = "REF_RECORD_ID"
-
-@Field
-final REF_BOOK_VERSION = "VERSION"
-
-@Field
-final REF_BOOK_STATUS = "STATUS"
-
-@Field
-final REF_BOOK_VERSION_VALUE = null
-
-@Field
-def recordIdCounter = 1
-
 
 def buildXml(def writer) {
     buildXml(writer, false)
@@ -214,8 +198,7 @@ def buildXmlForSpecificReport(def writer) {
 }
 
 def buildXml(def writer, boolean isForSpecificReport) {
-    println formMap
-    if (hasProperty("formMap")) {
+    if (hasProperty(PART_NUMBER)) {
         pageNumber = formMap[PART_NUMBER]
     }
     //Текущая страница представляющая порядковый номер файла
