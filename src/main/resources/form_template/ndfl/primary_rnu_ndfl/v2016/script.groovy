@@ -21,10 +21,13 @@ import groovy.xml.MarkupBuilder
 
 import javax.script.ScriptException
 import javax.xml.namespace.QName
+import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.Attribute
 import javax.xml.stream.events.Characters
+import javax.xml.stream.events.EndElement
 import javax.xml.stream.events.Namespace
+import javax.xml.stream.events.StartElement
 import javax.xml.stream.events.XMLEvent
 
 /**
@@ -60,6 +63,10 @@ def SIMILARITY_THRESHOLD = 900;
 def calculate() {
 
     def asnuId = declarationData.asnuId;
+
+    if (asnuId == null) {
+        throw new ServiceException("Для декларации " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
+    }
 
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
@@ -134,7 +141,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к обновлению данных по физлицам (" + personList.size() + " записей)");
+    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size() + " записей)");
 
     Date versionFrom = getVersionFrom();
 
@@ -189,7 +196,7 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
  */
 def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к созданию данных по физ.лицам (" + personList.size() + " записей)");
+    logger.info("Подготовка к созданию данных по физ.лицам: " + personList.size() + " записей");
 
     List<RefBookRecord> addressRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
@@ -261,7 +268,7 @@ def fillAddressAttr(Map<String, RefBookValue> values, NdflPerson person) {
     Long countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
 
     putOrUpdate(values, "ADDRESS_TYPE", RefBookAttributeType.NUMBER, addressType);
-    putOrUpdate(values, "COUNTRY_ID", RefBookAttributeType.STRING, countryId);
+    putOrUpdate(values, "COUNTRY_ID", RefBookAttributeType.REFERENCE, countryId);
     putOrUpdate(values, "REGION_CODE", RefBookAttributeType.STRING, person.getRegionCode());
     putOrUpdate(values, "DISTRICT", RefBookAttributeType.STRING, person.getArea());
     putOrUpdate(values, "CITY", RefBookAttributeType.STRING, person.getCity());
@@ -401,7 +408,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
 
 def fillIdentityDocAttr(Map<String, RefBookValue> values, NdflPerson person) {
 
-    values.put("PERSON_ID", new RefBookValue(RefBookAttributeType.NUMBER, person.getPersonId()));
+    values.put("PERSON_ID", new RefBookValue(RefBookAttributeType.REFERENCE, person.getPersonId()));
     values.put("DOC_NUMBER", new RefBookValue(RefBookAttributeType.STRING, person.getIdDocNumber()));
     values.put("ISSUED_BY", new RefBookValue(RefBookAttributeType.STRING, null));
     values.put("ISSUED_DATE", new RefBookValue(RefBookAttributeType.DATE, null));
@@ -419,7 +426,7 @@ def fillIdentityDocAttr(Map<String, RefBookValue> values, NdflPerson person) {
 RefBookRecord createIdentityTaxpayerRecord(NdflPerson person, Long asnuId) {
     RefBookRecord record = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
-    putOrUpdate(values, "PERSON_ID", RefBookAttributeType.NUMBER, person.getPersonId());
+    putOrUpdate(values, "PERSON_ID", RefBookAttributeType.REFERENCE, person.getPersonId());
     putOrUpdate(values, "INP", RefBookAttributeType.STRING, person.getInp());
     putOrUpdate(values, "AS_NU", RefBookAttributeType.REFERENCE, asnuId);
     record.setValues(values);
@@ -686,31 +693,7 @@ def findReportPeriodCode(reportPeriod) {
 
 //------------------ Import Data ----------------------
 
-
-void importData(){
-
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
-    }
-
-    //TODЩ временно вернул, из-за проблем с sax-парсером на стенде
-    def root = new XmlSlurper().parse(ImportInputStream);
-
-    if (root == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-
-    def servicePart = root.'СлЧасть'
-
-    def infoParts = root.'ИнфЧасть'
-
-    infoParts.each {
-        processInfoPart(it)
-    }
-
-}
-
-/*void importData() {
+void importData() {
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
@@ -720,12 +703,10 @@ void importData(){
     QName infoPartName = QName.valueOf('ИнфЧасть')
 
     //Используем StAX парсер для импорта
-    def xmlFactory = XMLInputFactory.newInstance()
+    XMLInputFactory xmlFactory = XMLInputFactory.newInstance()
     xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
     xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
-    def reader = xmlFactory.createXMLEventReader(ImportInputStream)
-
-    xmlFactory.createXMLStreamReader()
+    XMLEventReader reader = xmlFactory.createXMLEventReader(ImportInputStream)
 
     def sb;
     try {
@@ -745,22 +726,55 @@ void importData(){
                 sb = new StringBuilder()
             }
 
-            def eventStr = toString(event);
+            if (event.isStartElement()) {
+                sb?.append(processStartElement(event.asStartElement()))
+            }
 
-            sb?.append(eventStr)
-
-            println("Event: "+eventStr);
+            if (event.isEndElement()) {
+                sb?.append(processEndElement(event.asEndElement()))
+            }
 
             if (event.isEndElement() && event.getName().equals(infoPartName)) {
-                def infoPart = new XmlSlurper().parseText(sb.toString())
-                processInfoPart(infoPart)
+                String personData = sb.toString();
+                if (personData != null && !personData.isEmpty()) {
+                    def infoPart = new XmlSlurper().parseText(sb.toString())
+                    processInfoPart(infoPart)
+                }
             }
         }
     } finally {
         reader?.close()
     }
-}*/
+}
 
+String processStartElement(StartElement start) {
+    String var1 = "<" + start.getName().getLocalPart();
+    Iterator var2;
+    Attribute var3;
+    if (start.getAttributes() != null) {
+        var2 = start.getAttributes();
+        for (var3 = null; var2.hasNext(); var1 = var1 + " " + processAttr(var3)) {
+            //println processAttr(var3)
+            var3 = (Attribute) var2.next();
+        }
+    }
+    var1 = var1 + ">";
+    return var1;
+}
+
+String processAttr(Attribute attr) {
+    if (attr != null) {
+        return attr.getName().getLocalPart() + "=\'" + attr.getValue() + "\'"
+    } else {
+        return "";
+    }
+}
+
+String processEndElement(EndElement end) {
+    StringBuffer var1 = new StringBuffer();
+    var1.append("</").append(end.getName().getLocalPart()).append(">");
+    return var1.toString();
+}
 
 void processInfoPart(infoPart) {
 
