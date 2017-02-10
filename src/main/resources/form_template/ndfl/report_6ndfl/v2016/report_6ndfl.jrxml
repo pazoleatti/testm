@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_6ndfl" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="f035ddc0-f16d-484f-8b9c-07eb70711269">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_6ndfl" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" language="groovy" uuid="f035ddc0-f16d-484f-8b9c-07eb70711269">
 	<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="false"/>
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="984"/>
+	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<style name="KL" mode="Transparent" pattern="">
 		<box>
@@ -85,6 +85,18 @@
     )
 ).substring(0,18)]]></variableExpression>
 			<initialValueExpression><![CDATA[(      (          ($F{ФактДоход} == null || $F{ФактДоход}.equals("0"))  ?                "---------------" :                ($F{ФактДоход}.indexOf(".") < 0 ?                   ($F{ФактДоход} + "-----------------").substring(0, 15) :  	                  ($F{ФактДоход}.substring(0, ($F{ФактДоход}.indexOf(".")))+"-----------------").substring(0, 15)               )      )  + "." +        (($F{ФактДоход} == null || $F{ФактДоход}.equals("0"))  ?                "--" :                ( 	$F{ФактДоход}.indexOf(".") < 0 ?                   "--" :  	                  ($F{ФактДоход}.substring(($F{ФактДоход}.indexOf("."))+1, $F{ФактДоход}.length())+"--").substring(0,2)                )      )  ).substring(0,18)]]></initialValueExpression>
+		</variable>
+		<variable name="ДатаФактДох" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ДатаФактДох} == null ? "---------------------------" : ($F{ДатаФактДох} + "-------------------------").substring(0,10)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДатаФактДох} == null ? "---------------------------" : ($F{ДатаФактДох} + "-------------------------").substring(0,10)]]></initialValueExpression>
+		</variable>
+		<variable name="ДатаУдержНал" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ДатаУдержНал} == null ? "---------------------------" : ($F{ДатаУдержНал} + "-------------------------").substring(0,10)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДатаУдержНал} == null ? "---------------------------" : ($F{ДатаУдержНал} + "-------------------------").substring(0,10)]]></initialValueExpression>
+		</variable>
+		<variable name="СрокПрчслНал" class="java.lang.String">
+			<variableExpression><![CDATA[$F{СрокПрчслНал} == null ? "---------------------------" : ($F{СрокПрчслНал} + "-------------------------").substring(0,10)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СрокПрчслНал} == null ? "---------------------------" : ($F{СрокПрчслНал} + "-------------------------").substring(0,10)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="dsPart1_add" uuid="b97a37b1-0878-4cf4-a826-f99ac96b8d72">
@@ -232,6 +244,16 @@
     )
 ).substring(0,18)]]></variableExpression>
 			<initialValueExpression><![CDATA[(     (         ($F{АвансПлат} == null || $F{АвансПлат}.equals("0"))  ?         "---------------" :         ($F{АвансПлат}.indexOf(".") < 0 ?             ($F{АвансПлат} + "-----------------").substring(0, 15) :             ($F{АвансПлат}.substring(0, ($F{АвансПлат}.indexOf(".")))+"-----------------").substring(0, 15)         )     )  + "." +     (($F{АвансПлат} == null || $F{АвансПлат}.equals("0"))  ?         "--" :         ($F{АвансПлат}.indexOf(".") < 0 ?             "--" :             ($F{АвансПлат}.substring(($F{АвансПлат}.indexOf("."))+1, $F{АвансПлат}.length())+"--").substring(0,2)         )     ) ).substring(0,18)]]></initialValueExpression>
+		</variable>
+		<variable name="Ставка" class="java.lang.String">
+			<variableExpression><![CDATA[(
+    (
+        ($F{Ставка} == null || $F{Ставка}.equals("0"))  ?
+        "--" :
+        ($F{Ставка} + "--").substring(0, 2)
+    )
+).substring(0,2)]]></variableExpression>
+			<initialValueExpression><![CDATA[(     (         ($F{Ставка} == null || $F{Ставка}.equals("0"))  ?         "--" :         ($F{Ставка} + "--").substring(0, 2)     ) ).substring(0,2)]]></initialValueExpression>
 		</variable>
 		<filterExpression><![CDATA[!($F{НомСтр}=="1"|| $F{НомСтр}.equals("1"))]]></filterExpression>
 	</subDataset>
@@ -604,6 +626,36 @@
 	<variable name="BarCode2" class="java.lang.String">
 		<variableExpression><![CDATA["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"]]></variableExpression>
 		<initialValueExpression><![CDATA["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"]]></initialValueExpression>
+	</variable>
+	<variable name="НомКорр" class="java.lang.String">
+		<variableExpression><![CDATA[("000"+$F{НомКорр}).substring(("000"+$F{НомКорр}).length()-3)]]></variableExpression>
+		<initialValueExpression><![CDATA[("000"+$F{НомКорр}).substring(("000"+$F{НомКорр}).length()-3)]]></initialValueExpression>
+	</variable>
+	<variable name="ОтчетГод" class="java.lang.String">
+		<variableExpression><![CDATA[("0000"+$F{ОтчетГод}).substring(("0000"+$F{ОтчетГод}).length()-4)]]></variableExpression>
+		<initialValueExpression><![CDATA[("0000"+$F{ОтчетГод}).substring(("0000"+$F{ОтчетГод}).length()-4)]]></initialValueExpression>
+	</variable>
+	<variable name="КодНО" class="java.lang.String">
+		<variableExpression><![CDATA[("0000"+$F{КодНО}).substring(("0000"+$F{КодНО}).length()-4)]]></variableExpression>
+		<initialValueExpression><![CDATA[("0000"+$F{КодНО}).substring(("0000"+$F{КодНО}).length()-4)]]></initialValueExpression>
+	</variable>
+	<variable name="ПоМесту" class="java.lang.String">
+		<variableExpression><![CDATA[("000"+$F{ПоМесту}).substring(("000"+$F{ПоМесту}).length()-3)]]></variableExpression>
+		<initialValueExpression><![CDATA[("000"+$F{ПоМесту}).substring(("000"+$F{ПоМесту}).length()-3)]]></initialValueExpression>
+	</variable>
+	<variable name="Ставка" class="java.lang.String">
+		<variableExpression><![CDATA[(
+    (
+        ($F{Ставка} == null || $F{Ставка}.equals("0"))  ?
+        "--" :
+        ($F{Ставка} + "--").substring(0, 2)
+    )
+).substring(0,2)]]></variableExpression>
+		<initialValueExpression><![CDATA[(     (         ($F{Ставка} == null || $F{Ставка}.equals("0"))  ?         "--" :         ($F{Ставка} + "--").substring(0, 2)     ) ).substring(0,2)]]></initialValueExpression>
+	</variable>
+	<variable name="ОКТМО" class="java.lang.String">
+		<variableExpression><![CDATA[$F{ОКТМО} == null ?     "-----------" :     ($F{ОКТМО}+"-----------").substring(0,11)]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{ОКТМО} == null ?     "-----------" :     ($F{ОКТМО}+"-----------").substring(0,11)]]></initialValueExpression>
 	</variable>
 	<detail>
 		<band height="842" splitType="Stretch">
@@ -1060,7 +1112,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{НомКорр}.charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{НомКорр}.charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="43755d69-555a-4f57-ace1-97cf0bf31fa4" x="155" y="104" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1074,7 +1126,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{НомКорр}.charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{НомКорр}.charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="f960a823-c150-43a3-92c6-c83029e62757" x="125" y="104" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1088,7 +1140,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{НомКорр}.charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{НомКорр}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="a8cb3735-1905-4507-b3f2-260f60cae286" x="385" y="105" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1144,7 +1196,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОтчетГод}.charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОтчетГод}.charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="9d8ef73d-7ba3-4701-89f2-d87ce67b3355" x="510" y="104" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1158,7 +1210,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОтчетГод}.charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОтчетГод}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="7723cdc1-1aed-426a-bf65-b4c76bbcf8c6" x="539" y="104" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1172,7 +1224,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОтчетГод}.charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОтчетГод}.charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="97668eea-6718-4400-a7e8-385aa3a5cab7" x="554" y="104" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1186,7 +1238,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОтчетГод}.charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОтчетГод}.charAt(3)]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="e8856de4-c331-4a3d-a2e4-b27b54696481" x="0" y="123" width="220" height="20" isPrintWhenDetailOverflows="true"/>
@@ -1207,7 +1259,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{КодНО}.charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{КодНО}.charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="d21d5898-2c12-4853-81d5-6522940a7803" x="220" y="124" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1221,7 +1273,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{КодНО}.charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{КодНО}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="598c0152-8780-467e-a878-dbcdee981d69" x="250" y="124" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1235,7 +1287,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{КодНО}.charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{КодНО}.charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="d6965528-2521-4ac3-99ec-77ef53708237" x="265" y="124" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1249,7 +1301,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{КодНО}.charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{КодНО}.charAt(3)]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="c9e77fa5-5339-46b3-b620-b20e64bac687" x="370" y="124" width="155" height="20" isPrintWhenDetailOverflows="true"/>
@@ -1270,7 +1322,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ПоМесту}.charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ПоМесту}.charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="3e694aa7-ca8c-487c-a73b-c98ad44ef570" x="525" y="124" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1284,7 +1336,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ПоМесту}.charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ПоМесту}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="710b7e93-36f7-41ca-a4f5-0f517a052801" x="555" y="124" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1298,7 +1350,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ПоМесту}.charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ПоМесту}.charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="4f3d69cf-5383-46e7-b94c-f1871ec8a34b" x="30" y="144" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3566,7 +3618,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(7)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(7)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="c0a34b1f-c9bb-488f-a310-dc8adfd76686" x="225" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3580,7 +3632,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="d80aa414-e1a5-4cf8-8692-4de42d08b461" x="285" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3594,7 +3646,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(8)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(8)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="d6411dfb-b7bc-40b0-b904-cde9989b1dec" x="255" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3608,7 +3660,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(6)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(6)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="44e66294-1cde-498f-a943-c793e6207354" x="315" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3622,7 +3674,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(10)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(10)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="ef912935-2c1d-4874-9617-ae6f2325b157" x="195" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3636,7 +3688,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="3473fde8-d652-482b-981d-2bdf50a4e122" x="300" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3650,7 +3702,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(9)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(9)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="bb590522-7ddb-4752-a086-9914420df336" x="210" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3664,7 +3716,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="f0f92117-6419-4477-98d9-906cf78d2b76" x="180" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3678,7 +3730,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="976a36bc-2375-4c6f-85d3-345ab1670929" x="165" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3692,7 +3744,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="ef0ea96c-b585-47ee-bf5b-ad9e5799885b" x="240" y="248" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -3706,7 +3758,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ОКТМО}.charAt(5)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(5)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="8011b3f8-8a98-4b37-b40f-c18b603e68d5" x="315" y="280" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -4136,7 +4188,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ПрПодп}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{ПрПодп}==null ? "-" : $F{ПрПодп})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="b505db17-968a-4f48-b79b-c2aa39587bf8" x="136" y="393" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -8883,7 +8935,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{Ставка}.charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{Ставка}.charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="7fa95367-cc9c-4cf8-8a53-d99c85d4a3ef" x="31" y="96" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -8897,7 +8949,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{Ставка}.charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{Ставка}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="2f69d0dd-1301-4e60-83ef-9d5c96c0df55" x="1" y="140" width="29" height="20" isPrintWhenDetailOverflows="true"/>
@@ -9456,7 +9508,7 @@
 				<text><![CDATA[Сумма исчисленного налога]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="1243548e-6d3b-4d3a-9a7d-e80061c0f665" x="515" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="1243548e-6d3b-4d3a-9a7d-e80061c0f665" x="507" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9484,7 +9536,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="f609993f-252a-460e-aee5-636752119ad8" x="335" y="182" width="15" height="19" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="f609993f-252a-460e-aee5-636752119ad8" x="326" y="182" width="15" height="19" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9512,7 +9564,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(11)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="04792ba9-b0bf-4296-b7e6-6959d370b4b4" x="380" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="04792ba9-b0bf-4296-b7e6-6959d370b4b4" x="372" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9526,7 +9578,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="5ae0b906-b8db-41e3-839a-2980ddfaa29a" x="425" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="5ae0b906-b8db-41e3-839a-2980ddfaa29a" x="416" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9548,7 +9600,7 @@
 				<text><![CDATA[Сумма налоговых вычетов]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="d164911f-e147-4a3d-92b2-b0f86d5d0104" x="485" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="d164911f-e147-4a3d-92b2-b0f86d5d0104" x="476" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9604,7 +9656,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="a6c39fd2-3e27-412e-a0ac-1790682f4a9a" x="395" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="a6c39fd2-3e27-412e-a0ac-1790682f4a9a" x="386" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9646,7 +9698,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(5)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="dd457f67-42f9-45ca-a433-55f5933c75ca" x="365" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="dd457f67-42f9-45ca-a433-55f5933c75ca" x="357" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9703,7 +9755,7 @@
 				<text><![CDATA[.]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="1373ecce-bcfd-46e9-b47a-f162cc137ff1" x="350" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="1373ecce-bcfd-46e9-b47a-f162cc137ff1" x="341" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9745,7 +9797,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(8)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="1e6a8750-7bf2-4145-a09c-383f03322a1b" x="545" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="1e6a8750-7bf2-4145-a09c-383f03322a1b" x="537" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9759,7 +9811,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(14)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="2629353d-ad78-44cd-a73d-8858928e1a4d" x="440" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="2629353d-ad78-44cd-a73d-8858928e1a4d" x="431" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9773,7 +9825,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(7)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="37c80b3b-954e-48b4-9f49-04f16ccfbb02" x="500" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="37c80b3b-954e-48b4-9f49-04f16ccfbb02" x="491" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9787,7 +9839,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(11)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="03609558-4135-448e-b923-412040c76c79" x="410" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="03609558-4135-448e-b923-412040c76c79" x="401" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9801,7 +9853,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(5)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="764eca38-885f-4d41-82e8-617635b11f60" x="470" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="764eca38-885f-4d41-82e8-617635b11f60" x="461" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9857,7 +9909,7 @@
 				<textFieldExpression><![CDATA[$V{ВычетНал}.charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="05145549-fac1-411f-86bc-c46e77d9d702" x="530" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="05145549-fac1-411f-86bc-c46e77d9d702" x="522" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9871,7 +9923,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(13)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="e026796c-2de5-467c-8f62-891c24135f2e" x="455" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="e026796c-2de5-467c-8f62-891c24135f2e" x="446" y="182" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -9969,7 +10021,7 @@
 				<textFieldExpression><![CDATA[$V{АвансПлат}.charAt(11)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="88bdaeeb-f054-403c-9c21-6623db7d9fae" x="361" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="88bdaeeb-f054-403c-9c21-6623db7d9fae" x="362" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -10081,7 +10133,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНалДив}.charAt(10)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="a1a73c7b-5633-43d9-b45b-dfb72747e155" x="376" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="a1a73c7b-5633-43d9-b45b-dfb72747e155" x="377" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -10102,7 +10154,7 @@
 				<text><![CDATA[050]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="385dd0b6-1c2e-4382-a1fd-f5e2cf468f81" x="526" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="385dd0b6-1c2e-4382-a1fd-f5e2cf468f81" x="527" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -10193,7 +10245,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНалДив}.charAt(13)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="b1ddac72-b895-4ff2-b22f-dae47d05c0db" x="541" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="b1ddac72-b895-4ff2-b22f-dae47d05c0db" x="542" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -10328,7 +10380,7 @@
 				<textFieldExpression><![CDATA[$V{АвансПлат}.charAt(9)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="abce8d21-fc31-467d-b843-a69535333e42" x="511" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="abce8d21-fc31-467d-b843-a69535333e42" x="512" y="224" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -11932,7 +11984,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Ставка}.charAt(0)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{Ставка}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="ebb9243b-a6ce-4cbf-98d4-4ecc5def3b7b" x="161" y="157" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12205,7 +12257,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{Ставка}.charAt(1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{Ставка}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="2772b74a-98b7-42bc-913e-eacdd4a68e72" x="209" y="74" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12706,7 +12758,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаФактДох}.charAt(0)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаФактДох}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="74e71059-9927-47fb-b375-444df18d77f2" x="46" y="37" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12720,7 +12772,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаФактДох}.charAt(1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаФактДох}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="58b602a5-6ccc-46da-99dc-2cb05037c9bb" x="76" y="37" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12734,7 +12786,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаФактДох}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаФактДох}.charAt(3)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="69c244c4-a909-42ca-8d37-0097d53c0d59" x="91" y="37" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12748,7 +12800,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаФактДох}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаФактДох}.charAt(4)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="4df010b0-4e6c-45a1-90de-cb136cddab56" x="121" y="37" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12762,7 +12814,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаФактДох}.charAt(6)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаФактДох}.charAt(6)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="f93ab50c-9b7b-47e7-b76d-e7b7a3c2e60a" x="136" y="37" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12776,7 +12828,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаФактДох}.charAt(7)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаФактДох}.charAt(7)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="2335a557-0237-435b-87a7-0044ca4e0405" x="151" y="37" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12790,7 +12842,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаФактДох}.charAt(8)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаФактДох}.charAt(8)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="87a65fc6-5647-4ae9-bf0e-fbe93b7bdefa" x="166" y="37" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12804,7 +12856,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаФактДох}.charAt(9)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаФактДох}.charAt(9)]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="875e97e2-7137-417b-a17e-1c3a237dc998" mode="Transparent" x="61" y="37" width="15" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -12834,7 +12886,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаУдержНал}.charAt(9)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаУдержНал}.charAt(9)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="29105480-783f-4e0f-9ca5-9ec8e50a5aa6" x="46" y="57" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12848,7 +12900,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаУдержНал}.charAt(1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаУдержНал}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="18cf11a8-06ce-4871-83f6-876f266c58dd" x="121" y="57" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12862,7 +12914,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаУдержНал}.charAt(6)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаУдержНал}.charAt(6)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="c7894ca5-c17f-4210-8e35-9dfbc33e80c5" x="31" y="57" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12876,7 +12928,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаУдержНал}.charAt(0)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаУдержНал}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="2ea015c5-b736-4538-956a-996277dbb098" mode="Transparent" x="61" y="57" width="15" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -12905,7 +12957,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаУдержНал}.charAt(8)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаУдержНал}.charAt(8)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="cca4ec5b-e411-4a7a-a70d-15beff9c53f7" x="91" y="57" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12919,7 +12971,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаУдержНал}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаУдержНал}.charAt(4)]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="86eb7876-8e11-41bf-b8f5-6f57e5d1c6c3" mode="Transparent" x="106" y="57" width="15" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -12941,7 +12993,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаУдержНал}.charAt(7)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаУдержНал}.charAt(7)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="23bf1cbd-3134-44e2-88ab-545286f2b44f" x="76" y="57" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12955,7 +13007,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ДатаУдержНал}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДатаУдержНал}.charAt(3)]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="70e3e881-8033-4b45-a99c-12adbcb9078b" x="2" y="75" width="29" height="20" isPrintWhenDetailOverflows="true"/>
@@ -12976,7 +13028,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{СрокПрчслНал}.charAt(9)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СрокПрчслНал}.charAt(9)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="36e7379c-2fac-4af6-a158-30dff22682b2" x="151" y="75" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -12990,7 +13042,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{СрокПрчслНал}.charAt(8)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СрокПрчслНал}.charAt(8)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="7ca7d891-118b-4d2e-b24c-3e362d36225a" x="136" y="75" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -13004,7 +13056,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{СрокПрчслНал}.charAt(7)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СрокПрчслНал}.charAt(7)]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="14a6f38c-e3c5-44a1-b1b3-4693d59bfe80" mode="Transparent" x="61" y="75" width="15" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -13026,7 +13078,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{СрокПрчслНал}.charAt(0)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СрокПрчслНал}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="405c75b5-3bc2-4710-9a12-0f41af0a5b12" x="46" y="75" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -13040,7 +13092,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{СрокПрчслНал}.charAt(1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СрокПрчслНал}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="c1f4d4ba-e635-4ba3-8749-2f8e87fbd2c1" x="121" y="75" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -13054,7 +13106,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{СрокПрчслНал}.charAt(6)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СрокПрчслНал}.charAt(6)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="69aef9b6-d1fd-4862-97ae-648b40425e5f" x="91" y="75" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -13068,7 +13120,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{СрокПрчслНал}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СрокПрчслНал}.charAt(4)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="94aff5fe-aa62-452f-9d4f-083733a66057" x="76" y="75" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -13082,7 +13134,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{СрокПрчслНал}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{СрокПрчслНал}.charAt(3)]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement uuid="410971a4-6000-4b54-896c-047ff2ed357f" mode="Transparent" x="106" y="75" width="15" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
