@@ -211,6 +211,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 						oktmo != null
 								? ", ОКТМО: \"" + oktmo + "\""
 								: "",
+                        asunId != null
+                                ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
+                                : "",
                         fileName != null
                                 ? ", Имя файла: \"" + fileName + "\""
                                 : "")

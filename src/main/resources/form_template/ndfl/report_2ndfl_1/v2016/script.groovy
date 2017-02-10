@@ -451,7 +451,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
         }
     }
     saveNdflRefences()
-//    println(writer)
+    //println(writer)
 }
 
 def saveNdflRefences() {
@@ -561,8 +561,9 @@ def groupByTaxRate(def incomes) {
     def toReturn = []
     def rates = []
     incomes.each {
-        rates << it.taxRate
-        rates.toUnique()
+        if(!rates.contains(it.taxRate)) {
+            rates << it.taxRate
+        }
     }
     rates.each { rate -> toReturn << incomes.findAll { it.taxRate.equals(rate) } }
     return toReturn
@@ -573,8 +574,9 @@ def groupByIncomeCode(def incomes) {
     def toReturn = []
     def incomeCodes = []
     incomes.each {
-        incomeCodes << it.incomeCode
-        incomeCodes.toUnique()
+        if (!incomeCodes.contains((it.incomeCode))) {
+            incomeCodes << it.incomeCode
+        }
     }
     incomeCodes.each { code -> toReturn << incomes.findAll { it.incomeCode.equals(code) } }
     return toReturn
@@ -585,8 +587,9 @@ def groupByDeductionTypeCode(def deductions) {
     def toReturn = []
     def typeCodes = []
     deductions.each {
-        typeCodes << it.typeCode
-        typeCodes.toUnique()
+        if (!typeCodes.contains(it.typeCode)) {
+            typeCodes.toUnique()
+        }
     }
     typeCodes.each { typeCode -> toReturn << deductions.findAll { it.typeCode.equals(typeCode) } }
     return toReturn
