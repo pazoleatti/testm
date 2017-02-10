@@ -39,6 +39,11 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    public DepartmentReportPeriod getLast(int departmentId, int reportPeriodId) {
+        return departmentReportPeriodDao.getLast(departmentId, reportPeriodId);
+    }
+
+    @Override
     public DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId) {
         return departmentReportPeriodDao.getPrevLast(departmentId, reportPeriodId);
     }

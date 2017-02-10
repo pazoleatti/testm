@@ -324,14 +324,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceException();
-        }
-        try {
-            validateDeclaration(userInfo, dd, validateLogger, true, FormDataEvent.CHECK, lockStateLogger);
-        } finally {
-            logger.getEntries().addAll(validateLogger.getEntries());
-        }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException();
         } else {
             logger.info("Проверка завершена, ошибок не обнаружено");
         }
@@ -398,7 +390,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationData declarationData = declarationDataDao.get(id);
 
         Logger scriptLogger = new Logger();
-        Logger validateLogger = new Logger();
         try {
             lockStateLogger.updateState("Проверка форм-источников");
             checkSources(declarationData, logger, userInfo);
@@ -406,14 +397,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , scriptLogger, null);
         } finally {
             logger.getEntries().addAll(scriptLogger.getEntries());
-        }
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException();
-        }
-        try {
-            validateDeclaration(userInfo, declarationData, validateLogger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED , lockStateLogger);
-        } finally {
-            logger.getEntries().addAll(validateLogger.getEntries());
         }
         if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceException();
@@ -441,16 +424,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-        }
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-        if (declarationTemplate.getType().getIsIfrs() &&
-                departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
-            IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
-            if (ifrsData != null && ifrsData.getBlobDataId() != null) {
-                ifrsDataService.deleteReport(declarationData, userInfo);
-            } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
-                ifrsDataService.cancelTask(declarationData, userInfo);
-            }
         }
 
         declarationData.setState(State.CREATED);
@@ -1182,9 +1155,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             }
         }
-        if (DeclarationDataReportType.XML_DEC.getReportType().equals(reportType)) {
-            reportService.deleteDec(declarationDataId);
-        }
     }
 
     @Override
@@ -1442,111 +1412,82 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, String lock) {
+    public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile, AttachFileType fileType) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
-
-        File dataFile = null;
         try {
-            LOG.info(String.format("Создание временного файла: %s", lock));
-            if (stateLogger != null) {
-                stateLogger.updateState("Создание временного файла");
-            }
-            dataFile = File.createTempFile("dataFile", ".original");
-            OutputStream dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
-            try {
-                IOUtils.copy(inputStream, dataFileOutputStream);
-            } finally {
-                IOUtils.closeQuietly(dataFileOutputStream);
-            }
-
             DeclarationData declarationData = get(declarationDataId, userInfo);
 
-            // проверка по xsd
-            validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, new LockStateLogger() {
-                @Override
-                public void updateState(String state) {
-                    // ничего не делаем
-                }
-            });
-
-            //Архивирование перед сохраннеием в базу
-            File zipOutFile = null;
-            try {
-                zipOutFile = File.createTempFile("xml", ".zip");
-                FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
-                ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-                ZipEntry zipEntry = new ZipEntry(fileName);
-                zos.putNextEntry(zipEntry);
-                FileInputStream fi = new FileInputStream(dataFile);
-
+            String fileUuid;
+            if (AttachFileType.TYPE_1.equals(fileType)) {
+                //Архивирование перед сохраннеием в базу
+                File zipOutFile = null;
                 try {
-                    IOUtils.copy(fi, zos);
+                    zipOutFile = File.createTempFile("xml", ".zip");
+                    FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+                    ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+                    ZipEntry zipEntry = new ZipEntry(fileName);
+                    zos.putNextEntry(zipEntry);
+                    FileInputStream fi = new FileInputStream(dataFile);
+
+                    try {
+                        IOUtils.copy(fi, zos);
+                    } finally {
+                        IOUtils.closeQuietly(fi);
+                        IOUtils.closeQuietly(zos);
+                        IOUtils.closeQuietly(fileOutputStream);
+                    }
+
+                    LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
+                    if (stateLogger != null) {
+                        stateLogger.updateState("Сохранение XML-файла в базе данных");
+                    }
+
+                    fileUuid = blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", new Date());
+
+                    reportService.deleteDec(declarationData.getId());
+                    reportService.createDec(declarationData.getId(), fileUuid, DeclarationDataReportType.XML_DEC);
                 } finally {
-                    IOUtils.closeQuietly(fi);
-                    IOUtils.closeQuietly(zos);
-                    IOUtils.closeQuietly(fileOutputStream);
+                    if (zipOutFile != null && !zipOutFile.delete()) {
+                        LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                    }
                 }
-
-                LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
-                if (stateLogger != null) {
-                    stateLogger.updateState("Сохранение XML-файла в базе данных");
-                }
-
-                String uuid = blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", new Date());
-
-                reportService.deleteDec(declarationData.getId());
-                reportService.createDec(declarationData.getId(), uuid, DeclarationDataReportType.XML_DEC);
-
-                TAUser user = userService.getSystemUserInfo().getUser();
-                RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
-                Long defaultFileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + DEFAULT_TF_FILE_TYPE_CODE + "").get(0);
-
-                DeclarationDataFile declarationDataFile = new DeclarationDataFile();
-                declarationDataFile.setDeclarationDataId(declarationData.getId());
-                declarationDataFile.setUuid(uuid);
-                declarationDataFile.setUserName(user.getName());
-                declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
-                declarationDataFile.setFileTypeId(defaultFileTypeId);
-                declarationDataFileDao.saveFile(declarationDataFile);
-            } finally {
-                if (zipOutFile != null && !zipOutFile.delete()) {
-                    LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
-                }
+            } else {
+                fileUuid = blobDataService.create(dataFile, fileName, new Date());
             }
+
+            TAUser user = userService.getSystemUserInfo().getUser();
+            RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
+            Long fileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + fileType.getId() + "").get(0);
+
+            DeclarationDataFile declarationDataFile = new DeclarationDataFile();
+            declarationDataFile.setDeclarationDataId(declarationData.getId());
+            declarationDataFile.setUuid(fileUuid);
+            declarationDataFile.setUserName(user.getName());
+            declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
+            declarationDataFile.setFileTypeId(fileTypeId);
+            declarationDataFileDao.saveFile(declarationDataFile);
 
             InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
             try {
                 Map<String, Object> additionalParameters = new HashMap<String, Object>();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
-                if (stateLogger != null) {
-                    stateLogger.updateState("Импорт файла");
-                }
-                LOG.info(String.format("Выполнение скрипта: %s", lock));
+                additionalParameters.put("dataFile", dataFile);
                 if (!declarationDataScriptingService.executeScript(userInfo, declarationData, formDataEvent, logger, additionalParameters)) {
                     throw new ServiceException("Импорт данных не предусмотрен");
                 }
                 logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, null);
-                String note = "Загрузка данных из файла \"" + fileName + "\" в декларацию";
+                String note = "Загрузка данных из файла \"" + fileName + "\" в налоговую форму";
                 auditService.add(formDataEvent, userInfo, declarationData, null, note, null);
             } finally {
                 IOUtils.closeQuietly(dataFileInputStream);
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                if (stateLogger != null) {
-                    stateLogger.updateState("Сохранение ошибок");
-                }
-                LOG.info(String.format("Сохранение ошибок: %s", lock));
-                String uuid = logEntryService.save(logger.getEntries());
-                throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
+                throw new ServiceException();
             }
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
-        } finally {
-            if (dataFile != null) {
-                dataFile.delete();
-            }
         }
     }
 

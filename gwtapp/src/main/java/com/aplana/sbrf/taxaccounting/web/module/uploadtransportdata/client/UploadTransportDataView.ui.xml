@@ -22,10 +22,10 @@
                 <g:VerticalPanel spacing="10">
                     <g:HorizontalPanel>
                         <g:Button ui:field="uploadButton" width="300px"
-                                  text="Загрузить ТФ в каталог загрузки"
-                                  title="1 шаг. Загрузка ТФ с компьютера пользователя в каталог загрузки. Может быть загружен один ТФ или архив zip, содержащий множество ТФ"/>
+                                  text="Загрузить файл"
+                                  title="Загружаются только те файлы, которые пользователь предоставляет системе по нажатию этой кнопки"/>
                         <g:cell verticalAlignment="middle">
-                            <g:Label addStyleNames="{style.marginLeft15}" text="1 шаг. Загрузка ТФ с компьютера пользователя в каталог загрузки. Может быть загружен один ТФ или архив zip, содержащий множество ТФ"/>
+                            <g:Label addStyleNames="{style.marginLeft15}" text="Загружаются только те файлы, которые пользователь предоставляет системе по нажатию этой кнопки."/>
                         </g:cell>
                         <g:FormPanel ui:field="formPanel" encoding="multipart/form-data" method="post">
                             <g:FileUpload ui:field="uploader" name="uploader" visible="false"/>
@@ -34,10 +34,10 @@
 
                     <g:HorizontalPanel>
                         <g:Button ui:field="loadButton" width="300px"
-                                  text="Обработать ТФ из каталога загрузки"
-                                  title="2 шаг. Обработка всех доступных ТФ, находящихся в централизованном каталоге загрузки."/>
+                                  text="Обработать файлы из каталога загрузки"
+                                  title="Загружаются файлы из каталогов загруки"/>
                         <g:cell verticalAlignment="middle">
-                            <g:Label addStyleNames="{style.marginLeft15}" text="2 шаг. Обработка всех доступных ТФ, находящихся в централизованном каталоге загрузки."/>
+                            <g:Label addStyleNames="{style.marginLeft15}" text="Загружаются файлы из каталогов загруки."/>
                         </g:cell>
                     </g:HorizontalPanel>
 

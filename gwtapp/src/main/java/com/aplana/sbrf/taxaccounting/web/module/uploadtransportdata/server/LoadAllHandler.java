@@ -69,47 +69,6 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         BalancingVariants balancingVariant = BalancingVariants.SHORT;
-        /*
-        if (!action.isForce()) {
-            Logger localLogger = new Logger();
-            List<TransportFileInfo> files = loadRefBookDataService.getRefBookTransportDataFiles(userInfo, localLogger);
-            files.addAll(loadFormDataService.getFormDataFiles(userInfo, localLogger));
-            if (files.isEmpty()) {
-                logger.error("Нет файлов для обработки");
-                result.setDialogMsg(String.format("Выполнение операции \"%s\" невозможно, т.к. нет файлов для обработки!", reportType.getDescription()));
-                result.setUuid(logEntryService.save(logger.getEntries()));
-                return result;
-            }
-
-            AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId());
-            if (taskTypeData.getTaskLimit() > 0) {
-                long maxFileSize = taskTypeData.getTaskLimit();
-                int skip = 0;
-
-                for (TransportFileInfo file : files) {
-                    if (!action.isForce() && file.getLength() > maxFileSize) {
-                        logger.error("ТФ \"%s\", путь к каталогу загрузки \"%s\", размер ТФ %s Кбайт", file.getName(), file.getPath(), file.getLength());
-                        skip++;
-                    } else if (taskTypeData.getShortQueueLimit() != 0 && file.getLength() > taskTypeData.getShortQueueLimit()) {
-                        balancingVariant = BalancingVariants.LONG;
-                    }
-
-                }
-                if (skip == files.size()) {
-                    logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-                    result.setDialogMsg(String.format("Выполнение операции \"%s\" невозможно, т.к. размер всех ТФ превышает максимально допустимый (%s Кбайт)!", reportType.getDescription(), taskTypeData.getTaskLimit()));
-                    result.setUuid(logEntryService.save(logger.getEntries()));
-                    return result;
-                }
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-                    result.setDialogMsg(String.format("Выполнение операции \"%s\" для части ТФ невозможно, т.к. их размер превышает максимально допустимый (%s Кбайт). Продолжить?", reportType.getDescription(), taskTypeData.getTaskLimit()));
-                    result.setFileSizeLimit(true);
-                    result.setUuid(logEntryService.save(logger.getEntries()));
-                    return result;
-                }
-            }
-        }*/
         LockData lockData = lockDataService.lock(key, userId,
                 LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
                 LockData.State.IN_QUEUE.getText());

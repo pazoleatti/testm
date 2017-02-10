@@ -142,9 +142,9 @@ public class GetMainMenuActionHandler extends
                     || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
-                menuItem.getSubMenu().add(new MenuItem("Загрузить ТФ", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
+                menuItem.getSubMenu().add(new MenuItem("Загрузить файлы", NUMBER_SIGN + UploadTransportDataTokens.uploadTransportData));
                 taxMenu.getSubMenu().add(menuItem);
-           }
+            }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 MenuItem menuItem = new MenuItem("Общие параметры", NUMBER_SIGN + CommonParameterPresenter.TOKEN);

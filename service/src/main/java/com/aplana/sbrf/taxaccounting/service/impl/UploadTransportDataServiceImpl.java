@@ -355,7 +355,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private CheckResult checkFileNameAccess(TAUserInfo userInfo, InputStream inputStream, String fileName, Logger logger) {
         try {
             // Не ТФ декларации
-            if (!TransportDataParam.isValidDecName(fileName)) {
+            if (!TransportDataParam.isValidDecName(fileName, inputStream)) {
                 logger.warn(U2_0, fileName);
                 return null;
             }
@@ -363,7 +363,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             CheckResult checkResult = new CheckResult();
 
             // Параметры из имени файла
-            TransportDataParam transportDataParam = TransportDataParam.valueOfDec(fileName);
+            TransportDataParam transportDataParam = TransportDataParam.valueOfDec(fileName, inputStream);
             String reportPeriodCode = transportDataParam.getReportPeriodCode();
             Integer year = transportDataParam.getYear();
             String departmentCode = transportDataParam.getDepartmentCode();
@@ -374,29 +374,6 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             if (declarationTypeId == 200) {
                 departmentCode = "18_0000_00"; // ToDo нужно определять по КПП
-                try {
-                    SAXParserFactory factory = SAXParserFactory.newInstance();
-                    SAXParser saxParser = factory.newSAXParser();
-                    LoadDeclarationDataServiceImpl.SAXHandler handler = new LoadDeclarationDataServiceImpl.SAXHandler(new HashMap<String, List<String>>(){{
-                        put(TAG_DOCUMENT, Arrays.asList(ATTR_PERIOD, ATTR_YEAR));
-                    }});
-                    saxParser.parse(inputStream, handler);
-                    reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD);
-                    try {
-                        year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
-                    } catch (NumberFormatException nfe) {
-                        // Ignore
-                    }
-                } catch (IOException e) {
-                    LOG.error("", e);
-                    throw new ServiceException("", e);
-                } catch (ParserConfigurationException e) {
-                    LOG.error("Ошибка при парсинге xml", e);
-                    throw new ServiceException("", e);
-                } catch (SAXException e) {
-                    LOG.error("", e);
-                    throw new ServiceException("", e);
-                }
             }
 
             // Вывод результата разбора имени файла
