@@ -15,7 +15,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE: //формирование xml
         println "!CALCULATE!"
-        buildXml()
+        buildXml(xml)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -25,6 +25,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
         println "!CREATE_SPECIFIC_REPORT!"
+        createSpecificReport()
         break
     case FormDataEvent.CREATE_FORMS: // создание экземпляра
         println "!CREATE_FORMS!"
@@ -153,7 +154,15 @@ final String PART_TOTAL = "partTotal"
 @Field
 final String NDFL_PERSONS = "ndflPersons"
 
-def buildXml() {
+def buildXml(def writer) {
+    buildXml(writer, false)
+}
+
+def buildXmlForSpecificReport(def writer) {
+    buildXml(writer, true)
+}
+
+def buildXml(def writer, boolean isForSpecificReport) {
     println formMap
     if (hasProperty("formMap")) {
         pageNumber = formMap[PART_NUMBER]
@@ -816,4 +825,15 @@ class PairKppOktmo {
         this.oktmo = oktmo
         this.taxOrganCode = taxOrganCode
     }
+}
+
+def createSpecificReport() {
+    def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
+
+    def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
+        buildXmlForSpecificReport(it)
+    });
+
+    declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".pdf")
 }
