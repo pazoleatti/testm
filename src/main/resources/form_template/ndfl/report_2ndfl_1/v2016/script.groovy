@@ -123,6 +123,9 @@ final int REF_BOOK_DEDUCTION_MARK_ID = 927
 final int NDFL_REFERENCES = 964
 
 @Field
+final int REF_BOOK_DOC_STATE = 929
+
+@Field
 final String NDFL_2_S_PRIZNAKOM_1 = "2 НДФЛ (1)"
 
 @Field
@@ -725,8 +728,7 @@ final int RNU_NDFL_DECLARATION_TYPE = 101
 @Field
 def departmentParamTableList = null;
 
-@Field
-def departmentReportPeriodMap = [:]
+
 
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
@@ -736,14 +738,17 @@ def createForm() {
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
     def ndflReferencesWithError = null
-
     if (korrPeriod) {
         def prevDepartmentPeriodReport = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
         def declarationsForRemove = []
         declarations.each { declaration ->
+            def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id
+            def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id
+            def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id
             def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
-            if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.state == State.ACCEPTED)) {
+            if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.docState != stateDocReject
+            || declaration.docState != stateDocNeedClarify || declaration.docState != stateDocError)) {
                 declarationsForRemove << declaration
             }
         }
@@ -906,6 +911,14 @@ def createReports() {
 @Field
 def sourceReportPeriod = null
 
+@Field
+def departmentReportPeriodMap = [:]
+
+// Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
+@Field
+def departmentFullNameMap = [:]
+
+
 def getReportPeriod() {
     if (sourceReportPeriod == null) {
         sourceReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
@@ -1022,6 +1035,15 @@ def getDepartmentReportPeriodById(def id) {
     }
     return departmentReportPeriodMap[id]
 }
+
+
+/** Получить полное название подразделения по id подразделения. */
+def getDepartmentFullName(def id) {
+    if (departmentFullNameMap[id] == null) {
+        departmentFullNameMap[id] = departmentService.getParentsHierarchy(id)
+    }
+    return departmentFullNameMap[id]
+}
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
 // Получить список детали подразделения из справочника для некорректировочного периода
@@ -1048,19 +1070,6 @@ def isCorrectionPeriod() {
         return true
     }
 }
-
-// Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
-@Field
-def departmentFullNameMap = [:]
-
-/** Получить полное название подразделения по id подразделения. */
-def getDepartmentFullName(def id) {
-    if (departmentFullNameMap[id] == null) {
-        departmentFullNameMap[id] = departmentService.getParentsHierarchy(id)
-    }
-    return departmentFullNameMap[id]
-}
-
 
 class PairKppOktmo {
     def kpp

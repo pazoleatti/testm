@@ -21,6 +21,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.GET_SOURCES: //формирование списка источников
         println "!GET_SOURCES!"
+        getSources()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
         println "!CREATE_SPECIFIC_REPORT!"
@@ -561,6 +562,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 @Field
 def departmentParamTableList = null;
 
+@Field
+final int REF_BOOK_DOC_STATE = 929
 
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
@@ -575,8 +578,12 @@ def createForm() {
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
         def declarationsForRemove = []
         declarations.each { declaration ->
+            def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id
+            def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id
+            def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id
             def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
-            if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.state == State.ACCEPTED)) {
+            if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.docState != stateDocReject
+                    || declaration.docState != stateDocNeedClarify || declaration.docState != stateDocError)) {
                 declarationsForRemove << declaration
             }
         }
@@ -732,6 +739,14 @@ def createReports() {
 @Field
 def sourceReportPeriod = null
 
+@Field
+def departmentReportPeriodMap = [:]
+
+// Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
+@Field
+def departmentFullNameMap = [:]
+
+
 def getReportPeriod() {
     if (sourceReportPeriod == null) {
         sourceReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
@@ -749,8 +764,8 @@ void getSources() {
     def sourceTypeId = 101
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
-    println "allDepartmentReportPeriodIds ${allDepartmentReportPeriodIds}"
-    def tmpDeclarationDataList = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, allDepartmentReportPeriodIds, [declarationData.kpp], [declarationData.oktmo])
+    // Найти подразделения в РНУ которых имеются операции из декларации
+    def tmpDeclarationDataList = getDeclarationDataList(sourceTypeId, allDepartmentReportPeriodIds)
     tmpDeclarationDataList.each {
         println it.id
     }
@@ -836,8 +851,8 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
 
     return relation
 }
-
-def getDeclarationDataTerBankList(def sourceTypeId, def allDepartmentReportPeriodIds) {
+ // Найти подразделения в РНУ которых имеются операции из декларации
+def getDeclarationDataList(def sourceTypeId, def allDepartmentReportPeriodIds) {
     // Найти все доходы по декларации
     def toReturn = []
     def incomes = ndflPersonService.findNdflPersonIncome(declarationData.id)
@@ -845,10 +860,10 @@ def getDeclarationDataTerBankList(def sourceTypeId, def allDepartmentReportPerio
     incomes.each { income ->
         kppOktmoSet << new PairKppOktmo(income.kpp, income.oktmo, null)
     }
-    for (reportPeriodId in allDepartmentReportPeriodIds) {
-        tmpDepartmentReportPeriod = departmentReportPeriodService.get(reportPeriodId)
+    for (departmentReportPeriodId in allDepartmentReportPeriodIds) {
+        def tmpDepartmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId)
         for (kppOktmo in kppOktmoSet) {
-            def declarationData = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, it, tmpDepartmentReportPeriod.departmentId, tmpDepartmentReportPeriod.reportPeriod.id, kppOktmo.kpp, kppOktmo.oktmo)
+            def declarationData = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, departmentReportPeriodId, tmpDepartmentReportPeriod.departmentId, tmpDepartmentReportPeriod.reportPeriod.id, kppOktmo.kpp, kppOktmo.oktmo)
             if (declarationData != null) {
                 toReturn << declarationData
                 break
@@ -856,6 +871,19 @@ def getDeclarationDataTerBankList(def sourceTypeId, def allDepartmentReportPerio
         }
     }
     return toReturn
+}
+def getDepartmentReportPeriodById(def id) {
+    if (id != null && departmentReportPeriodMap[id] == null) {
+        departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
+    }
+    return departmentReportPeriodMap[id]
+}
+/** Получить полное название подразделения по id подразделения. */
+def getDepartmentFullName(def id) {
+    if (departmentFullNameMap[id] == null) {
+        departmentFullNameMap[id] = departmentService.getParentsHierarchy(id)
+    }
+    return departmentFullNameMap[id]
 }
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
