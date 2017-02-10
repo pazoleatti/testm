@@ -15,13 +15,19 @@ import com.aplana.sbrf.taxaccounting.model.PersonData
 // com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
 import com.aplana.sbrf.taxaccounting.refbook.*
 import groovy.transform.Field
+import groovy.transform.Memoized
 import groovy.util.slurpersupport.NodeChild
 import groovy.xml.MarkupBuilder
 
 import javax.script.ScriptException
 import javax.xml.namespace.QName
+import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.events.Attribute
 import javax.xml.stream.events.Characters
+import javax.xml.stream.events.EndElement
+import javax.xml.stream.events.Namespace
+import javax.xml.stream.events.StartElement
 import javax.xml.stream.events.XMLEvent
 
 /**
@@ -57,6 +63,10 @@ def SIMILARITY_THRESHOLD = 900;
 def calculate() {
 
     def asnuId = declarationData.asnuId;
+
+    if (asnuId == null) {
+        throw new ServiceException("Для декларации " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
+    }
 
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
@@ -131,7 +141,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к обновлению данных по физлицам ("+personList.size()+" записей)");
+    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size() + " записей)");
 
     Date versionFrom = getVersionFrom();
 
@@ -186,7 +196,7 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
  */
 def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к созданию данных по физ.лицам ("+personList.size()+" записей)");
+    logger.info("Подготовка к созданию данных по физ.лицам: " + personList.size() + " записей");
 
     List<RefBookRecord> addressRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
@@ -196,7 +206,7 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
     }
 
     List<Long> addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, addressRecords)
-    logger.info("В справочнике 'Адреса физических лиц' создано записей: "+addressIds.size());
+    logger.info("В справочнике 'Адреса физических лиц' создано записей: " + addressIds.size());
 
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
@@ -209,7 +219,7 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
     //сгенерированные идентификаторы справочника физлиц
     List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, personRecords)
-    logger.info("В справочнике 'Физические лица' создано записей: "+personIds.size());
+    logger.info("В справочнике 'Физические лица' создано записей: " + personIds.size());
 
     //создание записей справочников документы и идентфикаторы физлиц
     List<RefBookRecord> documentsRecords = new ArrayList<RefBookRecord>()
@@ -226,8 +236,8 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
     List<Long> taxIds = getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, taxpayerIdsRecords)
 
-    logger.info("В справочнике 'Документы физических лиц' создано записей: "+docIds.size());
-    logger.info("В справочнике 'Идентификаторы физических лиц' создано записей: "+taxIds.size());
+    logger.info("В справочнике 'Документы физических лиц' создано записей: " + docIds.size());
+    logger.info("В справочнике 'Идентификаторы физических лиц' создано записей: " + taxIds.size());
 
 }
 
@@ -240,6 +250,7 @@ RefBookRecord creatAddressRecord(NdflPerson person) {
     RefBookRecord record = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
     fillAddressAttr(values, person)
+    record.setValues(values);
     return record;
 }
 
@@ -257,7 +268,7 @@ def fillAddressAttr(Map<String, RefBookValue> values, NdflPerson person) {
     Long countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
 
     putOrUpdate(values, "ADDRESS_TYPE", RefBookAttributeType.NUMBER, addressType);
-    putOrUpdate(values, "COUNTRY_ID", RefBookAttributeType.STRING, countryId);
+    putOrUpdate(values, "COUNTRY_ID", RefBookAttributeType.REFERENCE, countryId);
     putOrUpdate(values, "REGION_CODE", RefBookAttributeType.STRING, person.getRegionCode());
     putOrUpdate(values, "DISTRICT", RefBookAttributeType.STRING, person.getArea());
     putOrUpdate(values, "CITY", RefBookAttributeType.STRING, person.getCity());
@@ -296,17 +307,17 @@ def updatePersonRecord(Map<String, RefBookValue> values, NdflPerson person, Long
 }
 
 /**
- * Заполнени аттрибутов справочника физлиц
+ * Заполнение аттрибутов справочника физлиц
  * @param values карта для хранения значений атрибутов
  * @param person класс предоставляющий данные для заполнения справочника
  * @param asnuId ссылка на справочник АСНУ
- * @param addressId ссылка на справочник адресса физлиц
+ * @param addressId ссылка на справочник адреса физлиц
  * @return
  */
 def fillNdflPersonAttr(Map<String, RefBookValue> values, NdflPerson person, Long asnuId, Long addressId) {
 
-    def citizenshipCodeMap = getRefCitizenship();
-    def taxpayerStatusMap = getRefTaxpayerStatus();
+    Long countryId = findCountryId(person.getCitizenship());
+    Long statusId = findTaxpayerStatusByCode(person.getStatus());
 
     putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName());
     putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName());
@@ -323,12 +334,8 @@ def fillNdflPersonAttr(Map<String, RefBookValue> values, NdflPerson person, Long
     putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, 2);
     putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, 2);
     putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, 2);
-    putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, citizenshipCodeMap.find {
-        it.value == person.getCitizenship()
-    }?.key);
-    putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, taxpayerStatusMap.find {
-        it.value == person.getStatus()
-    }?.key);
+    putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, countryId);
+    putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, statusId);
     putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, asnuId);
     putOrUpdate(values, "DUBLICATES", RefBookAttributeType.REFERENCE, null);
 }
@@ -401,7 +408,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
 
 def fillIdentityDocAttr(Map<String, RefBookValue> values, NdflPerson person) {
 
-    values.put("PERSON_ID", new RefBookValue(RefBookAttributeType.NUMBER, person.getPersonId()));
+    values.put("PERSON_ID", new RefBookValue(RefBookAttributeType.REFERENCE, person.getPersonId()));
     values.put("DOC_NUMBER", new RefBookValue(RefBookAttributeType.STRING, person.getIdDocNumber()));
     values.put("ISSUED_BY", new RefBookValue(RefBookAttributeType.STRING, null));
     values.put("ISSUED_DATE", new RefBookValue(RefBookAttributeType.DATE, null));
@@ -419,7 +426,7 @@ def fillIdentityDocAttr(Map<String, RefBookValue> values, NdflPerson person) {
 RefBookRecord createIdentityTaxpayerRecord(NdflPerson person, Long asnuId) {
     RefBookRecord record = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
-    putOrUpdate(values, "PERSON_ID", RefBookAttributeType.NUMBER, person.getPersonId());
+    putOrUpdate(values, "PERSON_ID", RefBookAttributeType.REFERENCE, person.getPersonId());
     putOrUpdate(values, "INP", RefBookAttributeType.STRING, person.getInp());
     putOrUpdate(values, "AS_NU", RefBookAttributeType.REFERENCE, asnuId);
     record.setValues(values);
@@ -503,7 +510,6 @@ def findTaxpayerStatusByCode(code) {
     }?.key
 }
 
-
 /**
  * Получить дату которая используется в качестве версии записей справочника
  * @return дата используемая в качестве даты версии справочника
@@ -535,7 +541,6 @@ def findCountryId(countryCode) {
         it.value == countryCode
     }?.key : null;
 }
-
 
 //------------------ Create Report ----------------------
 
@@ -698,11 +703,10 @@ void importData() {
     QName infoPartName = QName.valueOf('ИнфЧасть')
 
     //Используем StAX парсер для импорта
-    def xmlFactory = XMLInputFactory.newInstance()
+    XMLInputFactory xmlFactory = XMLInputFactory.newInstance()
     xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
     xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
-    def reader = xmlFactory.createXMLEventReader(ImportInputStream)
-
+    XMLEventReader reader = xmlFactory.createXMLEventReader(ImportInputStream)
 
     def sb;
     try {
@@ -722,16 +726,54 @@ void importData() {
                 sb = new StringBuilder()
             }
 
-            sb?.append(event.toString())
+            if (event.isStartElement()) {
+                sb?.append(processStartElement(event.asStartElement()))
+            }
+
+            if (event.isEndElement()) {
+                sb?.append(processEndElement(event.asEndElement()))
+            }
 
             if (event.isEndElement() && event.getName().equals(infoPartName)) {
-                def infoPart = new XmlSlurper().parseText(sb.toString())
-                processInfoPart(infoPart)
+                String personData = sb.toString();
+                if (personData != null && !personData.isEmpty()) {
+                    def infoPart = new XmlSlurper().parseText(sb.toString())
+                    processInfoPart(infoPart)
+                }
             }
         }
     } finally {
         reader?.close()
     }
+}
+
+String processStartElement(StartElement start) {
+    String var1 = "<" + start.getName().getLocalPart();
+    Iterator var2;
+    Attribute var3;
+    if (start.getAttributes() != null) {
+        var2 = start.getAttributes();
+        for (var3 = null; var2.hasNext(); var1 = var1 + " " + processAttr(var3)) {
+            //println processAttr(var3)
+            var3 = (Attribute) var2.next();
+        }
+    }
+    var1 = var1 + ">";
+    return var1;
+}
+
+String processAttr(Attribute attr) {
+    if (attr != null) {
+        return attr.getName().getLocalPart() + "=\'" + attr.getValue() + "\'"
+    } else {
+        return "";
+    }
+}
+
+String processEndElement(EndElement end) {
+    StringBuffer var1 = new StringBuffer();
+    var1.append("</").append(end.getName().getLocalPart()).append(">");
+    return var1.toString();
 }
 
 void processInfoPart(infoPart) {
@@ -1264,7 +1306,7 @@ def checkDataReference(
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
 
         // Спр1 ФИАС
-        if (!findAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
+        if (!isExistsAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
             logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON, ndflPerson.rowNum, C_ADDRESS, fioAndInp, C_ADDRESS, R_FIAS);
         }
@@ -2280,22 +2322,17 @@ def getOktmoAndKpp(def departmentParamId) {
  * @param city город
  * @param locality населенный пункт
  * @param street улица
- * @return адресообразующий объект справочника
  */
-def findAddress(def regionCode, def area, def city, def locality, def street) {
-    def addressObjectList = fiasRefBookService.findAddress(regionCode, area, city, locality, street)
-    def res = false
-    if (addressObjectList != null) {
-        if (addressObjectList.size() == 1) {
-            addressObjectList.each { addressObject ->
-                // Если объект адреса листовой
-                if (addressObject.isLeaaf == true) {
-                    res = true
-                }
-            }
-        }
+/**
+ * Существует ли адрес в справочнике адресов
+ */
+@Memoized
+boolean isExistsAddress(regionCode, area, city, locality, street) {
+    if (!regionCode || !area || !city || !locality || !street) {
+        return false
     }
-    return res;
+
+    return fiasRefBookService.findAddress(regionCode, area, city, locality, street).size() > 0
 }
 
 /**

@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.report_6ndfl.v2016;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByRate;
@@ -10,14 +8,19 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl;
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import groovy.lang.Closure;
+import net.sf.jasperreports.engine.JasperPrint;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.custommonkey.xmlunit.Diff;
+import org.junit.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.w3c.dom.Node;
@@ -27,18 +30,24 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import java.io.IOException;
-import java.io.StringReader;
+import java.awt.*;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * Скрипт для тестирования Формирования xml-файла ЭД "1151099 (6 НДФЛ) Расчет сумм налога на доходы физических лиц, исчисленных и удержанных налоговым агентом"
@@ -53,7 +62,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final long ASNU_ID = 1000;
     private static final String KPP = "123456789";
-    private static final String OKTMO = "12345678";
+    private static final String OKTMO = "12345678901";
     private static final String CODE_ORG = "1234";
 
     @Override
@@ -85,74 +94,54 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
     @Before
     public void mockService() {
         //mock сервисов для получения тестовых наборов данных
-    }
-
-    /**
-     * Инициализация перед каждым отдельным тестом
-     */
-    @Before
-    public void init() {
-        // Хэлпер хранится статично для оптимизации, чтобы он был один для всех тестов отдельного скрипта
-        if (testHelper == null) {
-            String path = getFolderPath();
-            if (path == null) {
-                throw new ServiceException("Test folder path is null!");
-            }
-            testHelper = new DeclarationTestScriptHelper(path, getDeclarationData(), getMockHelper()) {};
-        }
-        testHelper.reset();
-    }
-
-    @Test
-    public void buildXmlTest() throws IOException, SAXException {
         // СумСтавка
         when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
                 .thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
-            @Override
-            public NdflPersonIncomeCommonValue answer(InvocationOnMock invocationOnMock) throws Throwable {
-                NdflPersonIncomeCommonValue ndflPersonIncomeCommonValue = new NdflPersonIncomeCommonValue();
-                ndflPersonIncomeCommonValue.setCountPerson(11);
-                ndflPersonIncomeCommonValue.setWithholdingTax(22L);
-                ndflPersonIncomeCommonValue.setNotHoldingTax(33L);
-                ndflPersonIncomeCommonValue.setRefoundTax(44L);
+                    @Override
+                    public NdflPersonIncomeCommonValue answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        NdflPersonIncomeCommonValue ndflPersonIncomeCommonValue = new NdflPersonIncomeCommonValue();
+                        ndflPersonIncomeCommonValue.setCountPerson(11);
+                        ndflPersonIncomeCommonValue.setWithholdingTax(22L);
+                        ndflPersonIncomeCommonValue.setNotHoldingTax(33L);
+                        ndflPersonIncomeCommonValue.setRefoundTax(44L);
 
-                List<NdflPersonIncomeByRate> ndflPersonIncomeByRateList = new ArrayList<NdflPersonIncomeByRate>();
-                NdflPersonIncomeByRate ndflPersonIncomeByRate1 = new NdflPersonIncomeByRate();
-                ndflPersonIncomeByRate1.setTaxRate(13);
-                ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(7777.77));
-                ndflPersonIncomeByRate1.setIncomeAccruedSummDiv(new BigDecimal(6666.66));
-                ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(5555.55));
-                ndflPersonIncomeByRate1.setCalculatedTax(288L);
-                ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
-                ndflPersonIncomeByRate1.setPrepaymentSum(280L);
-                ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
+                        List<NdflPersonIncomeByRate> ndflPersonIncomeByRateList = new ArrayList<NdflPersonIncomeByRate>();
+                        NdflPersonIncomeByRate ndflPersonIncomeByRate1 = new NdflPersonIncomeByRate();
+                        ndflPersonIncomeByRate1.setTaxRate(13);
+                        ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(7777.77));
+                        ndflPersonIncomeByRate1.setIncomeAccruedSummDiv(new BigDecimal(6666.66));
+                        ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(5555.55));
+                        ndflPersonIncomeByRate1.setCalculatedTax(288L);
+                        ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
+                        ndflPersonIncomeByRate1.setPrepaymentSum(280L);
+                        ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
 
-                ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);
+                        ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);
 
-                return ndflPersonIncomeCommonValue;
-            }
-        });
+                        return ndflPersonIncomeCommonValue;
+                    }
+                });
 
         // СумДата
         when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
                 .thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
-            @Override
-            public List<NdflPersonIncomeByDate> answer(InvocationOnMock invocationOnMock) throws Throwable {
-                DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+                    @Override
+                    public List<NdflPersonIncomeByDate> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
 
-                List<NdflPersonIncomeByDate> ndflPersonIncomeByDateList = new ArrayList<NdflPersonIncomeByDate>();
+                        List<NdflPersonIncomeByDate> ndflPersonIncomeByDateList = new ArrayList<NdflPersonIncomeByDate>();
 
-                NdflPersonIncomeByDate ndflPersonIncomeByDate1 = new NdflPersonIncomeByDate();
-                ndflPersonIncomeByDate1.setIncomeAccruedDate(format.parse("24.01.2017"));
-                ndflPersonIncomeByDate1.setTaxDate(format.parse("24.01.2017"));
-                ndflPersonIncomeByDate1.setTaxTransferDate(format.parse("24.01.2017"));
-                ndflPersonIncomeByDate1.setIncomePayoutSumm(new BigDecimal(1111.5));
-                ndflPersonIncomeByDate1.setWithholdingTax(2222L);
-                ndflPersonIncomeByDateList.add(ndflPersonIncomeByDate1);
+                        NdflPersonIncomeByDate ndflPersonIncomeByDate1 = new NdflPersonIncomeByDate();
+                        ndflPersonIncomeByDate1.setIncomeAccruedDate(format.parse("24.01.2017"));
+                        ndflPersonIncomeByDate1.setTaxDate(format.parse("24.01.2017"));
+                        ndflPersonIncomeByDate1.setTaxTransferDate(format.parse("24.01.2017"));
+                        ndflPersonIncomeByDate1.setIncomePayoutSumm(new BigDecimal(1111.5));
+                        ndflPersonIncomeByDate1.setWithholdingTax(2222L);
+                        ndflPersonIncomeByDateList.add(ndflPersonIncomeByDate1);
 
-                return ndflPersonIncomeByDateList;
-            }
-        });
+                        return ndflPersonIncomeByDateList;
+                    }
+                });
 
         // Период
         when(testHelper.getFormDataService().getRefBookValue(eq(8L), anyLong(), anyMap())).thenAnswer(
@@ -192,6 +181,26 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
 
         // НомКорр
         when(testHelper.getReportPeriodService().getCorrectionNumber(anyInt())).thenReturn(111);
+    }
+
+    /**
+     * Инициализация перед каждым отдельным тестом
+     */
+    @Before
+    public void init() {
+        // Хэлпер хранится статично для оптимизации, чтобы он был один для всех тестов отдельного скрипта
+        if (testHelper == null) {
+            String path = getFolderPath();
+            if (path == null) {
+                throw new ServiceException("Test folder path is null!");
+            }
+            testHelper = new DeclarationTestScriptHelper(path, getDeclarationData(), getMockHelper()) {};
+        }
+        testHelper.reset();
+    }
+
+    @Test
+    public void buildXmlTest() throws IOException, SAXException {
 
         testHelper.execute(FormDataEvent.CALCULATE);
 
@@ -235,5 +244,78 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         assertTrue(xmlDiff.identical());
 
         checkLogger();
+    }
+
+    /**
+     * Тест создания спецотчета
+     * НАРУШАЕТ ВЫПОЛНЕНИЕ ТЕСТА ГЕНЕРАЦИИ XML, БУДУЧИ ВЫПОЛНЕННЫМ ПЕРВЫМ
+     *
+     * @throws IOException
+     */
+    @Test
+    @Ignore
+    public void createSpecificReportTest() throws Exception {
+
+        ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
+        testHelper.setScriptSpecificReportHolder(reportHolder);
+
+        doAnswer(new Answer<JasperPrint>() {
+            @Override
+            public JasperPrint answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                InputStream jrxmlTemplate = (InputStream) args[0];
+                Map param = (Map) args[1];
+                Closure closure = (Closure) args[2];
+
+                DeclarationService declarationService = new DeclarationServiceImpl();
+                ByteArrayInputStream xmlData = declarationService.generateXmlData(closure);
+
+                DeclarationDataService declarationDataService = new DeclarationDataServiceImpl();
+                Connection connection = DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb", "SA", "");
+                return declarationDataService.createJasperReport(xmlData, jrxmlTemplate, param, connection);
+
+            }
+        }).when(testHelper.getDeclarationService()).createJasperReport(any(InputStream.class), anyMap(), any(Closure.class));
+
+        testHelper.execute(FormDataEvent.CREATE_SPECIFIC_REPORT);
+
+        ScriptSpecificDeclarationDataReportHolder resultReportHolder = testHelper.getScriptSpecificReportHolder();
+        ByteArrayOutputStream outputStream = (ByteArrayOutputStream) resultReportHolder.getFileOutputStream();
+
+        //Что-то сформировали
+        Assert.assertTrue(outputStream.toByteArray().length > 0);
+
+//        writeToFileAndOpen(outputStream, "person_report.pdf");
+
+        checkLogger();
+    }
+
+    /**
+     * Метод помогает при разработке. Сохраняет отчет в файл и открывает его для визуальной проверки.
+     *
+     * @param byteArrayOutputStream
+     * @throws IOException
+     */
+    private void writeToFileAndOpen(ByteArrayOutputStream byteArrayOutputStream, String fileName) throws IOException {
+        File file = new File("C:\\temp\\" + fileName);
+        OutputStream foutputStream = new FileOutputStream(file);
+        try {
+            byteArrayOutputStream.writeTo(foutputStream);
+        } finally {
+            foutputStream.close();
+        }
+        Desktop.getDesktop().open(file);
+    }
+
+    @Override
+    protected DeclarationSubreport createDeclarationSubreport() {
+        DeclarationSubreport result = new DeclarationSubreport();
+        result.setId(1L);
+        result.setAlias("report_6ndfl");
+        result.setName("report_6ndfl");
+        result.setBlobDataId("100500");
+        result.setOrder(1);
+        result.setDeclarationSubreportParams(Collections.EMPTY_LIST);
+        return result;
     }
 }
