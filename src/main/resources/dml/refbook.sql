@@ -672,6 +672,7 @@ insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,refer
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,precision,required,is_unique,max_length) values (9645,964,5,'Отчество','LASTNAME',1,1,null,null,10,null,0,0,60);
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,precision,required,is_unique,max_length,format) values (9646,964,6,'Дата рождения ФЛ','BIRTHDAY',1,3,null,null,10,null,1,0,null,1);
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,precision,required,is_unique,max_length) values (9647,964,7,'Текст ошибки от ФНС','ERRTEXT',1,1,null,null,10,null,0,0,2000);
+insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,precision,required,is_unique,max_length) values (9648,964,8,'Идентификатор декларации к которой относятся данные','DECLARATION_DATA_ID',1,2,null,null,10,0,0,0,18);
 
 ---------------------------------
 
