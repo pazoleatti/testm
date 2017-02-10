@@ -103,8 +103,8 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
-                getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
+        return String.format("Выполнен расчет налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
 
@@ -128,8 +128,8 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
-                getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
+        return String.format("Произошла непредвиденная ошибка при расчете налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
 }

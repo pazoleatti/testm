@@ -222,7 +222,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                     ИсчислНал: ndflPersonIncomeByRate.calculatedTax,
                                     ИсчислНалДив: ndflPersonIncomeByRate.calculatedTaxDiv,
                                     АвансПлат: ndflPersonIncomeByRate.prepaymentSum,
-                                    НомСтр: index
+                                    НомСтр: index + 1
                             ) {}
                         } else {
                             СумСтавка(
@@ -1006,6 +1006,6 @@ def createSpecificReport() {
         buildXmlForSpecificReport(it)
     });
 
-    declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".pdf")
+    declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
 }

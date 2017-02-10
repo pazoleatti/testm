@@ -9,8 +9,10 @@ import net.sf.jasperreports.engine.util.JRSwapFile;
 
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
@@ -31,7 +33,7 @@ public interface DeclarationService {
     /**
      * Поиск декларации в отчетном периоде подразделения + «КПП» и «Налоговый орган»
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String guid);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
     /**
      * Декларация в последнем отчетном периоде подразделения
@@ -180,10 +182,84 @@ public interface DeclarationService {
 
     DeclarationTemplate getTemplate(int declarationTemplateId);
 
+    DeclarationType getTemplateType(int declarationTypeId);
+
     Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note);
 
     void delete(long declarationDataId, TAUserInfo userInfo);
+
+
+    /**
+     * Удаляет все отчеты налоговой формы
+     * @param declarationDataId
+     */
+    void deleteReport(long declarationDataId);
+
+    /**
+     * Удаляет отчеты заданных типов
+     * @param declarationDataId
+     */
+    void deleteReport(long declarationDataId, List<DeclarationDataReportType> declarationDataReportTypeList);
+
+    /**
+     * Метод передающий управление на проверку декларации сторонней утилите
+     * @param declarationData
+     * @param userInfo
+     * @param logger
+     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
+     */
+    void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile);
+
+    /**
+     * Возвращает идентификатор действующего {@link DeclarationTemplate описания декларации} по виду декларации
+     * Такое описание для каждого вида декларации в любой момент времени может быть только одно
+     * @param declarationTypeId идентификатор вида декларации
+     * @return идентификатор описания декларации
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если не удалось найти активное описание декларации по заданному типу,
+     * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
+     */
+    int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId);
+
+    /**
+     * Получение тела скрипта.
+     * @param declarationTemplateId идентификатор вида декларации
+     * @return тело скрипта
+     */
+    String getDeclarationTemplateScript(int declarationTemplateId);
+
+    /**
+     * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
+     *
+     * @param departmentId идентификатор подразделения
+     * @param taxType      вид налога
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
+     */
+    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
+
+    /**
+     * Получние id для всех деклараций по фильтру.
+     * @param declarationFilter
+     * @param ordering
+     * @param asc
+     * @return
+     */
+    List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc);
+
+    /**
+     *
+     * @param logger
+     * @param userInfo
+     * @param declarationData
+     * @param inputStream
+     * @param fileName
+     * @param dataFile
+     * @param attachFileType
+     */
+    void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
+                               String fileName, File dataFile, AttachFileType attachFileType);
 
     /**
      * Найти декларацию НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО

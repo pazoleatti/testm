@@ -118,4 +118,9 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     public Integer getCorrectionNumber(int departmentReportPeriodId) {
         return departmentReportPeriodDao.getCorrectionNumber(departmentReportPeriodId);
     }
+
+    @Override
+    public ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year) {
+        return reportPeriodService.getByTaxTypedCodeYear(taxType, code, year);
+    }
 }

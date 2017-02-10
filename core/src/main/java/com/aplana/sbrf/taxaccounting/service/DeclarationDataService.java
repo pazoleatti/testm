@@ -9,6 +9,7 @@ import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -121,6 +122,18 @@ public interface DeclarationDataService {
 	 */
     void accept(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
+    /**
+     * Метод передающий управление на проверку декларации сторонней утилите
+     * @param userInfo
+     * @param declarationData
+     * @param logger
+     * @param operation - не используется
+     * @param isErrorFatal
+     * @param xmlFile
+     * @param stateLogger
+     */
+    public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+                                    FormDataEvent operation, File xmlFile, LockStateLogger stateLogger);
 
     /**
      * Отмена принятия декларации
@@ -341,7 +354,7 @@ public interface DeclarationDataService {
      * Импорт ТФ Декларации
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
-                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, String lock);
+                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile, AttachFileType fileType);
 
     /**
      * Получение данных по файлам для формы "Файлы и комментарии"
