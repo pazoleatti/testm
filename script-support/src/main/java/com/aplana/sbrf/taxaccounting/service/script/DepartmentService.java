@@ -38,4 +38,9 @@ public interface DepartmentService {
      * @return список идентификаторов подразделений
      */
     List<Integer> getDepartmentIdsByType(int type);
+
+    /**
+     * Получить подразделение
+     */
+    Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly);
 }

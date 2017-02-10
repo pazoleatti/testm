@@ -52,5 +52,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Integer> getDepartmentIdsByType(int type) {
         return departmentDao.getDepartmentIdsByType(type);
     }
+
+    @Override
+    public Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly) {
+        return departmentService.getDepartmentBySbrfCode(sbrfCode, activeOnly);
+    }
 }
 

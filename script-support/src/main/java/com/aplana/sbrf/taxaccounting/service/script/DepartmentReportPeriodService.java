@@ -18,6 +18,11 @@ public interface DepartmentReportPeriodService {
     List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
     /**
+     * Последний отчетный период подразделения для комбинации отчетный период-подразделение
+     */
+    DepartmentReportPeriod getLast(int departmentId, int reportPeriodId);
+
+    /**
      * Предпоследний отчетный период подразделения для комбинации отчетный период-подразделение
      */
     DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId);

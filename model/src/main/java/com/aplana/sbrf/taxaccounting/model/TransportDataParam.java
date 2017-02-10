@@ -1,7 +1,17 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -27,7 +37,9 @@ public class TransportDataParam {
     private final String kpp;
     private final String asnuCode;
     private final String guid;
-    private Integer declarationTypeId; //ToDщ потом нужно будет переделать на код формы???
+    private Integer declarationTypeId; //ToDo потом нужно будет переделать на код формы???
+    private final boolean isFNS;
+    private final Long declarationDataId;
 
     /**
      * Маппинг периодов для НДФЛ
@@ -53,7 +65,7 @@ public class TransportDataParam {
      * @param guid             GUID ТФ
      * @param declarationTypeId тип декларации
      */
-    public TransportDataParam(String formCode, String departmentCode, String reportPeriodCode, Integer year, Integer month, String kpp, String asnuCode, String guid, Integer declarationTypeId) {
+    public TransportDataParam(String formCode, String departmentCode, String reportPeriodCode, Integer year, Integer month, String kpp, String asnuCode, String guid, Integer declarationTypeId, boolean isFNS, Long declarationDataId) {
         this.formCode = formCode;
         this.departmentCode = departmentCode;
         this.reportPeriodCode = reportPeriodCode;
@@ -63,6 +75,8 @@ public class TransportDataParam {
         this.asnuCode = asnuCode;
         this.guid = guid;
         this.declarationTypeId = declarationTypeId;
+        this.isFNS = isFNS;
+        this.declarationDataId = declarationDataId;
     }
 
     /**
@@ -94,7 +108,7 @@ public class TransportDataParam {
                 // Ignore
             }
         }
-        return new TransportDataParam(formCode, departmentCode, reportPeriodCode, year, month, null, null, null, null);
+        return new TransportDataParam(formCode, departmentCode, reportPeriodCode, year, month, null, null, null, null, false, null);
     }
 
     /**
@@ -112,12 +126,48 @@ public class TransportDataParam {
     }
 
 
+    public static class SAXHandler extends DefaultHandler {
+        private Map<String, Map<String, String>> values;
+        private Map<String, List<String>> tagAttrNames;
+
+        public SAXHandler(Map<String, List<String>> tagAttrNames) {
+            this.tagAttrNames = tagAttrNames;
+        }
+
+        public Map<String, Map<String, String>> getValues() {
+            return values;
+        }
+
+        @Override
+        public void startDocument() throws SAXException {
+            values = new HashMap<String, Map<String, String>>();
+            for (Map.Entry<String, List<String>> entry : tagAttrNames.entrySet()) {
+                values.put(entry.getKey(), new HashMap<String, String>());
+            }
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            for (Map.Entry<String, List<String>> entry : tagAttrNames.entrySet()) {
+                if (entry.getKey().equals(qName)) {
+                    for (String attrName: entry.getValue()) {
+                        values.get(qName).put(attrName, attributes.getValue(attrName));
+                    }
+                }
+            }
+        }
+    }
+
+    public static final String TAG_DOCUMENT = "Документ";
+    public static final String ATTR_PERIOD = "Период";
+    public static final String ATTR_YEAR = "ОтчетГод";
+
     /**
      * Параметры ТФ, получаемые из имени ТФ
      *
      * @param name Имя ТФ
      */
-    public static TransportDataParam valueOfDec(String name) {
+    public static TransportDataParam valueOfDec(String name, InputStream inputStream) {
         Integer declarationTypeId;
         String departmentCode ;
         String reportPeriodCode;
@@ -125,6 +175,7 @@ public class TransportDataParam {
         String guid = null;
         String kpp = null;
         Integer year = null;
+        boolean isFNS = false;
         Pattern pattern = Pattern.compile(NO_RASCHSV_PATTERN);
         if (name != null && name.toLowerCase().endsWith(NAME_EXTENSION_DEC)
                 & name.length() == NAME_LENGTH_QUARTER_DEC) {
@@ -149,7 +200,7 @@ public class TransportDataParam {
         } else {
             throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR_DEC, name));
         }
-        return new TransportDataParam(null, departmentCode, reportPeriodCode, year, null, kpp, asnuCode, guid, declarationTypeId);
+        return new TransportDataParam(null, departmentCode, reportPeriodCode, year, null, kpp, asnuCode, guid, declarationTypeId, isFNS, null);
     }
 
     /**
@@ -157,9 +208,9 @@ public class TransportDataParam {
      *
      * @param name Имя ТФ
      */
-    public static boolean isValidDecName(String name) {
+    public static boolean isValidDecName(String name, InputStream inputStream) {
         try {
-            TransportDataParam.valueOfDec(name);
+            TransportDataParam.valueOfDec(name, inputStream);
         } catch (IllegalArgumentException e) {
             return false;
         }
@@ -214,6 +265,14 @@ public class TransportDataParam {
 
     public String getKpp() {
         return kpp;
+    }
+
+    public boolean isFNS() {
+        return isFNS;
+    }
+
+    public Long getDeclarationDataId() {
+        return declarationDataId;
     }
 
     @Override
