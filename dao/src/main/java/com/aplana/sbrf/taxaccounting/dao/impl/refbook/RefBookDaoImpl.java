@@ -7,16 +7,34 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTree
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormLink;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TaxTypeCase;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -320,11 +338,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<Long> getDeletedRecords(Long refBookId, String filter) {
         PreparedStatementData ps = getRefBookSql2(refBookId, filter);
-        RefBook refBookClone = SerializationUtils.clone(get(refBookId));
         List<Long> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Long>() {
             @Override
             public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return rs.getLong("record_id");
+                return rs.getLong(RefBook.RECORD_ID_ALIAS);
             }
         });
         return records;
@@ -2741,8 +2758,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
 
-        ps.appendQuery("WITH tc AS (SELECT level as lvl, ");
-        ps.appendQuery(" CONNECT_BY_ROOT frb.ID as \"RECORD_ID\" ");
+        ps.appendQuery("WITH tc AS (SELECT level AS lvl, ");
+        ps.appendQuery(" CONNECT_BY_ROOT frb.ID AS ");
+		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+		ps.appendQuery(" ");
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", CONNECT_BY_ROOT frb.");
             ps.appendQuery(attribute.getAlias());
@@ -2789,13 +2808,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         appendSortClause(ps, refBook, sortAttribute, isSortAscending, "");
         ps.appendQuery(" FROM (");
         ps.appendQuery("SELECT DISTINCT ");
-        ps.appendQuery("RECORD_ID ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+		ps.appendQuery(" ");
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", ");
             ps.appendQuery(attribute.getAlias());
         }
-        ps.appendQuery(", (SELECT 1 FROM dual WHERE EXISTS (SELECT 1 FROM tc tc2 WHERE lvl > 1 AND tc2.record_id = tc.record_id)) AS " + RefBook.RECORD_HAS_CHILD_ALIAS);
+        ps.appendQuery(", (SELECT 1 FROM dual WHERE EXISTS (SELECT 1 FROM tc tc2 WHERE lvl > 1 AND tc2.");
+		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+		ps.appendQuery(" = tc.");
+		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+		ps.appendQuery(")) AS " + RefBook.RECORD_HAS_CHILD_ALIAS);
         ps.appendQuery(" FROM tc ");
         ps.appendQuery(") res ");
 

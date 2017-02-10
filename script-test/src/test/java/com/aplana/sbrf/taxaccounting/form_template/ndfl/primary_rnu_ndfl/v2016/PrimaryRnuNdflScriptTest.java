@@ -24,12 +24,14 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+
 import java.awt.*;
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.text.ParseException;
+
 import java.util.*;
 import java.util.List;
 
@@ -45,6 +47,8 @@ import static org.mockito.Mockito.*;
  * @author Andrey Drunk
  */
 public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
+    
+    public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(PrimaryRnuNdflScriptTest.class.getName());
 
     private static final int DEPARTMENT_ID = 1;
     private static final int DECLARATION_TEMPLATE_ID = 1022;
@@ -96,7 +100,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             public Long answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
                 NdflPerson ndflPerson = (NdflPerson) args[0];
-                //System.out.println(ndflPerson + " [" + ndflPerson.getFirstName() + "," + ndflPerson.getLastName() + "]");
+                LOGGER.info("save ndflPerson: "+ndflPerson + " [" + ndflPerson.getFirstName() + "," + ndflPerson.getLastName() + "]");
                 importedData.add(ndflPerson);
                 return (long) importedData.size();
             }
@@ -148,7 +152,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             }
         }).when(testHelper.getRefBookDataProvider()).updateRecordVersionWithoutLock(any(Logger.class), anyLong(), any(Date.class), any(Date.class), anyMap());
 
-
         when(testHelper.getRefBookDataProvider().createRecordVersionWithoutLock(any(Logger.class), any(Date.class), any(Date.class), anyList())).thenAnswer(new Answer<List<Long>>() {
             @Override
             public List<Long> answer(InvocationOnMock invocation) throws Throwable {
@@ -157,7 +160,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
                 return new ArrayList<Long>(ndflPersonMap.keySet());
             }
         });
-
 
         when(testHelper.getNdflPersonService().updatePersonRefBookReferences(anyList())).thenAnswer(new Answer<int[]>() {
             @Override
