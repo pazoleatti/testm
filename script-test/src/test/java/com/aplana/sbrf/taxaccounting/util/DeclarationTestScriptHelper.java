@@ -80,6 +80,8 @@ public class DeclarationTestScriptHelper {
     private RaschsvUplPrevOssService raschsvUplPrevOssService;
     private RaschsvVyplFinFbService raschsvVyplFinFbService;
 
+    private String importFileName = null;
+
     // Задаются из конкретного теста
 
     private InputStream importFileInputStream;
@@ -93,6 +95,13 @@ public class DeclarationTestScriptHelper {
      * Cписок источников получаемый из скрипта по событию com.aplana.sbrf.taxaccounting.model.FormDataEvent.GET_SOURCES
      */
     private FormSources sources;
+
+    public String getImportFileName() {
+        return importFileName;
+    }
+    public void setImportFileName(String importFileName) {
+        this.importFileName = importFileName;
+    }
 
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
@@ -326,6 +335,18 @@ public class DeclarationTestScriptHelper {
         if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
             bindings.put("ImportInputStream", importFileInputStream);
             bindings.put("importService", mockHelper.mockImportService());
+        }
+
+        if (formDataEvent == FormDataEvent.IMPORT
+                || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE
+                || formDataEvent == FormDataEvent.CHECK) {
+            String name;
+            if (importFileName == null || importFileName.isEmpty()) {
+                name = "test-file-name." + (formDataEvent == FormDataEvent.IMPORT ? "xlsm" : "rnu");
+            } else {
+                name = importFileName;
+            }
+            bindings.put("UploadFileName", name);
         }
 
         try {

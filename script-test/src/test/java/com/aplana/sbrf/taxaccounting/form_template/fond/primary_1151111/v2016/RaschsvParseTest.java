@@ -222,6 +222,53 @@ public class RaschsvParseTest extends ScriptTestBase {
         Assert.assertTrue(containLog("Период расчетных сведений Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц = \"'21'/'2016'\" в транспортном файле \"" + FILE_NAME + "\" не входит в отчетный период формы"));
     }
 
+    /**
+     * Тестирование разбора xml
+     * @throws IOException
+     */
+    @Test
+    public void parseTest() throws IOException {
+        initMock();
+        InputStream inputStream = RaschsvParseTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/primary_1151111/v2016/NO_RASCHSV_PARSE.xml");
+
+        Map<String, Object> params = new HashedMap<String, Object>();
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(1L);
+        params.put("declarationData", declarationData);
+
+        // Проверка соответствия числа узлов по их имени
+        Map<String, Integer> countNodes = new HashedMap<String, Integer>();
+        countNodes.put("ПерсСвСтрахЛиц", 10);
+        countNodes.put("УплПерОПС", 1);
+        countNodes.put("УплПерОМС", 1);
+        countNodes.put("УплПерОПСДоп", 10);
+        countNodes.put("УплПерДСО", 10);
+        countNodes.put("УплПерОСС", 1);
+        countNodes.put("ПревРасхОСС", 1);
+        countNodes.put("РасчСВ_ОПС_ОМС", 10);
+        countNodes.put("РасчСВ_ОСС.ВНМ", 1);
+        countNodes.put("РасхОССЗак", 1);
+        countNodes.put("ВыплФинФБ", 1);
+
+        countNodes.put("ПравТариф3.1.427", 1);
+        countNodes.put("ПравТариф5.1.427", 1);
+        countNodes.put("ПравТариф7.1.427", 1);
+        countNodes.put("СвПримТариф9.1.427", 1);
+        countNodes.put("СвПримТариф2.2.425", 1);
+        countNodes.put("СвПримТариф1.3.422", 1);
+
+        countNodes.put("СведПатент", 10);
+        countNodes.put("СвИноГражд", 10);
+        countNodes.put("СведОбуч", 10);
+        params.put("countNodes", countNodes);
+
+        testHelper.setImportFileInputStream(inputStream);
+        testHelper.setImportFileName(FILE_NAME);
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, params);
+
+        checkLogger();
+    }
+
     private static RaschsvItogVypl findByMonthAndCode(Collection<RaschsvItogVypl> list, String month, String code) {
         for (RaschsvItogVypl raschsvItogVypl : list) {
             if (month.equals(raschsvItogVypl.getMesyac()) && code.equals(raschsvItogVypl.getKodKatLic())) {
