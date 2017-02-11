@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.util.TestUtils.readFile;
@@ -108,6 +109,8 @@ public class DeclarationTestScriptHelper {
     private final ScriptTestMockHelper mockHelper;
 
     private StringWriter xmlStringWriter;
+
+    private Map<String, Object> calculateParams = new HashMap<String, Object>();
 
     public RefBookPersonService getRefBookPersonService() {
         return refBookPersonService;
@@ -251,6 +254,10 @@ public class DeclarationTestScriptHelper {
         getLogger().clear();
     }
 
+    public Map<String, Object> getCalculateParams() {
+        return calculateParams;
+    }
+
     /**
      * Выполнение части скрипта, связанного с указанным событием
      */
@@ -294,6 +301,11 @@ public class DeclarationTestScriptHelper {
         bindings.put("userInfo", new TAUserInfo());
         bindings.put("user", user);
         bindings.put("applicationVersion", "test-version");
+
+        bindings.put("calculateParams", calculateParams);
+
+
+
 
         bindings.put(DeclarationDataScriptParams.DOC_DATE, new Date());
 

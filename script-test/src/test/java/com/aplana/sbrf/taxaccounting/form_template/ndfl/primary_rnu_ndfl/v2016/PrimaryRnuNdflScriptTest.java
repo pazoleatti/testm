@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
@@ -175,6 +176,9 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
 
         testHelper.execute(FormDataEvent.CALCULATE);
+
+        Assert.assertTrue((Boolean) testHelper.getCalculateParams().get(DeclarationDataScriptParams.NOT_REPLACE_XML));
+
         checkLogger();
     }
 

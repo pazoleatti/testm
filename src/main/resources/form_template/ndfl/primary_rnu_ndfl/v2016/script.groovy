@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.PersonData
+import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 
 // com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
 import com.aplana.sbrf.taxaccounting.refbook.*
@@ -67,6 +68,9 @@ def calculate() {
     if (asnuId == null) {
         throw new ServiceException("Для декларации " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
     }
+
+    //выставляем параметр что скрипт не формирует новый xml-файл
+    calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
@@ -694,6 +698,9 @@ def findReportPeriodCode(reportPeriod) {
 //------------------ Import Data ----------------------
 
 void importData() {
+
+    //валидация по схеме
+    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
