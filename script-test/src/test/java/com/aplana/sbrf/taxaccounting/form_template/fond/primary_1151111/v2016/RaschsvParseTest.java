@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.form_template.fond.primary_1151111.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogStrahLic;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVypl;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVyplDop;
 import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -12,18 +15,18 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -52,6 +55,7 @@ public class RaschsvParseTest extends ScriptTestBase {
      */
     private static final FormDataKind KIND = FormDataKind.PRIMARY;
 
+    private static final Long DECLARATION_DATA_ID = 1L;
     private static final String FILE_NAME = "NO_RASCHSV_123_1234_7723643863123456789_20170802_guid1.xml";
 
     @Override
@@ -104,6 +108,8 @@ public class RaschsvParseTest extends ScriptTestBase {
     }
 
     public void initMock() {
+        Mockito.reset(testHelper.getRaschsvItogVyplService());
+
         RefBookDataProvider okvedDataRovider = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.OKVED.getId()))).thenReturn(okvedDataRovider);
         when(okvedDataRovider.getRecordsCount(any(Date.class), eq("CODE = '1234'"))).thenReturn(1);
@@ -215,5 +221,170 @@ public class RaschsvParseTest extends ScriptTestBase {
         Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок = \"20\" получателя доходов с СНИЛС \"112-233-445 90\" не найден в справочнике \"Коды документов, удостоверяющих личность\""));
         Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд = \"640\" получателя доходов с СНИЛС  \"112-233-445 90\" не найден в справочнике ОКСМ"));
         Assert.assertTrue(containLog("Период расчетных сведений Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц = \"'21'/'2016'\" в транспортном файле \"" + FILE_NAME + "\" не входит в отчетный период формы"));
+    }
+
+    /**
+     * Тестирование разбора xml
+     * @throws IOException
+     */
+    @Test
+    public void parseTest() throws IOException {
+        initMock();
+        InputStream inputStream = RaschsvParseTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/primary_1151111/v2016/NO_RASCHSV_PARSE.xml");
+
+        Map<String, Object> params = new HashedMap<String, Object>();
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(1L);
+        params.put("declarationData", declarationData);
+
+        // Проверка соответствия числа узлов по их имени
+        Map<String, Integer> countNodes = new HashedMap<String, Integer>();
+        countNodes.put("ПерсСвСтрахЛиц", 10);
+        countNodes.put("УплПерОПС", 1);
+        countNodes.put("УплПерОМС", 1);
+        countNodes.put("УплПерОПСДоп", 10);
+        countNodes.put("УплПерДСО", 10);
+        countNodes.put("УплПерОСС", 1);
+        countNodes.put("ПревРасхОСС", 1);
+        countNodes.put("РасчСВ_ОПС_ОМС", 10);
+        countNodes.put("РасчСВ_ОСС.ВНМ", 1);
+        countNodes.put("РасхОССЗак", 1);
+        countNodes.put("ВыплФинФБ", 1);
+
+        countNodes.put("ПравТариф3.1.427", 1);
+        countNodes.put("ПравТариф5.1.427", 1);
+        countNodes.put("ПравТариф7.1.427", 1);
+        countNodes.put("СвПримТариф9.1.427", 1);
+        countNodes.put("СвПримТариф2.2.425", 1);
+        countNodes.put("СвПримТариф1.3.422", 1);
+
+        countNodes.put("СведПатент", 10);
+        countNodes.put("СвИноГражд", 10);
+        countNodes.put("СведОбуч", 10);
+        params.put("countNodes", countNodes);
+
+        testHelper.setImportFileInputStream(inputStream);
+        testHelper.setImportFileName(FILE_NAME);
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, params);
+
+        checkLogger();
+    }
+
+    private static RaschsvItogVypl findByMonthAndCode(Collection<RaschsvItogVypl> list, String month, String code) {
+        for (RaschsvItogVypl raschsvItogVypl : list) {
+            if (month.equals(raschsvItogVypl.getMesyac()) && code.equals(raschsvItogVypl.getKodKatLic())) {
+                return raschsvItogVypl;
+            }
+        }
+
+        return null;
+    }
+
+    private static RaschsvItogVyplDop findByMonthAndTarif(Collection<RaschsvItogVyplDop> list, String month, String tarif) {
+        for (RaschsvItogVyplDop raschsvItogVyplDop : list) {
+            if (month.equals(raschsvItogVyplDop.getMesyac()) && tarif.equals(raschsvItogVyplDop.getTarif())) {
+                return raschsvItogVyplDop;
+            }
+        }
+
+        return null;
+    }
+
+    @Test
+    public void checkRaschsvItog() {
+        initMock();
+
+        InputStream inputStream = RaschsvParseTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/primary_1151111/v2016/NO_RASCHSV_Valid.xml");
+
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(DECLARATION_DATA_ID);
+
+        Map<String, Object> params = new HashedMap<String, Object>();
+        params.put("declarationData", declarationData);
+
+        testHelper.setImportFileInputStream(inputStream);
+        testHelper.setImportFileName(FILE_NAME);
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, params);
+
+        ArgumentCaptor<RaschsvItogStrahLic> argumentLic = ArgumentCaptor.forClass(RaschsvItogStrahLic.class);
+        ArgumentCaptor<Collection> argumentVupl = ArgumentCaptor.forClass(Collection.class);
+
+        verify(testHelper.getRaschsvItogVyplService(), Mockito.times(1)).insertItogStrahLic(argumentLic.capture());
+        verify(testHelper.getRaschsvItogVyplService(), Mockito.times(1)).insertItogVypl(argumentVupl.capture());
+
+        RaschsvItogStrahLic raschsvItogStrahLic = argumentLic.getValue();
+        Assert.assertEquals(DECLARATION_DATA_ID, raschsvItogStrahLic.getDeclarationDataId());
+
+        Collection<RaschsvItogVypl> vyplCollection = argumentVupl.getValue();
+        Assert.assertEquals(3, vyplCollection.size());
+
+        RaschsvItogVypl xo = findByMonthAndCode(vyplCollection, "01", "ХО");
+        Assert.assertNotNull(xo);
+        Assert.assertEquals(new BigDecimal(100), xo.getSumVypl());
+        Assert.assertEquals(new BigDecimal(0), xo.getVyplOps());
+        Assert.assertEquals(new BigDecimal(0), xo.getVyplOpsDog());
+        Assert.assertEquals(new BigDecimal(0), xo.getSumNachisl());
+
+        RaschsvItogVypl asb01 = findByMonthAndCode(vyplCollection, "01", "АСБ");
+        Assert.assertNotNull(asb01);
+        Assert.assertEquals(new BigDecimal(100), asb01.getSumVypl());
+        Assert.assertEquals(new BigDecimal(1000), asb01.getVyplOps());
+        Assert.assertEquals(new BigDecimal(10000), asb01.getVyplOpsDog());
+        Assert.assertEquals(new BigDecimal(100000), asb01.getSumNachisl());
+
+        RaschsvItogVypl asb02 = findByMonthAndCode(vyplCollection, "02", "АСБ");
+        Assert.assertNotNull(asb02);
+        Assert.assertEquals(new BigDecimal(200), asb02.getSumVypl());
+        Assert.assertEquals(new BigDecimal(2000), asb02.getVyplOps());
+        Assert.assertEquals(new BigDecimal(20000), asb02.getVyplOpsDog());
+        Assert.assertEquals(new BigDecimal(200000), asb02.getSumNachisl());
+
+        checkLoggerErrorOrWarn();
+    }
+
+    @Test
+    public void checkRaschsvItogDop() {
+        initMock();
+
+        InputStream inputStream = RaschsvParseTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/primary_1151111/v2016/NO_RASCHSV_Valid.xml");
+
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(DECLARATION_DATA_ID);
+
+        Map<String, Object> params = new HashedMap<String, Object>();
+        params.put("declarationData", declarationData);
+
+        testHelper.setImportFileInputStream(inputStream);
+        testHelper.setImportFileName(FILE_NAME);
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE, params);
+
+        ArgumentCaptor<RaschsvItogStrahLic> argumentLic = ArgumentCaptor.forClass(RaschsvItogStrahLic.class);
+        ArgumentCaptor<Collection> argumentVupl = ArgumentCaptor.forClass(Collection.class);
+
+        verify(testHelper.getRaschsvItogVyplService(), Mockito.times(1)).insertItogStrahLic(argumentLic.capture());
+        verify(testHelper.getRaschsvItogVyplService(), Mockito.times(1)).insertItogVyplDop(argumentVupl.capture());
+
+        RaschsvItogStrahLic raschsvItogStrahLic = argumentLic.getValue();
+        Assert.assertEquals(DECLARATION_DATA_ID, raschsvItogStrahLic.getDeclarationDataId());
+
+        Collection<RaschsvItogVyplDop> vyplCollection = argumentVupl.getValue();
+        Assert.assertEquals(3, vyplCollection.size());
+
+        RaschsvItogVyplDop xo = findByMonthAndTarif(vyplCollection, "01", "01");
+        Assert.assertNotNull(xo);
+        Assert.assertEquals(new BigDecimal(100), xo.getSumVypl());
+        Assert.assertEquals(new BigDecimal(0), xo.getSumNachisl());
+
+        RaschsvItogVyplDop asb01 = findByMonthAndTarif(vyplCollection, "01", "02");
+        Assert.assertNotNull(asb01);
+        Assert.assertEquals(new BigDecimal(100), asb01.getSumVypl());
+        Assert.assertEquals(new BigDecimal(1000), asb01.getSumNachisl());
+
+        RaschsvItogVyplDop asb02 = findByMonthAndTarif(vyplCollection, "02", "01");
+        Assert.assertNotNull(asb02);
+        Assert.assertEquals(new BigDecimal(200), asb02.getSumVypl());
+        Assert.assertEquals(new BigDecimal(2000), asb02.getSumNachisl());
+
+        checkLoggerErrorOrWarn();
     }
 }

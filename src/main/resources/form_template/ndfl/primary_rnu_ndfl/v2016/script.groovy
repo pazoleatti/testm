@@ -1915,9 +1915,6 @@ def checkDataCommon(
     if (msgErrDubl != "" || msgErrAbsent != "") {
         logger.warn(MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent);
     }
-
-    // Общ9 ИНП - проверка должна осуществляться в процессе загрузки
-    // todo https://jira.aplana.com/browse/SBRFNDFL-307
 }
 
 /**
