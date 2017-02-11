@@ -2541,6 +2541,9 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 // Коды категорий застрахованных лиц
 @Field def personCategoryCodeCache = []
 
+// Кэш для справочников
+@Field def refBookCache = [:]
+
 // Поля справочников
 @Field final String RF_CODE = "CODE"
 @Field final String RF_FOR_FOND = "FOR_FOND"
@@ -2568,8 +2571,7 @@ def checkRaschsv() {
     def mapConfigurationParam = getConfigurationParam()
 
     // Коды ОКТМО
-    def mapOktmoCode = getOKTMO()
-    def mapActualOktmoCode = getActualOKTMO()
+//    def mapActualOktmoCode = getActualOKTMO()
 
     // Коды тарифа плательщика
     def mapActualTariffPayerCode = getActualTariffPayerCode()
@@ -2626,11 +2628,12 @@ def checkRaschsv() {
                 // СвНП
                 if (documentChildNode.name == NODE_NAME_SV_NP) {
 
-                    // НПЮЛ
                     def sberbankInnXml = ""
                     def sVReorgYLFormXml = ""
                     def sVReorgYLInnXml = ""
                     def sVReorgYLKppXml = ""
+
+                    // НПЮЛ
                     documentChildNode.childNodes().each { NPYLNode ->
                         if (NPYLNode.name == NODE_NAME_NPYL) {
                             sberbankInnXml = NPYLNode.attributes()[NPYL_INNYL]
@@ -2652,14 +2655,14 @@ def checkRaschsv() {
                     def okvedCodeParam = mapOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
                     if (okvedCodeXml != okvedCodeParam) {
                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, SV_NP_OKVED].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, okvedCodeXml, "КПП = \"" + kppXml + "\""))
+                        logger.warn(sprintf(msgErrNotEquals, pathAttr, okvedCodeXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
                     }
 
                     // 2.1.4 Актуальность ОКВЭД
                     // При оценке актуальности значения справочника берутся НЕ на последний день отчетного периода, а на ТЕКУЩУЮ СИСТЕМНУЮ ДАТУ.
                     def okvedCodeActualParam = mapActualOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
                     if (okvedCodeParam != okvedCodeActualParam) {
-                        logger.warn("В настройках подразделений указан неактуальный ОКВЭД = \"" + okvedCodeParam + "\"")
+                        logger.warn("В настройках подразделений указан неактуальный ОКВЭД = \"" + okvedCodeParam + "\" с настройками подразделения")
                     }
 
                     // 2.1.5 Соответсвие ИНН ЮЛ Общим параметрам
@@ -2673,28 +2676,28 @@ def checkRaschsv() {
                     def kppParam = departmentParamIncomeRow?.KPP?.stringValue
                     if (kppXml != kppParam) {
                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NPYL_KPP].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, kppXml, "ИНН = \"" + sberbankInnXml + "\""))
+                        logger.warn(sprintf(msgErrNotEquals, pathAttr, kppXml, "ИНН = \"" + sberbankInnXml + "\" с настройками подразделения"))
                     }
 
                     // 2.1.7 Соответствие формы реорганизации
                     def sVReorgYLFormParam = mapReorgFormCode.get(departmentParamIncomeRow?.REORG_FORM_CODE?.referenceValue)
                     if (sVReorgYLFormXml != sVReorgYLFormParam) {
                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_FORM_REORG].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLFormXml, "КПП = \"" + kppXml + "\""))
+                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLFormXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
                     }
 
                     // 2.1.8 Соответствие ИНН реорганизованной организации
                     def sVReorgYLInnParam = departmentParamIncomeRow?.REORG_INN?.stringValue
                     if (sVReorgYLInnXml != sVReorgYLInnParam) {
                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_INNYL].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLInnXml, "КПП = \"" + kppXml + "\""))
+                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLInnXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
                     }
 
                     // 2.1.9 Соответствие КПП реорганизованной организации
                     def sVReorgYLKppParam = departmentParamIncomeRow?.REORG_KPP?.stringValue
                     if (sVReorgYLKppXml != sVReorgYLKppParam) {
                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_KPP].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLKppXml, "КПП = \"" + kppXml + "\""))
+                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLKppXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
                     }
                 } else if (documentChildNode.name == NODE_NAME_RASCHET_SV) {
                     // РасчетСВ
@@ -2705,16 +2708,16 @@ def checkRaschsv() {
 
                             // 2.2.1 Соответствие кода ОКТМО
                             def oktmoXml = raschetSvChildNode.attributes()[OBYAZ_PLAT_SV_OKTMO]
-                            def oktmoParam = mapOktmoCode.get(departmentParamIncomeRow?.OKTMO?.referenceValue)
-                            if (oktmoXml != oktmoParam) {
+                            def oktmoParam = getRefBookValue(REF_BOOK_OKTMO_ID, departmentParamIncomeRow?.OKTMO?.referenceValue)
+                            oktmoParam.each {key, value -> logger.info(key + " = " + value.toString())}
+                            if (oktmoXml != oktmoParam?.CODE?.stringValue) {
                                 def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_OBYAZ_PLAT_SV, OBYAZ_PLAT_SV_OKTMO].join(".")
-                                logger.warn(sprintf(msgErrNotEquals, pathAttr, oktmoXml, "КПП = \"" + kppXml + "\""))
+                                logger.warn(sprintf(msgErrNotEquals, pathAttr, oktmoXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
                             }
 
                             // 2.2.2 Актуальность ОКТМО
                             // При оценке актуальности значения справочника берутся НЕ на последний день отчетного периода, а на ТЕКУЩУЮ СИСТЕМНУЮ ДАТУ.
-                            def oktmoActualParam = mapActualOktmoCode.get(departmentParamIncomeRow?.OKTMO?.referenceValue)
-                            if (oktmoParam != oktmoActualParam) {
+                            if (oktmoParam != isActualRecordOKTMO(departmentParamIncomeRow?.OKTMO?.referenceValue)) {
                                 logger.warn("В настройках подразделений указан неактуальный ОКТМО = \"" + oktmoParam + "\"")
                             }
 
@@ -2968,6 +2971,23 @@ def getActualRefBook(def long refBookId) {
 }
 
 /**
+ * Получить все актуальные записи справочника по его идентификатору
+ * @param refBookId - идентификатор справочника
+ * @return - возвращает лист
+ */
+def getActualRefBookByRecordId(def long refBookId, def recordId) {
+    if (recordId == null) {
+        return [:]
+    }
+    def filter = "ID = $recordId"
+    def refBookList = getProvider(refBookId).getRecords(new Date(), null, filter, null)
+    if (refBookList == null || refBookList.size() == 0) {
+        throw new Exception("Ошибка при получении записей справочника " + refBookId)
+    }
+    return refBookList
+}
+
+/**
  * Получить "Коды видов доходов"
  * @return
  */
@@ -3066,17 +3086,15 @@ def getOKTMO() {
 }
 
 /**
- * Получить актальные "Коды ОКТМО"
+ * Получить актульные "Коды ОКТМО"
  * @return
  */
-def getActualOKTMO() {
-    if (oktmoCodeActualCache.size() == 0) {
-        def refBookMap = getActualRefBook(REF_BOOK_OKTMO_ID)
-        refBookMap.each { refBook ->
-            oktmoCodeActualCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
-        }
+def isActualRecordOKTMO(def recordId) {
+    def refBookMap = getActualRefBookByRecordId(REF_BOOK_OKTMO_ID, recordId)
+    refBookMap.each { refBook ->
+        return true
     }
-    return oktmoCodeActualCache
+    return false
 }
 
 /**

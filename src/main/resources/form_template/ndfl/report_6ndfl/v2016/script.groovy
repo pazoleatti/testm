@@ -38,8 +38,7 @@ switch (formDataEvent) {
 }
 
 // Коды, определяющие налоговый (отчётный) период
-//@Field final long REF_BOOK_PERIOD_CODE_ID = RefBook.Id.PERIOD_CODE.id
-@Field final long REF_BOOK_PERIOD_CODE_ID = 8
+@Field final long REF_BOOK_PERIOD_CODE_ID = RefBook.Id.PERIOD_CODE.id
 
 // Коды представления налоговой декларации по месту нахождения (учёта)
 @Field final long REF_BOOK_TAX_PLACE_TYPE_CODE_ID = RefBook.Id.TAX_PLACE_TYPE_CODE.id
