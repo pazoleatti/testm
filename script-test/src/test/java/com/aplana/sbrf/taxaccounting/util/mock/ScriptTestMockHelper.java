@@ -44,6 +44,8 @@ public interface ScriptTestMockHelper {
 
     NdflPersonService mockNdflPersonService();
 
+    RaschsvItogVyplService mockRaschsvItogVyplService();
+
     DataRowHelper getDataRowHelper();
 
     RefBookDataProvider getRefBookDataProvider();

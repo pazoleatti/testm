@@ -346,6 +346,11 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return ndflPersonService;
     }
 
+    @Override
+    public RaschsvItogVyplService mockRaschsvItogVyplService() {
+        return mock(RaschsvItogVyplService.class);
+    }
+
     // "Персонифицированные сведения о застрахованных лицах"
     @Override
     public RaschsvPersSvStrahLicService mockRaschsvPersSvStrahLicService() {

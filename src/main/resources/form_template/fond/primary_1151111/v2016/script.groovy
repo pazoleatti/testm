@@ -52,6 +52,9 @@ import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt422
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedObuch
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvReestrMdo
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvnpPodpisant
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVypl
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogStrahLic
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVyplDop;
 import groovy.transform.Field
 import groovy.transform.Memoized
 
@@ -1144,6 +1147,9 @@ void parseRaschsv() {
     // Сохранение Сведений о плательщике страховых взносов и Сведения о лице, подписавшем документ
     raschsvSvnpPodpisantService.insertRaschsvSvnpPodpisant(raschsvSvnpPodpisant)
 
+    // Расчет сводных показателей
+    raschSvItog(fileNode, declarationDataId)
+
     // Тестирование соответствия числа узлов
     if (binding.variables.containsKey("countNodes")) {
         if (countNodes.get(NODE_NAME_PERS_SV_STRAH_LIC) != testCntNodePersSvStrahLic) {
@@ -1717,6 +1723,137 @@ def checkFL(fileNode) {
             }
         }
     }
+}
+
+/**
+ * Сохраняет в базу запись "Сводные показатели формы"
+ *
+ * @param declarationDataId
+ * @return идентификатор записи
+ */
+def insertItogStrahLic(declarationDataId) {
+    RaschsvItogStrahLic raschsvItogStrahLic = new RaschsvItogStrahLic()
+    raschsvItogStrahLic.declarationDataId = declarationDataId
+    return raschsvItogVyplService.insertItogStrahLic(raschsvItogStrahLic)
+}
+
+/**
+ * Сохраняет в базу ."Сводные сведения о выплатах"
+ */
+def insertItogVypl(raschsvItogVyplSet) {
+    raschsvItogVyplService.insertItogVypl(raschsvItogVyplSet)
+}
+
+
+/**
+ * Сохраняет в базу ."Сводные сведения о выплатах"
+ */
+def insertItogVyplDop(raschsvItogVyplDopSet) {
+    raschsvItogVyplService.insertItogVyplDop(raschsvItogVyplDopSet)
+}
+
+/**
+ * Расчет сводных показателей
+ *
+ * @param fileNode корневой узел xml
+ */
+def raschSvItog(fileNode, declarationDataId) {
+    Long raschsvItogStrahLicId = insertItogStrahLic(declarationDataId)
+    raschSvItogMt(fileNode, raschsvItogStrahLicId)
+    raschSvItogDop(fileNode, raschsvItogStrahLicId)
+}
+
+/**
+ * Расчет данных раздела <Форма>."Сводные сведения о выплатах"
+ */
+def raschSvItogMt(fileNode, raschsvItogStrahLicId) {
+    Map<Tuple2, RaschsvItogVypl> groups = [:]
+
+    def vyplMk = fileNode?.
+        "$NODE_NAME_DOCUMENT"?.
+        "$NODE_NAME_RASCHET_SV"?.
+        "$NODE_NAME_PERS_SV_STRAH_LIC"?.
+        "$NODE_NAME_SV_VYPL_SVOPS"?.
+        "$NODE_NAME_SV_VYPL"?.
+        "$NODE_NAME_SV_VYPL_MK"
+
+    // Расчет данных раздела <Форма>."Сводные сведения о выплатах"
+    vyplMk.each { vypl ->
+        def month = vypl."@Месяц" as String
+        def codeCat = vypl."@КодКатЛиц" as String
+        def sumVypl = (vypl."@СумВыпл" as String ?:"0").toBigDecimal()
+        def sumVyplOps = (vypl."@ВыплОПС" as String ?:"0").toBigDecimal()
+        def sumVyplOpsDog = (vypl."@ВыплОПСДог" as String ?:"0").toBigDecimal()
+        def sumNachisl = (vypl."@НачислСВ" as String ?:"0").toBigDecimal()
+
+        def groupKey = new Tuple2(month, codeCat)
+        def groupValue = groups.get(groupKey)
+
+        if (groupValue != null) {
+            groupValue.kolFl += 1
+            groupValue.sumVypl += sumVypl
+            groupValue.vyplOps += sumVyplOps
+            groupValue.vyplOpsDog += sumVyplOpsDog
+            groupValue.sumNachisl += sumNachisl
+        } else {
+            groupValue = new RaschsvItogVypl()
+            groupValue.mesyac = month
+            groupValue.kodKatLic = codeCat
+            groupValue.kolFl = 1
+            groupValue.sumVypl = sumVypl
+            groupValue.vyplOps = sumVyplOps
+            groupValue.vyplOpsDog = sumVyplOpsDog
+            groupValue.sumNachisl = sumNachisl
+            groupValue.raschsvItogStrahLicId = raschsvItogStrahLicId
+
+            groups.put(groupKey, groupValue)
+        }
+    }
+
+    insertItogVypl(groups.values())
+}
+
+/**
+ * Расчет данных раздела <Форма>."Сводные сведения о выплатах по доп. тарифам"
+ */
+def raschSvItogDop(fileNode, raschsvItogStrahLicId) {
+    Map<Tuple2, RaschsvItogVyplDop> groups = [:]
+
+    def vyplDop = fileNode?.
+        "$NODE_NAME_DOCUMENT"?.
+        "$NODE_NAME_RASCHET_SV"?.
+        "$NODE_NAME_PERS_SV_STRAH_LIC"?.
+        "$NODE_NAME_SV_VYPL_SVOPS"?.
+        "$NODE_NAME_VYPL_SV_DOP"?.
+        "$NODE_NAME_VYPL_SV_DOP_MT"
+
+    vyplDop.each { vypl ->
+        def month = vypl."@Месяц" as String
+        def tarif = vypl."@Тариф" as String
+        def vyplSv = (vypl."@ВыплСВ" as String ?:"0").toBigDecimal()
+        def nachislSv = (vypl."@НачислСВ" as String ?:"0").toBigDecimal()
+
+        def groupKey = new Tuple2(month, tarif)
+        def groupValue = groups.get(groupKey)
+
+        if (groupValue != null) {
+            groupValue.kolFl += 1
+            groupValue.sumVypl += vyplSv
+            groupValue.sumNachisl += nachislSv
+        } else {
+            groupValue = new RaschsvItogVyplDop()
+            groupValue.mesyac = month
+            groupValue.tarif = tarif
+            groupValue.kolFl = 1
+            groupValue.sumVypl = vyplSv
+            groupValue.sumNachisl = nachislSv
+            groupValue.raschsvItogStrahLicId = raschsvItogStrahLicId
+
+            groups.put(groupKey, groupValue)
+        }
+    }
+
+    insertItogVyplDop(groups.values())
 }
 
 /**
