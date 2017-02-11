@@ -56,6 +56,7 @@ public class Relation implements Serializable {
     /** КПП */
     private String kpp;
 
+
     /**
      * Статус НФ
      */
@@ -65,7 +66,6 @@ public class Relation implements Serializable {
      * Идентификатор АСНУ
      */
     private Long asnuId;
-
 
 
     /**************  Параметры для легкой версии ***************/

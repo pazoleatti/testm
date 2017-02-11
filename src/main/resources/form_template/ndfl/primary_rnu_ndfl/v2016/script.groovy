@@ -380,7 +380,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             return;
         } else {
             RefBookRecord refBookRecord = createIdentityDocRecord(person);
-            List<Long> ids = getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
+            List<Long> ids = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
             Map<String, RefBookValue> values = refBookRecord.getValues();
             values.put(RefBook.RECORD_ID_ALIAS, ids.first());
             identityDocRecords.add(values);
@@ -402,6 +402,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             minimalPrior?.put("INC_REP", "1");
         }
 
+        //Обновление признака включается в отчетность
         for (Map<String, RefBookValue> identityDocsValues : identityDocRecords) {
             getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, person.getPersonId(), versionFrom, null, identityDocsValues);
         }
