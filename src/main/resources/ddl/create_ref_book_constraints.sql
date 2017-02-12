@@ -32,6 +32,7 @@ alter table ref_book_country add constraint pk_ref_book_country primary key (id)
 alter table ref_book_doc_type add constraint pk_ref_book_doc_type primary key (id);
 alter table ref_book_tax_place_type add constraint pk_ref_book_tax_place_type primary key (id);
 alter table ref_book_signatory_mark add constraint pk_ref_book_signatory_mark primary key (id);
+alter table ref_book_person_category add constraint pk_ref_book_person_category primary key(id);
 
 -- foreign keys
 --alter table ref_book_oktmo add constraint ref_book_oktmo_fk_parent_id foreign key (parent_id) references ref_book_oktmo(id);
