@@ -104,10 +104,10 @@ testCntNodeSvObuch = 0
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
-        parseRaschsv()
+        importData()
         break
     case FormDataEvent.CHECK:
-        checkRaschsv()
+        checkData()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         def writer = scriptSpecificReportHolder.getFileOutputStream()
@@ -1097,7 +1097,13 @@ class TestDataHolder {
 @Field final SPRAV_NOMER = "Номер"
 @Field final SPRAV_DATA = "Дата"
 
-void parseRaschsv() {
+/**
+ * Разбор xml-файла 1151111 с сохранением в БД
+ */
+void importData() {
+
+    //валидация по схеме
+    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
@@ -2685,7 +2691,7 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 @Field final String RF_FOR_FOND = "FOR_FOND"
 @Field final String RF_FOR_OPS_OMS = "FOR_OPS_OMS"
 
-def checkRaschsv() {
+def checkData() {
     def msgErrNotEquals = "Не совпадает значение %s = \"%s\" плательщика страховых взносов %s."
 
     // Параметры подразделения
