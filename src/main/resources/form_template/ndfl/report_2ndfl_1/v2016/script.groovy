@@ -269,7 +269,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
         listKnf.each { np ->
             // Порядковый номер физического лица
             if (isCorrectionPeriod()) {
-                nomspr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, "PERSON_ID = ${np.personId}", null).get(0).num
+                nomspr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "PERSON_ID = ${np.personId}", null).get(0).num
             }
             Документ(КНД: KND,
                     ДатаДок: dateDoc,
@@ -783,8 +783,7 @@ def createForm() {
     if (departmentReportPeriod.correctionDate != null) {
         def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
 
-        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
-        println declarations
+        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
         def declarationsForRemove = []
         declarations.each { declaration ->
             def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id
@@ -798,7 +797,6 @@ def createForm() {
             }
         }
         declarations.removeAll(declarationsForRemove)
-        println declarations
         declarations.each { declaration ->
             pairKppOktmoList << new PairKppOktmo(Integer.valueOf(declaration.kpp), declaration.oktmo)
         }
@@ -873,7 +871,7 @@ def createForm() {
 def getPrevDepartmentReportPeriod(departmentReportPeriod) {
     def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
     if (prevDepartmentReportPeriod == null) {
-        prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(departmentId, reportPeriodId)
+        prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
     }
     return prevDepartmentReportPeriod
 }

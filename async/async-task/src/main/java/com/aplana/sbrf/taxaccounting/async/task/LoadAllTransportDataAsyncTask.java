@@ -15,7 +15,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 /**
- * Реализация таска "Загрузка ТФ из каталога загрузки"
+ * Реализация таска "Загрузка файлов"
  * @author Lhaziev
  */
 public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
@@ -75,16 +75,16 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Загрузка ТФ из каталога загрузки";
+        return "Загрузка файлов";
     }
 
     @Override
     protected String getNotificationMsg(Map<String, Object> params) {
-        return "Загрузка ТФ из каталога загрузки завершена";
+        return "Загрузка файлов завершена";
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        return "Произошла непредвиденная ошибка при загрузке ТФ из каталога загрузки";
+        return "Произошла непредвиденная ошибка при загрузке файлов";
     }
 }

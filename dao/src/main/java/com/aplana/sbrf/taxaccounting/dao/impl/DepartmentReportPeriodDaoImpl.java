@@ -373,14 +373,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Override
     public DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId) {
         try {
-            return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("departmentId", departmentId).
+                    addValue("reportPeriodId", reportPeriodId);
+            return getNamedParameterJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
                             "drp.is_active, drp.is_balance_period, drp.correction_date from department_report_period drp " +
                             "where drp.REPORT_PERIOD_ID = :reportPeriodId and drp.DEPARTMENT_ID = :departmentId and " +
                             "drp.CORRECTION_DATE in (select max(CORRECTION_DATE) from department_report_period where " +
                             "REPORT_PERIOD_ID = :reportPeriodId and DEPARTMENT_ID = :departmentId and CORRECTION_DATE " +
                             "not in (select max(CORRECTION_DATE) from department_report_period where " +
-                            "REPORT_PERIOD_ID = :reportPeriodId and :departmentId));",
-                    new Object[]{departmentId, reportPeriodId}, mapper);
+                            "REPORT_PERIOD_ID = :reportPeriodId and DEPARTMENT_ID = :departmentId))",
+                    params, mapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

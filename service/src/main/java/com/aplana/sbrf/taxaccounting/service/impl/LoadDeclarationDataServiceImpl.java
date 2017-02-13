@@ -15,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
@@ -212,11 +211,6 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                         fileName, FormDataEvent.IMPORT_TRANSPORT_FILE, null, dataFile, attachFileType);
             } finally {
                 IOUtils.closeQuietly(inputStream);
-            }
-
-            // Если при выполнении скрипта возникли фатальные ошибки, то
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceException("При выполнении загрузки произошли ошибки");
             }
         } finally {
             // Снимаем блокировку
