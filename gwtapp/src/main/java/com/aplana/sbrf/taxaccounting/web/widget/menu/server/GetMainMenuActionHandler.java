@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyTokens;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.lock.client.LockTokens;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
@@ -209,8 +208,6 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_CONF)) {
                     MenuItem templateMenu = new MenuItem("Настройки", "", null);
                     adminMenuItem.getSubMenu().add(templateMenu);
-                    templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", NUMBER_SIGN
-                            + AdminConstants.NameTokens.adminPage));
                     templateMenu.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
                             + DeclarationTemplateTokens.declarationTemplateList));
                     templateMenu.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN
