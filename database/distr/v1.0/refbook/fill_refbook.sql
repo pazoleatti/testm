@@ -4,6 +4,12 @@ prompt async_task_type
 prompt event
 @@event;
 
+prompt audit_form_type
+@@audit_form_type;
+
+prompt configuration_email
+@@configuration_email;
+
 prompt ref_book_tax_place_type
 @@ref_book_tax_place_type;
 
@@ -50,8 +56,8 @@ prompt ref_book_deduction_type
 prompt ref_book_income_type
 @@ref_income_type;
 
-prompt ref_book_tariff_payer
-@@ref_book_tariff_payer;
+prompt ref_book_asnu
+@@ref_asnu;
 
 prompt ref_book_okved
 @@ref_okved;
