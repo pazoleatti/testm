@@ -379,7 +379,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                             "drp.CORRECTION_DATE in (select max(CORRECTION_DATE) from department_report_period where " +
                             "REPORT_PERIOD_ID = :reportPeriodId and DEPARTMENT_ID = :departmentId and CORRECTION_DATE " +
                             "not in (select max(CORRECTION_DATE) from department_report_period where " +
-                            "REPORT_PERIOD_ID = :reportPeriodId and :departmentId));",
+                            "REPORT_PERIOD_ID = :reportPeriodId and DEPARTMENT_ID = :departmentId))",
                     new Object[]{departmentId, reportPeriodId}, mapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
