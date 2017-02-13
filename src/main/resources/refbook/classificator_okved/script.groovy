@@ -1,9 +1,9 @@
-package refbook.classificator_eco_activities
+package refbook.classificator_okved
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * Cкрипт справочника «Общероссийский классификатор видов экономической деятельности» (id = 34)
+ * Cкрипт справочника «Общероссийский классификатор видов экономической деятельности» (id = 925)
  *
  * @author Bulat Kinzyabulatov
  */

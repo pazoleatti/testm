@@ -411,7 +411,7 @@ class Main {
 //          'classificator_code_724_2_1'   : 102, // удалили из бд
             'classificator_country'        : 10,
             'classificator_currency'       : 15,
-            'classificator_eco_activities' : 34,
+            'classificator_okved' : 34,
             'classificator_income'         : 28,
             'classificator_oktmo'          : 96,
             'classificator_outcome'        : 27,
