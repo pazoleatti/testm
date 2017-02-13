@@ -1487,7 +1487,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceException();
+                throw new ServiceException("При выполнении загрузки произошли ошибки");
             }
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
