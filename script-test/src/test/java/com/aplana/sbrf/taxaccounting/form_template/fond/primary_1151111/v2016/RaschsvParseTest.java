@@ -3,12 +3,14 @@ package com.aplana.sbrf.taxaccounting.form_template.fond.primary_1151111.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogStrahLic;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVypl;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVyplDop;
 import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -19,6 +21,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -142,6 +145,9 @@ public class RaschsvParseTest extends ScriptTestBase {
         when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000114'"))).thenReturn(0);
         when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000115'"))).thenReturn(0);
         when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000116'"))).thenReturn(0);
+
+        DeclarationService declarationService = mock(DeclarationService.class);
+        Mockito.doThrow(new IllegalArgumentException()).when(declarationService).validateDeclaration(any(DeclarationData.class), any(TAUserInfo.class), any(Logger.class), any(File.class));
     }
 
     @Test
@@ -155,6 +161,8 @@ public class RaschsvParseTest extends ScriptTestBase {
 
         Map<String, Object> params = new HashedMap<String, Object>();
         params.put("declarationData", declarationData);
+        File dataFile = null;
+        params.put("dataFile", dataFile);
 
         testHelper.setImportFileInputStream(inputStream);
         testHelper.setImportFileName(FILE_NAME);
@@ -175,6 +183,8 @@ public class RaschsvParseTest extends ScriptTestBase {
         declarationData.setId(1L);
 
         params.put("declarationData", declarationData);
+        File dataFile = null;
+        params.put("dataFile", dataFile);
 
         testHelper.setImportFileInputStream(inputStream);
         testHelper.setImportFileName(FILE_NAME);
@@ -185,11 +195,9 @@ public class RaschsvParseTest extends ScriptTestBase {
         Assert.assertTrue(containLog("КПП в имени не совпадает с КПП внутри файла"));
         Assert.assertTrue(containLog("Файл.Документ.СвНП.ОКВЭД = \"0000\" не найден в справочнике ОКВЭД"));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПЮП.ИННЮЛ = \"7723643860\" для организации - плательщика страховых взносов в транспортном файле \"" + FILE_NAME + "\""));
-        Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПЮП.КПП = \"1234567890\" для организации - плательщика страховых взносов с ИНН \"7723643860\""));
         Assert.assertTrue(containLog("Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ реорганизованной организации для организации плательщика страховых взносов с ИНН 7723643860"));
         Assert.assertTrue(containLog("Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП реорганизованной организации для организации плательщика страховых взносов с ИНН 7723643860"));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ = \"\" реорганизованной организации для организации плательщика страховых взносов с ИНН 7723643860"));
-        Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП = \"1234567891\" реорганизованной организации для организации плательщика страховых взносов с ИНН 7723643860"));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПИП.ИННФЛ = \"500100732250\" индивидуального предпринимателя - плательщика страховых взносов в транспортном файле \""+ FILE_NAME + "\""));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.СвНП.НПФЛ.ИННФЛ = \"500100732250\" физического лица - плательщика страховых взносов в транспортном файле \"" + FILE_NAME + "\""));
         Assert.assertTrue(containLog("В справочнике отсутствует Файл.Документ.СвНП.НПФЛ.СвНПФЛ.АдрМЖРФ = \"'590'/'591'/'592'/'593'/'594'\" для ФЛ с ИНН \"500100732250\""));
@@ -228,7 +236,7 @@ public class RaschsvParseTest extends ScriptTestBase {
      * @throws IOException
      */
     @Test
-    public void parseTest() throws IOException {
+    public void importDataTest() throws IOException {
         initMock();
         InputStream inputStream = RaschsvParseTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/primary_1151111/v2016/NO_RASCHSV_PARSE.xml");
 
@@ -236,6 +244,9 @@ public class RaschsvParseTest extends ScriptTestBase {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(1L);
         params.put("declarationData", declarationData);
+
+        File dataFile = null;
+        params.put("dataFile", dataFile);
 
         // Проверка соответствия числа узлов по их имени
         Map<String, Integer> countNodes = new HashedMap<String, Integer>();
@@ -301,6 +312,8 @@ public class RaschsvParseTest extends ScriptTestBase {
 
         Map<String, Object> params = new HashedMap<String, Object>();
         params.put("declarationData", declarationData);
+        File dataFile = null;
+        params.put("dataFile", dataFile);
 
         testHelper.setImportFileInputStream(inputStream);
         testHelper.setImportFileName(FILE_NAME);
@@ -353,6 +366,8 @@ public class RaschsvParseTest extends ScriptTestBase {
 
         Map<String, Object> params = new HashedMap<String, Object>();
         params.put("declarationData", declarationData);
+        File dataFile = null;
+        params.put("dataFile", dataFile);
 
         testHelper.setImportFileInputStream(inputStream);
         testHelper.setImportFileName(FILE_NAME);

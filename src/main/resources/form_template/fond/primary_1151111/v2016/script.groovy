@@ -104,12 +104,15 @@ testCntNodeSvObuch = 0
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
-        parseRaschsv()
+        println "!IMPORT_TRANSPORT_FILE!"
+        importData()
         break
     case FormDataEvent.CHECK:
-        checkRaschsv()
+        println "!CHECK!"
+        checkData()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        println "!CREATE_SPECIFIC_REPORT!"
         def writer = scriptSpecificReportHolder.getFileOutputStream()
         def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
         def workbook = getSpecialReportTemplate()
@@ -162,6 +165,8 @@ switch (formDataEvent) {
 // Коды категорий застрахованных лиц
 @Field final long REF_BOOK_PERSON_CATEGORY_ID = RefBook.Id.PERSON_CATEGORY.id
 
+@Field final REPORT_PERIOD_TYPE_ID = 8
+
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
@@ -187,14 +192,17 @@ switch (formDataEvent) {
 
 @Field final String PERSONAL_DATA_TOTAL_ROW_LABEL = "Всего за последние три месяца расчетного (отчетного) периода"
 
-// Идентификатор декларации
-//@Field final declarationId = declarationData.getId()
+// Персонифицированные данные о ФЛ
+@Field def raschsvPersSvStrahLic = null
 
 // Находит в базе данных RaschsvPersSvStrahLic
 RaschsvPersSvStrahLic getrRaschsvPersSvStrahLic() {
-    def declarationId = declarationData.getId()
-    def params = scriptSpecificReportHolder.getSubreportParamValues()
-    raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
+    if (raschsvPersSvStrahLic == null) {
+        def declarationId = declarationData.getId()
+        def params = scriptSpecificReportHolder.getSubreportParamValues()
+        raschsvPersSvStrahLic = raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
+    }
+    return raschsvPersSvStrahLic
 }
 
 // Находит в базе данных список List RaschsvPersSvStrahLic
@@ -226,8 +234,16 @@ RaschsvUplPrevOss getRaschsvUplPrevOss() {
 
 def fillGeneralList(final XSSFWorkbook workbook) {
     // TODO необходимо реализовать классы соответствующие данным и dao
-    /*def sheet = workbook.getSheet(COMMON_SHEET)
-    def xmlStream = declarationService.getXmlStream(declarationData.getId())
+    def sheet = workbook.getSheet(COMMON_SHEET)
+    def nomCorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def period = getProvider(REPORT_PERIOD_TYPE_ID).getRecordData(reportPeriod.dictTaxPeriodId)?.CODE?.value
+    def reportYear = reportPeriod.taxPeriod.year
+    def refDepartmentParam = getRefDepartment(declarationData.departmentId)
+    def refDepartmentParamRow = getRefDepartmentParamTable(refDepartmentParam?.id?.value)
+    def taxOrganCode = refDepartmentParamRow?.TAX_ORGAN_CODE?.value
+    def raschsvSvnpPodpisant = raschsvSvnpPodpisantService.findRaschsvSvnpPodpisant(declarationData.id)
+    /*def xmlStream = declarationService.getXmlStream(declarationData.getId())
     def slurper = new XmlSlurper()
     def Файл = slurper.parse(xmlStream)
     sheet.getRow(3).getCell(1).setCellValue(Файл.@ИдФайл.toString())
@@ -239,16 +255,39 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     sheet.getRow(11).getCell(1).setCellValue(Файл.Документ.@Период.toString())
     sheet.getRow(12).getCell(1).setCellValue(Файл.Документ.@ОтчетГод.toString())
     sheet.getRow(13).getCell(1).setCellValue(Файл.Документ.@КодНО.toString())
-    sheet.getRow(14).getCell(1).setCellValue(Файл.Документ.@ПоМесту.toString())
+    sheet.getRow(14).getCell(1).setCellValue(Файл.Документ.@ПоМесту.toString())*/
+    sheet.getRow(3).getCell(1).setCellValue(declarationData.fileName)
+    sheet.getRow(4).getCell(1).setCellValue(applicationVersion)
+    sheet.getRow(5).getCell(1).setCellValue("5.01")
+    sheet.getRow(8).getCell(1).setCellValue("1151111")
+    sheet.getRow(9).getCell(1).setCellValue(new Date().format("dd.MM.yyyy"))
+    sheet.getRow(10).getCell(1).setCellValue(nomCorr)
+    sheet.getRow(11).getCell(1).setCellValue(period)
+    sheet.getRow(12).getCell(1).setCellValue(reportYear)
+    sheet.getRow(13).getCell(1).setCellValue(taxOrganCode)
+    // TODO: Сделать получение данных соответствующих Файл.Документ.@ПоМесту
+    sheet.getRow(14).getCell(1).setCellValue("")
+    sheet.getRow(18).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpOkved)
+    sheet.getRow(19).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpTlph)
+    sheet.getRow(21).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpNaimOrg)
+    sheet.getRow(22).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpInnyl)
+    sheet.getRow(23).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpKpp)
+    sheet.getRow(25).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpSvReorgForm)
+    sheet.getRow(26).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpSvReorgInnyl)
+    sheet.getRow(27).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpSvReorgKpp)
+    sheet.getRow(30).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantPrPodp)
+    sheet.getRow(31).getCell(1).setCellValue(raschsvSvnpPodpisant.familia + " " + raschsvSvnpPodpisant.imya + " " + raschsvSvnpPodpisant.otchestvo)
+    sheet.getRow(33).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantNaimDoc)
+    sheet.getRow(34).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantNaimOrg)
     // TODO заменить на выгрузку из БД
-    sheet.getRow(18).getCell(1).setCellValue(Файл.Документ.СвНП.@ОКВЭД.toString())
+   /* sheet.getRow(18).getCell(1).setCellValue(Файл.Документ.СвНП.@ОКВЭД.toString())
     sheet.getRow(19).getCell(1).setCellValue(Файл.Документ.СвНП.@Тлф.toString())
     sheet.getRow(21).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.@НаимОрг.toString())
     sheet.getRow(22).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.@ИННЮЛ.toString())
     sheet.getRow(23).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.@КПП.toString())
     sheet.getRow(25).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.@ФормРеорг.toString())
     sheet.getRow(26).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.@ИННЮЛ.toString())
-    sheet.getRow(27).getCell(1).setCellValue(Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.@КПП.toString())
+    sheet.getRow(27).getCell(1).setCellValue(Файл.Документ.СвНП.AAНПЮЛ.СвРеоргЮЛ.@КПП.toString())
     sheet.getRow(30).getCell(1).setCellValue(Файл.Документ.Подписант.@ПрПодп.toString())
     sheet.getRow(31).getCell(1).setCellValue(Файл.Документ.Подписант.@Фамилия.toString() + " " + Файл.Документ.Подписант.@Имя.toString() + " " + Файл.Документ.Подписант.@Отчество.toString())
     sheet.getRow(33).getCell(1).setCellValue(Файл.Документ.Подписант.СвПред.@НаимДок.toString())
@@ -353,8 +392,8 @@ def fillCellsOfRaschsvPersSvStrahLicRow(final RaschsvPersSvStrahLic raschsvPersS
 //  Создает строки для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
 int fillRaschSvVyplat(final int startIndex, final RaschsvPersSvStrahLic raschsvPersSvStrahLic, final XSSFWorkbook workbook) {
     def raschsvSvVypl = raschsvPersSvStrahLic.raschsvSvVypl
-    def raschsvSvVyplMkList = raschsvSvVypl.raschsvSvVyplMkList
-    def raschsvSvVyplMkListSize = raschsvSvVyplMkList.size()
+    def raschsvSvVyplMkList = raschsvSvVypl?.raschsvSvVyplMkList
+    def raschsvSvVyplMkListSize = raschsvSvVyplMkList?.size()
     def sheet = workbook.getSheet(PERSONAL_DATA)
     sheet.shiftRows(startIndex, sheet.getLastRowNum(), raschsvSvVyplMkListSize + 1)
     for (int i = 0; i < raschsvSvVyplMkListSize; i++) {
@@ -421,8 +460,8 @@ def fillCellsOfRaschSvVyplat(final RaschsvSvVypl raschsvSvVypl, final XSSFRow ro
 // Заполняет таблицу "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
 int fillRaschSvVyplatDop(final int startIndex, final RaschsvPersSvStrahLic raschsvPersSvStrahLic, final XSSFWorkbook workbook) {
     def raschsvSvVyplDop = raschsvPersSvStrahLic.raschsvVyplSvDop
-    def raschsvSvVyplDopMtList = raschsvSvVyplDop.raschsvVyplSvDopMtList
-    def raschsvSvVyplDopMtListSize = raschsvSvVyplDopMtList.size()
+    def raschsvSvVyplDopMtList = raschsvSvVyplDop?.raschsvVyplSvDopMtList
+    def raschsvSvVyplDopMtListSize = raschsvSvVyplDopMtList?.size()
     def sheet = workbook.getSheet(PERSONAL_DATA)
     for (int i = 0; i < raschsvSvVyplDopMtListSize; i++) {
         def row = sheet.createRow(i + startIndex)
@@ -676,6 +715,41 @@ def formatDate(final date, final pattern) {
     formatter.format(date)
 }
 
+
+/**
+ * Получить Параметры подразделения по сборам, взносам
+ * @return
+ */
+def getRefDepartment(def departmentId) {
+    if (departmentParam == null) {
+        println departmentId
+        def departmentParamList = getProvider(950).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
+}
+
+/**
+ * Получить Параметры подразделения по сборам, взносам (таблица)
+ * @param departmentParamId
+ * @return
+ */
+def getRefDepartmentParamTable(def departmentParamId) {
+    if (departmentParamTable == null) {
+        println departmentParamId
+        println declarationData.kpp
+        def filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
+        def departmentParamTableList = getProvider(951).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParamTable = departmentParamTableList.get(0)
+    }
+    return departmentParamTable
+}
 
 /****************************************************************************
  *  Тестовые данные                                                         *
@@ -1097,7 +1171,13 @@ class TestDataHolder {
 @Field final SPRAV_NOMER = "Номер"
 @Field final SPRAV_DATA = "Дата"
 
-void parseRaschsv() {
+/**
+ * Разбор xml-файла 1151111 с сохранением в БД
+ */
+void importData() {
+
+    //валидация по схеме
+    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
@@ -1422,7 +1502,6 @@ def checkPaymentJL(fileNode) {
 
     documentSvNP?."$NODE_NAME_NPYL".each { npul ->
         def documentInn = npul?."@ИННЮЛ" as String
-        def documentKpp = npul?."@КПП" as String
 
         // 1.2.1 Поиск ОКВЭД в справочнике
         if (documentOkved && !isExistsOkved(documentOkved)) {
@@ -1432,11 +1511,6 @@ def checkPaymentJL(fileNode) {
         // 1.2.2 Корректность ИНН ЮЛ
         if (INN_JUR_LENGTH != documentInn.length() || !ScriptUtils.checkControlSumInn(documentInn)) {
             logger.warn(CHECK_PAYMENT_INN, documentInn, UploadFileName)
-        }
-
-        // 1.2.3 Корректность КПП ЮЛ
-        if (documentKpp && !isExistsKpp(documentKpp)) {
-            logger.warn(CHECK_PAYMENT_KPP, documentKpp, documentInn)
         }
 
         npul?."$NODE_NAME_SV_REORG_YL".each { reorg ->
@@ -1459,11 +1533,6 @@ def checkPaymentJL(fileNode) {
             // 1.2.6 Корректность ИНН реорганизованной организации
             if (INN_JUR_LENGTH != documentReorgInn.length() || !ScriptUtils.checkControlSumInn(documentReorgInn)) {
                 logger.warn(CHECK_PAYMENT_REORG_INN_VALUE, documentReorgInn, documentInn)
-            }
-
-            // 1.2.7 Корректность КПП реорганизованной организации
-            if (documentReorgKpp && !isExistsKpp(documentReorgKpp)) {
-                logger.warn(CHECK_PAYMENT_REORG_KPP_VALUE, documentReorgKpp, documentInn)
             }
         }
     }
@@ -2685,7 +2754,7 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 @Field final String RF_FOR_FOND = "FOR_FOND"
 @Field final String RF_FOR_OPS_OMS = "FOR_OPS_OMS"
 
-def checkRaschsv() {
+def checkData() {
     def msgErrNotEquals = "Не совпадает значение %s = \"%s\" плательщика страховых взносов %s."
 
     // Параметры подразделения

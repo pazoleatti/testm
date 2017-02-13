@@ -130,7 +130,6 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
     @Override
     public RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, Map<String, Object> subreportParams) {
-        try {
             MapSqlParameterSource sqlParams = new MapSqlParameterSource();
             String query = new String(SQL_SELECT_PERSONS);
             sqlParams.addValue(RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID, declarationDataId);
@@ -139,28 +138,28 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 if (paramValue != null) {
                     if (alias.equalsIgnoreCase(SUBREPORT_PARAM_FAMILIA_ALIAS)) {
                         query += " AND " + RaschsvPersSvStrahLic.COL_FAMILIA + " = :" + RaschsvPersSvStrahLic.COL_FAMILIA;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_FAMILIA, (String) paramValue);
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_FAMILIA, paramValue);
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_IMYA_ALIAS)) {
                         query += " AND " + RaschsvPersSvStrahLic.COL_IMYA + " = :" + RaschsvPersSvStrahLic.COL_IMYA;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, (String) paramValue);
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, paramValue);
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_OTCHESTVO_ALIAS)) {
                         query += " AND " + RaschsvPersSvStrahLic.COL_OTCHESTVO + " = :" + RaschsvPersSvStrahLic.COL_OTCHESTVO;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, (String) paramValue);
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, paramValue);
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_SNILS_ALIAS)) {
                         query += " AND " + RaschsvPersSvStrahLic.COL_SNILS + " = :" + RaschsvPersSvStrahLic.COL_SNILS;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, (String) paramValue);
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, paramValue);
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_INN_ALIAS)) {
                         query += " AND " + RaschsvPersSvStrahLic.COL_INNFL + " = :" + RaschsvPersSvStrahLic.COL_INNFL;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_INNFL, (String) paramValue);
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_INNFL, paramValue);
                     }
                 }
             }
             List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
             raschsvPersSvStrahLicList.add(getNamedParameterJdbcTemplate().queryForObject(query, sqlParams, new RaschsvPersSvStrahLicRowMapper()));
+            if (raschsvPersSvStrahLicList.size() != 1) {
+                throw new EmptyResultDataAccessException("Количество найденых записей не равно 1", 1);
+            }
             return findSvVyplAndVyplSvDopByPersons(raschsvPersSvStrahLicList).get(0);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
     }
 
     /**
