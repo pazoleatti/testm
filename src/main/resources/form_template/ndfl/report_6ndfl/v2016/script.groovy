@@ -663,10 +663,11 @@ def createForm() {
 def getPrevDepartmentReportPeriod(departmentReportPeriod) {
     def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
     if (prevDepartmentReportPeriod == null) {
-        prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(departmentId, reportPeriodId)
+        prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
     }
     return prevDepartmentReportPeriod
 }
+
 
 def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
     ndflPersonsGroupedByKppOktmo.each { npGroup ->
