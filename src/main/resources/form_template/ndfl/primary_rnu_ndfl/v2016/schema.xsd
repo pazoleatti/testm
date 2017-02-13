@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1251"?>
-<!-- edited with XMLSpy v2007 (http://www.altova.com) by Ovchinnikova-EW (SBRF) -->
+<!-- edited with XMLSpy v2011 rel. 2 (http://www.altova.com) by TeaM DJiNN (TeaM DJiNN) -->
 <!-- Версия 2.1. от 08.12.2011 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:element name="Файл">
@@ -451,6 +451,11 @@ GUID</xs:documentation>
 														<xs:documentation>Сумма налога удержанная</xs:documentation>
 													</xs:annotation>
 												</xs:attribute>
+												<xs:attribute name="НИминусНУ" type="xs:integer" use="optional">
+													<xs:annotation>
+														<xs:documentation>Разница НИ и НУ</xs:documentation>
+													</xs:annotation>
+												</xs:attribute>
 												<xs:attribute name="ДолгНП" type="xs:integer" use="optional">
 													<xs:annotation>
 														<xs:documentation>Сумма налога, не удержанная налоговым агентом</xs:documentation>
@@ -515,7 +520,7 @@ GUID</xs:documentation>
 												</xs:attribute>
 												<xs:attribute name="УведТип" use="required">
 													<xs:annotation>
-														<xs:documentation>Признак дохода</xs:documentation>
+														<xs:documentation>Тип уведомления, подтверждающего право на налоговый вычет</xs:documentation>
 													</xs:annotation>
 													<xs:simpleType>
 														<xs:restriction base="xs:string">
