@@ -107,7 +107,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         result.add(new BaseWeigthCalculator<PersonData>(1) {
             @Override
             public double calc(PersonData a, PersonData b) {
-                return compareString(a.getCitizenship(), b.getCitizenship());
+                return compareNumber(a.getCitizenshipId(), b.getCitizenshipId());
             }
         });
 
@@ -119,7 +119,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 if (!result) {
                     return 0D;
                 }
-                return compareString(a.getAsnu(), b.getAsnu());
+                return compareNumber(a.getAsnuId(), b.getAsnuId());
             }
         });
 
@@ -168,7 +168,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         result.add(new BaseWeigthCalculator<PersonData>(10) {
             @Override
             public double calc(PersonData a, PersonData b) {
-                boolean result = equalsNullSafe(prepareStr(a.getDocumentType()), prepareStr(b.getDocumentType()));
+                boolean result = equalsNullSafe(a.getDocumentTypeId(), b.getDocumentTypeId());
                 if (!result) {
                     return 0D;
                 }
@@ -176,11 +176,77 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             }
         });
 
-        //weithMap.add("address", 1); //Адрес в РФ Одновременно поля <Адрес РФ> равны соответствующим полям  ЗСФЛ."Адрес места жительства в Российской Федерации"
-        //weithMap.add("address_foreign", 1); //Адрес в стране регистрации, Одновременно поля <Адрес Ино> равны соответствующим полям  ЗСФЛ."Адрес за пределами Российской Федерации "
-        //weithMap.add("ДУЛ", 1); //<Признак ОПС> = ЗСФЛ."ИНН в Российской Федерации"
-        //weithMap.add("ДУЛ", 1); //<Признак ОПС> = ЗСФЛ."ИНН в Российской Федерации"
-        //weithMap.add("ДУЛ", 1); //<Признак ОПС> = ЗСФЛ."ИНН в Российской Федерации"
+        /**
+         * Адрес в РФ
+         */
+        result.add(new BaseWeigthCalculator<PersonData>(1) {
+            @Override
+            public double calc(PersonData a, PersonData b) {
+
+                boolean result = equalsNullSafeStr(a.getRegionCode(), b.getRegionCode());
+                if (!result) {
+                    return 0D;
+                }
+
+                result = equalsNullSafeStr(a.getPostalCode(), b.getPostalCode());
+                if (!result) {
+                    return 0D;
+                }
+
+                result = equalsNullSafeStr(a.getDistrict(), b.getDistrict());
+                if (!result) {
+                    return 0D;
+                }
+
+                result = equalsNullSafeStr(a.getCity(), b.getCity());
+                if (!result) {
+                    return 0D;
+                }
+
+                result = equalsNullSafeStr(a.getLocality(), b.getLocality());
+                if (!result) {
+                    return 0D;
+                }
+
+                result = equalsNullSafeStr(a.getStreet(), b.getStreet());
+                if (!result) {
+                    return 0D;
+                }
+
+                result = equalsNullSafeStr(a.getHouse(), b.getHouse());
+                if (!result) {
+                    return 0D;
+                }
+
+                result = equalsNullSafeStr(a.getBuild(), b.getBuild());
+                if (!result) {
+                    return 0D;
+                }
+
+                result = equalsNullSafeStr(a.getAppartment(), b.getAppartment());
+                if (!result) {
+                    return 0D;
+                }
+
+                return weigth;
+            }
+        });
+
+        //адрес ино
+        result.add(new BaseWeigthCalculator<PersonData>(1) {
+            @Override
+            public double calc(PersonData a, PersonData b) {
+
+                boolean result = equalsNullSafe(a.getCountryId(), b.getCountryId());
+                if (!result) {
+                    return 0D;
+                }
+                return compareString(a.getAddressIno(), b.getAddressIno());
+            }
+        });
+
+
+
         return result;
     }
 
