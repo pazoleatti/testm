@@ -20,9 +20,9 @@ import java.util.regex.Pattern
  * Created by lhaziev on 09.02.2017.
  */
 switch (formDataEvent) {
- case FormDataEvent.IMPORT_TRANSPORT_FILE:
-    importTF()
-    break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTF()
+        break
 }
 
 public class SAXHandler extends DefaultHandler {
@@ -101,8 +101,8 @@ def importTF() {
         declarationTypeId = 100;
         String departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim();
         Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
-        if (formDepartment) {
-            logger.error("Не удалось определить подразделение")
+        if (formDepartment == null) {
+            logger.error("Не удалось определить подразделение \"%s\"", departmentCode)
             return
         }
         departmentId = formDepartment != null ? formDepartment.getId() : null;
