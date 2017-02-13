@@ -1176,7 +1176,7 @@ class TestDataHolder {
  */
 void importData() {
 
-    //валидация по схеме
+    // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
     if (logger.containsLevel(LogLevel.ERROR)) {

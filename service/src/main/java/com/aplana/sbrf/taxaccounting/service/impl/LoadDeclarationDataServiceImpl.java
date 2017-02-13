@@ -183,7 +183,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
 
     @Override
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                                      String fileName, File dataFile, AttachFileType attachFileType) {
+                                      String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declarationData.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         DeclarationType declarationType = declarationTemplate.getType();
@@ -208,7 +208,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             // Скрипт загрузки ТФ + прикладываем файл к НФ
             try {
                 declarationDataService.importDeclarationData(logger, userInfo, declarationData.getId(), inputStream,
-                        fileName, FormDataEvent.IMPORT_TRANSPORT_FILE, null, dataFile, attachFileType);
+                        fileName, FormDataEvent.IMPORT_TRANSPORT_FILE, null, dataFile, attachFileType, createDateFile);
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }

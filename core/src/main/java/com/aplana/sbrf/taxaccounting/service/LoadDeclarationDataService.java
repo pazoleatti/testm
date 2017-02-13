@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,8 @@ public interface LoadDeclarationDataService {
      * @param fileName
      * @param dataFile
      * @param attachFileType
+     * @param createDateFile
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                               String fileName, File dataFile, AttachFileType attachFileType);
+                               String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile);
 }

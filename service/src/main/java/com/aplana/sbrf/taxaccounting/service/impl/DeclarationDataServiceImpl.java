@@ -1415,7 +1415,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile, AttachFileType fileType) {
+    public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream,
+                                      String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
+                                      AttachFileType fileType, Date createDateFile) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
         try {
             DeclarationData declarationData = get(declarationDataId, userInfo);
@@ -1445,7 +1447,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         stateLogger.updateState("Сохранение XML-файла в базе данных");
                     }
 
-                    fileUuid = blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", new Date());
+                    createDateFile = createDateFile == null ? new Date() : createDateFile;
+                    fileUuid = blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", createDateFile);
 
                     reportService.deleteDec(declarationData.getId());
                     reportService.createDec(declarationData.getId(), fileUuid, DeclarationDataReportType.XML_DEC);
