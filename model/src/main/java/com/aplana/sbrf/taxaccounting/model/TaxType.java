@@ -91,7 +91,7 @@ public enum TaxType {
         if (this.equals(DEAL)) {
             return "уведомления";
         } else {
-            return "декларации";
+            return "налоговой формы";
         }
     }
 

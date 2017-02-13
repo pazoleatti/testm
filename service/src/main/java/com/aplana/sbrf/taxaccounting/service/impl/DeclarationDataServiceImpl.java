@@ -323,6 +323,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException();
         } else {
             logger.info("Проверка завершена, ошибок не обнаружено");
+            if (State.CREATED.equals(dd.getState())) {
+                // Переводим в состояние подготовлено
+                declarationDataDao.setStatus(id, State.PREPARED);
+            }
         }
     }
 
@@ -860,11 +864,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             virtualizer.setReadOnly(false);
             params.put(JRParameter.REPORT_VIRTUALIZER, virtualizer);
             Connection connection = ((DataSource) applicationContext.getBean("dataSource")).getConnection();
-            try {
-                return JasperFillManager.fillReport(jasperTemplate, params, connection);
-            } finally {
-                connection.close();
-            }
+            return JasperFillManager.fillReport(jasperTemplate, params, connection);
         } catch (Exception e) {
             throw new ServiceException("Невозможно заполнить отчет", e);
         }
@@ -1541,12 +1541,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             return JasperFillManager.fillReport(inputStream, parameters, connection);
         } catch (JRException e) {
             throw new ServiceException("Ошибка при вычислении отчета!", e);
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                LOG.warn("Ошибка при попытке закрыть соединение с БД!", e);
-            }
         }
     }
 

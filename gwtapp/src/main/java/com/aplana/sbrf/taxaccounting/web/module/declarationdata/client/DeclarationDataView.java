@@ -95,7 +95,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     private LinkButton printToXml, printToExcel;
 
-    private Timer timerExcel, timerXML, timerPDF, timerAccept, timerSpecific;
+    private Timer timerExcel, timerXML, timerPDF, timerAccept, timerSpecific, timerCheck;
     private boolean isVisiblePDF;
 
 	@Inject
@@ -168,6 +168,16 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             }
         };
 
+        timerCheck = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerReport(DeclarationDataReportType.CHECK_DEC, true);
+                } catch (Exception e) {
+                }
+            }
+        };
+
         timerSpecific = new Timer() {
             @Override
             public void run() {
@@ -183,6 +193,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         timerPDF.cancel();
         timerAccept.cancel();
         timerSpecific.cancel();
+        timerCheck.cancel();
 	}
 
     @Override
@@ -373,22 +384,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @UiHandler("viewPdf")
     public void onViewPdfButton(ClickEvent event){
-        if (isVisiblePDF)
+        if (isVisiblePDF) {
             getUiHandlers().viewReport(false, DeclarationDataReportType.PDF_DEC);
-        //getUiHandlers().viewPdf(false);
+        }
     }
-/*
-	@UiHandler("downloadExcelButton")
-	public void onDownloadExcelButton(ClickEvent event){
-        getUiHandlers().viewReport(false, DeclarationDataReportType.EXCEL_DEC);
-		//getUiHandlers().downloadExcel();
-	}
-
-
-	@UiHandler("downloadXmlButton")
-	public void onDownloadAsLegislatorButton(ClickEvent event){
-		getUiHandlers().downloadXml();
-	}*/
 
 	@UiHandler("infoAnchor")
 	void onInfoButtonClicked(ClickEvent event) {
@@ -434,11 +433,14 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 viewPdf.setVisible(isVisiblePDF);
             }
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
-            if (isLoad) {
+            if (!isLoad) {
                 getUiHandlers().revealPlaceRequest();
                 timerAccept.cancel();
-            } else {
-
+            }
+        } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
+            if (!isLoad) {
+                getUiHandlers().revealPlaceRequest();
+                timerCheck.cancel();
             }
         }
     }
@@ -459,6 +461,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
             timerAccept.scheduleRepeating(10000);
             timerAccept.run();
+        } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
+            timerCheck.scheduleRepeating(10000);
+            timerCheck.run();
         }
     }
 
@@ -472,6 +477,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             timerPDF.cancel();
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
             timerAccept.cancel();
+        } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
+            timerCheck.cancel();
         } else if (type.isSubreport()) {
             timerSpecific.cancel();
         }

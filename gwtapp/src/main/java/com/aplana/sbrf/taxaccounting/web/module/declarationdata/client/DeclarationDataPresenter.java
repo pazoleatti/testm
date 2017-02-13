@@ -501,7 +501,8 @@ public class DeclarationDataPresenter
                                 }
                             });
                         }
-					}
+                        onTimerReport(DeclarationDataReportType.CHECK_DEC, false);
+                    }
 				}, this));
 	}
 

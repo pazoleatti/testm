@@ -133,8 +133,8 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	private void canAccept(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Принять декларацию можно только если она еще не принята
-		if (!declaration.getState().equals(State.CREATED)) {
-			throw new AccessDeniedException("Декларация уже принята");
+		if (declaration.getState().equals(State.ACCEPTED)) {
+			throw new AccessDeniedException("Налоговая форма уже принята");
 		}
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
@@ -152,7 +152,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Отменить принятие декларации можно только если она принята
 		if (!declaration.getState().equals(State.ACCEPTED)) {
-			throw new AccessDeniedException("Декларация не принята");
+			throw new AccessDeniedException("Налоговая форма не принята");
 		}
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
@@ -170,7 +170,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Удалять декларацию можно только если она не принята
 		if (declaration.getState().equals(State.ACCEPTED)) {
-			throw new AccessDeniedException("Декларация принята");
+			throw new AccessDeniedException("Налоговая форма принята");
 		}
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
@@ -187,7 +187,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Обновлять декларацию можно только если она не принята
 		if (declaration.getState().equals(State.ACCEPTED)) {
-			throw new AccessDeniedException("Декларация принята");
+			throw new AccessDeniedException("Налоговая форма принята");
 		}
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
