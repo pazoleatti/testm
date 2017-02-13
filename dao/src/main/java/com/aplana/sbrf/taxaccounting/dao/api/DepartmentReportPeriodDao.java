@@ -89,7 +89,8 @@ public interface DepartmentReportPeriodDao {
     DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId);
 
     /**
-     * Предпоследний отчетный период подразделения для комбинации отчетный период-подразделение
+     * Предпоследний отчетный период подразделения для комбинации отчетный период-подразделение.
+     * Если предпоследний отчетный период не является корректировочным возвращается null
      */
     DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId);
 
