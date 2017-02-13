@@ -104,6 +104,8 @@ public class TestScriptHelper {
     private FiasRefBookService fiasRefBookService;
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
+    // Сервис "Сводные сведения о выплатах"
+    private RaschsvItogVyplService raschsvItogVyplService;
 
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
@@ -174,6 +176,7 @@ public class TestScriptHelper {
         declarationService = mockHelper.mockDeclarationService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
+        raschsvItogVyplService = mockHelper.mockRaschsvItogVyplService();
         fiasRefBookService = mockHelper.mockFiasRefBookService();
         raschsvPersSvStrahLicService = mockHelper.mockRaschsvPersSvStrahLicService();
         raschsvObyazPlatSvService = mockHelper.mockRaschsvObyazPlatSvService();
@@ -343,6 +346,8 @@ public class TestScriptHelper {
         bindings.put("ndflPersonService", ndflPersonService);
         // Фиас адреса
         bindings.put("fiasRefBookService", fiasRefBookService);
+        // Сводные сведения о выплатах
+        bindings.put("raschsvItogVyplService", raschsvItogVyplService);
 
 
         for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
@@ -479,6 +484,10 @@ public class TestScriptHelper {
 
     public DepartmentReportPeriodService getDepartmentReportPeriodService() {
         return departmentReportPeriodService;
+    }
+
+    public RaschsvItogVyplService getRaschsvItogVyplService() {
+        return raschsvItogVyplService;
     }
 
     /**

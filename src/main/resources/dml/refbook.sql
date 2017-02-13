@@ -1,3 +1,4 @@
+
 ALTER TABLE ref_book DISABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_attribute_id;
 ALTER TABLE ref_book_attribute DISABLE CONSTRAINT ref_book_attr_fk_ref_book_id;
@@ -64,7 +65,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (93,'Виды налоговых форм',0,0,1,null,'FORM_TYPE');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (94,'Типы налоговых форм',0,0,1,null,'FORM_KIND');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (95,'Системные роли',1,0,1,null, 'SEC_ROLE');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (96,'Общероссийский классификатор территорий муниципальных образований (ОКТМО)',1,1,1,null, 'REF_BOOK_OKTMO');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (96,'Общероссийский классификатор территорий муниципальных образований (ОКТМО)',1,0,1,null, 'REF_BOOK_OKTMO');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (97,'Типы акций',1,0,0,null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (100,'Эмитенты',1,0,0,null);
 
@@ -603,6 +604,10 @@ insert into ref_book (id, name, visible, type, read_only, region_attribute_id,ta
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9401, 940,'Код','CODE',1,1,null,null,1,null,20,1,1,null,null,0,20);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9402, 940,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,1000);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9403, 940,'Уровень кода','LEV',1,3,null,null,1,null,6,1,0,null,null,0,1);
+
+insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (941,'Коды категорий застрахованных лиц',1,0,0,null,'REF_BOOK_PERSON_CATEGORY',0);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9411, 941,'Код','CODE',1,1,null,null,1,null,6,1,1,null,null,0,4);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9412, 941,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,2000);
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (950,'Параметры подразделения по НДФЛ',0,0,0,null,'REF_BOOK_NDFL');
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (951,'Параметры подразделения по НДФЛ (таблица)',0,0,0,null,'REF_BOOK_NDFL_DETAIL');

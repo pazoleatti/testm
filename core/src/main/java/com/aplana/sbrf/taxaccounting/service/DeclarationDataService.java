@@ -122,6 +122,18 @@ public interface DeclarationDataService {
 	 */
     void accept(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
+    /**
+     * Метод передающий управление на проверку декларации сторонней утилите
+     * @param userInfo
+     * @param declarationData
+     * @param logger
+     * @param operation - не используется
+     * @param isErrorFatal
+     * @param xmlFile
+     * @param stateLogger
+     */
+    public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+                                    FormDataEvent operation, File xmlFile, LockStateLogger stateLogger);
 
     /**
      * Отмена принятия декларации

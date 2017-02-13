@@ -9,9 +9,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -73,6 +75,9 @@ public class RaschsvDaoTest {
 
     @Autowired
     private RaschsvSvnpPodpisantDao raschsvSvnpPodpisantDao;
+
+    @Autowired
+    private RaschsvItogVyplDao raschsvItogVyplDao;
 
     // Идентификатор декларации
     private static final Long DECLARATION_ID_EXIST = 1L;
@@ -711,5 +716,43 @@ public class RaschsvDaoTest {
         raschsvSvnpPodpisant.setPodpisantNaimOrg("1");
 
         assertNotNull(raschsvSvnpPodpisantDao.insertRaschsvSvnpPodpisant(raschsvSvnpPodpisant));
+    }
+
+    @Test
+    public void testRaschsvItog() {
+        RaschsvItogStrahLic raschsvItogStrahLic = new RaschsvItogStrahLic();
+        raschsvItogStrahLic.setDeclarationDataId(DECLARATION_ID_EXIST);
+        Long strahLicId = raschsvItogVyplDao.insertItogStrahLic(raschsvItogStrahLic);
+        Assert.notNull(strahLicId);
+
+        RaschsvItogVypl raschsvItogVypl = new RaschsvItogVypl();
+        raschsvItogVypl.setRaschsvItogStrahLicId(strahLicId);
+        raschsvItogVypl.setMesyac("01");
+        raschsvItogVypl.setKodKatLic("ABC");
+        raschsvItogVypl.setKolFl(10L);
+        raschsvItogVypl.setSumVypl(new BigDecimal(10));
+        raschsvItogVypl.setVyplOps(new BigDecimal(11));
+        raschsvItogVypl.setVyplOpsDog(new BigDecimal(12));
+        raschsvItogVypl.setSumNachisl(new BigDecimal(13));
+
+        Assert.isTrue(raschsvItogVyplDao.insertItogVypl(Arrays.asList(raschsvItogVypl)).length > 0);
+    }
+
+    @Test
+    public void testRaschsvItogDop() {
+        RaschsvItogStrahLic raschsvItogStrahLic = new RaschsvItogStrahLic();
+        raschsvItogStrahLic.setDeclarationDataId(DECLARATION_ID_EXIST);
+        Long strahLicId = raschsvItogVyplDao.insertItogStrahLic(raschsvItogStrahLic);
+        Assert.notNull(strahLicId);
+
+        RaschsvItogVyplDop raschsvItogVyplDop = new RaschsvItogVyplDop();
+        raschsvItogVyplDop.setRaschsvItogStrahLicId(strahLicId);
+        raschsvItogVyplDop.setMesyac("01");
+        raschsvItogVyplDop.setTarif("01");
+        raschsvItogVyplDop.setKolFl(1L);
+        raschsvItogVyplDop.setSumVypl(new BigDecimal(10L));
+        raschsvItogVyplDop.setSumNachisl(new BigDecimal(10L));
+
+        Assert.isTrue(raschsvItogVyplDao.insertItogVyplDop(Arrays.asList(raschsvItogVyplDop)).length > 0);
     }
 }

@@ -2,15 +2,12 @@ package com.aplana.sbrf.taxaccounting.form_template.ndfl.consolidated_rnu_ndfl.v
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
@@ -19,18 +16,15 @@ import org.mockito.stubbing.Answer;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
  * Тесты скрипта для формы РНУ-НДФЛ Консолидированная
+ *
  * @author Andrey Drunk
  */
-public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
+public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     private static final int DEPARTMENT_ID = 1;
     private static final int DECLARATION_TEMPLATE_ID = 1022;
@@ -60,15 +54,14 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
         return getDefaultScriptTestMockHelper(ConsolidatedRnuNdflScriptTest.class);
     }
 
-    @After
-    public void resetMock() {
-        reset(testHelper.getRefBookFactory());
-    }
-
-    @Before
-    public void mockService() {
-        //mock сервисов для получения тестовых наборов данных
-    }
+    //@After
+    //public void resetMock() {
+    //reset(testHelper.getRefBookFactory());
+    //}
+    //@Before
+    //public void mockService() {
+    //mock сервисов для получения тестовых наборов данных
+    //}
 
     @Test
     public void checkTest() {
@@ -77,20 +70,10 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
     }
 
     @Test
-    public void calcTest() throws Exception {
-        //TODO заготовка тестов формирования xml, и проверка с помощью xpath
-        testHelper.execute(FormDataEvent.CALCULATE);
-        // testHelper.getLogger().info("%s", testHelper.getXmlStringWriter() + "");
-        assertNotNull(testHelper.getXmlStringWriter());
+    public void calculateTest() throws Exception {
 
-        //Проверяем XML
-        assertEquals("100500", xpath("//*[local-name()='Файл']/@имя"));
 
-        checkLogger();
-    }
-
-    @Test
-    public void calcCompose() throws Exception {
+        when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
 
         //mock service
         when(testHelper.getDeclarationService().getDeclarationSourcesInfo(any(DeclarationData.class),
@@ -103,14 +86,21 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
             }
         });
 
-       //declarationService.getDeclarationSourcesInfo(declarationData, false, false, null, userInfo, logger);
+        //declarationService.getDeclarationSourcesInfo(declarationData, false, false, null, userInfo, logger);
 
-        testHelper.execute(FormDataEvent.COMPOSE);
+        testHelper.execute(FormDataEvent.CALCULATE);
+
+
+        assertEquals("1", xpath("//*[local-name()='Файл']/@имя"));
+
         checkLogger();
+
+
     }
 
+
     @Test
-    public void calcGetSources() throws Exception {
+    public void getSourcesTest() throws Exception {
         testHelper.execute(FormDataEvent.GET_SOURCES);
         checkLogger();
     }
@@ -121,9 +111,27 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase{
     //    checkLogger();
     //}
 
-    private Relation createRelation(){
+    private Relation createRelation() {
         Relation relation = new Relation();
         return relation;
+    }
+
+
+    private Map<Long, Map<String, RefBookValue>> createRefBook() {
+        Map<Long, Map<String, RefBookValue>> map = new HashMap<Long, Map<String, RefBookValue>>();
+        for (int i = 0; i < 5; i++) {
+            map.put(Long.valueOf(i), createRefBookMock(i));
+        }
+        return map;
+    }
+
+    private Map<String, RefBookValue> createRefBookMock(long id) {
+        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+        result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+        result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "foo"));
+        result.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(new Random().nextInt(1000))));
+
+        return result;
     }
 
 

@@ -86,6 +86,16 @@ public abstract class ScriptTestBase {
     }
 
     /**
+     * Проверка логгера на наличие ошибок
+     */
+    protected void checkLoggerErrorOrWarn() {
+        if (testHelper.getLogger().containsLevel(LogLevel.ERROR) || testHelper.getLogger().containsLevel(LogLevel.WARNING)) {
+            printLog();
+        }
+        Assert.assertFalse("Logger contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+    }
+
+    /**
      * Файл для импорта из Excel-файлов (из интерфейса)
      */
     protected InputStream getImportXlsInputStream() {

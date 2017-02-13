@@ -109,8 +109,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private ReportService reportService;
     @Autowired
-    private IfrsDataService ifrsDataService;
-    @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private PeriodService reportPeriodService;
@@ -213,6 +211,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 						oktmo != null
 								? ", ОКТМО: \"" + oktmo + "\""
 								: "",
+                        asunId != null
+                                ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
+                                : "",
                         fileName != null
                                 ? ", Имя файла: \"" + fileName + "\""
                                 : "")
@@ -310,7 +311,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LOG.info(String.format("Проверка данных декларации/уведомления %s", id));
         DeclarationData dd = declarationDataDao.get(id);
         Logger scriptLogger = new Logger();
-        Logger validateLogger = new Logger();
         try {
             lockStateLogger.updateState("Проверка форм-источников");
             checkSources(dd, logger, userInfo);
@@ -711,6 +711,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             exchangeParams = new HashMap<String, Object>();
         }
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(DeclarationDataScriptParams.NOT_REPLACE_XML, false);
+        exchangeParams.put("calculateParams", params);
 
         File xmlFile = null;
         Writer fileWriter = null;
@@ -737,47 +740,54 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 IOUtils.closeQuietly(fileWriter);
             }
 
-            //Получение имени файла записанного в xml
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            SAXHandler handler = new SAXHandler(new HashMap<String, String>(){{
-                put(TAG_FILE, ATTR_FILE_ID);
-                put(TAG_DOCUMENT, ATTR_DOC_DATE);
-            }});
-            saxParser.parse(xmlFile, handler);
-            String decName = handler.getValues().get(TAG_FILE);
-            Date decDate = getFormattedDate(handler.getValues().get(TAG_DOCUMENT));
-            if (decDate == null)
-                decDate = docDate;
+            boolean notReplaceXml = false;
+            if (params.containsKey(DeclarationDataScriptParams.NOT_REPLACE_XML) && params.get(DeclarationDataScriptParams.NOT_REPLACE_XML) != null) {
+                notReplaceXml = (Boolean)params.get(DeclarationDataScriptParams.NOT_REPLACE_XML);
+            }
+            if (!notReplaceXml) {
+                //Получение имени файла записанного в xml
+                SAXParserFactory factory = SAXParserFactory.newInstance();
+                SAXParser saxParser = factory.newSAXParser();
+                SAXHandler handler = new SAXHandler(new HashMap<String, String>() {{
+                    put(TAG_FILE, ATTR_FILE_ID);
+                    put(TAG_DOCUMENT, ATTR_DOC_DATE);
+                }});
+                saxParser.parse(xmlFile, handler);
+                String decName = handler.getValues().get(TAG_FILE);
+                Date decDate = getFormattedDate(handler.getValues().get(TAG_DOCUMENT));
+                if (decDate == null)
+                    decDate = docDate;
 
-            //Архивирование перед сохраннеием в базу
-            File zipOutFile = null;
-            try {
-                zipOutFile = File.createTempFile("xml", ".zip");
-                FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
-                ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-                ZipEntry zipEntry = new ZipEntry(decName+".xml");
-                zos.putNextEntry(zipEntry);
-                FileInputStream fi = new FileInputStream(xmlFile);
-
+                //Архивирование перед сохраннеием в базу
+                File zipOutFile = null;
                 try {
-                    IOUtils.copy(fi, zos);
+                    zipOutFile = File.createTempFile("xml", ".zip");
+                    FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+                    ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+                    ZipEntry zipEntry = new ZipEntry(decName + ".xml");
+                    zos.putNextEntry(zipEntry);
+                    FileInputStream fi = new FileInputStream(xmlFile);
+
+                    try {
+                        IOUtils.copy(fi, zos);
+                    } finally {
+                        IOUtils.closeQuietly(fi);
+                        IOUtils.closeQuietly(zos);
+                        IOUtils.closeQuietly(fileOutputStream);
+                    }
+
+                    LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
+                    stateLogger.updateState("Сохранение XML-файла в базе данных");
+
+                    reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.XML_DEC));
+                    reportService.createDec(declarationData.getId(),
+                            blobDataService.create(zipOutFile, decName + ".zip", decDate),
+                            DeclarationDataReportType.XML_DEC);
+                    declarationDataDao.setFileName(declarationData.getId(), decName);
                 } finally {
-                    IOUtils.closeQuietly(fi);
-                    IOUtils.closeQuietly(zos);
-                    IOUtils.closeQuietly(fileOutputStream);
-                }
-
-                LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Сохранение XML-файла в базе данных");
-
-                reportService.createDec(declarationData.getId(),
-                        blobDataService.create(zipOutFile, decName + ".zip", decDate),
-                        DeclarationDataReportType.XML_DEC);
-                declarationDataDao.setFileName(declarationData.getId(), decName);
-            } finally {
-                if (zipOutFile != null && !zipOutFile.delete()) {
-                    LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                    if (zipOutFile != null && !zipOutFile.delete()) {
+                        LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                    }
                 }
             }
         } catch (IOException e) {
@@ -808,12 +818,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    /**
-     * Метод передающий управление на проверку декларации сторонней утилите
-     * @param isErrorFatal true-если ошибки при проверке фатальные
-     * @param xmlFile файл декларации
-     */
-    private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
+    @Override
+    public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                                      FormDataEvent operation, File xmlFile, LockStateLogger stateLogger) {
         Locale oldLocale = Locale.getDefault();
         LOG.info(String.format("Получение данных декларации %s", declarationData.getId()));
@@ -1565,7 +1571,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Logger scriptLogger = new Logger();
             try {
                 calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
-                validateDeclaration(userInfo, get(entry.getKey(), userInfo), scriptLogger, true, null, stateLogger);
+                //validateDeclaration(userInfo, get(entry.getKey(), userInfo), scriptLogger, true, null, stateLogger);
             } catch (Exception e) {
                 scriptLogger.error(e);
             } finally {

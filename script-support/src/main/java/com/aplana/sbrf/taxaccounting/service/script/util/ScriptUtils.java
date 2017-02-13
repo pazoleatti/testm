@@ -121,6 +121,7 @@ public final class ScriptUtils {
     public static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
     // разделитель между идентификаторами в ключе для кеширования записей справочника
     public static final String SEPARATOR = "_";
+    public static final String SNILS_REGEXP = "\\d{3}-\\d{3}-\\d{3}\\s\\d{2}";
 
     /**
      * Запрещаем создавать экземляры класса
@@ -2527,5 +2528,47 @@ public final class ScriptUtils {
 
     public static boolean isEmptyCells(String[] rowCells) {
         return rowCells.length == 1 && "".equals(rowCells[0]);
+    }
+
+    /**
+     * Проверка корректности СНИЛС
+     */
+    public static boolean checkSnils(String snils) {
+        if (snils == null || snils.length() != 14) {
+            return false;
+        }
+
+        if (!checkFormat(snils, SNILS_REGEXP)) {
+            return false;
+        }
+
+        Integer valueWithoutDelimiter = Integer.valueOf(snils.substring(0, 11).replace("-", ""));
+
+        if (valueWithoutDelimiter <= 1001998) {
+            return false;
+        }
+
+        Integer controlBlock = Integer.valueOf(snils.substring(12, 14));
+
+        Integer controlSumm =
+                  9*Integer.valueOf(snils.substring(0, 1))
+                + 8*Integer.valueOf(snils.substring(1, 2))
+                + 7*Integer.valueOf(snils.substring(2, 3))
+                + 6*Integer.valueOf(snils.substring(4, 5))
+                + 5*Integer.valueOf(snils.substring(5, 6))
+                + 4*Integer.valueOf(snils.substring(6, 7))
+                + 3*Integer.valueOf(snils.substring(8, 9))
+                + 2*Integer.valueOf(snils.substring(9, 10))
+                +   Integer.valueOf(snils.substring(10, 11));
+
+        if (controlSumm < 100) {
+            return controlBlock.equals(controlSumm);
+        }
+
+        if (controlSumm == 100 || controlSumm == 101) {
+            return controlBlock.equals(0);
+        }
+
+        return controlBlock.equals(controlSumm % 101);
     }
 }

@@ -17,12 +17,10 @@ import org.apache.commons.io.IOUtils;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.util.TestUtils.readFile;
@@ -80,6 +78,8 @@ public class DeclarationTestScriptHelper {
     private RaschsvUplPrevOssService raschsvUplPrevOssService;
     private RaschsvVyplFinFbService raschsvVyplFinFbService;
 
+    private String importFileName = null;
+
     // Задаются из конкретного теста
 
     private InputStream importFileInputStream;
@@ -94,6 +94,13 @@ public class DeclarationTestScriptHelper {
      */
     private FormSources sources;
 
+    public String getImportFileName() {
+        return importFileName;
+    }
+    public void setImportFileName(String importFileName) {
+        this.importFileName = importFileName;
+    }
+
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -107,7 +114,11 @@ public class DeclarationTestScriptHelper {
     private DeclarationTemplate declarationTemplate;
     private final ScriptTestMockHelper mockHelper;
 
+    private File dataFile;
+
     private StringWriter xmlStringWriter;
+
+    private Map<String, Object> calculateParams = new HashMap<String, Object>();
 
     public RefBookPersonService getRefBookPersonService() {
         return refBookPersonService;
@@ -117,8 +128,12 @@ public class DeclarationTestScriptHelper {
         return fiasRefBookService;
     }
 
-    public InputStream getImportFileInputStream() {
-        return importFileInputStream;
+    public void setImportFileInputStream(InputStream importFileInputStream) {
+        this.importFileInputStream = importFileInputStream;
+    }
+
+    public void setDataFile(File dataFile) {
+        this.dataFile = dataFile;
     }
 
     public NdflPersonService getNdflPersonService() {
@@ -169,10 +184,6 @@ public class DeclarationTestScriptHelper {
     }
     public RaschsvVyplFinFbService getRaschsvVyplFinFbService() {
         return raschsvVyplFinFbService;
-    }
-
-    public void setImportFileInputStream(InputStream importFileInputStream) {
-        this.importFileInputStream = importFileInputStream;
     }
 
     public ScriptSpecificDeclarationDataReportHolder getScriptSpecificReportHolder() {
@@ -251,6 +262,10 @@ public class DeclarationTestScriptHelper {
         getLogger().clear();
     }
 
+    public Map<String, Object> getCalculateParams() {
+        return calculateParams;
+    }
+
     /**
      * Выполнение части скрипта, связанного с указанным событием
      */
@@ -295,6 +310,13 @@ public class DeclarationTestScriptHelper {
         bindings.put("user", user);
         bindings.put("applicationVersion", "test-version");
 
+        bindings.put("calculateParams", calculateParams);
+
+
+
+
+
+
         bindings.put(DeclarationDataScriptParams.DOC_DATE, new Date());
 
 
@@ -326,6 +348,20 @@ public class DeclarationTestScriptHelper {
         if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
             bindings.put("ImportInputStream", importFileInputStream);
             bindings.put("importService", mockHelper.mockImportService());
+            //файл для проверки
+            bindings.put("dataFile", dataFile);
+        }
+
+        if (formDataEvent == FormDataEvent.IMPORT
+                || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE
+                || formDataEvent == FormDataEvent.CHECK) {
+            String name;
+            if (importFileName == null || importFileName.isEmpty()) {
+                name = "test-file-name." + (formDataEvent == FormDataEvent.IMPORT ? "xlsm" : "rnu");
+            } else {
+                name = importFileName;
+            }
+            bindings.put("UploadFileName", name);
         }
 
         try {

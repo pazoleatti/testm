@@ -827,4 +827,10 @@ public class ScriptUtilsTest {
         Assert.assertEquals(expectedStr, logger.getEntries().get(0).getMessage());
         logger.getEntries().clear();
     }
+
+    @Test
+    public void testCheckSnils() {
+        Assert.assertTrue(ScriptUtils.checkSnils("112-233-445 95"));
+        Assert.assertFalse(ScriptUtils.checkSnils("112-233-445 96"));
+    }
 }
