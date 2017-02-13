@@ -104,12 +104,15 @@ testCntNodeSvObuch = 0
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        println "!IMPORT_TRANSPORT_FILE!"
         importData()
         break
     case FormDataEvent.CHECK:
+        println "!CHECK!"
         checkData()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        println "!CREATE_SPECIFIC_REPORT!"
         def writer = scriptSpecificReportHolder.getFileOutputStream()
         def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
         def workbook = getSpecialReportTemplate()
@@ -1103,7 +1106,7 @@ class TestDataHolder {
 void importData() {
 
     //валидация по схеме
-//    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
+    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
