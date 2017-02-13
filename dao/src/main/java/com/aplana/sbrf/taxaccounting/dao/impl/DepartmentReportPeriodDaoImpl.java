@@ -374,19 +374,12 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId) {
         try {
             return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
-                            "drp.is_active, drp.is_balance_period, drp.correction_date " +
-                            "from " +
-                            "department_report_period drp, " +
-                            "(select max(correction_date) as correction_date, department_id, report_period_id " +
-                            "from department_report_period " +
-                            "where department_id = ? and report_period_id = ? " +
-                            "and correction_date not in " +
-                            "(select max(correction_date) from department_report_period)" +
-                            "group by department_id, report_period_id) m " +
-                            "where drp.department_id = m.department_id " +
-                            "and drp.report_period_id = m.report_period_id " +
-                            "and (drp.correction_date = m.correction_date or (m.correction_date is null " +
-                            "and drp.correction_date is null))",
+                            "drp.is_active, drp.is_balance_period, drp.correction_date from department_report_period drp " +
+                            "where drp.REPORT_PERIOD_ID = :reportPeriodId and drp.DEPARTMENT_ID = :departmentId and " +
+                            "drp.CORRECTION_DATE in (select max(CORRECTION_DATE) from department_report_period where " +
+                            "REPORT_PERIOD_ID = :reportPeriodId and DEPARTMENT_ID = :departmentId and CORRECTION_DATE " +
+                            "not in (select max(CORRECTION_DATE) from department_report_period where " +
+                            "REPORT_PERIOD_ID = :reportPeriodId and :departmentId));",
                     new Object[]{departmentId, reportPeriodId}, mapper);
         } catch (EmptyResultDataAccessException e) {
             return null;

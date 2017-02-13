@@ -775,27 +775,30 @@ def departmentParamTableList = null;
 
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    def korrPeriod = isCorrectionPeriod()
     def pairKppOktmoList = []
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
     def ndflReferencesWithError = null
-    if (korrPeriod) {
-        def prevDepartmentPeriodReport = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
+    if (departmentReportPeriod.correctionDate != null) {
+        def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
+
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
+        println declarations
         def declarationsForRemove = []
         declarations.each { declaration ->
             def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id
             def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id
             def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id
             def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
+
             if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.docState != stateDocReject
             || declaration.docState != stateDocNeedClarify || declaration.docState != stateDocError)) {
                 declarationsForRemove << declaration
             }
         }
         declarations.removeAll(declarationsForRemove)
+        println declarations
         declarations.each { declaration ->
             pairKppOktmoList << new PairKppOktmo(Integer.valueOf(declaration.kpp), declaration.oktmo)
         }
@@ -865,6 +868,14 @@ def createForm() {
             formMap.put(ddId, params)
         }
     }
+}
+
+def getPrevDepartmentReportPeriod(departmentReportPeriod) {
+    def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
+    if (prevDepartmentReportPeriod == null) {
+        prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(departmentId, reportPeriodId)
+    }
+    return prevDepartmentReportPeriod
 }
 
 def findAllTerBankDeclarationData(def departmentReportPeriod) {
@@ -1105,13 +1116,6 @@ def getDepartmentParamTableList(def departmentParamId, def reportPeriodId) {
 def getNdflReferencesWithError() {
     def filter = "DECLARATION_DATA_ID = ${declarationData.id} AND ERRTEXT IS NOT NULL"
     getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
-}
-
-def isCorrectionPeriod() {
-    def nomKorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
-    if (nomKorr != 0) {
-        return true
-    }
 }
 
 class PairKppOktmo {

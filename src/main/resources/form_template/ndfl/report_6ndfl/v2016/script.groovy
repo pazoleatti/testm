@@ -570,7 +570,7 @@ def createForm() {
     def declarationTypeId = currDeclarationTemplate.type.id
 
     if (korrPeriod) {
-        def prevDepartmentPeriodReport = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
+        def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
         def declarationsForRemove = []
         declarations.each { declaration ->
@@ -658,6 +658,14 @@ def createForm() {
         appendNdflPersonsToForm(ddId, npGroup.value)
     }
 
+}
+
+def getPrevDepartmentReportPeriod(departmentReportPeriod) {
+    def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
+    if (prevDepartmentReportPeriod == null) {
+        prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(departmentId, reportPeriodId)
+    }
+    return prevDepartmentReportPeriod
 }
 
 def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
