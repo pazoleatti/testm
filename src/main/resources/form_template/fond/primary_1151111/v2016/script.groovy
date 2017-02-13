@@ -160,8 +160,7 @@ switch (formDataEvent) {
 @Field final long REF_BOOK_HARD_WORK_ID = RefBook.Id.HARD_WORK.id
 
 // Коды категорий застрахованных лиц
-// todo https://jira.aplana.com/browse/SBRFNDFL-353
-//@Field final long REF_BOOK_PERSON_CATEGORY_ID = RefBook.Id.PERSON_CATEGORY.id
+@Field final long REF_BOOK_PERSON_CATEGORY_ID = RefBook.Id.PERSON_CATEGORY.id
 
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
@@ -2696,9 +2695,6 @@ def checkRaschsv() {
     // Общие параметры
     def mapConfigurationParam = getConfigurationParam()
 
-    // Коды ОКТМО
-//    def mapActualOktmoCode = getActualOKTMO()
-
     // Коды тарифа плательщика
     def mapActualTariffPayerCode = getActualTariffPayerCode()
 
@@ -2709,8 +2705,7 @@ def checkRaschsv() {
     def listActualHardWork = getActualHardWork()
 
     // Коды категорий застрахованных лиц
-    // todo https://jira.aplana.com/browse/SBRFNDFL-353
-//    def listPersonCategory = getActualPersonCategory()
+    def listPersonCategory = getActualPersonCategory()
 
     def xmlStream = declarationService.getXmlStream(declarationData.id)
     def fileNode = new XmlSlurper().parse(xmlStream);
@@ -2832,7 +2827,7 @@ def checkRaschsv() {
                         // ОбязПлатСВ
                         if (raschetSvChildNode.name == NODE_NAME_OBYAZ_PLAT_SV) {
 
-                            // 2.2.1 Соответствие кода ОКТМО
+                            // 2.2.1 Соответствие кода ОКТМО (справочник ОКТМО очень большой, поэтому обращаться к нему будем по записи)
                             def oktmoXml = raschetSvChildNode.attributes()[OBYAZ_PLAT_SV_OKTMO]
                             def oktmoParam = getRefBookValue(REF_BOOK_OKTMO_ID, departmentParamIncomeRow?.OKTMO?.referenceValue)
                             oktmoParam.each {key, value -> logger.info(key + " = " + value.toString())}
@@ -2841,7 +2836,7 @@ def checkRaschsv() {
                                 logger.warn(sprintf(msgErrNotEquals, pathAttr, oktmoXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
                             }
 
-                            // 2.2.2 Актуальность ОКТМО
+                            // 2.2.2 Актуальность ОКТМО (справочник ОКТМО очень большой, поэтому обращаться к нему будем по записи)
                             // При оценке актуальности значения справочника берутся НЕ на последний день отчетного периода, а на ТЕКУЩУЮ СИСТЕМНУЮ ДАТУ.
                             if (oktmoParam != isActualRecordOKTMO(departmentParamIncomeRow?.OKTMO?.referenceValue)) {
                                 logger.warn("В настройках подразделений указан неактуальный ОКТМО = \"" + oktmoParam + "\"")
@@ -2945,13 +2940,12 @@ def checkRaschsv() {
                                                 // СвВыплМК
                                                 if (svVyplMkNode.name == NODE_NAME_SV_VYPL_MK) {
                                                     // 2.3.5 Значение кода категории застрахованного лица
-                                                    // todo https://jira.aplana.com/browse/SBRFNDFL-353
                                                     def kodKatLisCodeXml = svVyplMkNode.attributes()[SV_VYPL_MT_KOD_KAT_LIC]
-//                                                    if (!listPersonCategory.contains(kodKatLisCodeXml)) {
-//                                                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_PERS_SV_STRAH_LIC, NODE_NAME_SV_VYPL_SVOPS,
-//                                                                        NODE_NAME_SV_VYPL, NODE_NAME_SV_VYPL_MK, SV_VYPL_MT_KOD_KAT_LIC].join(".")
-//                                                        logger.warn(pathAttr + " = \"" + kodKatLisCodeXml + "\" ФЛ с СНИЛС = \"" + snils + "\"  не найден (не действует) в справочнике \"Коды категорий застрахованных лиц\".")
-//                                                    }
+                                                    if (!listPersonCategory.contains(kodKatLisCodeXml)) {
+                                                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_PERS_SV_STRAH_LIC, NODE_NAME_SV_VYPL_SVOPS,
+                                                                        NODE_NAME_SV_VYPL, NODE_NAME_SV_VYPL_MK, SV_VYPL_MT_KOD_KAT_LIC].join(".")
+                                                        logger.warn(pathAttr + " = \"" + kodKatLisCodeXml + "\" ФЛ с СНИЛС = \"" + snils + "\"  не найден (не действует) в справочнике \"Коды категорий застрахованных лиц\".")
+                                                    }
                                                 }
                                             }
                                         }

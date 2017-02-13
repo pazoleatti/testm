@@ -48,8 +48,7 @@ public class RaschsvCheckTest extends DeclarationScriptTestBase {
     private static final long REF_BOOK_TARIFF_PAYER_ID = RefBook.Id.TARIFF_PAYER.getId();
     private static final long REF_BOOK_FILL_BASE_ID = RefBook.Id.FILL_BASE.getId();
     private static final long REF_BOOK_HARD_WORK_ID = RefBook.Id.HARD_WORK.getId();
-    // todo https://jira.aplana.com/browse/SBRFNDFL-353
-//    private static final long REF_BOOK_PERSON_CATEGORY_ID = RefBook.Id.PERSON_CATEGORY.getId();
+    private static final long REF_BOOK_PERSON_CATEGORY_ID = RefBook.Id.PERSON_CATEGORY.getId();
 
     private static final int DEPARTMENT_ID = 1;
     private static final int DECLARATION_TEMPLATE_ID = 1022;
@@ -226,14 +225,13 @@ public class RaschsvCheckTest extends DeclarationScriptTestBase {
         when(refBookHardWorkDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(hardWorkPagingResult);
 
         // Категории застрахованных лиц
-        // todo https://jira.aplana.com/browse/SBRFNDFL-353
-//        RefBookDataProvider refBookPersonCategoryDataProvider = mock(RefBookDataProvider.class);
-//        PagingResult<Map<String, RefBookValue>> personCategoryPagingResult = new PagingResult<Map<String, RefBookValue>>();
-//        Map<String, RefBookValue> personCategoryPagingResultItem = new HashMap<String, RefBookValue>();
-//        personCategoryPagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "ПНЭД"));
-//        personCategoryPagingResult.add(personCategoryPagingResultItem);
-//        when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_PERSON_CATEGORY_ID)).thenReturn(refBookPersonCategoryDataProvider);
-//        when(refBookPersonCategoryDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(personCategoryPagingResult);
+        RefBookDataProvider refBookPersonCategoryDataProvider = mock(RefBookDataProvider.class);
+        PagingResult<Map<String, RefBookValue>> personCategoryPagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> personCategoryPagingResultItem = new HashMap<String, RefBookValue>();
+        personCategoryPagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "ПНЭД"));
+        personCategoryPagingResult.add(personCategoryPagingResultItem);
+        when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_PERSON_CATEGORY_ID)).thenReturn(refBookPersonCategoryDataProvider);
+        when(refBookPersonCategoryDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(personCategoryPagingResult);
     }
 
     /**

@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.PersonData
+import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 
 // com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
 import com.aplana.sbrf.taxaccounting.refbook.*
@@ -67,6 +68,9 @@ def calculate() {
     if (asnuId == null) {
         throw new ServiceException("Для декларации " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
     }
+
+    //выставляем параметр что скрипт не формирует новый xml-файл
+    calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
@@ -376,7 +380,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             return;
         } else {
             RefBookRecord refBookRecord = createIdentityDocRecord(person);
-            List<Long> ids = getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
+            List<Long> ids = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
             Map<String, RefBookValue> values = refBookRecord.getValues();
             values.put(RefBook.RECORD_ID_ALIAS, ids.first());
             identityDocRecords.add(values);
@@ -398,6 +402,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             minimalPrior?.put("INC_REP", "1");
         }
 
+        //Обновление признака включается в отчетность
         for (Map<String, RefBookValue> identityDocsValues : identityDocRecords) {
             getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, person.getPersonId(), versionFrom, null, identityDocsValues);
         }
@@ -694,6 +699,9 @@ def findReportPeriodCode(reportPeriod) {
 //------------------ Import Data ----------------------
 
 void importData() {
+
+    //валидация по схеме
+    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         return

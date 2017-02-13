@@ -425,6 +425,18 @@ comment on column ref_book_signatory_mark.version is 'Версия. Дата а�
 comment on column ref_book_signatory_mark.code is 'Код';
 comment on column ref_book_signatory_mark.name is 'Наименование';
 
+--Коды категорий застрахованных лиц
+create table ref_book_person_category
+(
+  id number(18) not null,
+  code varchar2(4 char) not null,
+  name varchar2(2000 char) not null
+);
+comment on table ref_book_person_category is 'Коды категорий застрахованных лиц';
+comment on column ref_book_person_category.id is 'Уникальный идентификатор';
+comment on column ref_book_person_category.code is 'Код категории застрахованного лица';
+comment on column ref_book_person_category.name is 'Название категории застрахованного лица';
+
 
 -- Параметры подразделения по НДФЛ
 create table ref_book_ndfl
