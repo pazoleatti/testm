@@ -1428,7 +1428,6 @@ def checkPaymentJL(fileNode) {
 
     documentSvNP?."$NODE_NAME_NPYL".each { npul ->
         def documentInn = npul?."@ИННЮЛ" as String
-        def documentKpp = npul?."@КПП" as String
 
         // 1.2.1 Поиск ОКВЭД в справочнике
         if (documentOkved && !isExistsOkved(documentOkved)) {
@@ -1438,11 +1437,6 @@ def checkPaymentJL(fileNode) {
         // 1.2.2 Корректность ИНН ЮЛ
         if (INN_JUR_LENGTH != documentInn.length() || !ScriptUtils.checkControlSumInn(documentInn)) {
             logger.warn(CHECK_PAYMENT_INN, documentInn, UploadFileName)
-        }
-
-        // 1.2.3 Корректность КПП ЮЛ
-        if (documentKpp && !isExistsKpp(documentKpp)) {
-            logger.warn(CHECK_PAYMENT_KPP, documentKpp, documentInn)
         }
 
         npul?."$NODE_NAME_SV_REORG_YL".each { reorg ->
@@ -1465,11 +1459,6 @@ def checkPaymentJL(fileNode) {
             // 1.2.6 Корректность ИНН реорганизованной организации
             if (INN_JUR_LENGTH != documentReorgInn.length() || !ScriptUtils.checkControlSumInn(documentReorgInn)) {
                 logger.warn(CHECK_PAYMENT_REORG_INN_VALUE, documentReorgInn, documentInn)
-            }
-
-            // 1.2.7 Корректность КПП реорганизованной организации
-            if (documentReorgKpp && !isExistsKpp(documentReorgKpp)) {
-                logger.warn(CHECK_PAYMENT_REORG_KPP_VALUE, documentReorgKpp, documentInn)
             }
         }
     }
