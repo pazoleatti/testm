@@ -257,9 +257,10 @@ public interface DeclarationService {
      * @param fileName
      * @param dataFile
      * @param attachFileType
+     * @param createDateFile
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                               String fileName, File dataFile, AttachFileType attachFileType);
+                               String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile);
 
     /**
      * Найти декларацию НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО

@@ -349,8 +349,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream, String fileName, File dataFile, AttachFileType attachFileType) {
-        loadDeclarationDataService.importDeclarationData(logger, userInfo, declarationData, inputStream, fileName, dataFile, attachFileType);
+    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream, String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
+        loadDeclarationDataService.importDeclarationData(logger, userInfo, declarationData, inputStream, fileName, dataFile, attachFileType, createDateFile);
     }
 
     @Override

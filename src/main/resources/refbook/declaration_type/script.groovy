@@ -69,8 +69,12 @@ String ATTR_YEAR = "ОтчетГод";
 @Field
 String NAME_FORMAT_ERROR_DEC = "Имя транспортного файла «%s» не соответствует формату!";
 
-@Field
-String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field String KV_OTCH_PATTERN = "KV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field String UO_OTCH_PATTERN = "UO_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field String IV_OTCH_PATTERN = "IV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field String UU_OTCH_PATTERN = "UU_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+
 @Field
 String NAME_EXTENSION_DEC = ".xml";
 @Field
@@ -95,10 +99,24 @@ def importTF() {
     String kpp = null;
     Integer year = null;
     boolean isFNS = false;
-    Pattern pattern = Pattern.compile(NO_RASCHSV_PATTERN);
+
+    // Дата создания файла
+    Date createDateFile = null
+
+    // Категория прикрепленного файла
+    AttachFileType attachFileType = null
+
+    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN);
+    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN);
+    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN);
+    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN);
+    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN);
+
     if (UploadFileName != null && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
             & UploadFileName.length() == NAME_LENGTH_QUARTER_DEC) {
+        // РНУ_НДФЛ (первичная)
         declarationTypeId = 100;
+        attachFileType = AttachFileType.TYPE_1
         String departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim();
         Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
         if (formDepartment == null) {
@@ -119,39 +137,59 @@ def importTF() {
             logger.error("Ошибка заполнения атрибутов транспортного файла \"%s\".", UploadFileName)
             return
         }
-    } else if (pattern.matcher(UploadFileName).matches()) {
-        declarationTypeId = 200;
-        reportPeriodCode = null;
-        kpp = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$4");
+    } else if (patternNoRaschsv.matcher(UploadFileName).matches() ||
+            patternKvOtch.matcher(UploadFileName).matches() ||
+            patternUoOtch.matcher(UploadFileName).matches() ||
+            patternIvOtch.matcher(UploadFileName).matches() ||
+            patternUuOtch.matcher(UploadFileName).matches()) {
+        // ТФ 1151111 (первичная) и ответы от ФНС по ней
 
-        try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            def sett = new HashMap<String, List<String>>();
-            sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR]);
-            SAXHandler handler = new SAXHandler(sett);
-            saxParser.parse(ImportInputStream, handler);
-            reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD);
+        declarationTypeId = 200;
+        kpp = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$4");
+        reportPeriodCode = null;
+        createDateFile = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$5").substring(0,8));
+
+        if (patternNoRaschsv.matcher(UploadFileName).matches()) {
+            // 1151111 (первичная)
+            attachFileType = AttachFileType.TYPE_1
             try {
-                year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
-            } catch (NumberFormatException nfe) {
-                logger.error("Ошибка заполнения атрибутов транспортного файла \"%s\".", UploadFileName)
+                SAXParserFactory factory = SAXParserFactory.newInstance();
+                SAXParser saxParser = factory.newSAXParser();
+                def sett = new HashMap<String, List<String>>();
+                sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR]);
+                SAXHandler handler = new SAXHandler(sett);
+                saxParser.parse(ImportInputStream, handler);
+                reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD);
+                try {
+                    year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
+                } catch (NumberFormatException nfe) {
+                    logger.error("Ошибка заполнения атрибутов транспортного файла \"%s\".", UploadFileName)
+                    return
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                logger.error("Ошибка чтения файла \"%s\".", UploadFileName);
                 return
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+                logger.error("Некорректное имя или формат файла \"%s\".", UploadFileName);
+                return
+            } catch (SAXException e) {
+                e.printStackTrace();
+                logger.error("Некорректное имя или формат файла \"%s\".", UploadFileName);
+                return
+            } finally {
+                IOUtils.closeQuietly(ImportInputStream);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error("Ошибка чтения файла \"%s\".", UploadFileName);
-            return
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            logger.error("Некорректное имя или формат файла \"%s\".", UploadFileName);
-            return
-        } catch (SAXException e) {
-            e.printStackTrace();
-            logger.error("Некорректное имя или формат файла \"%s\".", UploadFileName);
-            return
-        } finally {
-            IOUtils.closeQuietly(ImportInputStream);
+        } else if (patternKvOtch.matcher(UploadFileName).matches()) {
+            // Квитанция о приеме налоговой декларации
+            attachFileType = AttachFileType.TYPE_1
+        } else if (patternUoOtch.matcher(UploadFileName).matches()) {
+            // Уведомление об отказе в приеме налоговой декларации
+        } else if (patternIvOtch.matcher(UploadFileName).matches()) {
+            // Извещение о вводе
+        } else if (patternUuOtch.matcher(UploadFileName).matches()) {
+            // 	Уведомление об уточнении
         }
     } else {
         throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR_DEC, UploadFileName));
@@ -258,10 +296,12 @@ def importTF() {
         return;
     }
 
+    // Создание экземпляра декларации
     Long declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null);
     InputStream inputStream = new FileInputStream(dataFile)
     try {
-        declarationService.importDeclarationData(logger, userInfo, declarationService.getDeclarationData(declarationDataId), inputStream, UploadFileName, dataFile, AttachFileType.TYPE_1)
+        // Запуск события скрипта для разбора полученного файла
+        declarationService.importDeclarationData(logger, userInfo, declarationService.getDeclarationData(declarationDataId), inputStream, UploadFileName, dataFile, attachFileType, createDateFile)
     } finally {
         IOUtils.closeQuietly(inputStream);
     }

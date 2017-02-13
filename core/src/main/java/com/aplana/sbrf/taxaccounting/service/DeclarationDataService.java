@@ -354,7 +354,8 @@ public interface DeclarationDataService {
      * Импорт ТФ Декларации
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
-                        String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile, AttachFileType fileType);
+							   String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
+							   AttachFileType fileType, Date createDateFile);
 
     /**
      * Получение данных по файлам для формы "Файлы и комментарии"
