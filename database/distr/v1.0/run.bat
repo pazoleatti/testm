@@ -26,7 +26,7 @@ ECHO ## dml: fill refbook
 "%ORA_BIN%\sqlplus" %AUTH% @"upd_refbook316.sql" > "%LOG_DIR%/upd_refbook316.txt"
 ECHO ## dml: fill oktmo
 CD ldr
-load_oktmo.bat  > "%../LOG_DIR%/load_oktmo.txt"
+call load_oktmo.bat
 CD ..
 ECHO ## dml: fill other refbook
 CD refbook
