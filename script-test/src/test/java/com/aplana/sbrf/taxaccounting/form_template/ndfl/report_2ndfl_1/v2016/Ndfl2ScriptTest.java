@@ -18,6 +18,7 @@ import org.custommonkey.xmlunit.Validator;
 import org.custommonkey.xmlunit.exceptions.XpathException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -37,6 +38,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
+@Ignore
 public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
     private static final int DEPARTMENT_ID = 1254;
