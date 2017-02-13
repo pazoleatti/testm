@@ -571,7 +571,7 @@ def createForm() {
 
     if (korrPeriod) {
         def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
-        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport.id)
+        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
         def declarationsForRemove = []
         declarations.each { declaration ->
             def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id
