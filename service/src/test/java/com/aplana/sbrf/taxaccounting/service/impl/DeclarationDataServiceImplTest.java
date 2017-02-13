@@ -401,19 +401,12 @@ public class DeclarationDataServiceImplTest {
         declarationSubreport.setName("report name");
         DeclarationDataReportType specificReport = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, declarationSubreport);
 
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.CHECK_DEC, TaxType.INCOME), "Проверка декларации");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, TaxType.INCOME), "Принятие декларации");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.EXCEL_DEC, TaxType.INCOME), "Формирование отчета декларации в XLSX-формате");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.XML_DEC, TaxType.INCOME), "Расчет декларации");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.PDF_DEC, TaxType.INCOME), "Создание формы предварительного просмотра декларации");
-        assertEquals(declarationDataService.getTaskName(specificReport, TaxType.INCOME), "Формирование отчета \"report name\" декларации");
-
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.CHECK_DEC, TaxType.DEAL), "Проверка уведомления");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, TaxType.DEAL), "Принятие уведомления");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.EXCEL_DEC, TaxType.DEAL), "Формирование отчета уведомления в XLSX-формате");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.XML_DEC, TaxType.DEAL), "Расчет уведомления");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.PDF_DEC, TaxType.DEAL), "Создание формы предварительного просмотра уведомления");
-        assertEquals(declarationDataService.getTaskName(specificReport, TaxType.DEAL), "Формирование отчета \"report name\" уведомления");
+        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.CHECK_DEC, TaxType.INCOME), "Проверка налоговой формы");
+        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, TaxType.INCOME), "Принятие налоговой формы");
+        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.EXCEL_DEC, TaxType.INCOME), "Формирование отчета налоговой формы в XLSX-формате");
+        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.XML_DEC, TaxType.INCOME), "Расчет налоговой формы");
+        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.PDF_DEC, TaxType.INCOME), "Создание формы предварительного просмотра налоговой формы");
+        assertEquals(declarationDataService.getTaskName(specificReport, TaxType.INCOME), "Формирование отчета \"report name\" налоговой формы");
     }
 
     @Test

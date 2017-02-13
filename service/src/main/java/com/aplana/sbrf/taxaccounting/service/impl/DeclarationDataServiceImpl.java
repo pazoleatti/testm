@@ -323,6 +323,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             throw new ServiceException();
         } else {
             logger.info("Проверка завершена, ошибок не обнаружено");
+            if (State.CREATED.equals(dd.getState())) {
+                // Переводим в состояние подготовлено
+                declarationDataDao.setStatus(id, State.PREPARED);
+            }
         }
     }
 
