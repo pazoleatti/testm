@@ -59,7 +59,7 @@ switch (formDataEvent) {
  * Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
  */
 @Field
-def SIMILARITY_THRESHOLD = 900;
+def SIMILARITY_THRESHOLD = 700;
 
 def calculate() {
 
@@ -274,8 +274,9 @@ def fillAddressAttr(Map<String, RefBookValue> values, NdflPerson person) {
     putOrUpdate(values, "STREET", RefBookAttributeType.STRING, person.getStreet());
     putOrUpdate(values, "HOUSE", RefBookAttributeType.STRING, person.getHouse());
     putOrUpdate(values, "BUILD", RefBookAttributeType.STRING, person.getBuilding());
-    putOrUpdate(values, "APPARTMENT", RefBookAttributeType.STRING, person.getRowNum()?.toString());
+    putOrUpdate(values, "APPARTMENT", RefBookAttributeType.STRING, person.getFlat());
     putOrUpdate(values, "POSTAL_CODE", RefBookAttributeType.STRING, person.getPostIndex());
+    putOrUpdate(values, "ADDRESS", RefBookAttributeType.STRING, person.getAddress());
 }
 
 /**
@@ -504,29 +505,27 @@ PersonData createPersonData(NdflPerson person, Long asnuId) {
     personData.documentTypeId = findDocumentTypeByCode(person.getIdDocType());
     personData.documentNumber = person.getIdDocNumber();
 
-    //Выставляем тип адреса
+    //Выставляем тип адреса getAddress
     int addressType = person.getAddress() != null && !person.getAddress().isEmpty() ? 1 : 0;
     //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
 
     //Устанавливаем тип адреса, проверяется при сравнении
     personData.addressType = addressType;
 
-    if (addressType == 0){
-        //Адрес в РФ
-        personData.regionCode = person.getRegionCode();
-        personData.postalCode = person.getPostIndex();
-        personData.district = person.getArea();
-        personData.city = person.getCity();
-        personData.locality = person.getLocality();
-        personData.street = person.getStreet();
-        personData.house = person.getHouse();
-        personData.build = person.getBuilding();
-        personData.appartment = person.getFlat();
-    } else {
-        //Адрес вре РФ, ставим код страны и сам адрес
-        personData.countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
-        personData.addressIno = person.getAddress();
-    }
+    //Адрес в РФ
+    personData.regionCode = person.getRegionCode();
+    personData.postalCode = person.getPostIndex();
+    personData.district = person.getArea();
+    personData.city = person.getCity();
+    personData.locality = person.getLocality();
+    personData.street = person.getStreet();
+    personData.house = person.getHouse();
+    personData.build = person.getBuilding();
+    personData.appartment = person.getFlat();
+
+    //Адрес вре РФ, ставим код страны и сам адрес
+    personData.countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
+    personData.addressIno = person.getAddress();
 
     return personData;
 }
@@ -722,6 +721,12 @@ void importData() {
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
+    InputStream xmlInputStream = ImportInputStream;
+
+    if (xmlInputStream == null) {
+        throw new ServiceException("Отсутствует значение параметра ImportInputStream!");
+    }
+
     if (logger.containsLevel(LogLevel.WARNING)) {
         throw new ServiceException("ТФ не соответствует XSD-схеме РНУ НФДЛ. Загрузка не возможна.");
     }
@@ -733,7 +738,7 @@ void importData() {
     XMLInputFactory xmlFactory = XMLInputFactory.newInstance()
     xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
     xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
-    XMLEventReader reader = xmlFactory.createXMLEventReader(ImportInputStream)
+    XMLEventReader reader = xmlFactory.createXMLEventReader(xmlInputStream)
 
     def sb;
     try {

@@ -143,7 +143,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         result.add(new BaseWeigthCalculator<PersonData>(15) {
             @Override
             public double calc(PersonData a, PersonData b) {
-                return compareString(a.getInnForeign(), b.getInnForeign());
+                return compareString(a.getSnils(), b.getSnils());
             }
 
             @Override
@@ -249,6 +249,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
         return result;
     }
+
 
     private class PersonDataComparator implements Comparator<PersonData> {
         @Override

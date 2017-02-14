@@ -31,7 +31,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         StringBuilder SQL = new StringBuilder();
         SQL.append("SELECT \n");
         SQL.append("  --фл \n");
-        SQL.append("  person.id AS person_id, person.record_id AS person_record_id, person.last_name AS last_name, person.first_name AS first_name, person.middle_name AS middle_name, person.sex AS sex, person.birth_date AS birth_date, person.inn AS inn, person.inn_foreign AS inn_foreign, person.snils AS snils, person.pension AS pension, person.medical AS midical, person.social AS social, \n");
+        SQL.append("  person.id AS person_id, person.record_id AS person_record_id, person.last_name AS last_name, person.first_name AS first_name, person.middle_name AS middle_name, person.sex AS sex, person.birth_date AS birth_date, person.inn AS inn, person.inn_foreign AS inn_foreign, person.snils AS snils, person.pension AS pension, person.medical AS midical, person.social AS social, person.employee AS employee, \n");
         SQL.append("  --ссылки на записи \n");
         SQL.append("  person.citizenship AS citizenship_ref_id, person.taxpayer_state AS status_ref_id, \n");
         SQL.append("  --документы \n");
@@ -123,11 +123,11 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
             //identical
             person.setInp(rs.getString("inp"));
-            person.setAsnuId(SqlUtils.getLong(rs, "citizenship_ref_id"));
+            person.setAsnuId(SqlUtils.getLong(rs, "asnu_ref_id"));
 
             //documents
             person.setDocumentTypeId(SqlUtils.getLong(rs, "document_type_ref_id"));
-            person.setDocumentNumber(rs.getString("asnu_ref_id"));
+            person.setDocumentNumber(rs.getString("document_number"));
 
             //address
             person.setAddressType(SqlUtils.getInteger(rs, "address_type"));
@@ -142,6 +142,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             person.setBuild(rs.getString("build"));
             person.setAppartment(rs.getString("appartment"));
 
+            //additional
             person.setPension(SqlUtils.getInteger(rs, "pension"));
             person.setMedical(SqlUtils.getInteger(rs, "midical"));
             person.setSocial(SqlUtils.getInteger(rs, "social"));
