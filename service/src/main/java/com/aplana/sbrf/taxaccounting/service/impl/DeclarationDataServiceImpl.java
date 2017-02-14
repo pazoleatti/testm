@@ -246,6 +246,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setTaxOrganCode(taxOrganCode);
                 newDeclaration.setKpp(taxOrganKpp);
 				newDeclaration.setOktmo(oktmo);
+                newDeclaration.setAsnuId(asunId);
                 newDeclaration.setFileName(fileName);
 
                 // Вызываем событие скрипта CREATE
