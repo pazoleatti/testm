@@ -260,7 +260,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         try {
             return getJdbcTemplate().queryForObject(String.format(SQL_GET_RECORD_ID, refBook.getTableName(), uniqueRecordId), Long.class);
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException(String.format("Не найдена запись справочника с id = %d", uniqueRecordId));
+            throw new DaoException(String.format("Не найдена запись справочника '%s' (id = %d) с id = %d", (refBook !=null ? refBook.getName() : "null"), (refBook!=null ? refBook.getId() : null), uniqueRecordId));
         }
     }
 
