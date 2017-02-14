@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="812" leftMargin="20" rightMargin="10" topMargin="20" bottomMargin="20" uuid="4de428c4-6f3c-42d2-abda-38ee0633bb0a">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="832" leftMargin="10" rightMargin="0" topMargin="10" bottomMargin="10" isIgnorePagination="true" uuid="4de428c4-6f3c-42d2-abda-38ee0633bb0a">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="143"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="true"/>
+	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="false"/>
+	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
+	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
+	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
 	<subDataset name="dsTab1" uuid="0d625995-fc75-4d01-aab2-cc1470fd1bc9">
 		<parameter name="declarationID" class="java.lang.Integer">
 			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
@@ -163,7 +168,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 	<title>
 		<band height="199" splitType="Stretch">
 			<textField>
-				<reportElement uuid="2f22b327-7058-483e-baf5-5921b07a4602" x="133" y="55" width="347" height="20"/>
+				<reportElement uuid="2f22b327-7058-483e-baf5-5921b07a4602" x="0" y="55" width="812" height="20"/>
 				<box>
 					<bottomPen lineWidth="0.0"/>
 				</box>
@@ -174,30 +179,30 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 				<textFieldExpression><![CDATA[$F{REPNAME}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="ea445851-6fee-4dd4-9d12-bba91b2125f5" x="226" y="75" width="20" height="20"/>
-				<textElement textAlignment="Right">
+				<reportElement uuid="ea445851-6fee-4dd4-9d12-bba91b2125f5" x="334" y="75" width="36" height="20"/>
+				<textElement textAlignment="Center">
 					<font fontName="Arial" size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[за]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="e713083b-bfec-408c-82ea-7f1834cb9c35" mode="Transparent" x="246" y="75" width="59" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="e713083b-bfec-408c-82ea-7f1834cb9c35" mode="Transparent" x="370" y="75" width="32" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PERNAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="4d0fe135-25bd-4270-ad49-618e0b0c1a3b" mode="Transparent" x="305" y="75" width="81" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="4d0fe135-25bd-4270-ad49-618e0b0c1a3b" mode="Transparent" x="414" y="75" width="81" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{OTCHET_GOD}+" г."]]></textFieldExpression>
@@ -211,7 +216,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font fontName="Arial" size="10" isBold="true"/>
+					<font fontName="Arial" size="10" isBold="true" pdfFontName="arial.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[ Всего застрахованных лиц]]></text>
 			</staticText>
@@ -224,7 +229,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PERS_CNT}]]></textFieldExpression>
@@ -232,39 +237,25 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 		</band>
 	</title>
 	<detail>
-		<band height="93" splitType="Stretch">
-			<staticText>
-				<reportElement uuid="aac96366-cee2-4ef0-a7d1-b5e8d2c3e588" x="0" y="0" width="605" height="20"/>
-				<textElement>
-					<font fontName="Arial" size="10" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физических лиц]]></text>
-			</staticText>
+		<band height="65" splitType="Stretch">
 			<componentElement>
-				<reportElement uuid="453fbfb4-d989-4fa5-9701-0f059863beab" key="table" x="0" y="33" width="802" height="51"/>
+				<reportElement uuid="453fbfb4-d989-4fa5-9701-0f059863beab" key="table" x="0" y="10" width="812" height="51"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
 					<datasetRun subDataset="dsTab1" uuid="79c6cc25-cd38-4435-abd9-37663bb769b3">
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:columnGroup width="110" uuid="5b216062-3565-4adf-a404-b866611cc0f8">
-						<jr:tableFooter height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
+					<jr:columnGroup width="830" uuid="5aa1b701-65ff-40a6-8901-4ab7a819794f">
+						<jr:tableHeader height="24" rowSpan="1">
 							<staticText>
-								<reportElement uuid="76ce494c-3301-49ae-97a8-55da7ea571fc" x="0" y="0" width="110" height="13"/>
-								<textElement textAlignment="Right">
-									<font fontName="Arial" size="8" isBold="true"/>
-									<paragraph rightIndent="5"/>
+								<reportElement uuid="b57b5e46-0e93-4244-9419-9c239525dfe7" x="0" y="0" width="830" height="24"/>
+								<textElement verticalAlignment="Middle">
+									<font fontName="Arial" size="9" isBold="true" pdfFontName="arial.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 								</textElement>
-								<text><![CDATA[Всего:]]></text>
+								<text><![CDATA[Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физических лиц]]></text>
 							</staticText>
-						</jr:tableFooter>
-						<jr:column width="32" uuid="40a7bbbd-b682-40d3-bb7b-d8c0fbd5b058">
-							<jr:columnHeader height="85" rowSpan="1">
+						</jr:tableHeader>
+						<jr:columnGroup width="137" uuid="5b216062-3565-4adf-a404-b866611cc0f8">
+							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -272,617 +263,757 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="4206e0b3-001d-4293-a3c6-14191e260f99" x="0" y="0" width="32" height="84"/>
-									<textElement textAlignment="Center">
-										<font fontName="Arial" size="8" isBold="true"/>
-									</textElement>
-									<text><![CDATA[Месяц]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell height="13" rowSpan="1">
-								<box>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textField>
-									<reportElement uuid="32bafbfc-a2b7-468b-8662-d4a600fbc80e" x="0" y="0" width="32" height="12"/>
-									<textElement textAlignment="Center">
-										<font fontName="Arial" size="8"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{MESYAC}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="78" uuid="79945da5-9e2c-48b6-bfc8-fa4f1135b65f">
-							<jr:columnHeader height="85" rowSpan="1">
-								<box>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<staticText>
-									<reportElement uuid="4416ea00-06b1-4ecc-913d-f1e39af75eaa" mode="Transparent" x="0" y="0" width="78" height="84" forecolor="#000000" backcolor="#FFFFFF"/>
-									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<text><![CDATA[Категория застрахованного лица]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell height="13" rowSpan="1">
-								<box>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="b0a03f57-25df-41fa-940a-121a222a82e8" mode="Transparent" x="0" y="0" width="78" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{KOD_KAT_LIC}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-					</jr:columnGroup>
-					<jr:column width="74" uuid="702da718-4b3a-4a09-8d35-d170f895ba0b">
-						<jr:tableFooter height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField evaluationTime="Group" evaluationGroup="grDecl" pattern="" isBlankWhenNull="false">
-								<reportElement uuid="c98c46be-3d27-47cf-9bc2-3b2e6c6f46a0" mode="Transparent" x="0" y="0" width="74" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{vPersCntTot}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:columnHeader height="85" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="3192f923-23bc-4f6e-9ca1-d1e2901cfa9b" mode="Transparent" x="0" y="0" width="74" height="84" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Количество застрахованных]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="377d3c01-4753-4d6a-9e13-a8e88ace739e" mode="Transparent" x="0" y="0" width="74" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{PERS_CNT}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="103" uuid="52846206-d9fc-441f-9c40-e49372861619">
-						<jr:tableFooter height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="b1f273f5-b8d7-48b1-b687-3fec908a1bba" mode="Transparent" x="0" y="0" width="103" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{vSumVyplTot}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:columnHeader height="85" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="e3a0a30a-ff18-46bd-a67f-bd4a7fbda9c3" mode="Transparent" x="0" y="0" width="102" height="84" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Сумма выплат и иных
-вознаграждений, руб.]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="7f9c034a-710f-4dfc-84eb-21982492a81c" mode="Transparent" x="0" y="0" width="103" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{SUM_VYPL}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="150" uuid="6e511c9a-f710-403d-9350-588d03e5f1a3">
-						<jr:tableFooter height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="5132b6e9-4a81-4e6a-8282-cb738b9ea847" mode="Transparent" x="0" y="0" width="150" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{vVyplOpsTot}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:columnHeader height="85" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="39d99d8b-520d-4eb3-aba9-0ea8dad85c12" mode="Transparent" x="0" y="0" width="150" height="84" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[База для исчисления страховых
-взносов на обязательное
-пенсионное страхование в
-пределах предельной величины,
-руб.]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="3c7ab2d9-e058-4d41-b81b-f8ba8fbd4ce5" mode="Transparent" x="0" y="0" width="150" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{VYPL_OPS}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="167" uuid="d10777ce-ebb3-4266-b1ca-78b0ef94b0c4">
-						<jr:tableFooter height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="9647da0d-72eb-42e3-bd3e-abceab50767e" mode="Transparent" x="0" y="0" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{vVyplOpsDogTot}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:columnHeader height="85" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="79a8a6a7-f21f-40a3-903b-79e4d74c5313" mode="Transparent" x="0" y="0" width="166" height="84" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[База для исчисления страховых
-взносов на обязательное
-пенсионное страхование в пределах
-предельной величины, в том числе
-по гражданско-правовым
-договорам, руб.
-]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="f8145110-c172-4980-a493-07ea3b65a5ff" mode="Transparent" x="0" y="0" width="167" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{VYPL_OPS_DOG}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="139" uuid="782a970a-ed37-4a73-9335-131c542f0be9">
-						<jr:tableFooter height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="0a4d6bbb-816c-462f-9997-d910e044babf" mode="Transparent" x="0" y="0" width="139" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{vNachislSvTot}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:columnHeader height="85" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="bd033082-8d67-4319-86ae-92650bc63582" mode="Transparent" x="0" y="0" width="138" height="84" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Сумма исчисленных страховых
-взносов с базы исчисления
-страховых взносов, не
-превышающих предельную
-величину, руб.
-]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="13" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="7c4c9a07-e70d-42e0-aca9-26f4c2588b42" mode="Transparent" x="0" y="0" width="139" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{NACHISL_SV}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-				</jr:table>
-			</componentElement>
-		</band>
-		<band height="94" splitType="Stretch">
-			<staticText>
-				<reportElement uuid="e229c8da-7a5e-4c82-85cc-5f051e454457" x="0" y="0" width="778" height="30"/>
-				<textElement>
-					<font fontName="Arial" size="10" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физических лиц, на которые исчислены страховые взносы по дополнительному тарифу]]></text>
-			</staticText>
-			<componentElement>
-				<reportElement uuid="c4051329-f034-4150-85f6-f62392f92d42" key="table" x="0" y="42" width="802" height="41"/>
-				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
-					<datasetRun subDataset="dsTab2" uuid="c4349e89-aab5-4a23-9e31-7ceb8178f92a">
-						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					</datasetRun>
-					<jr:columnGroup width="90" uuid="90a90588-1303-4976-9f7b-67226675be4c">
-						<jr:groupFooter groupName="DECLARATION_DATA_ID">
-							<jr:cell height="11" rowSpan="1">
-								<box>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<staticText>
-									<reportElement uuid="2e6ba2ce-4005-4b1f-aaf3-c1cd9add8ee0" x="0" y="0" width="90" height="11"/>
+									<reportElement uuid="76ce494c-3301-49ae-97a8-55da7ea571fc" x="0" y="0" width="137" height="13"/>
 									<textElement textAlignment="Right">
 										<font fontName="Arial" size="8" isBold="true"/>
 										<paragraph rightIndent="5"/>
 									</textElement>
 									<text><![CDATA[Всего:]]></text>
 								</staticText>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:column width="31" uuid="eda20d5f-ea63-45d4-8ec5-c596ff773043">
-							<jr:columnHeader height="31" rowSpan="1">
+							</jr:tableFooter>
+							<jr:column width="46" uuid="40a7bbbd-b682-40d3-bb7b-d8c0fbd5b058">
+								<jr:columnHeader height="82" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<staticText>
+										<reportElement uuid="4206e0b3-001d-4293-a3c6-14191e260f99" x="0" y="0" width="46" height="69"/>
+										<textElement textAlignment="Center">
+											<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
+										</textElement>
+										<text><![CDATA[Месяц]]></text>
+									</staticText>
+								</jr:columnHeader>
+								<jr:detailCell height="13" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="32bafbfc-a2b7-468b-8662-d4a600fbc80e" x="0" y="0" width="46" height="13"/>
+										<textElement textAlignment="Center">
+											<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$F{MESYAC}]]></textFieldExpression>
+									</textField>
+								</jr:detailCell>
+							</jr:column>
+							<jr:column width="91" uuid="79945da5-9e2c-48b6-bfc8-fa4f1135b65f">
+								<jr:columnHeader height="82" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<staticText>
+										<reportElement uuid="4416ea00-06b1-4ecc-913d-f1e39af75eaa" mode="Transparent" x="0" y="0" width="91" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single"/>
+										</textElement>
+										<text><![CDATA[Категория застрахованного лица]]></text>
+									</staticText>
+								</jr:columnHeader>
+								<jr:detailCell height="13" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField pattern="" isBlankWhenNull="false">
+										<reportElement uuid="b0a03f57-25df-41fa-940a-121a222a82e8" mode="Transparent" x="0" y="0" width="91" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$F{KOD_KAT_LIC}]]></textFieldExpression>
+									</textField>
+								</jr:detailCell>
+							</jr:column>
+						</jr:columnGroup>
+						<jr:column width="86" uuid="702da718-4b3a-4a09-8d35-d170f895ba0b">
+							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<staticText>
-									<reportElement uuid="758568f2-58a1-4097-b0e9-ee8615babe2b" x="0" y="0" width="31" height="30"/>
-									<textElement textAlignment="Center">
-										<font fontName="Arial" size="8" isBold="true"/>
-									</textElement>
-									<text><![CDATA[Месяц]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell height="12" rowSpan="1">
-								<box>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textField>
-									<reportElement uuid="53db76c7-0e2c-4fdc-aeeb-fcfe00a7e1f9" mode="Transparent" x="0" y="0" width="31" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{MESYAC}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="59" uuid="9421f01b-5fcb-480d-9fad-8fb03e95b22a">
-							<jr:columnHeader height="31" rowSpan="1">
-								<box>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<staticText>
-									<reportElement uuid="d305a314-c428-48c9-bf74-54ad97a0d1b0" mode="Transparent" x="0" y="0" width="59" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
-									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<text><![CDATA[Код тарифа]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell height="12" rowSpan="1">
-								<box>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="4e4ffda5-62b8-4e24-ac17-89375ad1f45d" mode="Transparent" x="0" y="0" width="59" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{TARIF}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-					</jr:columnGroup>
-					<jr:column width="78" uuid="b06d020b-b6bb-4e75-8535-12787c52cfb0">
-						<jr:groupFooter groupName="DECLARATION_DATA_ID">
-							<jr:cell height="11" rowSpan="1">
-								<box>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textField>
-									<reportElement uuid="405d57d3-b666-48dd-8ccf-1d1386c3ccb7" mode="Transparent" x="0" y="0" width="78" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField evaluationTime="Group" evaluationGroup="grDecl" pattern="" isBlankWhenNull="false">
+									<reportElement uuid="c98c46be-3d27-47cf-9bc2-3b2e6c6f46a0" mode="Transparent" x="0" y="0" width="86" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$V{vPersCntTot}]]></textFieldExpression>
 								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader height="31" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="b1bf350b-f231-4f63-b425-7e05d424511a" mode="Transparent" x="0" y="0" width="78" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Количество застрахованных]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:columnFooter height="0" rowSpan="1"/>
-						<jr:detailCell height="12" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="cb2327c5-f085-4650-8f06-8dd6b9ff5d87" mode="Transparent" x="0" y="0" width="78" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{PERS_CNT}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="106" uuid="efb0ff27-87a8-4abc-b195-6ecfca85533b">
-						<jr:groupFooter groupName="DECLARATION_DATA_ID">
-							<jr:cell height="11" rowSpan="1">
+							</jr:tableFooter>
+							<jr:columnHeader height="82" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField>
-									<reportElement uuid="9282f9cd-b996-4413-8e2d-2183acebf2fa" mode="Transparent" x="0" y="0" width="106" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+								<staticText>
+									<reportElement uuid="3192f923-23bc-4f6e-9ca1-d1e2901cfa9b" mode="Transparent" x="0" y="0" width="86" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[Количество застрахованных]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="13" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="377d3c01-4753-4d6a-9e13-a8e88ace739e" mode="Transparent" x="0" y="0" width="86" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$V{vVyplSvTot}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{PERS_CNT}]]></textFieldExpression>
 								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader height="31" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="746024f2-d184-4eb2-8200-820841040a39" mode="Transparent" x="0" y="0" width="106" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Сумма выплат и иных
-вознаграждений, руб
-]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:columnFooter height="0" rowSpan="1"/>
-						<jr:detailCell height="12" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="64a6a6e5-26da-4d85-981b-1fe30a5a4d10" mode="Transparent" x="0" y="0" width="106" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{VYPL_SV}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="144" uuid="06f5049e-a962-44ec-84a3-22ba0c47741b">
-						<jr:groupFooter groupName="DECLARATION_DATA_ID">
-							<jr:cell height="11" rowSpan="1">
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="116" uuid="52846206-d9fc-441f-9c40-e49372861619">
+							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField>
-									<reportElement uuid="d16fb29e-4c59-4ba9-8cb6-7d59b5368d33" mode="Transparent" x="0" y="0" width="144" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="b1f273f5-b8d7-48b1-b687-3fec908a1bba" mode="Transparent" x="0" y="0" width="116" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{vSumVyplTot}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="82" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="e3a0a30a-ff18-46bd-a67f-bd4a7fbda9c3" mode="Transparent" x="0" y="0" width="116" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[Сумма выплат и иных
+вознаграждений, руб.]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="13" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="7f9c034a-710f-4dfc-84eb-21982492a81c" mode="Transparent" x="0" y="0" width="116" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{SUM_VYPL}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="167" uuid="6e511c9a-f710-403d-9350-588d03e5f1a3">
+							<jr:tableFooter height="13" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="5132b6e9-4a81-4e6a-8282-cb738b9ea847" mode="Transparent" x="0" y="0" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{vVyplOpsTot}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="82" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="39d99d8b-520d-4eb3-aba9-0ea8dad85c12" mode="Transparent" x="0" y="0" width="167" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[База для исчисления страховых
+взносов на обязательное
+пенсионное страхование в
+пределах предельной величины,
+руб.]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="13" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="3c7ab2d9-e058-4d41-b81b-f8ba8fbd4ce5" mode="Transparent" x="0" y="0" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{VYPL_OPS}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="177" uuid="d10777ce-ebb3-4266-b1ca-78b0ef94b0c4">
+							<jr:tableFooter height="13" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="9647da0d-72eb-42e3-bd3e-abceab50767e" mode="Transparent" x="0" y="0" width="177" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{vVyplOpsDogTot}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="82" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="79a8a6a7-f21f-40a3-903b-79e4d74c5313" mode="Transparent" x="0" y="0" width="177" height="82" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[База для исчисления страховых
+взносов на обязательное
+пенсионное страхование в пределах
+предельной величины, в том числе
+по гражданско-правовым
+договорам, руб.
+]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="13" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="f8145110-c172-4980-a493-07ea3b65a5ff" mode="Transparent" x="0" y="0" width="177" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{VYPL_OPS_DOG}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="147" uuid="782a970a-ed37-4a73-9335-131c542f0be9">
+							<jr:tableFooter height="13" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="0a4d6bbb-816c-462f-9997-d910e044babf" mode="Transparent" x="0" y="0" width="147" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$V{vNachislSvTot}]]></textFieldExpression>
 								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader height="31" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="ca641cc3-3fd1-4c38-967f-d131930634da" mode="Transparent" x="0" y="0" width="144" height="30" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Сумма исчисленных страховых
-взносов, руб
+							</jr:tableFooter>
+							<jr:columnHeader height="82" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="bd033082-8d67-4319-86ae-92650bc63582" mode="Transparent" x="0" y="0" width="147" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[Сумма исчисленных страховых
+взносов с базы исчисления
+страховых взносов, не
+превышающих предельную
+величину, руб.
 ]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:columnFooter height="0" rowSpan="1"/>
-						<jr:detailCell height="12" rowSpan="1">
-							<box>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="577e8624-14e5-47f8-85ba-26c0ebd6bb44" mode="Transparent" x="0" y="0" width="144" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{NACHISL_SV}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="13" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="7c4c9a07-e70d-42e0-aca9-26f4c2588b42" mode="Transparent" x="0" y="0" width="147" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{NACHISL_SV}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
 				</jr:table>
 			</componentElement>
 		</band>
-		<band height="91" splitType="Stretch">
-			<staticText>
-				<reportElement uuid="af7f146b-d2dc-4646-89cc-db2d8db59b6c" x="0" y="0" width="605" height="20"/>
-				<textElement>
-					<font fontName="Arial" size="10" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Суммы страховых взносов подлежащие уплате за расчетный (отчетный) период]]></text>
-			</staticText>
+		<band height="64" splitType="Stretch">
 			<componentElement>
-				<reportElement uuid="6cbce747-8c81-40c7-9b4e-9115af09c755" key="table" x="0" y="30" width="802" height="51"/>
+				<reportElement uuid="c4051329-f034-4150-85f6-f62392f92d42" key="table" x="0" y="15" width="812" height="41"/>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
+					<datasetRun subDataset="dsTab2" uuid="c4349e89-aab5-4a23-9e31-7ceb8178f92a">
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="510" uuid="d1c71f68-d0c7-40f1-b6c9-e36e167be076">
+						<jr:tableHeader height="30" rowSpan="1">
+							<staticText>
+								<reportElement uuid="35327bca-0fb0-4834-8c9a-2e3e079c85f1" x="0" y="0" width="510" height="30" isPrintInFirstWholeBand="true"/>
+								<textElement verticalAlignment="Middle">
+									<font fontName="Arial" size="9" isBold="true" pdfFontName="arial.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+								</textElement>
+								<text><![CDATA[Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физических лиц, на которые исчислены страховые взносы по дополнительному тарифу]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:columnGroup width="119" uuid="90a90588-1303-4976-9f7b-67226675be4c">
+							<jr:groupFooter groupName="DECLARATION_DATA_ID">
+								<jr:cell height="11" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<staticText>
+										<reportElement uuid="2e6ba2ce-4005-4b1f-aaf3-c1cd9add8ee0" x="0" y="0" width="119" height="11"/>
+										<textElement textAlignment="Right">
+											<font fontName="Arial" size="8" isBold="true"/>
+											<paragraph rightIndent="5"/>
+										</textElement>
+										<text><![CDATA[Всего:]]></text>
+									</staticText>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:column width="46" uuid="eda20d5f-ea63-45d4-8ec5-c596ff773043">
+								<jr:columnHeader height="31" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<staticText>
+										<reportElement uuid="758568f2-58a1-4097-b0e9-ee8615babe2b" x="0" y="0" width="46" height="31"/>
+										<textElement textAlignment="Center">
+											<font fontName="Arial" size="8" isBold="true"/>
+										</textElement>
+										<text><![CDATA[Месяц]]></text>
+									</staticText>
+								</jr:columnHeader>
+								<jr:detailCell height="12" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="53db76c7-0e2c-4fdc-aeeb-fcfe00a7e1f9" mode="Transparent" x="0" y="0" width="46" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$F{MESYAC}]]></textFieldExpression>
+									</textField>
+								</jr:detailCell>
+							</jr:column>
+							<jr:column width="73" uuid="9421f01b-5fcb-480d-9fad-8fb03e95b22a">
+								<jr:columnHeader height="31" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<staticText>
+										<reportElement uuid="d305a314-c428-48c9-bf74-54ad97a0d1b0" mode="Transparent" x="0" y="0" width="73" height="31" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single"/>
+										</textElement>
+										<text><![CDATA[Код тарифа]]></text>
+									</staticText>
+								</jr:columnHeader>
+								<jr:detailCell height="12" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField pattern="" isBlankWhenNull="false">
+										<reportElement uuid="4e4ffda5-62b8-4e24-ac17-89375ad1f45d" mode="Transparent" x="0" y="0" width="73" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$F{TARIF}]]></textFieldExpression>
+									</textField>
+								</jr:detailCell>
+							</jr:column>
+						</jr:columnGroup>
+						<jr:column width="93" uuid="b06d020b-b6bb-4e75-8535-12787c52cfb0">
+							<jr:tableHeader height="0" rowSpan="1"/>
+							<jr:groupFooter groupName="DECLARATION_DATA_ID">
+								<jr:cell height="11" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="405d57d3-b666-48dd-8ccf-1d1386c3ccb7" mode="Transparent" x="0" y="0" width="93" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single" rightIndent="5"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$V{vPersCntTot}]]></textFieldExpression>
+									</textField>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:columnHeader height="31" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="b1bf350b-f231-4f63-b425-7e05d424511a" mode="Transparent" x="0" y="0" width="93" height="31" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[Количество застрахованных]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="0" rowSpan="1"/>
+							<jr:detailCell height="12" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="cb2327c5-f085-4650-8f06-8dd6b9ff5d87" mode="Transparent" x="0" y="0" width="93" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{PERS_CNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="126" uuid="efb0ff27-87a8-4abc-b195-6ecfca85533b">
+							<jr:tableHeader height="0" rowSpan="1"/>
+							<jr:groupFooter groupName="DECLARATION_DATA_ID">
+								<jr:cell height="11" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="9282f9cd-b996-4413-8e2d-2183acebf2fa" mode="Transparent" x="0" y="0" width="126" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single" rightIndent="5"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$V{vVyplSvTot}]]></textFieldExpression>
+									</textField>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:columnHeader height="31" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="746024f2-d184-4eb2-8200-820841040a39" mode="Transparent" x="0" y="0" width="126" height="31" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[Сумма выплат и иных
+вознаграждений, руб
+]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="0" rowSpan="1"/>
+							<jr:detailCell height="12" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="64a6a6e5-26da-4d85-981b-1fe30a5a4d10" mode="Transparent" x="0" y="0" width="126" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{VYPL_SV}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="172" uuid="06f5049e-a962-44ec-84a3-22ba0c47741b">
+							<jr:tableHeader height="0" rowSpan="1"/>
+							<jr:groupFooter groupName="DECLARATION_DATA_ID">
+								<jr:cell height="11" rowSpan="1">
+									<box>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="d16fb29e-4c59-4ba9-8cb6-7d59b5368d33" mode="Transparent" x="0" y="0" width="172" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single" rightIndent="5"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$V{vNachislSvTot}]]></textFieldExpression>
+									</textField>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:columnHeader height="31" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="ca641cc3-3fd1-4c38-967f-d131930634da" mode="Transparent" x="0" y="0" width="172" height="31" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[Сумма исчисленных страховых
+взносов, руб
+]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="0" rowSpan="1"/>
+							<jr:detailCell height="12" rowSpan="1">
+								<box>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="577e8624-14e5-47f8-85ba-26c0ebd6bb44" mode="Transparent" x="0" y="0" width="172" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{NACHISL_SV}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+			<break>
+				<reportElement uuid="244daeab-6255-4684-9a6a-5d62b44b6abc" x="0" y="0" width="100" height="1"/>
+			</break>
+		</band>
+		<band height="76" splitType="Stretch">
+			<componentElement>
+				<reportElement uuid="6cbce747-8c81-40c7-9b4e-9115af09c755" key="table" x="0" y="14" width="832" height="41"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="dsTab3" uuid="7bd470ff-48fb-4e99-b7d3-5ce67e91176f">
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:columnGroup width="256" uuid="26c9604b-e436-4f96-855e-5f28954ce5c4">
-						<jr:groupFooter groupName="grDeclId">
-							<jr:cell height="12" rowSpan="1">
+					<jr:columnGroup width="998" uuid="ec52adfa-4cea-4578-92d1-4516cf035b0d">
+						<jr:tableHeader height="30" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c28a59cb-3c7a-4f8e-a471-7c64d9c5bb9a" x="0" y="0" width="998" height="30"/>
+								<textElement verticalAlignment="Middle">
+									<font fontName="Arial" size="9" isBold="true" pdfFontName="arial.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+								</textElement>
+								<text><![CDATA[Суммы страховых взносов подлежащие уплате за расчетный (отчетный) период]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:columnGroup width="364" uuid="26c9604b-e436-4f96-855e-5f28954ce5c4">
+							<jr:groupFooter groupName="grDeclId">
+								<jr:cell height="12" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<staticText>
+										<reportElement uuid="5b0873c1-e4da-4d2e-8415-6ae616a7f714" x="0" y="0" width="364" height="12"/>
+										<textElement textAlignment="Right">
+											<font fontName="Arial" size="8" isBold="true"/>
+										</textElement>
+										<text><![CDATA[Всего:]]></text>
+									</staticText>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:column width="251" uuid="4238c166-b054-4786-9597-e0ec28dfbb19">
+								<jr:columnHeader height="57" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<staticText>
+										<reportElement uuid="60b7751f-bac5-4510-96b7-aa2f8137aa25" x="0" y="0" width="251" height="57"/>
+										<textElement textAlignment="Center">
+											<font fontName="Arial" size="8" isBold="true"/>
+										</textElement>
+										<text><![CDATA[Тип страховых взносов]]></text>
+									</staticText>
+								</jr:columnHeader>
+								<jr:detailCell height="23" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField isStretchWithOverflow="true">
+										<reportElement uuid="09ae5126-41b7-4b8f-85df-c629ce961a2d" stretchType="RelativeToTallestObject" x="0" y="0" width="251" height="23"/>
+										<textElement>
+											<font fontName="Arial" size="8"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$F{ROW_TEXT}]]></textFieldExpression>
+									</textField>
+								</jr:detailCell>
+							</jr:column>
+							<jr:column width="113" uuid="0f9243bb-86fd-4cab-b653-793308152568">
+								<jr:columnHeader height="57" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<staticText>
+										<reportElement uuid="c221c063-ca24-458c-9684-801b45606a5d" mode="Transparent" x="0" y="0" width="113" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single"/>
+										</textElement>
+										<text><![CDATA[Код бюджетной классификации]]></text>
+									</staticText>
+								</jr:columnHeader>
+								<jr:detailCell height="23" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField pattern="" isBlankWhenNull="false">
+										<reportElement uuid="f5182fc9-bddb-43d0-8e9c-bb4d31dcd498" mode="Transparent" x="0" y="0" width="113" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$F{KBK}]]></textFieldExpression>
+									</textField>
+								</jr:detailCell>
+							</jr:column>
+						</jr:columnGroup>
+						<jr:column width="144" uuid="72dc7ccf-9de9-410e-875b-6ebbe3f05624">
+							<jr:tableHeader height="0" rowSpan="1"/>
+							<jr:groupFooter groupName="grDeclId">
+								<jr:cell height="12" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="6e7185ef-e6f7-4f05-8bb9-55766bc1683f" mode="Transparent" x="0" y="0" width="144" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single" rightIndent="5"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$V{vSumSbUplPerTot}]]></textFieldExpression>
+									</textField>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:columnHeader height="57" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -891,67 +1022,18 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="5b0873c1-e4da-4d2e-8415-6ae616a7f714" x="0" y="0" width="256" height="12"/>
-									<textElement textAlignment="Right">
-										<font fontName="Arial" size="8" isBold="true"/>
-									</textElement>
-									<text><![CDATA[Всего:]]></text>
-								</staticText>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:column width="153" uuid="4238c166-b054-4786-9597-e0ec28dfbb19">
-							<jr:columnHeader height="48" rowSpan="1">
-								<box>
-									<pen lineWidth="0.5"/>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<staticText>
-									<reportElement uuid="60b7751f-bac5-4510-96b7-aa2f8137aa25" x="0" y="0" width="153" height="48"/>
-									<textElement textAlignment="Center">
-										<font fontName="Arial" size="8" isBold="true"/>
-									</textElement>
-									<text><![CDATA[Тип страховых взносов]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell height="10" rowSpan="1">
-								<box>
-									<pen lineWidth="0.5"/>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textField isStretchWithOverflow="true">
-									<reportElement uuid="09ae5126-41b7-4b8f-85df-c629ce961a2d" stretchType="RelativeToTallestObject" x="0" y="0" width="153" height="10"/>
-									<textElement>
-										<font fontName="Arial" size="8"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{ROW_TEXT}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="103" uuid="0f9243bb-86fd-4cab-b653-793308152568">
-							<jr:columnHeader height="48" rowSpan="1">
-								<box>
-									<pen lineWidth="0.5"/>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<staticText>
-									<reportElement uuid="c221c063-ca24-458c-9684-801b45606a5d" mode="Transparent" x="0" y="0" width="103" height="48" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="887ae4a9-3485-47f6-9ea5-c7215bd227ec" mode="Transparent" x="0" y="0" width="144" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Код бюджетной классификации]]></text>
+									<text><![CDATA[Сумма страховых взносов,
+подлежащая уплате за
+расчетный (отчетный)
+период, руб.]]></text>
 								</staticText>
 							</jr:columnHeader>
-							<jr:detailCell height="10" rowSpan="1">
+							<jr:detailCell height="23" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -960,19 +1042,37 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="f5182fc9-bddb-43d0-8e9c-bb4d31dcd498" mode="Transparent" x="0" y="0" width="103" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
-									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
+									<reportElement uuid="d97d19b2-873d-4ba1-83c7-f5f927d674ee" mode="Transparent" x="0" y="0" width="144" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$F{KBK}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{SUM_SB_UPL_PER}]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-					</jr:columnGroup>
-					<jr:column width="124" uuid="72dc7ccf-9de9-410e-875b-6ebbe3f05624">
-						<jr:groupFooter groupName="grDeclId">
-							<jr:cell height="12" rowSpan="1">
+						<jr:column width="163" uuid="c3633e7a-89fa-41f7-a380-1cc072746fe2">
+							<jr:tableHeader height="0" rowSpan="1"/>
+							<jr:groupFooter groupName="grDeclId">
+								<jr:cell height="12" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="57e1ff8b-d676-4a81-9e5d-8601cc8f2c42" mode="Transparent" x="0" y="0" width="163" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single" rightIndent="5"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$V{vSumSbUpl1MTot}]]></textFieldExpression>
+									</textField>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:columnHeader height="57" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -980,116 +1080,20 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField>
-									<reportElement uuid="6e7185ef-e6f7-4f05-8bb9-55766bc1683f" mode="Transparent" x="0" y="0" width="124" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single" rightIndent="5"/>
+								<staticText>
+									<reportElement uuid="dbd67f6e-a8a7-4b27-b0e7-3b1e1157fee9" mode="Transparent" x="0" y="0" width="163" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$V{vSumSbUplPerTot}]]></textFieldExpression>
-								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader height="48" rowSpan="1">
-							<box>
-								<pen lineWidth="0.5"/>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="887ae4a9-3485-47f6-9ea5-c7215bd227ec" mode="Transparent" x="0" y="0" width="124" height="48" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Сумма страховых взносов,
-подлежащая уплате за
-расчетный (отчетный)
-период, руб.]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="10" rowSpan="1">
-							<box>
-								<pen lineWidth="0.5"/>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="d97d19b2-873d-4ba1-83c7-f5f927d674ee" mode="Transparent" x="0" y="0" width="124" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{SUM_SB_UPL_PER}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="147" uuid="c3633e7a-89fa-41f7-a380-1cc072746fe2">
-						<jr:groupFooter groupName="grDeclId">
-							<jr:cell height="12" rowSpan="1">
-								<box>
-									<pen lineWidth="0.5"/>
-									<topPen lineWidth="0.5"/>
-									<leftPen lineWidth="0.5"/>
-									<bottomPen lineWidth="0.5"/>
-									<rightPen lineWidth="0.5"/>
-								</box>
-								<textField>
-									<reportElement uuid="57e1ff8b-d676-4a81-9e5d-8601cc8f2c42" mode="Transparent" x="0" y="0" width="147" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
-									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single" rightIndent="5"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{vSumSbUpl1MTot}]]></textFieldExpression>
-								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader height="48" rowSpan="1">
-							<box>
-								<pen lineWidth="0.5"/>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="dbd67f6e-a8a7-4b27-b0e7-3b1e1157fee9" mode="Transparent" x="0" y="0" width="147" height="48" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Сумма страховых взносов,
+									<text><![CDATA[Сумма страховых взносов,
 подлежащая уплате за первый
 из последних трех месяцев
 расчетного (отчетного) периода,
 руб.]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="10" rowSpan="1">
-							<box>
-								<pen lineWidth="0.5"/>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="db334642-562d-4eb8-bb22-dd96050605eb" mode="Transparent" x="0" y="0" width="147" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{SUM_SB_UPL_1M}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="145" uuid="24d0ddf6-632e-4f39-a5f4-2038ad534002">
-						<jr:groupFooter groupName="grDeclId">
-							<jr:cell height="12" rowSpan="1">
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1097,58 +1101,59 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField>
-									<reportElement uuid="0f4bdba2-c654-4402-8edb-797473a86b41" mode="Transparent" x="0" y="0" width="145" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="db334642-562d-4eb8-bb22-dd96050605eb" mode="Transparent" x="0" y="0" width="163" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$V{vSumSbUpl2MTot}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{SUM_SB_UPL_1M}]]></textFieldExpression>
 								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader height="48" rowSpan="1">
-							<box>
-								<pen lineWidth="0.5"/>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="67c803bc-8508-4969-bcd2-d38b0dfac84a" mode="Transparent" x="0" y="0" width="145" height="48" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Сумма страховых взносов,
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="166" uuid="24d0ddf6-632e-4f39-a5f4-2038ad534002">
+							<jr:tableHeader height="0" rowSpan="1"/>
+							<jr:groupFooter groupName="grDeclId">
+								<jr:cell height="12" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="0f4bdba2-c654-4402-8edb-797473a86b41" mode="Transparent" x="0" y="0" width="166" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single" rightIndent="5"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$V{vSumSbUpl2MTot}]]></textFieldExpression>
+									</textField>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:columnHeader height="57" rowSpan="1">
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="67c803bc-8508-4969-bcd2-d38b0dfac84a" mode="Transparent" x="0" y="0" width="166" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[Сумма страховых взносов,
 подлежащая уплате за второй
 из последних трех месяцев
 расчетного (отчетного) периода,
 руб.]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="10" rowSpan="1">
-							<box>
-								<pen lineWidth="0.5"/>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="49a916ea-34e2-4b46-8e1f-958a7530e6fa" mode="Transparent" x="0" y="0" width="145" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{SUM_SB_UPL_2M}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="138" uuid="f2ab1e5e-1524-4645-afed-586e0a664cbb">
-						<jr:groupFooter groupName="grDeclId">
-							<jr:cell height="12" rowSpan="1">
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1156,58 +1161,83 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField>
-									<reportElement uuid="2bff2e7f-6990-472d-a6a3-0fb7a9729b92" mode="Transparent" x="0" y="0" width="138" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="49a916ea-34e2-4b46-8e1f-958a7530e6fa" mode="Transparent" x="0" y="0" width="166" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$V{vSumSbUpl3MTot}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{SUM_SB_UPL_2M}]]></textFieldExpression>
 								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader height="48" rowSpan="1">
-							<box>
-								<pen lineWidth="0.5"/>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<staticText>
-								<reportElement uuid="853c031e-da82-4371-b129-f0d7b3921779" mode="Transparent" x="0" y="0" width="138" height="48" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Сумма страховых взносов,
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="161" uuid="f2ab1e5e-1524-4645-afed-586e0a664cbb">
+							<jr:tableHeader height="0" rowSpan="1"/>
+							<jr:groupFooter groupName="grDeclId">
+								<jr:cell height="12" rowSpan="1">
+									<box>
+										<pen lineWidth="0.5"/>
+										<topPen lineWidth="0.5"/>
+										<leftPen lineWidth="0.5"/>
+										<bottomPen lineWidth="0.5"/>
+										<rightPen lineWidth="0.5"/>
+									</box>
+									<textField>
+										<reportElement uuid="2bff2e7f-6990-472d-a6a3-0fb7a9729b92" mode="Transparent" x="0" y="0" width="161" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<paragraph lineSpacing="Single" rightIndent="5"/>
+										</textElement>
+										<textFieldExpression><![CDATA[$V{vSumSbUpl3MTot}]]></textFieldExpression>
+									</textField>
+								</jr:cell>
+							</jr:groupFooter>
+							<jr:columnHeader height="57" rowSpan="1">
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<staticText>
+									<reportElement uuid="853c031e-da82-4371-b129-f0d7b3921779" mode="Transparent" x="0" y="0" width="161" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[Сумма страховых взносов,
 подлежащая уплате за третий
 из последних трех месяцев
 расчетного (отчетного) периода,
 руб.
 ]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell height="10" rowSpan="1">
-							<box>
-								<pen lineWidth="0.5"/>
-								<topPen lineWidth="0.5"/>
-								<leftPen lineWidth="0.5"/>
-								<bottomPen lineWidth="0.5"/>
-								<rightPen lineWidth="0.5"/>
-							</box>
-							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="20f09a61-ed6d-424d-8dac-20dd2b6d44b1" mode="Transparent" x="0" y="0" width="138" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" rightIndent="5"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{SUM_SB_UPL_3M}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23" rowSpan="1">
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.5"/>
+									<leftPen lineWidth="0.5"/>
+									<bottomPen lineWidth="0.5"/>
+									<rightPen lineWidth="0.5"/>
+								</box>
+								<textField pattern="" isBlankWhenNull="false">
+									<reportElement uuid="20f09a61-ed6d-424d-8dac-20dd2b6d44b1" mode="Transparent" x="0" y="0" width="161" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<paragraph lineSpacing="Single" rightIndent="5"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{SUM_SB_UPL_3M}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
 				</jr:table>
 			</componentElement>
+			<break>
+				<reportElement uuid="cb84f4d9-0f0a-4e64-9733-4499e71884a1" x="0" y="0" width="100" height="1"/>
+			</break>
 		</band>
 	</detail>
 </jasperReport>
