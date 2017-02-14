@@ -127,7 +127,7 @@ public class DeclarationDataServiceImplTest {
 
         DeclarationType declarationType = new DeclarationType();
         declarationType.setId(1);
-        declarationType.setName("Тестовый тип декларации");
+        declarationType.setName("Тестовый тип налоговой формы");
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setType(declarationType);
@@ -187,11 +187,11 @@ public class DeclarationDataServiceImplTest {
 
         assertTrue(declarationDataService.existDeclaration(1, 1, logger.getEntries()));
         assertEquals(
-                "Существует экземпляр \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\" для макета!",
+                "Существует экземпляр \"Тестовый тип налоговой формы\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\" для макета!",
                 logger.getEntries().get(0).getMessage()
         );
         assertEquals(
-                "Существует экземпляр \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\" с датой сдачи корректировки 01.01.2014 для макета!",
+                "Существует экземпляр \"Тестовый тип налоговой формы\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\" с датой сдачи корректировки 01.01.2014 для макета!",
                 logger.getEntries().get(1).getMessage()
         );
     }
@@ -235,7 +235,7 @@ public class DeclarationDataServiceImplTest {
 
         DeclarationType declarationType = new DeclarationType();
         declarationType.setId(1);
-        declarationType.setName("Тестовый тип декларации");
+        declarationType.setName("Тестовый тип налоговой формы");
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setType(declarationType);
@@ -370,7 +370,7 @@ public class DeclarationDataServiceImplTest {
             //Nothing
         }
 
-        assertEquals("Декларация / Уведомление содержит неактуальные консолидированные данные  (расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"",
+        assertEquals("Налоговая форма содержит неактуальные консолидированные данные  (расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"",
                 logger.getEntries().get(0).getMessage());
 
         try{
@@ -415,7 +415,7 @@ public class DeclarationDataServiceImplTest {
 
         DeclarationType declarationType = new DeclarationType();
         declarationType.setId(112);
-        declarationType.setName("Тестовый тип декларации");
+        declarationType.setName("Тестовый тип налоговой формы");
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setType(declarationType);

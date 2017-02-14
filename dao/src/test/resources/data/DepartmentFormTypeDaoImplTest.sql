@@ -11,7 +11,7 @@ INSERT INTO tax_type (id, name) VALUES ('P', 'Имущество');
 INSERT INTO tax_type (id, name) VALUES ('V', 'НДС');
 INSERT INTO tax_type (id, name) VALUES ('D', 'ТЦО');
 
-INSERT INTO declaration_type (id, name, tax_type) VALUES (1, 'Вид декларации (тест)', 'T');
+INSERT INTO declaration_type (id, name, tax_type) VALUES (1, 'Вид налоговой формы (тест)', 'T');
 
 INSERT INTO form_type (id, name, tax_type) VALUES (1, 'FormType - Transport', 'T');
 INSERT INTO form_type (id, name, tax_type) VALUES (2, 'FormType - Income', 'I');

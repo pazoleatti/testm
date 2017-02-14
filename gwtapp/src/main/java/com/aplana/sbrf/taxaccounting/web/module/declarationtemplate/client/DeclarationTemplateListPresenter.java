@@ -50,7 +50,7 @@ public class DeclarationTemplateListPresenter
 
     private final PlaceManager placeManager;
 
-    @Title("Шаблоны деклараций")
+    @Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(DeclarationTemplateTokens.declarationTemplateList)
 	public interface MyProxy extends ProxyPlace<DeclarationTemplateListPresenter> {

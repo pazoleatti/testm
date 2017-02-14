@@ -21,7 +21,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/exclamation_mark.png" title="Информация по форме/декларации" ui:field="modalWindowTitle">
+    <dw:ModalWindow iconUrl="resources/img/exclamation_mark.png" title="Информация по налоговой форме" ui:field="modalWindowTitle">
         <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">

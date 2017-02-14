@@ -40,7 +40,7 @@ public class ConstIncomeHeaderBuilder extends AbstractHeaderOrFooterBuilder impl
 
         tr = startRow();
 
-        buildHeader(tr, new TextHeader("Параметры декларации"), 2, 0, true);
+        buildHeader(tr, new TextHeader("Параметры налоговой формы"), 2, 0, true);
 
         buildHeader(tr, new TextHeader("Реквизиты подразделения"), 8, 0, true);
 
@@ -48,7 +48,7 @@ public class ConstIncomeHeaderBuilder extends AbstractHeaderOrFooterBuilder impl
 
         buildHeader(tr, new TextHeader("Сведения о реорганизации"), 3, 0, true);
 
-        buildHeader(tr, new TextHeader("Ответственный за декларацию"), 6, 0, true);
+        buildHeader(tr, new TextHeader("Ответственный за налоговую форму"), 6, 0, true);
 
         tr.endTR();
 

@@ -40,13 +40,13 @@ public class ConstLandHeaderBuilder extends AbstractHeaderOrFooterBuilder implem
 
         tr = startRow();
 
-        buildHeader(tr, new TextHeader("Параметры декларации"), 3, 0, true);
+        buildHeader(tr, new TextHeader("Параметры налоговой формы"), 3, 0, true);
 
         buildHeader(tr, new TextHeader("Реквизиты подразделения"), 5, 0, true);
 
         buildHeader(tr, new TextHeader("Сведения о реорганизации"), 3, 0, true);
 
-        buildHeader(tr, new TextHeader("Ответственный за декларацию"), 7, 0, true);
+        buildHeader(tr, new TextHeader("Ответственный за налоговую форму"), 7, 0, true);
 
         tr.endTR();
 

@@ -30,7 +30,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
 
 	private static final Log LOG = LogFactory.getLog(LoadDeclarationDataServiceImpl.class);
     private static final String LOCK_MSG = "Обработка данных транспортного файла не выполнена, " +
-            "т.к. в данный момент выполняется изменение данных декларации \"%s\" " +
+            "т.к. в данный момент выполняется изменение данных налоговой формы \"%s\" " +
             "для подразделения \"%s\" " +
             "в периоде \"%s\", " +
             "инициированное пользователем \"%s\" " +

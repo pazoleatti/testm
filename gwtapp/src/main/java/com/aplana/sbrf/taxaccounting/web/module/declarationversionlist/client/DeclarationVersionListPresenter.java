@@ -97,7 +97,7 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
         void setKindLabel(String kindLabel);
     }
 
-    @Title("Версии макетов деклараций")
+    @Title("Версии макетов налоговых форм")
     @ProxyCodeSplit
     @NameToken(DeclarationTemplateTokens.declarationVersionList)
     public interface MyProxy extends ProxyPlace<DeclarationVersionListPresenter> {

@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Months;
 import com.aplana.sbrf.taxaccounting.model.Relation;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -23,7 +21,13 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
@@ -50,7 +54,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
     public static final String TITLE_FORM = "Формы источники/приемники";
-    public static final String TITLE_DEC = "Декларации приемники";
+    public static final String TITLE_DEC = "Налоговые формы приемники";
     public static final String TITLE_DEC_DEAL = "Уведомления приемники";
 
     interface UrlTemplates extends SafeHtmlTemplates {
@@ -318,11 +322,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             table.addColumn(formTypeColumn, "Вид формы");
             table.setColumnWidth(formTypeColumn, 110, Style.Unit.PX);
         } else {
-            if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
-                table.addColumn(formTypeColumn, "Вид декларации");
-            } else {
-                table.addColumn(formTypeColumn, "Вид уведомления");
-            }
+			table.addColumn(formTypeColumn, "Вид налоговой формы");
         }
         table.addColumn(yearColumn, "Год");
         table.setColumnWidth(yearColumn, 40, Style.Unit.PX);
@@ -345,11 +345,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         if (isForm) {
             table.addColumn(stateColumn, "Состояние формы");
         } else {
-            if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
-                table.addColumn(stateColumn, "Состояние декларации");
-            } else {
-                table.addColumn(stateColumn, "Состояние уведомления");
-            }
+			table.addColumn(stateColumn, "Состояние налоговой формы");
         }
         table.setColumnWidth(stateColumn, 90, Style.Unit.PX);
     }

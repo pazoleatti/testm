@@ -51,7 +51,7 @@
                 </g:HorizontalPanel>
             </g:VerticalPanel>
             <g:HorizontalPanel verticalAlignment="middle" height="26px">
-                <g:Label width="250px" text="Наименование декларации:"/>
+                <g:Label width="250px" text="Наименование налоговой формы:"/>
                 <g:TextBox width="500px" ui:field="decName" addStyleNames="{style.fix}"/>
             </g:HorizontalPanel>
             <g:HorizontalPanel verticalAlignment="middle" height="26px">

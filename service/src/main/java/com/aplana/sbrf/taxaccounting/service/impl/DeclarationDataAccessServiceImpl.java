@@ -3,12 +3,21 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,7 +77,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
         if (departmentReportPeriod.isBalance()) {
             String msg = departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType() == TaxType.DEAL ?
-                    "Уведомление не может быть создано" : "Декларация не может быть создана";
+                    "Уведомление не может быть создано" : "Налоговая форма не может быть создана";
             error(msg + " в периоде ввода остатков!", logger);
         }
 
@@ -92,7 +101,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         }
 
         // Прочие
-        error("Нет прав на доступ к декларации", logger);
+        error("Нет прав на доступ к налоговой форме", logger);
 	}
 
 	private void canRead(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -123,7 +132,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			}
 		}
 		if (!found) {
-            error("Выбранный вид декларации не назначен подразделению", logger);
+            error("Выбранный вид налоговой формы не назначен подразделению", logger);
 		}
 		// Создавать декларацию могут только контролёры УНП и контролёры
 		// текущего уровня обособленного подразделения

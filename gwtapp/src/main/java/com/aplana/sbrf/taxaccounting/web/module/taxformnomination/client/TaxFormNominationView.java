@@ -260,7 +260,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 		decGrid.addResizableColumn(departmentColumn, "Подразделение");
 
-		declarationTypeHeader = decGrid.createResizableHeader("Вид декларации", declarationType);
+		declarationTypeHeader = decGrid.createResizableHeader("Вид налоговой формы", declarationType);
 		decGrid.addColumn(declarationType, declarationTypeHeader);
 
 		departmentColumn.setSortable(true);

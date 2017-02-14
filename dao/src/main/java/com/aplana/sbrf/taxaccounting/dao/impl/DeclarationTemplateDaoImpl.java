@@ -84,7 +84,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 					new DeclarationTemplateRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Невозможно получить список деклараций");
+			throw new DaoException("Невозможно получить список налоговых форм");
 		}
 	}
 
@@ -98,7 +98,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 					new DeclarationTemplateRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Шаблон декларации с id = %d не найден в БД", declarationTemplateId);
+			throw new DaoException("Шаблон налоговой формы с id = %d не найден в БД", declarationTemplateId);
 		}
 	}
 
@@ -121,9 +121,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                     new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}, Integer.class
             );
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Выбранный вид декларации %d - %s не существует в выбранном периоде.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
+            throw new DaoException("Выбранный вид налоговой формы %d - %s не существует в выбранном периоде.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
         }catch(IncorrectResultSizeDataAccessException e){
-            throw new DaoException("Для даного вида декларации %d - %s найдено несколько активных шаблонов деклараций.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
+            throw new DaoException("Для даного вида налоговой формы %d - %s найдено несколько активных шаблонов деклараций.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
         }
 	}
 
@@ -236,8 +236,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                         }
                     });
         } catch (DataAccessException e){
-			LOG.error("Ошибка обновления деклараций.", e);
-            throw new DaoException("Ошибка обновления деклараций.", e);
+			LOG.error("Ошибка обновления налоговых форм.", e);
+            throw new DaoException("Ошибка обновления налоговых форм.", e);
         }
     }
 
@@ -273,8 +273,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         } catch (EmptyResultDataAccessException e){
             return "";
         } catch (DataAccessException e){
-			LOG.error("Ошибка получения скрипта декларации.", e);
-            throw new DaoException("Ошибка получения скрипта декларации.", e);
+			LOG.error("Ошибка получения скрипта налоговой формы.", e);
+            throw new DaoException("Ошибка получения скрипта налоговой формы.", e);
         }
     }
 
@@ -507,7 +507,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         } catch (EmptyResultDataAccessException e) {
             return false;
         }catch(IncorrectResultSizeDataAccessException e){
-            throw new DaoException("Для даного вида декларации %d - %s найдено несколько активных шаблонов деклараций.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
+            throw new DaoException("Для даного вида налоговой формы %d - %s найдено несколько активных шаблонов деклараций.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
         }
     }
 

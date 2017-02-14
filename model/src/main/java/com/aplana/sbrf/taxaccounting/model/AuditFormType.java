@@ -7,10 +7,10 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public enum AuditFormType {
 
-    FORM_TYPE_TAX(1, "Налоговая форма"),
-    FORM_TYPE_DECLARATION(2, "Декларация"),
-    FORM_TEMPLATE_VERSION(3, "Версия макета НФ"),
-    DECLARATION_VERSION(4, "Версия макета декларации"),
+    FORM_TYPE_TAX(1, "-"),
+    FORM_TYPE_DECLARATION(2, "Налоговая форма"),
+    FORM_TEMPLATE_VERSION(3, "--"),
+    DECLARATION_VERSION(4, "Версия макета налоговой формы"),
     INCOME101(5, "Форма 101"),
     INCOME102(6, "Форма 102");
 

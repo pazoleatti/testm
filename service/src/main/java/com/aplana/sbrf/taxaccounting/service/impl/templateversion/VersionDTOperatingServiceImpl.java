@@ -24,11 +24,11 @@ import java.util.List;
 public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     public static final String MSG_IS_USED_VERSION =
-            "Существует экземпляр декларации для макета:";
+            "Существует экземпляр налоговой формы для макета:";
     private static final String MSG_HAVE_DESTINATION =
-            "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
+            "Существует назначение налоговой формы в качестве источника данных для налоговой формы вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
     private static final String MSG_HAVE_SOURCE =
-            "Существует назначение декларации в качестве приёмника данных для %s типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
+            "Существует назначение налоговой формы в качестве приёмника данных для %s типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override

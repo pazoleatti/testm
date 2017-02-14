@@ -40,7 +40,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private static final long TABLE_FOND_REFBOOK_ID = RefBook.WithTable.FOND.getTableRefBookId();
     private static final long FOND_REFBOOK_ID =  RefBook.WithTable.FOND.getRefBookId();
 
-    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
+    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
     private static final String EDIT_FOUND_TEXT_D = "В периоде %s найдены экземпляры форм/уведомлений, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
@@ -432,7 +432,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                             Dialog.errorMessage("Поля не уникальны", "Поля \"" + getColumn("TAX_ORGAN_CODE").getName() + "\" и \"" + getColumn("KPP").getName() + "\" таблицы должны быть уникальны");
                                                             break;
                                                         case INCORRECT_FIELDS:
-                                                            Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
+                                                            Dialog.errorMessage("Поля блока \"Ответственный за налоговую форму\" заполнены некорректно");
                                                             break;
                                                         case COMMON_ERROR:
                                                             Dialog.errorMessage("Операция не выполнена. Запись не сохранена, обнаружены фатальные ошибки!");
@@ -476,7 +476,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                     AddLogAction addLogAction = new AddLogAction();
                                                     addLogAction.setOldUUID(result.getUuid());
                                                     addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
-                                                            "Для актуализации данных в найденных экземплярах налоговых форм/деклараций их необходимо рассчитать/обновить")));
+                                                            "Для актуализации данных в найденных экземплярах налоговых форм их необходимо рассчитать/обновить")));
                                                     dispatcher.execute(addLogAction, CallbackUtils
                                                             .defaultCallback(new AbstractCallback<AddLogResult>() {
                                                                 @Override

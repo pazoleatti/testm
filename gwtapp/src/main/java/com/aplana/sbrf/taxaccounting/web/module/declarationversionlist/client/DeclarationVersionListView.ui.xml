@@ -50,8 +50,8 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar childValign="middle" height="100%">
-                            <style:LinkAnchor ui:field="returnAnchor" title="Перейти к списку макетов деклараций"
-                                              text="Макеты деклараций" addStyleNames="{style.titleText}" disableImage="true"/>
+                            <style:LinkAnchor ui:field="returnAnchor" title="Перейти к списку макетов налоговых форм"
+                                              text="Макеты налоговых форм" addStyleNames="{style.titleText}" disableImage="true"/>
                             <g:Label text="—" addStyleNames="{style.header}"/>
                         </style:LeftBar>
                     </fm:Left>

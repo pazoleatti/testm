@@ -56,7 +56,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
 
         Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, DeclarationDataReportType.getDDReportTypeByReportType(getReportType()));
         if (value == null) {
-            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
+            throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
         }
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
@@ -129,7 +129,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
             str = "";
         }
         return String.format("Не удалось принять %s: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s. Найдены фатальные ошибки.",
-                declarationTemplate.getType().getTaxType() == TaxType.DEAL ? "уведомление" : "декларацию",
+                "налоговую форму",
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(),
                 reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                         formatter.get().format(reportPeriod.getCorrectionDate())) : "",

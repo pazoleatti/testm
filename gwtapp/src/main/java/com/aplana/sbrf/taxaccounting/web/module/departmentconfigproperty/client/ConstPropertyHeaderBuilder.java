@@ -40,13 +40,13 @@ public class ConstPropertyHeaderBuilder extends AbstractHeaderOrFooterBuilder im
 
         tr = startRow();
 
-        buildHeader(tr, new TextHeader("Параметры декларации"), 2, 0, true);
+        buildHeader(tr, new TextHeader("Параметры налоговой формы"), 2, 0, true);
 
         buildHeader(tr, new TextHeader("Реквизиты подразделения"), 4, 0, true);
 
         buildHeader(tr, new TextHeader("Сведения о реорганизации"), 3, 0, true);
 
-        buildHeader(tr, new TextHeader("Ответственный за декларацию"), 6, 0, true);
+        buildHeader(tr, new TextHeader("Ответственный за налоговую форму"), 6, 0, true);
 
         tr.endTR();
 

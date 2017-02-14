@@ -24,7 +24,7 @@ static void main(String[] args) {
             "%typeId%"       : '0',
 
             // имя типа
-            "%typeName%"     : 'Название типа декларации',
+            "%typeName%"     : 'Название типа налоговой формы',
 
             // вид налога
             "%taxType%"      : 'TaxType.INCOME',
@@ -39,7 +39,7 @@ static void main(String[] args) {
             "%templateId%"   : '0',
 
             // имя версии
-            "%templateName%" : 'Название версии макета декларации',
+            "%templateName%" : 'Название версии макета налоговой формы',
 
             // версия в формате 01.01.2015
             "%version%"      : '01.01.2016',

@@ -68,7 +68,7 @@
             <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.formDecPanel}">
                 <g:Label ui:field="formDecLabel" text="Налоговые формы" addStyleNames="{style.formDecLabel}"/>
                 <g:HTML ui:field="verSep" addStyleNames="{style.verSep}"/>
-                <style:LinkButton ui:field="formDecAnchor" text="Декларации"
+                <style:LinkButton ui:field="formDecAnchor" text="Налоговые формы"
                                   disableImage="true" addStyleNames="{style.formDecAnchor}"/>
             </g:HorizontalPanel>
             <g:HorizontalPanel spacing="0" height="22px" verticalAlignment="middle" addStyleNames="{style.checkboxes}">

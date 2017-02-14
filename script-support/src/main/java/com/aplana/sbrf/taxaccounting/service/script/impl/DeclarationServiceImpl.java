@@ -38,7 +38,7 @@ import java.util.zip.ZipInputStream;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder {
 
-    private static final String CHECK_UNIQUE_ERROR = "Декларация с заданными параметрами уже существует!";
+    private static final String CHECK_UNIQUE_ERROR = "Налоговая форма с заданными параметрами уже существует!";
     private static final String CHECK_UNIQUE_NOTIFICATION_ERROR = "Уведомление с заданными параметрами уже существует!";
 
     // Тип налога -> ID справочника с параметрами подразделения

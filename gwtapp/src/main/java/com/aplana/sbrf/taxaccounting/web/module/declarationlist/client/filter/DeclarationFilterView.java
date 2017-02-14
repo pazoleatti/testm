@@ -359,7 +359,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel2.add(departmentPicker);
         verticalPanel3.add(correctionTag);
 
-        label = getLabel("Вид декларации:");
+        label = getLabel("Вид налоговой формы:");
         verticalPanel4.add(label);
 
         label = getLabel("Состояние:");

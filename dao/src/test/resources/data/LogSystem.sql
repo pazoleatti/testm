@@ -17,7 +17,7 @@ insert into form_data_source (department_form_type_id, src_department_form_type_
 
 insert into AUDIT_FORM_TYPE(id, name)
 select 1, 'Налоговая форма' from dual UNION
-select 2, 'Декларация' from dual;
+select 2, 'Налоговая форма' from dual;
 
 insert into log_system(id, log_date, ip, event_id, user_login, roles, department_name, report_period_name,
   declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id, form_type_id, audit_form_type_id)

@@ -3,13 +3,24 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookFactoryImpl;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.ScriptExecutionService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -153,7 +164,7 @@ public class ScriptExecutionServiceTest {
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         Assert.assertEquals(2, logger.getEntries().size());
-        Assert.assertEquals("Выполнен импорт скрипта для макета декларации формы \"template\" из файла \"11-2015.groovy\"", logger.getEntries().get(0).getMessage());
+        Assert.assertEquals("Выполнен импорт скрипта для макета налоговой формы формы \"template\" из файла \"11-2015.groovy\"", logger.getEntries().get(0).getMessage());
         Assert.assertEquals("Импорт завершен", logger.getEntries().get(1).getMessage());
     }
 
@@ -174,7 +185,7 @@ public class ScriptExecutionServiceTest {
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         Assert.assertEquals(2, logger.getEntries().size());
-        Assert.assertEquals("Макет декларации \"template\" заблокирован пользователем с логином \"10\". Макет пропущен.", logger.getEntries().get(0).getMessage());
+        Assert.assertEquals("Макет налоговой формы \"template\" заблокирован пользователем с логином \"10\". Макет пропущен.", logger.getEntries().get(0).getMessage());
         Assert.assertEquals("Импорт завершен", logger.getEntries().get(1).getMessage());
     }
 
@@ -192,7 +203,7 @@ public class ScriptExecutionServiceTest {
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         Assert.assertEquals(4, logger.getEntries().size());
-        Assert.assertEquals("Выполнен импорт скрипта для макета декларации формы \"template\" из файла \"11-2015.groovy\"", logger.getEntries().get(0).getMessage());
+        Assert.assertEquals("Выполнен импорт скрипта для макета налоговой формы формы \"template\" из файла \"11-2015.groovy\"", logger.getEntries().get(0).getMessage());
         Assert.assertEquals("Выполнен импорт скрипта для справочника \"ref10\" из файла \"10.groovy\"", logger.getEntries().get(1).getMessage());
         Assert.assertEquals("Выполнен импорт скрипта для макета налоговой формы \"ft10\" из файла \"10-2016.groovy\"", logger.getEntries().get(2).getMessage());
         Assert.assertEquals("Импорт завершен", logger.getEntries().get(3).getMessage());
@@ -215,7 +226,7 @@ public class ScriptExecutionServiceTest {
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
         Assert.assertEquals(4, logger.getEntries().size());
-        Assert.assertEquals("Макет декларации/уведомления, указанный в файле \"12-2015.groovy\" не существует. Файл пропущен.", logger.getEntries().get(0).getMessage());
+        Assert.assertEquals("Макет налоговой формы, указанный в файле \"12-2015.groovy\" не существует. Файл пропущен.", logger.getEntries().get(0).getMessage());
         Assert.assertEquals("Макет налоговой формы, указанный в файле \"12-2016.groovy\" не существует. Файл пропущен.", logger.getEntries().get(1).getMessage());
         Assert.assertEquals("Справочник, указанный в файле \"12.groovy\" не существует. Файл пропущен.", logger.getEntries().get(2).getMessage());
         Assert.assertEquals("Импорт завершен", logger.getEntries().get(3).getMessage());

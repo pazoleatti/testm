@@ -11,7 +11,7 @@ import java.util.Comparator;
 public enum AuditFieldList {
 
     ALL(1, "Все поля", 1),
-    FORM_DECLARATION_TYPE(3, "Вид налоговой формы/декларации", 8),
+    FORM_DECLARATION_TYPE(3, "Вид налоговой формы", 8),
     TYPE(12, "Тип формы", 6),
     PERIOD(4, "Период", 4),
     DEPARTMENT(5, "Подразделение", 5),

@@ -136,7 +136,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	                        " values (SEQ_DEPT_DECLARATION_TYPE.nextval, ?, ?)",
                     departmentId, declarationTypeId);
 		} catch (DataIntegrityViolationException e) {
-    		throw new DaoException("Декларация указанного типа уже назначена подразделению", e);
+    		throw new DaoException("Налоговая форма указанного типа уже назначена подразделению", e);
     	}
 		
 	}
@@ -232,8 +232,8 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     new Object[]{declarationTypeId},
                     DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
         } catch (DataAccessException e){
-			LOG.error("Получение списка деклараций назначений", e);
-            throw new DaoException("Получение списка деклараций назначений", e);
+			LOG.error("Получение списка налоговых форм назначений", e);
+            throw new DaoException("Получение списка налоговых форм назначений", e);
         }
     }
 

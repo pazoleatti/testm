@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.aspectj.weaver.loadtime.definition.Definition;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +35,7 @@ public class DeclarationTypeDaoTest {
 	public void testGet() {
 		DeclarationType dt = declarationTypeDao.get(1);
 		assertEquals(1, dt.getId());
-		assertEquals("Вид декларации 1", dt.getName());
+		assertEquals("Вид налоговой формы 1", dt.getName());
 		assertEquals(TaxType.TRANSPORT, dt.getTaxType());
 	}
 	

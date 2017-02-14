@@ -66,7 +66,7 @@ def calculate() {
     def asnuId = declarationData.asnuId;
 
     if (asnuId == null) {
-        throw new ServiceException("Для декларации " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
+        throw new ServiceException("Для налоговой формы " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
     }
 
     //выставляем параметр что скрипт не формирует новый xml-файл
@@ -74,7 +74,7 @@ def calculate() {
 
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
-    logger.info("Рассчет данных декларации. Записей о физ. лицах в декларации: " + ndflPersonList.size());
+    logger.info("Рассчет данных налоговой формы. Записей о физ. лицах в декларации: " + ndflPersonList.size());
 
     //Два списка для создания новых записей и для обновления существующих
     List<NdflPerson> createdPerson = new ArrayList<NdflPerson>();

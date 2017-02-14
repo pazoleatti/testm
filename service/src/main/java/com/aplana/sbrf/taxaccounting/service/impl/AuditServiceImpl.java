@@ -206,7 +206,7 @@ public class AuditServiceImpl implements AuditService {
                 return auditDao.getLogsBusinessForControlUnp(filter);
             }
         } catch (DaoException e) {
-            throw new ServiceException("Поиск по НФ/декларациям.", e);
+            throw new ServiceException("Поиск по налоговым формам.", e);
         }
 
 
