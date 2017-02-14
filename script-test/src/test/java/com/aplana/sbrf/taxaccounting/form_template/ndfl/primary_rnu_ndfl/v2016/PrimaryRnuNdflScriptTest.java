@@ -21,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -125,7 +126,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
         result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "foo"));
         result.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(new Random().nextInt(1000))));
-
         return result;
     }
 
@@ -134,6 +134,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
      *
      * @throws IOException
      */
+    @Ignore
     @Test
     public void calculateTest() throws IOException {
         final int ndflPersonSize = 5;

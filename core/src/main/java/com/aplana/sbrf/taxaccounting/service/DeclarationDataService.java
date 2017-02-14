@@ -64,7 +64,7 @@ public interface DeclarationDataService {
      * @param declarationData
      * @param userInfo
      */
-    void setXlsxDataBlobs(Logger logger,
+    String setXlsxDataBlobs(Logger logger,
                          DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
 	/**
 	 * Получить декларацию

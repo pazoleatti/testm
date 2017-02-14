@@ -56,10 +56,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     Label formKindLabel;
     @UiField
     Label formKind;
-    /*@UiField
-    Label formTypeLabel;
-    @UiField
-    Label formType;*/
     @UiField
 	Label reportPeriod;
 	@UiField
@@ -320,7 +316,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         int top = (num == 4) ?
                 TABLE_TOP4 : ((num == 3) ? TABLE_TOP3 : TABLE_TOP2);
         noPdfPanel.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
-        viewPdf.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
     }
 
     @Override

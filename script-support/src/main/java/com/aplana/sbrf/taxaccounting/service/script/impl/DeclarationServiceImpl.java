@@ -329,7 +329,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public void validateDeclaration (DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile) {
+    public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile) {
         declarationDataService.validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, new LockStateLogger() {
             @Override
             public void updateState(String state) {

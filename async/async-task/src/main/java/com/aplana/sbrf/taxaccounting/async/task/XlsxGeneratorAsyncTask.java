@@ -37,6 +37,9 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LockDataService lockService;
 
+    @Autowired
+    private ReportService reportService;
+
     @Override
     protected ReportType getReportType() {
         return ReportType.EXCEL_DEC;
@@ -70,12 +73,14 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
-            declarationDataService.setXlsxDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
+            String uuid = declarationDataService.setXlsxDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
                     lockService.updateState(lock, lockDate, state);
                 }
             });
+            reportService.createDec(declarationData.getId(), uuid, DeclarationDataReportType.EXCEL_DEC);
+            return new TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
         }
         return new TaskStatus(true, null);
     }
