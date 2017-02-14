@@ -47,7 +47,7 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px">
-                        <g:Label width="150px">Возможность выбора записиси</g:Label>
+                        <g:Label width="150px">Возможность выбора записи</g:Label>
                         <g:CheckBox ui:field="selectRecordBox"/>
                     </g:HorizontalPanel>
 
