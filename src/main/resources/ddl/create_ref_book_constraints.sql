@@ -57,7 +57,7 @@ alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_oblig forei
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_type foreign key(type) references ref_book_record(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_re_code foreign key(reorg_form_code) references ref_book_reorganization(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_signatory foreign key(signatory_id) references ref_book_signatory_mark(id);
-alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id) disable novalidate;
+alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
 alter table declaration_template add constraint fk_declaration_template_fkind foreign key(form_kind) references declaration_kind(id);
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
 alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);
