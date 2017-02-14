@@ -86,6 +86,9 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                         params.put("alias", ddReportType.getReportAlias());
                         if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
                             params.put("subreportParamValues", action.getSubreportParamValues());
+                            if (action.getSelectedRow() != null) {
+                                params.put("selectedRecord", action.getSelectedRow());
+                            }
                         }
                     }
                     asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {

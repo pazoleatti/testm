@@ -74,7 +74,7 @@ public class RefBookPersonServiceTest {
         result.setInn(inn);
         result.setInnForeign(innForeign);
         result.setSnils(snils);
-        result.setDocumentType(docType);
+        result.setDocumentTypeId(5L);
         result.setDocumentNumber(docNumber);
         result.setLastName(lastName);
         result.setFirstName(firstName);
@@ -199,7 +199,7 @@ public class RefBookPersonServiceTest {
         result.add(new BaseWeigthCalculator<PersonData>(10) {
             @Override
             public double calc(PersonData a, PersonData b) {
-                boolean result = equalsNullSafe(prepareStr(a.getDocumentType()), prepareStr(b.getDocumentType()));
+                boolean result = equalsNullSafe(a.getDocumentTypeId(), b.getDocumentTypeId());
                 if (!result) {
                     return 0D;
                 }

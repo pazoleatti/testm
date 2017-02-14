@@ -646,7 +646,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo, LockStateLogger stateLogger) {
+    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger) {
         Map<String, Object> params = new HashMap<String, Object>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = null;
@@ -663,7 +663,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 scriptSpecificReportHolder.setFileInputStream(inputStream);
                 scriptSpecificReportHolder.setFileName(ddReportType.getSubreport().getAlias());
                 scriptSpecificReportHolder.setSubreportParamValues(subreportParamValues);
-                params.put(DeclarationDataScriptParams.DOC_DATE, new Date());
+                scriptSpecificReportHolder.setSelectedRecord(selectedRecord);
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
                 stateLogger.updateState("Формирование отчета");
                 if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
@@ -685,6 +685,32 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 reportFile.delete();
         }
     }
+
+    @Override
+    public PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
+        InputStream inputStream = null;
+        if (ddReportType.getSubreport().getBlobDataId() != null) {
+            inputStream = blobDataService.get(ddReportType.getSubreport().getBlobDataId()).getInputStream();
+        }
+        try {
+            scriptSpecificReportHolder.setDeclarationSubreport(ddReportType.getSubreport());
+            scriptSpecificReportHolder.setFileInputStream(inputStream);
+            scriptSpecificReportHolder.setFileName(ddReportType.getSubreport().getAlias());
+            scriptSpecificReportHolder.setSubreportParamValues(subreportParamValues);
+            params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.PREPARE_SPECIFIC_REPORT, logger, params);
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
+            }
+
+            return scriptSpecificReportHolder.getPrepareSpecificReportResult();
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
 
     public void setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         File xlsxFile = null;

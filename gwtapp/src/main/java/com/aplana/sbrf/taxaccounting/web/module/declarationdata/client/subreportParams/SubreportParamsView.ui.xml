@@ -1,15 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
              xmlns:t="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:dw="urn:import:com.aplana.gwt.client">
 
     <ui:style>
-        .content {
-            margin: 10px;
-        }
-
         .footerPanel {
             background-color: #E8E1CF;
             width: 100%;
@@ -22,24 +18,47 @@
         }
 
         .table {
-            border: 1px solid #aeaeac;
-            border-top: 0;
+            top: 0;
+            left: 5px;
+            right: 5px;
         }
 
-        .btns {
-            margin-left: 5px;
+        .label {
+            font-weight: bold;
+            font-size: 13px;
+            margin: 0px 10px 4px 10px;
+        }
+
+        .horSep {
+            height: 1px;
+            margin: 4px 9px 0px 9px;
+            border-top: 1px solid #aeaeac;
         }
 
     </ui:style>
 
-    <dw:ModalWindow ui:field="modalWindow" iconUrl="resources/img/printer-16.png" title="Формирование отчетов">
-        <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
+    <dw:ModalWindow ui:field="modalWindow" iconUrl="resources/img/printer-16.png" title="Формирование отчетов"
+                    resizable="false">
+        <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite" width="550px">
             <g:cell height="100%">
                 <g:VerticalPanel spacing="10" ui:field="editPanel" width="100%"/>
             </g:cell>
 
+            <g:Label ui:field="horSep" addStyleNames="{style.horSep}"/>
+
+            <g:Label ui:field="selectRecordLabel" text="Выбор запсиси:"  addStyleNames="{style.label}"/>
+
+            <g:ResizeLayoutPanel ui:field="resultPanel" addStyleNames="{style.table}" visible="false" width="540px">
+                <t:GenericDataGrid height="100%" width="100%" ui:field="resultTable"/>
+            </g:ResizeLayoutPanel>
+
+            <pager:FlexiblePager ui:field="pager"
+                                 location="CENTER" showFastForwardButton="false" visible="false"
+                                 fastForwardRows="0" showLastPageButton="true" type="resultTable"/>
+
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel addStyleNames="{style.footerPanel}">
+                    <g:Button addStyleNames="{style.footerButton}" text="Поиск" ui:field="findButton"/>
                     <g:Button addStyleNames="{style.footerButton}" text="Сформировать" ui:field="createButton"/>
                     <g:Button addStyleNames="{style.footerButton}" text="Отмена" ui:field="cancelButton"/>
                 </g:FlowPanel>

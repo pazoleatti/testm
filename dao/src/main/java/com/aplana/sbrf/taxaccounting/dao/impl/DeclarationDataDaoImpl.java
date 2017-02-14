@@ -619,4 +619,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return null;
         }
     }
+
+    @Override
+    public List<DeclarationData> findSourceDeclarationData(long declarationDataId) {
+        String query = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, drp.report_period_id, " +
+                "drp.department_id from DEPARTMENT_REPORT_PERIOD drp, DECLARATION_DATA dd " +
+                "inner join DECLARATION_DATA_CONSOLIDATION ddc on dd.ID = ddc.SOURCE_DECLARATION_DATA_ID " +
+                "where ddc.TARGET_DECLARATION_DATA_ID = :declarationDataId and drp.id in " +
+                "(select DEPARTMENT_REPORT_PERIOD_ID from declaration_data where id = :declarationDataId)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId);
+        return getNamedParameterJdbcTemplate().query(query, params, new DeclarationDataRowMapper());
+    }
 }

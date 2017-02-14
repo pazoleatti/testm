@@ -270,6 +270,7 @@ alter table declaration_subreport add constraint decl_subrep_pk primary key(id);
 alter table declaration_subreport add constraint decl_subrep_unq_combo unique (declaration_template_id, alias);
 alter table declaration_subreport add constraint decl_subrep_fk_decl_template foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
 alter table declaration_subreport add constraint decl_subrep_fk_blob_data foreign key (blob_data_id) references blob_data(id);
+alter table declaration_subreport add constraint chk_decl_subrep_sel_record check(select_record in (0,1));
 
 alter table declaration_report add constraint declaration_report_unq_combo unique (declaration_data_id, type, subreport_id);
 alter table declaration_report add constraint decl_report_fk_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;

@@ -1,12 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams;
 
 import com.aplana.gwt.client.ModalWindow;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParam;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefBookParamInfo;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -14,7 +17,11 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -30,6 +37,8 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     private static final int STRING_VALUE_MAX_LENGTH = 2000;
     private static final int NUMBER_VALUE_PRECISION = 19;
 
+    private Label noResultLabel = new Label();
+
     public interface Binder extends UiBinder<PopupPanel, SubreportParamsView> {
     }
 
@@ -40,32 +49,71 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     ModalWindow modalWindow;
 
     @UiField
+    Button findButton;
+
+    @UiField
     Button createButton;
 
     @UiField
     Button cancelButton;
 
-    private final PopupPanel widget;
+    @UiField
+    Label horSep, selectRecordLabel;
+
+    @UiField
+    ResizeLayoutPanel resultPanel;
+
+    @UiField
+    DataGrid<DataRow<Cell>> resultTable;
+
+    @UiField
+    FlexiblePager pager;
+
+    //private final PopupPanel widget;
     Map<DeclarationSubreportParam, HasValue> widgets;
+
+    ListDataProvider<DataRow<Cell>> model;
+    private SingleSelectionModel<DataRow<Cell>> singleSelectionModel;
+
+    private DataRowColumnFactory factory = new DataRowColumnFactory();
 
     @Inject
     public SubreportParamsView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
-        widget = uiBinder.createAndBindUi(this);
-        widget.setAnimationEnabled(true);
+        initWidget(uiBinder.createAndBindUi(this));
+
+        pager.setDisplay(resultTable);
+        // хак для горизонтального скроллбара у пустой таблицы
+        resultTable.setEmptyTableWidget(noResultLabel);
+
+        singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (event.getSource() == null) {
+                    createButton.setEnabled(false);
+                } else {
+                    createButton.setEnabled(true);
+                }
+            }
+        });
+
+        resultTable.setSelectionModel(singleSelectionModel);
+
+        model = new ListDataProvider<DataRow<Cell>>();
+        model.addDataDisplay(resultTable);
+
     }
 
-    @Override
-    public Widget asWidget() {
-        return widget;
+    @UiHandler("findButton")
+    public void onFind(ClickEvent event) {
+        getUiHandlers().onFind();
     }
 
-
-   @UiHandler("createButton")
+    @UiHandler("createButton")
     public void onCreate(ClickEvent event) {
        getUiHandlers().onCreate();
     }
-
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
@@ -78,6 +126,17 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
         editPanel.clear();
         if (widgets != null) {
             widgets.clear();
+        }
+        if (declarationSubreport.isSelectRecord()) {
+            createButton.setEnabled(false);
+            findButton.setVisible(true);
+            horSep.setVisible(false);
+            selectRecordLabel.setVisible(false);
+        } else {
+            createButton.setEnabled(true);
+            findButton.setVisible(false);
+            horSep.setVisible(false);
+            selectRecordLabel.setVisible(false);
         }
         Map<DeclarationSubreportParam, HasValue> widgets = new LinkedHashMap<DeclarationSubreportParam, HasValue>();
         for (final DeclarationSubreportParam subreportParam : declarationSubreport.getDeclarationSubreportParams()) {
@@ -94,7 +153,7 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
                 label = new Label(subreportParam.getName() + ":");
             }
             label.getElement().getStyle().setProperty("lineHeight", "12px");
-            label.getElement().getStyle().setProperty("width", "150px");
+            label.getElement().getStyle().setProperty("width", "200px");
             oneField.add(label);
             oneField.setCellHorizontalAlignment(label, HasHorizontalAlignment.ALIGN_LEFT);
             oneField.setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -142,7 +201,7 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
             if (widget instanceof DateMaskBoxPicker) {
                 widget.getElement().getStyle().setProperty("width", "110px");
             } else {
-                widget.getElement().getStyle().setProperty("width", "196px");
+                //widget.getElement().getStyle().setProperty("width", "196px");
             }
             oneField.add(widget);
             oneField.setCellWidth(widget, "80%");
@@ -151,7 +210,9 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
             editPanel.add(oneField);
             widgets.put(subreportParam, (HasValue) widget);
+            modalWindow.center();
         }
+
         this.widgets = widgets;
     }
 
@@ -258,5 +319,44 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
         }
     }
 
+    @Override
+    public void setTableData(PrepareSpecificReportResult prepareSpecificReportResult) {
+        if (prepareSpecificReportResult == null) {
+            pager.setVisible(false);
+            resultPanel.setVisible(false);
+            resultPanel.setHeight("0px");
+            horSep.setVisible(false);
+            selectRecordLabel.setVisible(false);
+            modalWindow.center();
+        } else {
+            pager.setVisible(true);
+            resultPanel.setVisible(true);
+            resultPanel.setHeight("150px");
+            horSep.setVisible(true);
+            selectRecordLabel.setVisible(true);
+            modalWindow.center();
 
+            factory.setReadOnly(true);
+
+            while (resultTable.getColumnCount() > 0) {
+                resultTable.removeColumn(0);
+            }
+
+            for (Column column: prepareSpecificReportResult.getTableColumns()) {
+                com.google.gwt.user.cellview.client.Column<DataRow<Cell>, ?> tableCol = factory.createTableColumn(column, resultTable);
+                resultTable.addColumn(tableCol, column.getName());
+                resultTable.setColumnWidth(tableCol, column.getWidth(), Style.Unit.EM);
+            }
+            model.getList().clear();
+            if (prepareSpecificReportResult.getDataRows() != null) {
+                model.getList().addAll(prepareSpecificReportResult.getDataRows());
+            }
+            resultTable.redraw();
+        }
+    }
+
+    @Override
+    public DataRow<Cell> getSelectedRow() {
+        return singleSelectionModel.getSelectedObject();
+    }
 }

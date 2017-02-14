@@ -83,12 +83,16 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
 
         Map<String, Object> subreportParamValues = null;
+        DataRow<Cell> selectedRecord = null;
         if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
             subreportParamValues = (Map<String, Object>)params.get("subreportParamValues");
+            if (params.containsKey("selectedRecord")) {
+                selectedRecord = (DataRow<Cell>)params.get("selectedRecord");
+            }
         }
 
         if (declarationData != null) {
-            String uuid = declarationDataService.createSpecificReport(logger, declarationData, ddReportType, subreportParamValues, userInfo, new LockStateLogger() {
+            String uuid = declarationDataService.createSpecificReport(logger, declarationData, ddReportType, subreportParamValues, selectedRecord, userInfo, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
                     lockService.updateState(lock, lockDate, state);

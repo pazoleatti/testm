@@ -272,6 +272,14 @@ public interface DeclarationService {
      * @param kpp
      * @return
      */
-
+    @SuppressWarnings("unused")
     DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
+
+    /**
+     * Найти декларации источники
+     * @param declarationDataId
+     * @return
+     */
+    @SuppressWarnings("unused")
+    List<DeclarationData> findSourceDeclarationData(long declarationDataId);
 }

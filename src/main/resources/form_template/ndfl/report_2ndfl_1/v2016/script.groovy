@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
@@ -1128,7 +1129,20 @@ class PairKppOktmo {
     }
 }
 
+/************************************* СПЕЦОТЧЕТ **********************************************************************/
+
+@Field final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
+
 def createSpecificReport() {
+    def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
+    println alias
+    if (alias == ALIAS_PRIMARY_RNU_W_ERRORS) {
+        println "here"
+        createPrimaryRnuWithErrors()
+        return
+    }
+    println "not here"
+
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
 
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
@@ -1137,4 +1151,21 @@ def createSpecificReport() {
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+def createPrimaryRnuWithErrors() {
+    def sourceDeclarationDataList = declarationService.findSourceDeclarationData(declarationData.id)
+    println sourceDeclarationDataList
+    def writer = scriptSpecificReportHolder.getFileOutputStream()
+    def workbook = getSpecialReportTemplate()
+    workbook.write(writer)
+    writer.close()
+    scriptSpecificReportHolder
+            .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+// Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
+def getSpecialReportTemplate() {
+    def blobData = blobDataServiceDaoImpl.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
+    new XSSFWorkbook(blobData.getInputStream())
 }
