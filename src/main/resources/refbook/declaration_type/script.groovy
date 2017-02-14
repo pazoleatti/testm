@@ -104,6 +104,47 @@ def getPeriodNdflMap() {
 
 def importTF() {
     logger.setMessageDecorator(null)
+
+    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN);
+    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN);
+    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN);
+    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN);
+    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN);
+
+    if (UploadFileName != null
+        && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
+        && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
+    ) {
+        importNDFL()
+    } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
+        import115111()
+    } else if (
+        patternKvOtch.matcher(UploadFileName).matches() ||
+        patternUoOtch.matcher(UploadFileName).matches() ||
+        patternIvOtch.matcher(UploadFileName).matches() ||
+        patternUuOtch.matcher(UploadFileName).matches()
+    ) {
+        importOtch()
+    } else {
+        throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName));
+    }
+}
+
+def importNDFL() {
+    _importTF()
+}
+
+def import115111() {
+    _importTF()
+}
+
+def importOtch() {
+    _importTF()
+}
+
+@Deprecated
+def _importTF() {
+    logger.setMessageDecorator(null)
     Integer declarationTypeId;
     int departmentId;
     String reportPeriodCode;
@@ -402,4 +443,39 @@ def importTF() {
     } finally {
         IOUtils.closeQuietly(inputStream);
     }
+}
+
+def readXml1151111() {
+    def sett = [:]
+    sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR])
+
+    try {
+        SAXParserFactory factory = SAXParserFactory.newInstance()
+        SAXParser saxParser = factory.newSAXParser()
+        SAXHandler handler = new SAXHandler(sett)
+        saxParser.parse(ImportInputStream, handler)
+        reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD)
+        try {
+            year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR))
+        } catch (NumberFormatException nfe) {
+            logger.error("Файл «%s» не загружен: Не удалось извлечь данные о календарном годе из элемента Файл.Документ.ОтчетГод", UploadFileName)
+            return null
+        }
+    } catch (IOException e) {
+        e.printStackTrace()
+        logger.error("Файл «%s» не загружен: Ошибка чтения файла", UploadFileName)
+        return null
+    } catch (ParserConfigurationException e) {
+        e.printStackTrace()
+        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
+        return null
+    } catch (SAXException e) {
+        e.printStackTrace()
+        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
+        return null
+    } finally {
+        IOUtils.closeQuietly(ImportInputStream)
+    }
+
+    return [reportPeriodCode, year]
 }
