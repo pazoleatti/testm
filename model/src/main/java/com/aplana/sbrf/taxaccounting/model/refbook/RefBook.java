@@ -82,26 +82,38 @@ public class RefBook implements Serializable {
 
 	/**	Индентификаторы таблиц, используются датапровайдерами */
 	public enum Id {
-		ASNU(900), 									// АСНУ
-		REGION(923), 								// Субъекты РФ
-		NDFL(950), 									// Настройки подразделений по НДФЛ
-		NDFL_DETAIL(951), 							// Настройки подразделений по НДФЛ (таблица)
-		FOND(960), 									// Настройки подразделений по Сборы, взносы
-		FOND_DETAIL(961), 							// Настройки подразделений по Сборы, взносы (таблица)
+		// только чтение
+		PERIOD_CODE(8),								// Коды, определяющие налоговый (отчётный) период
+		USER(74),                                   // Пользователи
 		SEC_ROLE(95), 								// Роли
-		DEPARTMENT(30L),							// Подразделения
+		OKTMO(96),                                  // Территорий муниципальных образований (ОКТМО)
 		DEPARTMENT_TYPE(103),						// Типы подразделений
+		AUDIT_FIELD(104), 							// Список полей для журнала аудита
+		CONFIGURATION_PARAM(105), 					// Конфигурационные параметры
+		DECLARATION_TEMPLATE(207), 		            // Макеты налоговых форм
+		ASNU(900), 									// АСНУ
+		//DEDUCTION_MARK(927),
+		DOC_STATE(929),								// Состояние ЭД
+		DECLARATION_DATA_TYPE_REF_BOOK(931), 		// Випы налоговых форм (declaration)
+		DECLARATION_DATA_KIND_REF_BOOK(932), 		// Типы форм (declaration)
+		INCOME_KIND(933),							// Виды дохода
+		ATTACH_FILE_TYPE(934),						// Категории прикрепленных файлов
+		TAX_INSPECTION(935),						// Коды налоговых органов
+		NDFL_RATE(936),								// Ставка НДФЛ
 		FIAS_OPERSTAT(1010), 						// < ФИАС
 		FIAS_SOCRBASE(1020),
 		FIAS_ADDR_OBJECT(1030),
 		FIAS_HOUSE(1040),
 		FIAS_HOUSEINT(1050),
 		FIAS_ROOM(1060), 							// ФИАС >
-        DECLARATION_TEMPLATE(207), 		            // Макеты налоговых форм
-        DECLARATION_DATA_KIND_REF_BOOK(932), 		// Типы форм (declaration)
-		DECLARATION_DATA_TYPE_REF_BOOK(931), 		// Випы налоговых форм (declaration)
-		CONFIGURATION_PARAM(105), 					// Конфигурационные параметры
-		AUDIT_FIELD(104), 							// Список полей для журнала аудита
+		// редактируемые
+		TAX_PLACE_TYPE_CODE(2),						// Коды представления налоговой декларации по месту нахождения (учёта)
+		COUNTRY(10), 								// Страны
+		DETACH_TAX_PAY(25),                         // Признак возложения обязанности по уплате налога на обособленное подразделение
+		MAKE_CALC(26),								// Признак составления расчёта
+		DEPARTMENT(30L),							// Подразделения
+		MARK_SIGNATORY_CODE(35),					// Признак лица, подписавшего документ
+		DOCUMENT_CODES(360),						// Виды документов, удостоверяющих личность
 		EMAIL_CONFIG(400), 							// Настройки почтового клиента
 		ASYNC_CONFIG(401), 							// Настройки асинхронных задач
 		PERSON_ADDRESS(901),                        // Адреса физических лиц
@@ -109,29 +121,22 @@ public class RefBook implements Serializable {
 		TAXPAYER_STATUS(903),						// Статус налогоплательщика
 		PERSON(904), 								// Физ. лица
 		ID_TAX_PAYER(905),							// Идентификатор налогоплательщика
-		REORGANIZATION(928),						// Коды форм реорганизации (ликвидации) организации
-		TAX_PLACE_TYPE_CODE(2),						// Коды представления налоговой декларации по месту нахождения (учёта)
-		PERIOD_CODE(8),								// Коды, определяющие налоговый (отчётный) период
-		MARK_SIGNATORY_CODE(35),					// Признак лица, подписавшего документ
-		DOC_STATE(929),								// Состояние ЭД
-		USER(74),                                   // Пользователи
-		COUNTRY(10), 								// Страны
-		DOCUMENT_CODES(360),						// Виды документов, удостоверяющих личность
-		INCOME_CODE(922),							// Коды видов доходов
-		INCOME_KIND(933),							// Виды дохода
 		DEDUCTION_TYPE(921),						// Коды видов вычетов
+		INCOME_CODE(922),							// Коды видов доходов
+		REGION(923), 								// Субъекты РФ
 		PRESENT_PLACE(924),							// Коды места представления расчета
 		OKVED(925),									// Общероссийский классификатор видов экономической деятельности
-		ATTACH_FILE_TYPE(934),						// Категории прикрепленных файлов
-		TAX_INSPECTION(935),						// Коды налоговых органов
-		NDFL_RATE(936),								// Ставка НДФЛ
+		REORGANIZATION(928),						// Коды форм реорганизации (ликвидации) организации
 		FILL_BASE(937),								// Основания заполнения сумм страховых взносов
 		TARIFF_PAYER(938),							// Коды тарифа плательщика
 		HARD_WORK(939),								// Коды классов условий труда
-        NDFL_REFERENCES(964),                       // Реестр справок
-		OKTMO(96),                                  // Территорий муниципальных образований (ОКТМО)
-        KBK(940),                                   // Классификатор доходов бюджетов Российской Федерации
-		PERSON_CATEGORY(941);						// Категорий застрахованных лиц
+		KBK(940),                                   // Классификатор доходов бюджетов Российской Федерации
+		PERSON_CATEGORY(941),						// Категорий застрахованных лиц
+		NDFL(950), 									// Настройки подразделений по НДФЛ
+		NDFL_DETAIL(951), 							// Настройки подразделений по НДФЛ (таблица)
+		FOND(960), 									// Настройки подразделений по Сборы, взносы
+		FOND_DETAIL(961), 							// Настройки подразделений по Сборы, взносы (таблица)
+		NDFL_REFERENCES(964);                       // Реестр справок
 
         private final long id;
 
@@ -292,6 +297,17 @@ public class RefBook implements Serializable {
 			}
 		}
 		throw new IllegalArgumentException("Attribute \"" + alias + "\" not found in refbook (id=" + id + ", \"" + name + "\"))");
+	}
+
+	public List<RefBookAttribute> getRefAttributes() {
+		List<RefBookAttribute> result = new ArrayList<RefBookAttribute>();
+		// разыменовывание ссылок
+		for (RefBookAttribute attribute : attributes) {
+			if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
+				result.add(attribute);
+			}
+		}
+		return result;
 	}
 
 	/**
