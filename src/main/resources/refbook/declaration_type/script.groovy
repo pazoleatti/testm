@@ -155,9 +155,6 @@ def importOtch() {
     // Дата создания файла
     Date createDateFile = null
 
-    // Категория прикрепленного файла
-    AttachFileType attachFileType = null
-
     def String nodeNameFind = null
     def String attrNameFind = "ИмяОбрабФайла"
 
@@ -232,8 +229,8 @@ def importOtch() {
     // todo oshelepaev Проверка того, что файл ответа не был загружен ранее https://jira.aplana.com/browse/SBRFNDFL-338
     // Ожидаю https://jira.aplana.com/browse/SBRFNDFL-381
 
-    declarationDataId = declarationDataList.get(0)?.id
-    attachFileType = AttachFileType.TYPE_3
+    def declarationDataId = declarationDataList.get(0)?.id
+    AttachFileType attachFileType = AttachFileType.TYPE_3
 }
 
 @Deprecated
