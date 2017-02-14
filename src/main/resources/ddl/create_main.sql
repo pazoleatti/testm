@@ -859,7 +859,8 @@ create table declaration_subreport
   name                    varchar2(1000) not null,
   ord                     number(9)      not null,
   alias                   varchar2(128)  not null,
-  blob_data_id            varchar2(36)
+  blob_data_id            varchar2(36),
+  select_record           number(1) default 0 not null
 );
 
 comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
@@ -869,6 +870,7 @@ comment on column declaration_subreport.name is 'Наименование спе
 comment on column declaration_subreport.ord is 'Порядковый номер';
 comment on column declaration_subreport.alias is 'Код спец. отчета';
 comment on column declaration_subreport.blob_data_id is 'Макет JasperReports для формирования печатного представления формы';
+comment on column declaration_subreport.select_record is 'Возможность поиска/выбора записи при формировании спец. отчета';
 comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
 
 --------------------------------------------------------------------------------------------------------
