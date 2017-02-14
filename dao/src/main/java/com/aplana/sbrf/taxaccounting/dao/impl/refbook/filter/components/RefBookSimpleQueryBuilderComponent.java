@@ -242,7 +242,9 @@ public class RefBookSimpleQueryBuilderComponent {
 
         ps.appendQuery("SELECT * FROM (");
         if (onlyId) {
-            ps.appendQuery("SELECT record_id FROM ");
+			ps.appendQuery("SELECT ");
+			ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+			ps.appendQuery(" FROM ");
         } else {
             ps.appendQuery("SELECT res.*, rownum row_number_over FROM ");
         }

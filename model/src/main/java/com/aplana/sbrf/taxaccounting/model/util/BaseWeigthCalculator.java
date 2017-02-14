@@ -13,7 +13,7 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
     /**
      * Вес параметра
      */
-    private double weigth;
+    protected double weigth;
 
     /**
      * Конструктор
@@ -91,6 +91,12 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
             return null;
         }
     }
+
+
+    protected  boolean equalsNullSafeStr(String a, String b) {
+        return equalsNullSafe(prepareStr(a), prepareStr(b));
+    }
+
 
     /**
      * Основное условие сравнения параметров, если оба параметра не заданы то считается что они равны, если

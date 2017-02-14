@@ -35,7 +35,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (204, 'Коды налоговых органов', 0, 0, 1, null);
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (205, 'КПП налоговых органов', 0, 0, 1, null);
 
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (207, 'Виды форм', 1, 0, 1, null, 'DECLARATION_TYPE');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (207, 'Макеты форм', 1, 0, 1, null, 'DECLARATION_TYPE');
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) VALUES (360,'Коды документов',1,0,0,null,'REF_BOOK_DOC_TYPE');
 

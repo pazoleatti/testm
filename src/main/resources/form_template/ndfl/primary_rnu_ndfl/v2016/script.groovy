@@ -10,11 +10,12 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.*
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.model.PersonData
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 
 // com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
-import com.aplana.sbrf.taxaccounting.refbook.*
 import groovy.transform.Field
 import groovy.transform.Memoized
 import groovy.util.slurpersupport.NodeChild
@@ -27,7 +28,6 @@ import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.Attribute
 import javax.xml.stream.events.Characters
 import javax.xml.stream.events.EndElement
-import javax.xml.stream.events.Namespace
 import javax.xml.stream.events.StartElement
 import javax.xml.stream.events.XMLEvent
 
@@ -83,13 +83,7 @@ def calculate() {
 
     for (NdflPerson ndflPerson : ndflPersonList) {
 
-        PersonData personData = createPersonData(ndflPerson);
-
-        //Зполнение идентификаторов справочников
-        personData.setCitizenshipId(findCountryId(ndflPerson.getCitizenship()));
-        personData.setDocumentTypeId(findDocumentTypeByCode(ndflPerson.getIdDocType()));
-        personData.setAsnuId(asnuId);
-        personData.setTaxPayerStatusId(findTaxpayerStatusByCode(ndflPerson.getStatus()));
+        PersonData personData = createPersonData(ndflPerson, asnuId);
 
         Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD);
 
@@ -487,19 +481,53 @@ def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAtt
  * @param person
  * @return
  */
-PersonData createPersonData(NdflPerson person) {
+PersonData createPersonData(NdflPerson person, Long asnuId) {
     PersonData personData = new PersonData();
+
     personData.lastName = person.getLastName();
     personData.firstName = person.getFirstName();
     personData.middleName = person.getMiddleName();
+
     personData.inn = person.getInnNp();
     personData.innForeign = person.getInnForeign();
     personData.snils = person.getSnils();
     personData.birthDate = person.getBirthDay();
-    personData.citizenship = person.getCitizenship();
+
+    personData.taxPayerStatusId = findTaxpayerStatusByCode(person.getStatus());
+    personData.citizenshipId = findCountryId(person.getCitizenship());
+
+    //Идентификаторы
     personData.inp = person.getInp();
-    personData.documentType = person.getIdDocType();
+    personData.asnuId = asnuId;
+
+    //Документы
+    personData.documentTypeId = findDocumentTypeByCode(person.getIdDocType());
     personData.documentNumber = person.getIdDocNumber();
+
+    //Выставляем тип адреса
+    int addressType = person.getAddress() != null && !person.getAddress().isEmpty() ? 1 : 0;
+    //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
+
+    //Устанавливаем тип адреса, проверяется при сравнении
+    personData.addressType = addressType;
+
+    if (addressType == 0){
+        //Адрес в РФ
+        personData.regionCode = person.getRegionCode();
+        personData.postalCode = person.getPostIndex();
+        personData.district = person.getArea();
+        personData.city = person.getCity();
+        personData.locality = person.getLocality();
+        personData.street = person.getStreet();
+        personData.house = person.getHouse();
+        personData.build = person.getBuilding();
+        personData.appartment = person.getFlat();
+    } else {
+        //Адрес вре РФ, ставим код страны и сам адрес
+        personData.countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
+        personData.addressIno = person.getAddress();
+    }
+
     return personData;
 }
 
@@ -668,15 +696,6 @@ def mapToOperationId(collection) {
     return result;
 }
 
-
-def formatDate(date) {
-    return ScriptUtils.formatDate(date, "dd.MM.yyyy")
-}
-
-Date parseDate(xmlDate) {
-    return new java.text.SimpleDateFormat('dd.MM.yyyy').parse(xmlDate.text())
-}
-
 /**
  * Получить полное название подразделения по id подразделения.
  */
@@ -703,8 +722,8 @@ void importData() {
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (logger.containsLevel(LogLevel.WARNING)) {
+        throw new ServiceException("ТФ не соответствует XSD-схеме РНУ НФДЛ. Загрузка не возможна.");
     }
 
     //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
@@ -813,104 +832,135 @@ void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOpera
     ndflPerson.prepayments = ndflPersonOperationsNode.'СведАванс'.collect {
         transformNdflPersonPrepayment(it)
     }
-
 }
-
-// ----------------- Data -----------------------
 
 NdflPerson transformNdflPersonNode(NodeChild node) {
     NdflPerson ndflPerson = new NdflPerson()
-    //uses some Groovy magic
-    ndflPerson.inp = node.'@ИНП'
-    ndflPerson.snils = node.'@СНИЛС'
-    ndflPerson.lastName = node.'@ФамФЛ'
-    ndflPerson.firstName = node.'@ИмяФЛ'
-    ndflPerson.middleName = node.'@ОтчФЛ'
-    ndflPerson.birthDay = parseDate(node.'@ДатаРожд')
-    ndflPerson.citizenship = node.'@Гражд'
-    ndflPerson.innNp = node.'@ИННФЛ'
-    ndflPerson.innForeign = node.'@ИННИно'
-    ndflPerson.idDocType = node.'@УдЛичнФЛКод'
-    ndflPerson.idDocNumber = node.'@УдЛичнФЛНом'
-    ndflPerson.status = node.'@СтатусФЛ'
-    ndflPerson.postIndex = node.'@Индекс'
-    ndflPerson.regionCode = node.'@КодРегион'
-    ndflPerson.area = node.'@Район'
-    ndflPerson.city = node.'@Город'
-    ndflPerson.locality = node.'@НаселПункт'
-    ndflPerson.street = node.'@Улица'
-    ndflPerson.house = node.'@Дом'
-    ndflPerson.building = node.'@Корпус'
-    ndflPerson.flat = node.'@Кварт'
-    ndflPerson.countryCode = node.'@КодСтрИно'
-    ndflPerson.address = node.'@АдресИно'
-    ndflPerson.additionalData = node.'@ДопИнф'
+    ndflPerson.inp = toString(node.'@ИНП')
+    ndflPerson.snils = toString(node.'@СНИЛС')
+    ndflPerson.lastName = toString(node.'@ФамФЛ')
+    ndflPerson.firstName = toString(node.'@ИмяФЛ')
+    ndflPerson.middleName = toString(node.'@ОтчФЛ')
+    ndflPerson.birthDay = toDate(node.'@ДатаРожд')
+    ndflPerson.citizenship = toString(node.'@Гражд')
+    ndflPerson.innNp = toString(node.'@ИННФЛ')
+    ndflPerson.innForeign = toString(node.'@ИННИно')
+    ndflPerson.idDocType = toString(node.'@УдЛичнФЛКод')
+    ndflPerson.idDocNumber = toString(node.'@УдЛичнФЛНом')
+    ndflPerson.status = toString(node.'@СтатусФЛ')
+    ndflPerson.postIndex = toString(node.'@Индекс')
+    ndflPerson.regionCode = toString(node.'@КодРегион')
+    ndflPerson.area = toString(node.'@Район')
+    ndflPerson.city = toString(node.'@Город')
+    ndflPerson.locality = toString(node.'@НаселПункт')
+    ndflPerson.street = toString(node.'@Улица')
+    ndflPerson.house = toString(node.'@Дом')
+    ndflPerson.building = toString(node.'@Корпус')
+    ndflPerson.flat = toString(node.'@Кварт')
+    ndflPerson.countryCode = toString(node.'@КодСтрИно')
+    ndflPerson.address = toString(node.'@АдресИно')
+    ndflPerson.additionalData = toString(node.'@ДопИнф')
     return ndflPerson
 }
 
 NdflPersonIncome transformNdflPersonIncome(NodeChild node) {
     def operationNode = node.parent();
     NdflPersonIncome personIncome = new NdflPersonIncome()
-    personIncome.rowNum = node.'@НомСтр'.toInteger()
-    personIncome.incomeCode = node.'@КодДох'
-    personIncome.incomeType = node.'@ТипДох'
+    personIncome.rowNum = toInteger(node.'@НомСтр')
+    personIncome.incomeCode = toString(node.'@КодДох')
+    personIncome.incomeType = toString(node.'@ТипДох')
 
-    personIncome.operationId = operationNode.'@ИдОпер'.toBigDecimal()
-    personIncome.oktmo = operationNode.'@ОКТМО'
-    personIncome.kpp = operationNode.'@КПП'
+    personIncome.operationId = toBigDecimal(operationNode.'@ИдОпер')
+    personIncome.oktmo = toString(operationNode.'@ОКТМО')
+    personIncome.kpp = toString(operationNode.'@КПП')
 
-    personIncome.incomeAccruedDate = parseDate(node.'@ДатаДохНач')
-    personIncome.incomePayoutDate = parseDate(node.'@ДатаДохВыпл')
-    personIncome.incomeAccruedSumm = node.'@СуммДохНач'.toBigDecimal()
-    personIncome.incomePayoutSumm = node.'@СуммДохВыпл'.toBigDecimal()
-    personIncome.totalDeductionsSumm = node.'@СумВыч'.toBigDecimal()
-    personIncome.taxBase = node.'@НалБаза'.toBigDecimal()
-    personIncome.taxRate = node.'@Ставка'.toInteger()
-    personIncome.taxDate = parseDate(node.'@ДатаНалог')
-    personIncome.calculatedTax = node.'@НИ'.toInteger()
-    personIncome.withholdingTax = node.'@НУ'.toInteger()
-    personIncome.notHoldingTax = node.'@ДолгНП'.toInteger()
-    personIncome.overholdingTax = node.'@ДолгНА'.toInteger()
-    personIncome.refoundTax = node.'@ВозврНал'.toInteger()
-    personIncome.taxTransferDate = parseDate(node.'@СрокПрчслНал')
-    personIncome.paymentDate = parseDate(node.'@ПлПоручДат')
-    personIncome.paymentNumber = node.'@ПлатПоручНом'
-    personIncome.taxSumm = node.'@НалПерСумм'.toInteger()
+
+    personIncome.incomeAccruedDate = toDate(node.'@ДатаДохНач')
+    personIncome.incomePayoutDate = toDate(node.'@ДатаДохВыпл')
+    personIncome.incomeAccruedSumm = toBigDecimal(node.'@СуммДохНач')
+    personIncome.incomePayoutSumm = toBigDecimal(node.'@СуммДохВыпл')
+    personIncome.totalDeductionsSumm = toBigDecimal(node.'@СумВыч')
+    personIncome.taxBase = toBigDecimal(node.'@НалБаза')
+    personIncome.taxRate = toInteger(node.'@Ставка')
+    personIncome.taxDate = toDate(node.'@ДатаНалог')
+    personIncome.calculatedTax = toInteger(node.'@НИ')
+    personIncome.withholdingTax = toInteger(node.'@НУ')
+    personIncome.notHoldingTax = toInteger(node.'@ДолгНП')
+    personIncome.overholdingTax = toInteger(node.'@ДолгНА')
+    personIncome.refoundTax = toInteger(node.'@ВозврНал')
+    personIncome.taxTransferDate = toDate(node.'@СрокПрчслНал')
+    personIncome.paymentDate = toDate(node.'@ПлПоручДат')
+    personIncome.paymentNumber = toString(node.'@ПлатПоручНом')
+    personIncome.taxSumm = toInteger(node.'@НалПерСумм')
     return personIncome
 }
 
 NdflPersonDeduction transformNdflPersonDeduction(NodeChild node) {
 
     NdflPersonDeduction personDeduction = new NdflPersonDeduction()
-    personDeduction.rowNum = node.'@НомСтр'.toInteger()
-    personDeduction.operationId = node.parent().'@ИдОпер'.toBigDecimal()
-    personDeduction.typeCode = node.'@ВычетКод'
-    personDeduction.notifType = node.'@УведТип'
-    personDeduction.notifDate = parseDate(node.'@УведДата')
-    personDeduction.notifNum = node.'@УведНом'
-    personDeduction.notifSource = node.'@УведИФНС'
-    personDeduction.notifSumm = node.'@УведСум'.toBigDecimal()
-    personDeduction.incomeAccrued = parseDate(node.'@ДатаДохНач')
-    personDeduction.incomeCode = node.'@КодДох'
-    personDeduction.incomeSumm = node.'@СуммДохНач'.toBigDecimal()
-    personDeduction.periodPrevDate = parseDate(node.'@ДатаПредВыч')
-    personDeduction.periodPrevSumm = node.'@СумПредВыч'.toBigDecimal()
-    personDeduction.periodCurrDate = parseDate(node.'@ДатаТекВыч')
-    personDeduction.periodCurrSumm = node.'@СумТекВыч'.toBigDecimal()
+    personDeduction.rowNum = toInteger(node.'@НомСтр')
+    personDeduction.operationId = toBigDecimal(node.parent().'@ИдОпер')
+    personDeduction.typeCode = toString(node.'@ВычетКод')
+    personDeduction.notifType = toString(node.'@УведТип')
+    personDeduction.notifDate = toDate(node.'@УведДата')
+    personDeduction.notifNum = toString(node.'@УведНом')
+    personDeduction.notifSource = toString(node.'@УведИФНС')
+    personDeduction.notifSumm = toBigDecimal(node.'@УведСум')
+    personDeduction.incomeAccrued = toDate(node.'@ДатаДохНач')
+    personDeduction.incomeCode = toString(node.'@КодДох')
+    personDeduction.incomeSumm = toBigDecimal(node.'@СуммДохНач')
+    personDeduction.periodPrevDate = toDate(node.'@ДатаПредВыч')
+    personDeduction.periodPrevSumm = toBigDecimal(node.'@СумПредВыч')
+    personDeduction.periodCurrDate = toDate(node.'@ДатаТекВыч')
+    personDeduction.periodCurrSumm = toBigDecimal(node.'@СумТекВыч')
     return personDeduction
 }
 
 NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
-
     NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
-    personPrepayment.rowNum = node.'@НомСтр'.toInteger()
-    personPrepayment.operationId = node.parent().'@ИдОпер'.toBigDecimal()
-    personPrepayment.summ = node.'@Аванс'.toBigDecimal()
-    personPrepayment.notifNum = node.'@УведНом'
-    personPrepayment.notifDate = parseDate(node.'@УведДата')
-    personPrepayment.notifSource = node.'@УведИФНС'
-
+    personPrepayment.rowNum = toInteger(node.'@НомСтр')
+    personPrepayment.operationId = toBigDecimal(node.parent().'@ИдОпер')
+    personPrepayment.summ = toBigDecimal(node.'@Аванс')
+    personPrepayment.notifNum = toString(node.'@УведНом')
+    personPrepayment.notifDate = toDate(node.'@УведДата')
+    personPrepayment.notifSource = toString(node.'@УведИФНС')
     return personPrepayment;
+}
+
+Integer toInteger(xmlNode) {
+    if (xmlNode != null && !xmlNode.isEmpty()) {
+        return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Integer.valueOf(xmlNode.text()) : null;
+    } else {
+        return null;
+    }
+}
+
+BigDecimal toBigDecimal(xmlNode) {
+    if (xmlNode != null && !xmlNode.isEmpty()) {
+        return xmlNode.text() != null && !xmlNode.text().isEmpty() ? new BigDecimal(xmlNode.text()) : null;
+    } else {
+        return null;
+    }
+}
+
+Date toDate(xmlNode) {
+    if (xmlNode != null && !xmlNode.isEmpty()) {
+        return xmlNode.text() != null && !xmlNode.text().isEmpty() ? new java.text.SimpleDateFormat('dd.MM.yyyy').parse(xmlNode.text()) : null;
+    } else {
+        return null;
+    }
+}
+
+String toString(xmlNode) {
+    if (xmlNode != null && !xmlNode.isEmpty()) {
+        return xmlNode.text() != null && !xmlNode.text().isEmpty() ? StringUtils.cleanString(xmlNode.text()) : null;
+    } else {
+        return null;
+    }
+}
+
+def formatDate(date) {
+    return ScriptUtils.formatDate(date, "dd.MM.yyyy")
 }
 
 def ndflPersonAttr(ndflPerson) {

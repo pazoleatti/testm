@@ -66,8 +66,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(), REORGANIZATION.getId(),
 			REGION.getId(), PERSON.getId(), ID_DOC.getId(), PERSON_ADDRESS.getId(), ID_TAX_PAYER.getId(),
             OKVED.getId(), NDFL_REFERENCES.getId(),
-
-            OKATO.getId()
+			OKTMO.getId()
 	});
 
     @Autowired
@@ -114,12 +113,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
         if (DEPARTMENT.getId() == refBookId) {
             return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
         }
-		if(RefBookOktmoProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
-            RefBookOktmoProvider dataProvider = (RefBookOktmoProvider) applicationContext.getBean("RefBookOktmoProvider", RefBookDataProvider.class);
-            dataProvider.setRefBookId(refBookId);
-			dataProvider.setTableName(RefBookOktmoProvider.OKTMO_TABLE_NAME);
-            return dataProvider;
-		}
 		if (CONFIGURATION_PARAM.getId() == refBookId) {
             RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
             dataProvider.setRefBook(refBook);
