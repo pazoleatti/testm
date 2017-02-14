@@ -39,7 +39,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         SQL.append("  --идентификаторы \n");
         SQL.append("  taxpayer_id.inp AS inp, taxpayer_id.as_nu AS asnu_ref_id, \n");
         SQL.append("  -- адрес \n");
-        SQL.append("  addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id \n");
+        SQL.append("  addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id, addr.address \n");
         SQL.append("FROM ref_book_person person \n");
         SQL.append("LEFT JOIN ref_book_id_tax_payer taxpayer_id \n");
         SQL.append("ON person.id = taxpayer_id.person_id --Идентификаторы физлица \n");
@@ -141,6 +141,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             person.setHouse(rs.getString("house"));
             person.setBuild(rs.getString("build"));
             person.setAppartment(rs.getString("appartment"));
+            person.setAddressIno(rs.getString("address"));
 
             //additional
             person.setPension(SqlUtils.getInteger(rs, "pension"));
