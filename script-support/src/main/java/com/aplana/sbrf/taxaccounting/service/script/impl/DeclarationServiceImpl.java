@@ -357,4 +357,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriodId, String kpp, String oktmo) {
         return declarationDataDao.findDeclarationDataByKppOktmoOfNdflPersonIncomes(declarationTypeId, departmentReportPeriodId, departmentId, reportPeriodId, kpp, oktmo);
     }
+
+    @Override
+    public List<DeclarationData> findSourceDeclarationData(long declarationDataId) {
+        return declarationDataDao.findSourceDeclarationData(declarationDataId);
+    }
 }
