@@ -17,6 +17,10 @@ public class DeclarationSubreport implements Ordered, Serializable{
     private int order;
     private String blobDataId;
     private List<DeclarationSubreportParam> declarationSubreportParams;
+    /**
+     * Возможность поиска/выбора записи при формировании спец. отчета
+     */
+    private boolean selectRecord;
 
     public long getId() {
         return id;
@@ -65,5 +69,13 @@ public class DeclarationSubreport implements Ordered, Serializable{
 
     public void setDeclarationSubreportParams(List<DeclarationSubreportParam> declarationSubreportParams) {
         this.declarationSubreportParams = declarationSubreportParams;
+    }
+
+    public boolean isSelectRecord() {
+        return selectRecord;
+    }
+
+    public void setSelectRecord(boolean selectRecord) {
+        this.selectRecord = selectRecord;
     }
 }

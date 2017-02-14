@@ -50,6 +50,7 @@ public class GetSubreportHandler extends AbstractActionHandler<GetSubreportActio
         Map<Long, RefBookParamInfo> refBookParamInfoMap = new HashMap<Long, RefBookParamInfo>();
         for(DeclarationSubreport subreport: declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports()) {
             if (subreport.getId() == action.getDeclarationSubreportId()) {
+                result.setSelectRecord(subreport.isSelectRecord());
                 for (DeclarationSubreportParam declarationSubreportParam : subreport.getDeclarationSubreportParams()) {
                     if (declarationSubreportParam.getType().equals(DeclarationSubreportParamType.REFBOOK)) {
                         RefBook refBook = rbFactory.getByAttribute(declarationSubreportParam.getRefBookAttributeId());
@@ -60,7 +61,7 @@ public class GetSubreportHandler extends AbstractActionHandler<GetSubreportActio
         }
 
         result.setRefBookParamInfoMap(refBookParamInfoMap);
-        if (refBookParamInfoMap.size()>0) {
+        if (refBookParamInfoMap.size() > 0) {
             ReportPeriod reportPeriod = periodService.getReportPeriod(declarationData.getReportPeriodId());
             result.setStartDate(reportPeriod.getCalendarStartDate());
             result.setEndDate(reportPeriod.getEndDate());

@@ -83,7 +83,17 @@ public interface DeclarationDataService {
      * @param stateLogger
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
-    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo, LockStateLogger stateLogger);
+    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
+
+    /**
+     * Подготовить данные для спец. отчета
+     * @param logger
+     * @param declarationData
+     * @param ddReportType
+     * @param userInfo
+     * @return предварительные результаты для формирования спец. отчета
+     */
+    PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo);
 
 	DeclarationData get(long declarationDataId, TAUserInfo userInfo);
 

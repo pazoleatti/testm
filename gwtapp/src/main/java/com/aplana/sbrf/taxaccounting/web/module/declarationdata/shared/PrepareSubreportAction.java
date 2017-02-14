@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
@@ -9,18 +7,16 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 import java.util.Map;
 
 /**
- * Запуск асинх задачи формирования отчетов
+ * Действие добавления строки.
  *
  * @author lhaziev
  */
-public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> implements ActionName {
+public class PrepareSubreportAction extends UnsecuredActionImpl<PrepareSubreportResult> implements ActionName {
 
     private long declarationDataId;
-    private boolean isForce;
     private TaxType taxType;
     private String type;
     private Map<String, Object> subreportParamValues;
-    private DataRow<Cell> selectedRow;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -28,14 +24,6 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     public void setDeclarationDataId(long declarationDataId) {
         this.declarationDataId = declarationDataId;
-    }
-
-    public boolean isForce() {
-        return isForce;
-    }
-
-    public void setForce(boolean isForce) {
-        this.isForce = isForce;
     }
 
     public TaxType getTaxType() {
@@ -62,16 +50,8 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
         this.subreportParamValues = subreportParamValues;
     }
 
-    public DataRow<Cell> getSelectedRow() {
-        return selectedRow;
-    }
-
-    public void setSelectedRow(DataRow<Cell> selectedRow) {
-        this.selectedRow = selectedRow;
-    }
-
     @Override
 	public String getName() {
-		return "Формирование отчетов";
+		return "Подготовить данные для спец. отчета";
 	}
 }

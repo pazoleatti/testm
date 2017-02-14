@@ -43,6 +43,7 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
             result.setName(rs.getString("name"));
             result.setOrder(SqlUtils.getInteger(rs, "ord"));
             result.setBlobDataId(rs.getString("blob_data_id"));
+            result.setSelectRecord(rs.getBoolean("select_record"));
             result.setDeclarationSubreportParams(declarationSubreportParamDao.getDeclarationSubreportParams(result.getId()));
             return result;
 		}
@@ -51,7 +52,7 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
 	@Override
     public List<DeclarationSubreport> getDeclarationSubreports(int declarationTemplateId) {
 		return getJdbcTemplate().query(
-				"SELECT id, declaration_template_id, name, alias, ord, blob_data_id " +
+				"SELECT id, declaration_template_id, name, alias, ord, blob_data_id, select_record " +
 				"FROM declaration_subreport " +
 				"WHERE declaration_template_id = ? " +
 				"ORDER BY ord",
@@ -64,7 +65,7 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
     @Override
     public DeclarationSubreport getSubreportByAlias(int declarationTemplateId, String alias) {
         return getJdbcTemplate().queryForObject(
-                "SELECT id, declaration_template_id, name, alias, ord, blob_data_id " +
+                "SELECT id, declaration_template_id, name, alias, ord, blob_data_id, select_record " +
                         "FROM declaration_subreport " +
                         "WHERE declaration_template_id = ? and alias = ?",
                 new Object[] { declarationTemplateId, alias },
@@ -115,12 +116,12 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
     private List<Long> createDeclarationSubreports(final List<DeclarationSubreport> newSubreports, final int declarationTempldateId) {
         // Сгенерированый ключ -> реальный ключ в БД
         List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.DECLARATION_SUBREPORT, (long) newSubreports.size());
-        for (int i = 0; i<newSubreports.size(); i++) {
+        for (int i = 0; i < newSubreports.size(); i++) {
             newSubreports.get(i).setId(genKeys.get(i).intValue());
         }
         getJdbcTemplate().batchUpdate(
-                "INSERT INTO declaration_subreport (id, declaration_template_id, name, alias, ord, blob_data_id) " +
-                        "VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO declaration_subreport (id, declaration_template_id, name, alias, ord, blob_data_id, select_record) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -131,6 +132,7 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
                         ps.setString(4, subreport.getAlias());
                         ps.setInt(5, subreport.getOrder());
                         ps.setString(6, subreport.getBlobDataId());
+                        ps.setBoolean(7, subreport.isSelectRecord());
                     }
 
                     @Override
@@ -176,7 +178,7 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
 
     private Collection<Long> updateDeclarationSubreports(final List<DeclarationSubreport> oldSubreports, final int declarationTempldateId){
         getJdbcTemplate().batchUpdate(
-                "UPDATE declaration_subreport SET name = ?, alias = ?, ord = ?, blob_data_id = ? " +
+                "UPDATE declaration_subreport SET name = ?, alias = ?, ord = ?, blob_data_id = ?, select_record = ? " +
                         "WHERE id = ? and declaration_template_id = ?",
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -186,9 +188,10 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
                         ps.setString(2, subreport.getAlias());
                         ps.setInt(3, subreport.getOrder());
                         ps.setString(4, subreport.getBlobDataId());
+                        ps.setBoolean(5, subreport.isSelectRecord());
 
-                        ps.setLong(5, subreport.getId());
-                        ps.setInt(6, declarationTempldateId);
+                        ps.setLong(6, subreport.getId());
+                        ps.setInt(7, declarationTempldateId);
                     }
 
                     @Override
@@ -205,7 +208,7 @@ public class DeclarationSubreportDaoImpl extends AbstractDao implements Declarat
     public DeclarationSubreport getSubreportById(int id) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT id, declaration_template_id, name, alias, ord, blob_data_id " +
+                    "SELECT id, declaration_template_id, name, alias, ord, blob_data_id, select_record " +
                     "FROM declaration_subreport " +
                     "WHERE id = ?",
                     new Object[] { id },

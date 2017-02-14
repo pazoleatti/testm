@@ -40,7 +40,7 @@ import java.util.List;
 public class ModalWindow extends DialogBox implements CanHide {
 
     private static final Integer CAPTION_HEIGHT = 27;
-    private static final Integer MIN_WINDOW_HEIGHT = 160;
+    private static final Integer MIN_WINDOW_HEIGHT = 100;
     private static final Integer MIN_WINDOW_WIDTH = 350;
     private static final String CLOSE_ICON_TITLE = "Закрыть окно";
 
