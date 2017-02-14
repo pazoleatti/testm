@@ -712,7 +712,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
 
-    public void setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+    public String setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         File xlsxFile = null;
         try {
             xlsxFile = File.createTempFile("report", ".xlsx");
@@ -721,8 +721,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             LOG.info(String.format("Сохранение XLSX в базе данных для декларации %s", declarationData.getId()));
             stateLogger.updateState("Сохранение XLSX в базе данных");
 
-            reportService.createDec(declarationData.getId(), blobDataService.create(xlsxFile.getPath(), ""), DeclarationDataReportType.EXCEL_DEC);
             reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.JASPER_DEC));
+            return blobDataService.create(xlsxFile.getPath(), getXmlDataFileName(declarationData.getId(), userInfo).replace("zip", "xlsx"));
         } catch (IOException e) {
             throw new ServiceException("Ошибка при формировании временного файла для XLSX", e);
         } catch (Exception e) {

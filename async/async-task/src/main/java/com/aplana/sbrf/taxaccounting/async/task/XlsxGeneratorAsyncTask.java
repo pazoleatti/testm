@@ -37,6 +37,9 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LockDataService lockService;
 
+    @Autowired
+    private ReportService reportService;
+
     @Override
     protected ReportType getReportType() {
         return ReportType.EXCEL_DEC;
@@ -70,12 +73,14 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
-            declarationDataService.setXlsxDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
+            String uuid = declarationDataService.setXlsxDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
                     lockService.updateState(lock, lockDate, state);
                 }
             });
+            reportService.createDec(declarationData.getId(), uuid, DeclarationDataReportType.EXCEL_DEC);
+            return new TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
         }
         return new TaskStatus(true, null);
     }
@@ -105,7 +110,7 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
+        return String.format("Сформирован %s отчет налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
                 getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
@@ -130,7 +135,7 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
+        return String.format("Произошла непредвиденная ошибка при формировании %s отчета налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
                 getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
