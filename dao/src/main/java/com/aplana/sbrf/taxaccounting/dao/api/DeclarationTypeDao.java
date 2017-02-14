@@ -19,6 +19,13 @@ public interface DeclarationTypeDao {
 	DeclarationType get(int declarationTypeId);
 
 	/**
+	 * Получение вида декларации по идентификатору шаблона
+	 * @param declarationTemplateId
+	 * @return
+	 */
+	DeclarationType getTypeByTemplateId(int declarationTemplateId);
+
+	/**
 	 * Получить список всех действующих видов деклараций
 	 * @return список видов деклараций
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если в БД нет такой записи

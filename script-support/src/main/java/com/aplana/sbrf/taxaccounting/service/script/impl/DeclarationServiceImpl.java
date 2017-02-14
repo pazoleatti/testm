@@ -90,6 +90,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public List<DeclarationData> find(String fileName) {
+        return declarationDataDao.find(fileName);
+    }
+
+    @Override
     public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
         return declarationDataDao.getLast(declarationTypeId, departmentId, reportPeriodId);
     }
@@ -247,6 +252,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public DeclarationType getType(int declarationTypeId) {
         return declarationTypeDao.get(declarationTypeId);
+    }
+
+    @Override
+    public DeclarationType getTypeByTemplateId(int declarationTemplateId) {
+        return declarationTypeDao.getTypeByTemplateId(declarationTemplateId);
     }
 
     @Override

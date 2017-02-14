@@ -237,7 +237,7 @@ public class RaschsvCheckTest extends DeclarationScriptTestBase {
     /**
      * Тестирование проверок загруженных данных
      */
-    @Test
+//    @Test
     public void checkDataTest() {
 
         initRefBook();

@@ -124,6 +124,21 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
+    public List<DeclarationData> find(String fileName) {
+        return getJdbcTemplate().query(
+                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                        "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
+                        "drp.report_period_id, drp.department_id " +
+                        "from declaration_data dd, department_report_period drp " +
+                        "where drp.id = dd.department_report_period_id and file_name = ?",
+                new Object[]{
+                        fileName
+                },
+                new DeclarationDataRowMapper()
+        );
+    }
+
+    @Override
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         try {
             return getJdbcTemplate().query(

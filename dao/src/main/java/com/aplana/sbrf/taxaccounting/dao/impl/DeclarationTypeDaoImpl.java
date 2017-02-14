@@ -56,6 +56,22 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 		}
 	}
 
+    @Override
+    public DeclarationType getTypeByTemplateId(int declarationTemplateId) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select p.* from declaration_type p " +
+                    " inner join declaration_template m on p.id = m.declaration_type_id " +
+                    " where m.id = ?",
+                    new Object[] { declarationTemplateId },
+                    new int[] { Types.NUMERIC },
+                    new DeclarationTypeRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не удалось найти вид декларации с id = %d", declarationTemplateId);
+        }
+    }
+
 	@Override
 	public List<DeclarationType> listAll(){
 		return getJdbcTemplate().query("SELECT * FROM declaration_type where status = 0", new DeclarationTypeRowMapper());
