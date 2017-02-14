@@ -117,7 +117,7 @@ def importTF() {
     ) {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
-        import115111()
+        import1151111()
     } else if (
         patternKvOtch.matcher(UploadFileName).matches() ||
         patternUoOtch.matcher(UploadFileName).matches() ||
@@ -130,12 +130,104 @@ def importTF() {
     }
 }
 
+/**
+ * Импорт ТФ НДФЛ
+ */
 def importNDFL() {
     _importTF()
 }
 
-def import115111() {
-    _importTF()
+/**
+ * Импорт ТФ 1151111
+ */
+def import1151111() {
+    // 2. Разбор имени файла
+    String tranNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$1")
+    String endNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$2")
+    String inn = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$3")
+    String kpp = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$4")
+    String dateStr = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$5")
+    String guid = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$6")
+
+    // 3. Выполнить извлечение из ТФ элементы
+    def periodYearTuple = readXml1151111()
+    if (periodYearTuple == null) {
+        return
+    }
+    def (reportPeriodCode, year) = periodYearTuple
+
+    // 4. Определение <Отчетный/корректирующий периода>
+    RefBookDataProvider periodDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERIOD_CODE.getId())
+    if (periodDataProvider.getRecordsCount(new Date(), "CODE = '$reportPeriodCode'") == 0) {
+        logger.error("Файл «%s» не загружен: Значение элемента Файл.Документ.Период \"%s\" отсутствует в справочнике \"Коды. определяющие налоговый (отчетный) период", UploadFileName, reportPeriodCode)
+        return
+    }
+
+    if (periodDataProvider.getRecordsCount(new Date(), "CODE = '$reportPeriodCode' AND F = 1 ") == 0) {
+        logger.error("Файл «%s» не загружен: Значение элемента Файл.Документ.Период \"%s\" не разрешен для ФП \"Сборы, взносы\" ", UploadFileName, reportPeriodCode)
+        return
+    }
+
+    def periodId = periodDataProvider.getUniqueRecordIds(new Date(), "CODE = '$reportPeriodCode' AND F = 1").get(0)
+    def reportPeriod = periodDataProvider.getRecordData(periodId)
+
+    // 5. Определение подразделения
+    RefBookDataProvider fondDetailProvider = refBookFactory.getDataProvider(RefBook.Id.FOND_DETAIL.getId())
+    def results = fondDetailProvider.getRecords(new Date(117, 1, 1), null, "kpp = '$kpp'", null)
+    if (results.size() == 0) {
+        logger.error("Файл «%s» не загружен: Не найдено Подразделение, для которого указан КПП \"%s\" в настройках подразделения", UploadFileName, kpp)
+        return
+    }
+    if (results.size() > 1) {
+        //TODO зяпрос для departmentName, а не DEPARTMENT_ID
+        def joinName = results.get(0)*.DEPARTMENT_ID*.getReferenceValue().join(', ')
+        logger.error("Файл «%s» не загружен: Найдено несколько подразделений, для которого указан КПП \"%s\": \"%s\"", UploadFileName, kpp, joinName)
+        return
+    }
+    departmentId = results.get(0).DEPARTMENT_ID.getReferenceValue()
+    //TODO запрос для departmentName!!!
+    def departmentName = "departmentName"
+
+    // 4. Для <Подразделения>, <Период>, <Календаный год> открыт отчетный либо корректирующий период
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriod.getId())
+    if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
+        logger.error("Файл «%s» не загружен: Не найден период код \"%s\" %s %s", UploadFileName, reportPeriod.getName(), reportPeriodCode, year)
+        return
+    }
+
+    // 6. Определение <Макета> (версии макета), по которому необходимо создать форму
+    DeclarationType declarationType = declarationService.getTemplateType(DECLARATION_TYPE_ID_1151111)
+    Integer declarationTemplateId
+    try {
+        // TODO проверить запрос
+        declarationTemplateId = declarationService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.getId())
+    } catch (Exception ignored) {
+        logger.info("Файл «%s» не загружен: " +
+                "В подразделении %s не назначено ни одного актуального макета с параметрами: Вид = 1151111, Тип = Первичная либо Отчетная",
+                UploadFileName, departmentName
+        )
+        return
+    }
+
+    createDateFile = new Date().parse("yyyyMMdd", dateStr)
+    attachFileType = AttachFileType.TYPE_1
+
+    // Создание экземпляра декларации
+    declarationDataId = declarationService.create(
+            logger, declarationTemplateId, userInfo, departmentReportPeriod,
+            null, kpp, null, null, UploadFileName, null
+    )
+
+    InputStream inputStream = new FileInputStream(dataFile)
+    try {
+        // Запуск события скрипта для разбора полученного файла
+        declarationService.importDeclarationData(
+                logger, userInfo, declarationService.getDeclarationData(declarationDataId),
+                inputStream, UploadFileName, dataFile, attachFileType, createDateFile
+        )
+    } finally {
+        IOUtils.closeQuietly(inputStream)
+    }
 }
 
 /**
