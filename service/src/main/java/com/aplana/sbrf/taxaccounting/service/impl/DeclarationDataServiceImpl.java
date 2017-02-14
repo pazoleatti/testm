@@ -192,7 +192,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+        RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
         if (lockDataService.lock(key, userInfo.getUser().getId(),
                 String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
                         String.format("Создание %s", declarationTemplate.getType().getTaxType().getDeclarationShortName()),

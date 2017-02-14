@@ -53,8 +53,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             return new SimpleDateFormat("HH:mm dd.MM.yyyy");
         }
     };
-    private static final long REF_BOOK_DEPARTMENT = 30L; // Подразделения
-    private static final long REF_BOOK_PERIOD_DICT = 8L; // Коды отчетных периодов
+    private static final long REF_BOOK_DEPARTMENT = RefBook.Id.DEPARTMENT.getId(); // Подразделения
+    private static final long REF_BOOK_PERIOD_DICT = RefBook.Id.PERIOD_CODE.getId(); // Коды отчетных периодов
     private static final String SBRF_CODE_ATTR_NAME = "SBRF_CODE";
 
     @Autowired

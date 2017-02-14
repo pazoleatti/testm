@@ -46,7 +46,7 @@ public class PeriodServiceImplTest {
     @Autowired
     DepartmentService departmentService;
 
-    private static final Long PERIOD_CODE_REFBOOK = 8L;
+    private static final Long PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
     private final static String LOCAL_IP = "127.0.0.1";
     private static final int CONTROL_USER_ID = 2;
     private TAUserInfo userInfo = new TAUserInfo();

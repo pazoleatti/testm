@@ -238,7 +238,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     private void checkReferenceValues(RefBookDataProvider provider, RefBook refBook, Map<String, RefBookValue> rows, Date versionFrom, Date versionTo, Logger logger) {
         Map<RefBookDataProvider, List<RefBookLinkModel>> references = new HashMap<RefBookDataProvider, List<RefBookLinkModel>>();
 
-        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
+        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(RefBook.Id.OKTMO.getId());
         for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
             if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE
                     && !e.getKey().equals("DEPARTMENT_ID")) { //Подразделения не версионируются и их нет смысла проверять

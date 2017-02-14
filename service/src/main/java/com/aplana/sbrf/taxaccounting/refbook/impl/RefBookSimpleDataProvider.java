@@ -136,7 +136,9 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
 
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
-        throw new UnsupportedOperationException();
+		RefBookAttribute attribute = refBook.getAttribute(attributeId);
+		Map<String, RefBookValue> value = dao.getRecordData(refBook, recordId);
+		return value != null ? value.get(attribute.getAlias()) : null;
     }
 
     @Override

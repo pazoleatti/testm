@@ -27,7 +27,7 @@ public class GetPeriodIntervalHandler extends AbstractActionHandler<GetPeriodInt
     @Autowired
     private RefBookFactory rbFactory;
 
-    private static final Long PERIOD_CODE_REFBOOK = 8L;
+    private static final Long PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 
     public GetPeriodIntervalHandler() {
         super(GetPeriodIntervalAction.class);

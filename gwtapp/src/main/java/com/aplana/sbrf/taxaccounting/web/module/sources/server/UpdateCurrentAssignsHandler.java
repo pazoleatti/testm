@@ -49,7 +49,7 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
     @Autowired
     private SecurityService securityService;
 
-    private static final Long PERIOD_CODE_REFBOOK = 8L;
+    private static final Long PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 
     public UpdateCurrentAssignsHandler() {
         super(UpdateCurrentAssignsAction.class);

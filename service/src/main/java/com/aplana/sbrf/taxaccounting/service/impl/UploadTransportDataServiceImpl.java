@@ -98,8 +98,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     @Autowired
     private SourceService sourceService;
 
-    private static final long REF_BOOK_DEPARTMENT = 30L; // Подразделения
-    private static final long REF_BOOK_PERIOD_DICT = 8L; // Коды отчетных периодов
+    private static final long REF_BOOK_DEPARTMENT = RefBook.Id.DEPARTMENT.getId(); // Подразделения
+    private static final long REF_BOOK_PERIOD_DICT = RefBook.Id.PERIOD_CODE.getId(); // Коды отчетных периодов
     private static final String SBRF_CODE_ATTR_NAME = "SBRF_CODE";
 
     // Сообщения при загрузке в каталоги
@@ -429,10 +429,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             // АСНУ
             Long asnuId = null;
             if (asnuCode != null) {
-                RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+                RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
                 List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'");
                 if (asnuIds.size() != 1) {
-                    RefBook refBook = refBookDao.get(900L);
+                    RefBook refBook = refBookDao.get(RefBook.Id.ASNU.getId());
                     logger.warn(U2, fileName);
                     logger.warn(U2_1_ASNU, refBook.getName(), refBook.getAttribute("CODE").getName(), transportDataParam.getAsnuCode());
                     return null;

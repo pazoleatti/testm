@@ -503,21 +503,6 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
                 List<Long> dftIds = departmentFormTypeService.getIdsByPerformerId(depId);
                 departmentFormTypeService.deleteByIds(dftIds);
 
-                //Удаление БО
-                List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null, "department_id = " + depId);
-                /*for (Long accountPeriodId: ids) {
-                    List<Long> income101Ids = refBookIncome101.getUniqueRecordIds(null, String.format("account_period_id = %d", accountPeriodId));
-                    if (!income101Ids.isEmpty())
-                        refBookIncome101.deleteRecordVersions(logger, income101Ids, false);
-                    List<Long> income102Ids = refBookIncome102.getUniqueRecordIds(null,
-                            String.format("account_period_id = %d", accountPeriodId));
-                    if (!income102Ids.isEmpty())
-                        refBookIncome102.deleteRecordVersions(logger, income102Ids, false);
-                }*/
-                if (!ids.isEmpty()) {
-                    refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, ids, false);
-                }
-
                 //удаление назначений
                 Collection<Long> dftIsd = CollectionUtils.collect(sourceService.getDFTByDepartment(depId, null, null, null),
                         new Transformer() {
