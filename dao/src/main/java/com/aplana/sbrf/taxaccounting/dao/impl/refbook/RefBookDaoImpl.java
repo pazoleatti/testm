@@ -3145,14 +3145,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		}
 		RefBook refBook = getByAttribute(attributeId);
  		final RefBookAttribute attribute = refBook.getAttribute(attributeId);
-		String sql = String.format(
-			"SELECT record_id, %s value FROM ref_book_value WHERE attribute_id = %s AND %s",
-			attribute.getAttributeType() + "_value",
-			attributeId,
-			transformToSqlInStatement("record_id", recordIds));
-
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT record_id ")
+				.append(RefBook.RECORD_ID_ALIAS)
+				.append(", ")
+				.append(attribute.getAttributeType())
+				.append("_value  value FROM ref_book_value WHERE attribute_id = ")
+				.append(attributeId)
+				.append(" AND ")
+				.append(transformToSqlInStatement("record_id", recordIds));
 		DereferenceMapper mapper = new DereferenceMapper(attribute);
-		getJdbcTemplate().query(sql, mapper);
+		getJdbcTemplate().query(sql.toString(), mapper);
 		return mapper.getResult();
 	}
 
