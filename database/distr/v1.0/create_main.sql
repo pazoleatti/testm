@@ -859,7 +859,8 @@ create table declaration_subreport
   name                    varchar2(1000) not null,
   ord                     number(9)      not null,
   alias                   varchar2(128)  not null,
-  blob_data_id            varchar2(36)
+  blob_data_id            varchar2(36),
+  select_record           number(1) default 0 not null
 );
 
 comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
@@ -869,6 +870,7 @@ comment on column declaration_subreport.name is 'Наименование спе
 comment on column declaration_subreport.ord is 'Порядковый номер';
 comment on column declaration_subreport.alias is 'Код спец. отчета';
 comment on column declaration_subreport.blob_data_id is 'Макет JasperReports для формирования печатного представления формы';
+comment on column declaration_subreport.select_record is 'Возможность поиска/выбора записи при формировании спец. отчета';
 comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
 
 --------------------------------------------------------------------------------------------------------
@@ -2265,7 +2267,8 @@ create table ref_book_address
   street varchar2(50 char),
   house varchar2(20 char),
   build varchar2(20 char),
-  appartment varchar2(20 char)
+  appartment varchar2(20 char),
+  address varchar2(255 char)
 );
 
 comment on table ref_book_address is 'Адрес места жительства';
@@ -2274,7 +2277,7 @@ comment on column ref_book_address.record_id is 'Идентификатор ст
 comment on column ref_book_address.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_address.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 comment on column ref_book_address.address_type is 'Тип адреса. Значения: 0 - в РФ 1 - вне РФ';
-comment on column ref_book_address.country_id is 'Страна';
+comment on column ref_book_address.country_id is 'Страна проживания';
 comment on column ref_book_address.region_code is 'Код региона';
 comment on column ref_book_address.postal_code is 'Почтовый индекс';
 comment on column ref_book_address.district is 'Район';
@@ -2284,6 +2287,7 @@ comment on column ref_book_address.street is 'Улица (проспект, пе
 comment on column ref_book_address.house is 'Номер дома (владения)';
 comment on column ref_book_address.build is 'Номер корпуса (строения)';
 comment on column ref_book_address.appartment is 'Номер квартиры';
+comment on column ref_book_address.address is 'Адрес';
 
 create table ref_book_id_tax_payer
 (
