@@ -105,11 +105,11 @@ def getPeriodNdflMap() {
 def importTF() {
     logger.setMessageDecorator(null)
 
-    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN);
-    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN);
-    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN);
-    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN);
-    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN);
+    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN)
+    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN)
+    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN)
+    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN)
+    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN)
 
     if (UploadFileName != null
         && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
@@ -126,7 +126,7 @@ def importTF() {
     ) {
         importOtch()
     } else {
-        throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName));
+        throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName))
     }
 }
 
