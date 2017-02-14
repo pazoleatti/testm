@@ -36,6 +36,13 @@ public interface DeclarationService {
     DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
     /**
+     * Поиск деклараций по имени файла
+     * @param fileName - имя файла
+     * @return
+     */
+    List<DeclarationData> find(String fileName);
+
+    /**
      * Декларация в последнем отчетном периоде подразделения
      */
     @SuppressWarnings("unused")
@@ -178,8 +185,25 @@ public interface DeclarationService {
      */
     void exportXLSX(JasperPrint jasperPrint, OutputStream data);
 
+    /**
+     * Получение вида декларации по ее идентификатору
+     * @param declarationTypeId
+     * @return
+     */
     DeclarationType getType(int declarationTypeId);
 
+    /**
+     * Получение вида декларации по идентификатору шаблона
+     * @param declarationTemplateId
+     * @return
+     */
+    DeclarationType getTypeByTemplateId(int declarationTemplateId);
+
+    /**
+     * Получение шаблона налоговой декларации по ее идентификатору
+     * @param declarationTemplateId
+     * @return
+     */
     DeclarationTemplate getTemplate(int declarationTemplateId);
 
     DeclarationType getTemplateType(int declarationTypeId);
@@ -272,6 +296,14 @@ public interface DeclarationService {
      * @param kpp
      * @return
      */
-
+    @SuppressWarnings("unused")
     DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
+
+    /**
+     * Найти декларации источники
+     * @param declarationDataId
+     * @return
+     */
+    @SuppressWarnings("unused")
+    List<DeclarationData> findSourceDeclarationData(long declarationDataId);
 }

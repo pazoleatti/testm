@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subrepor
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -38,9 +39,13 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     private final DispatchAsync dispatcher;
     private DeclarationDataPresenter declarationDataPresenter;
 
-	public interface MyView extends PopupView, HasUiHandlers<SubreportParamsUiHandlers> {
+    private boolean selectRecord = false;
+
+    public interface MyView extends PopupView, HasUiHandlers<SubreportParamsUiHandlers> {
 		void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
         Map<String, Object> getFieldsValues() throws BadValueException;
+        void setTableData(PrepareSpecificReportResult prepareSpecificReportResult);
+        DataRow<Cell> getSelectedRow();
     }
 
 	@Inject
@@ -62,10 +67,12 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
         GetSubreportAction action = new GetSubreportAction();
         action.setDeclarationSubreportId(declarationSubreport.getId());
         action.setDeclarationId(declarationDataPresenter.getDeclarationId());
+        getView().setTableData(null);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetSubreportResult>() {
                     @Override
                     public void onSuccess(GetSubreportResult result) {
+                        selectRecord = declarationSubreport.isSelectRecord();
                         getView().setSubreport(declarationSubreport, result.getRefBookParamInfoMap(), result.getStartDate(), result.getEndDate());
                     }
 
@@ -78,6 +85,54 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     }
 
     @Override
+    public void onFind() {
+        try {
+            final PrepareSubreportAction action = new PrepareSubreportAction();
+            action.setDeclarationDataId(declarationDataPresenter.getDeclarationId());
+            action.setTaxType(declarationDataPresenter.getTaxType());
+            action.setType(declarationSubreport.getAlias());
+            action.setSubreportParamValues(getView().getFieldsValues());
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<PrepareSubreportResult>() {
+                        @Override
+                        public void onSuccess(PrepareSubreportResult result) {
+                            LogCleanEvent.fire(SubreportParamsPresenter.this);
+                            LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
+                            if (result.getPrepareSpecificReportResult() == null) {
+                                getView().setTableData(null);
+                            } else {
+                                // отображение таблицы
+                                getView().setTableData(result.getPrepareSpecificReportResult());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            super.onFailure(caught);
+                        }
+                    }, this));
+        } catch (BadValueException bve) {
+            Dialog.errorMessage("Отчет не сформирован", "Обнаружены фатальные ошибки!");
+            List<LogEntry> logEntries = new ArrayList<LogEntry>();
+            for (String entry : bve){
+                logEntries.add(new LogEntry(LogLevel.ERROR, entry));
+            }
+
+            SaveLogEntriesAction action = new SaveLogEntriesAction();
+            action.setLogEntries(logEntries);
+
+            dispatcher.execute(action,
+                    CallbackUtils.defaultCallback(
+                            new AbstractCallback<SaveLogEntriesResult>() {
+                                @Override
+                                public void onSuccess(SaveLogEntriesResult result) {
+                                    LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
+                                }
+                            }, this));
+        }
+    }
+
+    @Override
     public void onCreate() {
         try {
             CreateReportAction action = new CreateReportAction();
@@ -86,6 +141,9 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
             action.setTaxType(declarationDataPresenter.getTaxType());
             action.setType(declarationSubreport.getAlias());
             action.setSubreportParamValues(getView().getFieldsValues());
+            if (selectRecord) {
+                action.setSelectedRow(getView().getSelectedRow());
+            }
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<CreateReportResult>() {
                         @Override

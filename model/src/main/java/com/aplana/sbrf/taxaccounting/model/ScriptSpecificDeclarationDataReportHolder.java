@@ -36,6 +36,10 @@ public class ScriptSpecificDeclarationDataReportHolder {
      */
     private Map<String, Object> subreportParamValues;
 
+    private PrepareSpecificReportResult prepareSpecificReportResult;
+
+    private DataRow<Cell> selectedRecord;
+
     public DeclarationSubreport getDeclarationSubreport() {
         return declarationSubreport;
     }
@@ -92,5 +96,19 @@ public class ScriptSpecificDeclarationDataReportHolder {
         return null;
     }
 
+    public PrepareSpecificReportResult getPrepareSpecificReportResult() {
+        return prepareSpecificReportResult;
+    }
 
+    public void setPrepareSpecificReportResult(PrepareSpecificReportResult prepareSpecificReportResult) {
+        this.prepareSpecificReportResult = prepareSpecificReportResult;
+    }
+
+    public DataRow<Cell> getSelectedRecord() {
+        return selectedRecord;
+    }
+
+    public void setSelectedRecord(DataRow<Cell> selectedRecord) {
+        this.selectedRecord = selectedRecord;
+    }
 }

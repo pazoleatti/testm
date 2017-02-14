@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.gwtplatform.dispatch.shared.Result;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
@@ -12,6 +11,7 @@ public class GetSubreportResult implements Result {
     private Map<Long, RefBookParamInfo> refBookParamInfoMap;
     private Date startDate;
     private Date endDate;
+    private boolean selectRecord;
 
     public Map<Long, RefBookParamInfo> getRefBookParamInfoMap() {
         return refBookParamInfoMap;
@@ -35,5 +35,13 @@ public class GetSubreportResult implements Result {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public boolean isSelectRecord() {
+        return selectRecord;
+    }
+
+    public void setSelectRecord(boolean isSelectedRecord) {
+        this.selectRecord = isSelectedRecord;
     }
 }

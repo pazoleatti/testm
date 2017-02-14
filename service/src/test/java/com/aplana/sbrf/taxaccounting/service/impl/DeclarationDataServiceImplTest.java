@@ -489,9 +489,10 @@ public class DeclarationDataServiceImplTest {
         });
         ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
 
-        declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, userInfo, new LockStateLogger() {
+        declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, null, userInfo, new LockStateLogger() {
             @Override
             public void updateState(String state) {
+                //Nothing
             }
         });
 

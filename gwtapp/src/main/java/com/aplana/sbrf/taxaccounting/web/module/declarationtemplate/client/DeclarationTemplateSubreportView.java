@@ -50,6 +50,9 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
     TextBox nameBox, aliasBox;
 
     @UiField
+    CheckBox selectRecordBox;
+
+    @UiField
     LinkAnchor file;
 
     @UiField
@@ -249,6 +252,21 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
         column.setAlias(aliasBox.getValue());
     }
 
+    @UiHandler("selectRecordBox")
+    public void onSelectRecordBoxKeyPressed(KeyUpEvent event){
+        changeSelectRecordColumn();
+        onSubreportChanged();
+    }
+    @UiHandler("selectRecordBox")
+    public void onSelectRecordBoxClicked(ClickEvent event){
+        changeSelectRecordColumn();
+    }
+    private void changeSelectRecordColumn() {
+        int index = subreportListBox.getSelectedIndex();
+        DeclarationSubreport column = subreports.get(index);
+        column.setSelectRecord(selectRecordBox.getValue());
+    }
+
     @Override
     public void setDeclarationTemplate(DeclarationTemplateExt declaration) {
         subreports = declaration.getDeclarationTemplate().getSubreports();
@@ -304,6 +322,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
         DeclarationSubreport subreport = subreports.get(subreportListBox.getSelectedIndex());
         nameBox.setValue(subreport.getName());
         aliasBox.setValue(subreport.getAlias());
+        selectRecordBox.setValue(subreport.isSelectRecord());
         if (subreport.getBlobDataId() != null) {
             downloadFile.setEnabled(true);
             deleteFile.setEnabled(true);
@@ -587,6 +606,20 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
     private void changeAliasParam() {
         DeclarationSubreportParam selectedSubreportParam = getSelectedSubreportParam();
         selectedSubreportParam.setAlias(aliasParamBox.getValue());
+    }
+
+    @UiHandler("requiredCheckBox")
+    public void onRequiredCheckBoxKeyPressed(KeyUpEvent event){
+        changeRequiredCheck();
+        onSubreportChanged();
+    }
+    @UiHandler("requiredCheckBox")
+    public void onRequiredCheckBoxClicked(ClickEvent event){
+        changeRequiredCheck();
+    }
+    private void changeRequiredCheck() {
+        DeclarationSubreportParam selectedSubreportParam = getSelectedSubreportParam();
+        selectedSubreportParam.setRequired(requiredCheckBox.getValue());
     }
 
     @UiHandler("refBookBox")

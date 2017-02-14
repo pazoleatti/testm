@@ -19,7 +19,7 @@ class Schematron {
 			}
 			string xmlFleName = args[0];
 			string xsdFleName = args[1];
-			string xmlTargetFileName = args.Length == 2 ? Path.GetFileNameWithoutExtension(xmlFleName) : args[2];
+			string xmlTargetFileName = args.Length == 2 ? xmlFleName : args[2] + ".xml";
 			
 			FileStream pXml = new FileStream(xmlFleName, FileMode.Open, FileAccess.Read);
 			XmlSchemaSet pXsd = new System.Xml.Schema.XmlSchemaSet();
@@ -33,7 +33,7 @@ class Schematron {
 			// Версия: (3.3.147.101)+
 			SnpXmlValidatingReader reader = new SnpXmlValidatingReader ();// { ValidatingType = EVsaxValidateType.SaxSchematronUsch, ErrorCounter = 100 };
 			reader.ValidatingType = EVsaxValidateType.SaxSchematronUsch;
-			reader.ErrorCounter = 100;
+			reader.ErrorCounter = 10000;
 			// #3: Валидация Xml по Xsd со схематроном 'snp' (Способ проверки добавленный в VSAX3* )
 			// Версия: (3.3.145.301)+
 			// * - расширение схематрона для пофрагментарной обработки файла (фирменный метод решающий вопрос проверки больших файлов, но 
@@ -45,7 +45,7 @@ class Schematron {
 			Console.WriteLine(result && errors.Errors.Count == 0 ? "Result: SUCCESS" : "Result: FAIL");
 			int errcounter = 0;
 			foreach (ErrorsStruct e in errors.Errors) {
-			    if (errcounter > 100)
+			    if (errcounter > 10000)
                 {
                     break;
                 }

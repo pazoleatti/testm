@@ -1,19 +1,15 @@
 ﻿namespace VSAX3.Schematron
 {
     using System;
+    using System.IO;
 
     internal class UnisoftFunctions
     {
         private readonly string _fileName;
-        private string _lasterror;
-
-        public UnisoftFunctions() : this("")
-        {
-        }
+        private string _lasterror = "";
 
         public UnisoftFunctions(string srcFileName)
         {
-            this._lasterror = "";
             this._fileName = srcFileName;
         }
 
@@ -169,7 +165,7 @@
         public string getFileName()
         {
             this.setCheckError("");
-            return this._fileName;
+            return Path.GetFileNameWithoutExtension(this._fileName);
         }
 
         public string getNSIValue(string catalog, string incolumn, string outcolumn, string value)

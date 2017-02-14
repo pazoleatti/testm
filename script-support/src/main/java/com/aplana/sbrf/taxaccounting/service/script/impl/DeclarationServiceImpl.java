@@ -90,6 +90,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public List<DeclarationData> find(String fileName) {
+        return declarationDataDao.find(fileName);
+    }
+
+    @Override
     public DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId) {
         return declarationDataDao.getLast(declarationTypeId, departmentId, reportPeriodId);
     }
@@ -250,6 +255,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public DeclarationType getTypeByTemplateId(int declarationTemplateId) {
+        return declarationTypeDao.getTypeByTemplateId(declarationTemplateId);
+    }
+
+    @Override
     public DeclarationTemplate getTemplate(int declarationTemplateId) {
         return declarationTemplateDao.get(declarationTemplateId);
     }
@@ -356,5 +366,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriodId, String kpp, String oktmo) {
         return declarationDataDao.findDeclarationDataByKppOktmoOfNdflPersonIncomes(declarationTypeId, departmentReportPeriodId, departmentId, reportPeriodId, kpp, oktmo);
+    }
+
+    @Override
+    public List<DeclarationData> findSourceDeclarationData(long declarationDataId) {
+        return declarationDataDao.findSourceDeclarationData(declarationDataId);
     }
 }

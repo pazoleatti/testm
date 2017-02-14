@@ -78,6 +78,13 @@ public interface DeclarationDataDao {
 	DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
 	/**
+	 * Поиск деклараций по имени файла
+	 * @param fileName - имя файла
+	 * @return
+	 */
+	List<DeclarationData> find(String fileName);
+
+	/**
 	 * Получить количество записей, удовлетворяющих запросу
 	 * @param filter фильтр, по которому происходит поиск
 	 * @return количество записей, удовлетворяющих фильтру
@@ -146,4 +153,11 @@ public interface DeclarationDataDao {
 	 */
 
 	DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
+
+	/**
+	 * Найти декларации источники
+	 * @param declarationDataId
+	 * @return
+	 */
+	List<DeclarationData> findSourceDeclarationData(long declarationDataId);
 }
