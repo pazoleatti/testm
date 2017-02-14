@@ -66,7 +66,7 @@ def calculate() {
     def asnuId = declarationData.asnuId;
 
     if (asnuId == null) {
-        throw new ServiceException("Для декларации " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
+        throw new ServiceException("Для " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
     }
 
     //выставляем параметр что скрипт не формирует новый xml-файл
@@ -74,7 +74,7 @@ def calculate() {
 
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
-    logger.info("Рассчет данных декларации. Записей о физ. лицах в декларации: " + ndflPersonList.size());
+    logger.info("Рассчет данных. Общее количество записей о физ. лицах: " + ndflPersonList.size());
 
     //Два списка для создания новых записей и для обновления существующих
     List<NdflPerson> createdPerson = new ArrayList<NdflPerson>();
@@ -139,7 +139,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size() + " записей)");
+    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size() + ")");
 
     Date versionFrom = getVersionFrom();
 
@@ -194,7 +194,7 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
  */
 def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к созданию данных по физ.лицам: " + personList.size() + " записей");
+    logger.info("Подготовка к созданию данных по физ.лицам: " + personList.size());
 
     List<RefBookRecord> addressRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
@@ -377,7 +377,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             RefBookRecord refBookRecord = createIdentityDocRecord(person);
             List<Long> ids = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
             Map<String, RefBookValue> values = refBookRecord.getValues();
-            values.put(RefBook.RECORD_ID_ALIAS, ids.first());
+            values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, ids.first()));
             identityDocRecords.add(values);
         }
 
@@ -389,17 +389,19 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
         if (identityDocRecords.size() > 1) {
             //сбрасываем текушие
             identityDocRecords.each {
-                it.put("INC_REP", "0");
+                it.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "0"));
             }
             Map<String, RefBookValue> minimalPrior = identityDocRecords.min {
                 docPriorities.get(it.get("DOC_ID"));
             }
-            minimalPrior?.put("INC_REP", "1");
+
+            minimalPrior?.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
         }
 
         //Обновление признака включается в отчетность
         for (Map<String, RefBookValue> identityDocsValues : identityDocRecords) {
-            getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, person.getPersonId(), versionFrom, null, identityDocsValues);
+            Long uniqueId = identityDocsValues.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
+            getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, versionFrom, null, identityDocsValues);
         }
 
     }
@@ -434,14 +436,15 @@ RefBookRecord createIdentityTaxpayerRecord(NdflPerson person, Long asnuId) {
 }
 
 /**
- * Обновление записи в справочнике
- * @param taxpayerIdentityRefBook
- * @param person
- * @param asnuId
+ * Обновление записи в справочнике "Идентификаторы налогоплатильщика"
+ * @param taxpayerIdentityRefBook список записей справочника для текущего ФЛ
+ * @param person ФЛ
+ * @param asnuId id записи справочника АСНУ
  * @return
  */
 def updateTaxpayerIdentity(List<Map<String, RefBookValue>> taxpayerIdentityRefBook, NdflPerson person, Long asnuId) {
 
+    //Ищем в списке записей запись с такимже АСНУ, по постановке обновляем только ИНП в рамках одной АСНУ (корректировка)
     Long findedAsnuId = taxpayerIdentityRefBook?.find {
         asnuId.equals(it.get("AS_NU")?.getReferenceValue())
     }?.get("AS_NU")?.getReferenceValue();
@@ -449,13 +452,15 @@ def updateTaxpayerIdentity(List<Map<String, RefBookValue>> taxpayerIdentityRefBo
     if (findedAsnuId != null) {
         for (Map<String, RefBookValue> refBookValues : taxpayerIdentityRefBook) {
             RefBookValue value = refBookValues.get("AS_NU");
-            if (asnuId.equals(value.getReferenceValue())) {
-                Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS);
+            if (asnuId.equals(value?.getReferenceValue())) {
+                //нашли запись с нужной АСНУ, обновляем ИНП
+                Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
                 putOrUpdate(refBookValues, "INP", RefBookAttributeType.STRING, person.getInp());
-                getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getVersionFrom(), null, addressValues);
+                getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getVersionFrom(), null, refBookValues);
             }
         }
     } else {
+        //Такой АСНУ нету, создаем новую запиь
         RefBookRecord refBookRecord = createIdentityTaxpayerRecord(person, asnuId);
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
     }
@@ -537,9 +542,16 @@ PersonData createPersonData(NdflPerson person, Long asnuId) {
  */
 def findTaxpayerStatusByCode(code) {
     def taxpayerStatusMap = getRefTaxpayerStatus();
-    return taxpayerStatusMap.find {
+    def result = taxpayerStatusMap.find {
         it.value == code
     }?.key
+
+    if (code != null && !code.isEmpty() && result == null) {
+        logger.warn("В справочнике 'Статусы налогоплатильщика' не найдена запись, статус с кодом " + code);
+    }
+    return result;
+
+
 }
 
 /**
@@ -557,9 +569,13 @@ def getVersionFrom() {
  */
 def findDocumentTypeByCode(code) {
     Map<Long, String> documentTypeMap = getRefDocument()
-    return documentTypeMap.find {
+    def result = documentTypeMap.find {
         it.value?.equalsIgnoreCase(code)
     }?.key;
+    if (code != null && !code.isEmpty() && result == null) {
+        logger.warn("В справочнике 'Виды документов' не найдена запись, вид документа с кодом " + code);
+    }
+    return result;
 }
 
 /**
@@ -569,9 +585,13 @@ def findDocumentTypeByCode(code) {
  */
 def findCountryId(countryCode) {
     def citizenshipCodeMap = getRefCitizenship();
-    return countryCode != null && !countryCode.isEmpty() ? citizenshipCodeMap.find {
+    def result = countryCode != null && !countryCode.isEmpty() ? citizenshipCodeMap.find {
         it.value == countryCode
     }?.key : null;
+    if (countryCode != null && !countryCode.isEmpty() && result == null) {
+        logger.warn("В справочнике 'ОК 025-2001 (Общероссийский классификатор стран мира)' не найдена запись, страна с кодом " + countryCode);
+    }
+    return result;
 }
 
 //------------------ Create Report ----------------------
