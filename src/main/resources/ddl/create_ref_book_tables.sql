@@ -4,8 +4,8 @@
 -- ОКТМО
 create table ref_book_oktmo (
   id        number(18)     not null,
-  code      varchar2(4000) not null,
-  name      varchar2(4000) not null,
+  code      varchar2(11 char) not null,
+  name      varchar2(500 char) not null,
   version   date           not null,
   status    number(1)      not null,
   record_id number(9)      not null,
@@ -18,7 +18,7 @@ comment on column ref_book_oktmo.name is 'Наименование';
 comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
-comment on column ref_book_oktmo.razd is 'Раздел. Может быть 1 или 2';
+comment on column ref_book_oktmo.razd is 'Раздел';
 
 create sequence seq_ref_book_oktmo start with 300000 increment by 100;
 create sequence seq_ref_book_oktmo_record_id start with 1000000;
@@ -113,14 +113,14 @@ comment on column ref_book_present_place.for_fond is 'Используется �
 
 -- Справочник АСНУ
 create table ref_book_asnu (
-  id        number(9)           not null,
-  code      varchar2(4)         not null,
-  name      varchar2(100)       not null,
-  type      varchar2(255)       not null
+  id        number(9),
+  code      varchar2(4 char)    not null,
+  name      varchar2(100 char)  not null,
+  type      varchar2(255 char)  not null
 );
 
 comment on table ref_book_asnu is 'Справочник АСНУ';
-comment on column ref_book_asnu.id is 'Уникальный идентификатор';
+comment on column ref_book_asnu.id is 'Идентификатор';
 comment on column ref_book_asnu.code is 'Код АСНУ';
 comment on column ref_book_asnu.name is 'Наименование АСНУ';
 comment on column ref_book_asnu.type is 'Тип дохода';
@@ -466,7 +466,7 @@ create table ref_book_ndfl_detail
  status             number(1) default 0 not null,
  ref_book_ndfl_id   number(18)       not null,
  row_ord            number(4)        not null,
- department_id      number(18),
+ department_id      number(18)       not null,
  --Строка сведений о налогоплательщике
  tax_organ_code     varchar2(4 char),
  kpp                varchar2(9 char),

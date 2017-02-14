@@ -645,7 +645,7 @@ comment on column log_system.form_type_id is 'Идентификатор вид�
 comment on column log_system.is_error is 'Признак ошибки';
 comment on column log_system.audit_form_type_id is 'Тип формы';
 comment on column log_system.server is 'Сервер';
-comment on column log_system.log_id is 'Ссылка на журнал действий пользователей';
+comment on column log_system.log_id is '';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
@@ -718,7 +718,7 @@ comment on column notification.role_id is 'Идентификатор роли �
 comment on column notification.is_read is 'Признак прочтения';
 comment on column notification.type is 'Тип оповещения (0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
 comment on column notification.report_id is 'Идентификатор отчета';
-comment on column notification.log_id is 'Ссылка на журнал действий пользователей';
+comment on column notification.log_id is '';
 
 create sequence seq_notification start with 10000;
 
@@ -979,7 +979,8 @@ create table log_clob_query
   sql_mode         varchar2(10),
   text_query       clob,
   log_date         timestamp(6) default current_timestamp not null,
-  session_id       number(18) default 0                   not null
+  session_id       number(18) default 0                   not null,
+  form_type_id     number(9,0)
 );
 
 comment on table log_clob_query is 'Логирование DDL/DML запросов из ХП';
@@ -989,6 +990,7 @@ comment on column log_clob_query.sql_mode is 'DDL/DML';
 comment on column log_clob_query.text_query is 'Текст запроса';
 comment on column log_clob_query.log_date is 'Дата/время начала обработки запроса';
 comment on column log_clob_query.session_id is 'Идентификатор сессии (seq_log_query_session)';
+comment on column log_clob_query.form_type_id is 'Идентификатор типа (при вызове из процедуры удаления)';
 
 create sequence seq_log_query start with 1;
 create sequence seq_log_query_session start with 1;
@@ -2275,7 +2277,7 @@ comment on table ref_book_address is 'Адрес места жительства
 comment on column ref_book_address.id is 'Уникальный идентификатор';
 comment on column ref_book_address.record_id is 'Идентификатор строки. Может повторяться у разных версий';
 comment on column ref_book_address.version is 'Версия. Дата актуальности записи';
-comment on column ref_book_address.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
+comment on column ref_book_address.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_address.address_type is 'Тип адреса. Значения: 0 - в РФ 1 - вне РФ';
 comment on column ref_book_address.country_id is 'Страна проживания';
 comment on column ref_book_address.region_code is 'Код региона';
