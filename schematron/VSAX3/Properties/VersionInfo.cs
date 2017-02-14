@@ -4,10 +4,9 @@
 
     internal static class VersionInfo
     {
-        public const string AssemblyFileVersion = "3.3.147.101";
-        public const string AssemblyInformationalVersion = "3.3";
-        public const string AssemblyVersion = "3.3.*";
-        public const string Build = "10.07.2014";
+        public const string AssemblyFileVersion = "3.1.1410.131";
+        public const string AssemblyInformationalVersion = "3.1";
+        public const string AssemblyVersion = "3.1.*";
+        public const string Build = "13.10.2014";
     }
 }
-
