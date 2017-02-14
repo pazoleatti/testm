@@ -102,6 +102,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
                 return new TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
             } else {
                 reportService.createDec(declarationData.getId(), uuid, ddReportType);
+                return new TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
             }
         }
         return new TaskStatus(true, null);
@@ -134,23 +135,25 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
                 strSubreportParamValues.append(declarationSubreportParam.getName()).append(": ");
                 Object value = subreportParamValues.get(declarationSubreportParam.getAlias());
                 strSubreportParamValues.append("\"");
-                switch (declarationSubreportParam.getType()) {
-                    case STRING:
-                        strSubreportParamValues.append(value!= null?value.toString():"");
-                        break;
-                    case NUMBER:
-                        strSubreportParamValues.append(value!= null?value.toString():"");
-                        break;
-                    case DATE:
-                        strSubreportParamValues.append(value!= null?SDF_DD_MM_YYYY.get().format((Date)value):"");
-                        break;
-                    case REFBOOK:
-                        String strVal = "";
-                        if (value != null) {
-                            strVal = refBookHelper.dereferenceValue((Long)value, declarationSubreportParam.getRefBookAttributeId());
-                        }
-                        strSubreportParamValues.append(strVal);
-                        break;
+                if (value != null) {
+                    switch (declarationSubreportParam.getType()) {
+                        case STRING:
+                            strSubreportParamValues.append(value.toString());
+                            break;
+                        case NUMBER:
+                            strSubreportParamValues.append(value.toString());
+                            break;
+                        case DATE:
+                            strSubreportParamValues.append(SDF_DD_MM_YYYY.get().format((Date) value));
+                            break;
+                        case REFBOOK:
+                            String strVal = "";
+                            if (value != null) {
+                                strVal = refBookHelper.dereferenceValue((Long) value, declarationSubreportParam.getRefBookAttributeId());
+                            }
+                            strSubreportParamValues.append(strVal);
+                            break;
+                    }
                 }
                 strSubreportParamValues.append("\"");
                 strSubreportParamValues.append(", ");
@@ -192,23 +195,25 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
                 strSubreportParamValues.append(declarationSubreportParam.getName()).append(": ");
                 Object value = subreportParamValues.get(declarationSubreportParam.getAlias());
                 strSubreportParamValues.append("\"");
-                switch (declarationSubreportParam.getType()) {
-                    case STRING:
-                        strSubreportParamValues.append(value.toString());
-                        break;
-                    case NUMBER:
-                        strSubreportParamValues.append(value.toString());
-                        break;
-                    case DATE:
-                        strSubreportParamValues.append(SDF_DD_MM_YYYY.get().format((Date)value));
-                        break;
-                    case REFBOOK:
-                        String strVal = "";
-                        if (value != null) {
-                            strVal = refBookHelper.dereferenceValue((Long)value, declarationSubreportParam.getRefBookAttributeId());
-                        }
-                        strSubreportParamValues.append(strVal);
-                        break;
+                if (value != null) {
+                    switch (declarationSubreportParam.getType()) {
+                        case STRING:
+                            strSubreportParamValues.append(value.toString());
+                            break;
+                        case NUMBER:
+                            strSubreportParamValues.append(value.toString());
+                            break;
+                        case DATE:
+                            strSubreportParamValues.append(SDF_DD_MM_YYYY.get().format((Date) value));
+                            break;
+                        case REFBOOK:
+                            String strVal = "";
+                            if (value != null) {
+                                strVal = refBookHelper.dereferenceValue((Long) value, declarationSubreportParam.getRefBookAttributeId());
+                            }
+                            strSubreportParamValues.append(strVal);
+                            break;
+                    }
                 }
                 strSubreportParamValues.append("\"");
                 strSubreportParamValues.append(", ");
