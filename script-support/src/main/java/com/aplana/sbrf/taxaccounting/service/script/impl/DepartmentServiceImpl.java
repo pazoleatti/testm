@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service("departmentService")
 public class DepartmentServiceImpl implements DepartmentService {
@@ -56,6 +57,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly) {
         return departmentService.getDepartmentBySbrfCode(sbrfCode, activeOnly);
+    }
+
+    @Override
+    public Map<Integer, Department> getDepartments(List<Integer> departmentIds) {
+        return departmentService.getDepartments(departmentIds);
     }
 }
 

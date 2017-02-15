@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.List;
+import java.util.Map;
 
 @ScriptExposed
 public interface DepartmentService {
@@ -43,4 +44,11 @@ public interface DepartmentService {
      * Получить подразделение
      */
     Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly);
+
+    /**
+     * Получить подразделения по списку идентификаторов
+     * @param departmentIds список идентификаторов
+     * @return набор сочетаний идентификатор-подразделение
+     */
+    Map<Integer, Department> getDepartments(List<Integer> departmentIds);
 }

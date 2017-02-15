@@ -73,7 +73,7 @@ String ATTR_YEAR = "ОтчетГод";
 @Field String ERROR_NOT_FOUND_FORM = "Файл ответа «%s», для которого сформирован ответ, не найден в формах!";
 
 // Шаблоны имен файлов
-@Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)_(.*)\\.(xml|XML)";
 @Field final String KV_OTCH_PATTERN = "KV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
 @Field final String UO_OTCH_PATTERN = "UO_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
 @Field final String IV_OTCH_PATTERN = "IV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
@@ -172,13 +172,13 @@ def import1151111() {
     ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(declarationType.getTaxType(), reportPeriodTypeCode, year)
     if (reportPeriod == null) {
         logger.error("Файл «%s» не загружен: " +
-                "Для 1151111 (первичная) в cистеме не создан период с кодом «%s», календарный год «%s»!",
+                "Для 1151111 (первичная) в системе не создан период с кодом «%s», календарный год «%s»!",
                 UploadFileName, reportPeriodCode, year)
         return
     }
 
-    def reportyPeriodTypeId = reportPeriodTypeDataProvider.getUniqueRecordIds(new Date(), "CODE = '$reportPeriodTypeCode' AND F = 1").get(0).intValue()
-    def reportPeriodType = reportPeriodTypeDataProvider.getRecordData(reportyPeriodTypeId)
+    def reportPeriodTypeId = reportPeriodTypeDataProvider.getUniqueRecordIds(new Date(), "CODE = '$reportPeriodTypeCode' AND F = 1").get(0).intValue()
+    def reportPeriodType = reportPeriodTypeDataProvider.getRecordData(reportPeriodTypeId)
 
     // 5. Определение подразделения
     def fondDetailProvider = refBookFactory.getDataProvider(RefBook.Id.FOND_DETAIL.getId())
@@ -187,15 +187,16 @@ def import1151111() {
         logger.error("Файл «%s» не загружен: Не найдено Подразделение, для которого указан КПП \"%s\" в настройках подразделения", UploadFileName, kpp)
         return
     }
+
     if (results.size() > 1) {
-        //TODO зяпрос для departmentName, а не DEPARTMENT_ID
-        def joinName = results.get(0)*.DEPARTMENT_ID*.getReferenceValue().join(', ')
+        def departmentIds = results*.DEPARTMENT_ID*.getReferenceValue()*.intValue()
+        def departmentsMap = departmentService.getDepartments(departmentIds)
+        def joinName = departmentsMap.values()*.getName().join(', ')
         logger.error("Файл «%s» не загружен: Найдено несколько подразделений, для которого указан КПП \"%s\": \"%s\"", UploadFileName, kpp, joinName)
         return
     }
     def departmentId = results.get(0).DEPARTMENT_ID.getReferenceValue().intValue()
-    //TODO запрос для departmentName!!!
-    def departmentName = "departmentName"
+    def departmentName = departmentService.get(departmentId)
 
     // 4. Для <Подразделения>, <Период>, <Календаный год> открыт отчетный либо корректирующий период
     def departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriod.id)
@@ -214,6 +215,18 @@ def import1151111() {
                 UploadFileName, departmentName
         )
         return
+    }
+
+    // Проверка GUID
+    if (guid != null && !guid.isEmpty()) {
+        DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
+        declarationFilter.setFileName(guid)
+        declarationFilter.setTaxType(declarationType.getTaxType())
+        declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID)
+        List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false)
+        if (!declarationDataSearchResultItems.isEmpty()) {
+            logger.error("Файл «%s» не загружен: ТФ с GUID \"%s\" уже загружен в систему", UploadFileName, guid)
+        }
     }
 
     createDateFile = new Date().parse("yyyyMMdd", dateStr)
