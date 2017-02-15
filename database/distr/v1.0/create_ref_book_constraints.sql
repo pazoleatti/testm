@@ -62,6 +62,7 @@ alter table declaration_template add constraint fk_declaration_template_fkind fo
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
 alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);
 alter table report_period add constraint report_period_fk_dtp_id foreign key(dict_tax_period_id) references report_period_type(id);
+alter table ref_book_deduction_type add constraint fk_ref_book_deduc_type_mark foreign key (deduction_mark) references ref_book_deduction_mark(id);
 ------
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_country(id);
 alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_country(id);
