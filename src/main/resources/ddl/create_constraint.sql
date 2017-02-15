@@ -110,12 +110,6 @@ alter table report_period add constraint report_period_fk_taxperiod foreign key 
 alter table report_period add constraint report_period_uniq_tax_dict unique (tax_period_id, dict_tax_period_id);
 alter table report_period add constraint report_period_chk_date check (end_date >= start_date);
 
-alter table income_101 add constraint income_101_pk primary key (id);
-alter table income_101 add constraint income_101_fk_accperiod_id foreign key (account_period_id) references ref_book_record(id);
-
-alter table income_102 add constraint income_102_pk primary key (id);
-alter table income_102 add constraint income_102_fk_accperiod_id foreign key (account_period_id) references ref_book_record(id);
-
 alter table declaration_type add constraint declaration_type_pk primary key (id);
 alter table declaration_type add constraint declaration_type_fk_taxtype foreign key (tax_type) references tax_type(id);
 alter table declaration_type add constraint declaration_type_chk_status check (status in (-1, 0, 1, 2));

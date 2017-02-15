@@ -693,25 +693,6 @@ public class RefBookDaoTest {
 		refBookDao.dereferenceValues(4L, recordIds);
 	}
 
-    //@Test
-    public void getMatchedRecordsByUniqueAttributesIncome102() {
-        String opuCode = "code";
-        List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
-
-        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-        map.put("OPU_CODE", new RefBookValue(RefBookAttributeType.STRING, opuCode));
-        map.put("TOTAL_SUM", new RefBookValue(RefBookAttributeType.NUMBER, 1));
-        map.put("ITEM_NAME", new RefBookValue(RefBookAttributeType.STRING, "identifier"));
-        map.put("ACCOUNT_PERIOD_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
-        records.add(map);
-
-        RefBook refBook = refBookDao.get(52L);
-        List<RefBookAttribute> attributes = refBook.getAttributes();
-        List<String> matchedRecordsCount = refBookDao.getMatchedRecordsByUniqueAttributesIncome102(attributes, records, 1);
-        assertEquals(1, matchedRecordsCount.size());
-        assertEquals(opuCode, matchedRecordsCount.get(0));
-    }
-
     @Test
     public void testIsVersionUsedLikeParent() throws ParseException {
         List<Pair<Date, Date>> pairs = refBookDao.isVersionUsedLikeParent(4L, 8l, sdf.parse("01.01.2012"));
