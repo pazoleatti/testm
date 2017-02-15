@@ -154,25 +154,34 @@ def import1151111() {
     if (periodYearTuple == null) {
         return
     }
-    def (reportPeriodCode, year) = periodYearTuple
+    def (reportPeriodTypeCode, year) = periodYearTuple
 
     // 4. Определение <Отчетный/корректирующий периода>
-    RefBookDataProvider periodDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERIOD_CODE.getId())
-    if (periodDataProvider.getRecordsCount(new Date(), "CODE = '$reportPeriodCode'") == 0) {
-        logger.error("Файл «%s» не загружен: Значение элемента Файл.Документ.Период \"%s\" отсутствует в справочнике \"Коды. определяющие налоговый (отчетный) период", UploadFileName, reportPeriodCode)
+    def reportPeriodTypeDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERIOD_CODE.getId())
+    if (reportPeriodTypeDataProvider.getRecordsCount(new Date(), "CODE = '$reportPeriodTypeCode'") == 0) {
+        logger.error("Файл «%s» не загружен: Значение элемента Файл.Документ.Период \"%s\" отсутствует в справочнике \"Коды. определяющие налоговый (отчетный) период", UploadFileName, reportPeriodTypeCode)
         return
     }
 
-    if (periodDataProvider.getRecordsCount(new Date(), "CODE = '$reportPeriodCode' AND F = 1 ") == 0) {
-        logger.error("Файл «%s» не загружен: Значение элемента Файл.Документ.Период \"%s\" не разрешен для ФП \"Сборы, взносы\" ", UploadFileName, reportPeriodCode)
+    if (reportPeriodTypeDataProvider.getRecordsCount(new Date(), "CODE = '$reportPeriodTypeCode' AND F = 1 ") == 0) {
+        logger.error("Файл «%s» не загружен: Значение элемента Файл.Документ.Период \"%s\" не разрешен для ФП \"Сборы, взносы\" ", UploadFileName, reportPeriodTypeCode)
         return
     }
 
-    def periodId = periodDataProvider.getUniqueRecordIds(new Date(), "CODE = '$reportPeriodCode' AND F = 1").get(0)
-    def reportPeriod = periodDataProvider.getRecordData(periodId)
+    DeclarationType declarationType = declarationService.getTemplateType(DECLARATION_TYPE_RASCHSV_NDFL_ID.intValue())
+    ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(declarationType.getTaxType(), reportPeriodTypeCode, year)
+    if (reportPeriod == null) {
+        logger.error("Файл «%s» не загружен: " +
+                "Для 1151111 (первичная) в cистеме не создан период с кодом «%s», календарный год «%s»!",
+                UploadFileName, reportPeriodCode, year)
+        return
+    }
+
+    def reportyPeriodTypeId = reportPeriodTypeDataProvider.getUniqueRecordIds(new Date(), "CODE = '$reportPeriodTypeCode' AND F = 1").get(0).intValue()
+    def reportPeriodType = reportPeriodTypeDataProvider.getRecordData(reportyPeriodTypeId)
 
     // 5. Определение подразделения
-    RefBookDataProvider fondDetailProvider = refBookFactory.getDataProvider(RefBook.Id.FOND_DETAIL.getId())
+    def fondDetailProvider = refBookFactory.getDataProvider(RefBook.Id.FOND_DETAIL.getId())
     def results = fondDetailProvider.getRecords(new Date(117, 1, 1), null, "kpp = '$kpp'", null)
     if (results.size() == 0) {
         logger.error("Файл «%s» не загружен: Не найдено Подразделение, для которого указан КПП \"%s\" в настройках подразделения", UploadFileName, kpp)
@@ -184,23 +193,21 @@ def import1151111() {
         logger.error("Файл «%s» не загружен: Найдено несколько подразделений, для которого указан КПП \"%s\": \"%s\"", UploadFileName, kpp, joinName)
         return
     }
-    departmentId = results.get(0).DEPARTMENT_ID.getReferenceValue()
+    def departmentId = results.get(0).DEPARTMENT_ID.getReferenceValue().intValue()
     //TODO запрос для departmentName!!!
     def departmentName = "departmentName"
 
     // 4. Для <Подразделения>, <Период>, <Календаный год> открыт отчетный либо корректирующий период
-    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriod.getId())
+    def departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriod.id)
     if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
-        logger.error("Файл «%s» не загружен: Не найден период код \"%s\" %s %s", UploadFileName, reportPeriod.getName(), reportPeriodCode, year)
+        logger.error("Файл «%s» не загружен: Не найден период код \"%s\" %s %s", UploadFileName, reportPeriodType.NAME, reportPeriodTypeCode, year)
         return
     }
 
     // 6. Определение <Макета> (версии макета), по которому необходимо создать форму
-    DeclarationType declarationType = declarationService.getTemplateType(DECLARATION_TYPE_ID_1151111)
     Integer declarationTemplateId
     try {
-        // TODO проверить запрос
-        declarationTemplateId = declarationService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.getId())
+        declarationTemplateId = declarationService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.id)
     } catch (Exception ignored) {
         logger.info("Файл «%s» не загружен: " +
                 "В подразделении %s не назначено ни одного актуального макета с параметрами: Вид = 1151111, Тип = Первичная либо Отчетная",
