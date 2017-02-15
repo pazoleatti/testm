@@ -122,6 +122,7 @@ public final class ScriptUtils {
     // разделитель между идентификаторами в ключе для кеширования записей справочника
     public static final String SEPARATOR = "_";
     public static final String SNILS_REGEXP = "\\d{3}-\\d{3}-\\d{3}\\s\\d{2}";
+    public static final String DUL_REGEXP = "[^№]+\\s[^N№]+";
 
     /**
      * Запрещаем создавать экземляры класса
@@ -2570,5 +2571,20 @@ public final class ScriptUtils {
         }
 
         return controlBlock.equals(controlSumm % 101);
+    }
+
+    /**
+     * Проверка корректности ДУЛ
+     */
+    public static boolean checkDul(String dul) {
+        if (dul == null) {
+            return false;
+        }
+
+        if (!checkFormat(dul, DUL_REGEXP)) {
+            return false;
+        }
+
+        return true;
     }
 }
