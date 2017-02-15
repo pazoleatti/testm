@@ -1,23 +1,8 @@
-prompt async_task_type
-@@async_task_type;
-
-prompt event
-@@event;
-
-prompt audit_form_type
-@@audit_form_type;
-
-prompt configuration_email
-@@configuration_email;
-
 prompt ref_book_tax_place_type
 @@ref_book_tax_place_type;
 
 prompt ref_book_signatory_mark
 @@ref_book_signatory_mark;
-
-prompt department_type
-@@depart_type;
 
 prompt ref_book_country
 @@ref_book_country;
@@ -31,18 +16,11 @@ prompt report_period_type
 prompt departments
 @@departments;
 
-
 prompt fiction ref datas
 @@gen_fiction_datas;
 
-prompt declaration_type
-@@declaration_kind;
-
 prompt ref_book_doc_states
 @@doc_states;
-
-prompt states
-@@states;
 
 prompt ref_book_form_type
 @@ref_book_form_type;
@@ -92,8 +70,5 @@ prompt ref_book_income_kind
 prompt fill references in ref_book_region
 @@fill_regions_refs;
 
-prompt roles and system user
-@@sec_user;
-
-commit;
-exit;
+COMMIT;
+EXIT;

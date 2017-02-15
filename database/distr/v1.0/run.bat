@@ -1,42 +1,45 @@
 @ECHO OFF
 REM Нужно заполнить имя и пароль владельца схемы и алиас базы данных
-SET NDFL_USER=
-SET NDFL_PASS=
-SET NDFL_DBNAME=
-SET AUTH=%NDFL_USER%/%NDFL_PASS%@%NDFL_DBNAME%
-REM SET AUTH=NDFL_NEXT/TAX@172.16.127.16:1521/orcl.aplana.local
-ECHO ## DB: %AUTH%
-
+REM Формат: user_name/password@host:port/service_name
+SET AUTH=ndfl_test/ndfl_test@172.19.214.46:1521/orcl.aplana.local
 REM Нужно прописать путь к папке ORACLE_HOME\BIN
-SET ORA_BIN=
-REM SET ORA_BIN=C:\app\oracle\product\11.2.0\dbhome_1\BIN
+SET ORA_BIN=C:\app\oracle\product\11.2.0\dbhome_1\BIN
 SET LOG_DIR=logs
 SET BAD_DIR=bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
 
+ECHO ## DB: %AUTH%
 ECHO ## clean
+
+MKDIR %LOG_DIR%
+MKDIR %BAD_DIR%
+
 DEL /s /q /f %LOG_DIR%\*.txt
 DEL /s /q /f %BAD_DIR%\*.*
-REM MKDIR %LOG_DIR%
-REM MKDIR %BAD_DIR%
 
 ECHO ## ddl: create_all_tables
 "%ORA_BIN%\sqlplus" %AUTH% @"create_all_tables.sql" > "%LOG_DIR%/create_all_tables.txt"
 
-ECHO ## dml: fill refbook
-"%ORA_BIN%\sqlplus" %AUTH% @"refbook.sql" > "%LOG_DIR%/refbook.txt"
-ECHO ## dml: fill oktmo
-CD ldr
-call load_oktmo.bat
+ECHO ## dml: common
+CD dml
+CALL dml.bat
+CD ..	
+
+ECHO ## dml: refbook
+CD refbook_tables
+CALL fill.bat
 CD ..
-ECHO ## dml: fill other refbook
-CD refbook
-call fill.bat
+
+ECHO ## dml: template
+CD template
+REM CALL template.bat
 CD ..
+
 ECHO ## ddl: create all constraint
 "%ORA_BIN%\sqlplus" %AUTH% @"create_all_constraints.sql" > "%LOG_DIR%/create_all_constraints.txt"
+
 ECHO ## ddl: create triggers
 "%ORA_BIN%\sqlplus" %AUTH% @"create_triggers.sql" > "%LOG_DIR%/create_triggers.txt"
 
-
+rem добавить скрипт обновления последовательностей
 PAUSE

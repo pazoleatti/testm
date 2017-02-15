@@ -1,5 +1,4 @@
 insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (0,'Публичное акционерное общество "Сбербанк России"',null,1,'Банк','5','00__',null,1,0,0,0);
-insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (1,'Test',null,1,null,null,null,null,1,1,0,0);
 insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (4,'Байкальский банк',0,2,'Байкальский банк','18','18_0000_00',181276,1,4,0,0);
 insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (5,'Байкальский банк Отдел налогового планирования',4,4,'Байкальский банк Отдел НП','18','18_0001_00',181276,1,5,0,0);
 insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (8,'Волго-Вятский банк',0,2,'Волго-Вятский банк','42','42_0000_00',181325,1,8,0,0);
