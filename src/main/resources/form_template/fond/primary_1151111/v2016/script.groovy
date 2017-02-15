@@ -1372,11 +1372,9 @@ void importPrimaryData() {
 @Field final CHECK_FILE_NAME_KPP = "КПП в имени не совпадает с КПП внутри файла"
 @Field final CHECK_PAYMENT_OKVED_NOT_FOUND = "Файл.Документ.СвНП.ОКВЭД = \"%s\" не найден в справочнике ОКВЭД"
 @Field final CHECK_PAYMENT_INN = "Некорректный Файл.Документ.СвНП.НПЮП.ИННЮЛ = \"%s\" для организации - плательщика страховых взносов в транспортном файле \"%s\""
-@Field final CHECK_PAYMENT_KPP = "Некорректный Файл.Документ.СвНП.НПЮП.КПП = \"%s\" для организации - плательщика страховых взносов с ИНН \"%s\""
 @Field final CHECK_PAYMENT_REORG_INN = "Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
 @Field final CHECK_PAYMENT_REORG_KPP = "Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
 @Field final CHECK_PAYMENT_REORG_INN_VALUE = "Некорректный Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ = \"%s\" реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
-@Field final CHECK_PAYMENT_REORG_KPP_VALUE = "Некорректный Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП = \"%s\" реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
 @Field final CHECK_PAYMENT_IP_INN_VALUE = "Некорректный Файл.Документ.СвНП.НПИП.ИННФЛ = \"%s\" индивидуального предпринимателя - плательщика страховых взносов в транспортном файле \"%s\""
 @Field final CHECK_PAYMENT_IP_COUNTRY = "Файл.Документ.СвНП.НПИП.СвНПФЛ.Гражд = \"%s\" ФЛ с ИНН \"%s\" не найден в справочнике ОКСМ"
 @Field final CHECK_PAYMENT_IP_DOC = "Файл.Документ.СвНП.НПФЛ.СвНПФЛ.УдЛичнФЛ.КодВидДок = \"%s\" ФЛ с ИНН %s не найден в справочнике \"Коды документов, удостоверяющих личность\""
@@ -1689,7 +1687,7 @@ def checkPayer(fileNode) {
             payment?."$NODE_NAME_UPL_PER_OPS".each { ops ->
                 def kbkCode = ops?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.КБК", kbkCode)
                 }
             }
 
@@ -1697,7 +1695,7 @@ def checkPayer(fileNode) {
             payment?."$NODE_NAME_UPL_PER_OMS".each { oms ->
                 def kbkCode = oms?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОМС", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОМС.КБК", kbkCode)
                 }
             }
 
@@ -1705,7 +1703,7 @@ def checkPayer(fileNode) {
             payment?."$NODE_NAME_UPL_PER_OPS_DOP".each { dop ->
                 def kbkCode = dop?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПСДоп", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПСДоп.КБК", kbkCode)
                 }
             }
 
@@ -1713,7 +1711,7 @@ def checkPayer(fileNode) {
             payment?."$NODE_NAME_UPL_PER_DSO".each { dso ->
                 def kbkCode = dso?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерДСО", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерДСО.КБК", kbkCode)
                 }
             }
 
@@ -1721,7 +1719,7 @@ def checkPayer(fileNode) {
             payment?."$NODE_NAME_UPL_PREV_OSS".each { uplPrevOss ->
                 def kbkCode = uplPrevOss?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.КБК", kbkCode)
                 }
             }
 
