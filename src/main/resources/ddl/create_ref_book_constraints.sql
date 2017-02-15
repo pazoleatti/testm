@@ -62,6 +62,7 @@ alter table declaration_template add constraint fk_declaration_template_fkind fo
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
 alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);
 alter table report_period add constraint report_period_fk_dtp_id foreign key(dict_tax_period_id) references report_period_type(id);
+alter table ref_book_deduction_type add constraint fk_ref_book_deduc_type_mark foreign key (deduction_mark) references ref_book_deduction_mark(id);
 ------
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_country(id);
 alter table ref_book_person add constraint fk_ref_book_person_citizenship foreign key (citizenship) references ref_book_country(id);
@@ -77,7 +78,7 @@ alter table ref_book_region add constraint chk_ref_book_region_status check (sta
 --alter table ref_book_region add constraint chk_ref_book_region_oktmo_def check (decode(translate('#'||oktmo_definition,'#1234567890','#'),'#','ЦИФРЫ','Буквы')='ЦИФРЫ') disable;
 alter table ref_book_present_place add constraint chk_ref_book_pres_place_st check (status in (-1,0,1,2));
 --alter table ref_book_asnu add constraint chk_ref_book_asnu_code check (code between '0000' and '9999');
---alter table ref_book_form_type add constraint chk_ref_book_form_type_taxkind check (tax_kind in ('F','N')) disable novalidate;
+--alter table ref_book_form_type add constraint chk_ref_book_form_type_taxkind check (tax_kind in ('F','N')) disable;
 alter table ref_book_okved add constraint chk_ref_book_okved_status check (status between -1 and 2);
 alter table ref_book_deduction_mark add constraint chk_ref_book_ded_mark_status check (status between -1 and 2);
 alter table ref_book_reorganization add constraint chk_ref_book_reorg_status check(status between -1 and 2);

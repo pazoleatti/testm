@@ -313,12 +313,18 @@ comment on column ref_book_hard_work.name is 'Название класса ус
 create table ref_book_budget_income
 (
   id number(18) not null,
+  record_id number(9)           not null,
+  version   date                not null,
+  status    number(1) default 0 not null,
   code varchar2(20 char) not null,
   name varchar2(1000 char) not null,
   lev varchar2(1 char) not null
 );
 comment on table ref_book_budget_income is 'Классификатор доходов бюджетов Российской Федерации';
 comment on column ref_book_budget_income.id is 'Уникальный идентификатор';
+comment on column ref_book_budget_income.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_budget_income.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_budget_income.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_budget_income.code is 'Код бюджетной классификации';
 comment on column ref_book_budget_income.name is 'Наименование дохода бюджета Российской Федерации';
 comment on column ref_book_budget_income.lev is 'Уровень кода. Служит для определения уровней агрегирования кодов классификации доходов бюджетов. В рамках вида и подвида доходов код с большим значением уровня агрегируется на вышестоящий код с меньшим значением уровня';
@@ -389,7 +395,7 @@ comment on column ref_book_doc_type.code is 'Код';
 comment on column ref_book_doc_type.name is 'Наименование документа';
 comment on column ref_book_doc_type.priority is 'Приоритет';
 
---Коды представления налоговой декларации по месту нахождения (учёта)
+--Коды представления налоговой формы по месту нахождения (учёта)
 create table ref_book_tax_place_type
 (
   id        number(18)          not null,
@@ -399,7 +405,7 @@ create table ref_book_tax_place_type
   code      varchar2(3 char)    not null,
   name      varchar2(255 char)  not null
 );
-comment on table ref_book_tax_place_type is 'Коды представления налоговой налоговой формы по месту нахождения (учёта)';
+comment on table ref_book_tax_place_type is 'Коды представления налоговой формы по месту нахождения (учёта)';
 comment on column ref_book_tax_place_type.id is 'Уникальный идентификатор';
 comment on column ref_book_tax_place_type.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
 comment on column ref_book_tax_place_type.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
