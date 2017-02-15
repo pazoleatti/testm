@@ -1247,10 +1247,10 @@ void importPrimaryData() {
     }
 
     // Проверки при загрузке
-//    checkImportRaschsv(fileNode)
-//    if (logger.containsLevel(LogLevel.ERROR)) {
-//        return
-//    }
+    checkImportRaschsv(fileNode)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
 
     // Набор объектов ПерсСвСтрахЛиц
     def raschsvPersSvStrahLicList = []
