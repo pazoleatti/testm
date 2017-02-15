@@ -5,5 +5,7 @@ using (select distinct t.code,first_value(t.record_id) over(partition by t.code 
  on (r.code=nr.code)
 when matched then update set r.record_id=nr.first_rec_id;
 
+update ref_book_oktmo set code=substr(code,1,8) where razd=1;
+
 commit;
 exit;

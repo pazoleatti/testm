@@ -2125,12 +2125,18 @@ comment on column fias_room.postalcode is 'Почтовый индекс';
 --------------------------------------------------------------------------------------------------------------------------
 create table ref_book_taxpayer_state
 (
-  id number(18) not null,
-  code varchar2(1 char) not null,
-  name varchar2(1000 char) not null
+  id number(18)                   not null,
+  record_id   number(9)           not null,
+  version     date                not null,
+  status      number(1) default 0 not null,
+  code varchar2(1 char)           not null,
+  name varchar2(1000 char)        not null
 );
 
 comment on table ref_book_taxpayer_state is 'Статусы налогоплательщиков';
+comment on column ref_book_taxpayer_state.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_taxpayer_state.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_taxpayer_state.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_taxpayer_state.id is 'Уникальный идентификатор';
 comment on column ref_book_taxpayer_state.code is 'Код';
 comment on column ref_book_taxpayer_state.name is 'Наименование';
