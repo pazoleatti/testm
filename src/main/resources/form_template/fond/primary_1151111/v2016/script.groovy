@@ -1394,7 +1394,7 @@ void importPrimaryData() {
 @Field final CHECK_PERSON_DOCTYPE = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок = \"%s\" получателя доходов с СНИЛС \"%s\" не найден в справочнике \"Коды документов, удостоверяющих личность\""
 @Field final CHECK_PERSON_OKSM = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд = \"%s\" получателя доходов с СНИЛС  \"%s\" не найден в справочнике ОКСМ"
 @Field final CHECK_PERSON_PERIOD = "Период расчетных сведений Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц = \"'%s'/'%s'\" в транспортном файле \"%s\" не входит в отчетный период формы"
-
+@Field final CHECK_PERSON_DUL = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок = \"%s\" не соответствует порядку заполнения: знак \"N\" не проставляется, серия и номер документа отделяются знаком \" \" (\"пробел\")"
 /**
  * Существует ли CODE в справочнике ОКВЭД
  */
@@ -1450,15 +1450,6 @@ boolean isExistsOKTMO(String code) {
 boolean isExistsKBK(String code) {
     def dataProvider = refBookFactory.getDataProvider(RefBook.Id.KBK.getId())
     return dataProvider.getRecordsCount(new Date(), "CODE = '$code'") > 0
-}
-
-/**
- * Существует ли КПП
- */
-@Memoized
-boolean isExistsKpp(String code) {
-    def dataProvider = refBookFactory.getDataProvider(RefBook.Id.NDFL_DETAIL.getId())
-    return dataProvider.getRecordsCount(new Date(), "KPP = '$code'") > 0
 }
 
 /**
@@ -1822,6 +1813,7 @@ def checkFL(fileNode) {
                 def innFl = data?."@ИННФЛ" as String
                 def docTypeCode = data?."@КодВидДок" as String
                 def national = data?."@Гражд" as String
+                def serNumDoc = data?."@СерНомДок" as String
 
                 // 1.6.1 Корректность ИНН ФЛ - получателя дохода
                 if (INN_IP_LENGTH != innFl?.length() || !ScriptUtils.checkControlSumInn(innFl)) {
@@ -1841,6 +1833,11 @@ def checkFL(fileNode) {
                 // 1.6.4 Поиск кода гражданства ФЛ - получателя дохода в справочнике
                 if (national && !isExistsOKSM(national)) {
                     logger.error(CHECK_PERSON_OKSM, national, snils)
+                }
+
+                // 1.6.6 Корректность серии и номера ДУЛ
+                if (serNumDoc && !ScriptUtils.checkDul(serNumDoc)) {
+                    logger.error(CHECK_PERSON_DUL, serNumDoc)
                 }
             }
         }

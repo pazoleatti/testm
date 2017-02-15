@@ -1,10 +1,10 @@
 insert into DEPARTMENT_TYPE(id) values(-1);
-insert into DEPARTMENT(id,code,name,type,parent_id) values(-1,0,' ',-1,0);
+insert into DEPARTMENT(id,code,name,type,parent_id,is_active) values(-1,0,' ',-1,0,0);
 
 insert into ref_book_doc_type (id,record_id,version,status,code,name,priority) values (-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,' ',' ',1);
 insert into REF_BOOK_TAXPAYER_STATE(id,code,name) values(-1,' ',' ');
 insert into REF_BOOK_ASNU(id,code,name,type) values(-1,'0000',' ',' ');
-insert into REF_BOOK_DEDUCTION_TYPE(id,record_id,version,status,code,name,deduction_mark) values(-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,' ',' ',0);
+insert into REF_BOOK_DEDUCTION_TYPE(id,record_id,version,status,code,name,deduction_mark) values(-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,' ',' ',-1);
 --insert into REF_BOOK_INCOME_TYPE(id,record_id,version,status,code,name) values(-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,' ',' ');
 insert into REF_BOOK_REGION(id,record_id,version,status,code,name) values(-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,' ',' ');
 insert into REF_BOOK_PRESENT_PLACE(id,record_id,version,status,code,name) values(-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,' ',' ');

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils;
@@ -18,6 +17,10 @@ import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверки
@@ -247,7 +250,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
     def listKnf = ndflPersons
 
     // Порядковый номер физического лица
-    def nomSpr = (currentPageNumber - 1) * NUMBER_OF_PERSONS + 1
+    def nomSpr = (currentPageNumber - 1) * NUMBER_OF_PERSONS
 
     def dateDoc = Calendar.getInstance().getTime()?.format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
 
@@ -269,7 +272,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
         }
         listKnf.each { np ->
             // Порядковый номер физического лица
-            if (isCorrectionPeriod()) {
+            if (nomKorr != 0) {
                 nomspr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "PERSON_ID = ${np.personId}", null).get(0).num
             }
             Документ(КНД: KND,
@@ -816,15 +819,13 @@ def createForm() {
     }
 
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
-
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
-
     allDeclarationData.each { declaration ->
         pairKppOktmoList.each { np ->
             def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
             if (ndflPersons != null && ndflPersons.size != 0) {
-                if (isCorrectionPeriod()) {
+                if (departmentReportPeriod.correctionDate != null) {
                     def ndflPersonsPicked = []
                     ndflReferencesWithError.each { reference ->
                         ndflPersons.each { person ->
@@ -1133,15 +1134,15 @@ class PairKppOktmo {
 
 @Field final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
 
+// Мапа где ключ идентификатор NdflPerson, значение NdflPerson соответствующий идентификатору
+@Field Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
+
 def createSpecificReport() {
     def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
-    println alias
     if (alias == ALIAS_PRIMARY_RNU_W_ERRORS) {
-        println "here"
         createPrimaryRnuWithErrors()
         return
     }
-    println "not here"
 
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
 
@@ -1154,14 +1155,54 @@ def createSpecificReport() {
 }
 
 def createPrimaryRnuWithErrors() {
-    def sourceDeclarationDataList = declarationService.findSourceDeclarationData(declarationData.id)
-    println sourceDeclarationDataList
+    // Сведения о доходах из КНФ, которая является источником для входящей ОНФ и записи в реестре справок соответствующим доходам физлицам имеют ошибки
+    List<NdflPersonIncome> ndflPersonIncomeFromRNUConsolidatedList = ndflPersonService.findNdflPersonIncomeConsolidatedRNU(declarationData.id, declarationData.kpp, declarationData.oktmo)
+    // Сведения о вычетах имеющие такой же operationId как и сведения о доходах
+    List<NdflPersonDeduction> ndflPersonDeductionFromRNUConsolidatedList = []
+    // Сведения об авансах имеющие такой же operationId как и сведения о доходах
+    List<NdflPersonPrepayment> ndflPersonPrepaymentFromRNUConsolidatedList = []
+
+    ndflPersonIncomeFromRNUConsolidatedList.each {
+        ndflPersonDeductionFromRNUConsolidatedList.addAll(ndflPersonService.findDeductionsByNdflPersonAndOperation(it.ndflPersonId, it.operationId))
+        ndflPersonPrepaymentFromRNUConsolidatedList.addAll(ndflPersonService.findPrepaymentsByNdflPersonAndOperation(it.ndflPersonId, it.operationId))
+    }
+
+    ndflPersonIncomeFromRNUConsolidatedList.each {
+        NdflPersonIncome ndflPersonIncomePrimary = ndflPersonService.getIncome(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonIncomePrimary.ndflPersonId)
+        ndflPersonPrimary.incomes.add(ndflPersonIncomePrimary)
+    }
+
+    ndflPersonDeductionFromRNUConsolidatedList.each {
+        NdflPersonDeduction ndflPersonDeductionPrimary = ndflPersonService.getDeduction(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonDeductionPrimary.ndflPersonId)
+        ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)
+    }
+
+    ndflPersonDeductionFromRNUConsolidatedList.each {
+        NdflPersonPrepayment ndflPersonPrepaymentPrimary = ndflPersonService.getPrepayment(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)
+        ndflPersonPrimary.prepayments.add(ndflPersonPrepaymentPrimary)
+    }
+
     def writer = scriptSpecificReportHolder.getFileOutputStream()
     def workbook = getSpecialReportTemplate()
     workbook.write(writer)
     writer.close()
     scriptSpecificReportHolder
             .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+def initNdflPersonPrimary(ndflPersonId) {
+    NdflPerson ndflPersonPrimary = ndflpersonFromRNUPrimary[ndflPersonId]
+    if (ndflPersonPrimary == null) {
+        ndflPersonPrimary = ndflPersonService.get(ndflPersonId)
+        ndflPersonPrimary.incomes.clear()
+        ndflPersonPrimary.deductions.clear()
+        ndflPersonPrimary.prepayments.clear()
+        ndflpersonFromRNUPrimary[ndflPersonIncomePrimary.ndflPersonId] = ndflPersonPrimary
+    }
+    return ndflPersonPrimary
 }
 
 // Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его

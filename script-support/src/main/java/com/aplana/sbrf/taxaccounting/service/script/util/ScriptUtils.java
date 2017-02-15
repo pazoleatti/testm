@@ -122,6 +122,7 @@ public final class ScriptUtils {
     // разделитель между идентификаторами в ключе для кеширования записей справочника
     public static final String SEPARATOR = "_";
     public static final String SNILS_REGEXP = "\\d{3}-\\d{3}-\\d{3}\\s\\d{2}";
+    public static final String DUL_REGEXP = "[^№]+\\s[^N№]+";
 
     /**
      * Запрещаем создавать экземляры класса
@@ -2534,41 +2535,56 @@ public final class ScriptUtils {
      * Проверка корректности СНИЛС
      */
     public static boolean checkSnils(String snils) {
-        if (snils == null || snils.length() != 14) {
+        if (snils == null) {
             return false;
         }
 
-        if (!checkFormat(snils, SNILS_REGEXP)) {
+        String number = snils.replaceAll("\\D", "");
+
+        if (number.length() != 11) {
             return false;
         }
 
-        Integer valueWithoutDelimiter = Integer.valueOf(snils.substring(0, 11).replace("-", ""));
+        Integer firstValue;
+        Integer secondValue;
 
-        if (valueWithoutDelimiter <= 1001998) {
+        try {
+            firstValue = Integer.valueOf(number.substring(0, 9));
+            secondValue = Integer.valueOf(number.substring(9, 11));
+        } catch (NumberFormatException numberFormatException) {
             return false;
         }
 
-        Integer controlBlock = Integer.valueOf(snils.substring(12, 14));
+        if (firstValue <= 1001998) {
+            return true;
+        }
 
         Integer controlSumm =
-                  9*Integer.valueOf(snils.substring(0, 1))
-                + 8*Integer.valueOf(snils.substring(1, 2))
-                + 7*Integer.valueOf(snils.substring(2, 3))
-                + 6*Integer.valueOf(snils.substring(4, 5))
-                + 5*Integer.valueOf(snils.substring(5, 6))
-                + 4*Integer.valueOf(snils.substring(6, 7))
-                + 3*Integer.valueOf(snils.substring(8, 9))
-                + 2*Integer.valueOf(snils.substring(9, 10))
-                +   Integer.valueOf(snils.substring(10, 11));
+                  9*Integer.valueOf(number.substring(0, 1))
+                + 8*Integer.valueOf(number.substring(1, 2))
+                + 7*Integer.valueOf(number.substring(2, 3))
+                + 6*Integer.valueOf(number.substring(3, 4))
+                + 5*Integer.valueOf(number.substring(4, 5))
+                + 4*Integer.valueOf(number.substring(5, 6))
+                + 3*Integer.valueOf(number.substring(6, 7))
+                + 2*Integer.valueOf(number.substring(7, 8))
+                +   Integer.valueOf(number.substring(8, 9));
 
-        if (controlSumm < 100) {
-            return controlBlock.equals(controlSumm);
+        return secondValue.equals(controlSumm % 101);
+    }
+
+    /**
+     * Проверка корректности ДУЛ
+     */
+    public static boolean checkDul(String dul) {
+        if (dul == null) {
+            return false;
         }
 
-        if (controlSumm == 100 || controlSumm == 101) {
-            return controlBlock.equals(0);
+        if (!checkFormat(dul, DUL_REGEXP)) {
+            return false;
         }
 
-        return controlBlock.equals(controlSumm % 101);
+        return true;
     }
 }
