@@ -1825,7 +1825,7 @@ def checkTariff_2_2_425(fileNode) {
                     }
 
                     // 1.5.2 Корректность СНИЛС иностранного гражданина и лица без гражданства
-                    if (!ScriptUtils.checkSnils(snils)) {
+                    if (snils && !ScriptUtils.checkSnils(snils)) {
                         logger.error(CHECK_TARIFF_SNILS, snils, innFl)
                     }
 
@@ -1870,7 +1870,7 @@ def checkFL(fileNode) {
                 }
 
                 // 1.6.2 Корректность СНИЛС ФЛ - получателя дохода
-                if (!ScriptUtils.checkSnils(snils)) {
+                if (snils && !ScriptUtils.checkSnils(snils)) {
                     logger.error(CHECK_PERSON_SNILS, snils)
                 }
 
