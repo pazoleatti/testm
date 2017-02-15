@@ -563,13 +563,12 @@ final int REF_BOOK_DOC_STATE = 929
 
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    def korrPeriod = isCorrectionPeriod()
     def pairKppOktmoList = []
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
 
-    if (korrPeriod) {
+    if (departmentReportPeriod.correctionDate != null) {
         def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
         def declarationsForRemove = []
@@ -623,7 +622,7 @@ def createForm() {
         pairKppOktmoList.each { np ->
             def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
             if (ndflPersons != null && ndflPersons.size != 0) {
-                if (isCorrectionPeriod()) {
+                if (departmentReportPeriod.correctionDate != null) {
                     def ndflPersonsPicked = []
                     ndflReferencesWithError.each { reference ->
                         ndflPersons.each { person ->
@@ -946,13 +945,6 @@ def getDepartmentParamTable(def departmentParamId) {
         departmentParamTable = departmentParamTableList.get(0)
     }
     return departmentParamTable
-}
-
-def isCorrectionPeriod() {
-    def nomKorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
-    if (nomKorr != 0) {
-        return true
-    }
 }
 
 def getReportPeriodEndDate(def reportPeriodId) {
