@@ -150,7 +150,7 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
     Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersons(personIds);
     //Id : Адрес
     Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPerson);
-    //PersonId : UniqId:Документы
+    //PersonId : UniqId: ИНП
     Map<Long, List<Map<String, RefBookValue>>> inpMap = getRefInpMap(personIds)
     //PersonId :  UniqId:Документы
     Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDul(personIds)

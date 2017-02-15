@@ -68,6 +68,7 @@ public class TestScriptHelper {
     private DepartmentReportPeriodService departmentReportPeriodService;
     private FormTypeService formTypeService;
     private DeclarationService declarationService;
+    private RefBookPersonService refBookPersonService;
     private TransactionHelper transactionHelper;
 
     // Сервисы "Персонифицированные сведения о застрахованных лицах"
@@ -174,6 +175,7 @@ public class TestScriptHelper {
         departmentReportPeriodService = mockHelper.mockDepartmentReportPeriodService();
         formTypeService = mockHelper.mockFormTypeService();
         declarationService = mockHelper.mockDeclarationService();
+        refBookPersonService = mockHelper.mockRefBookPersonService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
         raschsvItogVyplService = mockHelper.mockRaschsvItogVyplService();
@@ -301,6 +303,7 @@ public class TestScriptHelper {
         bindings.put("departmentReportPeriodService", departmentReportPeriodService);
         bindings.put("formTypeService", formTypeService);
         bindings.put("declarationService", declarationService);
+        bindings.put("refBookPersonService", refBookPersonService);
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("formDataDepartment", userDepartment);
         bindings.put("formData", formData);
@@ -488,6 +491,10 @@ public class TestScriptHelper {
 
     public RaschsvItogVyplService getRaschsvItogVyplService() {
         return raschsvItogVyplService;
+    }
+
+    public RefBookPersonService getRefBookPersonService() {
+        return refBookPersonService;
     }
 
     /**

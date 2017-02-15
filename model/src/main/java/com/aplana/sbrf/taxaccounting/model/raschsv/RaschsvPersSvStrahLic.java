@@ -29,6 +29,9 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     private String imya;
     private String otchestvo;
 
+    // Ссылка на справочник физлиц
+    private Long personId;
+
     // СвВыпл
     private RaschsvSvVypl raschsvSvVypl;
 
@@ -57,10 +60,11 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String COL_FAMILIA = "familia";
     public static final String COL_IMYA = "imya";
     public static final String COL_OTCHESTVO = "otchestvo";
+    public static final String COL_PERSON_ID = "person_id";
 
     public static final String[] COLUMNS = {COL_ID, COL_DECLARATION_DATA_ID, COL_NOM_KORR, COL_PERIOD, COL_OTCHET_GOD,
             COL_NOMER, COL_SV_DATA, COL_INNFL, COL_SNILS, COL_DATA_ROZD, COL_GRAZD, COL_POL, COL_KOD_VID_DOC, COL_SER_NOM_DOC,
-            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_OTCHESTVO
+            COL_PRIZ_OPS, COL_PRIZ_OMS, COL_PRIZ_OSS, COL_FAMILIA, COL_IMYA, COL_OTCHESTVO, COL_PERSON_ID
     };
 
     public Long getDeclarationDataId() { return declarationDataId; }
@@ -132,5 +136,12 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     }
     public void setRaschsvVyplSvDop(RaschsvVyplSvDop raschsvVyplSvDop) {
         this.raschsvVyplSvDop = raschsvVyplSvDop;
+    }
+
+    public Long getPersonId() {
+        return personId;
+    }
+    public void setPersonId(Long personId) {
+        this.personId = personId;
     }
 }

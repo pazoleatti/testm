@@ -290,6 +290,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                             .addValue(RaschsvPersSvStrahLic.COL_FAMILIA, raschsvPersSvStrahLic.getFamilia())
                             .addValue(RaschsvPersSvStrahLic.COL_IMYA, raschsvPersSvStrahLic.getImya())
                             .addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, raschsvPersSvStrahLic.getOtchestvo())
+                            .addValue(RaschsvPersSvStrahLic.COL_PERSON_ID, raschsvPersSvStrahLic.getPersonId())
                             .getValues());
         }
         int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_INSERT_PERS_SV_STRAH_LIC,
@@ -471,6 +472,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             raschsvPersSvStrahLic.setFamilia(rs.getString(RaschsvPersSvStrahLic.COL_FAMILIA));
             raschsvPersSvStrahLic.setImya(rs.getString(RaschsvPersSvStrahLic.COL_IMYA));
             raschsvPersSvStrahLic.setOtchestvo(rs.getString(RaschsvPersSvStrahLic.COL_OTCHESTVO));
+            raschsvPersSvStrahLic.setPersonId(rs.getLong(RaschsvPersSvStrahLic.COL_PERSON_ID));
 
             return raschsvPersSvStrahLic;
         }
