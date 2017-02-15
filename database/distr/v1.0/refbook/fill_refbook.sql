@@ -56,6 +56,9 @@ prompt ref_book_deduction_type
 prompt ref_book_income_type
 @@ref_income_type;
 
+prompt ref_book_budget_income
+@@ref_book_budget_income;
+
 prompt ref_book_asnu
 @@ref_asnu;
 

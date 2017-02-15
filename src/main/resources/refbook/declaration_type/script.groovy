@@ -134,6 +134,7 @@ def importTF() {
  * Импорт ТФ НДФЛ
  */
 def importNDFL() {
+    //TODO при правке НДФЛ: скопировать содержимое _importTF и удалить лишнее
     _importTF()
 }
 

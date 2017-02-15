@@ -831,6 +831,23 @@ public class ScriptUtilsTest {
     @Test
     public void testCheckSnils() {
         Assert.assertTrue(ScriptUtils.checkSnils("112-233-445 95"));
-        Assert.assertFalse(ScriptUtils.checkSnils("112-233-445 96"));
+        Assert.assertTrue(ScriptUtils.checkSnils("112 233 445 95"));
+        Assert.assertTrue(ScriptUtils.checkSnils("11223344595"));
+        Assert.assertTrue(ScriptUtils.checkSnils("001001998 00"));
+        Assert.assertTrue(ScriptUtils.checkSnils("001001997 00"));
+        Assert.assertFalse(ScriptUtils.checkSnils("001001999 00"));
+        Assert.assertFalse(ScriptUtils.checkSnils("11223344596"));
+    }
+
+    @Test
+    public void testCheckDul() {
+        Assert.assertTrue(ScriptUtils.checkDul("445 95"));
+        Assert.assertTrue(ScriptUtils.checkDul("445N 95"));
+        Assert.assertFalse(ScriptUtils.checkDul("445 95N"));
+        Assert.assertFalse(ScriptUtils.checkSnils("44596"));
+        Assert.assertFalse(ScriptUtils.checkSnils("4N596"));
+        Assert.assertFalse(ScriptUtils.checkSnils("4№596"));
+        Assert.assertFalse(ScriptUtils.checkSnils("4№ 596"));
+        Assert.assertFalse(ScriptUtils.checkSnils("4f №596"));
     }
 }
