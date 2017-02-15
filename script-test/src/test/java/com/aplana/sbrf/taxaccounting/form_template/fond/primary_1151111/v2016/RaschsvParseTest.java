@@ -7,8 +7,12 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogStrahLic;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVypl;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVyplDop;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -17,9 +21,12 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +35,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Тестирование разбора xml-файла Расчета по страховым взносам
@@ -111,6 +116,11 @@ public class RaschsvParseTest extends ScriptTestBase {
     }
 
     public void initMock() {
+        initReferenceMock();
+        initIdentificatePersonMock();
+    }
+
+    public void initReferenceMock() {
         Mockito.reset(testHelper.getRaschsvItogVyplService());
 
         RefBookDataProvider okvedDataRovider = mock(RefBookDataProvider.class);
@@ -125,11 +135,25 @@ public class RaschsvParseTest extends ScriptTestBase {
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.COUNTRY.getId()))).thenReturn(oksmDataRovider);
         when(oksmDataRovider.getRecordsCount(any(Date.class), eq("CODE = '643'"))).thenReturn(1);
         when(oksmDataRovider.getRecordsCount(any(Date.class), eq("CODE = '644'"))).thenReturn(0);
+        PagingResult<Map<String, RefBookValue>> countryPagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> countryPagingResultItem = new HashMap<String, RefBookValue>();
+        countryPagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 262254399L));
+        countryPagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "643"));
+        countryPagingResult.add(countryPagingResultItem);
+        when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.COUNTRY.getId())).thenReturn(oksmDataRovider);
+        when(oksmDataRovider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(countryPagingResult);
 
         RefBookDataProvider documentCodesProvider = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.DOCUMENT_CODES.getId()))).thenReturn(documentCodesProvider);
         when(documentCodesProvider.getRecordsCount(any(Date.class), eq("CODE = '21'"))).thenReturn(1);
         when(documentCodesProvider.getRecordsCount(any(Date.class), eq("CODE = '20'"))).thenReturn(0);
+        PagingResult<Map<String, RefBookValue>> documentTypePagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> documentTypePagingResultItem = new HashMap<String, RefBookValue>();
+        documentTypePagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 266135799L));
+        documentTypePagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "21"));
+        documentTypePagingResult.add(documentTypePagingResultItem);
+        when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.DOCUMENT_CODES.getId())).thenReturn(documentCodesProvider);
+        when(documentCodesProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(documentTypePagingResult);
 
         RefBookDataProvider oktmoProvider = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.OKTMO.getId()))).thenReturn(oktmoProvider);
@@ -148,6 +172,73 @@ public class RaschsvParseTest extends ScriptTestBase {
 
         DeclarationService declarationService = mock(DeclarationService.class);
         Mockito.doThrow(new IllegalArgumentException()).when(declarationService).validateDeclaration(any(DeclarationData.class), any(TAUserInfo.class), any(Logger.class), any(File.class));
+    }
+
+    public void initIdentificatePersonMock() {
+        final int raschsvPersSvStrahLicSize = 5;
+
+        final Map<Long, RaschsvPersSvStrahLic> raschsvPersSvStrahLicMap = mockFindRaschsvPersSvStrahLic(raschsvPersSvStrahLicSize);
+
+        when(testHelper.getRefBookPersonService().identificatePerson(any(PersonData.class), anyInt())).thenReturn(null).thenReturn(null).thenReturn(1L).thenReturn(2L).thenReturn(3L);
+
+        doAnswer(new Answer<Void>() {
+            public Void answer(InvocationOnMock invocation) {
+                Object[] args = invocation.getArguments();
+                return null;
+            }
+        }).when(testHelper.getRefBookDataProvider()).updateRecordVersionWithoutLock(any(Logger.class), anyLong(), any(Date.class), any(Date.class), anyMap());
+
+        when(testHelper.getRefBookDataProvider().createRecordVersionWithoutLock(any(Logger.class), any(Date.class), any(Date.class), anyList())).thenAnswer(new Answer<List<Long>>() {
+            @Override
+            public List<Long> answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return new ArrayList<Long>(raschsvPersSvStrahLicMap.keySet());
+            }
+        });
+
+        when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
+    }
+
+    private Map<Long, RaschsvPersSvStrahLic> mockFindRaschsvPersSvStrahLic(int size) {
+        Map<Long, RaschsvPersSvStrahLic> result = new HashMap<Long, RaschsvPersSvStrahLic>();
+        for (int i = 0; i < size; i++) {
+            result.put(Long.valueOf(i), createGoodRaschsvPersSvStrahLic(Long.valueOf(i)));
+        }
+        return result;
+    }
+
+    private Map<Long, Map<String, RefBookValue>> createRefBook() {
+        Map<Long, Map<String, RefBookValue>> map = new HashMap<Long, Map<String, RefBookValue>>();
+        for (int i = 0; i < 5; i++) {
+            map.put(Long.valueOf(i), createRefBookMock(i));
+        }
+        return map;
+    }
+
+    private Map<String, RefBookValue> createRefBookMock(long id) {
+        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+        result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+        result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "foo"));
+        result.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(new Random().nextInt(1000))));
+        return result;
+    }
+
+    private RaschsvPersSvStrahLic createGoodRaschsvPersSvStrahLic(Long id) {
+        RaschsvPersSvStrahLic person = new RaschsvPersSvStrahLic();
+        person.setId(id);
+        person.setDeclarationDataId(1L);
+        person.setInnfl("000-000-000-00");
+        person.setSnils("123-321-111-11");
+        person.setFamilia("Иванов");
+        person.setImya("Иван");
+        person.setOtchestvo("Иванович");
+        person.setDataRozd(new Date());
+        person.setGrazd("643");
+
+        person.setKodVidDoc("11");
+        person.setSerNomDoc("2002 123456");
+
+        return person;
     }
 
     @Test
@@ -222,8 +313,8 @@ public class RaschsvParseTest extends ScriptTestBase {
         Assert.assertTrue(containLog("Не заполнено Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ2М в транспортном файле \"" + FILE_NAME + "\""));
         Assert.assertTrue(containLog("Не заполнено Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ3М в транспортном файле \"" + FILE_NAME + "\""));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.ИННФЛ = \"500100732250\" иностранного гражданина, необходимый для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 в транспортном файле \"" + FILE_NAME + "\""));
-        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.СНИЛС = \"112-233-445 90\" иностранного гражданина с ИНН \"500100732250\" не найден в справочнике ОКСМ"));
-        Assert.assertTrue(containLog("Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.Гражд = \"640\" иностранного гражданина, необходимый для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 в транспортном файле \"" + FILE_NAME + "\""));
+        Assert.assertTrue(containLog("Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.СНИЛС = \"112-233-445 90\" иностранного гражданина, необходимый для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 в транспортном файле \"" + FILE_NAME + "\""));
+        Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.Гражд = \"640\" иностранного гражданина с ИНН \"500100732250\" не найден в справочнике ОКСМ"));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ = \"500100732250\" для получателя доходов в транспортном файле \"" + FILE_NAME + "\""));
         Assert.assertTrue(containLog("Некорректный Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС = \"112-233-445 90\" для получателя доходов"));
         Assert.assertTrue(containLog("Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок = \"20\" получателя доходов с СНИЛС \"112-233-445 90\" не найден в справочнике \"Коды документов, удостоверяющих личность\""));

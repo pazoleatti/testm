@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -74,45 +76,49 @@ public class TransportDataController {
         }
 
         TAUserInfo userInfo = securityService.currentUserInfo();
-        String uuid = blobDataService.create(file.getInputStream(), fileName);
+        InputStream inputStream = file.getInputStream();
+        try {
+            String uuid = blobDataService.create(inputStream, fileName);
 
-        int userId = userInfo.getUser().getId();
-        String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        BalancingVariants balancingVariant = BalancingVariants.SHORT;
-        LockData lockData = lockDataService.lock(key, userId,
-                LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
-                LockData.State.IN_QUEUE.getText());
-        if (lockData == null) {
-            try {
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
-                params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                params.put("blobDataId", uuid);
+            int userId = userInfo.getUser().getId();
+            String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+            BalancingVariants balancingVariant = BalancingVariants.SHORT;
+            LockData lockData = lockDataService.lock(key, userId,
+                    LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
+                    LockData.State.IN_QUEUE.getText());
+            if (lockData == null) {
+                try {
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
+                    params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                    params.put("blobDataId", uuid);
 
-                lockData = lockDataService.getLock(key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
-                try {
-                    lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(
-                            PropertyLoader.isProductionMode() ? ReportType.LOAD_ALL_TF.getAsyncTaskTypeId() : ReportType.LOAD_ALL_TF.getDevModeAsyncTaskTypeId(),
-                            params, balancingVariant);
-                    LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
-                    lockDataService.updateQueue(key, lockData.getDateLock(), queue);
-                    logger.info(String.format(CREATE_TASK, "Загрузки файла"));
-                } catch (AsyncTaskException e) {
-                    lockDataService.unlock(key, userId);
-                    logger.error("Ошибка при постановке в очередь задачи загрузки ТФ.");
-                }
-            } catch(Exception e) {
-                logger.error(e);
-                try {
-                    lockDataService.unlock(key, userId);
-                } catch (ServiceException e2) {
-                    logger.error(e2);
+                    lockData = lockDataService.getLock(key);
+                    params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                    try {
+                        lockDataService.addUserWaitingForLock(key, userId);
+                        asyncManager.executeAsync(
+                                PropertyLoader.isProductionMode() ? ReportType.LOAD_ALL_TF.getAsyncTaskTypeId() : ReportType.LOAD_ALL_TF.getDevModeAsyncTaskTypeId(),
+                                params, balancingVariant);
+                        LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
+                        lockDataService.updateQueue(key, lockData.getDateLock(), queue);
+                        logger.info(String.format(CREATE_TASK, "Загрузки файла"));
+                    } catch (AsyncTaskException e) {
+                        lockDataService.unlock(key, userId);
+                        logger.error("Ошибка при постановке в очередь задачи загрузки ТФ.");
+                    }
+                } catch (Exception e) {
+                    logger.error(e);
+                    try {
+                        lockDataService.unlock(key, userId);
+                    } catch (ServiceException e2) {
+                        logger.error(e2);
+                    }
                 }
             }
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
-
         if (!logger.getEntries().isEmpty()) {
             response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
         }

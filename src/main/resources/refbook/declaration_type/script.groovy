@@ -453,7 +453,6 @@ def _importTF() {
     if (declarationTypeId == DECLARATION_TYPE_RASCHSV_NDFL_ID) {
         def provider = refBookFactory.getDataProvider(RefBook.Id.FOND_DETAIL.getId());
         // Настройки подразделений сборов
-        logger.info(kpp)
         def results = provider.getRecords(new Date(117, 1, 1), null, "kpp = '$kpp'", null);
         if (results.size() == 0) {
             logger.error("Не удалось определить подразделение для транспортного файла \"%s\"", UploadFileName)

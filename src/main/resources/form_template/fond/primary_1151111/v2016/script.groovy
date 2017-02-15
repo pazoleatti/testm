@@ -1,5 +1,6 @@
 package form_template.fond.primary_1151111.v2016
 
+import javax.script.ScriptException
 import java.awt.Color
 import java.text.SimpleDateFormat
 
@@ -15,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.PersonData
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMk
@@ -166,6 +168,23 @@ switch (formDataEvent) {
 
 // Коды категорий застрахованных лиц
 @Field final long REF_BOOK_PERSON_CATEGORY_ID = RefBook.Id.PERSON_CATEGORY.id
+
+// Документ, удостоверяющий личность
+@Field def dulCache = [:]
+@Field final long REF_BOOK_ID_DOC_ID = RefBook.Id.ID_DOC.id
+
+// Виды документов, удостоверяющих личность
+@Field final long REF_BOOK_DOCUMENT_ID = RefBook.Id.DOCUMENT_CODES.id
+
+// Страны
+@Field final long REF_BOOK_COUNTRY_ID = RefBook.Id.COUNTRY.id
+
+// Физ. лица
+@Field def personsCache = [:]
+@Field final long REF_BOOK_PERSON_ID = RefBook.Id.PERSON.id
+
+// Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
+@Field def SIMILARITY_THRESHOLD = 700;
 
 @Field final REPORT_PERIOD_TYPE_ID = 8
 
@@ -1243,6 +1262,11 @@ void importPrimaryData() {
     RaschsvSvnpPodpisant raschsvSvnpPodpisant = new RaschsvSvnpPodpisant()
     raschsvSvnpPodpisant.declarationDataId = declarationDataId
 
+    //Два списка для создания новых записей и для обновления существующих
+    List<RaschsvPersSvStrahLic> createdPerson = new ArrayList<RaschsvPersSvStrahLic>();
+    List<RaschsvPersSvStrahLic> updatedPerson = new ArrayList<RaschsvPersSvStrahLic>();
+    def updCnt = 0, createCnt = 0;
+
     fileNode.childNodes().each { documentNode ->
         raschsvSvnpPodpisant.svnpTlph = documentNode.name
         if (documentNode.name == NODE_NAME_DOCUMENT) {
@@ -1259,7 +1283,23 @@ void importPrimaryData() {
                                 raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
                                 raschsvPersSvStrahLicList = []
                             }
-                            raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId))
+                            RaschsvPersSvStrahLic raschsvPersSvStrahLic = parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId)
+
+                            // Идентификация физического лица
+                            PersonData personData = createPersonData(raschsvPersSvStrahLic);
+                            Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD);
+                            raschsvPersSvStrahLic.personId = refBookPersonId
+                            if (refBookPersonId != null) {
+                                //обновление записи
+                                updatedPerson.add(raschsvPersSvStrahLic);
+                                updCnt++;
+                            } else {
+                                //Новые записи помещаем в список для пакетного создания
+                                createdPerson.add(raschsvPersSvStrahLic);
+                                createCnt++;
+                            }
+
+                            raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic)
                             testCntNodePersSvStrahLic++
                         }
                     }
@@ -1284,6 +1324,15 @@ void importPrimaryData() {
 
     // Расчет сводных показателей
     raschSvItog(fileNode, declarationDataId)
+
+    // Добавление записей в справочник Физические лица
+    if (createdPerson != null && !createdPerson.isEmpty()) {
+//        createRefbookPersonData(createdPerson);
+    }
+    // Добавление записей в справочнике Физические лица
+    if (updatedPerson != null && !updatedPerson.isEmpty()) {
+//        updateRefbookPersonData(updatedPerson);
+    }
 
     // Тестирование соответствия числа узлов
     if (binding.variables.containsKey("countNodes")) {
@@ -1387,8 +1436,8 @@ void importPrimaryData() {
 @Field final CHECK_CALCULATION_KBK = "%s = \"%s\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""
 @Field final CHECK_CALCULATION_SUMM = "Не заполнено %s в транспортном файле \"%s\""
 @Field final CHECK_TARIFF_INN = "Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.ИННФЛ = \"%s\" иностранного гражданина, необходимый для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 в транспортном файле \"%s\""
-@Field final CHECK_TARIFF_SNILS = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.СНИЛС = \"%s\" иностранного гражданина с ИНН \"%s\" не найден в справочнике ОКСМ"
-@Field final CHECK_TARIFF_COUNTRY = "Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.Гражд = \"%s\" иностранного гражданина, необходимый для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 в транспортном файле \"%s\""
+@Field final CHECK_TARIFF_SNILS = "Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.СНИЛС = \"%s\" иностранного гражданина, необходимый для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 в транспортном файле \"%s\""
+@Field final CHECK_TARIFF_COUNTRY = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.Гражд = \"%s\" иностранного гражданина с ИНН \"%s\" не найден в справочнике ОКСМ"
 @Field final CHECK_PERSON_INN = "Некорректный Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ = \"%s\" для получателя доходов в транспортном файле \"%s\""
 @Field final CHECK_PERSON_SNILS = "Некорректный Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС = \"%s\" для получателя доходов"
 @Field final CHECK_PERSON_DOCTYPE = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок = \"%s\" получателя доходов с СНИЛС \"%s\" не найден в справочнике \"Коды документов, удостоверяющих личность\""
@@ -1776,13 +1825,13 @@ def checkTariff_2_2_425(fileNode) {
                     }
 
                     // 1.5.2 Корректность СНИЛС иностранного гражданина и лица без гражданства
-                    if (!ScriptUtils.checkSnils(snils)) {
-                        logger.error(CHECK_TARIFF_SNILS, snils, innFl)
+                    if (snils && !ScriptUtils.checkSnils(snils)) {
+                        logger.error(CHECK_TARIFF_SNILS, snils, UploadFileName)
                     }
 
                     // 1.5.3 Поиск кода гражданства иностранного гражданина и лица без гражданства в справочнике
                     if (countryCode && !isExistsOKSM(countryCode)) {
-                        logger.error(CHECK_TARIFF_COUNTRY, countryCode, UploadFileName)
+                        logger.error(CHECK_TARIFF_COUNTRY, countryCode, innFl)
                     }
                 }
             }
@@ -1821,7 +1870,7 @@ def checkFL(fileNode) {
                 }
 
                 // 1.6.2 Корректность СНИЛС ФЛ - получателя дохода
-                if (!ScriptUtils.checkSnils(snils)) {
+                if (snils && !ScriptUtils.checkSnils(snils)) {
                     logger.error(CHECK_PERSON_SNILS, snils)
                 }
 
@@ -2729,6 +2778,272 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
     return raschsvPersSvStrahLic
 }
 
+/**
+ * Создание объекта по которуму будет идентифицироваться физлицо в справочнике
+ * @param person
+ * @return
+ */
+PersonData createPersonData(RaschsvPersSvStrahLic raschsvPersSvStrahLic) {
+    PersonData personData = new PersonData();
+
+    personData.lastName = raschsvPersSvStrahLic.familia;
+    personData.firstName = raschsvPersSvStrahLic.imya;
+    personData.middleName = raschsvPersSvStrahLic.otchestvo;
+
+    personData.inn = raschsvPersSvStrahLic.innfl;
+    personData.snils = raschsvPersSvStrahLic.snils;
+    personData.birthDate = raschsvPersSvStrahLic.dataRozd;
+
+    personData.citizenshipId = findCountryId(raschsvPersSvStrahLic.grazd);
+    personData.sex = raschsvPersSvStrahLic.pol;
+
+    //Документы
+    personData.documentTypeId = findDocumentTypeByCode(raschsvPersSvStrahLic.kodVidDoc);
+    personData.documentNumber = raschsvPersSvStrahLic.serNomDoc;
+
+    return personData;
+}
+
+/**
+ * Добавление записей в справочник "Физические лица"
+ * @param personList
+ * @return
+ */
+def createRefbookPersonData(List<RaschsvPersSvStrahLic> personList) {
+
+    logger.info("Подготовка к созданию данных по физ.лицам: " + personList.size() + " записей");
+
+    //создание записей справочника физлиц
+    List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
+    for (int i = 0; i < personList.size(); i++) {
+        RaschsvPersSvStrahLic person = personList.get(i)
+        RefBookRecord refBookRecord = createPersonRecord(person);
+        personRecords.add(refBookRecord);
+    }
+
+    //сгенерированные идентификаторы справочника физлиц
+    List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, personRecords)
+    logger.info("В справочнике 'Физические лица' создано записей: " + personIds.size());
+
+    //создание записей справочников документы и идентфикаторы физлиц
+    List<RefBookRecord> documentsRecords = new ArrayList<RefBookRecord>()
+    for (int i = 0; i < personList.size(); i++) {
+        RaschsvPersSvStrahLic person = personList.get(i)
+        person.setPersonId(personIds.get(i)); // выставляем присвоенный Id
+        documentsRecords.add(createIdentityDocRecord(person));
+    }
+
+    List<Long> docIds = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, documentsRecords)
+    logger.info("В справочнике 'Документы физических лиц' создано записей: " + docIds.size());
+}
+
+/**
+ * Обновление записей в справочнике "Физические лица"
+ * @param personList
+ * @return
+ */
+def updateRefbookPersonData(List<RaschsvPersSvStrahLic> personList) {
+
+    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size());
+
+    Date versionFrom = getVersionFrom();
+
+    List<Long> personIds = getPersonIds(personList);
+
+    //-----<INITIALIZE_CACHE_DATA>-----
+    //PersonId : Физлица
+    Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersons(personIds);
+    //PersonId :  UniqId:Документы
+    Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDul(personIds)
+    //-----<INITIALIZE_CACHE_DATA_END>-----
+
+    for (RaschsvPersSvStrahLic person : personList) {
+        def personId = person.getPersonId();
+        Map<String, RefBookValue> refBookPersonValues = refBookPerson.get(personId);
+
+        updatePersonRecord(refBookPersonValues, person);
+
+        getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, personId, versionFrom, null, refBookPersonValues);
+
+        //Обновление списка документов
+        if (person.serNomDoc != null && !person.serNomDoc.isEmpty() && person.kodVidDoc != null && !person.kodVidDoc.isEmpty()) {
+            updateIdentityDocRecords(identityDocMap.get(personId), person);
+        }
+    }
+    logger.info("В справочнике 'Физические лица' обновлено записей: " + personList.size());
+}
+
+/**
+ * Создание новой записи справочника физлиц
+ * @param person класс предоставляющий данные для заполнения справочника
+ * @param asnuId идентификатор АСНУ в справочнике АСНУ
+ * @return запись справочника
+ */
+RefBookRecord createPersonRecord(RaschsvPersSvStrahLic person) {
+    RefBookRecord refBookRecord = new RefBookRecord();
+    Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+    fillRaschsvPersSvStrahLicAttr(values, person);
+    refBookRecord.setValues(values);
+    return refBookRecord;
+}
+
+/**
+ * Обновление атрибутов записи справочника физлиц
+ * @param values
+ * @param person
+ * @return
+ */
+def updatePersonRecord(Map<String, RefBookValue> values, RaschsvPersSvStrahLic person) {
+    fillRaschsvPersSvStrahLicAttr(values, person);
+}
+
+/**
+ * Заполнение аттрибутов справочника физлиц
+ * @param values карта для хранения значений атрибутов
+ * @param person класс предоставляющий данные для заполнения справочника
+ * @return
+ */
+def fillRaschsvPersSvStrahLicAttr(Map<String, RefBookValue> values, RaschsvPersSvStrahLic person) {
+
+    Long countryId = findCountryId(person.grazd);
+
+    putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.familia);
+    putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.imya);
+    putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.otchestvo);
+    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, person.pol?.toInteger());
+    putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.innfl);
+    putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, null);
+    putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.snils);
+    putOrUpdate(values, "RECORD_ID", RefBookAttributeType.NUMBER, null);
+    putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.dataRozd);
+    putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null);
+    putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, null);
+    putOrUpdate(values, "PENSION", RefBookAttributeType.NUMBER, person.prizOps?.toInteger());
+    putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, person.prizOms?.toInteger());
+    putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, person.prizOss?.toInteger());
+    putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, 2);
+    putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, countryId);
+    putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, null);
+    putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, null);
+    putOrUpdate(values, "DUBLICATES", RefBookAttributeType.REFERENCE, null);
+}
+
+/**
+ * Если не заполнен входной параметр, то никаких изменений в соответствующий атрибут записи справочника не вносится
+ */
+def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value) {
+    RefBookValue refBookValue = valuesMap.get(attrName);
+    if (refBookValue != null) {
+        //обновление записи
+        if (value != null) {
+            refBookValue.setValue(value);
+        }
+    } else {
+        //создание новой записи
+        valuesMap.put(attrName, new RefBookValue(type, value));
+    }
+}
+
+/**
+ * Обновление документов
+ * @param identityDocRefBook
+ * @param person
+ * @return
+ */
+def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook, RaschsvPersSvStrahLic person) {
+    Map<Long, String> docCodes = getRefDocument()
+
+    //Id типа документа - приоритет,
+    Map<Long, Integer> docPriorities = getRefDocumentPriority();
+
+    //Идентификатор типа документа
+    Long docTypeId = docCodes.find { it.value == person.kodVidDoc }?.key;
+
+    if (docTypeId != null) {
+
+        //Ищем документ с таким же типом
+        Map<String, RefBookValue> findedDoc = identityDocRefBook?.find {
+            docTypeId.equals(it.get("DOC_ID")) && person.serNomDoc?.equalsIgnoreCase(it.get("DOC_NUMBER"));
+        };
+
+        List<Map<String, RefBookValue>> identityDocRecords = new ArrayList<Map<String, RefBookValue>>();
+
+        if (findedDoc != null) {
+            //документ с таким типом и номером существует, ничего не делаем
+            return;
+        } else {
+            RefBookRecord refBookRecord = createIdentityDocRecord(person);
+            List<Long> ids = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
+            Map<String, RefBookValue> values = refBookRecord.getValues();
+            values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, ids.first()));
+            identityDocRecords.add(values);
+        }
+
+        if (identityDocRefBook != null && !identityDocRefBook.isEmpty()) {
+            identityDocRecords.addAll(identityDocRecords);
+        }
+
+        //Если документов несколько - выбираем по приоритету какой использовать в отчетах
+        if (identityDocRecords.size() > 1) {
+            //сбрасываем текушие
+            identityDocRecords.each {
+                it.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "0"));
+            }
+            Map<String, RefBookValue> minimalPrior = identityDocRecords.min {
+                docPriorities.get(it.get("DOC_ID"));
+            }
+
+            minimalPrior?.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
+        }
+
+        //Обновление признака включается в отчетность
+        for (Map<String, RefBookValue> identityDocsValues : identityDocRecords) {
+            Long uniqueId = identityDocsValues.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
+            getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, versionFrom, null, identityDocsValues);
+        }
+    }
+}
+
+/**
+ * По цифровому коду страны найти id записи в кэше справочника
+ * @param String code
+ * @return Long id
+ */
+def findCountryId(countryCode) {
+    def citizenshipCodeMap = getRefCitizenship();
+    return countryCode != null && !countryCode.isEmpty() ? citizenshipCodeMap.find {
+        it.value == countryCode
+    }?.key : null;
+}
+
+/**
+ * Документы, удостоверяющие личность
+ */
+RefBookRecord createIdentityDocRecord(RaschsvPersSvStrahLic person) {
+    RefBookRecord record = new RefBookRecord();
+    Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+    fillIdentityDocAttr(values, person);
+    record.setValues(values);
+    return record;
+}
+
+/**
+ * Заполнение аттрибутов справочника документов
+ * @param values карта для хранения значений атрибутов
+ * @param person класс предоставляющий данные для заполнения справочника
+ * @return
+ */
+def fillIdentityDocAttr(Map<String, RefBookValue> values, RaschsvPersSvStrahLic person) {
+
+    values.put("PERSON_ID", new RefBookValue(RefBookAttributeType.REFERENCE, person.personId));
+    values.put("DOC_NUMBER", new RefBookValue(RefBookAttributeType.STRING, person.serNomDoc));
+    values.put("ISSUED_BY", new RefBookValue(RefBookAttributeType.STRING, null));
+    values.put("ISSUED_DATE", new RefBookValue(RefBookAttributeType.DATE, null));
+    //Признак включения в отчет, при создании ставиться 1, при обновлении надо выбрать с минимальным приоритетом
+    values.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
+    values.put("DOC_ID", new RefBookValue(RefBookAttributeType.REFERENCE, findDocumentTypeByCode(person.kodVidDoc)));
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
@@ -2749,6 +3064,9 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 
 // Дата окончания отчетного периода
 @Field def reportPeriodEndDate = null
+
+// Дата начала отчетного периода
+@Field def reportPeriodStartDate = null
 
 // Коды ОКВЭД
 @Field def okvedCodeCache = [:]
@@ -2779,6 +3097,15 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 
 // Коды категорий застрахованных лиц
 @Field def personCategoryCodeCache = []
+
+// Виды документов, удостоверяющих личность Мапа <Идентификатор, Код>
+@Field def documentCodesCache = [:]
+
+//Приоритет документов удостоверяющих личность <Идентификатор, Приоритет(int)>
+@Field def documentPriorityCache = [:]
+
+// Страны
+@Field def citizenshipCache = [:]
 
 // Кэш для справочников
 @Field def refBookCache = [:]
@@ -3111,6 +3438,41 @@ def getDepartmentParamTable(def departmentParamId) {
 }
 
 /**
+ * Получить дату которая используется в качестве версии записей справочника
+ * @return дата используемая в качестве даты версии справочника
+ */
+def getVersionFrom() {
+    return getReportPeriodStartDate();
+}
+
+/**
+ * Получить коллекцию идентификаторов записей справочника "Физические лица"
+ * @param ndflPersonList
+ * @return
+ */
+def getPersonIds(def ndflPersonList) {
+    def personIds = []
+    ndflPersonList.each { ndflPerson ->
+        // todo Почему ndflPerson.personId != 0
+        if (ndflPerson.personId != null && ndflPerson.personId != 0) {
+            personIds.add(ndflPerson.personId)
+        }
+    }
+    return personIds;
+}
+
+/**
+ * Получить дату начала отчетного периода
+ * @return
+ */
+def getReportPeriodStartDate() {
+    if (reportPeriodStartDate == null) {
+        reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodStartDate
+}
+
+/**
  * Получить дату окончания отчетного периода
  * @return
  */
@@ -3177,6 +3539,56 @@ Double getDouble(String val) {
 }
 
 /**
+ * Получить "Физические лица"
+ * @param personIds
+ * @return
+ */
+// todo добавить обработку дублей
+def getRefPersons(def personIds) {
+    if (personsCache.size() == 0) {
+        def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
+//        def dublMap = [:]
+//        def dublList = []
+        refBookMap.each { personId, person ->
+            personsCache.put(personId, person)
+
+            // Добавим дубликат в Мапу
+//            if (person.get(RF_DUBLICATES).value != null && !dublMap.get(person.get(RF_DUBLICATES).value)) {
+//                dublMap.put(person.get(RF_DUBLICATES).value, personId)
+//                dublList.add(person.get(RF_DUBLICATES).value)
+//            }
+        }
+        // Получим оригинальные записи, если имеются дубликаты
+//        if (dublMap.size() > 0) {
+//            def refBookDublMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, dublList)
+//            refBookDublMap.each { originalPersonId, person ->
+//                dublPersonId = dublMap.get(originalPersonId).value
+//            }
+//        }
+    }
+    return personsCache;
+}
+
+/**
+ * Получить "Документ, удостоверяющий личность (ДУЛ)"
+ * todo Получение ДУЛ реализовано путем отдельных запросов для каждого personId, в будущем переделать на использование одного запроса
+ * @return
+ */
+def getRefDul(def personIds) {
+    if (dulCache.size() == 0) {
+        personIds.each { personId ->
+            def refBookMap = getRefBookByFilter(REF_BOOK_ID_DOC_ID, "PERSON_ID = " + personId.toString())
+            def dulList = []
+            refBookMap.each { refBook ->
+                dulList.add(refBook)
+            }
+            dulCache.put(personId, dulList)
+        }
+    }
+    return dulCache;
+}
+
+/**
  * Получить все записи справочника по его идентификатору
  * @param refBookId - идентификатор справочника
  * @return - возвращает лист
@@ -3201,6 +3613,32 @@ def getActualRefBook(def long refBookId) {
     if (refBookList == null || refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
     }
+    return refBookList
+}
+
+/**
+ * Получить все записи справочника по его идентификатору и коллекции идентификаторов записей справочника
+ * @param refBookId - идентификатор справочника
+ * @param recordIds - коллекция идентификаторов записей справочника
+ * @return - возвращает мапу
+ */
+def getRefBookByRecordIds(def long refBookId, def recordIds) {
+    def refBookMap = getProvider(refBookId).getRecordData(recordIds)
+    if (refBookMap == null || refBookMap.size() == 0) {
+        throw new ScriptException("Ошибка при получении записей справочника " + refBookId)
+    }
+    return refBookMap
+}
+
+/**
+ * Получить все записи справочника по его идентификатору и фильтру (отсутствие значений не является ошибкой)
+ * @param refBookId - идентификатор справочника
+ * @param filter - фильтр
+ * @return - возвращает лист
+ */
+def getRefBookByFilter(def long refBookId, def filter) {
+    // Передаем как аргумент только срок действия версии справочника
+    def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
     return refBookList
 }
 
@@ -3385,4 +3823,58 @@ def getActualPersonCategory() {
         }
     }
     return personCategoryCodeCache
+}
+
+/**
+ * По коду документа найти id записи в кэше справочника
+ * @param String code
+ * @return Long id
+ */
+def findDocumentTypeByCode(code) {
+    Map<Long, String> documentTypeMap = getRefDocument()
+    return documentTypeMap.find {
+        it.value?.equalsIgnoreCase(code)
+    }?.key;
+}
+
+/**
+ * Получить "Коды видов документов, удостоверяющих личность"
+ * @return
+ */
+def getRefDocument() {
+    if (documentCodesCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
+        refBookList.each { refBook ->
+            documentCodesCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+        }
+    }
+    return documentCodesCache;
+}
+
+/**
+ * Получить "Приоритет видов документов, удостоверяющих личность"
+ * @return
+ */
+def getRefDocumentPriority() {
+    if (documentPriorityCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
+        refBookList.each { refBook ->
+            documentPriorityCache.put(refBook?.id?.numberValue, refBook?.PRIORITY?.stringValue)
+        }
+    }
+    return documentPriorityCache;
+}
+
+/**
+ * Получить "Страны"
+ * @return
+ */
+def getRefCitizenship() {
+    if (citizenshipCache.size() == 0) {
+        def refBookMap = getRefBook(REF_BOOK_COUNTRY_ID)
+        refBookMap.each { refBook ->
+            citizenshipCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+        }
+    }
+    return citizenshipCache;
 }

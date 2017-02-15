@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -237,7 +238,8 @@ public class RaschsvCheckTest extends DeclarationScriptTestBase {
     /**
      * Тестирование проверок загруженных данных
      */
-//    @Test
+    @Ignore
+    @Test
     public void checkDataTest() {
 
         initRefBook();

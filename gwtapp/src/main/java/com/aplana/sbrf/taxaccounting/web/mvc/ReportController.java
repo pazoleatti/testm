@@ -81,6 +81,19 @@ public class ReportController {
     }
 
     /**
+     * Получает файл из "Файлов и комментариев"
+     * @param uuid
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping(value = "/DeclarationDataFile/{uuid}", method = RequestMethod.GET)
+    public void processDownloadDeclarationDataFile(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        BlobData blobData = blobDataService.get(uuid);
+        createResponse(request, response, blobData);
+    }
+
+    /**
      * Обработка запроса на формирование отчета для налоговых форм
      * @param formDataId
      * @param isShowChecked
