@@ -25,7 +25,6 @@ ECHO ## ddl: create_all_tables
 
 ECHO ## dml: fill refbook
 "%ORA_BIN%\sqlplus" %AUTH% @"refbook.sql" > "%LOG_DIR%/refbook.txt"
-"%ORA_BIN%\sqlplus" %AUTH% @"upd_refbook316.sql" > "%LOG_DIR%/upd_refbook316.txt"
 ECHO ## dml: fill oktmo
 CD ldr
 call load_oktmo.bat
