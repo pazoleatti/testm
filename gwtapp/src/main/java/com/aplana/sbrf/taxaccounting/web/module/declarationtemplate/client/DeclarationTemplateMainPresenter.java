@@ -19,7 +19,24 @@ import com.aplana.sbrf.taxaccounting.web.main.entry.client.TaPlaceManagerImpl;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DeclarationTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTemplateEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.CreateNewDTVersionAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.CreateNewDTVersionResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.CreateNewDeclarationTypeAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.CreateNewDeclarationTypeResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeleteJrxmlAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeleteJrxmlResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationTypeAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationTypeResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.ResidualSaveAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.ResidualSaveResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.SetActiveAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.SetActiveResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.UnlockDeclarationAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.UpdateDeclarationAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.UpdateDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.InitTypeAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.InitTypeResult;
@@ -34,17 +51,36 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.*;
-import com.gwtplatform.mvp.client.annotations.*;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.ChangeTabHandler;
+import com.gwtplatform.mvp.client.HasUiHandlers;
+import com.gwtplatform.mvp.client.RequestTabsHandler;
+import com.gwtplatform.mvp.client.TabContainerPresenter;
+import com.gwtplatform.mvp.client.TabView;
+import com.gwtplatform.mvp.client.annotations.ChangeTab;
+import com.gwtplatform.mvp.client.annotations.ContentSlot;
+import com.gwtplatform.mvp.client.annotations.NameToken;
+import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.ProxyEvent;
+import com.gwtplatform.mvp.client.annotations.RequestTabs;
+import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
+import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
+import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
 
-import java.util.*;
-
-import com.google.gwt.regexp.shared.RegExp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DeclarationTemplateMainPresenter extends TabContainerPresenter<DeclarationTemplateMainPresenter.MyView, DeclarationTemplateMainPresenter.MyProxy>
 		implements DeclarationTemplateMainUiHandlers, CreateNewDTVersionEvent.MyHandler, DTCreateNewTypeEvent.MyHandler {
@@ -52,7 +88,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
     private static final String ERROR_MSG = "Не удалось загрузить макет";
     private static final String SUCCESS_MSG = "Файл загружен";
     private static final String JRXML_INFO_MES =
-            "Загрузка нового jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров деклараций данной версии макета. Продолжить?";
+            "Загрузка нового jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров налоговых форм данной версии макета. Продолжить?";
 
     @RequestTabs
     public static final GwtEvent.Type<RequestTabsHandler> TYPE_RequestTabs = new GwtEvent.Type<RequestTabsHandler>();
@@ -82,7 +118,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                         with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
-                TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+                TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон налоговой формы", declarationTemplate.getType().getName());
             }
         }, this).addCallback(new ManualRevealCallback<GetDeclarationTypeResult>(DeclarationTemplateMainPresenter.this)));
     }
@@ -105,7 +141,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         getView().setTemplateId(0);
         getView().setDeclarationTemplate(declarationTemplateExt);
         UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
-        TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+        TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон налоговой формы", declarationTemplate.getType().getName());
         RevealContentEvent.fire(DeclarationTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), DeclarationTemplateMainPresenter.this);
         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                 with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
@@ -227,7 +263,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
             return;
         }
         if (declarationTemplate.getName() == null || declarationTemplate.getName().isEmpty()){
-            Dialog.infoMessage("Введите имя декларации");
+            Dialog.infoMessage("Введите имя налоговой формы");
             return;
         }
 
@@ -239,7 +275,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 public void onSuccess(CreateNewDeclarationTypeResult result) {
                     LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
                     LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getLogUuid());
-                    Dialog.infoMessage("Декларация сохранена");
+                    Dialog.infoMessage("Налоговая форма сохранена");
                     declarationTemplate.setId(result.getDeclarationTemplateId());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
@@ -255,7 +291,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 public void onSuccess(CreateNewDTVersionResult result) {
                     LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
                     LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getLogUuid());
-                    Dialog.infoMessage("Декларация сохранена");
+                    Dialog.infoMessage("Налоговая форма сохранена");
                     declarationTemplate.setId(result.getDeclarationTemplateId());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
@@ -275,7 +311,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                             LogCleanEvent.fire(DeclarationTemplateMainPresenter.this);
                             if (result.isConfirmNeeded()) {
                                 Dialog.confirmMessage("Информация",
-                                        "Найдены экземпляры деклараций, использующие версию макета. Продолжить сохранение?",
+                                        "Найдены экземпляры налоговых форм, использующие версию макета. Продолжить сохранение?",
                                         new DialogHandler() {
                                             @Override
                                             public void yes() {
@@ -316,7 +352,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 LogAddEvent.fire(DeclarationTemplateMainPresenter.this, result.getUuid());
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
-                            "Найдены экземпляры деклараций, использующие версию макета. Изменить статус версии?",
+                            "Найдены экземпляры налоговых форм, использующие версию макета. Изменить статус версии?",
                             new DialogHandler() {
                                 @Override
                                 public void yes() {
@@ -364,7 +400,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                             declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
                             declarationTemplateExt.setEndDate(result.getEndDate());
 							getView().setDeclarationTemplate(declarationTemplateExt);
-							TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+							TitleUpdateEvent.fire(DeclarationTemplateMainPresenter.this, "Шаблон налоговой формы", declarationTemplate.getType().getName());
                             UpdateTemplateEvent.fire(DeclarationTemplateMainPresenter.this);
                             placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateInfo).
                                     with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(declarationId)).build());

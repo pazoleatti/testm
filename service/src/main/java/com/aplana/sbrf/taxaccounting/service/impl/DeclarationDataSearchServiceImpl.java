@@ -59,7 +59,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
             result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
                     asList(taxType), null, null)));
         } else {
-			throw new AccessDeniedException("Недостаточно прав для поиска деклараций");
+			throw new AccessDeniedException("Недостаточно прав для поиска налоговых форм");
 		}
         // Все типы деклараций, соответствующие виду налога
         result.setDeclarationTypes(declarationTypeDao.listAllByTaxType(taxType));

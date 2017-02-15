@@ -51,7 +51,7 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
 
         Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, DeclarationDataReportType.getDDReportTypeByReportType(getReportType()));
         if (value == null) {
-            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
+            throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
         }
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());

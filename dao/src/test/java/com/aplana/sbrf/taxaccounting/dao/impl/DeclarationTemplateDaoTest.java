@@ -63,7 +63,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(1, d1.getId().longValue());
 		assertEquals('T', d1.getType().getTaxType().getCode());
 		/*assertFalse(d1.isActive());*/
-        assertEquals("Декларация 1", d1.getName());
+        assertEquals("Налоговая форма 1", d1.getName());
 
 		DeclarationTemplate d2 = declarationTemplateDao.get(2);
 		assertEquals(2, d2.getId().longValue());
@@ -81,7 +81,7 @@ public class DeclarationTemplateDaoTest {
 
 		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
 		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
-        declarationTemplate.setName("Декларация");
+        declarationTemplate.setName("Налоговая форма");
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
 		DeclarationType declarationType = declarationTypeDao.get(1);
@@ -106,7 +106,7 @@ public class DeclarationTemplateDaoTest {
 		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
 		declarationTemplate.setId(1);
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
-        declarationTemplate.setName("Декларация");
+        declarationTemplate.setName("Налоговая форма");
 		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
@@ -130,7 +130,7 @@ public class DeclarationTemplateDaoTest {
     public void testSetJrxml() {
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(1);
-        declarationTemplate.setName("Декларация");
+        declarationTemplate.setName("Налоговая форма");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setVersion(new Date());
@@ -189,7 +189,7 @@ public class DeclarationTemplateDaoTest {
     public void getDeclarationTemplateScriptTest(){
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(1);
-        declarationTemplate.setName("Декларация");
+        declarationTemplate.setName("Налоговая форма");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");

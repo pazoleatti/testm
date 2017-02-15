@@ -13,10 +13,25 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.CheckSettingExistAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.CheckSettingExistResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DeleteDepartmentCombinedAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DeleteDepartmentCombinedResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetCheckDeclarationAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetCheckDeclarationResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetRefBookPeriodAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetRefBookPeriodResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetUserDepartmentAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetUserDepartmentResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.AddLogAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.AddLogResult;
-import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -25,9 +40,19 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Presenter для формы настроек подразделений
@@ -42,9 +67,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     public interface MyProxy extends ProxyPlace<DepartmentConfigPresenter>, Place {
     }
 
-    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
+    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
-    private static final String EDIT_FOUND_TEXT_D = "В периоде %s найдены экземпляры форм/уведомлений, " +
+    private static final String EDIT_FOUND_TEXT_D = "В периоде %s найдены экземпляры налоговых форм, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
 
     private final DispatchAsync dispatcher;
@@ -225,7 +250,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                                     AddLogAction addLogAction = new AddLogAction();
                                                     addLogAction.setOldUUID(uuid[0]);
                                                     addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
-                                                            "Для актуализации данных в найденных экземплярах налоговых форм/деклараций их необходимо рассчитать/обновить")));
+                                                            "Для актуализации данных в найденных экземплярах налоговых форм их необходимо рассчитать/обновить")));
                                                     dispatcher.execute(addLogAction, CallbackUtils
                                                             .defaultCallback(new AbstractCallback<AddLogResult>() {
                                                                 @Override

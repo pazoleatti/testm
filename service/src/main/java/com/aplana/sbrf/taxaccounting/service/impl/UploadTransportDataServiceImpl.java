@@ -2,7 +2,23 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.ImportCounter;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TransportDataParam;
+import com.aplana.sbrf.taxaccounting.model.UploadResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -10,7 +26,16 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -22,17 +47,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import java.io.*;
-import java.util.*;
-
-import static com.aplana.sbrf.taxaccounting.service.impl.LoadDeclarationDataServiceImpl.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Dmitriy Levykin
@@ -74,8 +98,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     @Autowired
     private SourceService sourceService;
 
-    private static final long REF_BOOK_DEPARTMENT = 30L; // Подразделения
-    private static final long REF_BOOK_PERIOD_DICT = 8L; // Коды отчетных периодов
+    private static final long REF_BOOK_DEPARTMENT = RefBook.Id.DEPARTMENT.getId(); // Подразделения
+    private static final long REF_BOOK_PERIOD_DICT = RefBook.Id.PERIOD_CODE.getId(); // Коды отчетных периодов
     private static final String SBRF_CODE_ATTR_NAME = "SBRF_CODE";
 
     // Сообщения при загрузке в каталоги
@@ -92,7 +116,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     static final String U3 = "Файл «%s» не загружен, так как ";
     static final String U3_1 = "подразделение «%s» недоступно текущему пользователю!";
     static final String U3_3 = "подразделение «%s» является недействующим (справочник «%s»)!";
-    static final String U3_6 = "для подразделения «%s» не назначено декларации «%s»!";
+    static final String U3_6 = "для подразделения «%s» не назначено налоговой формы «%s»!";
     static final String U3_4 = "для вида налога «%s» закрыт (либо еще не открыт) период с кодом «%s»%s, календарный год «%s»!";
     static final String U3_5 = "налоговая форма уже существует";
     static final String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
@@ -122,7 +146,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         L34_2_2("Нет доступа к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
         L37("При загрузке файла «%s» произошла непредвиденная ошибка: %s.", LogLevel.ERROR, true),
-        L48("Для деклараций загружаемого файла «%s» не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true);
+        L48("Для налоговых форм загружаемого файла «%s» не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true);
 
         private LogLevel level;
         private String text;
@@ -405,10 +429,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             // АСНУ
             Long asnuId = null;
             if (asnuCode != null) {
-                RefBookDataProvider asnuProvider = rbFactory.getDataProvider(900L);
+                RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
                 List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'");
                 if (asnuIds.size() != 1) {
-                    RefBook refBook = refBookDao.get(900L);
+                    RefBook refBook = refBookDao.get(RefBook.Id.ASNU.getId());
                     logger.warn(U2, fileName);
                     logger.warn(U2_1_ASNU, refBook.getName(), refBook.getAttribute("CODE").getName(), transportDataParam.getAsnuCode());
                     return null;

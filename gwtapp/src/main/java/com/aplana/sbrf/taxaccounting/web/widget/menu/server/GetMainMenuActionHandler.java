@@ -208,7 +208,7 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_CONF)) {
                     MenuItem templateMenu = new MenuItem("Настройки", "", null);
                     adminMenuItem.getSubMenu().add(templateMenu);
-                    templateMenu.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
+                    templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", NUMBER_SIGN
                             + DeclarationTemplateTokens.declarationTemplateList));
                     templateMenu.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN
                             + RefBookListTokens.REFBOOK_LIST_ADMIN));

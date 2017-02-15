@@ -38,7 +38,7 @@ public class SourceServiceTest {
         sourceClientData.setPeriodStart(SDF.parse("01.01.2014"));
         sourceClientData.setPeriodEnd(SDF.parse("31.12.2014"));
         final SourcePair pair = new SourcePair(1l, 1l);
-        pair.setDestinationType("Декларации");
+        pair.setDestinationType("Налоговые формы");
         pair.setSourceType("Форма");
         pair.setSourceKind("Первичная");
         pair.setDestinationDepartmentName("Банк-приемник");
@@ -51,7 +51,7 @@ public class SourceServiceTest {
         Logger logger = new Logger();
         sourceService.deleteSources(logger, sourceClientData);
         assertEquals(1, logger.getEntries().size());
-        assertEquals("Удалено назначение \"Банк-источник, Первичная: Форма\" в роли источника декларации \"Банк-приемник, Декларации\" в периоде 01.01.2014 - 31.12.2014.", logger.getEntries().get(0).getMessage());
+        assertEquals("Удалено назначение \"Банк-источник, Первичная: Форма\" в роли источника налоговой формы \"Банк-приемник, Налоговые формы\" в периоде 01.01.2014 - 31.12.2014.", logger.getEntries().get(0).getMessage());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class SourceServiceTest {
         sourceClientData.setPeriodStart(SDF.parse("01.01.2014"));
         sourceClientData.setPeriodEnd(SDF.parse("31.12.2014"));
         final SourcePair pair = new SourcePair(1l, 1l);
-        pair.setDestinationType("Декларации");
+        pair.setDestinationType("Налоговые формы");
         pair.setSourceType("Форма");
         pair.setSourceKind("Первичная");
         sourceClientData.setSourcePairs(new ArrayList<SourcePair>() {{

@@ -14,7 +14,7 @@ INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, 'Transport report period 1',  1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
 
-insert into declaration_template(id, name, version, declaration_type_id, form_kind, form_type) values (1, 'Декларация 1', date '2014-01-01', 1, 3, 1);
+insert into declaration_template(id, name, version, declaration_type_id, form_kind, form_type) values (1, 'Налоговая форма 1', date '2014-01-01', 1, 3, 1);
 insert into form_data(id, form_template_id, department_report_period_id, state, kind,  return_sign) values (1, 1, 1, 1, 3, 0);
 insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (1, 1, 1, 3);
 insert into log_business(id, log_date, event_id, user_login, roles, declaration_data_id, form_data_id, user_department_name, note) values (1, date '2013-01-01', 1, 'controlBank', 'operator', 1, null, 'А - департамент', 'the best note');

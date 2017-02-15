@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentChange;
+import com.aplana.sbrf.taxaccounting.model.DepartmentChangeOperationType;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -13,8 +19,10 @@ import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.DepartmentManagementServicePortType;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentmsendpoint.TaxDepartmentChanges;
-import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.*;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS_Service;
 import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChange;
+import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.TaxDepartmentChangeStatus;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -27,7 +35,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
-import java.net.*;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -195,7 +206,7 @@ public class DepartmentWS_Manager {
             departmentChange.setSbrfCode(department.getSbrfCode());
 
             if (department.getRegionId() != null) {
-                RefBookDataProvider dataProvider = refBookFactory.getDataProvider(4L);
+                RefBookDataProvider dataProvider = refBookFactory.getDataProvider(RefBook.Id.REGION.getId());
                 Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(department.getRegionId());
                 departmentChange.setRegion(refBookValueMap.get("NAME").getStringValue());
             } else {

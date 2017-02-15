@@ -210,8 +210,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                         }
                     });
         } catch (DataAccessException e){
-            LOG.error("Ошибка обновления деклараций.", e);
-            throw new DaoException("Ошибка обновления деклараций.", e);
+            LOG.error("Ошибка обновления налоговых форм.", e);
+            throw new DaoException("Ошибка обновления налоговых форм.", e);
         }
     }
 

@@ -88,7 +88,7 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
 
         for (DeclarationData dd : declarations) {
             StringBuilder msg = new StringBuilder();
-            msg.append("Для декларации/уведомления: ");
+            msg.append("Для налоговой формы: ");
             msg.append("\"").append(declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getName()).append("\"");
             DeclarationType declarationType = declarationTemplateService.get(dd.getDeclarationTemplateId()).getType();
             if (declarationType.getTaxType() == TaxType.PROPERTY || TaxType.TRANSPORT.equals(declarationType.getTaxType())) {

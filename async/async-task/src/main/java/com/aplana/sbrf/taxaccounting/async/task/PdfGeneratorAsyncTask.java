@@ -51,7 +51,7 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
 
         Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, DeclarationDataReportType.getDDReportTypeByReportType(getReportType()));
         if (value == null) {
-            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
+            throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
         }
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
@@ -105,7 +105,7 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
+        return String.format("Сформирован %s отчет налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
                 getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
@@ -130,7 +130,7 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
+        return String.format("Произошла непредвиденная ошибка при формировании %s отчета налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
                 getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
                 declarationTemplate.getType().getName(), str);
     }

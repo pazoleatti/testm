@@ -196,9 +196,9 @@ public class TaxFormNominationPresenter
                                 getView().reloadDeclarationTableData();
                                 if ((result.getUuid() != null) && !result.getUuid().isEmpty()) {
                                     if (result.isExistDeclaration()) {
-                                        Dialog.errorMessage("Невозможно отменить назначение, т.к. созданы экземпляры декларации");
+                                        Dialog.errorMessage("Невозможно отменить назначение, т.к. созданы экземпляры налоговой формы");
                                     } else {
-                                        Dialog.errorMessage("Невозможно снять назначение декларации, т.к. назначение декларации является приемником данных");
+                                        Dialog.errorMessage("Невозможно снять назначение налоговой формы, т.к. назначение налоговой формы является приемником данных");
                                         // TODO удаление связей
                                     }
                                     LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());

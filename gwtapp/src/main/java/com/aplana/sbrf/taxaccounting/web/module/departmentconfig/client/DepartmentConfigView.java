@@ -540,11 +540,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         currentTaxType = taxType;
         taxTypeLabel.setText(taxType.getName());
         //taxOrganCodeLabel.setText("Код налогового органа (кон.):");
-        if (TaxType.DEAL.equals(taxType)) {
-            labelResponsible.setText("Ответственный за уведомление");
-        } else {
-            labelResponsible.setText("Ответственный за декларацию");
-        }
+		labelResponsible.setText("Ответственный за налоговую форму");
 
 		reloadDepartments();
 	}

@@ -73,7 +73,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         List<Integer> formTypeList = formTypeService.getIfrsFormTypes();
         List<Integer> declarationTypeList = declarationTypeService.getIfrsDeclarationTypes();
         if (formTypeList.isEmpty() && declarationTypeList.isEmpty()) {
-            logger.error("Отсутствуют макеты налоговых форм/деклараций с признаком \"Отчетность для МСФО\"");
+            logger.error("Отсутствуют макеты налоговых форм с признаком \"Отчетность для МСФО\"");
             return false;
         }
 
@@ -119,7 +119,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 logger.error("Налоговая форма: Вид: \"%s\"", formTypeService.get(formType).getName());
             }
             for(Integer declarationType: declarationTypeList) {
-                logger.error("Декларация: Вид: \"%s\"", declarationTypeService.get(declarationType).getName());
+                logger.error("Налоговая форма: Вид: \"%s\"", declarationTypeService.get(declarationType).getName());
             }
             return false;
         }
@@ -131,7 +131,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
             }
             for(DeclarationData declarationData: notAcceptedDeclarationDataList) {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                logger.error("Декларация: Подразделение: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(declarationData.getDepartmentId()), declarationTemplate.getName());
+                logger.error("Налоговая форма: Подразделение: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(declarationData.getDepartmentId()), declarationTemplate.getName());
             }
             return false;
         }
@@ -142,7 +142,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
             }
             for(DeclarationData declarationData: notReportDeclarationDataList) {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                logger.error("Декларация: Подразделение: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(declarationData.getDepartmentId()), declarationTemplate.getName());
+                logger.error("Налоговая форма: Подразделение: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(declarationData.getDepartmentId()), declarationTemplate.getName());
             }
             return false;
         }
@@ -164,7 +164,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
 
             stateLogger.updateState("Получение налоговых форм для архива");
             List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
-            stateLogger.updateState("Получение деклараций для архива");
+            stateLogger.updateState("Получение налоговых форм для архива");
             List<DeclarationData> declarationDataList = declarationDataSearchService.getIfrs(reportPeriodId);
 
             List<Department> departments = departmentService.getAllChildren(0);
@@ -186,7 +186,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 zos.closeArchiveEntry();
             }
 
-            stateLogger.updateState("Добавление деклараций в архив");
+            stateLogger.updateState("Добавление налоговых форм в архив");
             for(DeclarationData declarationData: declarationDataList) {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
                 String uuid = reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), DeclarationDataReportType.EXCEL_DEC);
@@ -264,7 +264,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
 
-        String msg = String.format("Отменено формирование архива с отчетностью для МСФО за %s %s, так как распринят экземпляр декларации с отчетом для МСФО: Подразделение: \"%s\", Вид: \"%s\"",
+        String msg = String.format("Отменено формирование архива с отчетностью для МСФО за %s %s, так как распринят экземпляр налоговой формы с отчетом для МСФО: Подразделение: \"%s\", Вид: \"%s\"",
                 reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), department.getName(), declarationTemplate.getName());
         sendNotification(usersList, msg);
     }
@@ -276,7 +276,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
 
-        String msg = String.format("Удален архив с отчетностью для МСФО за %s %s, так как распринят экземпляр декларации с отчетом для МСФО: Подразделение: \"%s\", Вид: \"%s\"",
+        String msg = String.format("Удален архив с отчетностью для МСФО за %s %s, так как распринят экземпляр налоговой формы с отчетом для МСФО: Подразделение: \"%s\", Вид: \"%s\"",
                 reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), department.getName(), declarationTemplate.getName());
         sendNotification(getIfrsUsers(), msg);
     }

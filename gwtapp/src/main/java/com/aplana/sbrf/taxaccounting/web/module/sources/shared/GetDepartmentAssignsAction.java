@@ -85,6 +85,6 @@ public class GetDepartmentAssignsAction extends UnsecuredActionImpl<GetDepartmen
 
     @Override
     public String getName() {
-        return "Получение списка, назначеных департименту, " + (isForm ? "типов (налоговых) форм" : "деклараций/уведомлений");
+        return "Получение списка назначеных департаменту типов налоговых форм";
     }
 }

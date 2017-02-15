@@ -80,7 +80,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     public static final String TITLE_FORM = "Налоговые формы";
-    public static final String TITLE_DEC = "Декларации";
+    public static final String TITLE_DEC = "Налоговые формы";
     public static final String TITLE_FORM_DEAL = "Формы";
     public static final String TITLE_DEC_DEAL = "Уведомления";
 
@@ -1186,8 +1186,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     private String getNameTypeHeaderTitle(boolean isForm) {
-        return isForm ?
-                (isTaxTypeDeal || isTaxTypeETRorMarket ? "Вид формы" : "Вид налоговой формы") :
-                (isTaxTypeDeal ? "Вид уведомления" : "Вид декларации");
+        return "Вид налоговой формы";
     }
 }

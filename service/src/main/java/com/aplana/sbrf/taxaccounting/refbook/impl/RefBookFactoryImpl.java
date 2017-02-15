@@ -49,24 +49,18 @@ public class RefBookFactoryImpl implements RefBookFactory {
 		}
 	};
 
-	// Список простых нередактируемых справочников
-	private static final List<Long> simpleReadOnlyRefBooks = Arrays.asList(new Long[]{
-			USER.getId(), SEC_ROLE.getId(), DEPARTMENT_TYPE.getId(), ASNU.getId(),
-			DECLARATION_DATA_KIND_REF_BOOK.getId(), DECLARATION_DATA_TYPE_REF_BOOK.getId(),
-            DECLARATION_TEMPLATE.getId(), DOC_STATE.getId(), TAX_INSPECTION.getId(),
-			TAXPAYER_STATUS.getId(), NDFL_RATE.getId(), TARIFF_PAYER.getId(), PRESENT_PLACE.getId(),
-            PERSON_CATEGORY.getId()
-	});
 	// Список простых редактируемых версионируемых справочников
 	private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
-			NDFL.getId(), NDFL_DETAIL.getId(),
-            FOND.getId(), FOND_DETAIL.getId(),
-            FIAS_OPERSTAT.getId(), FIAS_SOCRBASE.getId(),
-            FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
-			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(), REORGANIZATION.getId(),
-			REGION.getId(), PERSON.getId(), ID_DOC.getId(), PERSON_ADDRESS.getId(), ID_TAX_PAYER.getId(),
-            OKVED.getId(), NDFL_REFERENCES.getId(),
-			OKTMO.getId()
+			TAX_PLACE_TYPE_CODE.getId(), COUNTRY.getId(), DETACH_TAX_PAY.getId(), MAKE_CALC.getId(), MARK_SIGNATORY_CODE.getId(),
+			DOCUMENT_CODES.getId(), PERSON_ADDRESS.getId(), ID_DOC.getId(), TAXPAYER_STATUS.getId(), PERSON.getId(),
+			ID_TAX_PAYER.getId(), DEDUCTION_TYPE.getId(), INCOME_CODE.getId(), REGION.getId(), PRESENT_PLACE.getId(),
+			OKVED.getId(), REORGANIZATION.getId(), FILL_BASE.getId(), TARIFF_PAYER.getId(), HARD_WORK.getId(),
+			KBK.getId(), PERSON_CATEGORY.getId(), NDFL.getId(), NDFL_DETAIL.getId(), FOND.getId(),
+			FOND_DETAIL.getId(), NDFL_REFERENCES.getId()
+//            FIAS_OPERSTAT.getId(), FIAS_SOCRBASE.getId(),
+//            FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
+//			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(),
+//			OKTMO.getId()
 	});
 
     @Autowired
@@ -98,12 +92,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
     public RefBookDataProvider getDataProvider(Long refBookId) {
 		RefBook refBook = get(refBookId);
 
-		if (simpleReadOnlyRefBooks.contains(refBookId)) {
-			RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-			dataProvider.setWhereClause("ID <> -1");
-			dataProvider.setRefBook(refBook);
-			return dataProvider;
-		}
 		if (simpleEditableRefBooks.contains(refBookId)) {
 			RefBookSimpleDataProvider dataProvider = (RefBookSimpleDataProvider) applicationContext.getBean("refBookSimpleDataProvider", RefBookDataProvider.class);
 			dataProvider.setRefBook(refBook);
@@ -131,6 +119,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
         }
         if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
             RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+			dataProvider.setWhereClause("ID <> -1");
             dataProvider.setRefBook(refBook);
             return dataProvider;
         } else {

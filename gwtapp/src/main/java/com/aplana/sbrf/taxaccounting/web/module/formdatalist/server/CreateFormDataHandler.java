@@ -1,11 +1,27 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.MessageGenerator;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.FormTypeService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormData;
@@ -18,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,9 +65,9 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     private static final String ERROR_SELECT_FORM_DATA_KIND = "Тип налоговой формы не выбран!";
     private static final String ERROR_SELECT_FORM_DATA_TYPE = "Вид налоговой формы не выбран!";
     private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
-    private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
+    private final static String MANUAL_USED_MESSAGE = "Для формирования налоговой формы в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
     private static final String NOT_EXIST_DESTINATIONS_ETR = "Форма не является источником данных для %s";
-    private static final String NOT_EXIST_DESTINATIONS_OTHER = "Налоговая форма не является источником данных для других налоговых форм и декларации.";
+    private static final String NOT_EXIST_DESTINATIONS_OTHER = "Налоговая форма не является источником данных для других налоговых форм.";
 
     public CreateFormDataHandler() {
 		super(CreateFormData.class);

@@ -3128,7 +3128,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 		@Override
 		public void processRow(ResultSet rs) throws SQLException {
-			Long recordId = rs.getLong("record_id");
+			Long recordId = rs.getLong(RefBook.RECORD_ID_ALIAS);
 			Object value = parseRefBookValue(rs, "value", attribute);
 			result.put(recordId, new RefBookValue(attribute.getAttributeType(), value));
 		}
@@ -3145,14 +3145,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		}
 		RefBook refBook = getByAttribute(attributeId);
  		final RefBookAttribute attribute = refBook.getAttribute(attributeId);
-		String sql = String.format(
-			"SELECT record_id, %s value FROM ref_book_value WHERE attribute_id = %s AND %s",
-			attribute.getAttributeType() + "_value",
-			attributeId,
-			transformToSqlInStatement("record_id", recordIds));
-
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT record_id ")
+				.append(RefBook.RECORD_ID_ALIAS)
+				.append(", ")
+				.append(attribute.getAttributeType())
+				.append("_value  value FROM ref_book_value WHERE attribute_id = ")
+				.append(attributeId)
+				.append(" AND ")
+				.append(transformToSqlInStatement("record_id", recordIds));
 		DereferenceMapper mapper = new DereferenceMapper(attribute);
-		getJdbcTemplate().query(sql, mapper);
+		getJdbcTemplate().query(sql.toString(), mapper);
 		return mapper.getResult();
 	}
 
@@ -3172,14 +3175,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         for (int i = 0; i < n; i++) {
             List<Long> ids = new ArrayList<Long>();
             ids.addAll(recordList.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, recordList.size())));
-            String sql = String.format(
-                    "SELECT id record_id, %s value FROM %s WHERE %s",
-                    attribute.getAlias(),
-                    tableName,
-                    transformToSqlInStatement("id", ids));
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT id ")
+					.append(RefBook.RECORD_ID_ALIAS)
+					.append(", ")
+					.append(attribute.getAlias())
+					.append(" value FROM ")
+					.append(tableName)
+					.append(" WHERE ")
+					.append(transformToSqlInStatement("id", ids));
 
             DereferenceMapper mapper = new DereferenceMapper(attribute);
-            getJdbcTemplate().query(sql, mapper);
+            getJdbcTemplate().query(sql.toString(), mapper);
             result.putAll(mapper.getResult());
         }
 		return result;

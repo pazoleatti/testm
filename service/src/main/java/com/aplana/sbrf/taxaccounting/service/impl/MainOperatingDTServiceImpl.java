@@ -26,7 +26,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
     private static final String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
-    private static final String HAVE_DDT_MESSAGE = "Существует назначение декларации подразделению \"%s\"!";
+    private static final String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению \"%s\"!";
 
     @Autowired
     private LogEntryService logEntryService;

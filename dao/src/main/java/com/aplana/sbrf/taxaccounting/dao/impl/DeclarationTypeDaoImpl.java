@@ -52,7 +52,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 				new DeclarationTypeRowMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Не удалось найти вид декларации с id = %d", declarationTypeId);
+			throw new DaoException("Не удалось найти вид налоговой формы с id = %d", declarationTypeId);
 		}
 	}
 

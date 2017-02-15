@@ -35,7 +35,7 @@ public class SourceServiceImpl implements SourceService {
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
     private static final String RECONSOLIDATE_FORM_MSG = "Для коррекции консолидированных данных необходимо нажать на кнопку \"Консолидировать\" в формах: ";
-    private static final String RECALCULATE_DECLARATION_MSG = "Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\" в декларациях: ";
+    private static final String RECALCULATE_DECLARATION_MSG = "Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\" в налоговых формах: ";
     private static final String DECLARATION_INSTANCE_MSG = "\"%s\", подразделение \"%s\", период \"%s%s\"%s%s";
     private static final String EMPTY_LIST_MSG = "Список назначений пуст!";
 
@@ -271,7 +271,7 @@ public class SourceServiceImpl implements SourceService {
                 if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getDestination())).isEmpty()) {
                     /** Если единственное назначение было удалено, то продолжать нет смысла */
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
-                            "Декларация",
+                            "Налоговая форма",
                             sourcePairs.get(0).getDestinationType(),
                             sourcePairs.get(0).getDestinationDepartmentName()));
                     throw new ServiceLoggerException(FATAL_SAVE_MSG,
@@ -318,7 +318,7 @@ public class SourceServiceImpl implements SourceService {
                     public List<String> getMessage(SourcePair sourcePair) {
                         boolean isSource = notExisting.contains(sourcePair.getSource());
                         return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
-                                (!isSource && isDeclaration) ? "Декларация" : "Форма",
+                                (!isSource && isDeclaration) ? "Налоговая форма" : "Форма",
                                 isSource ? (sourcePair.getSourceKind() + ": " + sourcePair.getSourceType()) : (sourcePair.getDestinationKind() + ": " + sourcePair.getDestinationType()),
                                 isSource ? sourcePair.getSourceDepartmentName() : sourcePair.getDestinationDepartmentName()));
                     }
@@ -729,7 +729,7 @@ public class SourceServiceImpl implements SourceService {
                                     sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
                                     sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                             "приемника",
-                            sourceClientData.isDeclaration() ? "декларации" : "формы",
+                            sourceClientData.isDeclaration() ? "налоговой формы" : "формы",
                             sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                             sdf.get().format(sourceObject.getPeriodStart()) + " - " +
                                     (sourceObject.getPeriodEnd() != null ? sdf.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
@@ -740,7 +740,7 @@ public class SourceServiceImpl implements SourceService {
                     logger.info(DELETE_SUCCESS_MSG,
                             sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                             "источника",
-                            sourceClientData.isDeclaration() ? "декларации" : "формы",
+                            sourceClientData.isDeclaration() ? "налоговой формы" : "формы",
                             sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                     (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
                                     sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),

@@ -129,7 +129,7 @@
                         <style:RightBar childValign="middle" height="100%">
                             <g:Label ui:field="formDecLabel" text="Налоговые формы" addStyleNames="{style.formDecLabel}"/>
                             <g:HTML ui:field="verSep" addStyleNames="{style.verSep}"/>
-                            <style:LinkButton ui:field="formDecAnchor" text="Декларации"
+                            <style:LinkButton ui:field="formDecAnchor" text="Налоговые формы"
                                               disableImage="true" addStyleNames="{style.titleText}"/>
                         </style:RightBar>
                     </fm:Left>

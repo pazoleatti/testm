@@ -76,14 +76,14 @@
                     <fm:Right>
                         <style:LeftBar childValign="middle" height="100%">
                             <style:LinkAnchor text="Экспорт макета" ui:field="downloadDectButton" img="resources/img/down_cc.png"
-                                              title="Экспорт макета деклараций"/>
+                                              title="Экспорт макета налоговых форм"/>
                             <fileuplod:FileUploadWidget isJrxml="true" ui:field="uploadDectFile" text="Импорт макета"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label ui:field="title" text="Декларация"/>
+                        <g:Label ui:field="title" text="Налоговая форма"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>

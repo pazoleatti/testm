@@ -29,7 +29,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
     private List<LogSearchResultItem> items;
 
     private static String[] headers = new String[]{"Дата-время", "Событие", "Текст события", "Период", "Подразделение",
-            "Тип формы", "Тип налоговой формы", "Вид налоговой формы/декларации",
+            "Тип формы", "Тип налоговой формы", "Вид налоговой формы",
             "Пользователь", "Роль пользователя", "IP пользователя", "Сервер"};
 
     public LogSystemXlsxReportBuilder(List<LogSearchResultItem> items) {

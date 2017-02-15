@@ -399,7 +399,7 @@ create table ref_book_tax_place_type
   code      varchar2(3 char)    not null,
   name      varchar2(255 char)  not null
 );
-comment on table ref_book_tax_place_type is 'Коды представления налоговой декларации по месту нахождения (учёта)';
+comment on table ref_book_tax_place_type is 'Коды представления налоговой налоговой формы по месту нахождения (учёта)';
 comment on column ref_book_tax_place_type.id is 'Уникальный идентификатор';
 comment on column ref_book_tax_place_type.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
 comment on column ref_book_tax_place_type.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';

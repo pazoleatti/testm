@@ -144,7 +144,7 @@ def collectRefBookPersonIds(def ndflPersonList) {
         if (ndflPerson.personId != null && ndflPerson.personId != 0) {
             personIdSet.add(it.personId);
         } else {
-            throw new ServiceException("Не указан идентификатор 'Идентификатор ФЛ', декларация id=" + ndflPerson.declarationDataId)
+            throw new ServiceException("Не указан идентификатор 'Идентификатор ФЛ', налоговая форма id=" + ndflPerson.declarationDataId)
         }
     }
     return new ArrayList<Long>(personIdSet);
@@ -222,7 +222,7 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
         Long declarationDataId = relation.declarationDataId;
         println "consolidate from relation declarationDataId=" + declarationDataId
         if (!relation.declarationState.equals(State.ACCEPTED)) {
-            logger.error("Декларация-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", подразделение: \"%s\"", relation.getDeclarationTypeName(), relation.getFullDepartmentName())
+            logger.error("Налоговая форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", подразделение: \"%s\"", relation.getDeclarationTypeName(), relation.getFullDepartmentName())
             continue
         }
         List<NdflPerson> ndflPersonList = findNdflPersonWithData(declarationDataId);

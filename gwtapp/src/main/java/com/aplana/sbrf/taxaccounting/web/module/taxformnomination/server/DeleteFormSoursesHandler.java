@@ -106,7 +106,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
                 // удаляем последний символ ", "
                 logger.error(
                         SOURCE_CANCEL_ERR + stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString(),
-                        data.getDepartment().getName(), data.getKind().getTitle(), data.getName(), "источником для декларации"
+                        data.getDepartment().getName(), data.getKind().getTitle(), data.getName(), "источником для налоговой формы"
                 );
             } else{
                 set.add(data.getId());

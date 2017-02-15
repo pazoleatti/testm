@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -56,7 +57,7 @@ public class GetConfigurationHandler extends
 			}
 		}
         Map<Integer, String> dereferenceValue = new HashMap<Integer, String>();
-        RefBookDataProvider provider = refBookFactory.getDataProvider(30L);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.DEPARTMENT.getId());
         for (Integer departmentId : needIds) {
             // Хорошо бы разом грузить все подразделения, сейчас провайдер не поддерживает
             Map<String, RefBookValue> map = provider.getRecordData(departmentId.longValue());

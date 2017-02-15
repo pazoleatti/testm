@@ -38,7 +38,7 @@
         }*/
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения деклараций" ui:field="modalWindowTitle">
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения налоговых форм" ui:field="modalWindowTitle">
         <g:VerticalPanel height="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
                 <!-- эта штука понадобится в 0.3.7

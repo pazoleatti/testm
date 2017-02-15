@@ -120,7 +120,7 @@ public class RegionSecurityServiceImplTest {
         when(refBookFactory.get(NOT_REGION_REF_BOOK_ID)).thenReturn(notRegionRefBook);
         when(refBookFactory.get(REGION_REF_BOOK_ID)).thenReturn(refBook);
 
-        when(refBookFactory.getDataProvider(30L)).thenReturn(departmentProvider);
+        when(refBookFactory.getDataProvider(RefBook.Id.DEPARTMENT.getId())).thenReturn(departmentProvider);
         when(departmentProvider.getRecordData(DEPARTAMENT_ID)).thenReturn(department);
         when(departmentProvider.getRecordData(BAD_DEPARTAMENT_ID)).thenReturn(badDepartment);
 

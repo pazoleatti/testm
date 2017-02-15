@@ -74,11 +74,7 @@ public class SaveAction extends UnsecuredActionImpl<GetTableDataResult> implemen
 		} else {
 			sb.append("Удаление назначений ");
 		}
-		if (isForm){
-			sb.append("налоговых форм");
-		} else {
-			sb.append("деклараций");
-		}
+		sb.append("налоговых форм");
 		return sb.toString();
 	}
 }

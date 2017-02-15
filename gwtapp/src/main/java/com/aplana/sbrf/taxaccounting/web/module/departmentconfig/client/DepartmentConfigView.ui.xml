@@ -291,7 +291,7 @@
 
                             <g:cell width="50%">
                                 <g:VerticalPanel spacing="2" width="100%" ui:field="taxTypeIPanel">
-                                    <style:LabelSeparator ui:field="labelResponsible" text="Ответственный за декларацию" addStyleNames="{style.labelSeparetors}"/>
+                                    <style:LabelSeparator ui:field="labelResponsible" text="Ответственный за налоговую форму" addStyleNames="{style.labelSeparetors}"/>
 
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
                                         <g:cell width="1%" height="22px">
@@ -358,7 +358,7 @@
                                             <r:RefBookPickerWidget ui:field="taxPlaceTypeCode" attributeIdInt="3"
                                                                    isHierarchical="false" width="200px"
                                                                    multiSelect="false" manualUpdate="true"
-                                                                   title="Коды представления налоговой декларации по месту нахождения (учёта)"/>
+                                                                   title="Коды представления налоговой формы по месту нахождения (учёта)"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="taxRatePanel" width="100%" spacing="1" verticalAlignment="middle">

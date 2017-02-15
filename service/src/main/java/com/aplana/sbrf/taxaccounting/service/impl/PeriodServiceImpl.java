@@ -34,7 +34,7 @@ import static com.aplana.sbrf.taxaccounting.model.TaxType.ETR;
 @Transactional
 public class PeriodServiceImpl implements PeriodService {
 
-	private static final Long PERIOD_CODE_REF_BOOK = 8L;
+	private static final Long PERIOD_CODE_REF_BOOK = RefBook.Id.PERIOD_CODE.getId();
 
     @Autowired
 	private ReportPeriodDao reportPeriodDao;
@@ -677,7 +677,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public List<Months> getAvailableMonthList(int reportPeriodId) {
 
-        RefBookDataProvider dataProvider = rbFactory.getDataProvider(8L);
+        RefBookDataProvider dataProvider = rbFactory.getDataProvider(RefBook.Id.PERIOD_CODE.getId());
 
         ReportPeriod reportPeriod = getReportPeriod(reportPeriodId);
 

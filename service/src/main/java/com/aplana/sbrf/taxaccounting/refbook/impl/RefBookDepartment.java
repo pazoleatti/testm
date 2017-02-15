@@ -503,21 +503,6 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
                 List<Long> dftIds = departmentFormTypeService.getIdsByPerformerId(depId);
                 departmentFormTypeService.deleteByIds(dftIds);
 
-                //Удаление БО
-                List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null, "department_id = " + depId);
-                /*for (Long accountPeriodId: ids) {
-                    List<Long> income101Ids = refBookIncome101.getUniqueRecordIds(null, String.format("account_period_id = %d", accountPeriodId));
-                    if (!income101Ids.isEmpty())
-                        refBookIncome101.deleteRecordVersions(logger, income101Ids, false);
-                    List<Long> income102Ids = refBookIncome102.getUniqueRecordIds(null,
-                            String.format("account_period_id = %d", accountPeriodId));
-                    if (!income102Ids.isEmpty())
-                        refBookIncome102.deleteRecordVersions(logger, income102Ids, false);
-                }*/
-                if (!ids.isEmpty()) {
-                    refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, ids, false);
-                }
-
                 //удаление назначений
                 Collection<Long> dftIsd = CollectionUtils.collect(sourceService.getDFTByDepartment(depId, null, null, null),
                         new Transformer() {
@@ -721,7 +706,7 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
                 declarationDataSearchService.getDeclarationData(new DeclarationDataFilter(){{setDepartmentIds(Arrays.asList(department.getId()));}},
                 DeclarationDataSearchOrdering.ID, true);
         for (DeclarationData decData : declarationDatas){
-            logger.error(String.format("Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
+            logger.error(String.format("Существует экземпляр налоговой формы \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
                     declarationTemplateService.get(decData.getDeclarationTemplateId()).getName(),
                     department.getName(),
                     periodService.getReportPeriod(decData.getReportPeriodId()).getName()));
@@ -746,7 +731,7 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
         List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDDTByDepartment(department.getId(), null, null, null);
         for (DepartmentDeclarationType ddt : departmentDeclarationTypes){
             DeclarationType declarationType = declarationTypeService.get(ddt.getDeclarationTypeId());
-            logger.warn(String.format("Существует назначение декларации \"%s\" подразделению \"%s\"!",
+            logger.warn(String.format("Существует назначение налоговой формы \"%s\" подразделению \"%s\"!",
                     declarationType.getName(), department.getName()));
         }
 

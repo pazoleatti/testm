@@ -35,7 +35,7 @@ import javax.xml.stream.events.XMLEvent
  * Справочник "Коды, определяющие налоговый (отчётный) период"
  */
 @Field
-def PERIOD_CODE_REFBOOK = 8L;
+def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:

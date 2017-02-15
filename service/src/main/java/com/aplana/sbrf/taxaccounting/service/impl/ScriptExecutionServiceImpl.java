@@ -209,7 +209,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         }
                         Integer declarationTemplateId = declarationTemplateService.get(declarationTypeId, year);
                         if (declarationTemplateId == null) {
-                            logger.error("Макет декларации/уведомления, указанный в файле \"%s\" не существует. Файл пропущен.", scriptFileName);
+                            logger.error("Макет налоговой формы, указанный в файле \"%s\" не существует. Файл пропущен.", scriptFileName);
                             continue;
                         }
 
@@ -223,14 +223,14 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             if (localLogger.containsLevel(LogLevel.ERROR)) {
                                 logger.getEntries().addAll(localLogger.getEntries());
                                 logger.error("%s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен.",
-                                        declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
+                                        "Макет налоговой формы",
                                         declarationTemplate.getName(), scriptName);
                                 continue;
                             }
-                            logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\" из файла \"%s\"", declarationTemplate.getName(), scriptFileName);
+                            logger.info("Выполнен импорт скрипта для макета налоговой формы формы \"%s\" из файла \"%s\"", declarationTemplate.getName(), scriptFileName);
                         } else {
                             logger.error(LOCK_MESSAGE,
-                                    declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
+                                    "Макет налоговой формы",
                                     declarationTemplate.getName(), lockUser);
                         }
 

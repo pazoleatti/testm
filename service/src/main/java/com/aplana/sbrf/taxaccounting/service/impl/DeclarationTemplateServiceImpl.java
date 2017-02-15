@@ -40,7 +40,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	private static final Log LOG = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private static final String ENCODING = "UTF-8";
-    private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
+    private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон налоговой формы!";
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -92,7 +92,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         try{
             return declarationTemplateDao.get(declarationTemplateId);
         } catch (DaoException e){
-            throw new ServiceException("Ошибка получения шаблона декларации.", e);
+            throw new ServiceException("Ошибка получения шаблона налоговой формы.", e);
         }
 	}
 
@@ -179,7 +179,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 		if (declarationTemplateId!=null){
 			LockData objectLock = lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
 			if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
-				throw new AccessDeniedException("Шаблон декларации заблокирован другим пользователем");
+				throw new AccessDeniedException("Шаблон налоговой формы заблокирован другим пользователем");
 			}
 		}
 	}
@@ -284,7 +284,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         try {
             return declarationTemplateDao.updateVersionStatus(versionStatus, declarationTemplateId);
         }catch (DaoException e){
-            throw new ServiceException("Обновление статуса декларации.", e);
+            throw new ServiceException("Обновление статуса налоговой формы.", e);
         }
     }
 
@@ -361,14 +361,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
         if(!existInLockDec.isEmpty()){
             isExist = true;
-            logger.warn("По следующим экземплярам деклараций запущена операция формирования pdf/xlsx отчета:");
+            logger.warn("По следующим экземплярам налоговых форм запущена операция формирования pdf/xlsx отчета:");
             for (String s : existInLockDec){
                 logger.warn(s);
             }
         }
         if(!existDec.isEmpty()){
             isExist = true;
-            logger.warn("По следующим экземплярам деклараций сформирован pdf/xlsx отчет:");
+            logger.warn("По следующим экземплярам налоговых форм сформирован pdf/xlsx отчет:");
             for (String s : existDec){
                 logger.warn(s);
             }

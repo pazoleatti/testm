@@ -62,7 +62,7 @@ public class DeclarationTemplateInfoPresenter
                     LogCleanEvent.fire(DeclarationTemplateInfoPresenter.this);
                     LogAddEvent.fire(DeclarationTemplateInfoPresenter.this, result.getUuid());
                     Dialog.confirmMessage("Удаление jrxml файла",
-                            "Удаление jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров деклараций данной версии макета. Продолжить?",
+                            "Удаление jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров налоговых форм данной версии макета. Продолжить?",
                             new DialogHandler() {
                                 @Override
                                 public void yes() {

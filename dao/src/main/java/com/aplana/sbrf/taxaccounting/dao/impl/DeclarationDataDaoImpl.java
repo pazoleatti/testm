@@ -84,7 +84,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public void delete(long id) {
         int count = getJdbcTemplate().update("delete from declaration_data where id = ?", id);
         if (count == 0) {
-            throw new DaoException("Не удалось удалить декларацию с id = %d, так как она не существует", id);
+            throw new DaoException("Не удалось удалить налоговую форму с id = %d, так как она не существует", id);
         }
     }
 
@@ -116,7 +116,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return null;
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new DaoException(
-                    "Для заданного сочетания параметров найдено несколько деклараций: declarationTypeId = %d, departmentReportPeriodId = %d",
+                    "Для заданного сочетания параметров найдено несколько налоговых форм: declarationTypeId = %d, departmentReportPeriodId = %d",
                     declarationTypeId,
                     departmentReportPeriodId
             );
@@ -225,7 +225,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         Long id = declarationData.getId();
         if (id != null) {
-            throw new DaoException("Произведена попытка перезаписать уже сохранённую декларацию!");
+            throw new DaoException("Произведена попытка перезаписать уже сохранённую налоговую форму!");
         }
 
         int countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +
@@ -246,7 +246,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 Integer.class);
 
         if (countOfExisted != 0) {
-            throw new DaoException("Декларация с заданными параметрами уже существует!");
+            throw new DaoException("Налоговая форма с заданными параметрами уже существует!");
         }
 
         id = generateId("seq_declaration_data", Long.class);
@@ -472,8 +472,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         } catch (DataAccessException e) {
-            LOG.error(String.format("Ошибка поиска деклараций для заданного шаблона %d", templateId), e);
-            throw new DaoException("Ошибка поиска деклараций для заданного шаблона %d", templateId);
+            LOG.error(String.format("Ошибка поиска налоговых форм для заданного шаблона %d", templateId), e);
+            throw new DaoException("Ошибка поиска налоговых форм для заданного шаблона %d", templateId);
         }
     }
 
@@ -499,7 +499,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         } catch (DataAccessException e) {
-            String errorMsg = String.format("Ошибка при поиске деклараций по заданному сочетанию параметров: declarationTypeId = %d, departmentId = %d", declarationTypeId, departmentId);
+            String errorMsg = String.format("Ошибка при поиске налоговых форм по заданному сочетанию параметров: declarationTypeId = %d, departmentId = %d", declarationTypeId, departmentId);
             LOG.error(errorMsg, e);
             throw new DaoException(errorMsg);
         }
@@ -548,7 +548,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return null;
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new DaoException(
-                    "Для заданного сочетания параметров найдено несколько деклараций: reportPeriodId = %d",
+                    "Для заданного сочетания параметров найдено несколько налоговых форм: reportPeriodId = %d",
                     reportPeriodId
             );
         }

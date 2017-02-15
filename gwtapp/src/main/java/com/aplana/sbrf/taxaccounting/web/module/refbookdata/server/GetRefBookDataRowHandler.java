@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -22,7 +26,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @PreAuthorize("isAuthenticated()")
@@ -167,7 +175,11 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                         case REFERENCE:
                             if (value.getReferenceValue() == null) tableCell = "";
                             else {
-                                tableCell = getColumn(attribute).getFormatter().format(dereferenceValues.get(attribute.getId()).get(value.getReferenceValue()));
+								Map<Long, String> row = dereferenceValues.get(attribute.getId());
+								if (row == null) {
+									throw new com.aplana.sbrf.taxaccounting.model.exception.ServiceException("Can't to dereference value");
+								}
+                                tableCell = getColumn(attribute).getFormatter().format(row.get(value.getReferenceValue()));
                             }
                             break;
                         default:
