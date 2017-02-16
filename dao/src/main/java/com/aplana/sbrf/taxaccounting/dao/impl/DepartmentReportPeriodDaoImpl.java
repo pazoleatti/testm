@@ -493,7 +493,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId) {
         String query = "select drp.id from DEPARTMENT_REPORT_PERIOD drp " +
                 "where drp.DEPARTMENT_ID in (select id from department where type = :departmentType) " +
-                "and drp.REPORT_PERIOD_ID = :reportPeriodId ";
+                "and drp.REPORT_PERIOD_ID = :reportPeriodId and drp.IS_ACTIVE = 1";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("departmentType", departmentTypeCode);
         params.addValue("reportPeriodId", reportPeriodId);

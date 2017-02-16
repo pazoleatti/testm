@@ -206,8 +206,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     List<DataRow<Cell>> checkedRows = new LinkedList<DataRow<Cell>>();
 
-    ListDataProvider<DataRow<Cell>> model;
-    Column<DataRow<Cell>, Boolean> checkColumn;
+    private ListDataProvider<DataRow<Cell>> model;
+    private Column<DataRow<Cell>, Boolean> checkColumn;
     private IdentityColumn<DataRow<Cell>> indexColumn;
 
     private HandlerRegistration resizeHandler;

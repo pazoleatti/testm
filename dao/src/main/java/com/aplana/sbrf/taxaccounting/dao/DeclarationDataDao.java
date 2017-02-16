@@ -142,7 +142,7 @@ public interface DeclarationDataDao {
 	List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
 
 	/**
-	 * Найти декларацию НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
+	 * Найти НФ НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
 	 * @param declarationTypeId
 	 * @param departmentReportPeriodId
 	 * @param departmentId
@@ -154,10 +154,4 @@ public interface DeclarationDataDao {
 
 	DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
 
-	/**
-	 * Найти декларации источники
-	 * @param declarationDataId
-	 * @return
-	 */
-	List<DeclarationData> findSourceDeclarationData(long declarationDataId);
 }

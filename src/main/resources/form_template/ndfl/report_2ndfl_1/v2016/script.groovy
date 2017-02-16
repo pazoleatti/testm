@@ -273,11 +273,13 @@ def buildXml(def writer, boolean isForSpecificReport) {
         listKnf.each { np ->
             // Порядковый номер физического лица
             if (nomKorr != 0) {
-                nomspr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "PERSON_ID = ${np.personId}", null).get(0).num
+                nomSpr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "PERSON_ID = ${np.personId}", null).get(0).NUM.value
+            } else {
+                nomSpr++
             }
             Документ(КНД: KND,
                     ДатаДок: dateDoc,
-                    НомСпр: nomSpr++,
+                    НомСпр: nomSpr,
                     ОтчетГод: otchetGod,
                     Признак: priznakF,
                     НомКорр: sprintf('%02d', nomKorr),
@@ -449,7 +451,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                     }
                 }
             }
-
             ndflReferencess << createRefBookAttributesForNdflReference(np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
 
         }
@@ -463,8 +464,7 @@ def saveNdflRefences() {
     getProvider(NDFL_REFERENCES).createRecordVersion(logger, new Date(), null, ndflReferencess)
 }
 
-def createRefBookAttributesForNdflReference(
-        def personId, def nomSpr, def lastName, def firstName, def middleName, def birthDay) {
+def createRefBookAttributesForNdflReference(def personId, def nomSpr, def lastName, def firstName, def middleName, def birthDay) {
     Map<String, RefBookValue> row = new HashMap<String, RefBookValue>();
     row.put(NDFL_REFERENCES_DECLARATION_DATA_ID, new RefBookValue(RefBookAttributeType.NUMBER, declarationData.id))
     row.put(NDFL_REFERENCES_PERSON_ID, new RefBookValue(RefBookAttributeType.REFERENCE, personId))
@@ -565,7 +565,7 @@ def groupByTaxRate(def incomes) {
     def toReturn = []
     def rates = []
     incomes.each {
-        if(!rates.contains(it.taxRate)) {
+        if (!rates.contains(it.taxRate)) {
             rates << it.taxRate
         }
     }
@@ -776,39 +776,38 @@ final int RNU_NDFL_DECLARATION_TYPE = 101
 def departmentParamTableList = null;
 
 
-
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def pairKppOktmoList = []
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
-    def ndflReferencesWithError = null
+    def ndflReferencesWithError = []
     if (departmentReportPeriod.correctionDate != null) {
         def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
 
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
         def declarationsForRemove = []
         declarations.each { declaration ->
-            def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id
-            def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id
-            def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id
-            def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
 
-            if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.docState != stateDocReject
-            || declaration.docState != stateDocNeedClarify || declaration.docState != stateDocError)) {
+            def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id.value
+            def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id.value
+            def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id.value
+            def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
+            if (!(declarationTemplate.declarationFormKind == DeclarationFormKind.REPORTS && (declaration.docState == stateDocReject
+                    || declaration.docState == stateDocNeedClarify || declaration.docState == stateDocError))) {
                 declarationsForRemove << declaration
             }
         }
         declarations.removeAll(declarationsForRemove)
-        declarations.each { declaration ->
-            pairKppOktmoList << new PairKppOktmo(Integer.valueOf(declaration.kpp), declaration.oktmo)
-        }
-        formType = getFormType(currDeclarationTemplate)
-        if (definePriznakF() != "0") {
-            ndflReferencesWithError = getNdflReferencesWithError()
 
+        declarations.each { declaration ->
+            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, null)
         }
+        declarations.each {
+            ndflReferencesWithError.addAll(getNdflReferencesWithError(it.id, it.reportPeriodId))
+        }
+
     } else {
 
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
@@ -817,30 +816,28 @@ def createForm() {
             pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, dep.OKTMO?.value, dep?.TAX_ORGAN_CODE?.value)
         }
     }
-
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
     allDeclarationData.each { declaration ->
-        pairKppOktmoList.each { np ->
-            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
+        pairKppOktmoList.each { pair ->
+            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, pair.kpp.toString(), pair.oktmo.toString())
             if (ndflPersons != null && ndflPersons.size != 0) {
                 if (departmentReportPeriod.correctionDate != null) {
                     def ndflPersonsPicked = []
                     ndflReferencesWithError.each { reference ->
                         ndflPersons.each { person ->
-                            if (reference.PERSON_ID?.value == person.id) {
+                            if (reference.PERSON_ID?.value == person.personId) {
                                 ndflPersonsPicked << person
                             }
                         }
                     }
                     ndflPersons = ndflPersonsPicked
                 }
-                ndflPersonsGroupedByKppOktmo[np] = ndflPersons
+                ndflPersonsGroupedByKppOktmo[pair] = ndflPersons
             }
         }
     }
-
     initNdflPersons(ndflPersonsGroupedByKppOktmo)
 
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
@@ -997,7 +994,7 @@ void getSources() {
         if (tmpDeclaration != null) {
             tmpDeclarationDataList << tmpDeclaration
         }
-   }
+    }
     def declarationsForRemove = []
     tmpDeclarationDataList.each { declaration ->
         if (declaration.state != State.ACCEPTED) {
@@ -1082,14 +1079,12 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
 }
 
 
-
 def getDepartmentReportPeriodById(def id) {
     if (id != null && departmentReportPeriodMap[id] == null) {
         departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
     }
     return departmentReportPeriodMap[id]
 }
-
 
 /** Получить полное название подразделения по id подразделения. */
 def getDepartmentFullName(def id) {
@@ -1113,9 +1108,17 @@ def getDepartmentParamTableList(def departmentParamId, def reportPeriodId) {
 }
 
 // Получить список из реестра справок с ошибкой ФНС
-def getNdflReferencesWithError() {
-    def filter = "DECLARATION_DATA_ID = ${declarationData.id} AND ERRTEXT IS NOT NULL"
-    getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
+def getNdflReferencesWithError(declarationDataId, reportPeriodId) {
+    def filter = "DECLARATION_DATA_ID = ${declarationDataId}"
+    def allNdflReferences = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
+    def ndflReferencesForRemove = []
+    allNdflReferences.each {
+        if (it.ERRTEXT?.value == null) {
+            ndflReferencesForRemove << it
+        }
+    }
+    allNdflReferences.removeAll(ndflReferencesForRemove)
+    return allNdflReferences
 }
 
 class PairKppOktmo {
@@ -1127,6 +1130,11 @@ class PairKppOktmo {
         this.kpp = kpp
         this.oktmo = oktmo
         this.taxOrganCode = taxOrganCode
+    }
+
+    @Override
+    String toString() {
+        return kpp + " " + oktmo + " " + taxOrganCode
     }
 }
 
@@ -1168,6 +1176,7 @@ def createPrimaryRnuWithErrors() {
     }
 
     ndflPersonIncomeFromRNUConsolidatedList.each {
+        println "iddd ${it.id}"
         NdflPersonIncome ndflPersonIncomePrimary = ndflPersonService.getIncome(it.sourceId)
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonIncomePrimary.ndflPersonId)
         ndflPersonPrimary.incomes.add(ndflPersonIncomePrimary)

@@ -18,7 +18,6 @@ import org.custommonkey.xmlunit.Validator;
 import org.custommonkey.xmlunit.exceptions.XpathException;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -38,7 +37,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-@Ignore
 public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
     private static final int DEPARTMENT_ID = 1254;
@@ -249,6 +247,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
     private List<NdflPerson> createNdflPersonMocks(Date taxDate, Date paymentDate) {
         List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>();
         NdflPerson ndflPerson = null;
+        int taxrate = 13;
         for (int i = 0; i <2; i++) {
             ndflPerson = new NdflPerson();
             ndflPerson.setId(1L);
@@ -302,9 +301,9 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPersonIncome1.setPaymentDate(paymentDate);
 
             ndflPersonIncome1.setIncomeCode("5011");
-/*
+
             NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncome();
-            ndflPersonIncome2.setTaxRate(13);
+            ndflPersonIncome2.setTaxRate(taxrate);
             ndflPersonIncome2.setIncomeAccruedSumm(BigDecimal.valueOf(100000L));
             ndflPersonIncome2.setNotHoldingTax(50000L);
             ndflPersonIncome2.setOperationId(1L);
@@ -323,9 +322,9 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPersonIncome2.setPaymentDate(paymentDate);
 
             ndflPersonIncome2.setIncomeCode("5011");
-*/
+
             ndflPerson.getIncomes().add(ndflPersonIncome1);
-//            ndflPerson.getIncomes().add(ndflPersonIncome2);
+            ndflPerson.getIncomes().add(ndflPersonIncome2);
 
 
             NdflPersonDeduction ndflPersonDeduction1 = new NdflPersonDeduction();
@@ -360,6 +359,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPerson.getPrepayments().add(ndflPersonPrepayment);
 
             ndflPersonList.add(ndflPerson);
+            taxrate = ++taxrate;
         }
 
 

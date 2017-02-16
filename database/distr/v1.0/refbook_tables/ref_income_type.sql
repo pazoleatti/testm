@@ -91,3 +91,8 @@ insert into ref_book_income_type (id,record_id,version,status,code,name) values 
 insert into ref_book_income_type (id,record_id,version,status,code,name) values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('01.01.2016','dd.mm.yyyy'),0,'3020','Доходы в виде процентов, получаемых по вкладам в банках');
 insert into ref_book_income_type (id,record_id,version,status,code,name) values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('01.01.2016','dd.mm.yyyy'),0,'3022','Доходы в виде платы за использование денежных средств членов кредитного потребительского кооператива (пайщиков), процентов за использование сельскохозяйственным кредитным потребительским кооперативом средств, привлекаемых в форме займов от членов сельскохозяйственного кредитного потребительского кооператива или ассоциированных членов сельскохозяйственного кредитного потребительского кооператива');
 insert into ref_book_income_type (id,record_id,version,status,code,name) values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('01.01.2016','dd.mm.yyyy'),0,'4800','Иные доходы');
+
+update ref_book_income_type set status=2,version=to_date('25.12.2016','dd.mm.yyyy') where code in ('1543','2791') and status=-1;
+update ref_book_income_type set version=to_date('26.12.2016','dd.mm.yyyy') where code between '1544' and '1549';
+update ref_book_income_type set version=to_date('26.12.2016','dd.mm.yyyy') where code between '1551' and '1554';
+update ref_book_income_type set version=to_date('26.12.2016','dd.mm.yyyy') where code between '2002' and '2003';
