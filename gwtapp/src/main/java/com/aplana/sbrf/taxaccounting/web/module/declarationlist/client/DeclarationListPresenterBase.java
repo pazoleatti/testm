@@ -24,7 +24,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	public interface MyView extends View, HasUiHandlers<DeclarationListUiHandlers> {
         void updateData(int pageNumber);
 
-        void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, Long selectedItemId);
+        void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, List<Long> selectedItemIds);
 
         void updateData();
 
@@ -40,11 +40,13 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void clearTable();
 
-        Long getSelectedId();
+        List<Long> getSelectedIds();
 
         void setPage(Integer page);
 
         int getPage();
+
+        void updateButton();
     }
 
 	protected final DispatchAsync dispatcher;

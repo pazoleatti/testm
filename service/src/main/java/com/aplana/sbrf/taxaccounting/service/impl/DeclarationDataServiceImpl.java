@@ -283,6 +283,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional(readOnly = false)
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
+        declarationDataDao.setStatus(id, State.CREATED);
     }
 
     private void calculateDeclaration(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
@@ -321,12 +322,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             logger.getEntries().addAll(scriptLogger.getEntries());
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException();
+            if (departmentReportPeriodService.get(dd.getDepartmentReportPeriodId()).isActive()) {
+                declarationDataDao.setStatus(id, State.CREATED);
+            }
         } else {
             logger.info("Проверка завершена, ошибок не обнаружено");
-            if (State.CREATED.equals(dd.getState())) {
-                // Переводим в состояние подготовлено
-                declarationDataDao.setStatus(id, State.PREPARED);
+            if (departmentReportPeriodService.get(dd.getDepartmentReportPeriodId()).isActive()) {
+                if (State.CREATED.equals(dd.getState())) {
+                    // Переводим в состояние подготовлено
+                    declarationDataDao.setStatus(id, State.PREPARED);
+                }
             }
         }
     }
@@ -938,8 +943,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             exporter.exportReport();
         } catch (Exception e) {
             throw new ServiceException("Невозможно экспортировать отчет в PDF", e);
-        } finally {
-            IOUtils.closeQuietly(data);
         }
     }
 
@@ -1223,7 +1226,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         if (ddReportType == null)
             return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                    "Налоговая форма",
+                    "налоговая форма",
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriod.getCorrectionDate() != null
                             ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1266,6 +1269,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case SPECIFIC_REPORT_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
                         getTaskName(ddReportType, declarationTemplate.getType().getTaxType()),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
+                                : "",
+                        department.getName(),
+                        declarationTemplate.getType().getName(),
+                        declaration.getTaxOrganCode() != null
+                                ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП: \"" + declaration.getKpp() + "\""
+                                : "",
+                        declaration.getOktmo() != null
+                                ? ", ОКТМО: \"" + declaration.getOktmo() + "\""
+                                : "");
+            case DELETE_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
+                        "налоговой формы",
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1595,7 +1616,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Logger scriptLogger = new Logger();
             try {
                 calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
-                //validateDeclaration(userInfo, get(entry.getKey(), userInfo), scriptLogger, true, null, stateLogger);
             } catch (Exception e) {
                 scriptLogger.error(e);
             } finally {
@@ -1603,14 +1623,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     fail++;
                     DeclarationData declarationData = get(entry.getKey(), userInfo);
                     oktmoKppList.add(String.format("ОКТМО: %s, КПП: %s.", declarationData.getOktmo(), declarationData.getKpp()));
-                    logger.error("Произошла непредвиденная ошибка при расчете для формы: " + getDeclarationFullName(entry.getKey(), null));
+                    logger.error("Произошла непредвиденная ошибка при расчете для " + getDeclarationFullName(entry.getKey(), null));
                     logger.getEntries().addAll(scriptLogger.getEntries());
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
-                    logger.info("Успешно выполнена расчет для формы: " + getDeclarationFullName(entry.getKey(), null));
+                    logger.info("Успешно выполнена расчет для " + getDeclarationFullName(entry.getKey(), null));
                     logger.getEntries().addAll(scriptLogger.getEntries());
-                    declarationDataDao.setStatus(entry.getKey(), State.ACCEPTED);
                 }
             }
         }

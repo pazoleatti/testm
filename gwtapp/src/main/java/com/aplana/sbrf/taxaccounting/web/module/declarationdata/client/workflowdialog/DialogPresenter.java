@@ -44,26 +44,18 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 
 	@Override
 	public void onConfirm() {
-		String comment = getView().getComment();
-		if("".equals(comment.trim())){
-			Dialog.warningMessage("Необходимо указать причину возврата");
-        } else if (comment.length() > MAX_LENGTH) {
-            Dialog.warningMessage("Необходимо уменьшить длину причины возврата до " + MAX_LENGTH + " символов");
-        } else {
-			hide();
-			LogCleanEvent.fire(this);
-			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
-			action.setAccepted(false);
-			action.setDeclarationId(declarationId);
-			action.setReasonForReturn(comment);
-			dispatchAsync.execute(action, CallbackUtils
-					.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+        hide();
+        LogCleanEvent.fire(this);
+        AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
+        action.setAccepted(false);
+        action.setDeclarationId(declarationId);
+        dispatchAsync.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
 						@Override
 						public void onSuccess(AcceptDeclarationDataResult result) {
 							revealPlaceRequest();
 						}
 					}, this));
-		}
 	}
 
 	@Override
