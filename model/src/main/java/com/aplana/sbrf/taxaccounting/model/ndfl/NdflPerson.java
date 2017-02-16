@@ -88,13 +88,6 @@ public class NdflPerson extends IdentityObject<Long> {
      */
     public static final String[] FIELDS = {"id", "declarationDataId", "personId", "rowNum", "inp", "snils", "lastName", "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber", "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat", "countryCode", "address", "additionalData"};
 
-    public Object[] createPreparedStatementArgs() {
-        return new Object[]{declarationDataId, personId, rowNum, inp, snils, lastName, firstName, middleName, birthDay, citizenship,
-                innNp, innForeign, idDocType, idDocNumber, status, postIndex, regionCode, area, city,
-                locality, street, house, building, flat, countryCode, address, additionalData
-        };
-    }
-
     public Long getDeclarationDataId() {
         return declarationDataId;
     }
