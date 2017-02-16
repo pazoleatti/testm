@@ -132,6 +132,10 @@ switch (formDataEvent) {
         scriptSpecificReportHolder
                 .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
         break
+    case FormDataEvent.DELETE:
+        println "!DELETE!"
+        deleteData()
+        break
     default:
         break
 }
@@ -1908,6 +1912,13 @@ def checkFL(fileNode) {
             }
         }
     }
+}
+
+/**
+ * Удаляет данные из raschsv_kol_lic_tip и raschsv_sv_sum_1tip по declarationData.id
+ */
+def deleteData() {
+    raschsvObyazPlatSvService.deleteFromLinkedTable(declarationData.id)
 }
 
 /**

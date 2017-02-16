@@ -3,11 +3,15 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvKolLicTipDao;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvKolLicTip;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Types;
 
 @Repository
 @Transactional
@@ -32,5 +36,45 @@ public class RaschsvKolLicTipDaoImpl extends AbstractDao implements RaschsvKolLi
         getNamedParameterJdbcTemplate().update(sql.toString(), params);
 
         return raschsvKolLicTip.getId();
+    }
+
+    @Override
+    public void deleteRaschsvKolLicTipByDeclarationDataId(Long declarationDataId) {
+        try {
+            getJdbcTemplate().update(
+                    "DELETE FROM raschsv_kol_lic_tip WHERE id in ( " +
+                        "select " +
+                            "klt.id " +
+                        "from " +
+                            "raschsv_obyaz_plat_sv ops " +
+                            "inner join raschsv_oss_vnm ov on (ops.id = ov.raschsv_obyaz_plat_sv_id) " +
+                            "inner join raschsv_oss_vnm_kol ovk on (ov.id = ovk.raschsv_oss_vnm_id) " +
+                            "inner join raschsv_kol_lic_tip klt on (ovk.raschsv_kol_lic_tip_id = klt.id) " +
+                        "where " +
+                            "ops.declaration_data_id = ? " +
+                    ") ",
+                    new Object[]{declarationDataId},
+                    new int[]{Types.INTEGER}
+            );
+
+            getJdbcTemplate().update(
+                    "DELETE FROM raschsv_kol_lic_tip WHERE id in (" +
+                        "select " +
+                            "rklt.id " +
+                        "from " +
+                            "raschsv_obyaz_plat_sv ops " +
+                            "inner join raschsv_sv_ops_oms rsvoo on (ops.id = rsvoo.raschsv_obyaz_plat_sv_id) " +
+                            "inner join raschsv_sv_ops_oms_rasch rsoor on (rsvoo.id = rsoor.raschsv_sv_ops_oms_id) " +
+                            "inner join raschsv_ops_oms_rasch_kol roork on (roork.raschsv_ops_oms_rasch_kol_id = rsoor.id) " +
+                            "inner join raschsv_kol_lic_tip rklt on (rklt.id = roork.raschsv_kol_lic_tip_id) " +
+                        "where "+
+                            "ops.declaration_data_id = ? " +
+                    ") ",
+                    new Object[]{declarationDataId},
+                    new int[]{Types.INTEGER}
+            );
+        } catch (DataAccessException e){
+            throw new DaoException(String.format("Не удалось удалить записи с raschsv_kol_lic_tip = %d", declarationDataId), e);
+        }
     }
 }

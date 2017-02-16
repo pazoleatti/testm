@@ -15,4 +15,10 @@ public interface RaschsvSvSum1TipDao {
      * @return
      */
     Long insertRaschsvSvSum1Tip(RaschsvSvSum1Tip raschsvSvSum1Tip);
+
+    /**
+     * Удаление СвСум1Тип по declarationDataId через все связанные таблицы
+     * @param declarationDataId
+     */
+    void deleteRaschsvSvSum1TipByDeclarationDataId(Long declarationDataId);
 }

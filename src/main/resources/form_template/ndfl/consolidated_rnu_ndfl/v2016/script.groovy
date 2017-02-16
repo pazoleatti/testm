@@ -61,16 +61,23 @@ void consolidation() {
     //список нф-источников
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
 
+    logger.info(String.format("НФ-источников найдено: %d", sourcesInfo.size()))
+
     List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
 
-    if (logger.containsLevel(LogLevel.WARNING)) {
-        throw new ServiceException("При получении источников возникли ошибки. Консолидация НФ в данный момент не возможна. ");
+    logger.info(String.format("ФЛ в ПНФ найдено: %d", ndflPersonList.size()));
+
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        throw new ServiceException("При получении источников возникли ошибки. Консолидация НФ не возможна.");
     }
 
     //Карта в которой хранится record_id и NdflPerson в котором объединяются данные о даходах
     SortedMap<Long, NdflPerson> ndflPersonMap = consolidateNdflPerson(ndflPersonList);
 
-    println "start actualize"
+    logger.info(String.format("ФЛ в КНФ найдено: %d", ndflPersonMap.size()))
+
+
+    println "consolidation start actualize"
     long time = System.currentTimeMillis();
     List<Long> personIds = new ArrayList<Long>();
     for (Map.Entry<Long, NdflPerson> entry : ndflPersonMap.entrySet()) {
@@ -80,16 +87,13 @@ void consolidation() {
         personIds.add(personId);
         ndflPerson.personId = personId;
     }
-    println "end actualize(" + (System.currentTimeMillis() - time) + ")"
+    println "consolidation end actualize(" + (System.currentTimeMillis() - time) + ")"
 
     //-----<INITIALIZE_CACHE_DATA>-----
-    time = System.currentTimeMillis();
-
     Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersons(personIds);
     Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPerson);
     //PersonId :  Документы
     Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDul(personIds)
-
     //-----<INITIALIZE_CACHE_DATA_END>-----
 
     //разделы в которых идет сплошная нумерация
@@ -119,6 +123,7 @@ void consolidation() {
 
         Map<String, RefBookValue> personRecord = refBookPerson.get(ndflPersonId);
 
+        //Выбираем ДУЛ с признаком включения в отчетность 1
         Map<String, RefBookValue> identityDocumentRecord = identityDocList?.find {
             it.get("INC_REP")?.getNumberValue() == 1
         };
@@ -150,6 +155,8 @@ void consolidation() {
 
     }
 
+    logger.info(String.format("Консолидация завершена, новых записей создано: %d", (ndflPersonNum - 1)));
+
 }
 
 /**
@@ -175,7 +182,7 @@ def collectRefBookPersonIds(List<NdflPerson> ndflPersonList) {
 def buildNdflPerson(NdflPerson currentNdflPerson, Map<String, RefBookValue> personRecord, Map<String, RefBookValue> identityDocumentRecord, Map<String, RefBookValue> addressRecord) {
 
     Map<Long, String> countryCodes = getRefCountryCode();
-    Map<Long, String> documentCodes = getRefDocumentTypeCodes();
+    Map<Long, Map<String, RefBookValue>> documentTypeRefBook= getRefDocumentTypeCodes();
     Map<Long, String> taxpayerStatusCodes = getRefTaxpayerStatusCodes();
 
     NdflPerson ndflPerson = new NdflPerson()
@@ -197,7 +204,9 @@ def buildNdflPerson(NdflPerson currentNdflPerson, Map<String, RefBookValue> pers
     ndflPerson.citizenship = countryCodes.get(countryId)
 
     //ДУЛ - заполняется на основе справочника Документы, удостоверяющие личность
-    ndflPerson.idDocType = documentCodes.get(identityDocumentRecord.get("DOC_ID")?.getReferenceValue())
+    Map<String, RefBookValue> docTypeRecord = documentTypeRefBook.get(identityDocumentRecord.get("DOC_ID")?.getReferenceValue())
+    ndflPerson.idDocType = docTypeRecord?.get("CODE")?.getStringValue();
+
     ndflPerson.idDocNumber = identityDocumentRecord.get("DOC_NUMBER")?.getStringValue()
 
     ndflPerson.status = taxpayerStatusCodes.get(identityDocumentRecord.get("TAXPAYER_STATE")?.getReferenceValue())
@@ -212,7 +221,6 @@ def buildNdflPerson(NdflPerson currentNdflPerson, Map<String, RefBookValue> pers
     ndflPerson.building = addressRecord.get("BUILD")?.getStringValue()
     ndflPerson.flat = addressRecord.get("APPARTMENT")?.getStringValue()
     ndflPerson.countryCode = countryCodes.get(addressRecord.get("COUNTRY_ID")?.getReferenceValue())
-    //TODO адресс ино, как заполнять?
     ndflPerson.address = addressRecord.get("ADDRESS")?.getStringValue()
     ndflPerson.additionalData = currentNdflPerson.additionalData
     return ndflPerson
@@ -242,15 +250,20 @@ def consolidateDetail(ndflPersonDetail, i) {
 List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
     List<NdflPerson> result = new ArrayList<NdflPerson>();
     // собираем данные из источников
+    int i = 0;
     for (Relation relation : sourcesInfo) {
         Long declarationDataId = relation.declarationDataId;
         if (!relation.declarationState.equals(State.ACCEPTED)) {
-            logger.warn(String.format("Налоговая форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", подразделение: \"%s\"", relation.getDeclarationTypeName(), relation.getFullDepartmentName()))
+            logger.error(String.format("Налоговая форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", подразделение: \"%s\", id=\"%d\"", relation.getDeclarationTypeName(), relation.getFullDepartmentName(), declarationDataId))
             continue
         }
         List<NdflPerson> ndflPersonList = findNdflPersonWithData(declarationDataId);
         result.addAll(ndflPersonList);
+        i++;
     }
+
+    logger.info(String.format("НФ-источников выбрано для консолидации: %d", i))
+
     return result;
 }
 
@@ -287,6 +300,7 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList) {
 
     //список уникальных id физлиц из справочника
     List<Long> personIds = collectRefBookPersonIds(ndflPersonList)
+
     Map<Long, Map<String, RefBookValue>> refBookPerson = getRefBookByRecordIds(RefBook.Id.PERSON.getId(), personIds)
 
     Map<Long, NdflPerson> result = new TreeMap<Long, NdflPerson>();
@@ -419,7 +433,7 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
 
             declarationDataList.add(declarationData);
         } else {
-            logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(departmentId) + ", отчетный период: " + reportPeriodId);
+            logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(departmentId) + ", отчетный период: " + reportPeriodId + ", id: "+declarationData.id);
         }
     }
 
@@ -599,6 +613,7 @@ def createSpecificReport() {
 @Field Map<Long, String> countryCodeCache = [:]
 //Виды документов, удостоверяющих личность
 @Field Map<Long, Map<String, RefBookValue>> documentTypeCache = [:]
+
 //Коды статуса налогоплатильщика
 @Field Map<Long, String> taxpayerStatusCodeCache = [:]
 //Адреса физлиц

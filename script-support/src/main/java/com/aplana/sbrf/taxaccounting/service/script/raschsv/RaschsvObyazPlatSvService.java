@@ -22,4 +22,10 @@ public interface RaschsvObyazPlatSvService {
      * @return
      */
     RaschsvObyazPlatSv findObyazPlatSv(Long declarationDataId);
+
+    /**
+     * Удаляет данные из связанных таблиц: raschsv_kol_lic_tip и raschsv_sv_sum_1tip
+     * @param declarationDataId - идентификатор декларации
+     */
+    void deleteFromLinkedTable(Long declarationDataId);
 }
