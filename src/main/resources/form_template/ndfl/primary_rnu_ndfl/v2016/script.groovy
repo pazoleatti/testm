@@ -41,15 +41,18 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
         break
+    case FormDataEvent.PREPARE_SPECIFIC_REPORT:
+        prepareSpecificReport()
+        break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
-        createSpecificReport();
+        createSpecificReport()
         break
     case FormDataEvent.CHECK:
-        checkData();
+        checkData()
         break
     case FormDataEvent.CALCULATE:
-        calculate();
-        //checkData();
+        calculate()
+        //checkData()
         break
 }
 
@@ -139,7 +142,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size());
+    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size() + ")");
 
     Date versionFrom = getVersionFrom();
 
@@ -597,9 +600,13 @@ def findCountryId(countryCode) {
     return result;
 }
 
-//------------------ Create Report ----------------------
+//------------------ PREPARE_SPECIFIC_REPORT ----------------------
 
-def createSpecificReport() {
+def prepareSpecificReport() {
+    PrepareSpecificReportResult result = new PrepareSpecificReportResult();
+    List<Column> tableColumns = createTableColumns();
+    List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+    def rowColumns = createRowColumns()
 
     //Проверка, подготовка данных
     def params = scriptSpecificReportHolder.subreportParamValues
@@ -609,37 +616,155 @@ def createSpecificReport() {
         throw new ServiceException("Для поиска физического лица необходимо задать один из критериев.");
     }
 
-    PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, reportParameters);
+    def resultReportParameters = [:]
+    reportParameters.each { key, value ->
+        if (value != null) {
+            resultReportParameters.put(key, value)
+        }
+    }
+    PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters);
 
     if (pagingResult.isEmpty()) {
-        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + params);
+        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + resultReportParameters);
     }
 
-    if (pagingResult.size() > 1) {
-        pagingResult.getRecords().each() { ndflPerson ->
-            StringBuilder sb = new StringBuilder();
-            sb.append("[").append("Фамилия: ").append(ndflPerson.lastName).append("],");
-            sb.append("[").append("Имя: ").append(ndflPerson.firstName).append("],");
-            sb.append("[").append("Отчество: ").append(ndflPerson.middleName).append("],");
-            sb.append("[").append("СНИЛС: ").append(ndflPerson.snils).append("],");
-            sb.append("[").append("ИНН: ").append(ndflPerson.innNp).append("],");
-            sb.append("[").append("Дата рождения: ").append(formatDate(ndflPerson.birthDay)).append("],");
-            sb.append("[").append("ДУЛ: ").append(ndflPerson.idDocNumber).append("],");
-            logger.info(sb.toString())
-        }
-        throw new ServiceException("Найдено " + pagingResult.getTotalCount() + " записей. Отображено записей " + pagingResult.size() + ". Уточните критерии поиска.");
+    pagingResult.getRecords().each() { ndflPerson ->
+        DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
+        row.getCell("id").setStringValue(ndflPerson.id.toString())
+        row.lastName = ndflPerson.lastName
+        row.firstName = ndflPerson.firstName
+        row.middleName = ndflPerson.middleName
+        row.snils = ndflPerson.snils
+        row.innNp = ndflPerson.innNp
+        row.birthDay = ndflPerson.birthDay
+        row.idDocNumber = ndflPerson.idDocNumber
+        dataRows.add(row)
     }
 
-    def ndflPerson = ndflPersonService.get(pagingResult.get(0).id);
+    result.setTableColumns(tableColumns);
+    result.setDataRows(dataRows);
+    scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
+    scriptSpecificReportHolder.setSubreportParamValues(params)
+}
+
+def createTableColumns() {
+    List<Column> tableColumns = new ArrayList<Column>()
+
+    Column column1 = new StringColumn()
+    column1.setAlias("lastName")
+    column1.setName("Фамилия")
+    column1.setWidth(10)
+    tableColumns.add(column1)
+
+    Column column2 = new StringColumn()
+    column2.setAlias("firstName")
+    column2.setName("Имя")
+    column2.setWidth(10)
+    tableColumns.add(column2)
+
+    Column column3 = new StringColumn()
+    column3.setAlias("middleName")
+    column3.setName("Отчество")
+    column3.setWidth(10)
+    tableColumns.add(column3)
+
+    Column column4 = new StringColumn()
+    column4.setAlias("snils")
+    column4.setName("СНИЛС")
+    column4.setWidth(10)
+    tableColumns.add(column4)
+
+    Column column5 = new StringColumn()
+    column5.setAlias("innNp")
+    column5.setName("ИНН")
+    column5.setWidth(10)
+    tableColumns.add(column5)
+
+    Column column6= new DateColumn()
+    column6.setAlias("birthDay")
+    column6.setName("Дата рождения")
+    column6.setWidth(10)
+    tableColumns.add(column6)
+
+    Column column7 = new StringColumn()
+    column7.setAlias("idDocNumber")
+    column7.setName("ДУЛ")
+    column7.setWidth(10)
+    tableColumns.add(column7)
+
+    return tableColumns;
+}
+
+def createRowColumns() {
+    List<Column> tableColumns = new ArrayList<Column>();
+
+    Column columnId = new StringColumn()
+    columnId.setAlias("id")
+    columnId.setName("id")
+    columnId.setWidth(10)
+    tableColumns.add(columnId)
+
+    Column column1 = new StringColumn()
+    column1.setAlias("lastName")
+    column1.setName("Фамилия")
+    column1.setWidth(10)
+    tableColumns.add(column1)
+
+    Column column2 = new StringColumn()
+    column2.setAlias("firstName")
+    column2.setName("Имя")
+    column2.setWidth(10)
+    tableColumns.add(column2)
+
+    Column column3 = new StringColumn()
+    column3.setAlias("middleName")
+    column3.setName("Отчество")
+    column3.setWidth(10)
+    tableColumns.add(column3)
+
+    Column column4 = new StringColumn()
+    column4.setAlias("snils")
+    column4.setName("СНИЛС")
+    column4.setWidth(10)
+    tableColumns.add(column4)
+
+    Column column5 = new StringColumn()
+    column5.setAlias("innNp")
+    column5.setName("ИНН")
+    column5.setWidth(10)
+    tableColumns.add(column5)
+
+    Column column6= new DateColumn()
+    column6.setAlias("birthDay")
+    column6.setName("Дата рождения")
+    column6.setWidth(10)
+    tableColumns.add(column6)
+
+    Column column7 = new StringColumn()
+    column7.setAlias("idDocNumber")
+    column7.setName("ДУЛ")
+    column7.setWidth(10)
+    tableColumns.add(column7)
+
+    return tableColumns;
+}
+
+//------------------ Create Report ----------------------
+
+def createSpecificReport() {
+
+    def params = scriptSpecificReportHolder.subreportParamValues
+    def row = scriptSpecificReportHolder.getSelectedRecord()
+    def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
 
     if (ndflPerson != null) {
-
         //формирование отчета
         def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
             calculateReportData(it, ndflPerson)
         });
 
-        declarationService.exportPDF(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+        declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+        scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
 
     } else {
         throw new ServiceException("Не найдены данные для формирования отчета!");

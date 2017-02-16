@@ -235,7 +235,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
      *
      * @throws IOException
      */
-    @Test
+    //@Test
     public void createSpecificReportTest() throws Exception {
 
         ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();

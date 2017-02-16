@@ -205,6 +205,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             formDataFilter.setFormKindIds(null);
         }
         formDataFilter.setFileName(fileNamePicker.getValue());
+        formDataFilter.setDocStateId(docStatePicker.getSingleValue());
+
 		return formDataFilter;
 	}
 
@@ -259,7 +261,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         }
 
         Style style = separator.getElement().getStyle();
-        style.setProperty("height", (isReports) ? (65 + 22) : 44, Style.Unit.PX);
+        style.setProperty("height", (isReports) ? (65 + 22) : 65, Style.Unit.PX);
 
         switch (taxType) {
             case NDFL:
@@ -532,13 +534,26 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel6.add(label);
         verticalPanel7.add(asnuPicker);*/
 
+        if (taxType.equals(TaxType.NDFL)) {
+            label = getLabel("Наименование АСНУ:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel4.add(label);
+            verticalPanel5.add(asnuPicker);
+        }
+
         if (!isReports) {
             label = getLabel("Состояние:");
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel6.add(label);
             verticalPanel7.add(formStatePicker);
+
+            label = getLabel("Состояние ЭД:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel6.add(label);
+            verticalPanel7.add(docStatePicker);
         }
-        if (taxType.equals(TaxType.PFR)) {
+
+        if (taxType.equals(TaxType.PFR) || taxType.equals(TaxType.NDFL)) {
             label = getLabel("Файл:");
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel6.add(label);

@@ -170,6 +170,12 @@
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>fonts</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
