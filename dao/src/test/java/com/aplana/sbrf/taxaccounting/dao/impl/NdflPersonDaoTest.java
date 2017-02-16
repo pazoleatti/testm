@@ -149,6 +149,9 @@ public class NdflPersonDaoTest {
         boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getPrepayments(), ndflPerson.getPrepayments(), new NdflPersonPrepaymentEquator());
         Assert.assertTrue(prepaymentEquals);
 
+
+
+
     }
 
     @Test(expected = DaoException.class)
@@ -246,6 +249,7 @@ public class NdflPersonDaoTest {
         personIncome.setOperationId(11111L);
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
+        personIncome.setSourceId(112233L);
         return personIncome;
     }
 
@@ -269,7 +273,7 @@ public class NdflPersonDaoTest {
         personDeduction.setPeriodPrevSumm(new BigDecimal("999999.99")); //123456789123456789.12
         personDeduction.setPeriodCurrDate(toDate("01.01.2016"));
         personDeduction.setPeriodCurrSumm(new BigDecimal("999999.99"));
-
+        personDeduction.setSourceId(112233L);
 
         return personDeduction;
     }
@@ -283,6 +287,7 @@ public class NdflPersonDaoTest {
         personPrepayment.setNotifNum("123-456-000");
         personPrepayment.setNotifDate(toDate("01.01.2016"));
         personPrepayment.setNotifSource("AAA");
+        personPrepayment.setSourceId(112233L);
 
         return personPrepayment;
     }
