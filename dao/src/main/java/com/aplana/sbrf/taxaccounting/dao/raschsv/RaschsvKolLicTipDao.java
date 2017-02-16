@@ -13,4 +13,10 @@ public interface RaschsvKolLicTipDao {
      * @return
      */
     Long insertRaschsvKolLicTip(RaschsvKolLicTip raschsvKolLicTip);
+
+    /**
+     * Удаление КолЛицТип по declarationDataId через все связанные таблицы
+     * @param declarationDataId
+     */
+    void deleteRaschsvKolLicTipByDeclarationDataId(Long declarationDataId);
 }
