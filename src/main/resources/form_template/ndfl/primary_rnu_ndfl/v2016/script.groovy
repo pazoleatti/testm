@@ -139,7 +139,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size() + ")");
+    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size());
 
     Date versionFrom = getVersionFrom();
 
@@ -162,8 +162,8 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
         Map<String, RefBookValue> refBookPersonValues = refBookPerson.get(personId);
         def addressId = refBookPersonValues.get("ADDRESS")?.getReferenceValue();
 
-        if (addressMap.containsKey(personId)) {
-            Map<String, RefBookValue> addressValues = addressMap.get(personId);
+        if (addressMap.containsKey(addressId)) {
+            Map<String, RefBookValue> addressValues = addressMap.get(addressId);
             fillAddressAttr(addressValues, person);
             getProvider(RefBook.Id.PERSON_ADDRESS.getId()).updateRecordVersionWithoutLock(logger, addressId, versionFrom, null, addressValues);
         } else {
@@ -177,6 +177,7 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
         getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, personId, versionFrom, null, refBookPersonValues);
 
         //Обновление списка документов
+        //Проверка, если задан номер и тип документа
         if (person.getIdDocNumber() != null && !person.getIdDocNumber().isEmpty() && person.getIdDocType() != null && !person.getIdDocType().isEmpty()) {
             updateIdentityDocRecords(identityDocMap.get(personId), person);
         }
@@ -365,7 +366,9 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
 
         //Ищем документ с таким же типом
         Map<String, RefBookValue> findedDoc = identityDocRefBook?.find {
-            docTypeId.equals(it.get("DOC_ID")) && person.getIdDocNumber()?.equalsIgnoreCase(it.get("DOC_NUMBER"));
+            Long docIdRef = it.get("DOC_ID")?.getReferenceValue();
+            String docNumber = it.get("DOC_NUMBER")?.getStringValue();
+            docTypeId.equals(docIdRef) && person.getIdDocNumber()?.equalsIgnoreCase(docNumber);
         };
 
         List<Map<String, RefBookValue>> identityDocRecords = new ArrayList<Map<String, RefBookValue>>();
