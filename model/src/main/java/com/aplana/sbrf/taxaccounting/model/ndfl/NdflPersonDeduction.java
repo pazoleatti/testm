@@ -35,13 +35,13 @@ public class NdflPersonDeduction extends NdflPersonOperation {
             "notif_type", "notif_date", "notif_num", "notif_source",
             "notif_summ", "income_accrued", "income_code", "income_summ",
             "period_prev_date", "period_prev_summ",
-            "period_curr_date", "period_curr_summ"};
+            "period_curr_date", "period_curr_summ", "source_id"};
 
     public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "typeCode",
             "notifType", "notifDate", "notifNum", "notifSource",
             "notifSumm", "incomeAccrued", "incomeCode", "incomeSumm",
             "periodPrevDate", "periodPrevSumm",
-            "periodCurrDate", "periodCurrSumm"};
+            "periodCurrDate", "periodCurrSumm", "sourceId"};
 
     @Override
     public String getTableName() {
