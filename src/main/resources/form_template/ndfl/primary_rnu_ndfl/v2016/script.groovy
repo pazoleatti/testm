@@ -337,7 +337,7 @@ def fillNdflPersonAttr(Map<String, RefBookValue> values, NdflPerson person, Long
     putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, countryId);
     putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, statusId);
     putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, asnuId);
-    putOrUpdate(values, "DUBLICATES", RefBookAttributeType.REFERENCE, null);
+    putOrUpdate(values, "OLD_ID", RefBookAttributeType.REFERENCE, null);
 }
 
 /**
