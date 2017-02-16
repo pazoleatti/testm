@@ -111,6 +111,10 @@ switch (formDataEvent) {
         println "!IMPORT_TRANSPORT_FILE!"
         importData()
         break
+    case FormDataEvent.CALCULATE:
+        println "!CALCULATE!"
+        calculate()
+        break;
     case FormDataEvent.CHECK:
         println "!CHECK!"
         checkData()
@@ -923,7 +927,7 @@ class TestDataHolder {
 @Field final ERROR_MESSAGE_NOT_MATCH_NODE_COUNT = "Не соответствие числа узлов для «%s»"
 
 // Ограничение на число объектов в коллекциях
-@Field final MAX_COUNT_PERV_SV_STRAH_LIC = 1000
+@Field final Integer MAX_COUNT_PERV_SV_STRAH_LIC = 1000
 @Field final MAX_COUNT_UPL_PER = 1000
 @Field final MAX_COUNT_SV_OPS_OMS = 1000
 
@@ -1251,13 +1255,13 @@ void importPrimaryData() {
     }
 
     // Проверки при загрузке
-    checkImportRaschsv(fileNode)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
-    }
+//    checkImportRaschsv(fileNode)
+//    if (logger.containsLevel(LogLevel.ERROR)) {
+//        return
+//    }
 
     // Набор объектов ПерсСвСтрахЛиц
-    List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
+    def raschsvPersSvStrahLicList = []
 
     // Идентификатор декларации для которой загружаются данные
     declarationDataId = declarationData.getId()
@@ -1265,11 +1269,6 @@ void importPrimaryData() {
     // Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ
     RaschsvSvnpPodpisant raschsvSvnpPodpisant = new RaschsvSvnpPodpisant()
     raschsvSvnpPodpisant.declarationDataId = declarationDataId
-
-    //Два списка для создания новых записей и для обновления существующих
-//    List<RaschsvPersSvStrahLic> createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
-//    List<RaschsvPersSvStrahLic> updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
-//    def updCnt = 0, createCnt = 0;
 
     fileNode.childNodes().each { documentNode ->
         raschsvSvnpPodpisant.svnpTlph = documentNode.name
@@ -1283,43 +1282,12 @@ void importPrimaryData() {
                             parseRaschsvObyazPlatSv(raschetSvChildNode, declarationDataId)
                         } else if (raschetSvChildNode.name == NODE_NAME_PERS_SV_STRAH_LIC) {
                             // Разбор узла ПерсСвСтрахЛиц
-
-                            // При заполнении List<ПерсСвСтрахЛиц> до некоторого объема сохраняем в БД
                             if (raschsvPersSvStrahLicList.size() >= MAX_COUNT_PERV_SV_STRAH_LIC) {
-//                                // Добавление записей в справочник Физические лица
-//                                if (createdPersonList != null && !createdPersonList.isEmpty()) {
-//                                    createRefbookPersonData(createdPersonList);
-//                                }
-//                                // Обновление записей в справочнике Физические лица
-//                                if (updatedPersonList != null && !updatedPersonList.isEmpty()) {
-//                                    updateRefbookPersonData(updatedPersonList);
-//                                }
-
                                 // При добавлении (обновлении) записей в справочнике Физические лица, в объект ПерсСвСтрахЛиц будет добавлена ссылка на запись в справочнике Физические лица
                                 raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
-
-                                raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>()
-//                                createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
-//                                updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
+                                raschsvPersSvStrahLicList = []
                             }
-
-                            RaschsvPersSvStrahLic raschsvPersSvStrahLic = parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId)
-
-//                            // Идентификация физического лица
-//                            PersonData personData = createPersonData(raschsvPersSvStrahLic);
-//                            Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD);
-//                            raschsvPersSvStrahLic.personId = refBookPersonId
-//                            if (refBookPersonId != null) {
-//                                //обновление записи
-//                                updatedPersonList.add(raschsvPersSvStrahLic);
-//                                updCnt++;
-//                            } else {
-//                                //Новые записи помещаем в список для пакетного создания
-//                                createdPersonList.add(raschsvPersSvStrahLic);
-//                                createCnt++;
-//                            }
-
-                            raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic)
+                            raschsvPersSvStrahLicList.add(parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId))
                             testCntNodePersSvStrahLic++
                         }
                     }
@@ -1333,18 +1301,8 @@ void importPrimaryData() {
             }
         }
     }
-
     // Сохранение коллекции объектов ПерсСвСтрахЛиц
-    if (raschsvPersSvStrahLicList != null && !raschsvPersSvStrahLicList.isEmpty()) {
-//        // Добавление записей в справочник Физические лица
-//        if (createdPersonList != null && !createdPersonList.isEmpty()) {
-//            createRefbookPersonData(createdPersonList);
-//        }
-//        // Добавление записей в справочник Физические лица
-//        if (updatedPersonList != null && !updatedPersonList.isEmpty()) {
-//            updateRefbookPersonData(updatedPersonList);
-//        }
-
+    if (raschsvPersSvStrahLicList.size() >= 0) {
         // При добавлении (обновлении) записей в справочнике Физические лица, в объект ПерсСвСтрахЛиц будет добавлена ссылка на запись в справочнике Физические лица
         raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
     }
@@ -2806,6 +2764,53 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
     return raschsvPersSvStrahLic
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+// Обработка события CALCULATE
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+def calculate() {
+    //Два списка для создания новых записей и для обновления существующих
+    List<RaschsvPersSvStrahLic> createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
+    List<RaschsvPersSvStrahLic> updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
+    def updCnt = 0, createCnt = 0;
+
+    def raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
+    if (raschsvPersSvStrahLicList != null && !raschsvPersSvStrahLicList.isEmpty()) {
+        raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
+
+            // Идентификация физического лица
+            PersonData personData = createPersonData(raschsvPersSvStrahLic);
+            Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD);
+            raschsvPersSvStrahLic.personId = refBookPersonId
+            if (refBookPersonId != null) {
+                //обновление записи
+                updatedPersonList.add(raschsvPersSvStrahLic);
+                updCnt++;
+            } else {
+                //Новые записи помещаем в список для пакетного создания
+                createdPersonList.add(raschsvPersSvStrahLic);
+                createCnt++;
+            }
+        }
+    }
+    // Добавление записей в справочник Физические лица
+    if (createdPersonList != null && !createdPersonList.isEmpty()) {
+        createRefbookPersonData(createdPersonList);
+    }
+    // Добавление записей в справочник Физические лица
+    if (updatedPersonList != null && !updatedPersonList.isEmpty()) {
+        updateRefbookPersonData(updatedPersonList);
+    }
+    raschsvPersSvStrahLicService.updatePersSvStrahLic(raschsvPersSvStrahLicList)
+    logger.info("Рассчет завешен. Записей обработано " + raschsvPersSvStrahLicList.size() + ".  В справочнике 'Физические лица' записей создано: " + createCnt + ", записей обновлено: " + updCnt);
+    return
+}
+
 /**
  * Создание объекта по которуму будет идентифицироваться физлицо в справочнике
  * @param person
@@ -2954,7 +2959,7 @@ def fillRaschsvPersSvStrahLicAttr(Map<String, RefBookValue> values, RaschsvPersS
     putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, countryId);
     putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, null);
     putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, null);
-    putOrUpdate(values, "DUBLICATES", RefBookAttributeType.REFERENCE, null);
+    putOrUpdate(values, "OLD_ID", RefBookAttributeType.REFERENCE, null);
 }
 
 /**

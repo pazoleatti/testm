@@ -18,6 +18,13 @@ public interface RaschsvPersSvStrahLicDao {
     Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList);
 
     /**
+     * Обновление ПерсСвСтрахЛиц
+     * @param raschsvPersSvStrahLicListList
+     * @return
+     */
+    Integer updatePersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicListList);
+
+    /**
      * Выборка ПерсСвСтрахЛиц
      * @param declarationDataId - идентификатор декларации
      * @param innfl - ИНН ФЛ

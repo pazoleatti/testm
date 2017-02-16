@@ -55,6 +55,11 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     private static final String SQL_INSERT_PERS_SV_STRAH_LIC = "INSERT INTO " + RaschsvPersSvStrahLic.TABLE_NAME +
             " (" + PERS_SV_STRAH_LIC_COLS + ") VALUES (" + PERS_SV_STRAH_LIC_FIELDS + ")";
 
+    // sql запрос для обновления ПерсСвСтрахЛиц
+    private static final String SQL_UPDATE_PERS_SV_STRAH_LIC = "UPDATE " + RaschsvPersSvStrahLic.TABLE_NAME +
+            " SET " + RaschsvPersSvStrahLic.COL_PERSON_ID + " = :" + RaschsvPersSvStrahLic.COL_PERSON_ID +
+            " WHERE " + RaschsvPersSvStrahLic.COL_ID + " = :" + RaschsvPersSvStrahLic.COL_ID;
+
     // sql запрос для сохранения в СвВыпл
     private static final String SQL_INSERT_SV_VYPL = "INSERT INTO " + RaschsvSvVypl.TABLE_NAME +
             " (" + SV_VYPL_COLS + ") VALUES (" + SV_VYPL_FIELDS + ")";
@@ -349,6 +354,21 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         if (!raschsvVyplSvDopMtList.isEmpty()) {
             insertRaschsvVyplSvDopMt(raschsvVyplSvDopMtList);
         }
+
+        return res.length;
+    }
+
+    @Override
+    public Integer updatePersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicListList) {
+        List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvPersSvStrahLicListList.size());
+        for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicListList) {
+            batchValues.add(
+                    new MapSqlParameterSource(RaschsvPersSvStrahLic.COL_ID, raschsvPersSvStrahLic.getId())
+                            .addValue(RaschsvPersSvStrahLic.COL_PERSON_ID, raschsvPersSvStrahLic.getPersonId())
+                            .getValues());
+        }
+        int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_UPDATE_PERS_SV_STRAH_LIC,
+                batchValues.toArray(new Map[raschsvPersSvStrahLicListList.size()]));
 
         return res.length;
     }

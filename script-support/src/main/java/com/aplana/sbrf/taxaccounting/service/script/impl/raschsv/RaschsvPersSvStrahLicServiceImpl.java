@@ -21,6 +21,11 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     }
 
     @Override
+    public Integer updatePersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicListList) {
+        return raschsvPersSvStrahLicDao.updatePersSvStrahLic(raschsvPersSvStrahLicListList);
+    }
+
+    @Override
     public RaschsvPersSvStrahLic findPersonByInn(Long declarationDataId, String innfl) {
         return raschsvPersSvStrahLicDao.findPersonByInn(declarationDataId, innfl);
     }
