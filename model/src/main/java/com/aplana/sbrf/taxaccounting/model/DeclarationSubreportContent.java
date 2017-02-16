@@ -19,6 +19,7 @@ public class DeclarationSubreportContent implements Ordered, Serializable{
     private String blobDataId;
     private String fileName;
     private List<DeclarationSubreportParamContent> subreportParams;
+    private boolean selectRecord;
 
     public String getAlias() {
         return alias;
@@ -66,5 +67,13 @@ public class DeclarationSubreportContent implements Ordered, Serializable{
 
     public void setSubreportParams(List<DeclarationSubreportParamContent> subreportParams) {
         this.subreportParams = subreportParams;
+    }
+
+    public boolean isSelectRecord() {
+        return selectRecord;
+    }
+
+    public void setSelectRecord(boolean selectRecord) {
+        this.selectRecord = selectRecord;
     }
 }

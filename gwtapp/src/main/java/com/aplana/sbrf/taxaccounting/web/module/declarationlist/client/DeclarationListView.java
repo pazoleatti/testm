@@ -357,6 +357,7 @@ public class DeclarationListView extends
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
             declarationTable.addColumn(declarationNoteColumn, declarationTable.createResizableHeader(NOTE_TITLE, declarationNoteColumn));
         } else {
+            declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
         }
 

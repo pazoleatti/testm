@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="repform" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="585" leftMargin="10" rightMargin="0" topMargin="10" bottomMargin="10" isFloatColumnFooter="true" uuid="4487ae25-5c53-429a-8f89-b8df12083233">
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="30"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="declarationId" class="java.lang.Long">
-		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA[14730]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[select row_number() over(order by inc.oktmo,inc.kpp) r,inc.kpp,inc.oktmo,
@@ -35,11 +35,11 @@
 	<title>
 		<band height="31" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="7ae04640-7bbf-43f0-9141-3172767e1a8f" x="0" y="11" width="575" height="20"/>
-				<textElement>
-					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				<reportElement uuid="7ae04640-7bbf-43f0-9141-3172767e1a8f" x="0" y="0" width="575" height="31"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="10" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 				</textElement>
-				<text><![CDATA[Предварительный просмотр]]></text>
+				<text><![CDATA[Реестр загруженных данных]]></text>
 			</staticText>
 		</band>
 	</title>
@@ -55,7 +55,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 				</textElement>
 				<text><![CDATA[№ п/п]]></text>
 			</staticText>
@@ -148,7 +148,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{R}]]></textFieldExpression>
@@ -163,7 +163,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{KPP}]]></textFieldExpression>
@@ -178,7 +178,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{OKTMO}]]></textFieldExpression>
@@ -193,7 +193,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{INC_CALCTAX}]]></textFieldExpression>
@@ -208,7 +208,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{INC_ACCURED}]]></textFieldExpression>
@@ -223,7 +223,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PERS_CNT}]]></textFieldExpression>
@@ -242,7 +242,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{vTotalCntPers}]]></textFieldExpression>
@@ -257,7 +257,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{vTotalIncAccure}]]></textFieldExpression>
@@ -272,7 +272,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{vTotalCalcTax}]]></textFieldExpression>
