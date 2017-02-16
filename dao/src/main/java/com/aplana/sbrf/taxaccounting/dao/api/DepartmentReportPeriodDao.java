@@ -113,7 +113,7 @@ public interface DepartmentReportPeriodDao {
 
 
     /**
-     * Найти id отчетных периодов подразделений для определенного типа подразделения и отчетного периода
+     * Найти id отчетных периодов подразделений для определенного типа подразделения и активного отчетного периода
      * @param departmentTypeCode
      * @param reportPeriodId
      * @return

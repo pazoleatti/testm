@@ -351,27 +351,27 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
         if (filter.getFileName() != null && !filter.getFileName().isEmpty()) {
             sql.append(" AND lower(dec.file_name) like lower(:fileName)");
-            values.put("fileName", "%"+filter.getFileName()+"%");
+            values.put("fileName", "%" + filter.getFileName() + "%");
         }
 
         if (filter.getTaxType() == TaxType.NDFL || filter.getTaxType() == TaxType.PFR) {
             if (!StringUtils.isBlank(filter.getTaxOrganCode())) {
                 sql.append(" AND lower(dec.tax_organ_code) like lower(:tax_organ_code)");
-                values.put("tax_organ_code", "%"+filter.getTaxOrganCode()+"%");
+                values.put("tax_organ_code", "%" + filter.getTaxOrganCode() + "%");
             }
 
             if (!StringUtils.isBlank(filter.getTaxOrganKpp())) {
                 sql.append(" AND lower(dec.kpp) like lower(:kpp)");
-                values.put("kpp", "%"+filter.getTaxOrganKpp()+"%");
+                values.put("kpp", "%" + filter.getTaxOrganKpp() + "%");
             }
 
             if (!StringUtils.isBlank(filter.getOktmo())) {
                 sql.append(" AND lower(dec.oktmo) like lower(:oktmo)");
-                values.put("oktmo", "%"+filter.getOktmo()+"%");
+                values.put("oktmo", "%" + filter.getOktmo() + "%");
             }
             if (!StringUtils.isBlank(filter.getNote())) {
                 sql.append(" AND lower(dec.note) like lower(:note)");
-                values.put("note", "%"+filter.getNote()+"%");
+                values.put("note", "%" + filter.getNote() + "%");
             }
 
             if (filter.getDocStateId() != null) {
@@ -570,7 +570,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             params.put("startDate", startDate);
             params.put("endDate", endDate);
             return getNamedParameterJdbcTemplate().queryForList(FIND_DD_BY_RANGE_IN_RP, params, Integer.class);
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Integer>(0);
         }
     }
@@ -612,15 +612,18 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriodId, String kpp, String oktmo) {
-        String sql  = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+        String sql = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, drp.report_period_id, drp.department_id " +
                 "from DEPARTMENT_REPORT_PERIOD drp, DECLARATION_DATA dd " +
-                "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId " +
+                "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId and drp.IS_ACTIVE = 1" +
                 "and drp.department_id = :departmentId and drp.REPORT_PERIOD_ID = :reportPeriodId " +
                 "and dd.DECLARATION_TEMPLATE_ID in " +
                 "(select dt.id from DECLARATION_TEMPLATE dt" +
                 " where dt.DECLARATION_TYPE_ID = :declarationTypeId) " +
-                "and dd.id in (select np.declaration_data_id from NDFL_PERSON np inner join declaration_data dd on dd.ID = np.DECLARATION_DATA_ID and np.id in (select npi.ndfl_person_id from NDFL_PERSON_INCOME npi inner join NDFL_PERSON np on np.id = npi.NDFL_PERSON_ID where npi.kpp = :kpp and npi.oktmo is null or npi.oktmo = :oktmo))";
+                "and dd.id in (select np.declaration_data_id from NDFL_PERSON np " +
+                "inner join declaration_data dd on dd.ID = np.DECLARATION_DATA_ID and np.id in " +
+                "(select npi.ndfl_person_id from NDFL_PERSON_INCOME npi " +
+                "inner join NDFL_PERSON np on np.id = npi.NDFL_PERSON_ID where npi.kpp = :kpp and npi.oktmo is null or npi.oktmo = :oktmo))";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTypeId", declarationTypeId)
                 .addValue("departmentReportPeriodId", departmentReportPeriodId)
@@ -633,18 +636,5 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
-    }
-
-    @Override
-    public List<DeclarationData> findSourceDeclarationData(long declarationDataId) {
-        String query = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, drp.report_period_id, " +
-                "drp.department_id from DEPARTMENT_REPORT_PERIOD drp, DECLARATION_DATA dd " +
-                "inner join DECLARATION_DATA_CONSOLIDATION ddc on dd.ID = ddc.SOURCE_DECLARATION_DATA_ID " +
-                "where ddc.TARGET_DECLARATION_DATA_ID = :declarationDataId and drp.id in " +
-                "(select DEPARTMENT_REPORT_PERIOD_ID from declaration_data where id = :declarationDataId)";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("declarationDataId", declarationDataId);
-        return getNamedParameterJdbcTemplate().query(query, params, new DeclarationDataRowMapper());
     }
 }

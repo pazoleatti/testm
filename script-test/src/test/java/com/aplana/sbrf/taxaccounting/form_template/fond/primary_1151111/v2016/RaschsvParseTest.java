@@ -494,4 +494,19 @@ public class RaschsvParseTest extends ScriptTestBase {
 
         checkLoggerErrorOrWarn();
     }
+
+    @Test
+    public void deleteEventTest() {
+        initMock();
+
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(-1L);
+
+        Map<String, Object> params = new HashedMap<String, Object>();
+        params.put("declarationData", declarationData);
+
+        testHelper.execute(FormDataEvent.DELETE, params);
+
+        verify(testHelper.getRaschsvObyazPlatSvService(), Mockito.times(1)).deleteFromLinkedTable(-1L);
+    }
 }

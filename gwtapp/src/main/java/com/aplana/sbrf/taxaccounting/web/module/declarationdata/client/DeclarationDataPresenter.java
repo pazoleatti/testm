@@ -430,8 +430,24 @@ public class DeclarationDataPresenter
 										}
 									}, DeclarationDataPresenter.this));
 		} else {
-			dialogPresenter.setDeclarationId(declarationId);
-			addToPopupSlot(dialogPresenter);
+            Dialog.confirmMessageYesClose("Отмена принятия", "Вы действительно хотите отменить принятие формы?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    LogCleanEvent.fire(DeclarationDataPresenter.this);
+                    AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
+                    action.setAccepted(false);
+                    action.setDeclarationId(declarationId);
+                    dispatcher.execute(action, CallbackUtils
+                            .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+                                @Override
+                                public void onSuccess(AcceptDeclarationDataResult result) {
+                                    revealPlaceRequest();
+                                }
+                            }, DeclarationDataPresenter.this));
+                }
+            });
+            //dialogPresenter.setDeclarationId(declarationId);
+			//addToPopupSlot(dialogPresenter);
 		}
 
 	}

@@ -755,4 +755,14 @@ public class RaschsvDaoTest {
 
         Assert.isTrue(raschsvItogVyplDao.insertItogVyplDop(Arrays.asList(raschsvItogVyplDop)).length > 0);
     }
+
+    @Test
+    public void testDeleteRaschsvSvSum1TipByDeclarationDataId() {
+        raschsvSvSum1TipDao.deleteRaschsvSvSum1TipByDeclarationDataId(-1L);
+    }
+
+    @Test
+    public void testDeleteRaschsvKolLicTipByDeclarationDataId() {
+        raschsvKolLicTipDao.deleteRaschsvKolLicTipByDeclarationDataId(-1L);
+    }
 }

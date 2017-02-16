@@ -189,4 +189,72 @@ public interface NdflPersonService {
      * @return
      */
     List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo);
+
+    /**
+     * Данные об авансах ФЛ по идентификатору декларации
+     *
+     * @param declarationDataId
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo);
+
+    /**
+     * Данные о доходах ФЛ по идентификатору декларации
+     *
+     * @param declarationDataId
+     * @param startDate         - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate           - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo);
+
+    /**
+     * Найти доходы из КНФ которая является источником для ОНФ
+     * @param declarationDataId идентификатор ОНФ для которой необходимо найти строки из КНФ
+     * @param kpp КПП ОНФ
+     * @param oktmo ОКТМО ОНФ
+     * @return
+     */
+    List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU(long declarationDataId, String kpp, String oktmo);
+
+    /**
+     * Найти вычеты для определенной операции
+     * @param ndflPersonId
+     * @param operationId
+     * @return
+     */
+    List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, long operationId);
+
+    /**
+     * Найти авансы для определенной операции
+     * @param ndflPersonId
+     * @param operationId
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, long operationId);
+
+    /**
+     * Найти доход по идентификатору
+     * @param id
+     * @return
+     */
+    NdflPersonIncome getIncome(long id);
+
+    /**
+     * Найти вычет по идентификатору
+     * @param id
+     * @return
+     */
+    NdflPersonDeduction getDeduction(long id);
+
+    /**
+     * Найти аванс по идентификатору
+     * @param id
+     * @return
+     */
+    NdflPersonPrepayment getPrepayment(long id);
 }

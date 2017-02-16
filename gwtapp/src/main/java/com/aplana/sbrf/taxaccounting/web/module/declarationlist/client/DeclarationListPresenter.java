@@ -1,22 +1,25 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationList;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationListResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
@@ -31,9 +34,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class DeclarationListPresenter extends
 		DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
@@ -50,7 +51,7 @@ public class DeclarationListPresenter extends
      */
     private Map<TaxType, DeclarationDataFilter> filterStates = new HashMap<TaxType, DeclarationDataFilter>();
     private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
-    private Long selectedItemId;
+    private List<Long> selectedItemIds;
     private TaxType taxType;
     private boolean isReports;
     private boolean ready = false;
@@ -58,11 +59,16 @@ public class DeclarationListPresenter extends
     @ProxyEvent
     @Override
     public void onClickApply(DeclarationFilterApplyEvent event) {
+        onFind();
+    }
+
+    private void onFind() {
         DeclarationDataFilter dataFilter = filterPresenter.getFilterData();
         saveFilterState(dataFilter.getTaxType(), dataFilter);
         updateTitle(dataFilter.getTaxType());
         getView().updateData(0);
     }
+
 
     @Override
     public void onCreateClicked() {
@@ -113,18 +119,20 @@ public class DeclarationListPresenter extends
             if (taxTypeOld == null || !taxType.equals(taxTypeOld)) {
                 filterStates.clear();
                 getView().updateTitle(taxType);
-                selectedItemId = null;
+                selectedItemIds = null;
             }
             String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
             if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
                     (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
                 filterPresenter.getView().clean();
                 filterStates.clear();
-                selectedItemId = null;
+                selectedItemIds = null;
             }
 			filterPresenter.initFilter(taxType, filterStates.get(taxType));
             filterPresenter.getView().updateFilter(taxType, isReports);
             getView().updatePageSize(taxType);
+            getView().updateButton();
+
             ready = false;
 		} catch (Exception e) {
 			ErrorEvent.fire(this, "Не удалось открыть список налоговых форм", e);
@@ -154,7 +162,7 @@ public class DeclarationListPresenter extends
             return;
         }
         DeclarationDataFilter filter = filterPresenter.getFilterData();
-        filter.setDeclarationDataId(selectedItemId);
+        filter.setDeclarationDataId((selectedItemIds != null && !selectedItemIds.isEmpty()) ? selectedItemIds.get(0) : null);
         filter.setCountOfRecords(length);
         filter.setStartIndex(start);
         filter.setAscSorting(getView().isAscSorting());
@@ -180,8 +188,8 @@ public class DeclarationListPresenter extends
                         } else {
                             getView().setTableData(start, result.getTotalCountOfRecords(),
                                 result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(),
-                                selectedItemId);
-                            selectedItemId = null;
+                                    selectedItemIds);
+                            selectedItemIds = null;
                         }
                     }
                 }, DeclarationListPresenter.this));
@@ -225,6 +233,97 @@ public class DeclarationListPresenter extends
     @Override
     protected void onHide() {
         super.onHide();
-        selectedItemId = getView().getSelectedId();
+        selectedItemIds = getView().getSelectedIds();
+    }
+
+    @Override
+    public List<Long> getSelectedItemIds() {
+        return selectedItemIds;
+    }
+
+    @Override
+    public void check() {
+        LogCleanEvent.fire(this);
+        CheckDeclarationListAction action = new CheckDeclarationListAction();
+        action.setDeclarationIds(getView().getSelectedIds());
+        action.setTaxType(taxType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<CheckDeclarationListResult>() {
+                    @Override
+                    public void onSuccess(CheckDeclarationListResult result) {
+                        LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                        onFind();
+                    }
+                }, DeclarationListPresenter.this));
+    }
+
+    @Override
+    public void delete() {
+        LogCleanEvent.fire(this);
+        DeleteDeclarationListAction action = new DeleteDeclarationListAction();
+        action.setDeclarationIds(getView().getSelectedIds());
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<DeleteDeclarationListResult>() {
+                    @Override
+                    public void onSuccess(DeleteDeclarationListResult result) {
+                        LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                        onFind();
+                    }
+                }, DeclarationListPresenter.this));
+    }
+
+    @Override
+    public void accept(final boolean accepted) {
+        if (accepted) {
+            LogCleanEvent.fire(this);
+            AcceptDeclarationListAction action = new AcceptDeclarationListAction();
+            action.setDeclarationIds(getView().getSelectedIds());
+            action.setTaxType(taxType);
+            action.setAccepted(accepted);
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<AcceptDeclarationListResult>() {
+                        @Override
+                        public void onSuccess(AcceptDeclarationListResult result) {
+                            LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                            onFind();
+                        }
+                    }, DeclarationListPresenter.this));
+        } else {
+            Dialog.confirmMessageYesClose("Отмена принятия", "Вы действительно хотите отменить принятие форм?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    AcceptDeclarationListAction action = new AcceptDeclarationListAction();
+                    action.setDeclarationIds(getView().getSelectedIds());
+                    action.setTaxType(taxType);
+                    action.setAccepted(accepted);
+                    dispatcher.execute(action, CallbackUtils
+                            .defaultCallback(new AbstractCallback<AcceptDeclarationListResult>() {
+                                @Override
+                                public void onSuccess(AcceptDeclarationListResult result) {
+                                    LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                                    onFind();
+                                }
+                            }, DeclarationListPresenter.this));
+                    super.yes();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onRecalculateClicked() {
+        LogCleanEvent.fire(this);
+        RecalculateDeclarationListAction action = new RecalculateDeclarationListAction();
+        action.setDeclarationIds(getView().getSelectedIds());
+        action.setTaxType(taxType);
+        action.setDocDate(new Date());
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<RecalculateDeclarationListResult>() {
+                    @Override
+                    public void onSuccess(RecalculateDeclarationListResult result) {
+                        LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                        onFind();
+                    }
+                }, DeclarationListPresenter.this));
     }
 }
