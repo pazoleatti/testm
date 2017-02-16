@@ -131,8 +131,6 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
                                 Dialog.errorMessage(result.getMsg());
                                 getView().updateRow(id, result.getReportId());
                             }
-                        } else if (NotificationType.DEFAULT.equals(result.getNotificationType())) {
-
                         }
                     }
                 }, DialogPresenter.this));

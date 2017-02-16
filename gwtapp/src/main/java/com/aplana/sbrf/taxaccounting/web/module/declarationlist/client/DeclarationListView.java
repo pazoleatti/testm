@@ -1,13 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.TableWithCheckedColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -19,13 +21,12 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,8 +56,8 @@ public class DeclarationListView extends
     public static final String FILE_NAME_TITLE = "Файл ТФ";
     public static final String PERIOD_TITLE = "Период";
 
-    private static final int TABLE_TOP2 = 75;
-    private static final int TABLE_TOP4 = 130;
+    private static final int TABLE_TOP2 = 75 + 27;
+    private static final int TABLE_TOP4 = 130 + 32;
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {}
 
@@ -72,7 +73,7 @@ public class DeclarationListView extends
     private Map<Integer, String> departmentFullNames;
     private Map<Long, String> asnuNames;
 
-    private SingleSelectionModel<DeclarationDataSearchResultItem> selectionModel;
+    private MultiSelectionModel<DeclarationDataSearchResultItem> selectionModel;
 
     private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
@@ -81,6 +82,9 @@ public class DeclarationListView extends
 
 	@UiField
 	Panel filterContentPanel;
+
+	@UiField
+    Button checkButton, recalculateButton, deleteButton, acceptButton, cancelButton;
 
 	@UiField
     GenericDataGrid<DeclarationDataSearchResultItem> declarationTable;
@@ -96,6 +100,10 @@ public class DeclarationListView extends
 
     @UiField
     ResizeLayoutPanel tableWrapper;
+
+    //private ListDataProvider<DeclarationDataSearchResultItem> model;
+    private Column<DeclarationDataSearchResultItem, Boolean> checkColumn;
+    private List<DeclarationDataSearchResultItem> checkedRows = new LinkedList<DeclarationDataSearchResultItem>();
 
     private final AsyncDataProvider<DeclarationDataSearchResultItem> dataProvider = new AsyncDataProvider<DeclarationDataSearchResultItem>() {
         @Override
@@ -116,7 +124,7 @@ public class DeclarationListView extends
 	public DeclarationListView(final MyBinder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
 
-        selectionModel = new SingleSelectionModel<DeclarationDataSearchResultItem>();
+        selectionModel = new MultiSelectionModel<DeclarationDataSearchResultItem>();
         declarationTable.setSelectionModel(selectionModel);
 
         pager.setDisplay(declarationTable);
@@ -155,6 +163,26 @@ public class DeclarationListView extends
 
         clearTable();
 
+        checkColumn = new Column<DeclarationDataSearchResultItem, Boolean>(
+                new CheckboxCell(false, true)) {
+            @Override
+            public Boolean getValue(DeclarationDataSearchResultItem object) {
+                return selectionModel.isSelected(object);
+            }
+        };
+
+        checkColumn.setFieldUpdater(new FieldUpdater<DeclarationDataSearchResultItem, Boolean>() {
+            @Override
+            public void update(int index, DeclarationDataSearchResultItem object, Boolean chcked) {
+                if (chcked) {
+                    checkedRows.add(object);
+                } else {
+                    checkedRows.remove(object);
+                }
+                updateButton();
+            }
+        });
+
         TextColumn<DeclarationDataSearchResultItem> declarationKindColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
@@ -169,40 +197,12 @@ public class DeclarationListView extends
             }
         };
         
-        Column reportPeriodYearColumn;
-        if (taxType == TaxType.DEAL) {
-            reportPeriodYearColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
-                    new AbstractCell<DeclarationDataSearchResultItem>() {
-
-                        @Override
-                        public void render(Context context,
-                                           DeclarationDataSearchResultItem declaration,
-                                           SafeHtmlBuilder sb) {
-                            if (declaration == null) {
-                                return;
-                            }
-
-                            sb.appendHtmlConstant("<a href=\"#"
-                                    + DeclarationDataTokens.declarationData + ";"
-                                    + DeclarationDataTokens.declarationId + "="
-                                    + declaration.getDeclarationDataId() + "\">"
-                                    + getReportPeriodName(declaration) + "</a>");
-                        }
-                    }) {
-                @Override
-                public DeclarationDataSearchResultItem getValue(
-                        DeclarationDataSearchResultItem object) {
-                    return object;
-                }
-            };
-        } else {
-            reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-                @Override
-                public String getValue(DeclarationDataSearchResultItem object) {
-                    return String.valueOf(object.getReportPeriodYear());
-                }
-            };
-        }
+        Column reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return String.valueOf(object.getReportPeriodYear());
+            }
+        };
 
         reportPeriodColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
@@ -330,6 +330,9 @@ public class DeclarationListView extends
 
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
+        declarationTable.addColumn(checkColumn, declarationTable.createResizableHeader("", checkColumn));
+        declarationTable.setColumnWidth(checkColumn, 2, Style.Unit.EM);
+
         if (!isReports) {
             declarationTable.addColumn(declarationKindColumn, declarationTable.createResizableHeader(DECLARATION_KIND_TITLE, declarationKindColumn));
         }
@@ -359,13 +362,48 @@ public class DeclarationListView extends
 
     }
 
-    @Override
-    public Long getSelectedId() {
-        DeclarationDataSearchResultItem item = selectionModel.getSelectedObject();
-        if (item != null) {
-            return item.getDeclarationDataId();
+    @UiHandler("recalculateButton")
+    public void onRecalculateButtonClicked(ClickEvent event){
+        if (getUiHandlers() != null) {
+            getUiHandlers().onRecalculateClicked();
         }
-        return null;
+    }
+
+    @UiHandler("acceptButton")
+    public void onAccept(ClickEvent event){
+        getUiHandlers().accept(true);
+    }
+
+    @UiHandler("cancelButton")
+    public void onCancel(ClickEvent event){
+        getUiHandlers().accept(false);
+    }
+
+    @UiHandler("deleteButton")
+    public void onDelete(ClickEvent event){
+        getUiHandlers().delete();
+    }
+
+    @UiHandler("checkButton")
+    public void onCheck(ClickEvent event){
+        getUiHandlers().check();
+    }
+
+
+    private void updateCheckBoxHeader(boolean value) {
+        if (declarationTable.getHeaderBuilder() instanceof TableWithCheckedColumn) {
+            ((TableWithCheckedColumn) declarationTable.getHeaderBuilder()).getCheckBoxHeader().setValue(value);
+        }
+        declarationTable.redraw();
+    }
+
+    @Override
+    public List<Long> getSelectedIds() {
+        List<Long> ids = new ArrayList<Long>();
+        for(DeclarationDataSearchResultItem declarationDataSearchResultItem: checkedRows) {
+            ids.add(declarationDataSearchResultItem.getDeclarationDataId());
+        }
+        return ids;
     }
 
     @Override
@@ -400,15 +438,16 @@ public class DeclarationListView extends
     }
 
     @Override
-    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, Long selectedItemId) {
+    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, List<Long> selectedItemIds) {
         declarationTable.setRowCount((int) totalCount);
         declarationTable.setRowData(start, records);
         this.departmentFullNames = departmentFullNames;
         this.asnuNames = asnuNames;
         selectionModel.clear();
-        if (selectedItemId != null) {
+        checkedRows.clear();
+        if (selectedItemIds != null) {
             for(DeclarationDataSearchResultItem item: records) {
-                if (item.getDeclarationDataId().equals(selectedItemId)) {
+                if (selectedItemIds.contains(item.getDeclarationDataId())) {
                     selectionModel.setSelected(item, true);
                     break;
                 }
@@ -526,5 +565,33 @@ public class DeclarationListView extends
     public void updatePageSize(TaxType taxType) {
         pager.setType("declarationList" + taxType.getCode());
         declarationTable.setPageSize(pager.getPageSize());
+    }
+
+    @Override
+    public void updateButton() {
+        boolean check = checkedRows.size() > 0;
+        boolean calculate = check;
+        boolean delete = check;
+        boolean accept = check;
+        boolean cancel = check;
+        for(DeclarationDataSearchResultItem row: checkedRows) {
+            if (State.CREATED.equals(row.getState())) {
+                accept = false;
+                cancel = false;
+            }
+            if (State.PREPARED.equals(row.getState())) {
+                cancel = false;
+            }
+            if (State.ACCEPTED.equals(row.getState())) {
+                calculate = false;
+                //delete = false;
+                accept = false;
+            }
+        }
+        checkButton.setEnabled(check);
+        recalculateButton.setEnabled(calculate);
+        deleteButton.setEnabled(delete);
+        acceptButton.setEnabled(accept);
+        cancelButton.setEnabled(cancel);
     }
 }

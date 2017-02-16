@@ -35,6 +35,14 @@
         margin-right: 5px;
     }
 
+    .marginLeft10{
+        margin-left: 10px;
+    }
+    .horSep {
+        height: 1px;
+        margin: 4px 9px;
+        border-top: 1px solid #aeaeac;
+    }
 </ui:style>
 
     <fm:MainContainer>
@@ -71,6 +79,14 @@
             <fm:BodyContainer>
 
                 <g:HorizontalPanel ui:field="filterContentPanel" addStyleNames="{style.btnPanel}" />
+
+                <g:Label addStyleNames="{style.horSep}"/>
+
+                <g:Button text="Проверить" ui:field="checkButton" addStyleNames="{style.marginLeft10},{style.marginRight5}"/>
+                <g:Button text="Рассчитать" ui:field="recalculateButton" addStyleNames="{style.marginRight5}"/>
+                <g:Button text="Удалить" ui:field="deleteButton" addStyleNames="{style.marginRight5}"/>
+                <g:Button text="Принять" ui:field="acceptButton" addStyleNames="{style.marginRight5}"/>
+                <g:Button text="Отменить принятие" ui:field="cancelButton" addStyleNames="{style.marginRight5}"/>
 
                 <g:ResizeLayoutPanel addStyleNames="{style.table}" ui:field="tableWrapper">
                     <style:GenericDataGrid ui:field="declarationTable" width="100%" height="100%"/>
