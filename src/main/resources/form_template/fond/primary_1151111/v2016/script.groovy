@@ -1267,9 +1267,9 @@ void importPrimaryData() {
     raschsvSvnpPodpisant.declarationDataId = declarationDataId
 
     //Два списка для создания новых записей и для обновления существующих
-    List<RaschsvPersSvStrahLic> createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
-    List<RaschsvPersSvStrahLic> updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
-    def updCnt = 0, createCnt = 0;
+//    List<RaschsvPersSvStrahLic> createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
+//    List<RaschsvPersSvStrahLic> updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
+//    def updCnt = 0, createCnt = 0;
 
     fileNode.childNodes().each { documentNode ->
         raschsvSvnpPodpisant.svnpTlph = documentNode.name
@@ -1286,38 +1286,38 @@ void importPrimaryData() {
 
                             // При заполнении List<ПерсСвСтрахЛиц> до некоторого объема сохраняем в БД
                             if (raschsvPersSvStrahLicList.size() >= MAX_COUNT_PERV_SV_STRAH_LIC) {
-                                // Добавление записей в справочник Физические лица
-                                if (createdPersonList != null && !createdPersonList.isEmpty()) {
-                                    createRefbookPersonData(createdPersonList);
-                                }
-                                // Обновление записей в справочнике Физические лица
-                                if (updatedPersonList != null && !updatedPersonList.isEmpty()) {
-                                    updateRefbookPersonData(updatedPersonList);
-                                }
+//                                // Добавление записей в справочник Физические лица
+//                                if (createdPersonList != null && !createdPersonList.isEmpty()) {
+//                                    createRefbookPersonData(createdPersonList);
+//                                }
+//                                // Обновление записей в справочнике Физические лица
+//                                if (updatedPersonList != null && !updatedPersonList.isEmpty()) {
+//                                    updateRefbookPersonData(updatedPersonList);
+//                                }
 
                                 // При добавлении (обновлении) записей в справочнике Физические лица, в объект ПерсСвСтрахЛиц будет добавлена ссылка на запись в справочнике Физические лица
                                 raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
 
                                 raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>()
-                                createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
-                                updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
+//                                createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
+//                                updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
                             }
 
                             RaschsvPersSvStrahLic raschsvPersSvStrahLic = parseRaschsvPersSvStrahLic(raschetSvChildNode, declarationDataId)
 
-                            // Идентификация физического лица
-                            PersonData personData = createPersonData(raschsvPersSvStrahLic);
-                            Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD);
-                            raschsvPersSvStrahLic.personId = refBookPersonId
-                            if (refBookPersonId != null) {
-                                //обновление записи
-                                updatedPersonList.add(raschsvPersSvStrahLic);
-                                updCnt++;
-                            } else {
-                                //Новые записи помещаем в список для пакетного создания
-                                createdPersonList.add(raschsvPersSvStrahLic);
-                                createCnt++;
-                            }
+//                            // Идентификация физического лица
+//                            PersonData personData = createPersonData(raschsvPersSvStrahLic);
+//                            Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD);
+//                            raschsvPersSvStrahLic.personId = refBookPersonId
+//                            if (refBookPersonId != null) {
+//                                //обновление записи
+//                                updatedPersonList.add(raschsvPersSvStrahLic);
+//                                updCnt++;
+//                            } else {
+//                                //Новые записи помещаем в список для пакетного создания
+//                                createdPersonList.add(raschsvPersSvStrahLic);
+//                                createCnt++;
+//                            }
 
                             raschsvPersSvStrahLicList.add(raschsvPersSvStrahLic)
                             testCntNodePersSvStrahLic++
@@ -1336,14 +1336,14 @@ void importPrimaryData() {
 
     // Сохранение коллекции объектов ПерсСвСтрахЛиц
     if (raschsvPersSvStrahLicList != null && !raschsvPersSvStrahLicList.isEmpty()) {
-        // Добавление записей в справочник Физические лица
-        if (createdPersonList != null && !createdPersonList.isEmpty()) {
-            createRefbookPersonData(createdPersonList);
-        }
-        // Добавление записей в справочник Физические лица
-        if (updatedPersonList != null && !updatedPersonList.isEmpty()) {
-            updateRefbookPersonData(updatedPersonList);
-        }
+//        // Добавление записей в справочник Физические лица
+//        if (createdPersonList != null && !createdPersonList.isEmpty()) {
+//            createRefbookPersonData(createdPersonList);
+//        }
+//        // Добавление записей в справочник Физические лица
+//        if (updatedPersonList != null && !updatedPersonList.isEmpty()) {
+//            updateRefbookPersonData(updatedPersonList);
+//        }
 
         // При добавлении (обновлении) записей в справочнике Физические лица, в объект ПерсСвСтрахЛиц будет добавлена ссылка на запись в справочнике Физические лица
         raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
