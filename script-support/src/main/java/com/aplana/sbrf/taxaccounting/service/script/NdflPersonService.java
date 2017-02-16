@@ -189,4 +189,26 @@ public interface NdflPersonService {
      * @return
      */
     List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo);
+
+    /**
+     * Данные об авансах ФЛ по идентификатору декларации
+     *
+     * @param declarationDataId
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo);
+
+    /**
+     * Данные о доходах ФЛ по идентификатору декларации
+     *
+     * @param declarationDataId
+     * @param startDate         - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate           - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo);
 }

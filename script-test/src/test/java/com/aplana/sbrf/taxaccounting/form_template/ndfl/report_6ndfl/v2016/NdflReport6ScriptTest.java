@@ -2,9 +2,7 @@ package com.aplana.sbrf.taxaccounting.form_template.ndfl.report_6ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByDate;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeByRate;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncomeCommonValue;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -93,8 +91,8 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
 
     @Before
     public void mockService() {
-        //mock сервисов для получения тестовых наборов данных
         // СумСтавка
+        // todo https://jira.aplana.com/browse/SBRFNDFL-288 Удалить после обновления стенда
         when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
                 .thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
                     @Override
@@ -122,7 +120,9 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                     }
                 });
 
+
         // СумДата
+        // todo https://jira.aplana.com/browse/SBRFNDFL-288 Удалить после обновления стенда
         when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
                 .thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
                     @Override
@@ -140,6 +140,92 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                         ndflPersonIncomeByDateList.add(ndflPersonIncomeByDate1);
 
                         return ndflPersonIncomeByDateList;
+                    }
+                });
+
+        // Данные об авансах ФЛ по идентификатору декларации
+        when(testHelper.getNdflPersonService().findPrepaymentsByDeclarationDataId(any(Long.class), any(String.class), any(String.class)))
+                .thenAnswer(new Answer<List<NdflPersonPrepayment>>() {
+                    @Override
+                    public List<NdflPersonPrepayment> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        NdflPersonPrepayment ndflPersonPrepayment1 = new NdflPersonPrepayment();
+                        ndflPersonPrepayment1.setOperationId(1L);
+                        ndflPersonPrepayment1.setSumm(1L);
+
+                        NdflPersonPrepayment ndflPersonPrepayment2 = new NdflPersonPrepayment();
+                        ndflPersonPrepayment2.setOperationId(3L);
+                        ndflPersonPrepayment2.setSumm(1L);
+
+                        List<NdflPersonPrepayment> ndflPersonPrepaymentList = new ArrayList<NdflPersonPrepayment>();
+                        ndflPersonPrepaymentList.add(ndflPersonPrepayment1);
+                        ndflPersonPrepaymentList.add(ndflPersonPrepayment2);
+                        return ndflPersonPrepaymentList;
+                    }
+                });
+
+        // Данные о доходах ФЛ по идентификатору декларации
+        when(testHelper.getNdflPersonService().findIncomesByPeriodAndDeclarationDataId(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
+                .thenAnswer(new Answer<List<NdflPersonIncome>>() {
+                    @Override
+                    public List<NdflPersonIncome> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+
+                        // Ставка 13 Идентификато операции 1
+                        NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncome();
+                        ndflPersonIncome1.setNdflPersonId(1L);
+                        ndflPersonIncome1.setOperationId(1L);
+                        ndflPersonIncome1.setWithholdingTax(1L);
+                        ndflPersonIncome1.setNotHoldingTax(1L);
+                        ndflPersonIncome1.setRefoundTax(1L);
+                        ndflPersonIncome1.setTaxRate(13);
+                        ndflPersonIncome1.setIncomeAccruedSumm(new BigDecimal(1.1));
+                        ndflPersonIncome1.setTotalDeductionsSumm(new BigDecimal(1.1));
+                        ndflPersonIncome1.setCalculatedTax(1L);
+                        ndflPersonIncome1.setIncomeCode("1010");
+                        ndflPersonIncome1.setIncomeAccruedDate(format.parse("01.01.2001"));
+                        ndflPersonIncome1.setTaxDate(format.parse("01.01.2001"));
+                        ndflPersonIncome1.setTaxTransferDate(format.parse("01.01.2001"));
+                        ndflPersonIncome1.setIncomePayoutSumm(new BigDecimal(1.1));
+
+                        // Ставка 13 Идентификато операции 2
+                        NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncome();
+                        ndflPersonIncome2.setNdflPersonId(2L);
+                        ndflPersonIncome2.setOperationId(2L);
+                        ndflPersonIncome2.setWithholdingTax(1L);
+                        ndflPersonIncome2.setNotHoldingTax(1L);
+                        ndflPersonIncome2.setRefoundTax(1L);
+                        ndflPersonIncome2.setTaxRate(13);
+                        ndflPersonIncome2.setIncomeAccruedSumm(new BigDecimal(1.1));
+                        ndflPersonIncome2.setTotalDeductionsSumm(new BigDecimal(1.1));
+                        ndflPersonIncome2.setCalculatedTax(1L);
+                        ndflPersonIncome2.setIncomeCode("1010");
+                        ndflPersonIncome2.setIncomeAccruedDate(format.parse("02.02.2002"));
+                        ndflPersonIncome2.setTaxDate(format.parse("02.02.2002"));
+                        ndflPersonIncome2.setTaxTransferDate(format.parse("02.02.2002"));
+                        ndflPersonIncome2.setIncomePayoutSumm(new BigDecimal(1.1));
+
+                        // Ставка 20 Идентификато операции 3
+                        NdflPersonIncome ndflPersonIncome3 = new NdflPersonIncome();
+                        ndflPersonIncome2.setNdflPersonId(2L);
+                        ndflPersonIncome3.setOperationId(3L);
+                        ndflPersonIncome3.setWithholdingTax(1L);
+                        ndflPersonIncome3.setNotHoldingTax(1L);
+                        ndflPersonIncome3.setRefoundTax(1L);
+                        ndflPersonIncome3.setTaxRate(20);
+                        ndflPersonIncome3.setIncomeAccruedSumm(new BigDecimal(1.1));
+                        ndflPersonIncome3.setTotalDeductionsSumm(new BigDecimal(1.1));
+                        ndflPersonIncome3.setCalculatedTax(1L);
+                        ndflPersonIncome3.setIncomeCode("0000");
+                        ndflPersonIncome3.setIncomeAccruedDate(format.parse("03.03.2003"));
+                        ndflPersonIncome3.setTaxDate(format.parse("03.03.2003"));
+                        ndflPersonIncome3.setTaxTransferDate(format.parse("03.03.2003"));
+                        ndflPersonIncome3.setIncomePayoutSumm(new BigDecimal(1.1));
+
+                        List<NdflPersonIncome> ndflPersonIncomeList = new ArrayList<NdflPersonIncome>();
+                        ndflPersonIncomeList.add(ndflPersonIncome1);
+                        ndflPersonIncomeList.add(ndflPersonIncome2);
+                        ndflPersonIncomeList.add(ndflPersonIncome3);
+                        return ndflPersonIncomeList;
                     }
                 });
 
@@ -199,7 +285,8 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         testHelper.reset();
     }
 
-    @Test
+    // todo https://jira.aplana.com/browse/SBRFNDFL-288 Раскомментировать после обновления стенда
+//    @Test
     public void buildXmlTest() throws IOException, SAXException {
 
         testHelper.execute(FormDataEvent.CALCULATE);

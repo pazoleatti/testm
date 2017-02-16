@@ -111,9 +111,19 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo) {
+        return ndflPersonDao.findPrepaymentsByDeclarationDataId(declarationDataId, kpp, oktmo);
+    }
+
+    @Override
+    public List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo) {
+        return ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, startDate, endDate, kpp, oktmo);
+    }
+
+    // todo https://jira.aplana.com/browse/SBRFNDFL-288 Удалить после обновления стенда
+    @Override
     public NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo) {
         /*
-        todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-288 - НДФЛ. Перенести логику формирования 6-НДФЛ из сервисного класса в Groovy
         Одним из полей Обобщенных показателей о доходах является перечень просуммированых доходов и авансов для каждой ставки.
         В рамках одной ставки может быть несколько операций.
         Доходы одной операции имеют одну и только одну ставку.
@@ -227,6 +237,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    // todo https://jira.aplana.com/browse/SBRFNDFL-288 Удалить после обновления стенда
     public List<NdflPersonIncomeByDate> findNdflPersonIncomeByDate(long declarationDataId, Date calendarStartDate, Date endDate, String kpp, String oktmo) {
         /*
         Для заполнения СумДата будем учитывать только записи, в которых выполнены условия:
