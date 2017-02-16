@@ -849,17 +849,23 @@ void processInfoPart(infoPart) {
 
 void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode) {
 
-    ndflPerson.incomes = ndflPersonOperationsNode.'СведДохНал'.collect {
+    List<NdflPersonIncome> incomes = new ArrayList<NdflPersonIncome>();
+    incomes.addAll(ndflPersonOperationsNode.'СведДохНал'.collect {
         transformNdflPersonIncome(it)
-    }
+    });
+    ndflPerson.incomes.addAll(incomes);
 
-    ndflPerson.deductions = ndflPersonOperationsNode.'СведВыч'.collect {
+    List<NdflPersonDeduction> deductions = new ArrayList<NdflPersonDeduction>();
+    ndflPersonOperationsNode.'СведВыч'.collect {
         transformNdflPersonDeduction(it)
     }
+    ndflPerson.deductions.addAll(deductions)
 
+    List<NdflPersonPrepayment> prepayments = new ArrayList<NdflPersonPrepayment>();
     ndflPerson.prepayments = ndflPersonOperationsNode.'СведАванс'.collect {
         transformNdflPersonPrepayment(it)
     }
+    ndflPerson.prepayments.addAll(prepayments);
 }
 
 NdflPerson transformNdflPersonNode(NodeChild node) {
@@ -893,6 +899,7 @@ NdflPerson transformNdflPersonNode(NodeChild node) {
 
 NdflPersonIncome transformNdflPersonIncome(NodeChild node) {
     def operationNode = node.parent();
+
     NdflPersonIncome personIncome = new NdflPersonIncome()
     personIncome.rowNum = toInteger(node.'@НомСтр')
     personIncome.incomeCode = toString(node.'@КодДох')
