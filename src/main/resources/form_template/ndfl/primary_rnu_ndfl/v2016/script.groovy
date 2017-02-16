@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.model.PersonData
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
@@ -152,7 +153,7 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
     Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersons(personIds);
     //Id : Адрес
     Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPerson);
-    //PersonId : UniqId:Документы
+    //PersonId : UniqId: ИНП
     Map<Long, List<Map<String, RefBookValue>>> inpMap = getRefInpMap(personIds)
     //PersonId :  UniqId:Документы
     Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDul(personIds)
@@ -164,8 +165,8 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
         Map<String, RefBookValue> refBookPersonValues = refBookPerson.get(personId);
         def addressId = refBookPersonValues.get("ADDRESS")?.getReferenceValue();
 
-        if (addressMap.containsKey(personId)) {
-            Map<String, RefBookValue> addressValues = addressMap.get(personId);
+        if (addressMap.containsKey(addressId)) {
+            Map<String, RefBookValue> addressValues = addressMap.get(addressId);
             fillAddressAttr(addressValues, person);
             getProvider(RefBook.Id.PERSON_ADDRESS.getId()).updateRecordVersionWithoutLock(logger, addressId, versionFrom, null, addressValues);
         } else {
@@ -179,6 +180,7 @@ def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
         getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, personId, versionFrom, null, refBookPersonValues);
 
         //Обновление списка документов
+        //Проверка, если задан номер и тип документа
         if (person.getIdDocNumber() != null && !person.getIdDocNumber().isEmpty() && person.getIdDocType() != null && !person.getIdDocType().isEmpty()) {
             updateIdentityDocRecords(identityDocMap.get(personId), person);
         }
@@ -367,7 +369,9 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
 
         //Ищем документ с таким же типом
         Map<String, RefBookValue> findedDoc = identityDocRefBook?.find {
-            docTypeId.equals(it.get("DOC_ID")) && person.getIdDocNumber()?.equalsIgnoreCase(it.get("DOC_NUMBER"));
+            Long docIdRef = it.get("DOC_ID")?.getReferenceValue();
+            String docNumber = it.get("DOC_NUMBER")?.getStringValue();
+            docTypeId.equals(docIdRef) && person.getIdDocNumber()?.equalsIgnoreCase(docNumber);
         };
 
         List<Map<String, RefBookValue>> identityDocRecords = new ArrayList<Map<String, RefBookValue>>();
