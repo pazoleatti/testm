@@ -135,16 +135,11 @@ def buildXml(def writer, boolean isForSpecificReport) {
     def signatoryId = getRefBookValue(REF_BOOK_MARK_SIGNATORY_CODE_ID, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
 
     // Учитывать будем только информацию о доходах/налогах только за отчетный период
-    def ndflPersonIncomeCommonValue = ndflPersonService.findNdflPersonIncomeCommonValue(declarationData.id, reportPeriod.startDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
-    // todo https://jira.aplana.com/browse/SBRFNDFL-288 Раскомментировать после обновления стенда
-//    def ndflPersonIncomeCommonValue = findNdflPersonIncomeCommonValue(declarationData.id, reportPeriod.startDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
-
+    def ndflPersonIncomeCommonValue = findNdflPersonIncomeCommonValue(declarationData.id, reportPeriod.startDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
     def ndflPersonIncomeByRateList = ndflPersonIncomeCommonValue?.ndflPersonIncomeByRateList
 
     // Учитывать будем только информацию о доходах/налогах за последний квартал отчетного периода
-    def ndflPersonIncomeByDateList = ndflPersonService.findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
-    // todo https://jira.aplana.com/browse/SBRFNDFL-288 Раскомментировать после обновления стенда
-//    def ndflPersonIncomeByDateList = findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
+    def ndflPersonIncomeByDateList = findNdflPersonIncomeByDate(declarationData.id, reportPeriod.calendarStartDate, reportPeriod.endDate, declarationData.kpp, declarationData.oktmo)
 
     def builder = new MarkupBuilder(writer)
     builder.Файл(

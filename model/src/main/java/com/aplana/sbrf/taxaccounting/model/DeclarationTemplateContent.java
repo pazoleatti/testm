@@ -29,6 +29,7 @@ public class DeclarationTemplateContent {
             declarationSubreportContent.setName(declarationSubreport.getName());
             declarationSubreportContent.setOrder(declarationSubreport.getOrder());
             declarationSubreportContent.setBlobDataId(declarationSubreport.getBlobDataId());
+            declarationSubreportContent.setSelectRecord(declarationSubreport.isSelectRecord());
             declarationSubreportContent.setSubreportParams(new ArrayList<DeclarationSubreportParamContent>());
             for(DeclarationSubreportParam declarationSubreportParam: declarationSubreport.getDeclarationSubreportParams()) {
                 DeclarationSubreportParamContent declarationSubreportParamContent = new DeclarationSubreportParamContent();
@@ -54,6 +55,7 @@ public class DeclarationTemplateContent {
             declarationSubreport.setName(declarationSubreportContent.getName());
             declarationSubreport.setOrder(declarationSubreportContent.getOrder());
             declarationSubreport.setBlobDataId(declarationSubreportContent.getBlobDataId());
+            declarationSubreport.setSelectRecord(declarationSubreportContent.isSelectRecord());
             declarationSubreport.setDeclarationSubreportParams(new ArrayList<DeclarationSubreportParam>());
             for(DeclarationSubreportParamContent declarationSubreportParamContent: declarationSubreportContent.getSubreportParams()) {
                 DeclarationSubreportParam declarationSubreportParam = new DeclarationSubreportParam();
