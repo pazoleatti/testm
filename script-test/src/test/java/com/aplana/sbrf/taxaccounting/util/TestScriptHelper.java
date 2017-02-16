@@ -493,6 +493,10 @@ public class TestScriptHelper {
         return raschsvItogVyplService;
     }
 
+    public RaschsvObyazPlatSvService getRaschsvObyazPlatSvService() {
+        return raschsvObyazPlatSvService;
+    }
+
     public RefBookPersonService getRefBookPersonService() {
         return refBookPersonService;
     }
