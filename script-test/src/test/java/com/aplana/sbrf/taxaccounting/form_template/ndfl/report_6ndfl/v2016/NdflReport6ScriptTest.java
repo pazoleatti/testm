@@ -91,58 +91,6 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
 
     @Before
     public void mockService() {
-        // СумСтавка
-        // todo https://jira.aplana.com/browse/SBRFNDFL-288 Удалить после обновления стенда
-        when(testHelper.getNdflPersonService().findNdflPersonIncomeCommonValue(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
-                .thenAnswer(new Answer<NdflPersonIncomeCommonValue>() {
-                    @Override
-                    public NdflPersonIncomeCommonValue answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        NdflPersonIncomeCommonValue ndflPersonIncomeCommonValue = new NdflPersonIncomeCommonValue();
-                        ndflPersonIncomeCommonValue.setCountPerson(11);
-                        ndflPersonIncomeCommonValue.setWithholdingTax(22L);
-                        ndflPersonIncomeCommonValue.setNotHoldingTax(33L);
-                        ndflPersonIncomeCommonValue.setRefoundTax(44L);
-
-                        List<NdflPersonIncomeByRate> ndflPersonIncomeByRateList = new ArrayList<NdflPersonIncomeByRate>();
-                        NdflPersonIncomeByRate ndflPersonIncomeByRate1 = new NdflPersonIncomeByRate();
-                        ndflPersonIncomeByRate1.setTaxRate(13);
-                        ndflPersonIncomeByRate1.setIncomeAccruedSumm(new BigDecimal(7777.77));
-                        ndflPersonIncomeByRate1.setIncomeAccruedSummDiv(new BigDecimal(6666.66));
-                        ndflPersonIncomeByRate1.setTotalDeductionsSumm(new BigDecimal(5555.55));
-                        ndflPersonIncomeByRate1.setCalculatedTax(288L);
-                        ndflPersonIncomeByRate1.setCalculatedTaxDiv(9999L);
-                        ndflPersonIncomeByRate1.setPrepaymentSum(280L);
-                        ndflPersonIncomeByRateList.add(ndflPersonIncomeByRate1);
-
-                        ndflPersonIncomeCommonValue.setNdflPersonIncomeByRateList(ndflPersonIncomeByRateList);
-
-                        return ndflPersonIncomeCommonValue;
-                    }
-                });
-
-
-        // СумДата
-        // todo https://jira.aplana.com/browse/SBRFNDFL-288 Удалить после обновления стенда
-        when(testHelper.getNdflPersonService().findNdflPersonIncomeByDate(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
-                .thenAnswer(new Answer<List<NdflPersonIncomeByDate>>() {
-                    @Override
-                    public List<NdflPersonIncomeByDate> answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-
-                        List<NdflPersonIncomeByDate> ndflPersonIncomeByDateList = new ArrayList<NdflPersonIncomeByDate>();
-
-                        NdflPersonIncomeByDate ndflPersonIncomeByDate1 = new NdflPersonIncomeByDate();
-                        ndflPersonIncomeByDate1.setIncomeAccruedDate(format.parse("24.01.2017"));
-                        ndflPersonIncomeByDate1.setTaxDate(format.parse("24.01.2017"));
-                        ndflPersonIncomeByDate1.setTaxTransferDate(format.parse("24.01.2017"));
-                        ndflPersonIncomeByDate1.setIncomePayoutSumm(new BigDecimal(1111.5));
-                        ndflPersonIncomeByDate1.setWithholdingTax(2222L);
-                        ndflPersonIncomeByDateList.add(ndflPersonIncomeByDate1);
-
-                        return ndflPersonIncomeByDateList;
-                    }
-                });
-
         // Данные об авансах ФЛ по идентификатору декларации
         when(testHelper.getNdflPersonService().findPrepaymentsByDeclarationDataId(any(Long.class), any(String.class), any(String.class)))
                 .thenAnswer(new Answer<List<NdflPersonPrepayment>>() {
@@ -285,8 +233,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         testHelper.reset();
     }
 
-    // todo https://jira.aplana.com/browse/SBRFNDFL-288 Раскомментировать после обновления стенда
-//    @Test
+    @Test
     public void buildXmlTest() throws IOException, SAXException {
 
         testHelper.execute(FormDataEvent.CALCULATE);
