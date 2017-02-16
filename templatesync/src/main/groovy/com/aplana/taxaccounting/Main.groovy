@@ -415,29 +415,14 @@ class Main {
             'classificator_income'         : 28,
             'classificator_oktmo'          : 96,
             'classificator_outcome'        : 27,
-            'currency_rate'                : 22,
             'declaration_params_property'  : 200,
             'declaration_params_transport' : 210,
             'department'                   : 30,
-            'emitent'                      : 100,
-            'income101'                    : 50,
-            'income102'                    : 52,
             'jur_persons'                  : 520,
             'jur_persons_terms'            : 515,
-            'metal_rate'                   : 90,
-            'offshore'                     : 519,
-            'okato'                        : 3,
             'okei'                         : 12,
             'organization'                 : 9,
-            'problem_zones'                : 504,
-            'raising_rates_transport'      : 209,
-            'region'                       : 4,
-            'tax_benefits_land'            : 705,
-            'tax_benefits_property'        : 203,
-            'tax_benefits_transport'       : 7,
-            'vehicles_average_cost'        : 208,
-            'vehicles_average_cost_2015'   : 218,
-            'vehicles_tax_rate'            : 41
+            'region'                       : 923
     ]
 
     static void main(String[] args) {

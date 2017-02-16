@@ -1,14 +1,27 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.FormLink;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Дао для версионных справочников.
@@ -329,18 +342,6 @@ public interface RefBookDao {
     List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, Long uniqueRecordId,
                                                                 @NotNull List<RefBookAttribute> attributes,
                                                                 @NotNull List<RefBookRecord> records);
-
-    /**
-     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми
-     * Обеспечение соблюдения уникальности атрибутов в пределах справочника
-     *
-     * @param attributes      атрибуты справочника
-     * @param records         новые значения полей элемента справочника
-     * @param accountPeriodId идентификатор периода и подразделения БО
-     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
-     */
-    List<String> getMatchedRecordsByUniqueAttributesIncome102(@NotNull List<RefBookAttribute> attributes,
-                                                              @NotNull List<Map<String, RefBookValue>> records, Integer accountPeriodId);
 
     /**
      * Поиск существующих версий, которые могут пересекаться с новой версией

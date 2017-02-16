@@ -299,49 +299,7 @@ comment on column report_period.end_date is 'Дата окончания отч�
 comment on column report_period.calendar_start_date is 'Календарная дата начала отчетного периода';
 
 create sequence seq_report_period start with 100;
-----------------------------------------------------------------------------------------------------
-create table income_101 (
-  id                     number(18)         not null,
-  account                varchar2(255 char) not null,
-  income_debet_remains   number(22, 4),
-  income_credit_remains  number(22, 4),
-  debet_rate             number(22, 4),
-  credit_rate            number(22, 4),
-  outcome_debet_remains  number(22, 4),
-  outcome_credit_remains number(22, 4),
-  account_name           varchar2(255 char),
-  account_period_id      number(9)          not null
-);
-comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
-comment on column income_101.id is 'Код записи';
-comment on column income_101.account is 'Номер счета';
-comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
-comment on column income_101.income_credit_remains is 'Входящие остатки по кредиту';
-comment on column income_101.debet_rate is 'Обороты по дебету';
-comment on column income_101.credit_rate is 'Обороты по кредиту';
-comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
-comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
-comment on column income_101.account_name is 'Название счёта';
-comment on column income_101.account_period_id is 'Идентификатор периода и подразделения БО';
-
-create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
-create table income_102 (
-  id                number(18)        not null,
-  opu_code          varchar2(25 char) not null,
-  total_sum         number(22, 4),
-  item_name         varchar2(255 char),
-  account_period_id number(9)         not null
-);
-comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
-comment on column income_102.id is 'Код записи';
-comment on column income_102.opu_code is 'Код ОПУ';
-comment on column income_102.total_sum is 'Сумма';
-comment on column income_102.item_name is 'Наименование статьи';
-comment on column income_102.account_period_id is 'Идентификатор периода и подразделения БО';
-
-create sequence seq_income_102 start with 100;
----------------------------------------------------------------------------------------------------
 create table declaration_type (
   id        number(9)           not null,
   tax_type  char(1)             not null,
@@ -1202,10 +1160,10 @@ create table ndfl_person_income
   kpp                   varchar2(9 char),
   income_accrued_date   date,
   income_payout_date    date,
-  income_accrued_summ   number(20, 2),
-  income_payout_summ    number(20, 2),
-  total_deductions_summ number(20, 2),
-  tax_base              number(20, 2),
+  income_accrued_summ   number(22, 2),
+  income_payout_summ    number(22, 2),
+  total_deductions_summ number(22, 2),
+  tax_base              number(22, 2),
   tax_rate              number(2),
   tax_date              date,
   calculated_tax        number(20),
@@ -1260,14 +1218,14 @@ create table ndfl_person_deduction
   notif_date       date,
   notif_num        varchar2(20 char),
   notif_source     varchar2(20 char),
-  notif_summ       number(20, 2),
+  notif_summ       number(22, 2),
   income_accrued   date,
   income_code      varchar2(4 char),
-  income_summ      number(20, 2),
+  income_summ      number(22, 2),
   period_prev_date date,
-  period_prev_summ number(20, 2),
+  period_prev_summ number(22, 2),
   period_curr_date date,
-  period_curr_summ number(20, 2)
+  period_curr_summ number(22, 2)
 );
 
 comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
@@ -1412,11 +1370,11 @@ comment on column raschsv_kol_lic_tip.kol_3m_posl_3m is 'В том числе 3 
 create table raschsv_sv_sum_1tip
 (
    id                 NUMBER(18)           not null,
-   sum_vsego_per      NUMBER(17,2),
-   sum_vsego_posl_3m  NUMBER(17,2),
-   sum_1m_posl_3m     NUMBER(17,2),
-   sum_2m_posl_3m     NUMBER(17,2),
-   sum_3m_posl_3m     NUMBER(17,2)
+   sum_vsego_per      NUMBER(19,2),
+   sum_vsego_posl_3m  NUMBER(19,2),
+   sum_1m_posl_3m     NUMBER(19,2),
+   sum_2m_posl_3m     NUMBER(19,2),
+   sum_3m_posl_3m     NUMBER(19,2)
 );
 create sequence seq_raschsv_sv_sum_1tip start with 1;
 comment on table raschsv_sv_sum_1tip is 'Сведения по суммам (тип 1) (СвСум1Тип)';
@@ -1445,10 +1403,10 @@ create table raschsv_upl_per
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null,
    kbk                VARCHAR2(20 CHAR),
-   sum_sb_upl_per     NUMBER(17, 2),
-   sum_sb_upl_1m      NUMBER(17, 2),
-   sum_sb_upl_2m      NUMBER(17, 2),
-   sum_sb_upl_3m      NUMBER(17, 2)
+   sum_sb_upl_per     NUMBER(19, 2),
+   sum_sb_upl_1m      NUMBER(19, 2),
+   sum_sb_upl_2m      NUMBER(19, 2),
+   sum_sb_upl_3m      NUMBER(19, 2)
 );
 create sequence seq_raschsv_upl_per start with 1;
 comment on table raschsv_upl_per is 'Суммы страховых взносов, подлежащие уплате за расчетный (отчетный) период (УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО)';
@@ -1466,14 +1424,14 @@ create table raschsv_upl_prev_oss
    id                 NUMBER(18)           not null,
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null,
    kbk                VARCHAR2(20 CHAR),
-   sum_sb_upl_per     NUMBER(17, 2),
-   sum_sb_upl_1m      NUMBER(17, 2),
-   sum_sb_upl_2m      NUMBER(17, 2),
-   sum_sb_upl_3m      NUMBER(17, 2),
-   prev_rash_sv_per   NUMBER(17, 2),
-   prev_rash_sv_1m    NUMBER(17, 2),
-   prev_rash_sv_2m    NUMBER(17, 2),
-   prev_rash_sv_3m    NUMBER(17, 2)
+   sum_sb_upl_per     NUMBER(19, 2),
+   sum_sb_upl_1m      NUMBER(19, 2),
+   sum_sb_upl_2m      NUMBER(19, 2),
+   sum_sb_upl_3m      NUMBER(19, 2),
+   prev_rash_sv_per   NUMBER(19, 2),
+   prev_rash_sv_1m    NUMBER(19, 2),
+   prev_rash_sv_2m    NUMBER(19, 2),
+   prev_rash_sv_3m    NUMBER(19, 2)
 );
 create sequence seq_raschsv_upl_prev_oss start with 1;
 comment on table raschsv_upl_prev_oss is 'Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством, подлежащая уплате за расчетный и Сумма превышения произведенных плательщиком расходов на выплату страхового обеспечения (УплПерОСС, ПревРасхОСС)';
@@ -1563,7 +1521,7 @@ create table raschsv_upl_sv_prev
    raschsv_oss_vnm_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null,
    priznak            VARCHAR2(1 CHAR),
-   sv_sum             NUMBER(17, 2)
+   sv_sum             NUMBER(19, 2)
 );
 create sequence seq_raschsv_upl_sv_prev start with 1;
 comment on table raschsv_upl_sv_prev is 'Сумма страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами) (УплСВПрев)';
@@ -1612,8 +1570,8 @@ create table raschsv_rash_oss_zak_rash
    node_name          VARCHAR2(20 CHAR)    not null,
    chisl_sluch        NUMBER(7),
    kol_vypl           NUMBER(7),
-   rash_vsego         NUMBER(17,2),
-   rash_fin_fb        NUMBER(17,2)
+   rash_vsego         NUMBER(19,2),
+   rash_fin_fb        NUMBER(19,2)
 );
 create sequence seq_raschsv_rash_oss_zak_rash start with 1;
 comment on table raschsv_rash_oss_zak_rash is 'Дочерний узел Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации';
@@ -1639,7 +1597,7 @@ create table raschsv_vypl_prichina
    id                 NUMBER(18)           not null,
    raschsv_vypl_fin_fb_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null,
-   sv_vnf_uhod_inv    NUMBER(17, 2)
+   sv_vnf_uhod_inv    NUMBER(19, 2)
 );
 create sequence seq_raschsv_vypl_prichina start with 1;
 comment on table raschsv_vypl_prichina is 'Дочерний узел для Выплаты, произведенные за счет средств, финансируемых из федерального бюджета';
@@ -1655,7 +1613,7 @@ create table raschsv_rash_vypl
    node_name          VARCHAR2(20 CHAR)    not null,
    chisl_poluch       NUMBER(7),
    kol_vypl           NUMBER(7),
-   rashod             NUMBER(17, 2)
+   rashod             NUMBER(19, 2)
 );
 create sequence seq_raschsv_rash_vypl start with 1;
 comment on table raschsv_rash_vypl is 'Данные по выплате, произведенной за счет средств, финансируемых из федерального бюджета';
@@ -1676,8 +1634,8 @@ create table raschsv_prav_tarif3_1_427
    doh248_per         NUMBER(15),
    doh_kr5_427_9mpr   NUMBER(15),
    doh_kr5_427_per    NUMBER(15),
-   doh_doh5_427_9mpr  NUMBER(5, 2),
-   doh_doh5_427_per   NUMBER(5, 2),
+   doh_doh5_427_9mpr  NUMBER(7, 2),
+   doh_doh5_427_per   NUMBER(7, 2),
    data_zap_ak_org    DATE,
    nom_zap_ak_org     VARCHAR2(18 CHAR)
 );
@@ -1702,7 +1660,7 @@ create table raschsv_prav_tarif5_1_427
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null,
    doh346_15vs        NUMBER(15),
    doh6_427           NUMBER(15),
-   dol_doh6_427       NUMBER(5, 2)
+   dol_doh6_427       NUMBER(7, 2)
 );
 create sequence seq_raschsv_prav_tarif5_1_427 start with 1;
 comment on table raschsv_prav_tarif5_1_427 is 'Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427 (ПравТариф5.1.427)';
@@ -1724,8 +1682,8 @@ create table raschsv_prav_tarif7_1_427
    doh_grant_per      NUMBER(15),
    doh_ek_deyat_pred  NUMBER(15),
    doh_ek_deyat_per   NUMBER(15),
-   dol_doh_pred       NUMBER(5, 2),
-   dol_doh_per        NUMBER(5, 2)
+   dol_doh_pred       NUMBER(7, 2),
+   dol_doh_per        NUMBER(7, 2)
 );
 create sequence seq_raschsv_prav_tarif7_1_427 start with 1;
 comment on table raschsv_prav_tarif7_1_427 is 'Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 7 пункта 1 статьи 427 Налогового кодекса Российской Федерации (ПравТариф7.1.427)';
@@ -1931,10 +1889,10 @@ create table raschsv_sv_vypl
 (
    id                 NUMBER(18)           not null,
    raschsv_pers_sv_strah_lic_id NUMBER(18)           not null,
-   sum_vypl_vs3       NUMBER(17,2),
-   vypl_ops_vs3       NUMBER(17,2),
-   vypl_ops_dog_vs3   NUMBER(17,2),
-   nachisl_sv_vs3     NUMBER(17,2)
+   sum_vypl_vs3       NUMBER(19,2),
+   vypl_ops_vs3       NUMBER(19,2),
+   vypl_ops_dog_vs3   NUMBER(19,2),
+   nachisl_sv_vs3     NUMBER(19,2)
 );
 create sequence seq_raschsv_sv_vypl start with 1;
 comment on table raschsv_sv_vypl is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица (СвВыпл)';
@@ -1951,10 +1909,10 @@ create table raschsv_sv_vypl_mk
    raschsv_sv_vypl_id NUMBER(18)           not null,
    mesyac             VARCHAR2(2 CHAR),
    kod_kat_lic        VARCHAR2(4 CHAR),
-   sum_vypl           NUMBER(17,2),
-   vypl_ops           NUMBER(17,2),
-   vypl_ops_dog       NUMBER(17,2),
-   nachisl_sv         NUMBER(17,2)
+   sum_vypl           NUMBER(19,2),
+   vypl_ops           NUMBER(19,2),
+   vypl_ops_dog       NUMBER(19,2),
+   nachisl_sv         NUMBER(19,2)
 );
 create sequence seq_raschsv_sv_vypl_mk start with 1;
 comment on table raschsv_sv_vypl_mk is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица (СвВыплМК)';
@@ -1971,8 +1929,8 @@ create table raschsv_vypl_sv_dop
 (
    id                 NUMBER(18)           not null,
    raschsv_pers_sv_strah_lic_id NUMBER(18)           not null,
-   vypl_sv_vs3        NUMBER(17,2),
-   nachisl_sv_vs3     NUMBER(17,2)
+   vypl_sv_vs3        NUMBER(19,2),
+   nachisl_sv_vs3     NUMBER(19,2)
 );
 create sequence seq_raschsv_vypl_sv_dop start with 1;
 comment on table raschsv_vypl_sv_dop is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
@@ -1987,8 +1945,8 @@ create table raschsv_vypl_sv_dop_mt
    raschsv_vypl_sv_dop_id NUMBER(18)           not null,
    mesyac             VARCHAR2(2 CHAR),
    tarif             VARCHAR2(2 CHAR),
-   vypl_sv            NUMBER(17,2),
-   nachisl_sv         NUMBER(17,2)
+   vypl_sv            NUMBER(19,2),
+   nachisl_sv         NUMBER(19,2)
 );
 create sequence seq_raschsv_vypl_sv_dop_mt start with 1;
 comment on table raschsv_vypl_sv_dop_mt is 'Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа (ВыплСВДопМТ)';
@@ -2167,12 +2125,18 @@ comment on column fias_room.postalcode is 'Почтовый индекс';
 --------------------------------------------------------------------------------------------------------------------------
 create table ref_book_taxpayer_state
 (
-  id number(18) not null,
-  code varchar2(1 char) not null,
-  name varchar2(1000 char) not null
+  id number(18)                   not null,
+  record_id   number(9)           not null,
+  version     date                not null,
+  status      number(1) default 0 not null,
+  code varchar2(1 char)           not null,
+  name varchar2(1000 char)        not null
 );
 
 comment on table ref_book_taxpayer_state is 'Статусы налогоплательщиков';
+comment on column ref_book_taxpayer_state.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_taxpayer_state.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_taxpayer_state.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_taxpayer_state.id is 'Уникальный идентификатор';
 comment on column ref_book_taxpayer_state.code is 'Код';
 comment on column ref_book_taxpayer_state.name is 'Наименование';
@@ -2371,10 +2335,10 @@ create table raschsv_itog_vypl (
   mesyac                    varchar2(2 char)  not null,
   kod_kat_lic               varchar2(4 char)  not null,
   kol_fl                    number(20)        not null,
-  sum_vypl                  number(23,2)      not null,
-  vypl_ops                  number(23,2),
-  vypl_ops_dog              number(23,2),
-  sum_nachisl               number(23,2)
+  sum_vypl                  number(25,2)      not null,
+  vypl_ops                  number(25,2),
+  vypl_ops_dog              number(25,2),
+  sum_nachisl               number(25,2)
 );
 
 comment on table raschsv_itog_vypl is 'НФ вида 1151111: Сводные сведения о выплатах';
@@ -2394,8 +2358,8 @@ create table raschsv_itog_vypl_dop (
   mesyac                    varchar2(2 char)  not null,
   tarif                     varchar2(2 char)  not null,
   kol_fl                    number(20)        not null,
-  sum_vypl                  number(23,2)      not null,
-  sum_nachisl               number(23,2)
+  sum_vypl                  number(25,2)      not null,
+  sum_nachisl               number(25,2)
 );
 
 comment on table raschsv_itog_vypl_dop is 'НФ вида 1151111: Сводные сведения о выплатах по доп. тарифам';
@@ -2441,5 +2405,3 @@ comment on column log_entry.log_level is 'Уровень важности (0 - �
 comment on column log_entry.message is 'Текст сообщения';
 
 create sequence seq_log_entry start with 1;
-
-

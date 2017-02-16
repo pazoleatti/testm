@@ -299,49 +299,7 @@ comment on column report_period.end_date is 'Дата окончания отч�
 comment on column report_period.calendar_start_date is 'Календарная дата начала отчетного периода';
 
 create sequence seq_report_period start with 100;
-----------------------------------------------------------------------------------------------------
-create table income_101 (
-  id                     number(18)         not null,
-  account                varchar2(255 char) not null,
-  income_debet_remains   number(22, 4),
-  income_credit_remains  number(22, 4),
-  debet_rate             number(22, 4),
-  credit_rate            number(22, 4),
-  outcome_debet_remains  number(22, 4),
-  outcome_credit_remains number(22, 4),
-  account_name           varchar2(255 char),
-  account_period_id      number(9)          not null
-);
-comment on table income_101 is 'Оборотная ведомость (Форма 0409101-СБ)';
-comment on column income_101.id is 'Код записи';
-comment on column income_101.account is 'Номер счета';
-comment on column income_101.income_debet_remains is 'Входящие остатки по дебету';
-comment on column income_101.income_credit_remains is 'Входящие остатки по кредиту';
-comment on column income_101.debet_rate is 'Обороты по дебету';
-comment on column income_101.credit_rate is 'Обороты по кредиту';
-comment on column income_101.outcome_debet_remains is 'Исходящие остатки по дебету';
-comment on column income_101.outcome_credit_remains is 'Исходящие остатки по кредиту';
-comment on column income_101.account_name is 'Название счёта';
-comment on column income_101.account_period_id is 'Идентификатор периода и подразделения БО';
-
-create sequence seq_income_101 start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
-create table income_102 (
-  id                number(18)        not null,
-  opu_code          varchar2(25 char) not null,
-  total_sum         number(22, 4),
-  item_name         varchar2(255 char),
-  account_period_id number(9)         not null
-);
-comment on table income_102 is 'Отчет о прибылях и убытках (Форма 0409102-СБ)';
-comment on column income_102.id is 'Код записи';
-comment on column income_102.opu_code is 'Код ОПУ';
-comment on column income_102.total_sum is 'Сумма';
-comment on column income_102.item_name is 'Наименование статьи';
-comment on column income_102.account_period_id is 'Идентификатор периода и подразделения БО';
-
-create sequence seq_income_102 start with 100;
----------------------------------------------------------------------------------------------------
 create table declaration_type (
   id        number(9)           not null,
   tax_type  char(1)             not null,
@@ -350,7 +308,7 @@ create table declaration_type (
   is_ifrs   number(1) default 0 not null,
   ifrs_name varchar2(200)
 );
-comment on table declaration_type is ' Виды деклараций';
+comment on table declaration_type is ' Виды налоговых форм';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_type.tax_type is 'Вид налога';
 comment on column declaration_type.name is 'Наименование';
@@ -365,10 +323,10 @@ create table department_declaration_type (
   department_id       number(9) not null,
   declaration_type_id number(9) not null
 );
-comment on table department_declaration_type is 'Сведения о декларациях, с которыми можно работать в подразделении';
+comment on table department_declaration_type is 'Сведения о налоговых формах, с которыми можно работать в подразделении';
 comment on column department_declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column department_declaration_type.department_id is 'Идентификатор подразделения';
-comment on column department_declaration_type.declaration_type_id is 'Вид декларации';
+comment on column department_declaration_type.declaration_type_id is 'Вид налоговой формы';
 
 create sequence seq_dept_declaration_type start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -384,13 +342,13 @@ create table declaration_template (
   form_kind number(18),
   form_type number(18)
 );
-comment on table declaration_template is 'Шаблоны налоговых деклараций';
+comment on table declaration_template is 'Шаблон налоговой формы';
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_template.version is 'Версия';
 comment on column declaration_template.name is 'Наименование версии макета';
-comment on column declaration_template.create_script is 'Скрипт формирования декларации';
+comment on column declaration_template.create_script is 'Скрипт формирования налоговой формы';
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
-comment on column declaration_template.declaration_type_id is 'Вид деклараций';
+comment on column declaration_template.declaration_type_id is 'Вид налоговой формы';
 comment on column declaration_template.XSD is 'XSD-схема';
 comment on column declaration_template.status is 'Статус версии (значения (-1, 0, 1, 2))';
 comment on column declaration_template.form_kind is 'Тип налоговой формы';
@@ -414,9 +372,9 @@ create table declaration_data (
 );
 
 
-comment on table declaration_data is 'Налоговые декларации';
+comment on table declaration_data is 'Налоговые формы';
 comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
+comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон налоговой формы';
 comment on column declaration_data.tax_organ_code is 'Налоговый орган';
 comment on column declaration_data.kpp is 'КПП';
 comment on column declaration_data.oktmo is 'ОКТМО';
@@ -517,9 +475,9 @@ create table declaration_source (
   period_start                   date      not null,
   period_end                     date      null
 );
-comment on table declaration_source is 'Информация о формах-источниках данных для деклараций разных видов';
-comment on column declaration_source.department_declaration_type_id is 'Иденфтикиатор сочетания вида декларации и подразделения, для которого задаётся источник';
-comment on column declaration_source.src_department_form_type_id is 'Идентификатор сочетания типа и вида формы, а также подразделения, которые являются источников данных для деклараций';
+comment on table declaration_source is 'Информация о формах-источниках данных для налоговой формы разных видов';
+comment on column declaration_source.department_declaration_type_id is 'Идентификатор сочетания вида налоговой формы и подразделения, для которого задаётся источник';
+comment on column declaration_source.src_department_form_type_id is 'Идентификатор сочетания типа и вида формы, а также подразделения, которые являются источниками данных для налоговой формы';
 comment on column declaration_source.period_start is 'Дата начала действия назначения';
 comment on column declaration_source.period_end is 'Дата окончания действия назначения';
 ----------------------------------------------------------------------------------------------------
@@ -582,13 +540,13 @@ create table log_business (
   note                 varchar2(510),
   user_department_name varchar2(4000) not null
 );
-comment on table log_business is 'Журнал событий налоговых форм\деклараций';
+comment on table log_business is 'Журнал событий налоговых форм';
 comment on column log_business.id is 'Код записи';
 comment on column log_business.log_date is 'Дата события';
 comment on column log_business.event_id is 'Код события (1 - создать,2 - удалить,3 - рассчитать,4 - обобщить,5 - проверить,6 - сохранить,7 - импорт данных,101 - утвердить,102 - вернуть из \утверждена\ в \создана\,103 - принять из \утверждена\,104 - вернуть из \принята\ в \утверждена\,105 - принять из \создана\,106 - вернуть из \принята\ в \создана\,107 - подготовить,108, вернуть из \подготовлена\ в \создана\,109, принять из \подготовлена\,110, вернуть из \принята\ в \подготовлена\,203 - после принять из \утверждена\,204 - после вернуть из \принята\ в \утверждена\,205 - после принять из \создана\,206 - после вернуть из \принята\ в \создана\,207 - после принять из \"подготовлена\,301 - добавить строку,303 - удалить строку,302 - загрузка)';
 comment on column log_business.user_login is 'Логин пользователя';
 comment on column log_business.roles is 'Список ролей пользователя';
-comment on column log_business.declaration_data_id is 'Код декларации';
+comment on column log_business.declaration_data_id is 'Код налоговой формы';
 comment on column log_business.form_data_id is 'Код налоговой формы';
 comment on column log_business.note is 'Текст сообщения';
 comment on column log_business.user_department_name is 'Подразделение пользователя';
@@ -633,15 +591,15 @@ comment on column log_system.ip is 'IP-адрес пользователя';
 comment on column log_system.event_id is 'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108 - Вернуть из \Подготовлена\ в \Создана\,109 - Принять из \Подготовлена\,110 - Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
 comment on column log_system.user_login is 'Логин пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
-comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
+comment on column log_system.department_name is 'Наименование подразделения налоговой формы';
 comment on column log_system.report_period_name is 'Наименование отчетного периода';
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
 comment on column log_system.note is 'Текст сообщения';
 comment on column log_system.user_department_name is 'Наименование подразделения пользователя';
-comment on column log_system.declaration_type_name is 'Вид декларации';
+comment on column log_system.declaration_type_name is 'Вид налоговой формы';
 comment on column log_system.form_type_name is 'Вид налоговой формы';
-comment on column log_system.form_department_id is 'Идентификатор подразделения налоговой формы/декларации';
-comment on column log_system.form_type_id is 'Идентификатор вида НФ';
+comment on column log_system.form_department_id is 'Идентификатор подразделения налоговой формы';
+comment on column log_system.form_type_id is 'Идентификатор вида налоговой формы';
 comment on column log_system.is_error is 'Признак ошибки';
 comment on column log_system.audit_form_type_id is 'Тип формы';
 comment on column log_system.server is 'Сервер';
@@ -737,7 +695,7 @@ create table template_changes (
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
 comment on column template_changes.id is 'Уникальный идентификатор записи';
 comment on column template_changes.form_template_id is 'Идентификатор налогового шаблона';
-comment on column template_changes.declaration_template_id is 'Идентификатор шаблона декларации';
+comment on column template_changes.declaration_template_id is 'Идентификатор шаблона налоговой формы';
 comment on column template_changes.event is 'Событие версии';
 comment on column template_changes.author is 'Автор изменения';
 comment on column template_changes.date_event is 'Дата изменения';
@@ -844,8 +802,8 @@ create table declaration_report
   subreport_id        number(9)
 );
 
-comment on table declaration_report is 'Отчеты по декларациям';
-comment on column declaration_report.declaration_data_id is 'Идентификатор декларации';
+comment on table declaration_report is 'Отчеты по налоговым формам';
+comment on column declaration_report.declaration_data_id is 'Идентификатор налоговой формы';
 comment on column declaration_report.blob_data_id is 'Идентификатор отчета';
 comment on column declaration_report.type is 'Тип отчета (0 - Excel, 1 - XML, 2 - PDF, 3 - Jasper, 4 - Спец.отчет)';
 comment on column declaration_report.subreport_id is 'Идентификатор спец. отчета';
@@ -863,15 +821,15 @@ create table declaration_subreport
   select_record           number(1) default 0 not null
 );
 
-comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
+comment on table declaration_subreport is 'Спец. отчеты версии макета налоговой формы';
 comment on column declaration_subreport.id is 'Идентификатор отчета';
-comment on column declaration_subreport.declaration_template_id is 'Идентификатор шаблона декларации';
+comment on column declaration_subreport.declaration_template_id is 'Идентификатор шаблона налоговой формы';
 comment on column declaration_subreport.name is 'Наименование спец. отчета';
 comment on column declaration_subreport.ord is 'Порядковый номер';
 comment on column declaration_subreport.alias is 'Код спец. отчета';
 comment on column declaration_subreport.blob_data_id is 'Макет JasperReports для формирования печатного представления формы';
 comment on column declaration_subreport.select_record is 'Возможность поиска/выбора записи при формировании спец. отчета';
-comment on table declaration_subreport is 'Спец. отчеты версии макета декларации';
+comment on table declaration_subreport is 'Спец. отчеты версии макета налоговой формы';
 
 --------------------------------------------------------------------------------------------------------
 create table lock_data_subscribers
@@ -927,9 +885,9 @@ create table declaration_data_consolidation
   source_declaration_data_id number(18)
 );
 
-comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм в декларации';
-comment on column declaration_data_consolidation.source_declaration_data_id is 'Идентификатор НФ источника';
-comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор НФ приемника';
+comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм';
+comment on column declaration_data_consolidation.source_declaration_data_id is 'Идентификатор источника';
+comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор приемника';
 
 --------------------------------------------------------------------------------------------------------
 create table log_system_report
@@ -1157,7 +1115,7 @@ create table ndfl_person (
 
 comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
 comment on column ndfl_person.id is 'Суррогатный ключ';
-comment on column ndfl_person.declaration_data_id is 'Идентификатор декларации к которой относятся данные';
+comment on column ndfl_person.declaration_data_id is 'Идентификатор налоговой формы к которой относятся данные';
 comment on column ndfl_person.person_id is 'Идентификатор в справочнике физлиц';
 comment on column ndfl_person.row_num is 'Порядковый номер строки';
 comment on column ndfl_person.inp is 'Уникальный код клиента';
@@ -1202,10 +1160,10 @@ create table ndfl_person_income
   kpp                   varchar2(9 char),
   income_accrued_date   date,
   income_payout_date    date,
-  income_accrued_summ   number(20, 2),
-  income_payout_summ    number(20, 2),
-  total_deductions_summ number(20, 2),
-  tax_base              number(20, 2),
+  income_accrued_summ   number(22, 2),
+  income_payout_summ    number(22, 2),
+  total_deductions_summ number(22, 2),
+  tax_base              number(22, 2),
   tax_rate              number(2),
   tax_date              date,
   calculated_tax        number(20),
@@ -1260,14 +1218,14 @@ create table ndfl_person_deduction
   notif_date       date,
   notif_num        varchar2(20 char),
   notif_source     varchar2(20 char),
-  notif_summ       number(20, 2),
+  notif_summ       number(22, 2),
   income_accrued   date,
   income_code      varchar2(4 char),
-  income_summ      number(20, 2),
+  income_summ      number(22, 2),
   period_prev_date date,
-  period_prev_summ number(20, 2),
+  period_prev_summ number(22, 2),
   period_curr_date date,
-  period_curr_summ number(20, 2)
+  period_curr_summ number(22, 2)
 );
 
 comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
@@ -1341,7 +1299,7 @@ comment on column ndfl_references.id is 'Уникальный идентифик
 comment on column ndfl_references.record_id is 'Идентификатор строки. Может повторяться у разных версий';
 comment on column ndfl_references.version is 'Версия. Дата актуальности записи';
 comment on column ndfl_references.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
-comment on column ndfl_references.declaration_data_id is 'Идентификатор декларации к которой относятся данные';
+comment on column ndfl_references.declaration_data_id is 'Идентификатор налоговой формы к которой относятся данные';
 comment on column ndfl_references.person_id is 'Физическое лицо';
 comment on column ndfl_references.num is 'Номер справки';
 comment on column ndfl_references.surname is 'Фамилия';
@@ -1375,7 +1333,7 @@ create table raschsv_svnp_podpisant
 create sequence seq_raschsv_svnp_podpisant start with 1;
 comment on table raschsv_svnp_podpisant is 'Сведения о плательщике страховых взносов и лице, подписавшем документ';
 comment on column raschsv_svnp_podpisant.id is 'Идентификатор';
-comment on column raschsv_svnp_podpisant.declaration_data_id is 'Идентификатор декларации';
+comment on column raschsv_svnp_podpisant.declaration_data_id is 'Идентификатор налоговой формы';
 comment on column raschsv_svnp_podpisant.svnp_okved is 'Код вида экономической деятельности по классификатору ОКВЭД2 (ОКВЭД)';
 comment on column raschsv_svnp_podpisant.svnp_tlph is 'Номер контактного телефона (Тлф)';
 comment on column raschsv_svnp_podpisant.svnp_naim_org is 'Наименование организации, обособленного подразделения (НаимОрг)';
@@ -1412,11 +1370,11 @@ comment on column raschsv_kol_lic_tip.kol_3m_posl_3m is 'В том числе 3 
 create table raschsv_sv_sum_1tip
 (
    id                 NUMBER(18)           not null,
-   sum_vsego_per      NUMBER(17,2),
-   sum_vsego_posl_3m  NUMBER(17,2),
-   sum_1m_posl_3m     NUMBER(17,2),
-   sum_2m_posl_3m     NUMBER(17,2),
-   sum_3m_posl_3m     NUMBER(17,2)
+   sum_vsego_per      NUMBER(19,2),
+   sum_vsego_posl_3m  NUMBER(19,2),
+   sum_1m_posl_3m     NUMBER(19,2),
+   sum_2m_posl_3m     NUMBER(19,2),
+   sum_3m_posl_3m     NUMBER(19,2)
 );
 create sequence seq_raschsv_sv_sum_1tip start with 1;
 comment on table raschsv_sv_sum_1tip is 'Сведения по суммам (тип 1) (СвСум1Тип)';
@@ -1436,7 +1394,7 @@ create table raschsv_obyaz_plat_sv
 create sequence seq_raschsv_obyaz_plat_sv start with 1;
 comment on table raschsv_obyaz_plat_sv is 'Сводные данные об обязательствах плательщика страховых взносов (ОбязПлатСВ)';
 comment on column raschsv_obyaz_plat_sv.id is 'Идентификатор';
-comment on column raschsv_obyaz_plat_sv.declaration_data_id is 'Идентификатор декларации';
+comment on column raschsv_obyaz_plat_sv.declaration_data_id is 'Идентификатор налоговой формы';
 comment on column raschsv_obyaz_plat_sv.oktmo is 'Код по ОКТМО (ОКТМО)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_upl_per
@@ -1445,10 +1403,10 @@ create table raschsv_upl_per
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null,
    kbk                VARCHAR2(20 CHAR),
-   sum_sb_upl_per     NUMBER(17, 2),
-   sum_sb_upl_1m      NUMBER(17, 2),
-   sum_sb_upl_2m      NUMBER(17, 2),
-   sum_sb_upl_3m      NUMBER(17, 2)
+   sum_sb_upl_per     NUMBER(19, 2),
+   sum_sb_upl_1m      NUMBER(19, 2),
+   sum_sb_upl_2m      NUMBER(19, 2),
+   sum_sb_upl_3m      NUMBER(19, 2)
 );
 create sequence seq_raschsv_upl_per start with 1;
 comment on table raschsv_upl_per is 'Суммы страховых взносов, подлежащие уплате за расчетный (отчетный) период (УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО)';
@@ -1466,14 +1424,14 @@ create table raschsv_upl_prev_oss
    id                 NUMBER(18)           not null,
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null,
    kbk                VARCHAR2(20 CHAR),
-   sum_sb_upl_per     NUMBER(17, 2),
-   sum_sb_upl_1m      NUMBER(17, 2),
-   sum_sb_upl_2m      NUMBER(17, 2),
-   sum_sb_upl_3m      NUMBER(17, 2),
-   prev_rash_sv_per   NUMBER(17, 2),
-   prev_rash_sv_1m    NUMBER(17, 2),
-   prev_rash_sv_2m    NUMBER(17, 2),
-   prev_rash_sv_3m    NUMBER(17, 2)
+   sum_sb_upl_per     NUMBER(19, 2),
+   sum_sb_upl_1m      NUMBER(19, 2),
+   sum_sb_upl_2m      NUMBER(19, 2),
+   sum_sb_upl_3m      NUMBER(19, 2),
+   prev_rash_sv_per   NUMBER(19, 2),
+   prev_rash_sv_1m    NUMBER(19, 2),
+   prev_rash_sv_2m    NUMBER(19, 2),
+   prev_rash_sv_3m    NUMBER(19, 2)
 );
 create sequence seq_raschsv_upl_prev_oss start with 1;
 comment on table raschsv_upl_prev_oss is 'Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством, подлежащая уплате за расчетный и Сумма превышения произведенных плательщиком расходов на выплату страхового обеспечения (УплПерОСС, ПревРасхОСС)';
@@ -1563,7 +1521,7 @@ create table raschsv_upl_sv_prev
    raschsv_oss_vnm_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null,
    priznak            VARCHAR2(1 CHAR),
-   sv_sum             NUMBER(17, 2)
+   sv_sum             NUMBER(19, 2)
 );
 create sequence seq_raschsv_upl_sv_prev start with 1;
 comment on table raschsv_upl_sv_prev is 'Сумма страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами) (УплСВПрев)';
@@ -1612,8 +1570,8 @@ create table raschsv_rash_oss_zak_rash
    node_name          VARCHAR2(20 CHAR)    not null,
    chisl_sluch        NUMBER(7),
    kol_vypl           NUMBER(7),
-   rash_vsego         NUMBER(17,2),
-   rash_fin_fb        NUMBER(17,2)
+   rash_vsego         NUMBER(19,2),
+   rash_fin_fb        NUMBER(19,2)
 );
 create sequence seq_raschsv_rash_oss_zak_rash start with 1;
 comment on table raschsv_rash_oss_zak_rash is 'Дочерний узел Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации';
@@ -1639,7 +1597,7 @@ create table raschsv_vypl_prichina
    id                 NUMBER(18)           not null,
    raschsv_vypl_fin_fb_id NUMBER(18)           not null,
    node_name          VARCHAR2(20 CHAR)    not null,
-   sv_vnf_uhod_inv    NUMBER(17, 2)
+   sv_vnf_uhod_inv    NUMBER(19, 2)
 );
 create sequence seq_raschsv_vypl_prichina start with 1;
 comment on table raschsv_vypl_prichina is 'Дочерний узел для Выплаты, произведенные за счет средств, финансируемых из федерального бюджета';
@@ -1655,7 +1613,7 @@ create table raschsv_rash_vypl
    node_name          VARCHAR2(20 CHAR)    not null,
    chisl_poluch       NUMBER(7),
    kol_vypl           NUMBER(7),
-   rashod             NUMBER(17, 2)
+   rashod             NUMBER(19, 2)
 );
 create sequence seq_raschsv_rash_vypl start with 1;
 comment on table raschsv_rash_vypl is 'Данные по выплате, произведенной за счет средств, финансируемых из федерального бюджета';
@@ -1676,8 +1634,8 @@ create table raschsv_prav_tarif3_1_427
    doh248_per         NUMBER(15),
    doh_kr5_427_9mpr   NUMBER(15),
    doh_kr5_427_per    NUMBER(15),
-   doh_doh5_427_9mpr  NUMBER(5, 2),
-   doh_doh5_427_per   NUMBER(5, 2),
+   doh_doh5_427_9mpr  NUMBER(7, 2),
+   doh_doh5_427_per   NUMBER(7, 2),
    data_zap_ak_org    DATE,
    nom_zap_ak_org     VARCHAR2(18 CHAR)
 );
@@ -1702,7 +1660,7 @@ create table raschsv_prav_tarif5_1_427
    raschsv_obyaz_plat_sv_id NUMBER(18)           not null,
    doh346_15vs        NUMBER(15),
    doh6_427           NUMBER(15),
-   dol_doh6_427       NUMBER(5, 2)
+   dol_doh6_427       NUMBER(7, 2)
 );
 create sequence seq_raschsv_prav_tarif5_1_427 start with 1;
 comment on table raschsv_prav_tarif5_1_427 is 'Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427 (ПравТариф5.1.427)';
@@ -1724,8 +1682,8 @@ create table raschsv_prav_tarif7_1_427
    doh_grant_per      NUMBER(15),
    doh_ek_deyat_pred  NUMBER(15),
    doh_ek_deyat_per   NUMBER(15),
-   dol_doh_pred       NUMBER(5, 2),
-   dol_doh_per        NUMBER(5, 2)
+   dol_doh_pred       NUMBER(7, 2),
+   dol_doh_per        NUMBER(7, 2)
 );
 create sequence seq_raschsv_prav_tarif7_1_427 start with 1;
 comment on table raschsv_prav_tarif7_1_427 is 'Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 7 пункта 1 статьи 427 Налогового кодекса Российской Федерации (ПравТариф7.1.427)';
@@ -1906,7 +1864,7 @@ create table raschsv_pers_sv_strah_lic
 create sequence seq_raschsv_pers_sv_strah_lic start with 1;
 comment on table raschsv_pers_sv_strah_lic is 'Персонифицированные сведения о застрахованных лицах (ПерсСвСтрахЛиц)';
 comment on column raschsv_pers_sv_strah_lic.id is 'Идентификатор';
-comment on column raschsv_pers_sv_strah_lic.declaration_data_id is 'Идентификатор декларации';
+comment on column raschsv_pers_sv_strah_lic.declaration_data_id is 'Идентификатор налоговой формы';
 comment on column raschsv_pers_sv_strah_lic.nom_korr is 'Номер корректировки (НомКорр)';
 comment on column raschsv_pers_sv_strah_lic.period is 'Расчетный (отчетный) период (код) (Период)';
 comment on column raschsv_pers_sv_strah_lic.otchet_god is 'Календарный год (ОтчетГод)';
@@ -1931,10 +1889,10 @@ create table raschsv_sv_vypl
 (
    id                 NUMBER(18)           not null,
    raschsv_pers_sv_strah_lic_id NUMBER(18)           not null,
-   sum_vypl_vs3       NUMBER(17,2),
-   vypl_ops_vs3       NUMBER(17,2),
-   vypl_ops_dog_vs3   NUMBER(17,2),
-   nachisl_sv_vs3     NUMBER(17,2)
+   sum_vypl_vs3       NUMBER(19,2),
+   vypl_ops_vs3       NUMBER(19,2),
+   vypl_ops_dog_vs3   NUMBER(19,2),
+   nachisl_sv_vs3     NUMBER(19,2)
 );
 create sequence seq_raschsv_sv_vypl start with 1;
 comment on table raschsv_sv_vypl is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица (СвВыпл)';
@@ -1951,10 +1909,10 @@ create table raschsv_sv_vypl_mk
    raschsv_sv_vypl_id NUMBER(18)           not null,
    mesyac             VARCHAR2(2 CHAR),
    kod_kat_lic        VARCHAR2(4 CHAR),
-   sum_vypl           NUMBER(17,2),
-   vypl_ops           NUMBER(17,2),
-   vypl_ops_dog       NUMBER(17,2),
-   nachisl_sv         NUMBER(17,2)
+   sum_vypl           NUMBER(19,2),
+   vypl_ops           NUMBER(19,2),
+   vypl_ops_dog       NUMBER(19,2),
+   nachisl_sv         NUMBER(19,2)
 );
 create sequence seq_raschsv_sv_vypl_mk start with 1;
 comment on table raschsv_sv_vypl_mk is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, по месяцу и коду категории застрахованного лица (СвВыплМК)';
@@ -1971,8 +1929,8 @@ create table raschsv_vypl_sv_dop
 (
    id                 NUMBER(18)           not null,
    raschsv_pers_sv_strah_lic_id NUMBER(18)           not null,
-   vypl_sv_vs3        NUMBER(17,2),
-   nachisl_sv_vs3     NUMBER(17,2)
+   vypl_sv_vs3        NUMBER(19,2),
+   nachisl_sv_vs3     NUMBER(19,2)
 );
 create sequence seq_raschsv_vypl_sv_dop start with 1;
 comment on table raschsv_vypl_sv_dop is 'Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу (ВыплСВДоп)';
@@ -1987,8 +1945,8 @@ create table raschsv_vypl_sv_dop_mt
    raschsv_vypl_sv_dop_id NUMBER(18)           not null,
    mesyac             VARCHAR2(2 CHAR),
    tarif             VARCHAR2(2 CHAR),
-   vypl_sv            NUMBER(17,2),
-   nachisl_sv         NUMBER(17,2)
+   vypl_sv            NUMBER(19,2),
+   nachisl_sv         NUMBER(19,2)
 );
 create sequence seq_raschsv_vypl_sv_dop_mt start with 1;
 comment on table raschsv_vypl_sv_dop_mt is 'Сведения о сумме выплат и иных вознаграждений, исчисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу, по месяцу и коду тарифа (ВыплСВДопМТ)';
@@ -2012,7 +1970,7 @@ create table declaration_subreport_params
   attribute_id             number(18),
   required                 number(1) default 0 not null 
 );
-comment on table declaration_subreport_params is 'Параметры спец. отчетов деклараций';
+comment on table declaration_subreport_params is 'Параметры спец. отчетов налоговых форм';
 comment on column declaration_subreport_params.name is 'Наименование параметра';
 comment on column declaration_subreport_params.alias is 'Псевдоним параметры для доступа из скрипта';
 comment on column declaration_subreport_params.ord is 'Порядковый номер параметра';
@@ -2167,12 +2125,18 @@ comment on column fias_room.postalcode is 'Почтовый индекс';
 --------------------------------------------------------------------------------------------------------------------------
 create table ref_book_taxpayer_state
 (
-  id number(18) not null,
-  code varchar2(1 char) not null,
-  name varchar2(1000 char) not null
+  id number(18)                   not null,
+  record_id   number(9)           not null,
+  version     date                not null,
+  status      number(1) default 0 not null,
+  code varchar2(1 char)           not null,
+  name varchar2(1000 char)        not null
 );
 
 comment on table ref_book_taxpayer_state is 'Статусы налогоплательщиков';
+comment on column ref_book_taxpayer_state.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_taxpayer_state.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_taxpayer_state.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_taxpayer_state.id is 'Уникальный идентификатор';
 comment on column ref_book_taxpayer_state.code is 'Код';
 comment on column ref_book_taxpayer_state.name is 'Наименование';
@@ -2362,7 +2326,7 @@ create table raschsv_itog_strah_lic (
 
 comment on table raschsv_itog_strah_lic is 'НФ вида 1151111: Сводные показатели формы';
 comment on column raschsv_itog_strah_lic.id is 'Уникальный идентификатор';
-comment on column raschsv_itog_strah_lic.declaration_data_id is 'Идентификатор декларации';
+comment on column raschsv_itog_strah_lic.declaration_data_id is 'Идентификатор налоговой формы';
 comment on column raschsv_itog_strah_lic.kol_lic is 'Количество ФЛ';
 
 create table raschsv_itog_vypl (
@@ -2371,10 +2335,10 @@ create table raschsv_itog_vypl (
   mesyac                    varchar2(2 char)  not null,
   kod_kat_lic               varchar2(4 char)  not null,
   kol_fl                    number(20)        not null,
-  sum_vypl                  number(23,2)      not null,
-  vypl_ops                  number(23,2),
-  vypl_ops_dog              number(23,2),
-  sum_nachisl               number(23,2)
+  sum_vypl                  number(25,2)      not null,
+  vypl_ops                  number(25,2),
+  vypl_ops_dog              number(25,2),
+  sum_nachisl               number(25,2)
 );
 
 comment on table raschsv_itog_vypl is 'НФ вида 1151111: Сводные сведения о выплатах';
@@ -2394,8 +2358,8 @@ create table raschsv_itog_vypl_dop (
   mesyac                    varchar2(2 char)  not null,
   tarif                     varchar2(2 char)  not null,
   kol_fl                    number(20)        not null,
-  sum_vypl                  number(23,2)      not null,
-  sum_nachisl               number(23,2)
+  sum_vypl                  number(25,2)      not null,
+  sum_nachisl               number(25,2)
 );
 
 comment on table raschsv_itog_vypl_dop is 'НФ вида 1151111: Сводные сведения о выплатах по доп. тарифам';
@@ -2441,5 +2405,3 @@ comment on column log_entry.log_level is 'Уровень важности (0 - �
 comment on column log_entry.message is 'Текст сообщения';
 
 create sequence seq_log_entry start with 1;
-
-

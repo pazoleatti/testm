@@ -18,10 +18,7 @@ import org.apache.commons.io.IOUtils;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.*;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.util.TestUtils.readFile;
 
@@ -61,6 +58,7 @@ public class DeclarationTestScriptHelper {
     private FiasRefBookService fiasRefBookService;
     private TransactionHelper transactionHelper;
     private NdflPersonService ndflPersonService;
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     private RaschsvObyazPlatSvService raschsvObyazPlatSvService;
     private RaschsvOssVnmService raschsvOssVnmService;
@@ -136,8 +134,17 @@ public class DeclarationTestScriptHelper {
         this.dataFile = dataFile;
     }
 
+
     public NdflPersonService getNdflPersonService() {
         return ndflPersonService;
+    }
+
+    public DepartmentReportPeriodService getDepartmentReportPeriodService() {
+        return departmentReportPeriodService;
+    }
+
+    public void setDepartmentReportPeriodService(DepartmentReportPeriodService departmentReportPeriodService) {
+        this.departmentReportPeriodService = departmentReportPeriodService;
     }
 
     public RaschsvObyazPlatSvService getRaschsvObyazPlatSvService() {
@@ -238,6 +245,8 @@ public class DeclarationTestScriptHelper {
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
 
+        departmentReportPeriodService = mockHelper.mockDepartmentReportPeriodService();
+
         raschsvObyazPlatSvService = mockHelper.mockRaschsvObyazPlatSvService();
         raschsvOssVnmService = mockHelper.mockRaschsvOssVnmService();
         raschsvPersSvStrahLicService = mockHelper.mockRaschsvPersSvStrahLicService();
@@ -281,6 +290,7 @@ public class DeclarationTestScriptHelper {
         bindings.put("refBookDataProvider", refBookDataProvider);
         bindings.put("declarationService", declarationService);
         bindings.put("ndflPersonService", ndflPersonService);
+        bindings.put("departmentReportPeriodService", departmentReportPeriodService);
 
         bindings.put("raschsvObyazPlatSvService", raschsvObyazPlatSvService);
         bindings.put("raschsvOssVnmService", raschsvOssVnmService);
@@ -333,10 +343,13 @@ public class DeclarationTestScriptHelper {
             xmlStringWriter = null;
         }
 
-
         if (formDataEvent == FormDataEvent.GET_SOURCES) {
             sources = new FormSources();
+            sources.setSourceList(new ArrayList<Relation>());
             bindings.put("sources", sources);
+            bindings.put("light", true);
+            bindings.put("needSources", true);
+
             //bindings.put("light", false);
             //bindings.put("excludeIfNotExist", false);
             //bindings.put("stateRestriction", WorkflowState.ACCEPTED);

@@ -1,0 +1,45 @@
+LOAD DATA
+INFILE *
+APPEND
+CONTINUEIF NEXT(1:1) = '#'
+INTO TABLE "BLOB_DATA"
+FIELDS TERMINATED BY'|'
+OPTIONALLY ENCLOSED BY '[' AND ']'
+TRAILING NULLCOLS ( 
+ID char(36),
+NAME char(530),
+L_0 FILLER char,
+DATA LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
+CREATION_DATE DATE "DD.MM.RR")
+begindata
+ 99e90406-60f0-4a87-b6f0-7f127abf1fbb|refbook-currency_rate-script.groovy|currency_rate/script.groovy|14.11.14|
+ 99e90406-60f0-4a87-b6f0-7f127abf1182|refbook-metal_rate-script.groovy|metal_rate/script.groovy|14.11.14|
+ 99462c1e-1376-4fbe-8e31-eceb4ca470af|refbook-okato-script.groovy|okato/script.groovy|14.11.14|
+ ba9bb7ca-697c-b0c2-9999-e262617A9784|refbook-organization-script.groovy|organization/script.groovy|14.11.14|
+ 8891efea-5d2d-4f0e-bc63-6349f354b48d|refbook-region-script.groovy|region/script.groovy|14.11.14|
+ c4bc1551-cea9-45cf-8efc-53daebce7c5b|refbook-tax_benefits_property.groovy|tax_benefits_property/script.groovy|14.11.14|
+ 70275f9b-ccf0-4158-9328-660ef0d07fa7|refbook-tax_benefits_transport.groovy|tax_benefits_transport/script.groovy|14.11.14|
+ 4e1a8f16-3dfa-41b5-a71b-ba37efa2fadb|refbook-emitent.groovy|emitent/script.groovy|14.11.14|
+ 8e666bbc-dc0a-43fc-8570-ba36a2890975|refbook-classificator_outcome.groovy|classificator_outcome/script.groovy|14.11.14|
+ 6dd8378d-322d-442e-8199-a1a19aa57227|refbook-classificator_income.groovy|classificator_income/script.groovy|14.11.14|
+ b43514e5-55dd-4b74-9ce5-60007c32d6a6|refbook-bond.groovy|bond/script.groovy|14.11.14|
+ e3a970c0-22f2-11e4-8c21-0800200c9a66|refbook-account-plan|account_plan/script.groovy|14.11.14|
+ 1e62fa51-8537-4307-80fe-c2cd88516307|refbook-declaration_params_property|declaration_params_property/script.groovy|14.11.14|
+ fc9b5fdf-563f-4221-89d9-7e24a4d4ed9b|refbook-declaration_params_transport|declaration_params_transport/script.groovy|14.11.14|
+ ea88f431-f5b5-4029-8a79-679723da249c|refbook-vehicles_average_cost.groovy|vehicles_average_cost/script.groovy|28.01.15|
+ 990345ce-18c3-11e5-b60b-1697f925ec7b|refbook-classificator_code_724_2_1.groovy|classificator_code_724_2_1/script.groovy|14.11.14|
+ 990348e4-18c3-11e5-b60b-1697f925ec7b|refbook-classificator_country.groovy|classificator_country/script.groovy|14.11.14|
+ 99034c86-18c3-11e5-b60b-1697f925ec7b|refbook-classificator_eco_activities.groovy|classificator_eco_activities/script.groovy|14.11.14|
+ 99034dda-18c3-11e5-b60b-1697f925ec7b|refbook-department.groovy|department/script.groovy|14.11.14|
+ 99034f10-18c3-11e5-b60b-1697f925ec7b|refbook-okei.groovy|okei/script.groovy|14.11.14|
+ 99034f11-18c3-11e5-b60b-1697f925ec7b|refbook-income101.groovy|income101/script.groovy|14.11.14|
+ 99034f12-18c3-11e5-b60b-1697f925ec7b|refbook-income102.groovy|income102/script.groovy|14.11.14|
+ 99034f13-18c3-11e5-b60b-1697f925ec7b|refbook-jur_persons.groovy|jur_persons/script.groovy|14.11.14|
+ 99034f14-18c3-11e5-b60b-1697f925ec7b|refbook-jur_persons_terms.groovy|jur_persons_terms/script.groovy|14.11.14|
+ 99034f15-18c3-11e5-b60b-1697f925ec7b|refbook-problem_zones.groovy|problem_zones/script.groovy|14.11.14|
+ 99034f16-18c3-11e5-b60b-1697f925ec7b|refbook-offshore.groovy|offshore/script.groovy|14.11.14|
+ 99034f17-18c3-11e5-b60b-1697f925ec7b|refbook-raising_rates_transport.groovy|raising_rates_transport/script.groovy|14.11.14|
+ 99034f18-18c3-11e5-b60b-1697f925ec7b|refbook-vehicles_average_cost_2015.groovy|vehicles_average_cost_2015/script.groovy|14.11.14|
+ 99034f19-18c3-11e5-b60b-1697f925ec7b|refbook-classificator_currency.groovy|classificator_currency/script.groovy|14.12.15|
+ 99034f20-18c3-11e5-b60b-1697f925ec7b|refbook-classificator_oktmo.groovy|classificator_oktmo/script.groovy|14.12.15|
+ 99034f21-18c3-11e5-b60b-1697f925ec7b|refbook-vehicles_tax_rate.groovy|vehicles_tax_rate/script.groovy|14.12.15|

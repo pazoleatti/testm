@@ -115,12 +115,12 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9062, 905, 'АС НУ', 'AS_NU', 4, 2, 900, 9002, 1, null, 15, 1, 0, null, null, 0, null);
 
 
-insert into ref_book_taxpayer_state(id,code,name) values(seq_ref_book_record.nextval,'1','Налогоплательщик является налоговым резидентом Российской Федерации');
-insert into ref_book_taxpayer_state(id,code,name) values(seq_ref_book_record.nextval,'2','Налогоплательщик не является налоговым резидентом Российской Федерации');
-insert into ref_book_taxpayer_state(id,code,name) values(seq_ref_book_record.nextval,'3','Налогоплательщик - высококвалифицированный специалист не является налоговым резидентом Российской Федерации');
-insert into ref_book_taxpayer_state(id,code,name) values(seq_ref_book_record.nextval,'4','Налогоплательщик - участник Государственной программы по оказанию содействия добровольному переселению в Российскую Федерацию соотечественников, проживающих за рубежом (член экипажа судна, плавающего под Государственным флагом Российской Федерации), не является налоговым резидентом Российской Федерации');
-insert into ref_book_taxpayer_state(id,code,name) values(seq_ref_book_record.nextval,'5','Налогоплательщик - иностранный гражданин (лицо без гражданства) признан беженцем или получивший временное убежище на территории Российской Федерации, не является налоговым резидентом Российской Федерации');
-insert into ref_book_taxpayer_state(id,code,name) values(seq_ref_book_record.nextval,'6','Налогоплательщик - иностранный гражданин, осуществляет трудовую деятельность по найму в Российской Федерации на основании патента');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'1','Налогоплательщик является налоговым резидентом Российской Федерации', 1, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'2','Налогоплательщик не является налоговым резидентом Российской Федерации', 2, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'3','Налогоплательщик - высококвалифицированный специалист не является налоговым резидентом Российской Федерации', 3, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'4','Налогоплательщик - участник Государственной программы по оказанию содействия добровольному переселению в Российскую Федерацию соотечественников, проживающих за рубежом (член экипажа судна, плавающего под Государственным флагом Российской Федерации), не является налоговым резидентом Российской Федерации', 4, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'5','Налогоплательщик - иностранный гражданин (лицо без гражданства) признан беженцем или получивший временное убежище на территории Российской Федерации, не является налоговым резидентом Российской Федерации', 5, date '2016-01-01');
+insert into ref_book_taxpayer_state(id,code,name, record_id, version) values(seq_ref_book_record.nextval,'6','Налогоплательщик - иностранный гражданин, осуществляет трудовую деятельность по найму в Российской Федерации на основании патента', 6, date '2016-01-01');
 
 
 

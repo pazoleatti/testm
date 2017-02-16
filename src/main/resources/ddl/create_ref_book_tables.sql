@@ -271,27 +271,39 @@ comment on column ref_book_ndfl_rate.rate is 'Процентная ставка'
 --Основания заполнения сумм страховых взносов
 create table ref_book_fill_base
 (
-  id number(18) not null,
-  code varchar2(1 char) not null,
-  name varchar2(2000 char) not null
+  id number(18)                   not null,
+  record_id   number(9)           not null,
+  version     date                not null,
+  status      number(1) default 0 not null,
+  code varchar2(1 char)           not null,
+  name varchar2(2000 char)        not null
 );
 
 comment on table ref_book_fill_base is 'Основания заполнения сумм страховых взносов';
 comment on column ref_book_fill_base.id is 'Уникальный идентификатор';
+comment on column ref_book_fill_base.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_fill_base.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_fill_base.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_fill_base.code is 'Код основания заполнения';
 comment on column ref_book_fill_base.name is 'Название основания заполнения';
 
 --Коды тарифа плательщика
 create table ref_book_tariff_payer
 (
-  id          number(18) not null,
-  code        varchar2(2 char) not null,
+  id          number(18)          not null,
+  record_id   number(9)           not null,
+  version     date                not null,
+  status      number(1) default 0 not null,
+  code        varchar2(2 char)    not null,
   name        varchar2(2000 char) not null,
   for_ops_oms number(1)
 );
 
 comment on table ref_book_tariff_payer is 'Коды тарифа плательщика';
 comment on column ref_book_tariff_payer.id is 'Уникальный идентификатор';
+comment on column ref_book_tariff_payer.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_tariff_payer.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_tariff_payer.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_tariff_payer.code is 'Код тарифа плательщика';
 comment on column ref_book_tariff_payer.name is 'Название тарифа плательщика';
 comment on column ref_book_tariff_payer.for_ops_oms is 'Используется в ОПС и ОМС';
@@ -300,12 +312,18 @@ comment on column ref_book_tariff_payer.for_ops_oms is 'Используется
 create table ref_book_hard_work
 (
   id number(18) not null,
+  record_id   number(9)           not null,
+  version     date                not null,
+  status      number(1) default 0 not null,
   code varchar2(1 char) not null,
   name varchar2(2000 char) not null
 );
 
 comment on table ref_book_hard_work is 'Коды классов условий труда';
 comment on column ref_book_hard_work.id is 'Уникальный идентификатор';
+comment on column ref_book_hard_work.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_hard_work.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_hard_work.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_hard_work.code is 'Код класса условий труда';
 comment on column ref_book_hard_work.name is 'Название класса условий труда';
 
@@ -435,11 +453,17 @@ comment on column ref_book_signatory_mark.name is 'Наименование';
 create table ref_book_person_category
 (
   id number(18) not null,
+  record_id number(9)           not null,
+  status    number(1) default 0 not null,
+  version   date                not null,
   code varchar2(4 char) not null,
   name varchar2(2000 char) not null
 );
 comment on table ref_book_person_category is 'Коды категорий застрахованных лиц';
 comment on column ref_book_person_category.id is 'Уникальный идентификатор';
+comment on column ref_book_person_category.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+comment on column ref_book_person_category.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
+comment on column ref_book_person_category.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_person_category.code is 'Код категории застрахованного лица';
 comment on column ref_book_person_category.name is 'Название категории застрахованного лица';
 

@@ -745,21 +745,6 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
                     departmentService.getDepartment(type.getDepartmentId()).getName()));
         }
 
-/*        //7 точка запроса
-        List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null, "department_id = " + department.getId());
-        for (Long accountPeriodId: ids) {
-            List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format("account_period_id = %d", accountPeriodId));
-            List<Long> ref102 = refBookIncome102.getUniqueRecordIds(null, String.format("account_period_id = %d", accountPeriodId));
-            for (Long id : ref101) {
-                logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
-                        department.getName(), refBookIncome101Dao.getPeriodNameFromRefBook(id)));
-            }
-            for (Long id : ref102) {
-                logger.warn(String.format("Существует загруженная для подразделения %s бух. отчетность в периоде %s!",
-                        department.getName(), refBookIncome102Dao.getPeriodNameFromRefBook(id)));
-            }
-        }*/
-
         //8 точка запроса
         List<TAUserView> users = taUserService.getUsersByFilter(new MembersFilterData() {{
             setDepartmentIds(new HashSet<Integer>(Arrays.asList(department.getId())));
