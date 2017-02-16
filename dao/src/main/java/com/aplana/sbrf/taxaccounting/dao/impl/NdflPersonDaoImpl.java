@@ -323,6 +323,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
+
+
     @Override
     public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo) {
         String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " FROM ndfl_person_prepayment npi " +
@@ -436,6 +438,82 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         if (count == 0) {
             throw new DaoException("Не удалось удалить сущность класса NdflPerson с id = %d, так как она не существует", id);
         }
+    }
+
+    @Override
+    public List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU(long declarationDataId, String kpp, String oktmo) {
+        String oktmoNull = null;
+        if (oktmo == null) {
+            oktmoNull = "npi.OKTMO is null";
+        } else {
+            oktmoNull = "npi.OKTMO = :oktmo";
+        }
+        String query = "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " from NDFL_PERSON_INCOME npi " +
+                "where npi.KPP = :kpp and " + oktmoNull + " and npi.NDFL_PERSON_ID in " +
+                "(select np.id from NDFL_PERSON np where np.PERSON_ID in (select nr.person_id from NDFL_REFERENCES nr " +
+                "where nr.DECLARATION_DATA_ID = :declarationDataId and nr.ERRTEXT is not null) " +
+                "and np.DECLARATION_DATA_ID in (select dd.id from declaration_data dd " +
+                "inner join DECLARATION_DATA_CONSOLIDATION ddc on dd.id = ddc.SOURCE_DECLARATION_DATA_ID " +
+                "where ddc.TARGET_DECLARATION_DATA_ID = :declarationDataId))";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId)
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo);
+        return getNamedParameterJdbcTemplate().query(query, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, long operationId) {
+        String sql = "select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " " +
+                "from NDFL_PERSON_DEDUCTION npd where npd.NDFL_PERSON_ID = :ndflPersonId " +
+                "and npd.operation_id = :operationId";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ndflPersonId", ndflPersonId)
+                .addValue("operationId", operationId);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+        } catch(EmptyResultDataAccessException ex) {
+            return new ArrayList<NdflPersonDeduction>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, long operationId) {
+        String sql = "select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " " +
+                "from NDFL_PERSON_PREPAYMENT npp where npp.NDFL_PERSON_ID = :ndflPersonId " +
+                "and npp.operation_id = :operationId";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ndflPersonId", ndflPersonId)
+                .addValue("operationId", operationId);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+        } catch(EmptyResultDataAccessException ex) {
+            return new ArrayList<NdflPersonPrepayment>();
+        }
+    }
+
+    @Override
+    public NdflPersonIncome getIncome(long id) {
+        String sql = "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " from NDFL_PERSON_INCOME npi " +
+                "where npi.id = :id";
+        MapSqlParameterSource params = new MapSqlParameterSource("id", id);
+        return getNamedParameterJdbcTemplate().queryForObject(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+    }
+
+    @Override
+    public NdflPersonDeduction getDeduction(long id) {
+        String sql = "select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " from NDFL_PERSON_DEDUCTION npd " +
+                "where npd.id = :id";
+        MapSqlParameterSource params = new MapSqlParameterSource("id", id);
+        return getNamedParameterJdbcTemplate().queryForObject(sql, params, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+    }
+
+    @Override
+    public NdflPersonPrepayment getPrepayment(long id) {
+        String sql = "select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " from NDFL_PERSON_PREPAYMENT npp " +
+                "where npp.id = :id";
+        MapSqlParameterSource params = new MapSqlParameterSource("id", id);
+        return getNamedParameterJdbcTemplate().queryForObject(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
     }
 
     private <E> MapSqlParameterSource prepareParameters(E entity, String[] fields) {

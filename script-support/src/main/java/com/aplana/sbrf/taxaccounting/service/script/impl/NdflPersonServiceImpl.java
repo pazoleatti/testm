@@ -293,4 +293,33 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         }
     }
 
+    @Override
+    public List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU(long declarationDataId, String kpp, String oktmo) {
+        return ndflPersonDao.findNdflPersonIncomeConsolidatedRNU(declarationDataId, kpp, oktmo);
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, long operationId) {
+        return ndflPersonDao.findDeductionsByNdflPersonAndOperation(ndflPersonId, operationId);
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, long operationId) {
+        return ndflPersonDao.findPrepaymentsByNdflPersonAndOperation(ndflPersonId, operationId);
+    }
+
+    @Override
+    public NdflPersonIncome getIncome(long id) {
+        return ndflPersonDao.getIncome(id);
+    }
+
+    @Override
+    public NdflPersonDeduction getDeduction(long id) {
+        return ndflPersonDao.getDeduction(id);
+    }
+
+    @Override
+    public NdflPersonPrepayment getPrepayment(long id) {
+        return ndflPersonDao.getPrepayment(id);
+    }
 }
