@@ -146,6 +146,11 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			throw new AccessDeniedException("Налоговая форма уже принята");
 		}
 
+        // Принять декларацию можно только если она еще не принята
+        if (declaration.getState().equals(State.CREATED)) {
+            throw new AccessDeniedException("Переход в состояние \"" + State.ACCEPTED.getTitle() + "\" из текущего состояния невозможен");
+        }
+
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
 
         // Нельзя принимать декларацию в закрытом периоде

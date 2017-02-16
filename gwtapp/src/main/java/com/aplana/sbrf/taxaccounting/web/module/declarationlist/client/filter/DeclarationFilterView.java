@@ -252,15 +252,14 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     @Override
     public void updateFilter(TaxType taxType, boolean isReports) {
-        // http://conf.aplana.com/pages/viewpage.action?pageId=11383562
         panel.clear();
         // Верстка по-умолчанию
         if (taxType == null) {
-            taxType = TaxType.INCOME;
+            taxType = TaxType.NDFL;
         }
 
         Style style = separator.getElement().getStyle();
-        style.setProperty("height", (taxType == TaxType.PFR || taxType == TaxType.NDFL) ? (65 + 22) : 22, Style.Unit.PX);
+        style.setProperty("height", (isReports) ? (65 + 22) : 44, Style.Unit.PX);
 
         switch (taxType) {
             case NDFL:

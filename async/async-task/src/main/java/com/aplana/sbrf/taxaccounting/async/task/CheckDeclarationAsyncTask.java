@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,9 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
                     lockService.updateState(lock, lockDate, state);
                 }
             });
+        }
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return new TaskStatus(false, null);
         }
         return new TaskStatus(true, null);
     }

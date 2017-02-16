@@ -28,6 +28,7 @@
 
     .depAttr{
         line-height: 17px;
+        height: 17px;
     }
 
     .headerAttrName {
