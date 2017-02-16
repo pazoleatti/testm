@@ -573,22 +573,19 @@ def createForm() {
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
         def declarationsForRemove = []
         declarations.each { declaration ->
-            def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id
-            def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id
-            def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id
+
+            def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id.value
+            def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id.value
+            def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id.value
             def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
-            if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.docState != stateDocReject
-                    || declaration.docState != stateDocNeedClarify || declaration.docState != stateDocError)) {
+            if (!(declarationTemplate.declarationFormKind == DeclarationFormKind.REPORTS && (declaration.docState == stateDocReject
+                    || declaration.docState == stateDocNeedClarify || declaration.docState == stateDocError))) {
                 declarationsForRemove << declaration
             }
         }
         declarations.removeAll(declarationsForRemove)
         declarations.each { declaration ->
-            pairKppOktmoList << new PairKppOktmo(Integer.valueOf(declaration.kpp), declaration.oktmo)
-        }
-        formType = getFormType(currDeclarationTemplate)
-        if (definePriznakF() != "0") {
-
+            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, null)
         }
     } else {
 
@@ -606,6 +603,7 @@ def createForm() {
     allDepartmentReportPeriodIds.each {
         allDeclarationData.addAll(declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, it))
     }
+
     // удаление форм не со статусом принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
@@ -615,24 +613,12 @@ def createForm() {
     }
     allDeclarationData.removeAll(declarationsForRemove)
 
-
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
     allDeclarationData.each { declaration ->
         pairKppOktmoList.each { np ->
             def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
             if (ndflPersons != null && ndflPersons.size != 0) {
-                if (departmentReportPeriod.correctionDate != null) {
-                    def ndflPersonsPicked = []
-                    ndflReferencesWithError.each { reference ->
-                        ndflPersons.each { person ->
-                            if (reference.PERSON_ID?.value == person.id) {
-                                ndflPersonsPicked << person
-                            }
-                        }
-                    }
-                    ndflPersons = ndflPersonsPicked
-                }
                 ndflPersonsGroupedByKppOktmo[np] = ndflPersons
             }
         }
@@ -674,8 +660,6 @@ def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
         def kpp = npGroup.key.kpp
         npGroup.value.each {
             def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp, oktmo)
-            println incomes
-            resetId(incomes)
             def deductions = ndflPersonService.findDeductions(it.id)
             resetId(deductions)
             def prepayments = ndflPersonService.findPrepayments(it.id)
@@ -692,7 +676,6 @@ def appendNdflPersonsToForm (def declarationDataId, def ndflPersons){
     ndflPersons.each {
         it.setId(null)
         it.setDeclarationDataId(declarationDataId)
-        println it.incomes
         ndflPersonService.save(it)
     }
 
@@ -711,9 +694,7 @@ def createReports() {
     try {
         Department department = departmentService.get(declarationData.departmentId);
         DeclarationTemplate declarationTemplate =  declarationService.getTemplate(declarationData.declarationTemplateId);
-        println declarationTemplate
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
-        println departmentReportPeriod
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
@@ -722,7 +703,6 @@ def createReports() {
                 declarationTemplate.getName(),
                 department.getName(),
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod);
-        println path
         def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
         declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
             if (it.fileName == null) {
@@ -730,7 +710,6 @@ def createReports() {
             }
             ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName);
             zos.putArchiveEntry(ze);
-            println "${declarationService.getXmlStream(it.id)}"
             IOUtils.copy(declarationService.getXmlStream(it.id), zos)
             zos.closeArchiveEntry();
         }
@@ -770,9 +749,6 @@ void getSources() {
     def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
     // Найти подразделения в РНУ которых имеются операции из декларации
     def tmpDeclarationDataList = getDeclarationDataList(sourceTypeId, allDepartmentReportPeriodIds)
-    tmpDeclarationDataList.each {
-        println it.id
-    }
     def declarationsForRemove = []
     tmpDeclarationDataList.each { declaration ->
         if (declaration.state != State.ACCEPTED) {
