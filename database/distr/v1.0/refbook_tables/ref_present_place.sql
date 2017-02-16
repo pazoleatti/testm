@@ -14,3 +14,9 @@ insert into ref_book_present_place(id,record_id,version,status,code,name,for_ndf
 insert into ref_book_present_place(id,record_id,version,status,code,name,for_ndfl,for_fond) values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('01.01.2016','dd.mm.yyyy'),0,'126','по месту жительства нотариуса',0,1);
 insert into ref_book_present_place(id,record_id,version,status,code,name,for_ndfl,for_fond) values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('01.01.2016','dd.mm.yyyy'),0,'212','по месту учета российской организации',0,1);
 insert into ref_book_present_place(id,record_id,version,status,code,name,for_ndfl,for_fond) values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('01.01.2016','dd.mm.yyyy'),0,'213','по месту учета в качестве крупнейшего налогоплательщика',0,1);
+
+update ref_book_present_place set for_fond=0;
+update ref_book_present_place set for_fond=1 where code between '112' and '124' or code in ('214','217','222','335','350');
+
+update ref_book_present_place set for_ndfl=0;
+update ref_book_present_place set for_ndfl=1 where code='120' or code between '125' and '213' or code in ('220','320','350');
