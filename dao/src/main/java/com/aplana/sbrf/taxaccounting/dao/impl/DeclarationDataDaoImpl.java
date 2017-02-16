@@ -615,12 +615,15 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         String sql  = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, drp.report_period_id, drp.department_id " +
                 "from DEPARTMENT_REPORT_PERIOD drp, DECLARATION_DATA dd " +
-                "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId " +
+                "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId and drp.IS_ACTIVE = 1" +
                 "and drp.department_id = :departmentId and drp.REPORT_PERIOD_ID = :reportPeriodId " +
                 "and dd.DECLARATION_TEMPLATE_ID in " +
                 "(select dt.id from DECLARATION_TEMPLATE dt" +
                 " where dt.DECLARATION_TYPE_ID = :declarationTypeId) " +
-                "and dd.id in (select np.declaration_data_id from NDFL_PERSON np inner join declaration_data dd on dd.ID = np.DECLARATION_DATA_ID and np.id in (select npi.ndfl_person_id from NDFL_PERSON_INCOME npi inner join NDFL_PERSON np on np.id = npi.NDFL_PERSON_ID where npi.kpp = :kpp and npi.oktmo is null or npi.oktmo = :oktmo))";
+                "and dd.id in (select np.declaration_data_id from NDFL_PERSON np " +
+                "inner join declaration_data dd on dd.ID = np.DECLARATION_DATA_ID and np.id in " +
+                "(select npi.ndfl_person_id from NDFL_PERSON_INCOME npi " +
+                "inner join NDFL_PERSON np on np.id = npi.NDFL_PERSON_ID where npi.kpp = :kpp and npi.oktmo is null or npi.oktmo = :oktmo))";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTypeId", declarationTypeId)
                 .addValue("departmentReportPeriodId", departmentReportPeriodId)
