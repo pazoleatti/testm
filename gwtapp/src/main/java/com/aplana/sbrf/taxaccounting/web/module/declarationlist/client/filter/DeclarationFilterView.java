@@ -534,6 +534,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel6.add(label);
         verticalPanel7.add(asnuPicker);*/
 
+        if (taxType.equals(TaxType.NDFL)) {
+            label = getLabel("Наименование АСНУ:");
+            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+            verticalPanel4.add(label);
+            verticalPanel5.add(asnuPicker);
+        }
+
         if (!isReports) {
             label = getLabel("Состояние:");
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -546,7 +553,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             verticalPanel7.add(docStatePicker);
         }
 
-        if (taxType.equals(TaxType.PFR)) {
+        if (taxType.equals(TaxType.PFR) || taxType.equals(TaxType.NDFL)) {
             label = getLabel("Файл:");
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel6.add(label);
