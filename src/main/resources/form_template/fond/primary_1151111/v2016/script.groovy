@@ -183,7 +183,7 @@ switch (formDataEvent) {
 @Field final long REF_BOOK_ID_DOC_ID = RefBook.Id.ID_DOC.id
 
 // Виды документов, удостоверяющих личность
-@Field final long REF_BOOK_DOCUMENT_ID = RefBook.Id.DOCUMENT_CODES.id
+@Field final long REF_BOOK_DOCUMENT_CODES_ID = RefBook.Id.DOCUMENT_CODES.id
 
 // Страны
 @Field final long REF_BOOK_COUNTRY_ID = RefBook.Id.COUNTRY.id
@@ -3134,12 +3134,14 @@ def fillIdentityDocAttr(Map<String, RefBookValue> values, RaschsvPersSvStrahLic 
 
 // Виды документов, удостоверяющих личность Мапа <Идентификатор, Код>
 @Field def documentCodesCache = [:]
+@Field def documentCodesActualCache = []
 
 //Приоритет документов удостоверяющих личность <Идентификатор, Приоритет(int)>
 @Field def documentPriorityCache = [:]
 
 // Страны
 @Field def citizenshipCache = [:]
+@Field def citizenshipActualCache = []
 
 // Кэш для справочников
 @Field def refBookCache = [:]
@@ -3154,29 +3156,20 @@ def fillIdentityDocAttr(Map<String, RefBookValue> values, RaschsvPersSvStrahLic 
 @Field final String RF_FIRST_NAME = "FIRST_NAME"
 @Field final String RF_MIDDLE_NAME = "MIDDLE_NAME"
 @Field final String RF_BIRTH_DATE = "BIRTH_DATE"
-@Field final String RF_CITIZENSHIP = "CITIZENSHIP"
+@Field final String RF_SEX = "SEX"
+@Field final String RF_PENSION = "PENSION"
+@Field final String RF_MEDICAL = "MEDICAL"
+@Field final String RF_SOCIAL = "SOCIAL"
 @Field final String RF_INN = "INN"
-@Field final String RF_INN_FOREIGN = "INN_FOREIGN"
 @Field final String RF_SNILS = "SNILS"
-@Field final String RF_TAXPAYER_STATE = "TAXPAYER_STATE"
-@Field final String RF_ADDRESS = "ADDRESS"
-@Field final String RF_RECORD_ID = "RECORD_ID"
-@Field final String RF_COUNTRY = "COUNTRY"
-@Field final String RF_REGION_CODE = "REGION_CODE"
-@Field final String RF_DISTRICT = "DISTRICT"
-@Field final String RF_CITY = "CITY"
-@Field final String RF_LOCALITY = "LOCALITY"
-@Field final String RF_STREET = "STREET"
-@Field final String RF_HOUSE = "HOUSE"
-@Field final String RF_BUILD = "BUILD"
-@Field final String RF_APPARTMENT = "APPARTMENT"
-@Field final String RF_OLD_ID = "OLD_ID"
+@Field final String RF_CITIZENSHIP = "CITIZENSHIP"
 @Field final String RF_DOC_ID = "DOC_ID"
 @Field final String RF_DOC_NUMBER = "DOC_NUMBER"
+@Field final String RF_OLD_ID = "OLD_ID"
 
 def checkData() {
     // Проверки xml
-//    checkDataXml()
+    checkDataXml()
 
     // Проверки БД
     checkDataDB()
@@ -3190,52 +3183,138 @@ def checkDataDB() {
 
     def raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
 
+    // Гражданство
+    def citizenshipCodeMap = getRefCitizenship();
+    def citizenshipCodeActualList = getActualRefCitizenship();
+
     // Физические лица
     def personIds = getPersonIds(raschsvPersSvStrahLicList)
     def personMap = [:]
+
+    // ДУЛ <person_id, массив_ДУЛ>
+    def dulMap = [:]
+
     if (personIds.size() > 0) {
         personMap = getRefPersons(personIds)
+
+        // Получим мапу ДУЛ
+        dulMap = getRefDul(personIds)
     }
+
+    // Коды видов документов
+    def documentTypeActualList = getActualRefDocument()
 
     raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
         def fioBirthday = raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.dataRozd
 
         // 3.1.1 Назначение ФЛ записи справочника "Физические лица"
-        if (raschsvPersSvStrahLic.personId == null) {
+        // Если personId, то он принимает значение 0
+        if (raschsvPersSvStrahLic.personId == null || raschsvPersSvStrahLic.personId == 0) {
             logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" для ФЛ " + fioBirthday)
         } else {
-            def person = personMap.get(raschsvPersSvStrahLic.personId)
+            if (personMap.size() > 0) {
+                def person = personMap.get(raschsvPersSvStrahLic.personId)
+                // 3.1.2 Соответствие фамилии ФЛ и справочника
+                if (raschsvPersSvStrahLic.familia != person.get(RF_LAST_NAME).value) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Фамилия"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
 
-            // 3.1.2 Соответствие фамилии ФЛ и справочника
-            if (raschsvPersSvStrahLic.familia != person.get(RF_LAST_NAME).value) {
-                def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Фамилия"
-                logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                // 3.1.3 Соответствие имени ФЛ и справочника
+                if (raschsvPersSvStrahLic.imya != person.get(RF_FIRST_NAME).value) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Имя"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.4 Соответствие отчества ФЛ и справочника
+                if (raschsvPersSvStrahLic.otchestvo != null && raschsvPersSvStrahLic.otchestvo != person.get(RF_MIDDLE_NAME).value) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Отчество"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.5 Соответствие даты рождения ФЛ и справочника
+                if (raschsvPersSvStrahLic.dataRozd != person.get(RF_BIRTH_DATE).value) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ДатаРожд"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.6 Соответствие пола ФЛ и справочника
+                if (raschsvPersSvStrahLic.pol != person.get(RF_SEX)?.value?.toString()) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Пол"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.7 Соответствие признака ОПС ФЛ и справочника
+                if (raschsvPersSvStrahLic.prizOps != person.get(RF_PENSION)?.value?.toString()) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОПС"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.8 Соответствие признака ОМС ФЛ и справочника
+                if (raschsvPersSvStrahLic.prizOms != person.get(RF_MEDICAL)?.value?.toString()) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОМС"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.9 Соответствие признака ОСС
+                if (raschsvPersSvStrahLic.prizOss != person.get(RF_SOCIAL)?.value?.toString()) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОСС"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.10 Соответсвие ИНН ФЛ - получателя дохода
+                if (raschsvPersSvStrahLic.innfl != null && raschsvPersSvStrahLic.innfl != person.get(RF_INN)?.value?.toString()) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ"
+                    logger.warn("Не совпадает " + pathValue + " для ФЛ получателя доходов со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.11 Соответствие СНИЛС ФЛ - получателя дохода
+                if (raschsvPersSvStrahLic.snils != person.get(RF_SNILS)?.value?.toString()) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС"
+                    logger.warn("Не совпадает " + pathValue + " для ФЛ получателя доходов со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
+                def allDocList = dulMap.get(raschsvPersSvStrahLic.personId)
+                // Вид документа
+                def personDocTypeList = []
+                // Серия и номер документа
+                def personDocNumberList = []
+                allDocList.each { dul ->
+                    personDocType = getRefBookByRecordIds(REF_BOOK_DOCUMENT_CODES_ID,(dul.get(RF_DOC_ID).value))
+                    personDocTypeList.add(personDocType?.CODE?.stringValue)
+                    personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
+                }
+                if (!personDocTypeList.contains(raschsvPersSvStrahLic.kodVidDoc)) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.13 Актуальность кода вида документа ФЛ - получателя дохода
+                personDocTypeList.each { personDocType ->
+                    if (!documentTypeActualList.contains(personDocType)) {
+                        logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указаны неактуальные коды документов для ФЛ с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\".")
+                    }
+                }
+
+                // 3.1.14 Соответствие серии и номера документа
+                if (!personDocNumberList.contains(raschsvPersSvStrahLic.serNomDoc)) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.15 Соответсвие кода гражданства ФЛ - получателя дохода в справочнике
+                if (raschsvPersSvStrahLic.grazd != citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)) {
+                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд"
+                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                }
+
+                // 3.1.16 Актуальность кода гражданства ФЛ
+                citizenship = getRefBookByRecordIds(REF_BOOK_COUNTRY_ID, person.get(RF_CITIZENSHIP)?.value)
+                if (!citizenshipCodeActualList.contains(citizenship?.CODE?.stringValue)) {
+                    logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указан неактуальный код гражданства для ФЛ с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\".")
+                }
             }
-
-            // 3.1.3 Соответствие имени ФЛ и справочника
-            if (raschsvPersSvStrahLic.imya != person.get(RF_FIRST_NAME).value) {
-                def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Имя"
-                logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-            }
-
-            // 3.1.4 Соответствие отчества ФЛ и справочника
-            if (raschsvPersSvStrahLic.otchestvo != person.get(RF_MIDDLE_NAME).value) {
-                def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Отчество"
-                logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-            }
-
-            // 3.1.5 Соответствие даты рождения ФЛ и справочника
-            // 3.1.6 Соответствие пола ФЛ и справочника
-            // 3.1.7 Соответствие признака ОПС ФЛ и справочника
-            // 3.1.8 Соответствие признака ОМС ФЛ и справочника
-            // 3.1.9 Соответствие признака ОСС
-            // 3.1.10 Соответсвие ИНН ФЛ - получателя дохода
-            // 3.1.11 Соответствие СНИЛС ФЛ - получателя дохода
-            // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
-            // 3.1.13 Актуальность кода вида документа ФЛ - получателя дохода
-            // 3.1.14 Соответствие серии и номера документа
-            // 3.1.15 Соответсвие кода гражданства ФЛ - получателя дохода в справочнике
-            // 3.1.16 Актуальность кода гражданства ФЛ
         }
 
         // 3.2.1 Дубли физического лица рамках формы
@@ -3599,12 +3678,11 @@ def getVersionFrom() {
  * @param raschsvPersSvStrahLicList
  * @return
  */
-def getPersonIds(def ndflPersonList) {
+def getPersonIds(def raschsvPersSvStrahLicList) {
     def personIds = []
-    ndflPersonList.each { ndflPerson ->
-        // todo Почему ndflPerson.personId != 0
-        if (ndflPerson.personId != null && ndflPerson.personId != 0) {
-            personIds.add(ndflPerson.personId)
+    raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
+        if (raschsvPersSvStrahLic.personId != null && raschsvPersSvStrahLic.personId != 0) {
+            personIds.add(raschsvPersSvStrahLic.personId)
         }
     }
     return personIds;
@@ -3949,7 +4027,7 @@ def findDocumentTypeByCode(code) {
  */
 def getRefDocument() {
     if (documentCodesCache.size() == 0) {
-        def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
+        def refBookList = getRefBook(REF_BOOK_DOCUMENT_CODES_ID)
         refBookList.each { refBook ->
             documentCodesCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
         }
@@ -3958,12 +4036,26 @@ def getRefDocument() {
 }
 
 /**
+ * Получить актуальные "Коды видов документов, удостоверяющих личность"
+ * @return
+ */
+def getActualRefDocument() {
+    if (documentCodesActualCache.size() == 0) {
+        def refBookList = getActualRefBook(REF_BOOK_DOCUMENT_CODES_ID)
+        refBookList.each { refBook ->
+            documentCodesActualCache.add(refBook?.CODE?.stringValue)
+        }
+    }
+    return documentCodesActualCache;
+}
+
+/**
  * Получить "Приоритет видов документов, удостоверяющих личность"
  * @return
  */
 def getRefDocumentPriority() {
     if (documentPriorityCache.size() == 0) {
-        def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
+        def refBookList = getRefBook(REF_BOOK_DOCUMENT_CODES_ID)
         refBookList.each { refBook ->
             documentPriorityCache.put(refBook?.id?.numberValue, refBook?.PRIORITY?.stringValue)
         }
@@ -3983,4 +4075,18 @@ def getRefCitizenship() {
         }
     }
     return citizenshipCache;
+}
+
+/**
+ * Получить актуальные "Страны"
+ * @return
+ */
+def getActualRefCitizenship() {
+    if (citizenshipActualCache.size() == 0) {
+        def refBookMap = getActualRefBook(REF_BOOK_COUNTRY_ID)
+        refBookMap.each { refBook ->
+            citizenshipActualCache.add(refBook?.CODE?.stringValue)
+        }
+    }
+    return citizenshipActualCache;
 }

@@ -56,11 +56,10 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			ID_TAX_PAYER.getId(), DEDUCTION_TYPE.getId(), INCOME_CODE.getId(), REGION.getId(), PRESENT_PLACE.getId(),
 			OKVED.getId(), REORGANIZATION.getId(), FILL_BASE.getId(), TARIFF_PAYER.getId(), HARD_WORK.getId(),
 			KBK.getId(), PERSON_CATEGORY.getId(), NDFL.getId(), NDFL_DETAIL.getId(), FOND.getId(),
-			FOND_DETAIL.getId(), NDFL_REFERENCES.getId()
-//            FIAS_OPERSTAT.getId(), FIAS_SOCRBASE.getId(),
-//            FIAS_ADDR_OBJECT.getId(), FIAS_HOUSE.getId(),
-//			FIAS_HOUSEINT.getId(), FIAS_ROOM.getId(),
-//			OKTMO.getId()
+			FOND_DETAIL.getId(), NDFL_REFERENCES.getId(),
+
+			// справочник ОКТМО отдельным списком идет, так как является версионируемым, но только для чтения
+			OKTMO.getId()
 	});
 
     @Autowired

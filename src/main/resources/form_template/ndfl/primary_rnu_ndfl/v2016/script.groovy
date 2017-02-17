@@ -1612,20 +1612,20 @@ def checkDataReference(
             }
 
             // Спр17 Документ удостоверяющий личность (Обязательное поле)
-            def dulList = dulMap.get(ndflPerson.personId)
+            def allDocList = dulMap.get(ndflPerson.personId)
             // Вид документа
-            def idDocTypeList = []
+            def personDocTypeList = []
             // Серия и номер документа
-            def idDocNumberList = []
-            dulList.each { dul ->
-                idDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
-                idDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
+            def personDocNumberList = []
+            allDocList.each { dul ->
+                personDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
+                personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
             }
-            if (!idDocTypeList.contains(ndflPerson.idDocType)) {
+            if (!personDocTypeList.contains(ndflPerson.idDocType)) {
                 logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
                         T_PERSON, ndflPerson.rowNum, C_ID_DOC_TYPE, fioAndInp, C_ID_DOC_TYPE, R_PERSON);
             }
-            if (!idDocNumberList.contains(ndflPerson.idDocNumber)) {
+            if (!personDocNumberList.contains(ndflPerson.idDocNumber)) {
                 logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
                         T_PERSON, ndflPerson.rowNum, C_ID_DOC_NUMBER, fioAndInp, C_ID_DOC_NUMBER, R_PERSON);
             }
