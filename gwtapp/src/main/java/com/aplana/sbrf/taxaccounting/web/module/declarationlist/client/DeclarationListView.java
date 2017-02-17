@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.TableWithCheckedColumn;
@@ -56,7 +55,7 @@ public class DeclarationListView extends
     public static final String FILE_NAME_TITLE = "Файл ТФ";
     public static final String PERIOD_TITLE = "Период";
 
-    private static final int TABLE_TOP2 = 75 + 27;
+    private static final int TABLE_TOP3 = 75 + 27 + 30;
     private static final int TABLE_TOP4 = 130 + 32;
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {}
@@ -159,7 +158,7 @@ public class DeclarationListView extends
         }
         Style tableStyle = tableWrapper.getElement().getStyle();
         tableStyle.setProperty("top", (isReports) ?
-                TABLE_TOP4 : TABLE_TOP2, Style.Unit.PX);
+                TABLE_TOP4 : TABLE_TOP3, Style.Unit.PX);
 
         clearTable();
 

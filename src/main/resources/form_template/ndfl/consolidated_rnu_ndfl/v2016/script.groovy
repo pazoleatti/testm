@@ -76,7 +76,7 @@ void consolidation() {
 
     logger.info(String.format("ФЛ в КНФ найдено: %d", ndflPersonMap.size()))
 
-
+    //Актуализация первичного ключа запись, все одинаковые записи должны указывать на последнюю актуальную на данный момент версию
     println "consolidation start actualize"
     long time = System.currentTimeMillis();
     List<Long> personIds = new ArrayList<Long>();
@@ -142,11 +142,13 @@ void consolidation() {
             continue;
         }
 
+        //Создание консолидированной записи NdflPerson
         def consolidatePerson = buildNdflPerson(ndflPerson, personRecord, identityDocumentRecord, addressRecord);
 
         consolidatePerson.rowNum = ndflPersonNum;
         consolidatePerson.declarationDataId = declarationDataId
         consolidatePerson.incomes = incomes.withIndex().collect { detail, i -> consolidateDetail(detail, incomesRowNum) }
+
         consolidatePerson.deductions = deductions.withIndex().collect { detail, i -> consolidateDetail(detail, deductionRowNum) }
         consolidatePerson.prepayments = prepayments.withIndex().collect { detail, i -> consolidateDetail(detail, prepaymentRowNum) }
 
@@ -239,6 +241,7 @@ def consolidateDetail(ndflPersonDetail, i) {
     ndflPersonDetail.rowNum = i
     ndflPersonDetail.sourceId = sourceId;
     i++;
+
     return ndflPersonDetail
 }
 

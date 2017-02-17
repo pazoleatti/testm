@@ -1,0 +1,2 @@
+insert into ref_book_detach_tax_pay (id,record_id,version,status,code,name) values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('01.01.2012','DD.MM.YYYY'),0,'1','возложена');
+insert into ref_book_detach_tax_pay (id,record_id,version,status,code,name) values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('01.01.2012','DD.MM.YYYY'),0,'0','не возложена');

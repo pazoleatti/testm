@@ -503,7 +503,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel3.add(correctionTag);
 
         if (!isReports) {
-            label = getLabel("Тид налоговой формы:");
+            label = getLabel("Тип налоговой формы:");
             //label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel4.add(label);
             verticalPanel5.add(declarationKindPicker);
@@ -528,13 +528,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             verticalPanel5.add(notePicker);
         }
 
-        /*
-        label = getLabel("АСНУ:");
-        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel6.add(label);
-        verticalPanel7.add(asnuPicker);*/
-
-        if (taxType.equals(TaxType.NDFL)) {
+        if (taxType.equals(TaxType.NDFL) && !isReports) {
             label = getLabel("Наименование АСНУ:");
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel4.add(label);
@@ -575,11 +569,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel6.add(label);
             verticalPanel7.add(taxOrganisationPicker);
-
-            label = getLabel("Файл:");
-            label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-            verticalPanel6.add(label);
-            verticalPanel7.add(fileNamePicker);
         }
         panel.add(horizontalPanel);
     }
