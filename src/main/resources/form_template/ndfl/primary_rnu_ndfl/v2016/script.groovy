@@ -1734,7 +1734,7 @@ def checkDataReference(
         }
 
         // Спр7 Ставка (Необязательное поле)
-        if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate)) {
+        if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate.toString())) {
             logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON_INCOME, ndflPersonIncome.rowNum, C_RATE, fioAndInp, C_RATE, R_RATE);
         }
@@ -1789,8 +1789,9 @@ def checkDataCommon(
     def mapTerBank = getTerBank()
 
     // Параметры подразделения
-    def departmentParam = getDepartmentParam()
-    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
+    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-263
+//    def departmentParam = getDepartmentParam()
+//    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
 
     ndflPersonList.each { ndflPerson ->
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
@@ -2070,17 +2071,18 @@ def checkDataCommon(
         }
 
         // Общ10 Соответствие КПП и ОКТМО Тербанку
-        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
-        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
-        if (kppList == null) {
-            logger.error(MESSAGE_ERROR_VALUE,
-                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
-        } else {
-            if (!kppList.contains(ndflPersonIncome.kpp)) {
-                logger.error(MESSAGE_ERROR_VALUE,
-                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
-            }
-        }
+        // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-263
+//        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
+//        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
+//        if (kppList == null) {
+//            logger.error(MESSAGE_ERROR_VALUE,
+//                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
+//        } else {
+//            if (!kppList.contains(ndflPersonIncome.kpp)) {
+//                logger.error(MESSAGE_ERROR_VALUE,
+//                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
+//            }
+//        }
     }
 
     ndflPersonDeductionList.each { ndflPersonDeduction ->
