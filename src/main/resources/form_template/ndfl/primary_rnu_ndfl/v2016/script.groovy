@@ -1408,7 +1408,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String RF_HOUSE = "HOUSE"
 @Field final String RF_BUILD = "BUILD"
 @Field final String RF_APPARTMENT = "APPARTMENT"
-@Field final String RF_DUBLICATES = "DUBLICATES"
+@Field final String RF_OLD_ID = "OLD_ID"
 @Field final String RF_DOC_ID = "DOC_ID"
 @Field final String RF_DOC_NUMBER = "DOC_NUMBER"
 

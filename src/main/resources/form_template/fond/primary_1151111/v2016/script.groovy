@@ -3149,7 +3149,105 @@ def fillIdentityDocAttr(Map<String, RefBookValue> values, RaschsvPersSvStrahLic 
 @Field final String RF_FOR_FOND = "FOR_FOND"
 @Field final String RF_FOR_OPS_OMS = "FOR_OPS_OMS"
 
+// Поля справочника Физические лица
+@Field final String RF_LAST_NAME = "LAST_NAME"
+@Field final String RF_FIRST_NAME = "FIRST_NAME"
+@Field final String RF_MIDDLE_NAME = "MIDDLE_NAME"
+@Field final String RF_BIRTH_DATE = "BIRTH_DATE"
+@Field final String RF_CITIZENSHIP = "CITIZENSHIP"
+@Field final String RF_INN = "INN"
+@Field final String RF_INN_FOREIGN = "INN_FOREIGN"
+@Field final String RF_SNILS = "SNILS"
+@Field final String RF_TAXPAYER_STATE = "TAXPAYER_STATE"
+@Field final String RF_ADDRESS = "ADDRESS"
+@Field final String RF_RECORD_ID = "RECORD_ID"
+@Field final String RF_COUNTRY = "COUNTRY"
+@Field final String RF_REGION_CODE = "REGION_CODE"
+@Field final String RF_DISTRICT = "DISTRICT"
+@Field final String RF_CITY = "CITY"
+@Field final String RF_LOCALITY = "LOCALITY"
+@Field final String RF_STREET = "STREET"
+@Field final String RF_HOUSE = "HOUSE"
+@Field final String RF_BUILD = "BUILD"
+@Field final String RF_APPARTMENT = "APPARTMENT"
+@Field final String RF_OLD_ID = "OLD_ID"
+@Field final String RF_DOC_ID = "DOC_ID"
+@Field final String RF_DOC_NUMBER = "DOC_NUMBER"
+
 def checkData() {
+    // Проверки xml
+//    checkDataXml()
+
+    // Проверки БД
+    checkDataDB()
+}
+
+/**
+ * Проверки БД
+ * @return
+ */
+def checkDataDB() {
+
+    def raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
+
+    // Физические лица
+    def personIds = getPersonIds(raschsvPersSvStrahLicList)
+    def personMap = [:]
+    if (personIds.size() > 0) {
+        personMap = getRefPersons(personIds)
+    }
+
+    raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
+        def fioBirthday = raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.dataRozd
+
+        // 3.1.1 Назначение ФЛ записи справочника "Физические лица"
+        if (raschsvPersSvStrahLic.personId == null) {
+            logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" для ФЛ " + fioBirthday)
+        } else {
+            def person = personMap.get(raschsvPersSvStrahLic.personId)
+
+            // 3.1.2 Соответствие фамилии ФЛ и справочника
+            if (raschsvPersSvStrahLic.familia != person.get(RF_LAST_NAME).value) {
+                def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Фамилия"
+                logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+            }
+
+            // 3.1.3 Соответствие имени ФЛ и справочника
+            if (raschsvPersSvStrahLic.imya != person.get(RF_FIRST_NAME).value) {
+                def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Имя"
+                logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+            }
+
+            // 3.1.4 Соответствие отчества ФЛ и справочника
+            if (raschsvPersSvStrahLic.otchestvo != person.get(RF_MIDDLE_NAME).value) {
+                def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Отчество"
+                logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+            }
+
+            // 3.1.5 Соответствие даты рождения ФЛ и справочника
+            // 3.1.6 Соответствие пола ФЛ и справочника
+            // 3.1.7 Соответствие признака ОПС ФЛ и справочника
+            // 3.1.8 Соответствие признака ОМС ФЛ и справочника
+            // 3.1.9 Соответствие признака ОСС
+            // 3.1.10 Соответсвие ИНН ФЛ - получателя дохода
+            // 3.1.11 Соответствие СНИЛС ФЛ - получателя дохода
+            // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
+            // 3.1.13 Актуальность кода вида документа ФЛ - получателя дохода
+            // 3.1.14 Соответствие серии и номера документа
+            // 3.1.15 Соответсвие кода гражданства ФЛ - получателя дохода в справочнике
+            // 3.1.16 Актуальность кода гражданства ФЛ
+        }
+
+        // 3.2.1 Дубли физического лица рамках формы
+        // 3.2.2 Дубли физического лица в разных формах
+    }
+}
+
+/**
+ * Проверки xml
+ * @return
+ */
+def checkDataXml() {
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, null)
     if (logger.containsLevel(LogLevel.ERROR)) {
@@ -3498,7 +3596,7 @@ def getVersionFrom() {
 
 /**
  * Получить коллекцию идентификаторов записей справочника "Физические лица"
- * @param ndflPersonList
+ * @param raschsvPersSvStrahLicList
  * @return
  */
 def getPersonIds(def ndflPersonList) {
