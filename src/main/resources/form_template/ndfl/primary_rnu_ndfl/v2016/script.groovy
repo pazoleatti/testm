@@ -142,7 +142,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size() + ")");
+    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size());
 
     Date versionFrom = getVersionFrom();
 
@@ -228,7 +228,8 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
     List<RefBookRecord> taxpayerIdsRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
         NdflPerson person = personList.get(i)
-        person.setPersonId(personIds.get(i)); // выставляем присвоенный Id
+        Long generatedId = personIds.get(i);
+        person.setPersonId(generatedId); // выставляем присвоенный Id
         documentsRecords.add(createIdentityDocRecord(person));
         taxpayerIdsRecords.add(createIdentityTaxpayerRecord(person, asnuId));
     }
@@ -378,7 +379,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
 
         if (findedDoc != null) {
             //документ с таким типом и номером существует, ничего не делаем
-            return;
+            //return;
         } else {
             RefBookRecord refBookRecord = createIdentityDocRecord(person);
             List<Long> ids = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
@@ -387,22 +388,22 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             identityDocRecords.add(values);
         }
 
+        //Добавляем существующие документы если есть
         if (identityDocRefBook != null && !identityDocRefBook.isEmpty()) {
-            identityDocRecords.addAll(identityDocRecords);
+            identityDocRecords.addAll(identityDocRefBook);
         }
-
         //Если документов несколько - выбираем по приоритету какой использовать в отчетах
-        if (identityDocRecords.size() > 1) {
-            //сбрасываем текушие
-            identityDocRecords.each {
-                it.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "0"));
-            }
-            Map<String, RefBookValue> minimalPrior = identityDocRecords.min {
-                docPriorities.get(it.get("DOC_ID"));
-            }
-
-            minimalPrior?.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
+        //сбрасываем текушие
+        identityDocRecords.each {
+            it.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "0"));
         }
+
+        Map<String, RefBookValue> minimalPrior = identityDocRecords.min {
+            Long docIdRef = it.get("DOC_ID")?.getReferenceValue();
+            docPriorities.get(docIdRef);
+        }
+
+        minimalPrior.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
 
         //Обновление признака включается в отчетность
         for (Map<String, RefBookValue> identityDocsValues : identityDocRecords) {
@@ -410,6 +411,8 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, versionFrom, null, identityDocsValues);
         }
 
+    } else {
+        logger.error("Ошибка не найден тип документа с кодом " + person.getIdDocType())
     }
 }
 
@@ -680,7 +683,7 @@ def createTableColumns() {
     column5.setWidth(10)
     tableColumns.add(column5)
 
-    Column column6= new DateColumn()
+    Column column6 = new DateColumn()
     column6.setAlias("birthDay")
     column6.setName("Дата рождения")
     column6.setWidth(10)
@@ -734,7 +737,7 @@ def createRowColumns() {
     column5.setWidth(10)
     tableColumns.add(column5)
 
-    Column column6= new DateColumn()
+    Column column6 = new DateColumn()
     column6.setAlias("birthDay")
     column6.setName("Дата рождения")
     column6.setWidth(10)
