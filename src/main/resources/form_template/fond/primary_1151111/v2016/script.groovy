@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.PersonData
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
@@ -113,7 +114,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         println "!CALCULATE!"
-        calculate()
+        calculateData()
         break;
     case FormDataEvent.CHECK:
         println "!CHECK!"
@@ -2773,7 +2774,10 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
-def calculate() {
+def calculateData() {
+    //выставляем параметр что скрипт не формирует новый xml-файл
+    calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
+
     //Два списка для создания новых записей и для обновления существующих
     List<RaschsvPersSvStrahLic> createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
     List<RaschsvPersSvStrahLic> updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
