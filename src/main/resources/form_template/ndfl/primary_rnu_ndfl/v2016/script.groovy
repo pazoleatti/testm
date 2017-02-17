@@ -1527,8 +1527,9 @@ def checkDataReference(
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
 
         // Спр1 ФИАС
+        // todo oshelepeav Исправить на фатальную ошибку https://jira.aplana.com/browse/SBRFNDFL-448
         if (!isExistsAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+            logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON, ndflPerson.rowNum, C_ADDRESS, fioAndInp, C_ADDRESS, R_FIAS);
         }
 
