@@ -2401,3 +2401,13 @@ comment on column log_entry.log_level is 'Уровень важности (0 - �
 comment on column log_entry.message is 'Текст сообщения';
 
 create sequence seq_log_entry start with 1;
+--------------------------------------------------------------------------------------------------------------------------
+
+create table declaration_template_file
+(
+  declaration_template_id number(18) not null,
+  blob_data_id varchar2(36 byte) not null
+);
+comment on table declaration_template_file is 'Файлы макета налоговой формы';
+comment on column declaration_template_file.declaration_template_id is 'Ссылка на макет налоговой формы';
+comment on column declaration_template_file.blob_data_id is 'Ссылка на файл в таблице BLOB_DATA';
