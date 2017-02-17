@@ -3282,8 +3282,8 @@ def checkData() {
                     // 2.1.5 Соответсвие ИНН ЮЛ Общим параметрам
                     def sberbankInnParam = mapConfigurationParam.get("SBERBANK_INN")
                     if (sberbankInnXml != sberbankInnParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_NPYL, NPYL_INNYL].join(".")
-                        logger.warn("Не совпадает " + pathAttr + " = \"" + sberbankInnXml + "\" для организации - плательщика страховых взносов с настройками подразделения.")
+                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_NPYL, NODE_NAME_NPYL, NPYL_INNYL].join(".")
+                        logger.warn("Не совпадает " + pathAttr + " = \"" + sberbankInnXml + "\" для организации - плательщика страховых взносов с Общим параметром \"ИНН ПАО Сбербанк\".")
                     }
 
                     // 2.1.6 Соответсвие КПП ЮЛ настройкам подразделения
