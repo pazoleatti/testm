@@ -262,6 +262,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         checkLoggerErrorOrWarn();
     }
 
+    @Ignore
     @Test
     public void checkRaschsvInvalid() {
         initMock();
