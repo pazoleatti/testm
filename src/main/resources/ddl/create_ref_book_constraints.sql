@@ -51,6 +51,8 @@ alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_oblig forei
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_type foreign key(type) references ref_book_make_calc(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_re_code foreign key(reorg_form_code) references ref_book_reorganization(id);
 alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_signatory foreign key(signatory_id) references ref_book_signatory_mark(id);
+alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_oktmo foreign key(oktmo) references ref_book_oktmo(id);
+alter table ref_book_ndfl_detail add constraint fk_ref_book_ndfl_det_dept foreign key(department_id) references department(id);
 alter table ref_book_fond add constraint fk_ref_book_fond_depart foreign key(department_id) references department(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_parent foreign key(ref_book_fond_id) references ref_book_fond(id) on delete cascade;
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_pres_pl foreign key(present_place) references ref_book_present_place(id);
@@ -60,6 +62,8 @@ alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_oblig forei
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_type foreign key(type) references ref_book_make_calc(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_re_code foreign key(reorg_form_code) references ref_book_reorganization(id);
 alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_signatory foreign key(signatory_id) references ref_book_signatory_mark(id);
+alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_oktmo foreign key(oktmo) references ref_book_oktmo(id);
+alter table ref_book_fond_detail add constraint fk_ref_book_fond_det_dept foreign key(department_id) references department(id);
 alter table declaration_data add constraint declaration_data_fk_asnu_id foreign key (asnu_id) references ref_book_asnu(id);
 alter table declaration_template add constraint fk_declaration_template_fkind foreign key(form_kind) references declaration_kind(id);
 alter table declaration_template add constraint fk_declaration_template_ftype foreign key(form_type) references ref_book_form_type(id);
