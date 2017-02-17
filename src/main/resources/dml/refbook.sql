@@ -274,8 +274,8 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9412, 941,'Наименование','NAME',1,2,null,null,1,null,15,1,0,null,null,0,2000);
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (942,'Ограничение доступа по АСНУ',1,0,0,null,'SEC_USER_ASNU',0);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9421, 942,'Пользователь','USER_ID',4,1,74,651,1,null,15,1,1,null,null,0,null);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9422, 942,'	АС НУ','ASNU_ID',4,2,900,9002,1,null,15,1,1,null,null,0,null);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9421, 942,'Пользователь','USER_ID',4,1,74,651,1,null,15,1,0,null,null,0,null);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9422, 942,'	АС НУ','ASNU_ID',4,2,900,9002,1,null,15,1,0,null,null,0,null);
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (950,'Параметры подразделения по НДФЛ',0,0,0,null,'REF_BOOK_NDFL');
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (951,'Параметры подразделения по НДФЛ (таблица)',0,0,0,null,'REF_BOOK_NDFL_DETAIL');
