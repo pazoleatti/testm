@@ -594,5 +594,8 @@ alter table log_entry add constraint chk_log_entry_lev check(log_level in (0,1,2
 alter table notification add constraint fk_notification_log foreign key(log_id) references log(id);
 alter table log_system add constraint fk_log_system_log foreign key(log_id) references log(id);
 --------------------------------------------------------------------------------------------------------------------------
+alter table declaration_template_file add constraint pk_declaration_template_file primary key (blob_data_id,declaration_template_id);
+alter table declaration_template_file add constraint fk_decl_templ_file_template foreign key (declaration_template_id) references declaration_template(id);
+alter table declaration_template_file add constraint fk_decl_templ_file_blob foreign key (blob_data_id) references blob_data(id);
 
 

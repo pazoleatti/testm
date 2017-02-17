@@ -142,7 +142,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 def updateRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
 
-    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size() + ")");
+    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size());
 
     Date versionFrom = getVersionFrom();
 
@@ -228,7 +228,8 @@ def createRefbookPersonData(List<NdflPerson> personList, Long asnuId) {
     List<RefBookRecord> taxpayerIdsRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
         NdflPerson person = personList.get(i)
-        person.setPersonId(personIds.get(i)); // выставляем присвоенный Id
+        Long generatedId = personIds.get(i);
+        person.setPersonId(generatedId); // выставляем присвоенный Id
         documentsRecords.add(createIdentityDocRecord(person));
         taxpayerIdsRecords.add(createIdentityTaxpayerRecord(person, asnuId));
     }
@@ -378,7 +379,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
 
         if (findedDoc != null) {
             //документ с таким типом и номером существует, ничего не делаем
-            return;
+            //return;
         } else {
             RefBookRecord refBookRecord = createIdentityDocRecord(person);
             List<Long> ids = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
@@ -387,22 +388,22 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             identityDocRecords.add(values);
         }
 
+        //Добавляем существующие документы если есть
         if (identityDocRefBook != null && !identityDocRefBook.isEmpty()) {
-            identityDocRecords.addAll(identityDocRecords);
+            identityDocRecords.addAll(identityDocRefBook);
         }
-
         //Если документов несколько - выбираем по приоритету какой использовать в отчетах
-        if (identityDocRecords.size() > 1) {
-            //сбрасываем текушие
-            identityDocRecords.each {
-                it.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "0"));
-            }
-            Map<String, RefBookValue> minimalPrior = identityDocRecords.min {
-                docPriorities.get(it.get("DOC_ID"));
-            }
-
-            minimalPrior?.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
+        //сбрасываем текушие
+        identityDocRecords.each {
+            it.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "0"));
         }
+
+        Map<String, RefBookValue> minimalPrior = identityDocRecords.min {
+            Long docIdRef = it.get("DOC_ID")?.getReferenceValue();
+            docPriorities.get(docIdRef);
+        }
+
+        minimalPrior.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
 
         //Обновление признака включается в отчетность
         for (Map<String, RefBookValue> identityDocsValues : identityDocRecords) {
@@ -410,6 +411,8 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
             getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, versionFrom, null, identityDocsValues);
         }
 
+    } else {
+        logger.error("Ошибка не найден тип документа с кодом " + person.getIdDocType())
     }
 }
 
@@ -680,7 +683,7 @@ def createTableColumns() {
     column5.setWidth(10)
     tableColumns.add(column5)
 
-    Column column6= new DateColumn()
+    Column column6 = new DateColumn()
     column6.setAlias("birthDay")
     column6.setName("Дата рождения")
     column6.setWidth(10)
@@ -734,7 +737,7 @@ def createRowColumns() {
     column5.setWidth(10)
     tableColumns.add(column5)
 
-    Column column6= new DateColumn()
+    Column column6 = new DateColumn()
     column6.setAlias("birthDay")
     column6.setName("Дата рождения")
     column6.setWidth(10)
@@ -1405,7 +1408,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String RF_HOUSE = "HOUSE"
 @Field final String RF_BUILD = "BUILD"
 @Field final String RF_APPARTMENT = "APPARTMENT"
-@Field final String RF_DUBLICATES = "DUBLICATES"
+@Field final String RF_OLD_ID = "OLD_ID"
 @Field final String RF_DOC_ID = "DOC_ID"
 @Field final String RF_DOC_NUMBER = "DOC_NUMBER"
 
@@ -1524,8 +1527,9 @@ def checkDataReference(
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
 
         // Спр1 ФИАС
+        // todo oshelepeav Исправить на фатальную ошибку https://jira.aplana.com/browse/SBRFNDFL-448
         if (!isExistsAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
-            logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
+            logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON, ndflPerson.rowNum, C_ADDRESS, fioAndInp, C_ADDRESS, R_FIAS);
         }
 
@@ -1730,7 +1734,7 @@ def checkDataReference(
         }
 
         // Спр7 Ставка (Необязательное поле)
-        if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate)) {
+        if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate.toString())) {
             logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON_INCOME, ndflPersonIncome.rowNum, C_RATE, fioAndInp, C_RATE, R_RATE);
         }
@@ -1785,8 +1789,9 @@ def checkDataCommon(
     def mapTerBank = getTerBank()
 
     // Параметры подразделения
-    def departmentParam = getDepartmentParam()
-    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
+    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-263
+//    def departmentParam = getDepartmentParam()
+//    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
 
     ndflPersonList.each { ndflPerson ->
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
@@ -2066,17 +2071,18 @@ def checkDataCommon(
         }
 
         // Общ10 Соответствие КПП и ОКТМО Тербанку
-        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
-        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
-        if (kppList == null) {
-            logger.error(MESSAGE_ERROR_VALUE,
-                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
-        } else {
-            if (!kppList.contains(ndflPersonIncome.kpp)) {
-                logger.error(MESSAGE_ERROR_VALUE,
-                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
-            }
-        }
+        // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-263
+//        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
+//        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
+//        if (kppList == null) {
+//            logger.error(MESSAGE_ERROR_VALUE,
+//                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
+//        } else {
+//            if (!kppList.contains(ndflPersonIncome.kpp)) {
+//                logger.error(MESSAGE_ERROR_VALUE,
+//                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
+//            }
+//        }
     }
 
     ndflPersonDeductionList.each { ndflPersonDeduction ->

@@ -832,6 +832,7 @@ public class ScriptUtilsTest {
     public void testCheckSnils() {
         Assert.assertTrue(ScriptUtils.checkSnils("112-233-445 95"));
         Assert.assertTrue(ScriptUtils.checkSnils("112 233 445 95"));
+        Assert.assertTrue(ScriptUtils.checkSnils("137-199-816-00"));
         Assert.assertTrue(ScriptUtils.checkSnils("11223344595"));
         Assert.assertTrue(ScriptUtils.checkSnils("001001998 00"));
         Assert.assertTrue(ScriptUtils.checkSnils("001001997 00"));
