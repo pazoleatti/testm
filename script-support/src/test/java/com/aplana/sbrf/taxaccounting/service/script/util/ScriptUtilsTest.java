@@ -850,4 +850,24 @@ public class ScriptUtilsTest {
         Assert.assertFalse(ScriptUtils.checkSnils("4№ 596"));
         Assert.assertFalse(ScriptUtils.checkSnils("4f №596"));
     }
+
+    @Test
+    public void testEqualsNullSafe() throws ParseException {
+        Date d1 = ScriptUtils.parseDate("dd.MM.yyyy", "01.02.2017");
+        Date d2 = ScriptUtils.parseDate("dd.MM.yyyy", "01.02.2017");
+        Date d3 = ScriptUtils.parseDate("dd.MM.yyyy", "02.02.2017");
+        Assert.assertTrue(ScriptUtils.equalsNullSafe(d1, d2));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe(d1, d3));
+        BigDecimal bd1 = new BigDecimal("1000.00");
+        Assert.assertTrue(ScriptUtils.equalsNullSafe(bd1, 1000L));
+        Assert.assertTrue(ScriptUtils.equalsNullSafe(bd1, 1000));
+        Assert.assertTrue(ScriptUtils.equalsNullSafe("", ""));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe("foo", "bar"));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe("foo", null));
+        Assert.assertTrue(ScriptUtils.equalsNullSafe(null, null));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe(null, 1111));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe(1111, null));
+    }
+
+
 }
