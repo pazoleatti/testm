@@ -3430,6 +3430,8 @@ def checkDataXml() {
                     def sVReorgYLInnXml = ""
                     def sVReorgYLKppXml = ""
 
+                    boolean sVReorgYLIsExist = false
+
                     // НПЮЛ
                     documentChildNode.childNodes().each { NPYLNode ->
                         if (NPYLNode.name == NODE_NAME_NPYL) {
@@ -3439,6 +3441,7 @@ def checkDataXml() {
                             // СвРеоргЮЛ
                             NPYLNode.childNodes().each { sVReorgYLNode ->
                                 if (sVReorgYLNode.name == NODE_NAME_SV_REORG_YL) {
+                                    sVReorgYLIsExist = true
                                     sVReorgYLFormXml = sVReorgYLNode.attributes()[SV_REORG_YL_FORM_REORG]
                                     sVReorgYLInnXml = sVReorgYLNode.attributes()[SV_REORG_YL_INNYL]
                                     sVReorgYLKppXml = sVReorgYLNode.attributes()[SV_REORG_YL_KPP]
@@ -3475,26 +3478,30 @@ def checkDataXml() {
                         logger.warn("Не совпадает $pathAttr для организации - плательщика страховых взносов с КПП = \"$kppParam\"")
                     }
 
-                    // 2.1.7 Соответствие формы реорганизации
-                    def sVReorgYLFormParam = mapReorgFormCode.get(departmentParamIncomeRow?.REORG_FORM_CODE?.referenceValue)
-                    if (sVReorgYLFormXml != sVReorgYLFormParam) {
-                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ФормРеорг"
-                        logger.warn("Не совпадает $pathAttr для организации - плательщика страховых c формой реорганизации = \"$sVReorgYLFormParam\"")
+                    // Если узел СвРеоргЮЛ существует
+                    if (sVReorgYLIsExist) {
+                        // 2.1.7 Соответствие формы реорганизации
+                        def sVReorgYLFormParam = mapReorgFormCode.get(departmentParamIncomeRow?.REORG_FORM_CODE?.referenceValue)
+                        if (sVReorgYLFormXml != sVReorgYLFormParam) {
+                            def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ФормРеорг"
+                            logger.warn("Не совпадает $pathAttr для организации - плательщика страховых c формой реорганизации = \"$sVReorgYLFormParam\"")
+                        }
+
+                        // 2.1.8 Соответствие ИНН реорганизованной организации
+                        def sVReorgYLInnParam = departmentParamIncomeRow?.REORG_INN?.stringValue
+                        if (sVReorgYLInnXml != sVReorgYLInnParam) {
+                            def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ИННЮЛ"
+                            logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с ИНН реорганизованной организации = \"$sVReorgYLInnParam\"")
+                        }
+
+                        // 2.1.9 Соответствие КПП реорганизованной организации
+                        def sVReorgYLKppParam = departmentParamIncomeRow?.REORG_KPP?.stringValue
+                        if (sVReorgYLKppXml != sVReorgYLKppParam) {
+                            def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.КПП"
+                            logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с КПП реорганизованной организации = \"$sVReorgYLKppParam\"")
+                        }
                     }
 
-                    // 2.1.8 Соответствие ИНН реорганизованной организации
-                    def sVReorgYLInnParam = departmentParamIncomeRow?.REORG_INN?.stringValue
-                    if (sVReorgYLInnXml != sVReorgYLInnParam) {
-                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ИННЮЛ"
-                        logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с ИНН реорганизованной организации = \"$sVReorgYLInnParam\"")
-                    }
-
-                    // 2.1.9 Соответствие КПП реорганизованной организации
-                    def sVReorgYLKppParam = departmentParamIncomeRow?.REORG_KPP?.stringValue
-                    if (sVReorgYLKppXml != sVReorgYLKppParam) {
-                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.КПП"
-                        logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с КПП реорганизованной организации = \"$sVReorgYLKppParam\"")
-                    }
                 } else if (documentChildNode.name == NODE_NAME_RASCHET_SV) {
                     // РасчетСВ
                     documentChildNode.childNodes().each { raschetSvChildNode ->
