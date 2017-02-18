@@ -1815,7 +1815,7 @@ def checkDataCommon(
 
         // Общ11 СНИЛС (Необязательное поле)
         if (ndflPerson.snils != null && !ScriptUtils.checkSnils(ndflPerson.snils)) {
-            logger.error(MESSAGE_ERROR_VALUE,
+            logger.warn(MESSAGE_ERROR_VALUE,
                     T_PERSON, ndflPerson.rowNum, C_SNILS, fioAndInp, MESSAGE_ERROR_SNILS);
         }
     }
