@@ -3397,8 +3397,8 @@ def checkDataXml() {
             def poMestuParam = mapPresentPlace.get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
             def poMestuCodeParam = poMestuParam?.get(RF_CODE)?.value
             if (poMestuCodeXml != poMestuCodeParam) {
-                def pathPoMestu = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, DOCUMENT_PO_MESTU].join(".")
-                logger.warn("Код места, по которому предоставляется документ " + pathPoMestu + " = \"" + poMestuCodeXml + "\" не совпадает с настройками подразделения.")
+                def pathAttr = "Файл.Документ.ПоМесту"
+                logger.warn("Код места, по которому предоставляется документ $pathAttr = \"" + poMestuCodeXml + "\" не совпадает с настройками подразделения.")
             }
 
             // 2.1.2 Актуальность кода места
@@ -3406,7 +3406,7 @@ def checkDataXml() {
             def poMestuActualParam = mapActualPresentPlace.get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
             def poMestuCodeActualParam = poMestuActualParam?.get(RF_CODE)?.value
             if (poMestuCodeParam != poMestuCodeActualParam || !poMestuActualParam?.get(RF_FOR_FOND)?.value) {
-                logger.warn("В настройках подразделений указан неактуальный код места, по которому предоставляется документ = \"" + poMestuCodeActualParam + "\"")
+                logger.warn("В настройках подразделений указан неактуальный код места, по которому предоставляется документ = \"$poMestuCodeActualParam\"")
             }
 
             // НомКорр
@@ -3451,49 +3451,49 @@ def checkDataXml() {
                     def okvedCodeXml = documentChildNode.attributes()[SV_NP_OKVED]
                     def okvedCodeParam = mapOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
                     if (okvedCodeXml != okvedCodeParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, SV_NP_OKVED].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, okvedCodeXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
+                        def pathAttr = "Файл.Документ.СвНП.ОКВЭД"
+                        logger.warn("Не совпадает значение $pathAttr плательщика страховых взносов КПП = \"$kppXml\"")
                     }
 
                     // 2.1.4 Актуальность ОКВЭД
                     // При оценке актуальности значения справочника берутся НЕ на последний день отчетного периода, а на ТЕКУЩУЮ СИСТЕМНУЮ ДАТУ.
                     def okvedCodeActualParam = mapActualOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
                     if (okvedCodeParam != okvedCodeActualParam) {
-                        logger.warn("В настройках подразделений указан неактуальный ОКВЭД = \"" + okvedCodeParam + "\" с настройками подразделения")
+                        logger.warn("В настройках подразделений указан неактуальный ОКВЭД = \"$okvedCodeParam\" с настройками подразделения")
                     }
 
                     // 2.1.5 Соответсвие ИНН ЮЛ Общим параметрам
                     if (sberbankInnXml != sberbankInnParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_NPYL, NODE_NAME_NPYL, NPYL_INNYL].join(".")
-                        logger.warn("Не совпадает " + pathAttr + " = \"" + sberbankInnXml + "\" для организации - плательщика страховых взносов с Общим параметром \"ИНН ПАО Сбербанк\".")
+                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.ИННЮЛ"
+                        logger.warn("Не совпадает $pathAttr для организации - плательщика страховых взносов с Общим параметром \"ИНН ПАО Сбербанк\" = \"$sberbankInnParam\"")
                     }
 
                     // 2.1.6 Соответсвие КПП ЮЛ настройкам подразделения
                     def kppParam = departmentParamIncomeRow?.KPP?.stringValue
                     if (kppXml != kppParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NPYL_KPP].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, kppXml, "ИНН = \"" + sberbankInnXml + "\" с настройками подразделения"))
+                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.КПП"
+                        logger.warn("Не совпадает $pathAttr для организации - плательщика страховых взносов с КПП = \"$kppParam\"")
                     }
 
                     // 2.1.7 Соответствие формы реорганизации
                     def sVReorgYLFormParam = mapReorgFormCode.get(departmentParamIncomeRow?.REORG_FORM_CODE?.referenceValue)
                     if (sVReorgYLFormXml != sVReorgYLFormParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_FORM_REORG].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLFormXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
+                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ФормРеорг"
+                        logger.warn("Не совпадает $pathAttr для организации - плательщика страховых c формой реорганизации = \"$sVReorgYLFormParam\"")
                     }
 
                     // 2.1.8 Соответствие ИНН реорганизованной организации
                     def sVReorgYLInnParam = departmentParamIncomeRow?.REORG_INN?.stringValue
                     if (sVReorgYLInnXml != sVReorgYLInnParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_INNYL].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLInnXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
+                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ИННЮЛ"
+                        logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с ИНН реорганизованной организации = \"$sVReorgYLInnParam\"")
                     }
 
                     // 2.1.9 Соответствие КПП реорганизованной организации
                     def sVReorgYLKppParam = departmentParamIncomeRow?.REORG_KPP?.stringValue
                     if (sVReorgYLKppXml != sVReorgYLKppParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_KPP].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLKppXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
+                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.КПП"
+                        logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с КПП реорганизованной организации = \"$sVReorgYLKppParam\"")
                     }
                 } else if (documentChildNode.name == NODE_NAME_RASCHET_SV) {
                     // РасчетСВ
