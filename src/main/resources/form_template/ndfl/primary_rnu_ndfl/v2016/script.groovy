@@ -1151,9 +1151,8 @@ def ndflPersonAttr(ndflPerson) {
             'Кварт'      : ndflPerson.flat,
             'КодСтрИно'  : ndflPerson.countryCode,
             'АдресИно'   : ndflPerson.address,
-            'ДопИнф'     : ndflPerson.additionalData]
-
-
+            'ДопИнф'     : ndflPerson.additionalData
+    ]
 }
 
 def incomeAttr(personIncome) {
@@ -1296,6 +1295,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String MESSAGE_ERROR_NOT_FOUND_REF = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: \"%s\" не соответствует справочнику \"%s\"."
 @Field final String MESSAGE_ERROR_VALUE = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: %s."
 @Field final String MESSAGE_ERROR_INN = "Некорректный ИНН"
+@Field final String MESSAGE_ERROR_SNILS = "Некорректный СНИЛС"
 @Field final String MESSAGE_ERROR_BIRTHDAY = "Дата рождения налогоплательщика превышает дату отчетного периода"
 @Field final String MESSAGE_ERROR_DATE = "Дата не входит в отчетный период формы"
 @Field final String MESSAGE_ERROR_NOT_MATCH_RULE = "Значение не соответствует правилу: "
@@ -1349,6 +1349,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String C_INP = "Уникальный код клиента"
 @Field final String C_BIRTH_DATE = "Дата рождения"
 @Field final String C_INN_NP = "ИНН  физического лица"
+@Field final String C_SNILS = "СНИЛС"
 @Field final String C_INN_FOREIGN = "ИНН  иностранного гражданина"
 @Field final String C_REGION_CODE = "Код Региона"
 @Field final String C_AREA = "Район"
@@ -1800,7 +1801,7 @@ def checkDataCommon(
 
         rowNumPersonList.add(ndflPerson.rowNum)
 
-        // Общ1 ИНН (Необязательное поле)
+        // Общ1 Корректность ИНН (Необязательное поле)
         if (ndflPerson.innNp != null && !ScriptUtils.checkControlSumInn(ndflPerson.innNp)) {
             logger.error(MESSAGE_ERROR_VALUE,
                     T_PERSON, ndflPerson.rowNum, C_INN_NP, fioAndInp, MESSAGE_ERROR_INN);
@@ -1811,6 +1812,12 @@ def checkDataCommon(
             logger.error(MESSAGE_ERROR_VALUE,
                     T_PERSON, ndflPerson.rowNum, C_BIRTH_DATE, fioAndInp, MESSAGE_ERROR_BIRTHDAY);
         }
+
+        // Общ11 СНИЛС (Необязательное поле)
+        if (ndflPerson.snils != null && !ScriptUtils.checkSnils(ndflPerson.snils)) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON, ndflPerson.rowNum, C_SNILS, fioAndInp, MESSAGE_ERROR_SNILS);
+        }
     }
 
     ndflPersonIncomeList.each { ndflPersonIncome ->
@@ -1818,7 +1825,7 @@ def checkDataCommon(
 
         rowNumPersonIncomeList.add(ndflPersonIncome.rowNum)
 
-        // Общ5 Даты доходов
+        // Общ5 Принадлежность дат операций к отчетному периоду
         // Дата начисления дохода (Необязательное поле)
         if (ndflPersonIncome.incomeAccruedDate != null &&
                 (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate()
@@ -1848,7 +1855,7 @@ def checkDataCommon(
                     T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_DATE);
         }
 
-        // Общ7 Заполненность полей
+        // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         if (ndflPersonIncome.paymentDate == null &&
                 ndflPersonIncome.paymentNumber == null &&
                 ndflPersonIncome.taxSumm == null) {
@@ -2090,7 +2097,7 @@ def checkDataCommon(
 
         rowNumPersonDeductionList.add(ndflPersonDeduction.rowNum)
 
-        // Общ6 Даты налоговых вычетов
+        // Общ6 Принадлежность дат налоговых вычетов к отчетному периоду
         // Дата выдачи уведомления (Обязательное поле)
         if (ndflPersonDeduction.notifDate < getReportPeriodStartDate() || ndflPersonDeduction.notifDate > getReportPeriodEndDate()) {
             logger.error(MESSAGE_ERROR_VALUE,
@@ -2118,7 +2125,7 @@ def checkDataCommon(
         rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
     }
 
-    // Общ8 Отсутствие пропусков и повторений
+    // Общ8 Отсутствие пропусков и повторений в нумерации строк
     def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
     msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeList, T_PERSON_INCOME)
     msgErrDubl += getErrorMsgDubl(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
