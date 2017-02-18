@@ -787,42 +787,39 @@ void calculateReportData(writer, ndflPerson) {
 
     def reportPeriodCode = findReportPeriodCode(reportPeriod)
 
+    // Подготовка данных для СведОпер
+    def incomes = ndflPerson.incomes.sort { a, b -> (a.rowNum <=> b.rowNum) }
+    def deductions = ndflPerson.deductions.sort { a, b -> a.rowNum <=> b.rowNum }
+    def prepayments = ndflPerson.prepayments.sort { a, b -> a.rowNum <=> b.rowNum }
+    def operationList = incomes.collectEntries { personIncome ->
+        def key = personIncome.operationId
+        def value = ["ИдОпер": personIncome.operationId, "КПП": personIncome.kpp, "ОКТМО": personIncome.oktmo]
+        return [key, value]
+    }
+    def incomeOperations = mapToOperationId(incomes);
+    def deductionOperations = mapToOperationId(deductions);
+    def prepaymentOperations = mapToOperationId(prepayments);
+
     def builder = new MarkupBuilder(writer)
     builder.Файл() {
-
         СлЧасть('КодПодр': department.sbrfCode) {}
         ИнфЧасть('ПериодОтч': reportPeriodCode, 'ОтчетГод': reportPeriod?.taxPeriod?.year) {
-            ПолучДох(ndflPersonAttr(ndflPerson)) {
-                def incomes = ndflPerson.incomes.sort { a, b -> (a.rowNum <=> b.rowNum) }
-                def deductions = ndflPerson.deductions.sort { a, b -> a.rowNum <=> b.rowNum }
-                def prepayments = ndflPerson.prepayments.sort { a, b -> a.rowNum <=> b.rowNum }
+            ПолучДох(ndflPersonAttr(ndflPerson)) {}
+            operationList.each { key, value ->
+                СведОпер(value) {
+                    //доходы
+                    incomeOperations.get(key).each { personIncome ->
+                        СведДохНал(incomeAttr(personIncome)) {}
+                    }
 
-                def operationList = incomes.collectEntries { personIncome ->
-                    def key = personIncome.operationId
-                    def value = ["ИдОпер": personIncome.operationId, "КПП": personIncome.kpp, "ОКТМО": personIncome.oktmo]
-                    return [key, value]
-                }
+                    //Вычеты
+                    deductionOperations.get(key).each { personDeduction ->
+                        СведВыч(deductionAttr(personDeduction)) {}
+                    }
 
-                def incomeOperations = mapToOperationId(incomes);
-                def deductionOperations = mapToOperationId(deductions);
-                def prepaymentOperations = mapToOperationId(prepayments);
-
-                operationList.each { key, value ->
-                    СведОпер(value) {
-                        //доходы
-                        incomeOperations.get(key).each { personIncome ->
-                            СведДохНал(incomeAttr(personIncome)) {}
-                        }
-
-                        //Вычеты
-                        deductionOperations.get(key).each { personDeduction ->
-                            СведВыч(deductionAttr(personDeduction)) {}
-                        }
-
-                        //Авансовые платежи
-                        prepaymentOperations.get(key).each { personPrepayment ->
-                            СведАванс(prepaymentAttr(personPrepayment)) {}
-                        }
+                    //Авансовые платежи
+                    prepaymentOperations.get(key).each { personPrepayment ->
+                        СведАванс(prepaymentAttr(personPrepayment)) {}
                     }
                 }
             }
