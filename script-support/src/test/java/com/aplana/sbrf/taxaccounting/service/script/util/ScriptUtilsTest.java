@@ -870,5 +870,20 @@ public class ScriptUtilsTest {
         Assert.assertFalse(ScriptUtils.equalsNullSafe(1111, null));
     }
 
+    @Test
+    public void testIsEmpty() throws ParseException {
+
+        Assert.assertTrue(ScriptUtils.isEmpty(null));
+        Assert.assertTrue(ScriptUtils.isEmpty(""));
+
+        Assert.assertTrue(ScriptUtils.isEmpty(0));
+        Assert.assertTrue(ScriptUtils.isEmpty(0L));
+        Assert.assertTrue(ScriptUtils.isEmpty(new BigDecimal("0")));
+        Assert.assertTrue(ScriptUtils.isEmpty(new BigDecimal(".00")));
+        Assert.assertTrue(ScriptUtils.isEmpty(new BigDecimal("0.00")));
+
+        Assert.assertFalse(ScriptUtils.isEmpty(new BigDecimal("0.01")));
+
+    }
 
 }

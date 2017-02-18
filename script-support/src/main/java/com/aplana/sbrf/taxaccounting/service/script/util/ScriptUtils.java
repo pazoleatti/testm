@@ -2627,5 +2627,34 @@ public final class ScriptUtils {
     }
 
 
+    /**
+     * Проверка заполнения графы, значение считаться незаполненным в том числе, если в ней указан "0"
+     * @param value
+     * @return
+     */
+    public static boolean isEmpty(Object value) {
+
+        if (value == null){
+            return true;
+        }
+
+        if (value instanceof BigDecimal){
+            BigDecimal bigDecimal = (BigDecimal) value;
+            return bigDecimal.compareTo(BigDecimal.ZERO) == 0;
+        } else if (value instanceof Integer) {
+            Number number = (Number) value;
+            return number.intValue() == 0;
+        } else if (value instanceof Long) {
+            Number number = (Number) value;
+            return number.intValue() == 0;
+        } if (value instanceof String) {
+            String string = (String) value;
+            return string.isEmpty();
+        } else {
+            throw new UnsupportedOperationException("The method 'isEmpty' is not supported for arguments type "+value.getClass());
+        }
+    }
+
+
 
 }

@@ -56,9 +56,6 @@ switch (formDataEvent) {
 }
 
 //------------------ Calculate ----------------------
-def calc() {
-    calculate();
-}
 /**
  * Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
  */
@@ -2098,7 +2095,7 @@ def checkDataCommon(
             }
 
             // если не заполнены Раздел 2. Графы 7 и 11
-            if (ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.incomePayoutSumm != null) {
+            if (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 emptyField += ", \"" + C_INCOME_PAYOUT_DATE + "\", \"" + C_INCOME_PAYOUT_SUMM + "\""
 
                 // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть НЕ заполнена
@@ -2110,7 +2107,7 @@ def checkDataCommon(
             }
 
             // 	Раздел 2. Графа 13 "Налоговая база" должна быть заполнена
-            if (ndflPersonIncome.taxBase == null) {
+            if (ScriptUtils.isEmpty(ndflPersonIncome.taxBase)) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_BASE, emptyField])
                 logger.error(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
@@ -2132,13 +2129,13 @@ def checkDataCommon(
             def notEmptyField = "заполнены " + getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
 
             // Раздел 2. Графа 12 "Общая сумма вычетов" должна быть НЕ заполнена
-            if (ndflPersonIncome.totalDeductionsSumm != null) {
+            if (!ScriptUtils.isEmpty(ndflPersonIncome.totalDeductionsSumm)) {
                 def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TOTAL_DEDUCTIONS_SUMM, notEmptyField])
                 logger.error(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
             }
             // 	Раздел 2. Графа 13 "Налоговая база" должна быть НЕ заполнена
-            if (ndflPersonIncome.taxBase != null) {
+            if (!ScriptUtils.isEmpty(ndflPersonIncome.taxBase)) {
                 def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_BASE, notEmptyField])
                 logger.error(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
@@ -2168,11 +2165,11 @@ def checkDataCommon(
             def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_ACCRUED_DATE])
 
             // Раздел 2. Графа 10 "Сумма начисленного дохода" должна быть заполнена
-            if (ndflPersonIncome.incomeAccruedSumm != null) {
+            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
                 notEmptyField = "заполнены " + getQuotedFields([C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM])
 
                 // Раздел 2. Графа 16 "Сумма налога исчисленная" должна быть заполнена
-                if (ndflPersonIncome.calculatedTax == null) {
+                if (ScriptUtils.isEmpty(ndflPersonIncome.calculatedTax)) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_CALCULATED_TAX, notEmptyField])
                     logger.error(MESSAGE_ERROR_VALUE,
                             T_PERSON_INCOME, ndflPersonIncome.rowNum, C_CALCULATED_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
@@ -2196,7 +2193,7 @@ def checkDataCommon(
             }
         } else {
             // если заполнена Раздел 2. Графа 10 "Сумма начисленного дохода"
-            if (ndflPersonIncome.incomeAccruedSumm != null) {
+            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
                 def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_ACCRUED_SUMM])
 
                 // Раздел 2. Графа 6 "Дата начисления дохода" должна быть заполнена
@@ -2207,7 +2204,7 @@ def checkDataCommon(
                 def emptyField = "не заполнены " + getQuotedFields([C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM])
 
                 // Раздел 2. Графа 16 "Сумма налога исчисленная" должна быть НЕ заполнена
-                if (ndflPersonIncome.calculatedTax != null) {
+                if (!ScriptUtils.isEmpty(ndflPersonIncome.calculatedTax)) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_CALCULATED_TAX, emptyField])
                     logger.error(MESSAGE_ERROR_VALUE,
                             T_PERSON_INCOME, ndflPersonIncome.rowNum, C_CALCULATED_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
@@ -2231,11 +2228,11 @@ def checkDataCommon(
         if (ndflPersonIncome.incomePayoutDate != null) {
             def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_DATE])
             // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода" должна быть заполнена
-            if (ndflPersonIncome.incomePayoutSumm != null) {
+            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 notEmptyField = "заполнены " + getQuotedFields([C_INCOME_PAYOUT_DATE, C_INCOME_PAYOUT_SUMM])
 
                 // Раздел 2. Графа 17 "Сумма налога удержанная" должна быть заполнена
-                if (ndflPersonIncome.withholdingTax == null) {
+                if (ScriptUtils.isEmpty(ndflPersonIncome.withholdingTax)) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_WITHHOLDING_TAX, notEmptyField])
                     logger.error(MESSAGE_ERROR_VALUE,
                             T_PERSON_INCOME, ndflPersonIncome.rowNum, C_WITHHOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
@@ -2261,7 +2258,7 @@ def checkDataCommon(
             }
         } else {
             // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода"
-            if (ndflPersonIncome.incomePayoutSumm != null) {
+            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_SUMM])
 
                 // Раздел 2. Графа 7 "Дата выплаты дохода" должна быть заполнена
@@ -2272,7 +2269,7 @@ def checkDataCommon(
         }
 
         // Раздел 2. Графа 22, 23, 24 Должны быть либо заполнены все 3 Графы, либо ни одна их них
-        if (ndflPersonIncome.paymentDate != null || ndflPersonIncome.paymentNumber != null || ndflPersonIncome.taxSumm != null) {
+        if (ndflPersonIncome.paymentDate != null || ndflPersonIncome.paymentNumber != null || !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
             def allField = getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
             // Раздел 2. Графа 22 "Дата платежного поручения"
             if (ndflPersonIncome.paymentDate == null) {
@@ -2287,7 +2284,7 @@ def checkDataCommon(
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_PAYMENT_NUMBER, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
             }
             // Раздел 2. Графа 24 "Сумма налога перечисленная"
-            if (ndflPersonIncome.taxSumm == null) {
+            if (ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
                 def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_TAX_SUMM, allField])
                 logger.error(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
