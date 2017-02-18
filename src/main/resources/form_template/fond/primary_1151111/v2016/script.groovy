@@ -18,6 +18,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.PersonData
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMk
@@ -3365,8 +3367,12 @@ def checkDataXml() {
     def mapPresentPlace = getRefPresentPlace()
     def mapActualPresentPlace = getActualRefPresentPlace()
 
-    // Общие параметры
-    def mapConfigurationParam = getConfigurationParam()
+    // Получим ИНН из справочника "Общие параметры"
+    // todo https://jira.aplana.com/browse/SBRFNDFL-436 раскомментировать после обновления стенда
+    def sberbankInnParam = ""
+//    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+//    def sberbankInnParam = configurationParamModel.get(ConfigurationParam.SBERBANK_INN).get(1)
+//    logger.info(sberbankInnParam)
 
     // Коды тарифа плательщика
     def mapActualTariffPayerCode = getActualTariffPayerCode()
@@ -3457,7 +3463,6 @@ def checkDataXml() {
                     }
 
                     // 2.1.5 Соответсвие ИНН ЮЛ Общим параметрам
-                    def sberbankInnParam = mapConfigurationParam.get("SBERBANK_INN")
                     if (sberbankInnXml != sberbankInnParam) {
                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_NPYL, NODE_NAME_NPYL, NPYL_INNYL].join(".")
                         logger.warn("Не совпадает " + pathAttr + " = \"" + sberbankInnXml + "\" для организации - плательщика страховых взносов с Общим параметром \"ИНН ПАО Сбербанк\".")
@@ -3937,20 +3942,6 @@ def getActualRefPresentPlace() {
         }
     }
     return presentPlaceCodeActualCache
-}
-
-/**
- * Получить "Общие параметры"
- * @return
- */
-def getConfigurationParam() {
-    if (configurationParamCache.size() == 0) {
-        def refBookMap = getRefBook(REF_BOOK_CONFIGURATION_PARAM_ID)
-        refBookMap.each { refBook ->
-            configurationParamCache.put(refBook?.CODE?.stringValue, refBook?.VALUE?.stringValue)
-        }
-    }
-    return configurationParamCache
 }
 
 /**

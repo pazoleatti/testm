@@ -299,4 +299,8 @@ public interface DeclarationService {
     @SuppressWarnings("unused")
     DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
 
+    /**
+     * Получение конфигурационных параметров (табл. CONFIGURATION)
+     */
+    ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
 }
