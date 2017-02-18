@@ -2570,6 +2570,12 @@ public final class ScriptUtils {
                 + 2*Integer.valueOf(number.substring(7, 8))
                 +   Integer.valueOf(number.substring(8, 9));
 
+        Integer controlModSum = controlSumm % 101;
+
+        if (controlModSum.equals(100)) {
+            return secondValue.equals(0);
+        }
+
         return secondValue.equals(controlSumm % 101);
     }
 

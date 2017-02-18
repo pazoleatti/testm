@@ -1007,42 +1007,39 @@ void calculateReportData(writer, ndflPerson) {
 
     def reportPeriodCode = findReportPeriodCode(reportPeriod)
 
+    // Подготовка данных для СведОпер
+    def incomes = ndflPerson.incomes.sort { a, b -> (a.rowNum <=> b.rowNum) }
+    def deductions = ndflPerson.deductions.sort { a, b -> a.rowNum <=> b.rowNum }
+    def prepayments = ndflPerson.prepayments.sort { a, b -> a.rowNum <=> b.rowNum }
+    def operationList = incomes.collectEntries { personIncome ->
+        def key = personIncome.operationId
+        def value = ["ИдОпер": personIncome.operationId, "КПП": personIncome.kpp, "ОКТМО": personIncome.oktmo]
+        return [key, value]
+    }
+    def incomeOperations = mapToOperationId(incomes);
+    def deductionOperations = mapToOperationId(deductions);
+    def prepaymentOperations = mapToOperationId(prepayments);
+
     def builder = new MarkupBuilder(writer)
     builder.Файл() {
-
         СлЧасть('КодПодр': department.sbrfCode) {}
         ИнфЧасть('ПериодОтч': reportPeriodCode, 'ОтчетГод': reportPeriod?.taxPeriod?.year) {
-            ПолучДох(ndflPersonAttr(ndflPerson)) {
-                def incomes = ndflPerson.incomes.sort { a, b -> (a.rowNum <=> b.rowNum) }
-                def deductions = ndflPerson.deductions.sort { a, b -> a.rowNum <=> b.rowNum }
-                def prepayments = ndflPerson.prepayments.sort { a, b -> a.rowNum <=> b.rowNum }
+            ПолучДох(ndflPersonAttr(ndflPerson)) {}
+            operationList.each { key, value ->
+                СведОпер(value) {
+                    //доходы
+                    incomeOperations.get(key).each { personIncome ->
+                        СведДохНал(incomeAttr(personIncome)) {}
+                    }
 
-                def operationList = incomes.collectEntries { personIncome ->
-                    def key = personIncome.operationId
-                    def value = ["ИдОпер": personIncome.operationId, "КПП": personIncome.kpp, "ОКТМО": personIncome.oktmo]
-                    return [key, value]
-                }
+                    //Вычеты
+                    deductionOperations.get(key).each { personDeduction ->
+                        СведВыч(deductionAttr(personDeduction)) {}
+                    }
 
-                def incomeOperations = mapToOperationId(incomes);
-                def deductionOperations = mapToOperationId(deductions);
-                def prepaymentOperations = mapToOperationId(prepayments);
-
-                operationList.each { key, value ->
-                    СведОпер(value) {
-                        //доходы
-                        incomeOperations.get(key).each { personIncome ->
-                            СведДохНал(incomeAttr(personIncome)) {}
-                        }
-
-                        //Вычеты
-                        deductionOperations.get(key).each { personDeduction ->
-                            СведВыч(deductionAttr(personDeduction)) {}
-                        }
-
-                        //Авансовые платежи
-                        prepaymentOperations.get(key).each { personPrepayment ->
-                            СведАванс(prepaymentAttr(personPrepayment)) {}
-                        }
+                    //Авансовые платежи
+                    prepaymentOperations.get(key).each { personPrepayment ->
+                        СведАванс(prepaymentAttr(personPrepayment)) {}
                     }
                 }
             }
@@ -1371,9 +1368,8 @@ def ndflPersonAttr(ndflPerson) {
             'Кварт'      : ndflPerson.flat,
             'КодСтрИно'  : ndflPerson.countryCode,
             'АдресИно'   : ndflPerson.address,
-            'ДопИнф'     : ndflPerson.additionalData]
-
-
+            'ДопИнф'     : ndflPerson.additionalData
+    ]
 }
 
 def incomeAttr(personIncome) {
@@ -1516,6 +1512,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String MESSAGE_ERROR_NOT_FOUND_REF = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: \"%s\" не соответствует справочнику \"%s\"."
 @Field final String MESSAGE_ERROR_VALUE = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: %s."
 @Field final String MESSAGE_ERROR_INN = "Некорректный ИНН"
+@Field final String MESSAGE_ERROR_SNILS = "Некорректный СНИЛС"
 @Field final String MESSAGE_ERROR_BIRTHDAY = "Дата рождения налогоплательщика превышает дату отчетного периода"
 @Field final String MESSAGE_ERROR_DATE = "Дата не входит в отчетный период формы"
 @Field final String MESSAGE_ERROR_NOT_MATCH_RULE = "Значение не соответствует правилу: "
@@ -1569,6 +1566,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String C_INP = "Уникальный код клиента"
 @Field final String C_BIRTH_DATE = "Дата рождения"
 @Field final String C_INN_NP = "ИНН  физического лица"
+@Field final String C_SNILS = "СНИЛС"
 @Field final String C_INN_FOREIGN = "ИНН  иностранного гражданина"
 @Field final String C_REGION_CODE = "Код Региона"
 @Field final String C_AREA = "Район"
@@ -1628,7 +1626,7 @@ def prepaymentAttr(personPrepayment) {
 @Field final String RF_HOUSE = "HOUSE"
 @Field final String RF_BUILD = "BUILD"
 @Field final String RF_APPARTMENT = "APPARTMENT"
-@Field final String RF_DUBLICATES = "DUBLICATES"
+@Field final String RF_OLD_ID = "OLD_ID"
 @Field final String RF_DOC_ID = "DOC_ID"
 @Field final String RF_DOC_NUMBER = "DOC_NUMBER"
 
@@ -1832,20 +1830,20 @@ def checkDataReference(
             }
 
             // Спр17 Документ удостоверяющий личность (Обязательное поле)
-            def dulList = dulMap.get(ndflPerson.personId)
+            def allDocList = dulMap.get(ndflPerson.personId)
             // Вид документа
-            def idDocTypeList = []
+            def personDocTypeList = []
             // Серия и номер документа
-            def idDocNumberList = []
-            dulList.each { dul ->
-                idDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
-                idDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
+            def personDocNumberList = []
+            allDocList.each { dul ->
+                personDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
+                personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
             }
-            if (!idDocTypeList.contains(ndflPerson.idDocType)) {
+            if (!personDocTypeList.contains(ndflPerson.idDocType)) {
                 logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
                         T_PERSON, ndflPerson.rowNum, C_ID_DOC_TYPE, fioAndInp, C_ID_DOC_TYPE, R_PERSON);
             }
-            if (!idDocNumberList.contains(ndflPerson.idDocNumber)) {
+            if (!personDocNumberList.contains(ndflPerson.idDocNumber)) {
                 logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
                         T_PERSON, ndflPerson.rowNum, C_ID_DOC_NUMBER, fioAndInp, C_ID_DOC_NUMBER, R_PERSON);
             }
@@ -1954,7 +1952,7 @@ def checkDataReference(
         }
 
         // Спр7 Ставка (Необязательное поле)
-        if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate)) {
+        if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate.toString())) {
             logger.error(MESSAGE_ERROR_NOT_FOUND_REF,
                     T_PERSON_INCOME, ndflPersonIncome.rowNum, C_RATE, fioAndInp, C_RATE, R_RATE);
         }
@@ -2009,8 +2007,9 @@ def checkDataCommon(
     def mapTerBank = getTerBank()
 
     // Параметры подразделения
-    def departmentParam = getDepartmentParam()
-    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
+    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-263
+//    def departmentParam = getDepartmentParam()
+//    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
 
     ndflPersonList.each { ndflPerson ->
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
@@ -2019,7 +2018,7 @@ def checkDataCommon(
 
         rowNumPersonList.add(ndflPerson.rowNum)
 
-        // Общ1 ИНН (Необязательное поле)
+        // Общ1 Корректность ИНН (Необязательное поле)
         if (ndflPerson.innNp != null && !ScriptUtils.checkControlSumInn(ndflPerson.innNp)) {
             logger.error(MESSAGE_ERROR_VALUE,
                     T_PERSON, ndflPerson.rowNum, C_INN_NP, fioAndInp, MESSAGE_ERROR_INN);
@@ -2030,6 +2029,12 @@ def checkDataCommon(
             logger.error(MESSAGE_ERROR_VALUE,
                     T_PERSON, ndflPerson.rowNum, C_BIRTH_DATE, fioAndInp, MESSAGE_ERROR_BIRTHDAY);
         }
+
+        // Общ11 СНИЛС (Необязательное поле)
+        if (ndflPerson.snils != null && !ScriptUtils.checkSnils(ndflPerson.snils)) {
+            logger.warn(MESSAGE_ERROR_VALUE,
+                    T_PERSON, ndflPerson.rowNum, C_SNILS, fioAndInp, MESSAGE_ERROR_SNILS);
+        }
     }
 
     ndflPersonIncomeList.each { ndflPersonIncome ->
@@ -2037,7 +2042,7 @@ def checkDataCommon(
 
         rowNumPersonIncomeList.add(ndflPersonIncome.rowNum)
 
-        // Общ5 Даты доходов
+        // Общ5 Принадлежность дат операций к отчетному периоду
         // Дата начисления дохода (Необязательное поле)
         if (ndflPersonIncome.incomeAccruedDate != null &&
                 (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate()
@@ -2067,7 +2072,7 @@ def checkDataCommon(
                     T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_DATE);
         }
 
-        // Общ7 Заполненность полей
+        // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         if (ndflPersonIncome.paymentDate == null &&
                 ndflPersonIncome.paymentNumber == null &&
                 ndflPersonIncome.taxSumm == null) {
@@ -2290,17 +2295,18 @@ def checkDataCommon(
         }
 
         // Общ10 Соответствие КПП и ОКТМО Тербанку
-        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
-        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
-        if (kppList == null) {
-            logger.error(MESSAGE_ERROR_VALUE,
-                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
-        } else {
-            if (!kppList.contains(ndflPersonIncome.kpp)) {
-                logger.error(MESSAGE_ERROR_VALUE,
-                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
-            }
-        }
+        // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-263
+//        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
+//        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
+//        if (kppList == null) {
+//            logger.error(MESSAGE_ERROR_VALUE,
+//                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_OKTMO, fioAndInp, msgErr);
+//        } else {
+//            if (!kppList.contains(ndflPersonIncome.kpp)) {
+//                logger.error(MESSAGE_ERROR_VALUE,
+//                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_KPP, fioAndInp, msgErr);
+//            }
+//        }
     }
 
     ndflPersonDeductionList.each { ndflPersonDeduction ->
@@ -2308,7 +2314,7 @@ def checkDataCommon(
 
         rowNumPersonDeductionList.add(ndflPersonDeduction.rowNum)
 
-        // Общ6 Даты налоговых вычетов
+        // Общ6 Принадлежность дат налоговых вычетов к отчетному периоду
         // Дата выдачи уведомления (Обязательное поле)
         if (ndflPersonDeduction.notifDate < getReportPeriodStartDate() || ndflPersonDeduction.notifDate > getReportPeriodEndDate()) {
             logger.error(MESSAGE_ERROR_VALUE,
@@ -2336,7 +2342,7 @@ def checkDataCommon(
         rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
     }
 
-    // Общ8 Отсутствие пропусков и повторений
+    // Общ8 Отсутствие пропусков и повторений в нумерации строк
     def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
     msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeList, T_PERSON_INCOME)
     msgErrDubl += getErrorMsgDubl(rowNumPersonDeductionList, T_PERSON_DEDUCTION)

@@ -587,7 +587,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 try {
                     zipXmlIn.getNextEntry();
                     Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("declarationId", declarationData.getId());
+
+                    params.put("declarationId", declarationData.getId().intValue());
                     return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile, params);
                 } catch (IOException e) {
                     throw new ServiceException(e.getLocalizedMessage(), e);

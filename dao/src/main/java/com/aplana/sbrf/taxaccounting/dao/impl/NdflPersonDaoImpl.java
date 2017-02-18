@@ -225,15 +225,15 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         if (parameters != null && !parameters.isEmpty()) {
 
             if (contains(parameters, "lastName")) {
-                sb.append("AND np.last_name = :lastName \n");
+                sb.append("AND lower(np.last_name) = lower(:lastName) \n");
             }
 
             if (contains(parameters, "firstName")) {
-                sb.append("AND np.first_name = :firstName \n");
+                sb.append("AND lower(np.first_name) = lower(:firstName) \n");
             }
 
             if (contains(parameters, "middleName")) {
-                sb.append("AND (np.middle_name is null OR np.middle_name = :middleName) \n");
+                sb.append("AND (np.middle_name is null OR lower(np.middle_name) = lower(:middleName)) \n");
             }
 
             if (contains(parameters, "snils")) {

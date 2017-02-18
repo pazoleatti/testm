@@ -147,16 +147,16 @@ public interface RefBookDataProvider {
 
 	/**
 	 * По коду возвращает строку справочника
-	 * @param recordId код строки справочника
+	 * @param uniqRecordId код строки справочника
 	 * @return
 	 */
-	Map<String, RefBookValue> getRecordData(@NotNull Long recordId);
+	Map<String, RefBookValue> getRecordData(@NotNull Long uniqRecordId);
 
     /**
      * Получение структуры Код строки → Строка справочника по списку кодов строк
-     * @param recordIds код строки справочника
+     * @param uniqRecordIds коды строк справочника
      */
-    Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> recordIds);
+    Map<Long, Map<String, RefBookValue>> getRecordData(List<Long> uniqRecordIds);
 
     /**
      * Значение справочника по Id записи и Id атрибута
