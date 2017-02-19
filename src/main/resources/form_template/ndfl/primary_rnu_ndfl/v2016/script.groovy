@@ -29,6 +29,7 @@ import javax.xml.stream.events.Characters
 import javax.xml.stream.events.EndElement
 import javax.xml.stream.events.StartElement
 import javax.xml.stream.events.XMLEvent
+import java.text.SimpleDateFormat
 
 /**
  * Справочник "Коды, определяющие налоговый (отчётный) период"
@@ -216,12 +217,12 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
             logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", personId,
                     person.getLastName(),
                     person.getFirstName(),
-                    person.getMiddleName()) + ". Изменения внесены в справочники: "+buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
+                    person.getMiddleName()) + ". Изменения внесены в справочники: " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
         }
     }
 }
 
-def buildRefreshNotice(AttrCounter addressAttrCnt, AttrCounter personAttrCnt, AttrCounter documentAttrCnt, AttrCounter taxpayerIdentityAttrCnt){
+def buildRefreshNotice(AttrCounter addressAttrCnt, AttrCounter personAttrCnt, AttrCounter documentAttrCnt, AttrCounter taxpayerIdentityAttrCnt) {
     StringBuffer sb = new StringBuffer();
     appendAttrInfo("Адреса ФЛ", addressAttrCnt, sb);
     appendAttrInfo("ФЛ", personAttrCnt, sb);
@@ -230,12 +231,11 @@ def buildRefreshNotice(AttrCounter addressAttrCnt, AttrCounter personAttrCnt, At
     return sb.toString();
 }
 
-def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb){
-    if (attrCounter.isUpdate()){
+def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb) {
+    if (attrCounter.isUpdate()) {
         sb.append(name).append(attrCounter.buildInfo()).append(", ");
     }
 }
-
 
 /**
  * По списку
@@ -457,13 +457,13 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
         List<Map<String, RefBookValue>> actualDocumentsList = updatePriority(identityDocRecords);
 
         //Обновление признака включается в отчетность
-        for (int i = 0; i < identityDocRecords.size() ; i++) {
+        for (int i = 0; i < identityDocRecords.size(); i++) {
             //небольшой баг, предполагалось что будет два списка для сравнения измененных значений вывода в логах, но в этом случае надо копировать и карты в этих списках. Поэтому сейчас смена приоритета в логах не отображается.
             Map<String, RefBookValue> identityDocsValues = identityDocRecords.get(i);
             Map<String, RefBookValue> actualDocsValues = actualDocumentsList.get(i);
             Integer incRepValue = actualDocsValues.get("INC_REP")?.getNumberValue()?.intValue();
             putOrUpdate(identityDocsValues, "INC_REP", RefBookAttributeType.NUMBER, incRepValue, attrCounter);
-            if (attrCounter.isUpdate()){
+            if (attrCounter.isUpdate()) {
                 Long uniqueId = identityDocsValues.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
                 getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, versionFrom, null, identityDocsValues);
             }
@@ -479,7 +479,7 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
  * @param identityDocRecords
  * @return
  */
-List<Map<String, RefBookValue>> updatePriority(List<Map<String, RefBookValue>> identityDocRecords){
+List<Map<String, RefBookValue>> updatePriority(List<Map<String, RefBookValue>> identityDocRecords) {
 
     //Id типа документа - приоритет,
     Map<Long, Integer> docPriorities = getRefDocumentPriority();
@@ -499,8 +499,6 @@ List<Map<String, RefBookValue>> updatePriority(List<Map<String, RefBookValue>> i
     minimalPrior.put("INC_REP", new RefBookValue(RefBookAttributeType.NUMBER, 1));
     return result;
 }
-
-
 
 
 def fillIdentityDocAttr(Map<String, RefBookValue> values, PersonData person, AttributeChangeListener attributeChangeListener) {
@@ -983,11 +981,52 @@ def createSpecificReport() {
         });
 
         declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-        scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+
+        scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
 
     } else {
         throw new ServiceException("Не найдены данные для формирования отчета!");
     }
+}
+
+/**
+ * Формат имени файла: РНУ_НДФЛ_<ИД формы>_<ФамилияИО>_<ДУЛ>_<ДатаВремя выгрузки>, где
+ * <ИД формы> - ID формы из БД
+ * <ФамилияИО> - Фамилия ФЛ полностью + первая буква имени + первая буква отчества (при наличии). Пример: ИвановаИИ
+ * <ДУЛ> - Серия и номер документа, удостоверяющего личность в формате "Серия№Номер", Серия и Номер ДУЛ не должны содержать разделителей. Пример: 8888№123321
+ * <ДатаВремя выгрузки> - дата и время выгрузки в формате ГГГГММДД_ЧЧММ. Пример: 20160216_1842
+ * @return
+ */
+def createFileName(NdflPerson ndflPerson) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("РНУ_НДФЛ_");
+    sb.append(declarationData.id).append("_");
+    sb.append(capitalize(ndflPerson.lastName));
+    sb.append(firstChar(ndflPerson.firstName));
+    sb.append(firstChar(ndflPerson.middleName)).append("_");
+    sb.append(ndflPerson.idDocNumber?.replaceAll("\\s", "")?.toLowerCase()).append("_");
+    sb.append(new SimpleDateFormat("yyyy.MM.dd_HHmm").format(new Date()));
+    return sb.toString();
+}
+
+
+String firstChar(String str){
+    if (str != null && !str.isEmpty()) {
+        return String.valueOf(Character.toUpperCase(str.charAt(0)));
+    } else {
+        return "";
+    }
+}
+
+String capitalize(String str) {
+    int strLen;
+    if (str == null || (strLen = str.length()) == 0) {
+        return str;
+    }
+    return new StringBuilder(strLen)
+            .append(Character.toTitleCase(str.charAt(0)))
+            .append(str.substring(1).toLowerCase())
+            .toString();
 }
 
 void calculateReportData(writer, ndflPerson) {
