@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.model.PersonData
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
@@ -73,24 +72,24 @@ def calculate() {
     //выставляем параметр что скрипт не формирует новый xml-файл
     calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
-    List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    List<NdflPerson> declarationFormPersonList = ndflPersonService.findNdflPerson(declarationData.id)
 
-    logger.info("В ПНФ найдено записей о физ.лицах: " + ndflPersonList.size());
+    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size());
 
     //Два списка для создания новых записей и для обновления существующих
     List<PersonData> createdPerson = new ArrayList<PersonData>();
     List<PersonData> updatedPerson = new ArrayList<PersonData>();
     Map<Long, NdflPerson> resultMap = new HashMap<Long, NdflPerson>();
-    for (NdflPerson ndflPerson : ndflPersonList) {
+    for (NdflPerson declarationFormPerson : declarationFormPersonList) {
 
-        PersonData personData = createPersonData(ndflPerson, asnuId);
+        PersonData personData = createPersonData(declarationFormPerson, asnuId);
 
         Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, logger);
-        ndflPerson.setPersonId(refBookPersonId)
+        declarationFormPerson.setPersonId(refBookPersonId)
 
         //после идентификации выставим ссылку на запись справочника
         personData.setRefBookPersonId(refBookPersonId)
-        personData.setSourceId(ndflPerson.getId());
+        personData.setSourceId(declarationFormPerson.getId());
 
         if (refBookPersonId != null) {
             //обновление записи
@@ -100,7 +99,7 @@ def calculate() {
             createdPerson.add(personData);
         }
 
-        resultMap.put(ndflPerson.getId(), ndflPerson);
+        resultMap.put(declarationFormPerson.getId(), declarationFormPerson);
     }
 
     logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPerson.size() + ", подготовленно записей для обновления: " + updatedPerson.size());
@@ -108,13 +107,13 @@ def calculate() {
     //Создание справочников
     if (createdPerson != null && !createdPerson.isEmpty()) {
         createRefbookPersonData(createdPerson, asnuId);
-        updateNdflPerson(resultMap, createdPerson);
+        updateReferenceToPersonId(resultMap, createdPerson);
     }
 
     //Обновление справочников
     if (updatedPerson != null && !updatedPerson.isEmpty()) {
         updateRefbookPersonData(updatedPerson, asnuId);
-        updateNdflPerson(resultMap, updatedPerson);
+        updateReferenceToPersonId(resultMap, updatedPerson);
     }
 
     //Обновление данных декларации
@@ -127,7 +126,7 @@ def calculate() {
  * @param resultMap
  * @param personDataList
  */
-def updateNdflPerson(Map<Long, NdflPerson> resultMap, List<PersonData> personDataList) {
+def updateReferenceToPersonId(Map<Long, NdflPerson> resultMap, List<PersonData> personDataList) {
     for (PersonData personData : personDataList) {
         resultMap.get(personData.getSourceId()).setPersonId(personData.getRefBookPersonId());
     }
@@ -355,7 +354,7 @@ def fillAddressAttr(Map<String, RefBookValue> values, PersonData person, Attribu
 RefBookRecord createPersonRecord(PersonData person, Long asnuId, Long addressId, AttributeChangeListener attributeChangeListener) {
     RefBookRecord refBookRecord = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
-    fillNdflPersonAttr(values, person, asnuId, addressId, attributeChangeListener);
+    fillPersonAttr(values, person, asnuId, addressId, attributeChangeListener);
     refBookRecord.setValues(values);
     return refBookRecord;
 }
@@ -369,7 +368,7 @@ RefBookRecord createPersonRecord(PersonData person, Long asnuId, Long addressId,
  * @return
  */
 def updatePersonRecord(Map<String, RefBookValue> values, PersonData person, Long asnuId, Long addressId, AttributeChangeListener attributeChangeListener) {
-    fillNdflPersonAttr(values, person, asnuId, addressId, attributeChangeListener);
+    fillPersonAttr(values, person, asnuId, addressId, attributeChangeListener);
 }
 
 /**
@@ -380,7 +379,7 @@ def updatePersonRecord(Map<String, RefBookValue> values, PersonData person, Long
  * @param addressId ссылка на справочник адреса физлиц
  * @return
  */
-def fillNdflPersonAttr(Map<String, RefBookValue> values, PersonData person, Long asnuId, Long addressId, AttributeChangeListener attributeChangeListener) {
+def fillPersonAttr(Map<String, RefBookValue> values, PersonData person, Long asnuId, Long addressId, AttributeChangeListener attributeChangeListener) {
 
     Long countryId = findCountryId(person.getCitizenship());
     Long statusId = findTaxpayerStatusByCode(person.getStatus());
