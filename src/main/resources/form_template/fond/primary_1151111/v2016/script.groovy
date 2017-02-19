@@ -3578,11 +3578,8 @@ def checkDataXml() {
     def mapActualPresentPlace = getActualRefPresentPlace()
 
     // Получим ИНН из справочника "Общие параметры"
-    // todo https://jira.aplana.com/browse/SBRFNDFL-436 раскомментировать после обновления стенда
-    def sberbankInnParam = ""
-//    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
-//    def sberbankInnParam = configurationParamModel.get(ConfigurationParam.SBERBANK_INN).get(1)
-//    logger.info(sberbankInnParam)
+    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+    def sberbankInnParam = configurationParamModel?.get(ConfigurationParam.SBERBANK_INN)?.get(0)?.get(0)
 
     // Коды тарифа плательщика
     def mapActualTariffPayerCode = getActualTariffPayerCode()
