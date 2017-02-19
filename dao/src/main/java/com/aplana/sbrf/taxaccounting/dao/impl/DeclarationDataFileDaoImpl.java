@@ -2,8 +2,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -149,5 +151,46 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
                 file.getUserDepartmentName(),
                 file.getNote(),
                 file.getFileTypeId());
+    }
+
+
+    @Override
+    public DeclarationDataFile findFileWithMaxWeight(Long declarationDataId) {
+        String sql =
+                "select " +
+                    "t.name file_name, t.creation_date " +
+                "from (  " +
+                    "select " +
+                        "bd.name, bd.creation_date, " +
+                        "case when (lower(bd.name) like 'iv_%' or lower(bd.name) like 'uu_%') then 2 else 1 end weight " +
+                    "from " +
+                        "declaration_data_file ddf " +
+                        "join declaration_data dd on (ddf.declaration_data_id = dd.id) " +
+                        "join blob_data bd on ddf.blob_data_id = bd.id " +
+                    "where " +
+                        "dd.id = :declarationDataId and ( " +
+                            "lower(bd.name) like 'prot_no_ndfl2%' " +
+                            "or lower(bd.name) like 'прот_no_ndfl2%' " +
+                            "or lower(bd.name) like 'reestr_no_ndfl2%' " +
+                            "or lower(bd.name) like 'реестр_no_ndfl2%' " +
+                            "or lower(bd.name) like 'kv_%' " +
+                            "or lower(bd.name) like 'uo_%' " +
+                            "or lower(bd.name) like 'iv_%' " +
+                            "or lower(bd.name) like 'uu_%' " +
+                        ") " +
+                    "order by " +
+                        "weight desc, " +
+                        "bd.creation_date desc " +
+                ") t " +
+                "where rownum = 1 ";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId);
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new DeclarationDataFileDaoImpl.DeclarationDataFilesMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 }

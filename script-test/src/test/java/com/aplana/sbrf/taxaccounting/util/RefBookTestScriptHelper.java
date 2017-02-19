@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.util;
 
+import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -15,6 +17,7 @@ import net.sf.sevenzipjbinding.IInArchive;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -55,6 +58,8 @@ public class RefBookTestScriptHelper {
     private FormTypeService formTypeService;
     private DeclarationService declarationService;
     private ImportFiasDataService importFiasDataService;
+    private BlobDataService blobDataService;
+    private DepartmentService departmentService;
 
     // Заданы константно
     private Logger logger = new Logger();
@@ -67,7 +72,10 @@ public class RefBookTestScriptHelper {
     private boolean isNewRecords;
     private ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
     private InputStream importFileInputStream;
+    private InputStream importInputStream;
+    private File dataFile;
     private String fileName;
+    private String uploadFileName;
     private final ScriptTestMockHelper mockHelper;
     private Integer accountPeriodId; // необходим для БО: форма 101 и 102
     private IInArchive fiasArchive;
@@ -104,6 +112,8 @@ public class RefBookTestScriptHelper {
         formTypeService = mockHelper.mockFormTypeService();
         declarationService = mockHelper.mockDeclarationService();
         importFiasDataService = mockHelper.mockImportFiasDataService();
+        blobDataService = mockHelper.mockBlobDataService();
+        departmentService = mockHelper.mockDepartmentService();
     }
 
     public void setImportFileInputStream(InputStream importFileInputStream) {
@@ -120,6 +130,10 @@ public class RefBookTestScriptHelper {
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("refBookService", refBookService);
         bindings.put("formDataService", formDataService);
+        bindings.put("declarationService", declarationService);
+        bindings.put("formTypeService", formTypeService);
+        bindings.put("departmentService", departmentService);
+        bindings.put("blobDataServiceDaoImpl", blobDataService);
 
         bindings.put("uniqueRecordId", uniqueRecordId);
         bindings.put("recordCommonId", recordCommonId);
@@ -130,8 +144,11 @@ public class RefBookTestScriptHelper {
         bindings.put("scriptStatusHolder", scriptStatusHolder);
         bindings.put("logger", logger);
         bindings.put("accountPeriodId", accountPeriodId);
-
+        bindings.put("UploadFileName", uploadFileName);
+        bindings.put("ImportInputStream", importInputStream);
         bindings.put("importFiasDataService", importFiasDataService);
+        bindings.put("userInfo", new TAUserInfo());
+        bindings.put("dataFile", dataFile);
 
         if (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE ||
                 formDataEvent == FormDataEvent.IMPORT ||
@@ -315,8 +332,48 @@ public class RefBookTestScriptHelper {
         this.fileName = fileName;
     }
 
+    public String getUploadFileName() {
+        return uploadFileName;
+    }
+
+    public void setUploadFileName(String uploadFileName) {
+        this.uploadFileName = uploadFileName;
+    }
+
+    public File getDataFile() {
+        return dataFile;
+    }
+
+    public void setDataFile(File dataFile) {
+        this.dataFile = dataFile;
+    }
+
+    public InputStream getImportInputStream() {
+        return importInputStream;
+    }
+
+    public void setImportInputStream(InputStream importInputStream) {
+        this.importInputStream = importInputStream;
+    }
+
+    public BlobDataService getBlobDataService() {
+        return blobDataService;
+    }
+
+    public void setBlobDataService(BlobDataService blobDataService) {
+        this.blobDataService = blobDataService;
+    }
+
     public void setAccountPeriodId(Integer accountPeriodId) {
         this.accountPeriodId = accountPeriodId;
+    }
+
+    public DepartmentService getDepartmentService() {
+        return departmentService;
+    }
+
+    public void setDepartmentService(DepartmentService departmentService) {
+        this.departmentService = departmentService;
     }
 
     public ImportFiasDataService getImportFiasDataService() {

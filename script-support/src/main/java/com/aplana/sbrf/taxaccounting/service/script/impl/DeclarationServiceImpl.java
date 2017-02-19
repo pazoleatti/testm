@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
@@ -73,6 +74,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private LoadDeclarationDataService loadDeclarationDataService;
     @Autowired
     private ReportService reportService;
+    @Autowired
+    private DeclarationDataFileDao declarationDataFileDao;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -368,4 +371,28 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         return declarationDataDao.findDeclarationDataByKppOktmoOfNdflPersonIncomes(declarationTypeId, departmentReportPeriodId, departmentId, reportPeriodId, kpp, oktmo);
     }
 
+    @Override
+    public DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
+        return declarationDataDao.findDeclarationDataByFileNameAndFileType(fileName, fileTypeId);
+    }
+
+    @Override
+    public void saveFile(DeclarationDataFile file) {
+        declarationDataFileDao.saveFile(file);
+    }
+
+    @Override
+    public TAUserInfo getSystemUserInfo() {
+        return taUserService.getSystemUserInfo();
+    }
+
+    @Override
+    public DeclarationDataFile findFileWithMaxWeight(Long declarationDataId) {
+        return declarationDataFileDao.findFileWithMaxWeight(declarationDataId);
+    }
+
+    @Override
+    public void setDocStateId(long declarationDataId, Long docStateId) {
+        declarationDataDao.setDocStateId(declarationDataId, docStateId);
+    }
 }

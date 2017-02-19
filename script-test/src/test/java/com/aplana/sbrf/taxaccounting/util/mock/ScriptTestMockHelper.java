@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util.mock;
 
+import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -85,4 +86,6 @@ public interface ScriptTestMockHelper {
     RaschsvSvnpPodpisantService mockRaschsvSvnpPodpisantService();
 
     FiasRefBookService fiasRefBookService();
+
+    BlobDataService mockBlobDataService();
 }
