@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -76,6 +77,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private ReportService reportService;
     @Autowired
     private DeclarationDataFileDao declarationDataFileDao;
+    @Autowired
+    private ConfigurationService configurationService;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -394,5 +397,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public void setDocStateId(long declarationDataId, Long docStateId) {
         declarationDataDao.setDocStateId(declarationDataId, docStateId);
+    }
+    @Override
+    public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
+        return configurationService.getAllConfig(userInfo);
     }
 }

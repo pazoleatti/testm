@@ -328,4 +328,8 @@ public interface DeclarationService {
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
      */
     void setDocStateId(long declarationDataId, Long docStateId);
+    /**
+     * Получение конфигурационных параметров (табл. CONFIGURATION)
+     */
+    ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
 }
