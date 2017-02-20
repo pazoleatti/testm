@@ -7,7 +7,11 @@ import groovy.xml.MarkupBuilder
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
@@ -128,6 +132,9 @@ final int NDFL_REFERENCES = 964
 
 @Field
 final int REF_BOOK_DOC_STATE = 929
+
+@Field
+final int REPORT_PERIOD_TYPE_ID = 8
 
 @Field
 final String NDFL_2_S_PRIZNAKOM_1 = "2 НДФЛ (1)"
@@ -885,7 +892,7 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
     // удаление форм не со статусом принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
-        if (declaration.state != State.ACCEPTED) {
+        if (declaration.state != State.CREATED) {
             declarationsForRemove << declaration
         }
     }
@@ -1193,13 +1200,76 @@ def createPrimaryRnuWithErrors() {
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)
         ndflPersonPrimary.prepayments.add(ndflPersonPrepaymentPrimary)
     }
+    fillPrimaryRnuWithErrors()
+}
 
+/**
+ * Заполнение печатного представления спецотчета "Первичные РНУ с ошибками"
+ * @return
+ */
+def fillPrimaryRnuWithErrors() {
     def writer = scriptSpecificReportHolder.getFileOutputStream()
     def workbook = getSpecialReportTemplate()
+    fillGeneralData(workbook)
     workbook.write(writer)
     writer.close()
     scriptSpecificReportHolder
             .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+/**
+ * Заполнение шапки отчета
+ */
+def fillGeneralData(workbook) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    XSSFCellStyle style = makeStyleLeftAligned(workbook)
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    // Вид отчетности
+    String declarationTypeName = declarationTemplate.type.name
+    String note = declarationData.note
+    // Период
+    int year = departmentReportPeriod.reportPeriod.taxPeriod.year
+    String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).NAME.value
+    // Территориальный банк
+    String departmentName = department.name
+    // КПП
+    String kpp = declarationData.kpp
+    //	Дата сдачи корректировки
+    String dateDelivery = getProvider(REPORT_PERIOD_TYPE_ID)
+    .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).END_DATE.value?.format(DATE_FORMAT_DOTTED)
+    // ОКТМО
+    String oktmo = declarationData.oktmo
+    // Код НО (конечный)
+    String taxOrganCode = declarationData.taxOrganCode
+    // Дата формирования
+    String currentDate = new Date().format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
+    XSSFCell cell1 = sheet.getRow(2).createCell(1)
+    cell1.setCellValue(declarationTypeName + " " + note)
+    cell1.setCellStyle(style)
+    XSSFCell cell2 = sheet.getRow(3).createCell(1)
+    cell2.setCellValue(year + ":" + periodName)
+    cell2.setCellStyle(style)
+    XSSFCell cell3 = sheet.getRow(4).createCell(1)
+    cell3.setCellValue(dateDelivery)
+    cell3.setCellStyle(style)
+    XSSFCell cell4 = sheet.getRow(5).createCell(1)
+    cell4.setCellValue(departmentName)
+    cell4.setCellStyle(style)
+    XSSFCell cell5 = sheet.getRow(6).createCell(1)
+    cell5.setCellValue(kpp)
+    cell5.setCellStyle(style)
+    XSSFCell cell6 = sheet.getRow(7).createCell(1)
+    cell6.setCellValue(oktmo)
+    cell6.setCellStyle(style)
+    XSSFCell cell7 = sheet.getRow(8).createCell(1)
+    cell7.setCellValue(taxOrganCode)
+    cell7.setCellStyle(style)
+    XSSFCell cell8 = sheet.getRow(2).createCell(11)
+    cell8.setCellValue(currentDate)
+    cell8.setCellStyle(style)
 }
 
 def initNdflPersonPrimary(ndflPersonId) {
@@ -1209,13 +1279,73 @@ def initNdflPersonPrimary(ndflPersonId) {
         ndflPersonPrimary.incomes.clear()
         ndflPersonPrimary.deductions.clear()
         ndflPersonPrimary.prepayments.clear()
-        ndflpersonFromRNUPrimary[ndflPersonIncomePrimary.ndflPersonId] = ndflPersonPrimary
+        ndflpersonFromRNUPrimary[ndflPersonId] = ndflPersonPrimary
     }
     return ndflPersonPrimary
+}
+
+def fillPrimaryRNUNDFLWithErrorsTable(final XSSFWorkbook workbook) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    def startIndex = 12
+    ndflpersonFromRNUPrimary.values().each { ndflPerson ->
+        ndflPerson.incomes.each { income ->
+
+        }
+    }
+}
+
+def fillPrimaryRNUNDFLWithErrorsRow(final XSSFWorkbook workbook, declarationDataRnuPrimaryId) {
+    def styleLeftAligned = makeStyleLeftAligned(workbook)
+    styleLeftAligned = thinBorderStyle(styleLeftAligned)
+    def styleCenterAligned = makeStyleCenterAligned(workbook)
+    styleCenterAligned = thinBorderStyle(styleCenterAligned)
+    // Первичная НФ
+
+    // Период
+    int year = departmentReportPeriod.reportPeriod.taxPeriod.year
+    String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).NAME.value
 }
 
 // Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
 def getSpecialReportTemplate() {
     def blobData = blobDataServiceDaoImpl.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
     new XSSFWorkbook(blobData.getInputStream())
+}
+
+/**
+ * Создать стиль ячейки с выравниваем слева
+ * @param workbook
+ * @return
+ */
+
+def makeStyleLeftAligned(XSSFWorkbook workbook) {
+    def XSSFCellStyle style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_LEFT)
+    return style
+}
+
+/**
+ * Создать стиль ячейки с выравниваем по центру
+ * @param workbook
+ * @return
+ */
+
+def makeStyleCenterAligned(XSSFWorkbook workbook) {
+    def XSSFCellStyle style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_CENTER)
+    return style
+}
+
+/**
+ * Добавляет к стилю ячейки тонкие границы
+ * @param style
+ * @return
+ */
+def thinBorderStyle(final style) {
+    style.setBorderTop(CellStyle.BORDER_THIN)
+    style.setBorderBottom(CellStyle.BORDER_THIN)
+    style.setBorderLeft(CellStyle.BORDER_THIN)
+    style.setBorderRight(CellStyle.BORDER_THIN)
+    return style
 }

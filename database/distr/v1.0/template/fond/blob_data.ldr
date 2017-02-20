@@ -1,0 +1,18 @@
+LOAD DATA
+INFILE *
+APPEND
+CONTINUEIF NEXT(1:1) = '#'
+INTO TABLE "BLOB_DATA"
+FIELDS TERMINATED BY'|'
+OPTIONALLY ENCLOSED BY '[' AND ']'
+TRAILING NULLCOLS ( 
+ID char(36),
+NAME char(530),
+L_0 FILLER char,
+DATA LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
+CREATION_DATE DATE "DD.MM.RR")
+begindata
+ 8c76f33c-0ad2-4d1c-afc1-b70bc4ad4b5d|report.jrxml|primary_1151111/v2016/report.jrxml|01.01.2016|
+ 415b49b5-cbc9-4f95-bf5d-7f90521798f1|NO_RASCHSV_1_162_00_05_01_01.xsd|primary_1151111/v2016/NO_RASCHSV_1_162_00_05_01_01.xsd|01.01.2016|
+ e88efec4-f3ab-4162-a36a-053b2004b14e|report_person.xlsx|primary_1151111/v2016/report_person.xlsx|01.01.2016|
+ 3784d4da-a6f9-41c1-aec5-932d58bc2da6|report_summary.xlsx|primary_1151111/v2016/report_summary.xlsx|01.01.2016|

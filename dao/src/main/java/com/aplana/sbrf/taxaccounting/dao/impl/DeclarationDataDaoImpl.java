@@ -286,6 +286,20 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
+    public void setDocStateId(long declarationDataId, Long docStateId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("docStateId", docStateId);
+        values.put("declarationDataId", declarationDataId);
+        int count = getNamedParameterJdbcTemplate().update(
+                "update declaration_data set doc_state_id = :docStateId where id = :declarationDataId",
+                values
+        );
+        if (count == 0) {
+            throw new DaoException("Не удалось изменить статус налоговой формы с id = %d, так как она не существует.", declarationDataId);
+        }
+    }
+
+    @Override
     public void setFileName(long declarationDataId, String fileName) {
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("fileName", fileName);
@@ -635,6 +649,35 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .addValue("reportPeriodId", reportPeriodId)
                 .addValue("kpp", kpp)
                 .addValue("oktmo", oktmo);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
+        String sql =
+                "select " +
+                    "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                    "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
+                    "drp.report_period_id, drp.department_id " +
+                "from " +
+                    "DECLARATION_DATA dd " +
+                    "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
+                    "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
+                    "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
+                "where " +
+                    "bd.name = :fileName " +
+                    "and ddf.file_type_id = :fileTypeId ";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("fileName", fileName);
+        if (fileTypeId != null) {
+            params.addValue("fileTypeId", fileTypeId);
+        }
+
         try {
             return getNamedParameterJdbcTemplate().queryForObject(sql, params, new DeclarationDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
