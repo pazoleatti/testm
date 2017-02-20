@@ -2570,41 +2570,63 @@ def calculateData() {
     //выставляем параметр что скрипт не формирует новый xml-файл
     calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
+    List<RaschsvPersSvStrahLic> declarationFormPersonList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
+
+    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size());
+
     //Два списка для создания новых записей и для обновления существующих
-    List<RaschsvPersSvStrahLic> createdPersonList = new ArrayList<RaschsvPersSvStrahLic>()
-    List<RaschsvPersSvStrahLic> updatedPersonList = new ArrayList<RaschsvPersSvStrahLic>()
-    def updCnt = 0, createCnt = 0;
+    List<PersonData> createdPerson = new ArrayList<PersonData>();
+    List<PersonData> updatedPerson = new ArrayList<PersonData>();
+    Map<Long, RaschsvPersSvStrahLic> resultMap = new HashMap<Long, RaschsvPersSvStrahLic>();
+    for (RaschsvPersSvStrahLic declarationFormPerson : declarationFormPersonList) {
 
-    def raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
-    if (raschsvPersSvStrahLicList != null && !raschsvPersSvStrahLicList.isEmpty()) {
-        raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
+        PersonData personData = createPersonData(declarationFormPerson);
 
-            // Идентификация физического лица
-            PersonData personData = createPersonData(raschsvPersSvStrahLic);
-            Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD);
-            raschsvPersSvStrahLic.personId = refBookPersonId
-            if (refBookPersonId != null) {
-                //обновление записи
-                updatedPersonList.add(raschsvPersSvStrahLic);
-                updCnt++;
-            } else {
-                //Новые записи помещаем в список для пакетного создания
-                createdPersonList.add(raschsvPersSvStrahLic);
-                createCnt++;
-            }
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, logger);
+        declarationFormPerson.setPersonId(refBookPersonId)
+
+        //после идентификации выставим ссылку на запись справочника
+        personData.setRefBookPersonId(refBookPersonId)
+        personData.setSourceId(declarationFormPerson.getId());
+
+        if (refBookPersonId != null) {
+            //обновление записи
+            updatedPerson.add(personData);
+        } else {
+            //Новые записи помещаем в список для пакетного создания
+            createdPerson.add(personData);
         }
+
+        resultMap.put(declarationFormPerson.getId(), declarationFormPerson);
     }
-    // Добавление записей в справочник Физические лица
-    if (createdPersonList != null && !createdPersonList.isEmpty()) {
-        createRefbookPersonData(createdPersonList);
+
+    logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPerson.size() + ", подготовленно записей для обновления: " + updatedPerson.size());
+
+    //Создание справочников
+    if (createdPerson != null && !createdPerson.isEmpty()) {
+        createRefbookPersonData(createdPerson);
+        updateReferenceToPersonId(resultMap, createdPerson);
     }
-    // Добавление записей в справочник Физические лица
-    if (updatedPersonList != null && !updatedPersonList.isEmpty()) {
-        updateRefbookPersonData(updatedPersonList);
+
+    //Обновление справочников
+    if (updatedPerson != null && !updatedPerson.isEmpty()) {
+        updateRefbookPersonData(updatedPerson);
+        updateReferenceToPersonId(resultMap, updatedPerson);
     }
-    raschsvPersSvStrahLicService.updatePersSvStrahLic(raschsvPersSvStrahLicList)
-    logger.info("Рассчет завешен. Записей обработано " + raschsvPersSvStrahLicList.size() + ".  В справочнике 'Физические лица' записей создано: " + createCnt + ", записей обновлено: " + updCnt);
-    return
+
+    //Обновление данных декларации
+    raschsvPersSvStrahLicService.updatePersSvStrahLic(new ArrayList<RaschsvPersSvStrahLic>(resultMap.values()))
+}
+
+/**
+ * Обноаляет ссылки на справочник ФЛ
+ * @param resultMap
+ * @param personDataList
+ */
+def updateReferenceToPersonId(Map<Long, RaschsvPersSvStrahLic> resultMap, List<PersonData> personDataList) {
+    for (PersonData personData : personDataList) {
+        resultMap.get(personData.getSourceId()).setPersonId(personData.getRefBookPersonId());
+    }
 }
 
 /**
@@ -2612,23 +2634,27 @@ def calculateData() {
  * @param person
  * @return
  */
-PersonData createPersonData(RaschsvPersSvStrahLic raschsvPersSvStrahLic) {
+PersonData createPersonData(RaschsvPersSvStrahLic person) {
     PersonData personData = new PersonData();
 
-    personData.lastName = raschsvPersSvStrahLic.familia;
-    personData.firstName = raschsvPersSvStrahLic.imya;
-    personData.middleName = raschsvPersSvStrahLic.otchestvo;
+    personData.refBookPersonId = person.personId;
 
-    personData.inn = raschsvPersSvStrahLic.innfl;
-    personData.snils = raschsvPersSvStrahLic.snils;
-    personData.birthDate = raschsvPersSvStrahLic.dataRozd;
+    personData.lastName = person.familia;
+    personData.firstName = person.imya;
+    personData.middleName = person.otchestvo;
 
-    personData.citizenshipId = findCountryId(raschsvPersSvStrahLic.grazd);
-    personData.sex = raschsvPersSvStrahLic.pol?.toInteger();
+    personData.inn = person.innfl;
+    personData.snils = person.snils;
+    personData.birthDate = person.dataRozd;
+
+    personData.citizenshipId = findCountryId(person.grazd);
+    personData.citizenship = person.grazd;
+    personData.sex = person.pol?.toInteger();
 
     //Документы
-    personData.documentTypeId = findDocumentTypeByCode(raschsvPersSvStrahLic.kodVidDoc);
-    personData.documentNumber = raschsvPersSvStrahLic.serNomDoc;
+    personData.documentTypeCode = person.kodVidDoc;
+    personData.documentTypeId = findDocumentTypeByCode(person.kodVidDoc);
+    personData.documentNumber = person.serNomDoc;
 
     return personData;
 }
@@ -2638,32 +2664,45 @@ PersonData createPersonData(RaschsvPersSvStrahLic raschsvPersSvStrahLic) {
  * @param personList
  * @return
  */
-def createRefbookPersonData(List<RaschsvPersSvStrahLic> personList) {
-
-    logger.info("Подготовка к созданию данных по физ.лицам: " + personList.size() + " записей");
+def createRefbookPersonData(List<PersonData> personList) {
 
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
-        RaschsvPersSvStrahLic person = personList.get(i)
-        RefBookRecord refBookRecord = createPersonRecord(person);
+        PersonData person = personList.get(i)
+        RefBookRecord refBookRecord = createPersonRecord(person, new EmptyChangedListener());
         personRecords.add(refBookRecord);
     }
 
     //сгенерированные идентификаторы справочника физлиц
     List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, personRecords)
-    logger.info("В справочнике 'Физические лица' создано записей: " + personIds.size());
 
     //создание записей справочников документы и идентфикаторы физлиц
     List<RefBookRecord> documentsRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
-        RaschsvPersSvStrahLic person = personList.get(i)
-        // Устанавливаем ссылку на запись Физические лица для объекта ПерсСвСтрахЛиц
-        person.setPersonId(personIds.get(i));
-        documentsRecords.add(createIdentityDocRecord(person));
+        PersonData person = personList.get(i)
+        Long generatedId = personIds.get(i);
+        person.setRefBookPersonId(generatedId); // выставляем присвоенный Id
+        documentsRecords.add(createIdentityDocRecord(person, new EmptyChangedListener()));
     }
 
     List<Long> docIds = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, documentsRecords)
+
+    //Выводим информацию о созданных записях
+    for (int i = 0; i < personList.size(); i++) {
+        Long personId = personIds.get(i);
+        RefBookRecord personRecord = personRecords.get(i);
+        Map<String, RefBookValue> personValues = personRecord.getValues()
+
+        String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s",
+                personId,
+                personValues.get("LAST_NAME")?.getStringValue(),
+                personValues.get("FIRST_NAME")?.getStringValue(),
+                personValues.get("MIDDLE_NAME")?.getStringValue());
+        logger.info(noticeMsg);
+    }
+
+    logger.info("В справочнике 'Физические лица' создано записей: " + personIds.size());
     logger.info("В справочнике 'Документы физических лиц' создано записей: " + docIds.size());
 }
 
@@ -2674,33 +2713,58 @@ def createRefbookPersonData(List<RaschsvPersSvStrahLic> personList) {
  */
 def updateRefbookPersonData(List<RaschsvPersSvStrahLic> personList) {
 
-    logger.info("Подготовка к обновлению данных по физлицам: " + personList.size());
-
     Date versionFrom = getVersionFrom();
 
-    List<Long> personIds = getPersonIds(personList);
+    List<Long> personIds = collectPersonIds(personList);
 
     //-----<INITIALIZE_CACHE_DATA>-----
     //PersonId : Физлица
     Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersons(personIds);
-    //PersonId :  UniqId:Документы
+    //PersonId :  UniqId: Документы
     Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDul(personIds)
     //-----<INITIALIZE_CACHE_DATA_END>-----
 
-    for (RaschsvPersSvStrahLic person : personList) {
-        def personId = person.getPersonId();
+    for (PersonData person : personList) {
+        def personId = person.getRefBookPersonId();
+
         Map<String, RefBookValue> refBookPersonValues = refBookPerson.get(personId);
 
-        updatePersonRecord(refBookPersonValues, person);
+        AttrCounter personAttrCnt = new AttrCounter();
 
-        getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, personId, versionFrom, null, refBookPersonValues);
+        updatePersonRecord(refBookPersonValues, person, personAttrCnt);
 
+        if (personAttrCnt.isUpdate()) {
+            getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, personId, versionFrom, null, refBookPersonValues);
+        }
+
+        AttrCounter documentAttrCnt = new AttrCounter();
         //Обновление списка документов
-        if (person.serNomDoc != null && !person.serNomDoc.isEmpty() && person.kodVidDoc != null && !person.kodVidDoc.isEmpty()) {
-            updateIdentityDocRecords(identityDocMap.get(personId), person);
+        //Проверка, если задан номер и тип документа
+        if (person.getDocumentNumber() != null && !person.getDocumentNumber().isEmpty() && person.getDocumentTypeCode() != null && !person.getDocumentTypeCode().isEmpty()) {
+            updateIdentityDocRecords(identityDocMap.get(personId), person, documentAttrCnt);
+        }
+
+        if (personAttrCnt.isUpdate() || documentAttrCnt.isUpdate()) {
+
+            logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", personId,
+                    person.getLastName(),
+                    person.getFirstName(),
+                    person.getMiddleName()) + ". Изменения внесены в справочники: " + buildRefreshNotice(personAttrCnt, documentAttrCnt));
         }
     }
-    logger.info("В справочнике 'Физические лица' обновлено записей: " + personList.size());
+}
+
+def buildRefreshNotice(AttrCounter personAttrCnt, AttrCounter documentAttrCnt){
+    StringBuffer sb = new StringBuffer();
+    appendAttrInfo("ФЛ", personAttrCnt, sb);
+    appendAttrInfo("Документы ФЛ", documentAttrCnt, sb);
+    return sb.toString();
+}
+
+def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb){
+    if (attrCounter.isUpdate()){
+        sb.append(name).append(attrCounter.buildInfo()).append(", ");
+    }
 }
 
 /**
@@ -2709,10 +2773,10 @@ def updateRefbookPersonData(List<RaschsvPersSvStrahLic> personList) {
  * @param asnuId идентификатор АСНУ в справочнике АСНУ
  * @return запись справочника
  */
-RefBookRecord createPersonRecord(RaschsvPersSvStrahLic person) {
+RefBookRecord createPersonRecord(RaschsvPersSvStrahLic person, AttributeChangeListener attributeChangeListener) {
     RefBookRecord refBookRecord = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
-    fillRaschsvPersSvStrahLicAttr(values, person);
+    fillPersonAttr(values, person, attributeChangeListener);
     refBookRecord.setValues(values);
     return refBookRecord;
 }
@@ -2723,8 +2787,8 @@ RefBookRecord createPersonRecord(RaschsvPersSvStrahLic person) {
  * @param person
  * @return
  */
-def updatePersonRecord(Map<String, RefBookValue> values, RaschsvPersSvStrahLic person) {
-    fillRaschsvPersSvStrahLicAttr(values, person);
+def updatePersonRecord(Map<String, RefBookValue> values, PersonData person, AttributeChangeListener attributeChangeListener) {
+    fillPersonAttr(values, person, attributeChangeListener);
 }
 
 /**
@@ -2733,45 +2797,162 @@ def updatePersonRecord(Map<String, RefBookValue> values, RaschsvPersSvStrahLic p
  * @param person класс предоставляющий данные для заполнения справочника
  * @return
  */
-def fillRaschsvPersSvStrahLicAttr(Map<String, RefBookValue> values, RaschsvPersSvStrahLic person) {
+def fillPersonAttr(Map<String, RefBookValue> values, PersonData person, AttributeChangeListener attributeChangeListener) {
 
-    Long countryId = findCountryId(person.grazd);
+    Long countryId = findCountryId(person.getCitizenship());
 
-    putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.familia);
-    putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.imya);
-    putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.otchestvo);
-    putOrUpdate(values, "SEX", RefBookAttributeType.NUMBER, person.pol?.toInteger());
-    putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.innfl);
-    putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, null);
-    putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.snils);
-    putOrUpdate(values, "RECORD_ID", RefBookAttributeType.NUMBER, null);
-    putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.dataRozd);
-    putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null);
-    putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, null);
-    putOrUpdate(values, "PENSION", RefBookAttributeType.NUMBER, person.prizOps?.toInteger());
-    putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, person.prizOms?.toInteger());
-    putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, person.prizOss?.toInteger());
-    putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, 2);
-    putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, countryId);
-    putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, null);
-    putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, null);
-    putOrUpdate(values, "OLD_ID", RefBookAttributeType.REFERENCE, null);
+    putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
+    putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
+    putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
+    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, null, attributeChangeListener);
+    putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
+    putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
+    putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
+    putOrUpdate(values, "RECORD_ID", RefBookAttributeType.NUMBER, null, attributeChangeListener);
+    putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate(), attributeChangeListener);
+    putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null, attributeChangeListener);
+    putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, null, attributeChangeListener);
+    putOrUpdate(values, "PENSION", RefBookAttributeType.NUMBER, 2, attributeChangeListener);
+    putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, 2, attributeChangeListener);
+    putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, 2, attributeChangeListener);
+    putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, 2, attributeChangeListener);
+    putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, countryId, attributeChangeListener);
+    putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, null, attributeChangeListener);
+    putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, null, attributeChangeListener);
+    putOrUpdate(values, "OLD_ID", RefBookAttributeType.REFERENCE, null, attributeChangeListener);
 }
 
 /**
  * Если не заполнен входной параметр, то никаких изменений в соответствующий атрибут записи справочника не вносится
+ * @return 0 - изменений нет, 1-создание записи, 2 - обновление
  */
-def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value) {
+def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value, AttributeChangeListener attributeChangedListener) {
+
+    AttributeChangeEvent changeEvent = new AttributeChangeEvent(attrName, value);
+
     RefBookValue refBookValue = valuesMap.get(attrName);
     if (refBookValue != null) {
-        //обновление записи
-        if (value != null) {
+        //обновление записи, если новое значение задано и отличается от существующего
+        Object currentValue = refBookValue.getValue();
+        changeEvent.setCurrentValue(currentValue);
+        if (value != null && !ScriptUtils.equalsNullSafe(currentValue, value)) {
+            //значения не равны, обновление
             refBookValue.setValue(value);
+            changeEvent.setType(EventType.REFRESHED);
         }
     } else {
         //создание новой записи
         valuesMap.put(attrName, new RefBookValue(type, value));
+        changeEvent.setType(EventType.CREATED);
     }
+
+    attributeChangedListener.processAttr(changeEvent);
+
+}
+
+enum EventType {
+    IGNORED,
+    CREATED,
+    REFRESHED,
+    DELETED,
+}
+
+public class AttributeChangeEvent {
+
+    AttributeChangeEvent(String attrName, Object value) {
+        this.attrName = attrName
+        this.value = value
+    }
+    public EventType type = EventType.IGNORED;
+
+    private String attrName;
+
+    private Object currentValue;
+
+    private Object value;
+
+    public String getAttrName() {
+        return attrName;
+    }
+
+    public void setAttrName(String attrName) {
+        this.attrName = attrName;
+    }
+
+    Object getCurrentValue() {
+        return currentValue
+    }
+
+    void setCurrentValue(Object currentValue) {
+        this.currentValue = currentValue
+    }
+
+    EventType getType() {
+        return type
+    }
+
+    void setType(EventType type) {
+        this.type = type
+    }
+
+    Object getValue() {
+        return value
+    }
+
+    void setValue(Object value) {
+        this.value = value
+    }
+}
+
+class AttrCounter implements AttributeChangeListener {
+
+    StringBuilder sb = new StringBuilder();
+
+    private int refreshed = 0;
+    private int created = 0;
+    private int ignored = 0;
+
+    @Override
+    void processAttr(AttributeChangeEvent event) {
+        if (EventType.CREATED.equals(event.type)) {
+            created++;
+            //if (event.getValue() != null) {sb.append("[").append(event.getAttrName()).append(": ").append(event.getValue()).append("]")}
+        } else if (EventType.REFRESHED.equals(event.type)) {
+            refreshed++;
+            sb.append("[").append(event.getAttrName()).append(":").append(event.getCurrentValue()).append("->").append(event.getValue()).append("]")
+        } else if (EventType.IGNORED.equals(event.type)) {
+            ignored++;
+        }
+    }
+
+    public String buildInfo() {
+        return sb.toString();
+    }
+
+    public boolean isUpdate() {
+        return (created != 0 || refreshed != 0)
+    }
+
+}
+
+class EmptyChangedListener implements AttributeChangeListener {
+    public void processAttr(AttributeChangeEvent event) {
+        //do nothing...
+    }
+}
+
+public interface AttributeChangeListener extends EventListener {
+    public void processAttr(AttributeChangeEvent event);
+}
+
+def collectPersonIds(List<PersonData> personDataList) {
+    def personIds = []
+    personDataList.each { personData ->
+        if (personData.refBookPersonId != null && personData.refBookPersonId != 0) {
+            personIds.add(personData.refBookPersonId)
+        }
+    }
+    return personIds;
 }
 
 /**
@@ -2780,58 +2961,86 @@ def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAtt
  * @param person
  * @return
  */
-def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook, RaschsvPersSvStrahLic person) {
+def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook, PersonData person, AttrCounter attrCounter) {
+
     Map<Long, String> docCodes = getRefDocument()
 
-    //Id типа документа - приоритет,
-    Map<Long, Integer> docPriorities = getRefDocumentPriority();
-
     //Идентификатор типа документа
-    Long docTypeId = docCodes.find { it.value == person.kodVidDoc }?.key;
+    Long docTypeId = docCodes.find { it.value == person.getDocumentTypeCode() }?.key;
 
     if (docTypeId != null) {
 
         //Ищем документ с таким же типом
         Map<String, RefBookValue> findedDoc = identityDocRefBook?.find {
-            docTypeId.equals(it.get("DOC_ID")) && person.serNomDoc?.equalsIgnoreCase(it.get("DOC_NUMBER"));
+            Long docIdRef = it.get("DOC_ID")?.getReferenceValue();
+            String docNumber = it.get("DOC_NUMBER")?.getStringValue();
+            docTypeId.equals(docIdRef) && person.getDocumentNumber()?.equalsIgnoreCase(docNumber);
         };
 
         List<Map<String, RefBookValue>> identityDocRecords = new ArrayList<Map<String, RefBookValue>>();
 
         if (findedDoc != null) {
             //документ с таким типом и номером существует, ничего не делаем
-            return;
+            //return;
         } else {
-            RefBookRecord refBookRecord = createIdentityDocRecord(person);
+            RefBookRecord refBookRecord = createIdentityDocRecord(person, attrCounter);
             List<Long> ids = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, getVersionFrom(), null, Arrays.asList(refBookRecord));
+
+            //выставляем присвоеный ID и добавляем в общий список для выставления приоритетов
             Map<String, RefBookValue> values = refBookRecord.getValues();
             values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, ids.first()));
             identityDocRecords.add(values);
         }
 
+        //Добавляем существующие документы если есть
         if (identityDocRefBook != null && !identityDocRefBook.isEmpty()) {
-            identityDocRecords.addAll(identityDocRecords);
+            identityDocRecords.addAll(identityDocRefBook);
         }
 
-        //Если документов несколько - выбираем по приоритету какой использовать в отчетах
-        if (identityDocRecords.size() > 1) {
-            //сбрасываем текушие
-            identityDocRecords.each {
-                it.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "0"));
-            }
-            Map<String, RefBookValue> minimalPrior = identityDocRecords.min {
-                docPriorities.get(it.get("DOC_ID"));
-            }
-
-            minimalPrior?.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
-        }
+        List<Map<String, RefBookValue>> actualDocumentsList = updatePriority(identityDocRecords);
 
         //Обновление признака включается в отчетность
-        for (Map<String, RefBookValue> identityDocsValues : identityDocRecords) {
-            Long uniqueId = identityDocsValues.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
-            getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, versionFrom, null, identityDocsValues);
+        for (int i = 0; i < identityDocRecords.size() ; i++) {
+            //небольшой баг, предполагалось что будет два списка для сравнения измененных значений вывода в логах, но в этом случае надо копировать и карты в этих списках. Поэтому сейчас смена приоритета в логах не отображается.
+            Map<String, RefBookValue> identityDocsValues = identityDocRecords.get(i);
+            Map<String, RefBookValue> actualDocsValues = actualDocumentsList.get(i);
+            Integer incRepValue = actualDocsValues.get("INC_REP")?.getNumberValue()?.intValue();
+            putOrUpdate(identityDocsValues, "INC_REP", RefBookAttributeType.NUMBER, incRepValue, attrCounter);
+            if (attrCounter.isUpdate()){
+                Long uniqueId = identityDocsValues.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
+                getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, versionFrom, null, identityDocsValues);
+            }
         }
+
+    } else {
+        logger.error("Ошибка не найден тип документа с кодом " + person.getDocumentTypeCode())
     }
+}
+
+/**
+ * Метод получает на вход список документов и возвращает на выходе новый список документов в котором флаг включения в отчет выставлен документу с минимальным приоритетом
+ * @param identityDocRecords
+ * @return
+ */
+List<Map<String, RefBookValue>> updatePriority(List<Map<String, RefBookValue>> identityDocRecords){
+
+    //Id типа документа - приоритет,
+    Map<Long, Integer> docPriorities = getRefDocumentPriority();
+
+    List<Map<String, RefBookValue>> result = new ArrayList<Map<String, RefBookValue>>(identityDocRecords)
+
+    //сбрасываем флаг у всех документов
+    result.each { valuesMap ->
+        valuesMap.put("INC_REP", new RefBookValue(RefBookAttributeType.NUMBER, 0));
+    }
+
+    Map<String, RefBookValue> minimalPrior = result.min {
+        Long docIdRef = it.get("DOC_ID")?.getReferenceValue();
+        Integer prior = docPriorities.get(docIdRef);
+        return prior;
+    }
+    minimalPrior.put("INC_REP", new RefBookValue(RefBookAttributeType.NUMBER, 1));
+    return result;
 }
 
 /**
@@ -2841,18 +3050,22 @@ def updateIdentityDocRecords(List<Map<String, RefBookValue>> identityDocRefBook,
  */
 def findCountryId(countryCode) {
     def citizenshipCodeMap = getRefCitizenship();
-    return countryCode != null && !countryCode.isEmpty() ? citizenshipCodeMap.find {
+    def result = countryCode != null && !countryCode.isEmpty() ? citizenshipCodeMap.find {
         it.value == countryCode
     }?.key : null;
+    if (countryCode != null && !countryCode.isEmpty() && result == null) {
+        logger.warn("В справочнике 'ОК 025-2001 (Общероссийский классификатор стран мира)' не найдена запись, страна с кодом " + countryCode);
+    }
+    return result;
 }
 
 /**
  * Документы, удостоверяющие личность
  */
-RefBookRecord createIdentityDocRecord(RaschsvPersSvStrahLic person) {
+RefBookRecord createIdentityDocRecord(PersonData person, AttributeChangeListener attributeChangeListener) {
     RefBookRecord record = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
-    fillIdentityDocAttr(values, person);
+    fillIdentityDocAttr(values, person, attributeChangeListener);
     record.setValues(values);
     return record;
 }
@@ -2863,15 +3076,14 @@ RefBookRecord createIdentityDocRecord(RaschsvPersSvStrahLic person) {
  * @param person класс предоставляющий данные для заполнения справочника
  * @return
  */
-def fillIdentityDocAttr(Map<String, RefBookValue> values, RaschsvPersSvStrahLic person) {
-
-    values.put("PERSON_ID", new RefBookValue(RefBookAttributeType.REFERENCE, person.personId));
-    values.put("DOC_NUMBER", new RefBookValue(RefBookAttributeType.STRING, person.serNomDoc));
-    values.put("ISSUED_BY", new RefBookValue(RefBookAttributeType.STRING, null));
-    values.put("ISSUED_DATE", new RefBookValue(RefBookAttributeType.DATE, null));
+def fillIdentityDocAttr(Map<String, RefBookValue> values, PersonData person, AttributeChangeListener attributeChangeListener) {
+    putOrUpdate(values, "PERSON_ID", RefBookAttributeType.REFERENCE, person.getRefBookPersonId(), attributeChangeListener);
+    putOrUpdate(values, "DOC_NUMBER", RefBookAttributeType.STRING, person.getDocumentNumber(), attributeChangeListener);
+    putOrUpdate(values, "ISSUED_BY", RefBookAttributeType.STRING, null, attributeChangeListener);
+    putOrUpdate(values, "ISSUED_DATE", RefBookAttributeType.DATE, null, attributeChangeListener);
     //Признак включения в отчет, при создании ставиться 1, при обновлении надо выбрать с минимальным приоритетом
-    values.put("INC_REP", new RefBookValue(RefBookAttributeType.STRING, "1"));
-    values.put("DOC_ID", new RefBookValue(RefBookAttributeType.REFERENCE, findDocumentTypeByCode(person.kodVidDoc)));
+    putOrUpdate(values, "INC_REP", RefBookAttributeType.NUMBER, 1, attributeChangeListener);
+    putOrUpdate(values, "DOC_ID", RefBookAttributeType.REFERENCE, findDocumentTypeByCode(person.getDocumentTypeCode()), attributeChangeListener);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -3157,8 +3369,9 @@ def checkDataXml() {
     def mapPresentPlace = getRefPresentPlace()
     def mapActualPresentPlace = getActualRefPresentPlace()
 
-    // Общие параметры
-    def mapConfigurationParam = getConfigurationParam()
+    // Получим ИНН из справочника "Общие параметры"
+    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+    def sberbankInnParam = configurationParamModel?.get(ConfigurationParam.SBERBANK_INN)?.get(0)?.get(0)
 
     // Коды тарифа плательщика
     def mapActualTariffPayerCode = getActualTariffPayerCode()
@@ -3183,8 +3396,8 @@ def checkDataXml() {
             def poMestuParam = mapPresentPlace.get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
             def poMestuCodeParam = poMestuParam?.get(RF_CODE)?.value
             if (poMestuCodeXml != poMestuCodeParam) {
-                def pathPoMestu = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, DOCUMENT_PO_MESTU].join(".")
-                logger.warn("Код места, по которому предоставляется документ " + pathPoMestu + " = \"" + poMestuCodeXml + "\" не совпадает с настройками подразделения.")
+                def pathAttr = "Файл.Документ.ПоМесту"
+                logger.warn("Код места, по которому предоставляется документ $pathAttr = \"" + poMestuCodeXml + "\" не совпадает с настройками подразделения.")
             }
 
             // 2.1.2 Актуальность кода места
@@ -3192,7 +3405,7 @@ def checkDataXml() {
             def poMestuActualParam = mapActualPresentPlace.get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
             def poMestuCodeActualParam = poMestuActualParam?.get(RF_CODE)?.value
             if (poMestuCodeParam != poMestuCodeActualParam || !poMestuActualParam?.get(RF_FOR_FOND)?.value) {
-                logger.warn("В настройках подразделений указан неактуальный код места, по которому предоставляется документ = \"" + poMestuCodeActualParam + "\"")
+                logger.warn("В настройках подразделений указан неактуальный код места, по которому предоставляется документ = \"$poMestuCodeActualParam\"")
             }
 
             // НомКорр
@@ -3216,6 +3429,8 @@ def checkDataXml() {
                     def sVReorgYLInnXml = ""
                     def sVReorgYLKppXml = ""
 
+                    boolean sVReorgYLIsExist = false
+
                     // НПЮЛ
                     documentChildNode.childNodes().each { NPYLNode ->
                         if (NPYLNode.name == NODE_NAME_NPYL) {
@@ -3225,6 +3440,7 @@ def checkDataXml() {
                             // СвРеоргЮЛ
                             NPYLNode.childNodes().each { sVReorgYLNode ->
                                 if (sVReorgYLNode.name == NODE_NAME_SV_REORG_YL) {
+                                    sVReorgYLIsExist = true
                                     sVReorgYLFormXml = sVReorgYLNode.attributes()[SV_REORG_YL_FORM_REORG]
                                     sVReorgYLInnXml = sVReorgYLNode.attributes()[SV_REORG_YL_INNYL]
                                     sVReorgYLKppXml = sVReorgYLNode.attributes()[SV_REORG_YL_KPP]
@@ -3237,51 +3453,54 @@ def checkDataXml() {
                     def okvedCodeXml = documentChildNode.attributes()[SV_NP_OKVED]
                     def okvedCodeParam = mapOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
                     if (okvedCodeXml != okvedCodeParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, SV_NP_OKVED].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, okvedCodeXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
+                        def pathAttr = "Файл.Документ.СвНП.ОКВЭД"
+                        logger.warn("Не совпадает значение $pathAttr плательщика страховых взносов КПП = \"$kppXml\"")
                     }
 
                     // 2.1.4 Актуальность ОКВЭД
                     // При оценке актуальности значения справочника берутся НЕ на последний день отчетного периода, а на ТЕКУЩУЮ СИСТЕМНУЮ ДАТУ.
                     def okvedCodeActualParam = mapActualOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
                     if (okvedCodeParam != okvedCodeActualParam) {
-                        logger.warn("В настройках подразделений указан неактуальный ОКВЭД = \"" + okvedCodeParam + "\" с настройками подразделения")
+                        logger.warn("В настройках подразделений указан неактуальный ОКВЭД = \"$okvedCodeParam\" с настройками подразделения")
                     }
 
                     // 2.1.5 Соответсвие ИНН ЮЛ Общим параметрам
-                    def sberbankInnParam = mapConfigurationParam.get("SBERBANK_INN")
                     if (sberbankInnXml != sberbankInnParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_NPYL, NODE_NAME_NPYL, NPYL_INNYL].join(".")
-                        logger.warn("Не совпадает " + pathAttr + " = \"" + sberbankInnXml + "\" для организации - плательщика страховых взносов с Общим параметром \"ИНН ПАО Сбербанк\".")
+                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.ИННЮЛ"
+                        logger.warn("Не совпадает $pathAttr для организации - плательщика страховых взносов с Общим параметром \"ИНН ПАО Сбербанк\" = \"$sberbankInnParam\"")
                     }
 
                     // 2.1.6 Соответсвие КПП ЮЛ настройкам подразделения
                     def kppParam = departmentParamIncomeRow?.KPP?.stringValue
                     if (kppXml != kppParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NPYL_KPP].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, kppXml, "ИНН = \"" + sberbankInnXml + "\" с настройками подразделения"))
+                        def pathAttr = "Файл.Документ.СвНП.НПЮЛ.КПП"
+                        logger.warn("Не совпадает $pathAttr для организации - плательщика страховых взносов с КПП = \"$kppParam\"")
                     }
 
-                    // 2.1.7 Соответствие формы реорганизации
-                    def sVReorgYLFormParam = mapReorgFormCode.get(departmentParamIncomeRow?.REORG_FORM_CODE?.referenceValue)
-                    if (sVReorgYLFormXml != sVReorgYLFormParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_FORM_REORG].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLFormXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
+                    // Если узел СвРеоргЮЛ существует
+                    if (sVReorgYLIsExist) {
+                        // 2.1.7 Соответствие формы реорганизации
+                        def sVReorgYLFormParam = mapReorgFormCode.get(departmentParamIncomeRow?.REORG_FORM_CODE?.referenceValue)
+                        if (sVReorgYLFormXml != sVReorgYLFormParam) {
+                            def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ФормРеорг"
+                            logger.warn("Не совпадает $pathAttr для организации - плательщика страховых c формой реорганизации = \"$sVReorgYLFormParam\"")
+                        }
+
+                        // 2.1.8 Соответствие ИНН реорганизованной организации
+                        def sVReorgYLInnParam = departmentParamIncomeRow?.REORG_INN?.stringValue
+                        if (sVReorgYLInnXml != sVReorgYLInnParam) {
+                            def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ИННЮЛ"
+                            logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с ИНН реорганизованной организации = \"$sVReorgYLInnParam\"")
+                        }
+
+                        // 2.1.9 Соответствие КПП реорганизованной организации
+                        def sVReorgYLKppParam = departmentParamIncomeRow?.REORG_KPP?.stringValue
+                        if (sVReorgYLKppXml != sVReorgYLKppParam) {
+                            def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.КПП"
+                            logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с КПП реорганизованной организации = \"$sVReorgYLKppParam\"")
+                        }
                     }
 
-                    // 2.1.8 Соответствие ИНН реорганизованной организации
-                    def sVReorgYLInnParam = departmentParamIncomeRow?.REORG_INN?.stringValue
-                    if (sVReorgYLInnXml != sVReorgYLInnParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_INNYL].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLInnXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
-                    }
-
-                    // 2.1.9 Соответствие КПП реорганизованной организации
-                    def sVReorgYLKppParam = departmentParamIncomeRow?.REORG_KPP?.stringValue
-                    if (sVReorgYLKppXml != sVReorgYLKppParam) {
-                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_SV_NP, NODE_NAME_NPYL, NODE_NAME_SV_REORG_YL, SV_REORG_YL_KPP].join(".")
-                        logger.warn(sprintf(msgErrNotEquals, pathAttr, sVReorgYLKppXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
-                    }
                 } else if (documentChildNode.name == NODE_NAME_RASCHET_SV) {
                     // РасчетСВ
                     documentChildNode.childNodes().each { raschetSvChildNode ->
@@ -3732,20 +3951,6 @@ def getActualRefPresentPlace() {
 }
 
 /**
- * Получить "Общие параметры"
- * @return
- */
-def getConfigurationParam() {
-    if (configurationParamCache.size() == 0) {
-        def refBookMap = getRefBook(REF_BOOK_CONFIGURATION_PARAM_ID)
-        refBookMap.each { refBook ->
-            configurationParamCache.put(refBook?.CODE?.stringValue, refBook?.VALUE?.stringValue)
-        }
-    }
-    return configurationParamCache
-}
-
-/**
  * Получить "Коды тарифа плательщика"
  * @return
  */
@@ -3808,9 +4013,13 @@ def getActualPersonCategory() {
  */
 def findDocumentTypeByCode(code) {
     Map<Long, String> documentTypeMap = getRefDocument()
-    return documentTypeMap.find {
+    def result = documentTypeMap.find {
         it.value?.equalsIgnoreCase(code)
     }?.key;
+    if (code != null && !code.isEmpty() && result == null) {
+        logger.warn("В справочнике 'Виды документов' не найдена запись, вид документа с кодом " + code);
+    }
+    return result;
 }
 
 /**

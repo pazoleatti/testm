@@ -49,7 +49,7 @@ import static org.mockito.Mockito.*;
  * @author Andrey Drunk
  */
 public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
-    
+
     public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(PrimaryRnuNdflScriptTest.class.getName());
 
     private static final int DEPARTMENT_ID = 1;
@@ -102,7 +102,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             public Long answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
                 NdflPerson ndflPerson = (NdflPerson) args[0];
-                LOGGER.info("save ndflPerson: "+ndflPerson + " [" + ndflPerson.getFirstName() + "," + ndflPerson.getLastName() + "]");
+                LOGGER.info("save ndflPerson: " + ndflPerson + " [" + ndflPerson.getFirstName() + "," + ndflPerson.getLastName() + "]");
                 importedData.add(ndflPerson);
                 return (long) importedData.size();
             }
@@ -130,7 +130,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     }
 
     /**
-     * Тест рассчета данных декларации
+     * Тест расчета данных декларации
      *
      * @throws IOException
      */

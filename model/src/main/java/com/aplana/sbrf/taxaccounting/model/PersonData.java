@@ -13,16 +13,25 @@ import java.util.Date;
  */
 public class PersonData {
 
-
     /**
      * Уникальный идентификатор записи в справочнике физлиц, заполняется при получении записи из БД
      */
     private Long id;
 
     /**
+     * Идентификатор в справочнике физлиц
+     */
+    private Long refBookPersonId;
+
+    /**
      * Идентификатор записи (buisiness key) в справочнике физлиц, заполняется при получении записи из БД
      */
     private Long recordId;
+
+    /**
+     * Идентификатор объекта, на основании которого создана запись
+     */
+    private Long sourceId;
 
     //Набор полей из справочника физлица
     private String lastName;
@@ -46,6 +55,7 @@ public class PersonData {
      */
     private Long citizenshipId;
 
+
     /**
      * Идентификаторы налогоплательщика. Уникальный неизменяемый цифровой идентификатор налогоплательщика
      */
@@ -63,6 +73,11 @@ public class PersonData {
     private Long documentTypeId;
 
     /**
+     * Код типа документа
+     */
+    private String documentTypeCode;
+
+    /**
      * Номер документа
      */
     private String documentNumber;
@@ -72,10 +87,15 @@ public class PersonData {
      */
     private Double weigth;
 
+    private String citizenship;
+
+    private String status;
+
     /**
      * Адрес физлица
      */
     private Integer addressType;
+
 
     private String regionCode;
     private String postalCode;
@@ -91,6 +111,7 @@ public class PersonData {
      * Адрес вне РФ
      */
     private Long countryId;
+    private String countryCode;
     private String addressIno;
 
     private Integer pension;
@@ -112,6 +133,14 @@ public class PersonData {
 
     public void setRecordId(Long recordId) {
         this.recordId = recordId;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
     }
 
     public String getLastName() {
@@ -361,4 +390,48 @@ public class PersonData {
     public void setAddressIno(String addressIno) {
         this.addressIno = addressIno;
     }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public String getCitizenship() {
+        return citizenship;
+    }
+
+    public void setCitizenship(String citizenship) {
+        this.citizenship = citizenship;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getRefBookPersonId() {
+        return refBookPersonId;
+    }
+
+    public void setRefBookPersonId(Long refBookPersonId) {
+        this.refBookPersonId = refBookPersonId;
+    }
+
+    public String getDocumentTypeCode() {
+        return documentTypeCode;
+    }
+
+    public void setDocumentTypeCode(String documentTypeCode) {
+        this.documentTypeCode = documentTypeCode;
+    }
+
+
+
+
 }

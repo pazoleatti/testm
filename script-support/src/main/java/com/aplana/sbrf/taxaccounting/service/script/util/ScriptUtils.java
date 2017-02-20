@@ -2593,4 +2593,68 @@ public final class ScriptUtils {
 
         return true;
     }
+
+    /**
+     * Сравнение двух значений справочника, производится преобразование числовых значений a к типу сравниваемого значения b (Integer или Long) , так как в RefBookValue все числа хранятся как BigDecimal
+     * Ограничение: в текущей реализации нереализовано сравнение чисел с плавающей точкой
+     * @return
+     */
+    public static boolean equalsNullSafe(Object a, Object b) {
+        boolean result = false;
+        if (a == null && b == null) {
+            result = true;
+        } else if (a != null && b != null) {
+            if (a instanceof Number) {
+                Number anum = (Number) a;
+                if (b instanceof Integer) {
+                    return isEquals(anum.intValue(), b);
+                } else if (b instanceof Long) {
+                    return isEquals(anum.longValue(), b);
+                } else {
+                    throw new UnsupportedOperationException("The method 'equalsNullSafe' is not supported for arguments type "+a.getClass()+" and "+b.getClass());
+                }
+            } else {
+                result = a.equals(b);
+            }
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    private static boolean isEquals(Object a, Object b) {
+        return a.equals(b);
+    }
+
+
+    /**
+     * Проверка заполнения графы, значение считаться незаполненным в том числе, если в ней указан "0"
+     * @param value
+     * @return
+     */
+    public static boolean isEmpty(Object value) {
+
+        if (value == null){
+            return true;
+        }
+
+        if (value instanceof BigDecimal){
+            BigDecimal bigDecimal = (BigDecimal) value;
+            return bigDecimal.compareTo(BigDecimal.ZERO) == 0;
+        } else if (value instanceof Integer) {
+            Number number = (Number) value;
+            return number.intValue() == 0;
+        } else if (value instanceof Long) {
+            Number number = (Number) value;
+            return number.intValue() == 0;
+        } if (value instanceof String) {
+            String string = (String) value;
+            return string.isEmpty();
+        } else {
+            throw new UnsupportedOperationException("The method 'isEmpty' is not supported for arguments type "+value.getClass());
+        }
+    }
+
+
+
 }
