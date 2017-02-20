@@ -319,4 +319,14 @@ public class DeclarationDataDaoTest {
         declarationDataDao.updateNote(7, "Проверка комментария к НФ(decl)");
         assertEquals(declarationDataDao.getNote(7), "Проверка комментария к НФ(decl)");
     }
+
+    @Test
+    public void testFindDeclarationDataByFileNameAndFileType() {
+        declarationDataDao.findDeclarationDataByFileNameAndFileType("fileName", -1L);
+    }
+
+    @Test
+    public void testSetDocStateId() {
+        declarationDataDao.setDocStateId(1L, 268558099L);
+    }
 }

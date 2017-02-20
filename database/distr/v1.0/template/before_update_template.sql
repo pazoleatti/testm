@@ -20,8 +20,8 @@ ALTER TABLE notification DISABLE CONSTRAINT notification_fk_blob_data_id;
 ALTER TABLE notification DISABLE CONSTRAINT notification_fk_report_id;
 ALTER TABLE log_system DISABLE CONSTRAINT log_system_fk_blob_data;
 ALTER TABLE log_system_report DISABLE CONSTRAINT log_system_report_fk_blob_data;
-ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_blob_data
-ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_blob_data
+ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_blob_data;
+ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_blob_data;
 ALTER TABLE declaration_data_file DISABLE CONSTRAINT decl_data_file_pk;
 
 COMMIT;

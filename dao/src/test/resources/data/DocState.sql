@@ -1,0 +1,1 @@
+insert into ref_book_doc_state(ID, KND, NAME) values(268558099, 1166002, 'Принят')

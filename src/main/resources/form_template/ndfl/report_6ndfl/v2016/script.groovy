@@ -810,7 +810,7 @@ def createForm() {
     // удаление форм не со статусом принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
-        if (declaration.state != State.ACCEPTED) {
+        if (declaration.state != State.CREATED) {
             declarationsForRemove << declaration
         }
     }

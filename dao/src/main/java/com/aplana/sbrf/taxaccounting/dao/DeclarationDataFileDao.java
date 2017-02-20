@@ -26,4 +26,10 @@ public interface DeclarationDataFileDao {
      * Сохраняет отдельный файл
      */
     void saveFile(DeclarationDataFile file);
+
+    /**
+     * Находит файл с максимальным "весом"
+     * https://conf.aplana.com/pages/viewpage.action?pageId=27184983
+     */
+    DeclarationDataFile findFileWithMaxWeight(Long declarationDataId);
 }

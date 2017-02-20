@@ -18,10 +18,17 @@ public class DeclarationData extends IdentityObject<Long> {
     private String taxOrganCode;
     private String kpp;
 	private String oktmo;
+
     /**
      * Идентификатор АСНУ
      */
     private Long asnuId;
+
+    /**
+     * Комментарий к НФ
+     */
+    private String note;
+
     /**
      * Имя файла
      */
@@ -127,6 +134,14 @@ public class DeclarationData extends IdentityObject<Long> {
 
     public void setAsnuId(Long asnuId) {
         this.asnuId = asnuId;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public String getFileName() {

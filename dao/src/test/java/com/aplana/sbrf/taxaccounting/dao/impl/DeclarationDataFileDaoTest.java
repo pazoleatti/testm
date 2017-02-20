@@ -183,4 +183,9 @@ public class DeclarationDataFileDaoTest {
         assertNull(file.getNote());
         assertEquals(6, file.getFileTypeId());
     }
+
+    @Test
+    public void testFindFileWithMaxWeight() {
+        declarationDataFileDao.findFileWithMaxWeight(-1L);
+    }
 }

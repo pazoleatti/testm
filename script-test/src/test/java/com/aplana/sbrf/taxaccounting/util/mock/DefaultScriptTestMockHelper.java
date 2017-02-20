@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util.mock;
 
+import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -474,6 +475,11 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     @Override
     public FiasRefBookService fiasRefBookService() {
         return mock(FiasRefBookService.class);
+    }
+
+    @Override
+    public BlobDataService mockBlobDataService() {
+        return mock(BlobDataService.class);
     }
 
     /**

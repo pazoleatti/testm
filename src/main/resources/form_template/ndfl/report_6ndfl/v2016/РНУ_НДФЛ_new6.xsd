@@ -26,7 +26,7 @@ GUID</xs:documentation>
 							</xs:annotation>
 							<xs:simpleType>
 								<xs:restriction base="xs:string">
-									<xs:maxLength value="35"/>
+									<xs:maxLength value="59"/>
 								</xs:restriction>
 							</xs:simpleType>
 						</xs:attribute>
@@ -95,7 +95,7 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:maxLength value="14"/>
+												<xs:maxLength value="25"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
@@ -204,7 +204,9 @@ GUID</xs:documentation>
 											<xs:documentation>Статус</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
-											<xs:restriction base="xs:integer"/>
+											<xs:restriction base="xs:integer">
+												<xs:totalDigits value="1"/>
+											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
 									<xs:attribute name="Индекс" use="optional">
@@ -441,35 +443,65 @@ GUID</xs:documentation>
 														<xs:documentation>Дата налога</xs:documentation>
 													</xs:annotation>
 												</xs:attribute>
-												<xs:attribute name="НИ" type="xs:integer" use="optional">
+												<xs:attribute name="НИ" use="optional">
 													<xs:annotation>
 														<xs:documentation>Сумма налога исчисленная</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:integer">
+															<xs:totalDigits value="20"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
-												<xs:attribute name="НУ" type="xs:integer" use="optional">
+												<xs:attribute name="НУ" use="optional">
 													<xs:annotation>
 														<xs:documentation>Сумма налога удержанная</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:integer">
+															<xs:totalDigits value="20"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
-												<xs:attribute name="НИминусНУ" type="xs:integer" use="optional">
+												<xs:attribute name="НИминусНУ" use="optional">
 													<xs:annotation>
 														<xs:documentation>Разница НИ и НУ</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:integer">
+															<xs:totalDigits value="20"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
-												<xs:attribute name="ДолгНП" type="xs:integer" use="optional">
+												<xs:attribute name="ДолгНП" use="optional">
 													<xs:annotation>
 														<xs:documentation>Сумма налога, не удержанная налоговым агентом</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:integer">
+															<xs:totalDigits value="20"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
-												<xs:attribute name="ДолгНА" type="xs:integer" use="optional">
+												<xs:attribute name="ДолгНА" use="optional">
 													<xs:annotation>
 														<xs:documentation>Сумма налога, излишне удержанная налоговым агентом</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:integer">
+															<xs:totalDigits value="20"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
-												<xs:attribute name="ВозврНал" type="xs:integer" use="optional">
+												<xs:attribute name="ВозврНал" use="optional">
 													<xs:annotation>
 														<xs:documentation>Сумма возвращенного налога</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:integer">
+															<xs:totalDigits value="15"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
 												<xs:attribute name="СрокПрчслНал" type="ДатаТип" use="optional">
 													<xs:annotation>
@@ -491,10 +523,15 @@ GUID</xs:documentation>
 														</xs:restriction>
 													</xs:simpleType>
 												</xs:attribute>
-												<xs:attribute name="НалПерСумм" type="xs:integer" use="optional">
+												<xs:attribute name="НалПерСумм" use="optional">
 													<xs:annotation>
 														<xs:documentation>Сумма налога перечисленная</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:integer">
+															<xs:totalDigits value="20"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
 											</xs:complexType>
 										</xs:element>
@@ -524,7 +561,7 @@ GUID</xs:documentation>
 													</xs:annotation>
 													<xs:simpleType>
 														<xs:restriction base="xs:string">
-															<xs:length value="2"/>
+															<xs:length value="1"/>
 														</xs:restriction>
 													</xs:simpleType>
 												</xs:attribute>
@@ -544,10 +581,15 @@ GUID</xs:documentation>
 														</xs:restriction>
 													</xs:simpleType>
 												</xs:attribute>
-												<xs:attribute name="УведИФНС" type="xs:string" use="required">
+												<xs:attribute name="УведИФНС" use="required">
 													<xs:annotation>
 														<xs:documentation>Код налогового органа, выдавшего уведомление</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:string">
+															<xs:maxLength value="4"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
 												<xs:attribute name="УведСум">
 													<xs:annotation>
@@ -627,10 +669,15 @@ GUID</xs:documentation>
 														<xs:documentation>Порядковый номер строки</xs:documentation>
 													</xs:annotation>
 												</xs:attribute>
-												<xs:attribute name="Аванс" type="xs:integer" use="required">
+												<xs:attribute name="Аванс" use="required">
 													<xs:annotation>
 														<xs:documentation>Сумма фиксированного авансового платежа</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:integer">
+															<xs:totalDigits value="20"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
 												<xs:attribute name="УведНом" use="required">
 													<xs:annotation>
@@ -648,10 +695,15 @@ GUID</xs:documentation>
 														<xs:documentation>Дата выдачи уведомления</xs:documentation>
 													</xs:annotation>
 												</xs:attribute>
-												<xs:attribute name="УведИФНС" type="xs:string" use="required">
+												<xs:attribute name="УведИФНС" use="required">
 													<xs:annotation>
 														<xs:documentation>Код налогового органа, выдавшего уведомление</xs:documentation>
 													</xs:annotation>
+													<xs:simpleType>
+														<xs:restriction base="xs:string">
+															<xs:maxLength value="4"/>
+														</xs:restriction>
+													</xs:simpleType>
 												</xs:attribute>
 											</xs:complexType>
 										</xs:element>

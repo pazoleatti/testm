@@ -19,6 +19,11 @@ prompt ref_book_hard_work
 prompt ref_book_person_category
 @@ref_book_person_category;
 
+prompt ref_book_detach_tax_pay
+@@ref_book_detach_tax_pay;
+
+prompt ref_book_make_calc
+@@ref_book_make_calc;
 
 prompt ref_book_tax_place_type
 @@ref_book_tax_place_type;

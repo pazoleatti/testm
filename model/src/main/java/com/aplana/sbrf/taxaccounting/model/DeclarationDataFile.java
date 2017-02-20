@@ -92,4 +92,19 @@ public class DeclarationDataFile implements Serializable {
     public void setFileTypeName(String fileTypeName) {
         this.fileTypeName = fileTypeName;
     }
+
+    @Override
+    public String toString() {
+        return "DeclarationDataFile{" +
+                "declarationDataId=" + declarationDataId +
+                ", uuid='" + uuid + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", date=" + date +
+                ", userName='" + userName + '\'' +
+                ", userDepartmentName='" + userDepartmentName + '\'' +
+                ", note='" + note + '\'' +
+                ", fileTypeId=" + fileTypeId +
+                ", fileTypeName='" + fileTypeName + '\'' +
+                '}';
+    }
 }

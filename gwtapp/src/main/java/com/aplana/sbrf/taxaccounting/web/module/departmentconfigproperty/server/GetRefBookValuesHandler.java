@@ -4,7 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookLinkModel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
@@ -21,7 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -169,15 +180,16 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
                     cell.setNumberValue(data.get(a).getNumberValue());
                     break;
                 case REFERENCE:
-                    cell.setRefValue(data.get(a).getReferenceValue());
-                    if (needDeref && data.get(a).getReferenceValue() != null) {
-                        //if (refProviders.get(a).isRecordsExist(Arrays.asList(data.get(a).getReferenceValue())).isEmpty()) {
-                            Map<String, RefBookValue> refValue = refProviders.get(a).getRecordData(data.get(a).getReferenceValue());
+					Long refId = data.get(a).getReferenceValue();
+                    cell.setRefValue(refId);
+                    if (needDeref && refId != null) {
+                        if (refProviders.get(a).isRecordsExist(Arrays.asList(refId)).isEmpty()) {
+                            Map<String, RefBookValue> refValue = refProviders.get(a).getRecordData(refId);
                             cell.setDeRefValue(refValue.get(refAliases.get(a)).toString());
-                        /*} else {
+                        } else {
                             //Если ссылка на несуществующую запись, то отображаем пустое поле
                             cell.setDeRefValue("");
-                        }*/
+                        }
                     }
                     break;
                 default:

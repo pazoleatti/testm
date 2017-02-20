@@ -299,4 +299,37 @@ public interface DeclarationService {
     @SuppressWarnings("unused")
     DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
 
+    /**
+     * Поиск ОНФ по имени файла и типу файла
+     */
+    @SuppressWarnings("unused")
+    DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
+
+    /**
+     * Сохраняет отдельный файл
+     */
+    void saveFile(DeclarationDataFile file);
+
+    /**
+     * Возвращает информацию о системном пользователе
+     */
+    TAUserInfo getSystemUserInfo();
+
+    /**
+     * Находит файл с максимальным "весом"
+     * https://conf.aplana.com/pages/viewpage.action?pageId=27184983
+     */
+    DeclarationDataFile findFileWithMaxWeight(Long declarationDataId);
+
+    /**
+     * Установить ссстояние ЭД налоговой формы
+     * @param declarationDataId идентификатор налоговой формы
+     * @param docStateId ссстояние ЭД
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
+     */
+    void setDocStateId(long declarationDataId, Long docStateId);
+    /**
+     * Получение конфигурационных параметров (табл. CONFIGURATION)
+     */
+    ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
 }

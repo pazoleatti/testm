@@ -406,8 +406,7 @@ public class DeclarationTestScriptHelper {
         try {
             for (LogEntry logEntry : logger.getEntries()) {
                 // Перекодирование для исправления кодировки при выводе в Idea
-                System.out.println(logEntry.getLevel() + " "
-                        + new String(logEntry.getMessage().getBytes("utf8"), "cp1251"));
+                System.out.println(logEntry.getLevel() + " " + new String(logEntry.getMessage().getBytes("utf8"), "cp1251"));
             }
         } catch (UnsupportedEncodingException e) {
             // Ignore

@@ -11,6 +11,13 @@ import java.util.Map;
 public interface RaschsvPersSvStrahLicDao {
 
     /**
+     * Получить ПерсСвСтрахЛиц по id
+     * @param id
+     * @return возвращает объект RaschsvPersSvStrahLic с проиницилизированными сведениями о выплатах
+     */
+    RaschsvPersSvStrahLic get(long id);
+
+    /**
      * Сохранение ПерсСвСтрахЛиц
      * @param raschsvPersSvStrahLicList
      * @return
@@ -40,10 +47,10 @@ public interface RaschsvPersSvStrahLicDao {
     List<RaschsvPersSvStrahLic> findPersons(Long declarationDataId);
 
     /**
-     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * Найти физлиц по параметрам спецотчета
      * @param declarationDataId - идентификатор декларации
      * @param params - параметры спецотчета
      * @return
      */
-    RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
+    List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
 }

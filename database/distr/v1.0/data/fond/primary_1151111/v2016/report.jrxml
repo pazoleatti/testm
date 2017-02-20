@@ -9,7 +9,7 @@
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
 	<subDataset name="dsTab1" uuid="0d625995-fc75-4d01-aab2-cc1470fd1bc9">
-		<parameter name="declarationID" class="java.lang.Integer">
+		<parameter name="declarationId" class="java.lang.Integer">
 			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
 		</parameter>
 		<queryString>
@@ -23,7 +23,7 @@
        sum(d.nachisl_sv) nachisl_sv
   from raschsv_pers_sv_strah_lic m join raschsv_sv_vypl v on(v.raschsv_pers_sv_strah_lic_id=m.id)
                                    join raschsv_sv_vypl_mk d on (d.raschsv_sv_vypl_id=v.id)
- where m.declaration_data_id=$P{declarationID}
+ where m.declaration_data_id=$P{declarationId}
  group by m.declaration_data_id,d.mesyac,d.kod_kat_lic
  order by d.mesyac,d.kod_kat_lic]]>
 		</queryString>
@@ -56,7 +56,7 @@
 		</group>
 	</subDataset>
 	<subDataset name="dsTab2" uuid="1b0332f1-b730-4544-b4d1-9e3742ff4169">
-		<parameter name="declarationID" class="java.lang.Integer">
+		<parameter name="declarationId" class="java.lang.Integer">
 			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
 		</parameter>
 		<queryString>
@@ -68,7 +68,7 @@
        sum(d.nachisl_sv) nachisl_sv
   from raschsv_pers_sv_strah_lic m join raschsv_vypl_sv_dop v on(v.raschsv_pers_sv_strah_lic_id=m.id)
                                    join raschsv_vypl_sv_dop_mt d on (d.raschsv_vypl_sv_dop_id=v.id)
- where m.declaration_data_id=$P{declarationID}
+ where m.declaration_data_id=$P{declarationId}
  group by m.declaration_data_id,d.mesyac,d.tarif]]>
 		</queryString>
 		<field name="DECLARATION_DATA_ID" class="java.math.BigDecimal"/>
@@ -94,7 +94,7 @@
 		</group>
 	</subDataset>
 	<subDataset name="dsTab3" uuid="47d7a52b-77d5-4d68-bf59-55570a0450ed">
-		<parameter name="declarationID" class="java.lang.Integer">
+		<parameter name="declarationId" class="java.lang.Integer">
 			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
 		</parameter>
 		<queryString>
@@ -117,7 +117,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
                           'УплПревОСС',5,
                           9) ord
   from raschsv_obyaz_plat_sv m join raschsv_upl_per d on (d.raschsv_obyaz_plat_sv_id=m.id)
- where m.declaration_data_id=$P{declarationID}
+ where m.declaration_data_id=$P{declarationId}
  order by 7]]>
 		</queryString>
 		<field name="DECLARATION_DATA_ID" class="java.math.BigDecimal"/>
@@ -144,7 +144,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 			<groupExpression><![CDATA[$F{DECLARATION_DATA_ID}]]></groupExpression>
 		</group>
 	</subDataset>
-	<parameter name="declarationID" class="java.lang.Integer">
+	<parameter name="declarationId" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
 	</parameter>
 	<queryString>
@@ -155,7 +155,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
                                    join report_period per on (per.id=dp.report_period_id)
                                    join declaration_template templ on (templ.id=dd.declaration_template_id)
                                    join declaration_type t on (t.id=templ.declaration_type_id)
- where m.declaration_data_id=$P{declarationID}
+ where m.declaration_data_id=$P{declarationId}
  group by t.name,per.name,m.otchet_god]]>
 	</queryString>
 	<field name="REPNAME" class="java.lang.String"/>

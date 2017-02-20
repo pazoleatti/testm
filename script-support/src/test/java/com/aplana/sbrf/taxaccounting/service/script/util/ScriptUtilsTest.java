@@ -832,6 +832,7 @@ public class ScriptUtilsTest {
     public void testCheckSnils() {
         Assert.assertTrue(ScriptUtils.checkSnils("112-233-445 95"));
         Assert.assertTrue(ScriptUtils.checkSnils("112 233 445 95"));
+        Assert.assertTrue(ScriptUtils.checkSnils("137-199-816-00"));
         Assert.assertTrue(ScriptUtils.checkSnils("11223344595"));
         Assert.assertTrue(ScriptUtils.checkSnils("001001998 00"));
         Assert.assertTrue(ScriptUtils.checkSnils("001001997 00"));
@@ -850,4 +851,39 @@ public class ScriptUtilsTest {
         Assert.assertFalse(ScriptUtils.checkSnils("4№ 596"));
         Assert.assertFalse(ScriptUtils.checkSnils("4f №596"));
     }
+
+    @Test
+    public void testEqualsNullSafe() throws ParseException {
+        Date d1 = ScriptUtils.parseDate("dd.MM.yyyy", "01.02.2017");
+        Date d2 = ScriptUtils.parseDate("dd.MM.yyyy", "01.02.2017");
+        Date d3 = ScriptUtils.parseDate("dd.MM.yyyy", "02.02.2017");
+        Assert.assertTrue(ScriptUtils.equalsNullSafe(d1, d2));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe(d1, d3));
+        BigDecimal bd1 = new BigDecimal("1000.00");
+        Assert.assertTrue(ScriptUtils.equalsNullSafe(bd1, 1000L));
+        Assert.assertTrue(ScriptUtils.equalsNullSafe(bd1, 1000));
+        Assert.assertTrue(ScriptUtils.equalsNullSafe("", ""));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe("foo", "bar"));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe("foo", null));
+        Assert.assertTrue(ScriptUtils.equalsNullSafe(null, null));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe(null, 1111));
+        Assert.assertFalse(ScriptUtils.equalsNullSafe(1111, null));
+    }
+
+    @Test
+    public void testIsEmpty() throws ParseException {
+
+        Assert.assertTrue(ScriptUtils.isEmpty(null));
+        Assert.assertTrue(ScriptUtils.isEmpty(""));
+
+        Assert.assertTrue(ScriptUtils.isEmpty(0));
+        Assert.assertTrue(ScriptUtils.isEmpty(0L));
+        Assert.assertTrue(ScriptUtils.isEmpty(new BigDecimal("0")));
+        Assert.assertTrue(ScriptUtils.isEmpty(new BigDecimal(".00")));
+        Assert.assertTrue(ScriptUtils.isEmpty(new BigDecimal("0.00")));
+
+        Assert.assertFalse(ScriptUtils.isEmpty(new BigDecimal("0.01")));
+
+    }
+
 }
