@@ -1236,15 +1236,15 @@ void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOpera
     ndflPerson.incomes.addAll(incomes);
 
     List<NdflPersonDeduction> deductions = new ArrayList<NdflPersonDeduction>();
-    ndflPersonOperationsNode.'СведВыч'.collect {
+    deductions.addAll(ndflPersonOperationsNode.'СведВыч'.collect {
         transformNdflPersonDeduction(it)
-    }
+    });
     ndflPerson.deductions.addAll(deductions)
 
     List<NdflPersonPrepayment> prepayments = new ArrayList<NdflPersonPrepayment>();
-    ndflPerson.prepayments = ndflPersonOperationsNode.'СведАванс'.collect {
+    prepayments.addAll(ndflPersonOperationsNode.'СведАванс'.collect {
         transformNdflPersonPrepayment(it)
-    }
+    });
     ndflPerson.prepayments.addAll(prepayments);
 }
 
