@@ -26,6 +26,14 @@ public interface DeclarationService {
     DeclarationData getDeclarationData(long declarationDataId);
 
     /**
+     * Получить декларации
+     * @param declarationDataIds идентификатор декларации
+     * @return объект декларации
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
+     */
+    List<DeclarationData> getDeclarationData(List<Long> declarationDataIds);
+
+    /**
      * Поиск декларации в отчетном периоде подразделения
      */
     List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);

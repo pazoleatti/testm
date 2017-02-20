@@ -86,6 +86,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public List<DeclarationData> getDeclarationData(List<Long> declarationDataIds) {
+        return declarationDataDao.get(declarationDataIds);
+    }
+
+    @Override
     public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
     }

@@ -722,6 +722,4 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             return personPrepayment;
         }
     }
-
-
 }
