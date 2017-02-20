@@ -44,4 +44,14 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     public List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params) {
         return raschsvPersSvStrahLicDao.findPersonBySubreportParams(declarationDataId, params);
     }
+
+    @Override
+    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByDeclarationDataId(long declarationDataId) {
+        return raschsvPersSvStrahLicDao.findDublicatePersonIdByDeclarationDataId(declarationDataId);
+    }
+
+    @Override
+    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(List<Long> personIdList, long reportPeriodId) {
+        return raschsvPersSvStrahLicDao.findDublicatePersonIdByReportPeriodId(personIdList, reportPeriodId);
+    }
 }

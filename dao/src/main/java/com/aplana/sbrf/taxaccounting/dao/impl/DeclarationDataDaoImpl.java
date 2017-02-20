@@ -82,6 +82,23 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
+    public List<DeclarationData> get(List<Long> declarationDataIds) {
+        try {
+            return getJdbcTemplate().query(
+                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id," +
+                            "drp.report_period_id, drp.department_id " +
+                            "from declaration_data dd, department_report_period drp " +
+                            "where drp.id = dd.department_report_period_id and (" +
+                            SqlUtils.transformToSqlInStatement("dd.id", declarationDataIds) + ")",
+                    new DeclarationDataRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не удалось удалить налоговые формы");
+        }
+    }
+
+    @Override
     public void delete(long id) {
         int count = getJdbcTemplate().update("delete from declaration_data where id = ?", id);
         if (count == 0) {

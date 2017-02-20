@@ -56,5 +56,18 @@ public interface RaschsvPersSvStrahLicService {
      */
     List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
 
+    /**
+     * Найти дубли NdflPerson, ссылающиеся на person_id
+     * @param declarationDataId
+     * @return
+     */
+    List<RaschsvPersSvStrahLic> findDublicatePersonIdByDeclarationDataId(long declarationDataId);
 
+    /**
+     * Найти дубли RaschsvPersSvStrahLic, ссылающиеся на одну и ту же запись в таблице справочника Физические лица REF_BOOK_PERSON
+     * @param personIdList
+     * @param reportPeriodId
+     * @return
+     */
+    List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(List<Long> personIdList, long reportPeriodId);
 }
