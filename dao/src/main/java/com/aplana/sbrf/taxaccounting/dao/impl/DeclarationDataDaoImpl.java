@@ -656,14 +656,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
         String sql =
                 "select " +
-                    "dd.*" +
+                    "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                    "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
+                    "drp.report_period_id, drp.department_id " +
                 "from " +
                     "DECLARATION_DATA dd " +
+                    "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
                     "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
                     "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
                 "where " +
                     "bd.name = :fileName " +
-                    (fileTypeId != null ? "and ddf.file_type_id = :fileTypeId " : "");
+                    "and ddf.file_type_id = :fileTypeId ";
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("fileName", fileName);

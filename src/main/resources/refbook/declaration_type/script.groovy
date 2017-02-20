@@ -3,6 +3,7 @@ package refbook.declaration_type
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.service.impl.*
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
@@ -137,6 +138,10 @@ def importTF() {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
         import1151111()
+    } else if (isNdfl6Response(UploadFileName) && isNdfl6AndNot11151111(UploadFileName)) {
+        importNdflResponse()
+    } else if (isNdfl2Response(UploadFileName)) {
+        importNdflResponse()
     } else if (
         patternKvOtch.matcher(UploadFileName).matches() ||
         patternUoOtch.matcher(UploadFileName).matches() ||
@@ -144,8 +149,6 @@ def importTF() {
         patternUuOtch.matcher(UploadFileName).matches()
     ) {
         importOtch()
-    } else if (isNdfl2Response(UploadFileName) || isNdfl6Response(UploadFileName)) {
-        importNdflResponse()
     } else {
         throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName))
     }
@@ -401,6 +404,53 @@ def isNdfl6Response(fileName) {
 }
 
 /**
+ * Проверяет что файл ответа принадлежит 6 НФДЛ и не пренадлежит 1151111
+ * Для этого надо проверить содеражание файла
+ */
+def isNdfl6AndNot11151111(fileName) {
+    def contentMap = readNdfl6ResponseContent()
+    def reportFileName = getFileName(contentMap, fileName)
+
+    if (reportFileName == null) {
+        return false
+    }
+
+    // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
+    def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
+    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
+
+    def declarationData = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
+    if (declarationData == null) {
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Возвращает имя отчетного файла для 6НДФЛ
+ */
+def getFileName(contentMap, fileName) {
+    if (fileName.startsWith(NDFL6_PATTERN_1)) {
+        return contentMap.get(NDFL2_KV_FILE_TAG).get(NDFL2_KV_FILE_ATTR)
+    }
+
+    if (fileName.startsWith(NDFL6_PATTERN_2)) {
+        return contentMap.get(NDFL2_UO_FILE_TAG).get(NDFL2_UO_FILE_ATTR)
+    }
+
+    if (fileName.startsWith(NDFL6_PATTERN_3)) {
+        return contentMap.get(NDFL2_IV_FILE_TAG).get(NDFL2_IV_FILE_ATTR)
+    }
+
+    if (fileName.startsWith(NDFL6_PATTERN_4)) {
+        return contentMap.get(NDFL2_UU_FILE_TAG).get(NDFL2_UU_FILE_ATTR)
+    }
+
+    return null
+}
+
+/**
  * Определет вес документа
  */
 def getDocWeight(fileName) {
@@ -420,7 +470,7 @@ def getDocWeight(fileName) {
 @Field final String NDFL2_NOT_CORRECT_ERROR = "ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ"
 @Field final String NDFL2_CORRECT_ADDRESS_COUNT = "КОЛИЧЕСТВО СВЕДЕНИЙ С ИСПРАВЛЕННЫМИ АДРЕСАМИ"
 @Field final String NDFL2_CORRECT_ADDRESS = "СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ"
-@Field final String NDFL2_FILE_NAME_PATTERN = "(.+)(\\w+)\\.(xml|XML)\\s*"
+@Field final String NDFL2_FILE_NAME_PATTERN = "(.+)\\\\([^/\\\\]+\\.(xml|XML))\\s*"
 @Field final String NDFL2_NUMBER_PATTERN = "\\s*(.+):\\s*(\\d+)\\s*"
 @Field final String NDFL2_STR_PATTERN = "\\s*(.+):\\s*(.+)\\s*"
 @Field final String NDFL2_NOT_CORRECT_NUMB = "Номер п/п:"
@@ -632,7 +682,7 @@ def readNdfl6ResponseContent() {
         IOUtils.closeQuietly(ImportInputStream)
     }
 
-    return [reportPeriodCode, year]
+    return handler.getValues()
 }
 
 
@@ -666,7 +716,8 @@ def importNdflResponse() {
             reportFileName = ndfl2ContentReestrMap.get(NDFL2_TO_FILE)
         }
     } else {
-        reportFileName = readNdfl6ResponseContent()
+        def ndfl6Content = readNdfl6ResponseContent()
+        reportFileName = getFileName(ndfl6Content, UploadFileName)
     }
 
     if (reportFileName == null) {
@@ -676,13 +727,13 @@ def importNdflResponse() {
 
     // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
     def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = '${AttachFileType.TYPE_2.id}'").get(0)
+    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
 
     def declarationData = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
     if (declarationData == null) {
         //TODO несколкько
         logger.error("Файл ответа \"%s\", для которого сформирован ответ, не найден в отчетных формах", UploadFileName)
-        return null
+        return
     }
 
     // Проверить ОНФ на отсутствие ранее загруженного Файла ответа по условию: "Имя Файла ответа" не найдено в ОНФ."Файлы и комментарии"
@@ -697,9 +748,11 @@ def importNdflResponse() {
 
     def declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationFormTypeId = declarationTemplate.declarationFormTypeId
-    def formType = formTypeService.get(declarationFormTypeId as Integer)
+    def formTypeTypeProvider = refBookFactory.getDataProvider(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId())
+    def formType = formTypeTypeProvider.getRecordData(declarationFormTypeId)
+    def formTypeCode = formType.CODE.stringValue
 
-    if (NDFL2_1 == formType.code || NDFL2_2 == formType.code) {
+    if (NDFL2_1 == formTypeCode || NDFL2_2 == formTypeCode) {
         if (isNdfl2ResponseReestr(UploadFileName)) {
             // Ничего не делаль: Переход к шагу 6 ОС
         }
@@ -718,17 +771,17 @@ def importNdflResponse() {
                     notCorrect.each { entry ->
                         def ndflRefIds = ndflRefProvider.getUniqueRecordIds(
                                 new Date(),
-                                "DECLARATION_DATA_ID = ${declarationData.id} AND NUM = '${entry.ref}'"
+                                "DECLARATION_DATA_ID = ${declarationData.id} AND NUM = ${entry.ref}"
                         )
 
                         if (ndflRefIds.isEmpty()) {
-                            logger.error("В реестре справок формы \"${formType.code}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\" не найдено справки \"${entry.ref}\"", UploadFileName)
+                            logger.error("В реестре справок формы \"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\" не найдено справки \"${entry.ref}\"", UploadFileName)
+                        } else {
+                            def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
+
+                            ndflRef.ERRTEXT.value = "Путь к реквизиту: \"${entry.path}\"; Значение элемента: \"${entry.val}\"; Текст ошибки: \"${entry.text}\"".toString()
+                            ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
                         }
-
-                        def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
-
-                        ndflRef.ERRTEXT.value = "Путь к реквизиту: \"${entry.path}\"; Значение элемента: \"${entry.val}\"; Текст ошибки: \"${entry.text}\"".toString()
-                        ndflRefProvider.updateRecords(userInfo, new Date(), Arrays.asList(ndflRef))
                     }
                 }
             }
@@ -743,102 +796,105 @@ def importNdflResponse() {
                     correctAddresses.each { entry ->
                         def ndflRefIds = ndflRefProvider.getUniqueRecordIds(
                                 new Date(),
-                                "DECLARATION_DATA_ID = ${declarationData.id} AND NUM = '${entry.ref}'"
+                                "DECLARATION_DATA_ID = ${declarationData.id} AND NUM = ${entry.ref}"
                         )
 
                         if (ndflRefIds.isEmpty()) {
-                            logger.error("В реестре справок формы \"${formType.code}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\" не найдено справки \"${entry.ref}\"", UploadFileName)
-                        }
-
-                        def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
-
-                        if (entry.valid) {
-                            ndflRef.ERRTEXT.value = "\"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString()
+                            logger.error("В реестре справок формы \"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\" не найдено справки \"${entry.ref}\"", UploadFileName)
                         } else {
-                            ndflRef.ERRTEXT.value = "\"${entry.addressBefore}\"; (\"${entry.addressAfter}\")".toString()
+                            def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
+
+                            if (entry.valid) {
+                                ndflRef.ERRTEXT.value = "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString()
+                            } else {
+                                ndflRef.ERRTEXT.value = "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString()
+                            }
+                            ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
                         }
-                        ndflRefProvider.updateRecords(userInfo, new Date(), Arrays.asList(ndflRef))
                     }
                 }
             }
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                return
+            }
         }
+    }
+    // "Дата-время файла" = "Дата и время документа" раздела Параметры файла ответа
+    def fileDate = null
 
-        // "Дата-время файла" = "Дата и время документа" раздела Параметры файла ответа
-        def fileDate = null
+    if (isNdfl6Response(UploadFileName)) {
+        fileDate = Date.parse("yyyy", UploadFileName.replaceAll(NDFL6_FILE_NAME_PATTERN, "\$4"))
+    } else if (isNdfl2ResponseReestr(UploadFileName)) {
+        fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE))
+    } else if (isNdfl2ResponseProt(UploadFileName)) {
+        fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentMap.get(NDFL2_PROTOCOL_DATE))
+    }
 
-        if (isNdfl6Response(UploadFileName)) {
-            fileDate = Date.parse("yyyy", UploadFileName.replaceAll(NDFL6_FILE_NAME_PATTERN, "\$4"))
-        } else if (isNdfl2ResponseReestr(UploadFileName)) {
-            fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE))
-        } else if (isNdfl2ResponseProt(UploadFileName)) {
-            fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentMap.get(NDFL2_PROTOCOL_DATE))
-        }
+    // Сохранение файла ответа в форме
+    def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
+    def createUser = declarationService.getSystemUserInfo().getUser()
 
-        // Сохранение файла ответа в форме
-        def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
-        def createUser = declarationService.getSystemUserInfo().getUser()
+    def declarationDataFile = new DeclarationDataFile()
+    declarationDataFile.setDeclarationDataId(declarationData.id)
+    declarationDataFile.setUuid(fileUuid)
+    declarationDataFile.setUserName(createUser.getName())
+    declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
+    declarationDataFile.setFileTypeId(fileTypeId)
+    declarationDataFile.setDate(fileDate)
 
-        def declarationDataFile = new DeclarationDataFile()
-        declarationDataFile.setDeclarationDataId(declarationData.id)
-        declarationDataFile.setUuid(fileUuid)
-        declarationDataFile.setUserName(createUser.getName())
-        declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
-        declarationDataFile.setFileTypeId(fileTypeId)
-        declarationDataFile.setDate(fileDate)
+    declarationService.saveFile(declarationDataFile)
 
-        declarationService.saveFile(declarationDataFile)
+    def declarationDataFileMaxWeight = declarationService.findFileWithMaxWeight(declarationData.id)
+    def prevWeight
 
-        // TODO точно ли так искать?
-        def declarationDataFileMaxWeight = declarationService.findFileWithMaxWeight(declarationData.id)
+    if (declarationDataFileMaxWeight != null) {
+        prevWeight = getDocWeight(declarationDataFileMaxWeight.fileName)
+    }
 
-        //TODO что делать, если не существует?
-        if (declarationDataFileMaxWeight) {
-            def prevWeight = getDocWeight(declarationDataFileMaxWeight.fileName)
-            if (prevWeight <= docWeight) {
-                def nextKnd
+    if (prevWeight == null || prevWeight <= docWeight) {
+        def nextKnd
 
-                def kndAccept = 1166002	// Принят
-                def kndRefuse = 1166006	// Отклонен
-                def kndSuccess = 1166007 //	Успешно отработан
-                def kndRequired = 1166009 // Требует уточнения
+        def kndAccept = 1166002	// Принят
+        def kndRefuse = 1166006	// Отклонен
+        def kndSuccess = 1166007 //	Успешно отработан
+        def kndRequired = 1166009 // Требует уточнения
 
-                if (isNdfl2ResponseProt(UploadFileName)) {
-                    def errorCount = ndfl2ContentMap.get(NDFL2_ERROR_COUNT)
-                    if (errorCount && errorCount > 0) {
-                        // Требует уточнения
-                        nextKnd = kndRequired
-                    } else {
-                        //Принят
-                        nextKnd = kndAccept
-                    }
-                }
-
+        if (isNdfl2ResponseProt(UploadFileName)) {
+            def errorCount = ndfl2ContentMap.get(NDFL2_ERROR_COUNT)
+            if (errorCount && errorCount > 0) {
+                // Требует уточнения
+                nextKnd = kndRequired
+            } else {
                 //Принят
-                if (UploadFileName.startsWith(NDFL6_PATTERN_1)) {
-                    nextKnd = kndAccept
-                }
-
-                //Отклонен
-                if (UploadFileName.startsWith(NDFL6_PATTERN_2)) {
-                    nextKnd = kndRefuse
-                }
-
-                //Успешно обработан
-                if (UploadFileName.startsWith(NDFL6_PATTERN_3)) {
-                    nextKnd = kndSuccess
-                }
-
-                //Требует уточнения
-                if (UploadFileName.startsWith(NDFL6_PATTERN_4)) {
-                    nextKnd = kndRequired
-                }
-
-                if (nextKnd != null) {
-                    def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
-                    def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
-                    declarationService.setDocStateId(declarationData.id, docStateId)
-                }
+                nextKnd = kndAccept
             }
+        }
+
+        //Принят
+        if (UploadFileName.startsWith(NDFL6_PATTERN_1)) {
+            nextKnd = kndAccept
+        }
+
+        //Отклонен
+        if (UploadFileName.startsWith(NDFL6_PATTERN_2)) {
+            nextKnd = kndRefuse
+        }
+
+        //Успешно обработан
+        if (UploadFileName.startsWith(NDFL6_PATTERN_3)) {
+            nextKnd = kndSuccess
+        }
+
+        //Требует уточнения
+        if (UploadFileName.startsWith(NDFL6_PATTERN_4)) {
+            nextKnd = kndRequired
+        }
+
+        if (nextKnd != null) {
+            def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
+            def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
+            declarationService.setDocStateId(declarationData.id, docStateId)
         }
     }
 }

@@ -323,7 +323,6 @@ public class DeclarationDataDaoTest {
     @Test
     public void testFindDeclarationDataByFileNameAndFileType() {
         declarationDataDao.findDeclarationDataByFileNameAndFileType("fileName", -1L);
-        declarationDataDao.findDeclarationDataByFileNameAndFileType("fileName", null);
     }
 
     @Test

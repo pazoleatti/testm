@@ -37,6 +37,16 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
 		}
 	}
 
+    private final static class DeclarationDataFileShortMapper implements RowMapper<DeclarationDataFile> {
+        @Override
+        public DeclarationDataFile mapRow(ResultSet rs, int index) throws SQLException {
+            final DeclarationDataFile result = new DeclarationDataFile();
+            result.setFileName(rs.getString("file_name"));
+            result.setDate(new Date(rs.getTimestamp("file_creation_date").getTime()));
+            return result;
+        }
+    }
+
 	@Override
 	public List<DeclarationDataFile> getFiles(long declarationDataId) {
 		return getJdbcTemplate().query(
@@ -158,7 +168,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
     public DeclarationDataFile findFileWithMaxWeight(Long declarationDataId) {
         String sql =
                 "select " +
-                    "t.name file_name, t.creation_date " +
+                    "t.name file_name, t.creation_date file_creation_date " +
                 "from (  " +
                     "select " +
                         "bd.name, bd.creation_date, " +
@@ -188,7 +198,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
         params.addValue("declarationDataId", declarationDataId);
 
         try {
-            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new DeclarationDataFileDaoImpl.DeclarationDataFilesMapper());
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new DeclarationDataFileShortMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

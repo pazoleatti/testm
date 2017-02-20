@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.refbook.declaration_type;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -77,29 +78,36 @@ public class Ndfl62Test extends RefBookScriptTestBase {
 
         RefBookDataProvider attachFileType = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.ATTACH_FILE_TYPE.getId()))).thenReturn(attachFileType);
-        when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = '2'"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_ID));
+        when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 2"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_ID));
 
         FormType formType = new FormType();
         formType.setId(DECLARATION_FORM_TYPE_ID.intValue());
         formType.setCode(NDFL2_1);
         when(testHelper.getFormTypeService().get(DECLARATION_FORM_TYPE_ID.intValue())).thenReturn(formType);
 
+        RefBookDataProvider declarationDataTypeRefProvider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId()))).thenReturn(declarationDataTypeRefProvider);
+        RefBookValue codeTypeRefBookValue = new RefBookValue(RefBookAttributeType.STRING, "2 НДФЛ (2)");
+        Map<String, RefBookValue> resultTypeRef = new HashMap<String, RefBookValue>();
+        resultTypeRef.put("CODE", codeTypeRefBookValue);
+        when(declarationDataTypeRefProvider.getRecordData(DECLARATION_FORM_TYPE_ID)).thenReturn(resultTypeRef);
+
         RefBookDataProvider ndflRefProvider = mock(RefBookDataProvider.class);
 
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0076322'"))).thenReturn(Arrays.asList(0L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0099710'"))).thenReturn(Arrays.asList(1L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0102256'"))).thenReturn(Arrays.asList(2L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0108799'"))).thenReturn(Arrays.asList(3L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0124793'"))).thenReturn(Arrays.asList(4L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0136806'"))).thenReturn(Arrays.asList(5L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0137344'"))).thenReturn(Arrays.asList(6L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0215860'"))).thenReturn(Arrays.asList(7L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0229666'"))).thenReturn(Arrays.asList(8L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0237452'"))).thenReturn(Arrays.asList(9L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0261125'"))).thenReturn(Arrays.asList(10L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0272432'"))).thenReturn(Arrays.asList(11L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0143796'"))).thenReturn(Arrays.asList(12L));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0269856'"))).thenReturn(Arrays.asList(13L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0076322"))).thenReturn(Arrays.asList(0L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0099710"))).thenReturn(Arrays.asList(1L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0102256"))).thenReturn(Arrays.asList(2L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0108799"))).thenReturn(Arrays.asList(3L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0124793"))).thenReturn(Arrays.asList(4L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0136806"))).thenReturn(Arrays.asList(5L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0137344"))).thenReturn(Arrays.asList(6L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0215860"))).thenReturn(Arrays.asList(7L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0229666"))).thenReturn(Arrays.asList(8L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0237452"))).thenReturn(Arrays.asList(9L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0261125"))).thenReturn(Arrays.asList(10L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0272432"))).thenReturn(Arrays.asList(11L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0143796"))).thenReturn(Arrays.asList(12L));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0269856"))).thenReturn(Arrays.asList(13L));
 
         for (long i = 0; i < 14; i++) {
             Map<String, RefBookValue> correct = new HashMap<String, RefBookValue>();
@@ -108,8 +116,8 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         }
 
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.NDFL_REFERENCES.getId()))).thenReturn(ndflRefProvider);
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0913378'"))).thenReturn(Arrays.asList(NOT_CORRECT_1_ID));
-        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = '0913386'"))).thenReturn(Arrays.asList(NOT_CORRECT_2_ID));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0913378"))).thenReturn(Arrays.asList(NOT_CORRECT_1_ID));
+        when(ndflRefProvider.getUniqueRecordIds(any(Date.class), eq("DECLARATION_DATA_ID = " + DECLARATION_DATA_ID + " AND NUM = 0913386"))).thenReturn(Arrays.asList(NOT_CORRECT_2_ID));
 
         Map<String, RefBookValue> notCorrect_1 = new HashMap<String, RefBookValue>();
         notCorrect_1.put("ERRTEXT", new RefBookValue(RefBookAttributeType.STRING, null));
@@ -141,21 +149,21 @@ public class Ndfl62Test extends RefBookScriptTestBase {
 
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
 
-        ArgumentCaptor<List> argumentUpdate = ArgumentCaptor.forClass(List.class);
-        verify(ndflRefProvider, Mockito.times(16)).updateRecords(any(TAUserInfo.class), any(Date.class), argumentUpdate.capture());
-        List<List> allValues = argumentUpdate.getAllValues();
+        ArgumentCaptor<Map> argumentUpdate = ArgumentCaptor.forClass(Map.class);
+        verify(ndflRefProvider, Mockito.times(16)).updateRecordVersion(any(Logger.class), anyLong(), any(Date.class), any(Date.class), argumentUpdate.capture());
+        List<Map> allValues = argumentUpdate.getAllValues();
 
-        Map<String, RefBookValue> notCorrect1 = (Map<String, RefBookValue>)allValues.get(0).get(0);
+        Map<String, RefBookValue> notCorrect1 = (Map<String, RefBookValue>)allValues.get(0);
         Assert.assertEquals("Путь к реквизиту: \"ОбщСвИ/НомСпр\"; Значение элемента: \"0913378\"; Текст ошибки: \"Дубликат справки\"", notCorrect1.get("ERRTEXT").getStringValue());
 
-        Map<String, RefBookValue> notCorrect2 = (Map<String, RefBookValue>)allValues.get(1).get(0);
+        Map<String, RefBookValue> notCorrect2 = (Map<String, RefBookValue>)allValues.get(1);
         Assert.assertEquals("Путь к реквизиту: \"ОбщСвИ/НомСпр\"; Значение элемента: \"0913386\"; Текст ошибки: \"Дубликат справки\"", notCorrect2.get("ERRTEXT").getStringValue());
 
-        Map<String, RefBookValue> correct3 = (Map<String, RefBookValue>)allValues.get(2).get(0);
-        Assert.assertEquals("\",629830,89,,ГУБКИНСКИЙ Г,,9-Й МКР,35,,26\"; (\",629830,89,,Губкинский г,,9 мкр,35,,26\")", correct3.get("ERRTEXT").getStringValue());
+        Map<String, RefBookValue> correct3 = (Map<String, RefBookValue>)allValues.get(2);
+        Assert.assertEquals("Текст ошибки от ФНС: \",629830,89,,ГУБКИНСКИЙ Г,,9-Й МКР,35,,26\" ДО исправления; (\",629830,89,,Губкинский г,,9 мкр,35,,26\" ПОСЛЕ исправления)", correct3.get("ERRTEXT").getStringValue());
 
-        Map<String, RefBookValue> correct15 = (Map<String, RefBookValue>)allValues.get(15).get(0);
-        Assert.assertEquals("\",141000,50,МЫТИЩИНСКИЙ Р-Н,МЫТИЩИ Г,,,ВЧ151,,\"; (Адрес признан верным (ИФНСМЖ - 5029))", correct15.get("ERRTEXT").getStringValue());
+        Map<String, RefBookValue> correct15 = (Map<String, RefBookValue>)allValues.get(15);
+        Assert.assertEquals("Текст ошибки от ФНС: \",141000,50,МЫТИЩИНСКИЙ Р-Н,МЫТИЩИ Г,,,ВЧ151,,\"; (Адрес признан верным (ИФНСМЖ - 5029))", correct15.get("ERRTEXT").getStringValue());
 
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
 
@@ -204,12 +212,15 @@ public class Ndfl62Test extends RefBookScriptTestBase {
 
         RefBookDataProvider attachFileType = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.ATTACH_FILE_TYPE.getId()))).thenReturn(attachFileType);
-        when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = '2'"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_ID));
+        when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 2"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_ID));
 
-        FormType formType = new FormType();
-        formType.setId(DECLARATION_FORM_TYPE_ID.intValue());
-        formType.setCode(NDFL2_1);
-        when(testHelper.getFormTypeService().get(DECLARATION_FORM_TYPE_ID.intValue())).thenReturn(formType);
+        RefBookDataProvider declarationDataTypeRefProvider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId()))).thenReturn(declarationDataTypeRefProvider);
+        RefBookValue codeTypeRefBookValue = new RefBookValue(RefBookAttributeType.STRING, "2 НДФЛ (2)");
+        Map<String, RefBookValue> resultTypeRef = new HashMap<String, RefBookValue>();
+        resultTypeRef.put("CODE", codeTypeRefBookValue);
+        when(declarationDataTypeRefProvider.getRecordData(DECLARATION_FORM_TYPE_ID)).thenReturn(resultTypeRef);
+
         when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
