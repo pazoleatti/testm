@@ -13,6 +13,13 @@ import java.util.Map;
 public interface RaschsvPersSvStrahLicService {
 
     /**
+     * Получить ПерсСвСтрахЛиц по id
+     * @param id
+     * @return возвращает объект RaschsvPersSvStrahLic с проиницилизированными сведениями о выплатах
+     */
+    RaschsvPersSvStrahLic get(long id);
+
+    /**
      * Сохраняет перечень записей ПерсСвСтрахЛиц
      * @param raschsvPersSvStrahLicList
      * @return
@@ -47,7 +54,7 @@ public interface RaschsvPersSvStrahLicService {
      * @param params - параметры спецотчета
      * @return
      */
-    RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
+    List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
 
 
 }
