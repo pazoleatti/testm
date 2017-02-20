@@ -391,15 +391,30 @@ def createRowColumns() {
  *                                                                          *
  * **************************************************************************/
 
+/**
+ * Заполнить титульный лист excel представления
+ * @param workbook
+ * @return
+ */
 def fillGeneralList(final XSSFWorkbook workbook) {
-    // TODO необходимо реализовать классы соответствующие данным и dao
+    // Получчить титульный лист из шаблона
     def sheet = workbook.getSheet(COMMON_SHEET)
+    // Номер корректироки
     def nomCorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
+    // получить отчетный год
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     def period = getProvider(REPORT_PERIOD_TYPE_ID).getRecordData(reportPeriod.dictTaxPeriodId)?.CODE?.value
     def reportYear = reportPeriod.taxPeriod.year
+    // Код налогового органа
     def taxOrganCode = declarationData.taxOrganCode
+    // Подписант
     def raschsvSvnpPodpisant = raschsvSvnpPodpisantService.findRaschsvSvnpPodpisant(declarationData.id)
+
+    def departmentParam = getDepartmentParam(declarationData.departmentId)
+    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam?.id.value)
+    def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
+    // Место предоставления
+    def poMestuCodeParam = poMestuParam?.get(RF_CODE)?.value
     sheet.getRow(3).getCell(1).setCellValue(declarationData.fileName)
     sheet.getRow(4).getCell(1).setCellValue(applicationVersion)
     sheet.getRow(5).getCell(1).setCellValue("5.01")
@@ -409,8 +424,7 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     sheet.getRow(11).getCell(1).setCellValue(period)
     sheet.getRow(12).getCell(1).setCellValue(reportYear)
     sheet.getRow(13).getCell(1).setCellValue(taxOrganCode)
-    // TODO: Сделать получение данных соответствующих Файл.Документ.@ПоМесту
-    sheet.getRow(14).getCell(1).setCellValue("")
+    sheet.getRow(14).getCell(1).setCellValue(poMestuCodeParam)
     sheet.getRow(18).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpOkved)
     sheet.getRow(19).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpTlph)
     sheet.getRow(21).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpNaimOrg)
@@ -430,7 +444,11 @@ def fillGeneralList(final XSSFWorkbook workbook) {
  *                                                                          *
  * **************************************************************************/
 
-// Заполняет данными лист персонифицированных сведений
+/**
+ * Заполняет данными лист персонифицированных сведений
+ * @param workbook
+ * @return
+ */
 def fillPersSvSheet(final XSSFWorkbook workbook) {
     def startIndex = 3;
     def pointer = startIndex
@@ -441,7 +459,14 @@ def fillPersSvSheet(final XSSFWorkbook workbook) {
     pointer += fillRaschSvVyplatDop(pointer, raschsvPersSvStrahLic, workbook)
 }
 
-// Создает строку для таблицы Персонифицированные сведения о застрахованных лицах
+/**
+ * Создает строку для таблицы Персонифицированные сведения о застрахованных лицах
+ * @param startIndex
+ * @param raschsvPersSvStrahLic
+ * @param workbook
+ * @param sheetName
+ * @return
+ */
 def fillRaschsvPersSvStrahLicTable(
         final int startIndex,
         final RaschsvPersSvStrahLic raschsvPersSvStrahLic,
@@ -518,7 +543,13 @@ def fillCellsOfRaschsvPersSvStrahLicRow(RaschsvPersSvStrahLic raschsvPersSvStrah
     cell17.setCellValue(raschsvPersSvStrahLic.getPrizOss())
 }
 
-//  Создает строки для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+/**
+ * Создает строки для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+ * @param startIndex
+ * @param raschsvPersSvStrahLic
+ * @param workbook
+ * @return
+ */
 int fillRaschSvVyplat(
         final int startIndex, final RaschsvPersSvStrahLic raschsvPersSvStrahLic, final XSSFWorkbook workbook) {
     def raschsvSvVypl = raschsvPersSvStrahLic?.raschsvSvVypl
@@ -534,7 +565,13 @@ int fillRaschSvVyplat(
     return raschsvSvVyplMkListSize
 }
 
-// Заполняет данными строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+/**
+ * Заполняет данными строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+ * @param raschsvPersSvStrahLic
+ * @param raschsvSvVyplMk
+ * @param row
+ * @return
+ */
 def fillCellsOfRaschSvVyplatMt(
         final RaschsvPersSvStrahLic raschsvPersSvStrahLic, final RaschsvSvVyplMk raschsvSvVyplMk, final XSSFRow row) {
     def styleCenter = normalWithBorderStyleCenterAligned(row.getSheet().getWorkbook())
@@ -566,7 +603,12 @@ def fillCellsOfRaschSvVyplatMt(
     cell6.setCellValue(raschsvSvVyplMk.nachislSv)
 }
 
-// Заполняет данными итоговую строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+/**
+ * Заполняет данными итоговую строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица"
+ * @param raschsvSvVypl
+ * @param row
+ * @return
+ */
 def fillCellsOfRaschSvVyplat(final RaschsvSvVypl raschsvSvVypl, final XSSFRow row) {
     def styleLeft = normalWithBorderStyleLeftAligned(row.getSheet().getWorkbook())
     addFillingToStyle(styleLeft, TOTAL_ROW_FILL_COLOR)
@@ -603,7 +645,14 @@ int fillRaschSvVyplatDop(
     return raschsvSvVyplDopMtListSize
 }
 
-// Заполняет данными строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+
+/**
+ * Заполняет данными строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+ * @param raschsvPersSvStrahLic
+ * @param raschsvSvVyplDopMt
+ * @param row
+ * @return
+ */
 def fillCellsOfRaschSvVyplatDopMt(
         final RaschsvPersSvStrahLic raschsvPersSvStrahLic,
         final RaschsvVyplSvDopMt raschsvSvVyplDopMt, final XSSFRow row) {
@@ -628,7 +677,12 @@ def fillCellsOfRaschSvVyplatDopMt(
     cell4.setCellValue(raschsvSvVyplDopMt?.nachislSv)
 }
 
-// Заполняет данными итоговую строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+/**
+ * Заполняет данными итоговую строку для таблицы "Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физического лица, на которые исчислены страховые взносы по дополнительному тарифу"
+ * @param raschsvVyplSvDop
+ * @param row
+ * @return
+ */
 def fillCellsOfRaschSvVyplatDop(final RaschsvVyplSvDop raschsvVyplSvDop, final XSSFRow row) {
     def styleLeft = normalWithBorderStyleLeftAligned(row.getSheet().getWorkbook())
     addFillingToStyle(styleLeft, TOTAL_ROW_FILL_COLOR)
@@ -651,7 +705,11 @@ def fillCellsOfRaschSvVyplatDop(final RaschsvVyplSvDop raschsvVyplSvDop, final X
  *                                                                          *
  * **************************************************************************/
 
-// Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем слева
+ /**
+ * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем слева
+ * @param workbook
+ * @return
+ */
 def normalWithBorderStyleLeftAligned(workbook) {
     def style = workbook.createCellStyle()
     style.setAlignment(CellStyle.ALIGN_LEFT)
@@ -659,7 +717,11 @@ def normalWithBorderStyleLeftAligned(workbook) {
     return style
 }
 
-// Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+/**
+ * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+ * @param workbook
+ * @return
+ */
 def normalWithBorderStyleCenterAligned(workbook) {
     def style = workbook.createCellStyle()
     style.setAlignment(CellStyle.ALIGN_CENTER)
@@ -667,14 +729,22 @@ def normalWithBorderStyleCenterAligned(workbook) {
     return style
 }
 
-// Создать стиль ячейки с нормальным шрифтом с тонкими границами
+/**
+ * Создать стиль ячейки с нормальным шрифтом с тонкими границами
+ * @param workbook
+ * @return
+ */
 def normalWithBorderStyle(workbook) {
     def style = workbook.createCellStyle()
     thinBorderStyle(style)
     return style
 }
 
-// Добавляет к стилю ячейки тонкие границы
+/**
+ * Добавляет к стилю ячейки тонкие границы
+ * @param style
+ * @return
+ */
 def thinBorderStyle(final style) {
     style.setBorderTop(CellStyle.BORDER_THIN)
     style.setBorderBottom(CellStyle.BORDER_THIN)
@@ -683,7 +753,12 @@ def thinBorderStyle(final style) {
     return style
 }
 
-// Добавляет к стилю заливку
+/**
+ * Добавляет к стилю заливку
+ * @param style
+ * @param color
+ * @return
+ */
 def addFillingToStyle(final XSSFCellStyle style, final Color color) {
     style.setFillForegroundColor(new XSSFColor(color))
     style.setFillBackgroundColor(new XSSFColor(color))
