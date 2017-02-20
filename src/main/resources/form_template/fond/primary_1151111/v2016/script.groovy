@@ -3338,6 +3338,11 @@ def checkDataXml() {
     }
 
     def xmlStream = declarationService.getXmlStream(declarationData.id)
+
+    // Проверка является ли пакет пустым
+//    println(xmlStream.getText())
+//    logger.info(xmlStream.getText())
+
     def fileNode = new XmlSlurper().parse(xmlStream);
     if (fileNode == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
