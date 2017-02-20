@@ -2099,19 +2099,12 @@ def checkDataCommon(
             logger.error(MESSAGE_ERROR_VALUE,
                     T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_DATE, fioAndInp, MESSAGE_ERROR_DATE);
         }
-        // Срок (дата) перечисления налога (Необязательное поле)
-        if (ndflPersonIncome.taxTransferDate != null &&
-                (ndflPersonIncome.taxTransferDate < getReportPeriodStartDate()
-                        || ndflPersonIncome.taxTransferDate > getReportPeriodEndDate())) {
-            logger.error(MESSAGE_ERROR_VALUE,
-                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
+        // если не заполнены Раздел 2. Графы 22-24
         if (ndflPersonIncome.paymentDate == null &&
                 ndflPersonIncome.paymentNumber == null &&
                 ndflPersonIncome.taxSumm == null) {
-            // если не заполнены Раздел 2. Графы 22-24
             def emptyField = "не заполнены " + getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
 
             // если не заполнена Раздел 2. Графа 21
@@ -2132,8 +2125,8 @@ def checkDataCommon(
                 }
             }
 
-            // если не заполнены Раздел 2. Графы 7 и 11
-            if (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
+            // если НЕ заполнены Раздел 2. Графы 7 и 11
+            if (ndflPersonIncome.incomePayoutDate == null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 emptyField += ", \"" + C_INCOME_PAYOUT_DATE + "\", \"" + C_INCOME_PAYOUT_SUMM + "\""
 
                 // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть НЕ заполнена
@@ -2190,11 +2183,16 @@ def checkDataCommon(
                 logger.error(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
             }
-            // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть заполнена
-            if (ndflPersonIncome.taxTransferDate == null) {
-                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_TRANSFER_DATE, notEmptyField])
-                logger.error(MESSAGE_ERROR_VALUE,
-                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+
+            // если заполнены Раздел 2. Графы 7 и 11
+            if (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
+
+                // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть заполнена
+                if (ndflPersonIncome.taxTransferDate == null) {
+                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_TRANSFER_DATE, notEmptyField])
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                }
             }
         }
 
@@ -2265,7 +2263,8 @@ def checkDataCommon(
         // если заполнена Раздел 2. Графа 7 "Дата выплаты дохода"
         if (ndflPersonIncome.incomePayoutDate != null) {
             def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_DATE])
-            // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода" должна быть заполнена
+
+            // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода"
             if (!ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 notEmptyField = "заполнены " + getQuotedFields([C_INCOME_PAYOUT_DATE, C_INCOME_PAYOUT_SUMM])
 
@@ -2290,11 +2289,14 @@ def checkDataCommon(
                             T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
             } else {
+                // Раздел 2. Графа 11 "Сумма выплаченного дохода" должна быть заполнена
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_PAYOUT_SUMM, notEmptyField])
                 logger.error(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_PAYOUT_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
         } else {
+            // если не заполнена Раздел 2. Графа 7 "Дата выплаты дохода"
+
             // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода"
             if (!ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_SUMM])
@@ -2303,6 +2305,19 @@ def checkDataCommon(
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_PAYOUT_DATE, notEmptyField])
                 logger.error(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_PAYOUT_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+            } else {
+                // если НЕ заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода"
+                if (ndflPersonIncome.paymentDate == null &&
+                        ndflPersonIncome.paymentNumber == null &&
+                        ndflPersonIncome.taxSumm == null) {
+
+                    // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть НЕ заполнена
+                    if (ndflPersonIncome.taxTransferDate != null) {
+                        def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_TRANSFER_DATE, emptyField])
+                        logger.error(MESSAGE_ERROR_VALUE,
+                                T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                    }
+                }
             }
         }
 
