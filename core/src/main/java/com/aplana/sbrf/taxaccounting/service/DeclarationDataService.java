@@ -143,7 +143,7 @@ public interface DeclarationDataService {
      * @param stateLogger
      */
     public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                    FormDataEvent operation, File xmlFile, LockStateLogger stateLogger);
+                                    FormDataEvent operation, File xmlFile, String xsdBlobDataId, LockStateLogger stateLogger);
 
     /**
      * Отмена принятия декларации

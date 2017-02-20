@@ -851,23 +851,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String operationName = operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle();
             logger.error("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
         } else {
-            validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, lockStateLogger);
+            validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, null, lockStateLogger);
         }
     }
 
     @Override
     public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                     FormDataEvent operation, File xmlFile, LockStateLogger stateLogger) {
+                                     FormDataEvent operation, File xmlFile, String xsdBlobDataId, LockStateLogger stateLogger) {
         Locale oldLocale = Locale.getDefault();
         LOG.info(String.format("Получение данных налоговой формы %s", declarationData.getId()));
         Locale.setDefault(new Locale("ru", "RU"));
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
 
+        if (xsdBlobDataId == null) {
+            xsdBlobDataId = declarationTemplate.getXsdId();
+        }
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
             try {
                 LOG.info(String.format("Выполнение проверок XSD-файла налоговой формы %s", declarationData.getId()));
                 stateLogger.updateState("Выполнение проверок XSD-файла");
-                boolean valid = validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile);
+                boolean valid = validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile, xsdBlobDataId);
                 if (!logger.containsLevel(LogLevel.ERROR) && !valid) {
                     logger.error(VALIDATION_ERR_MSG);
                 }

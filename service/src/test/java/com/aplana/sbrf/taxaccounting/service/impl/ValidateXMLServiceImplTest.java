@@ -49,9 +49,10 @@ public class ValidateXMLServiceImplTest implements Runnable {
     @Autowired
     private LockDataService lockDataService;
 
+    private String uuidXsd1;
     @Before
     public void init() throws IOException {
-        String uuidXsd1 = UUID.randomUUID().toString();
+        uuidXsd1 = UUID.randomUUID().toString();
         DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
         declarationTemplate1.setXsdId(uuidXsd1);
         when(declarationTemplateService.get(5)).thenReturn(declarationTemplate1);
@@ -106,7 +107,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
         data.setId(3l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null));
     }
 
     @Test
@@ -140,7 +141,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
-        Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null));
+        Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null));
     }
 
     @Test
@@ -186,7 +187,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         data.setDeclarationTemplateId(3);
         data.setId(5l);
 		// при маленьком таймауте проверка не должна пройти
-		Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, 1000L));
+		Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, 1000L));
         Assert.assertEquals(3, logger.getEntries().size());
     }
 
@@ -202,7 +203,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
         data.setId(3l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, uuidXsd1));
     }
 
     @Test
