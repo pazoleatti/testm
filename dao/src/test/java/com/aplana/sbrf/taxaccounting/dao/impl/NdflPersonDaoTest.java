@@ -105,6 +105,9 @@ public class NdflPersonDaoTest {
             Assert.assertEquals(0, person.getPrepayments().size());
         }
 
+        List<NdflPerson> result2 = ndflPersonDao.findPerson(2);
+        Assert.assertNotNull(result2);
+        Assert.assertEquals(10, result2.size());
         Assert.assertEquals(3, result.size());
     }
 
@@ -148,8 +151,6 @@ public class NdflPersonDaoTest {
 
         boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getPrepayments(), ndflPerson.getPrepayments(), new NdflPersonPrepaymentEquator());
         Assert.assertTrue(prepaymentEquals);
-
-
 
 
     }

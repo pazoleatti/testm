@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -22,6 +23,7 @@ import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static org.mockito.Matchers.any;
@@ -250,7 +252,22 @@ public class RaschsvCheckTest extends DeclarationScriptTestBase {
             @Override
             public ZipInputStream answer(InvocationOnMock invocation) throws Throwable {
                 InputStream inputStream = RaschsvCheckTest.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/form_template/fond/primary_1151111/v2016/NO_RASCHSV_CHECK.xml");
-                return new ZipInputStream(inputStream);
+                ZipInputStream zipXmlIn = new ZipInputStream(inputStream);
+
+                // Проверка содержимого xml-файла
+                /*
+                String xmlToString = IOUtils.toString(inputStream, "windows-1251");
+                System.out.println(xmlToString);
+                */
+
+                if (zipXmlIn != null) {
+                    try {
+                        zipXmlIn.getNextEntry();
+                    } catch (IOException e) {
+                        throw new ServiceException("Не удалось получить поток xml для скрипта.", e);
+                    }
+                }
+                return zipXmlIn;
             }
         });
         testHelper.setImportFileName(FILE_NAME);

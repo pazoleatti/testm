@@ -295,7 +295,7 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
                 personId,
                 personValues.get("LAST_NAME")?.getStringValue(),
                 personValues.get("FIRST_NAME")?.getStringValue(),
-                personValues.get("MIDDLE_NAME")?.getStringValue());
+                (personValues.get("MIDDLE_NAME")?.getStringValue() ?: ""));
         logger.info(noticeMsg);
     }
 
@@ -2401,7 +2401,7 @@ def checkDataCommon(
 def checkDataIncome(ndflPersonList, ndflPersonIncomeList) {
 
     ndflPersonList.each { ndflPerson ->
-        def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
+        def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "");
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
     }

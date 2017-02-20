@@ -1,10 +1,18 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.consolidated_rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -15,11 +23,16 @@ import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.util.TestUtils.toDate;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -68,13 +81,12 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     @Test
     public void checkTest() {
-        testHelper.execute(FormDataEvent.CHECK);
+        //testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
     }
 
     @Test
     public void calculateTest() throws Exception {
-
 
         when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
 
@@ -93,94 +105,12 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
         testHelper.execute(FormDataEvent.CALCULATE);
 
-
         assertEquals("1", xpath("//*[local-name()='Файл']/@имя"));
 
         checkLogger();
 
-
     }
 
-    private  List<Department> createDepartmentList(){
-        List<Department> departmentList = new ArrayList<Department>();
-        Department department = new Department();
-        department.setFullName("Test department");
-        department.setId(123);
-        departmentList.add(department);
-        return departmentList;
-    }
-
-
-    private  List<ReportPeriod> createReportPeriodList(){
-        List<ReportPeriod> reportPeriodList = new ArrayList<ReportPeriod>();
-        reportPeriodList.add(createReportPeriod(1, "первый квартал"));
-        reportPeriodList.add(createReportPeriod(2, "полугодие"));
-        return reportPeriodList;
-    }
-
-    private ReportPeriod createReportPeriod(int id, String name){
-        ReportPeriod reportPeriod = new ReportPeriod();
-        reportPeriod.setName(name);
-        reportPeriod.setId(id);
-        reportPeriod.setStartDate(parseDate("01.01.2016"));
-        reportPeriod.setEndDate(parseDate("31.12.2016"));
-
-        TaxPeriod taxPeriod = new TaxPeriod();
-        taxPeriod.setYear(2016);
-        reportPeriod.setTaxPeriod(taxPeriod);
-
-        return reportPeriod;
-    }
-
-    private List<DeclarationData> createFirstQuarterDeclarationData(){
-        List<DeclarationData> result = new ArrayList<DeclarationData>();
-        result.add(createDeclarationData(11L, 100L, 1));
-        result.add(createDeclarationData(111L, 100L, 1));
-        result.add(createDeclarationData(22L, 100L, 2));
-        result.add(createDeclarationData(222L, 100L, 2));
-        result.add(createDeclarationData(2223L, 100L, 4));
-        result.add(createDeclarationData(22234L, 100L, 4));
-        result.add(createDeclarationData(22235L, 100L, 4));
-
-        result.add(createDeclarationData(33L, 101L, 1));
-        result.add(createDeclarationData(333L, 101L, 1));
-        result.add(createDeclarationData(44L, 101L, 2));
-
-        result.add(createDeclarationData(55L, 102L, 1));
-        result.add(createDeclarationData(66L, 102L, 2));
-        result.add(createDeclarationData(77L, 102L, 3));
-        return result;
-    }
-
-    private List<DeclarationData> createHalfYearDeclarationData(){
-        List<DeclarationData> result = new ArrayList<DeclarationData>();
-        result.add(createDeclarationData(88L, 100L, 1));
-        result.add(createDeclarationData(99L, 100L, 1));
-        return result;
-    }
-
-    public DepartmentReportPeriod createDepartmentReportPeriod(Integer id, String date) {
-        DepartmentReportPeriod d = new DepartmentReportPeriod();
-        d.setId(id);
-        if (date != null) {
-            d.setCorrectionDate(parseDate(date));
-        }
-
-        ReportPeriod rp = new ReportPeriod();
-        rp.setId(1111);
-        rp.setName("testtest");
-        d.setReportPeriod(createReportPeriod(1, "a"));
-        return d;
-    }
-
-    public DeclarationData createDeclarationData(Long id, Long asnuId, int departmentReportPeriodId) {
-        DeclarationData declarationData = new DeclarationData();
-        declarationData.setId(id);
-        declarationData.setAsnuId(asnuId);
-        declarationData.setDepartmentReportPeriodId(departmentReportPeriodId);
-        declarationData.setDeclarationTemplateId(100);
-        return declarationData;
-    }
 
     @Test
     public void getSourcesTest() throws Exception {
@@ -211,15 +141,244 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         checkLogger();
     }
 
+    @Test
+    public void checkDataTest() throws IOException {
+
+        final int ndflPersonSize = 5;
+
+        final Map<Long, NdflPerson> ndflPersonMap = mockFindNdflPerson(ndflPersonSize);
+        when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenReturn(new ArrayList<NdflPerson>(ndflPersonMap.values()));
+
+        when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
+        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(createRefBookRecord());
+
+        testHelper.execute(FormDataEvent.CHECK);
+
+        testHelper.printLog();
+    }
+
+    private Map<Long, NdflPerson> mockFindNdflPerson(int size) {
+        Map<Long, NdflPerson> result = new HashMap<Long, NdflPerson>();
+        for (int i = 0; i < size; i++) {
+            result.put(Long.valueOf(i), createGoodNdflPerson(Long.valueOf(i)));
+        }
+        return result;
+    }
+
+    private NdflPerson createGoodNdflPerson(Long id) {
+        NdflPerson person = new NdflPerson();
+        person.setId(id);
+        person.setDeclarationDataId(1L);
+        person.setInp("000-000-000-00");
+        person.setSnils("123-321-111-11");
+        person.setLastName("Иванов");
+        person.setFirstName("Иван");
+        //person.setMiddleName("Иванович");
+        person.setBirthDay(toDate("01.01.1980"));
+        person.setCitizenship("643");
+        person.setRowNum(4);
+        person.setInnNp("123456789123");
+        person.setInnForeign("");
+        person.setIdDocType("11");
+        person.setIdDocNumber("2002 123456");
+        person.setStatus("1");
+        person.setPostIndex("394000");
+        person.setRegionCode("77");
+        person.setArea("MSK");
+        person.setCity("Москва");
+
+        person.setLocality("Loc");
+        person.setStreet("улица");
+        person.setHouse("1A");
+        person.setBuilding("123");
+        person.setFlat("500");
+        person.setCountryCode("643");
+        person.setAddress("aaaaaaaa");
+        person.setAdditionalData("eeeeee");
+
+
+        List<NdflPersonIncome> ndflPersonIncomes = new ArrayList<NdflPersonIncome>();
+        ndflPersonIncomes.add(createNdflPersonIncomes(1, 11L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(2, 11L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(3, 11L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(6, 22L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(5, 22L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(4, 33L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(7, 22L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(9, 22L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(8, 22L));
+
+
+        person.setIncomes(ndflPersonIncomes);
+
+        List<NdflPersonDeduction> ndflPersonDeductions = new ArrayList<NdflPersonDeduction>();
+        ndflPersonDeductions.add(createNdflPersonDeduction(1));
+        ndflPersonDeductions.add(createNdflPersonDeduction(2));
+        person.setDeductions(ndflPersonDeductions);
+
+        List<NdflPersonPrepayment> ndflPersonPrepayments = new ArrayList<NdflPersonPrepayment>();
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(1));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(2));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(3));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(5));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(5));
+
+        person.setPrepayments(ndflPersonPrepayments);
+
+        return person;
+    }
+
+    private NdflPerson createGoodNdflPerson() throws Exception {
+        return createGoodNdflPerson(null);
+    }
+
+    private NdflPersonIncome createNdflPersonIncomes(int row, long operationId) {
+        NdflPersonIncome personIncome = new NdflPersonIncome();
+        personIncome.setRowNum(row);
+        personIncome.setOperationId(11111L);
+        personIncome.setOktmo("oktmo111");
+        personIncome.setKpp("kpp111");
+        personIncome.setIncomeAccruedDate(parseDate("01.01.2017"));
+        personIncome.setPaymentNumber("aaaaaaaa" + row);
+        personIncome.setTaxSumm(122222);
+        personIncome.setOperationId(operationId);
+        return personIncome;
+    }
+
+    private NdflPersonDeduction createNdflPersonDeduction(int row) {
+        NdflPersonDeduction personDeduction = new NdflPersonDeduction();
+        personDeduction.setRowNum(row);
+        personDeduction.setOperationId(11111L);
+        personDeduction.setTypeCode("001");
+
+        personDeduction.setNotifType("11");
+        personDeduction.setNotifDate(toDate("01.01.1980"));
+        personDeduction.setNotifNum("notif_num");
+        personDeduction.setNotifSource("notif_source");
+        personDeduction.setNotifSumm(new BigDecimal("999999.99"));
+
+        personDeduction.setIncomeAccrued(toDate("01.01.2016"));
+        personDeduction.setIncomeCode("1234");
+        personDeduction.setIncomeSumm(new BigDecimal("999999.99")); //123456789123456789.12
+
+        personDeduction.setPeriodPrevDate(toDate("01.01.2016"));
+        personDeduction.setPeriodPrevSumm(new BigDecimal("999999.99")); //123456789123456789.12
+        personDeduction.setPeriodCurrDate(toDate("01.01.2016"));
+        personDeduction.setPeriodCurrSumm(new BigDecimal("999999.99"));
+
+
+        return personDeduction;
+    }
+
+    private NdflPersonPrepayment createNdflPersonPrepayment(int row) {
+        NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
+        personPrepayment.setRowNum(row);
+        personPrepayment.setOperationId(11111L);
+        personPrepayment.setSumm(1999999L); //по xsd это поле xs:integer
+        personPrepayment.setNotifNum("123-456-000");
+        personPrepayment.setNotifDate(toDate("01.01.2016"));
+        personPrepayment.setNotifSource("AAA");
+        return personPrepayment;
+    }
+
+
     //@Test
     //public void calcCreateSpecificReport() throws Exception {
     //    testHelper.execute(FormDataEvent.CREATE_SPECIFIC_REPORT);
     //    checkLogger();
     //}
 
+    private List<Department> createDepartmentList() {
+        List<Department> departmentList = new ArrayList<Department>();
+        Department department = new Department();
+        department.setFullName("Test department");
+        department.setId(123);
+        departmentList.add(department);
+        return departmentList;
+    }
+
+    private List<ReportPeriod> createReportPeriodList() {
+        List<ReportPeriod> reportPeriodList = new ArrayList<ReportPeriod>();
+        reportPeriodList.add(createReportPeriod(1, "первый квартал"));
+        reportPeriodList.add(createReportPeriod(2, "полугодие"));
+        return reportPeriodList;
+    }
+
+    private ReportPeriod createReportPeriod(int id, String name) {
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setName(name);
+        reportPeriod.setId(id);
+        reportPeriod.setStartDate(parseDate("01.01.2016"));
+        reportPeriod.setEndDate(parseDate("31.12.2016"));
+
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2016);
+        reportPeriod.setTaxPeriod(taxPeriod);
+
+        return reportPeriod;
+    }
+
+    private List<DeclarationData> createFirstQuarterDeclarationData() {
+        List<DeclarationData> result = new ArrayList<DeclarationData>();
+        result.add(createDeclarationData(11L, 100L, 1));
+        result.add(createDeclarationData(111L, 100L, 1));
+        result.add(createDeclarationData(22L, 100L, 2));
+        result.add(createDeclarationData(222L, 100L, 2));
+        result.add(createDeclarationData(2223L, 100L, 4));
+        result.add(createDeclarationData(22234L, 100L, 4));
+        result.add(createDeclarationData(22235L, 100L, 4));
+
+        result.add(createDeclarationData(33L, 101L, 1));
+        result.add(createDeclarationData(333L, 101L, 1));
+        result.add(createDeclarationData(44L, 101L, 2));
+
+        result.add(createDeclarationData(55L, 102L, 1));
+        result.add(createDeclarationData(66L, 102L, 2));
+        result.add(createDeclarationData(77L, 102L, 3));
+        return result;
+    }
+
+    private List<DeclarationData> createHalfYearDeclarationData() {
+        List<DeclarationData> result = new ArrayList<DeclarationData>();
+        result.add(createDeclarationData(88L, 100L, 1));
+        result.add(createDeclarationData(99L, 100L, 1));
+        return result;
+    }
+
+    public DepartmentReportPeriod createDepartmentReportPeriod(Integer id, String date) {
+        DepartmentReportPeriod d = new DepartmentReportPeriod();
+        d.setId(id);
+        if (date != null) {
+            d.setCorrectionDate(parseDate(date));
+        }
+        ReportPeriod rp = new ReportPeriod();
+        rp.setId(1111);
+        rp.setName("testtest");
+        d.setReportPeriod(createReportPeriod(1, "a"));
+        return d;
+    }
+
+    public DeclarationData createDeclarationData(Long id, Long asnuId, int departmentReportPeriodId) {
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(id);
+        declarationData.setAsnuId(asnuId);
+        declarationData.setDepartmentReportPeriodId(departmentReportPeriodId);
+        declarationData.setDeclarationTemplateId(100);
+        return declarationData;
+    }
+
     private Relation createRelation() {
         Relation relation = new Relation();
         return relation;
+    }
+
+
+    private PagingResult<Map<String, RefBookValue>> createRefBookRecord() {
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+        for (int i = 0; i < 5; i++) {
+            result.add(createRefBookMock(i));
+        }
+        return result;
     }
 
 
@@ -236,22 +395,11 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
         result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "foo"));
         result.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(new Random().nextInt(1000))));
+        result.put("INCOME_TYPE_ID", new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(new Random().nextInt(1000))));
+
+
         return result;
     }
-
-
-    @Test
-    public void get() throws Exception {
-        System.out.println("test");
-
-        List<DepartmentReportPeriod> list = new ArrayList<DepartmentReportPeriod>();
-
-
-
-
-    }
-
-
 
     public Date parseDate(String xmlDate) {
         try {
@@ -260,8 +408,5 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
             throw new IllegalArgumentException(e);
         }
     }
-
-
-
 
 }
