@@ -16,6 +16,11 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     private RaschsvPersSvStrahLicDao raschsvPersSvStrahLicDao;
 
     @Override
+    public RaschsvPersSvStrahLic get(long id) {
+        return raschsvPersSvStrahLicDao.get(id);
+    }
+
+    @Override
     public Integer insertPersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLic) {
         return raschsvPersSvStrahLicDao.insertPersSvStrahLic(raschsvPersSvStrahLic);
     }
@@ -36,7 +41,7 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     }
 
     @Override
-    public RaschsvPersSvStrahLic findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params) {
+    public List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params) {
         return raschsvPersSvStrahLicDao.findPersonBySubreportParams(declarationDataId, params);
     }
 }
