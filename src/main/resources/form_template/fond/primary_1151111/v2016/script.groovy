@@ -3283,6 +3283,9 @@ def checkDataDB() {
     // Коды видов документов
     def documentTypeActualList = getActualRefDocument()
 
+    // Идентификаторы ссылок на справочник Физические лица
+    def personIdList = []
+
     raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
         def fioBirthday = raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.dataRozd
 
@@ -3292,6 +3295,7 @@ def checkDataDB() {
             logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" для ФЛ " + fioBirthday)
         } else {
             if (personMap.size() > 0) {
+                personIdList.add(raschsvPersSvStrahLic.personId)
                 def person = personMap.get(raschsvPersSvStrahLic.personId)
                 // 3.1.2 Соответствие фамилии ФЛ и справочника
                 if (raschsvPersSvStrahLic.familia != person.get(RF_LAST_NAME).value) {
@@ -3395,10 +3399,65 @@ def checkDataDB() {
                 }
             }
         }
-
-        // 3.2.1 Дубли физического лица рамках формы
-        // 3.2.2 Дубли физического лица в разных формах
     }
+
+    // 3.2.1 Дубли физического лица рамках формы
+    // todo Раскомментировать после обновления стенда https://jira.aplana.com/browse/SBRFNDFL-334
+//    def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByDeclarationDataId(declarationData.id)
+//    def msgError  = "Найдено несколько записей, идентифицированных как одно физическое лицо: "
+//    // Мапа для группировки дублей <personId, RaschsvPersSvStrahLic>
+//    def raschsvPersSvStrahLicDuplMap = [:]
+//    if (raschsvPersSvStrahLicDuplList != null && raschsvPersSvStrahLicDuplList.size > 0) {
+//        raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDuplicate ->
+//            raschsvPersSvStrahLicList = raschsvPersSvStrahLicDuplMap.get(raschsvPersSvStrahLicDuplicate.personId)
+//            if (raschsvPersSvStrahLicList == null) {
+//                raschsvPersSvStrahLicList = []
+//            }
+//            raschsvPersSvStrahLicList.add(raschsvPersSvStrahLicDuplicate)
+//            raschsvPersSvStrahLicDuplMap.put(raschsvPersSvStrahLicDuplicate.personId, raschsvPersSvStrahLicList)
+//        }
+//        // Для каждого дубля выводим свое сообщение об ошибке
+//        raschsvPersSvStrahLicDuplMap.each { key, value ->
+//            value.each { raschsvPersSvStrahLic ->
+//                msgError += raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.snils + "; "
+//            }
+//            logger.warn(msgError)
+//        }
+//    }
+
+    // 3.2.2 Дубли физического лица в разных формах
+    // todo Раскомментировать после обновления стенда https://jira.aplana.com/browse/SBRFNDFL-334
+//    raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByReportPeriodId(personIdList, declarationData.reportPeriodId)
+//    msgError = "ФЛ с идентификаторами: "
+//    if (raschsvPersSvStrahLicDuplList != null && raschsvPersSvStrahLicDuplList.size > 0) {
+//        def personIdDuplList = []
+//        def declarationDataIdDuplList = []
+//        raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDupl ->
+//            // Будем брать дубли из других DeclarationData
+//            if (raschsvPersSvStrahLicDupl.declarationDataId != declarationData.id) {
+//                if (!personIdDuplList.contains(raschsvPersSvStrahLicDupl.personId)) {
+//                    personIdDuplList.add(raschsvPersSvStrahLicDupl.personId)
+//                }
+//                if (!declarationDataIdDuplList.contains(raschsvPersSvStrahLicDupl.declarationDataId)
+//                        && raschsvPersSvStrahLicDupl.declarationDataId != declarationData.id) {
+//                    declarationDataIdDuplList.add(raschsvPersSvStrahLicDupl.declarationDataId)
+//                }
+//            }
+//        }
+//        if (declarationDataIdDuplList.size() > 0) {
+//            msgError += personIdDuplList.join(", ") + " найдены в других формах "
+//            def declarationDataList = declarationService.getDeclarationData(declarationDataIdDuplList)
+//            def declarationDataInfo = []
+//            declarationDataList.each { dd ->
+//                def declarationTypeName = declarationService.getTypeByTemplateId(dd.declarationTemplateId)?.name
+//                def departmentName = departmentService.get(dd.departmentId)?.name
+//                def startDate = reportPeriodService.getStartDate(dd.reportPeriodId)?.time?.format("dd.MM.yyyy")
+//                def endDate = reportPeriodService.getEndDate(dd.reportPeriodId)?.time?.format("dd.MM.yyyy")
+//                declarationDataInfo.add("\"$declarationTypeName\" \"$departmentName\" $startDate - $endDate")
+//            }
+//            logger.warn(msgError + declarationDataInfo.join(", "))
+//        }
+//    }
 }
 
 /**
