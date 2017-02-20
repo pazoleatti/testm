@@ -1,0 +1,79 @@
+
+SQL*Plus: Release 11.2.0.1.0 Production on Sun Feb 19 20:43:23 2017
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+
+Table altered.
+
+
+Table altered.
+
+ALTER TABLE template_changes ENABLE CONSTRAINT template_changes_fk_dec_t
+*
+ERROR at line 1:
+ORA-02430: cannot enable constraint (TEMPLATE_CHANGES_FK_DEC_T) - no such
+constraint
+
+
+
+Table altered.
+
+
+Table altered.
+
+
+Table altered.
+
+
+Table altered.
+
+
+Table altered.
+
+ALTER TABLE declaration_template ENABLE CONSTRAINT declaration_tem_fk_blob_data
+                                                   *
+ERROR at line 1:
+ORA-02298: cannot validate (NDFL_TEST.DECLARATION_TEM_FK_BLOB_DATA) - parent
+keys not found
+
+
+
+Table altered.
+
+ALTER TABLE notification ENABLE CONSTRAINT notification_fk_blob_data_id
+*
+ERROR at line 1:
+ORA-02430: cannot enable constraint (NOTIFICATION_FK_BLOB_DATA_ID) - no such
+constraint
+
+
+
+Table altered.
+
+ALTER TABLE log_system ENABLE CONSTRAINT log_system_fk_blob_data
+*
+ERROR at line 1:
+ORA-02430: cannot enable constraint (LOG_SYSTEM_FK_BLOB_DATA) - no such
+constraint
+
+
+
+Table altered.
+
+ALTER TABLE declaration_report ENABLE CONSTRAINT decl_report_fk_blob_data
+*
+ERROR at line 2:
+ORA-00933: SQL command not properly ended
+
+
+
+Commit complete.
+
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
