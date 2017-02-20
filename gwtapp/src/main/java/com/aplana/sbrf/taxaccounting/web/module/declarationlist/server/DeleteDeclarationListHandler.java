@@ -37,8 +37,9 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
         Logger logger = new Logger();
         for(Long declarationId: action.getDeclarationIds()) {
             try {
+                String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
                 declarationDataService.delete(declarationId, taUserInfo);
-                logger.info("Успешно удалена %s.", declarationDataService.getDeclarationFullName(declarationId, null));
+                logger.info("Успешно удалена %s.", declarationFullName);
             } catch (Exception e) {
                 logger.error("При удалении %s возникли ошибки:", declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));
                 if (e instanceof ServiceLoggerException) {
