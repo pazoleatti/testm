@@ -2848,7 +2848,7 @@ def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb){
  * @param asnuId идентификатор АСНУ в справочнике АСНУ
  * @return запись справочника
  */
-RefBookRecord createPersonRecord(RaschsvPersSvStrahLic person, AttributeChangeListener attributeChangeListener) {
+RefBookRecord createPersonRecord(PersonData person, AttributeChangeListener attributeChangeListener) {
     RefBookRecord refBookRecord = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
     fillPersonAttr(values, person, attributeChangeListener);
