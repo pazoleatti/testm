@@ -2160,7 +2160,8 @@ create table ref_book_person
   version        date not null,
   status         number(1) default 0 not null,
   source_id      number(18),
-  old_id         number(10)
+  old_id         number(10),
+  old_status     number(1)
 );
 
 comment on table ref_book_person is 'Физические лица';
@@ -2186,6 +2187,7 @@ comment on column ref_book_person.version is 'Версия. Дата актуа�
 comment on column ref_book_person.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_person.old_id is 'Старый идентификатор ФЛ';
 comment on column ref_book_person.source_id is 'Система-источник: ссылка на справочник кодов АС НУ';
+comment on column ref_book_person.old_status is 'Старый статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 
 create table ref_book_id_doc
 (
