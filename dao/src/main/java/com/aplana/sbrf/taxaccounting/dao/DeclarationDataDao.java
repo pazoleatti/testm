@@ -36,6 +36,14 @@ public interface DeclarationDataDao {
 	 */
 	void setStatus(long declarationDataId, State state);
 
+    /**
+     * Установить ссстояние ЭД налоговой формы
+     * @param declarationDataId идентификатор налоговой формы
+     * @param docStateId ссстояние ЭД
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
+     */
+    void setDocStateId(long declarationDataId, Long docStateId);
+
 	/**
 	 * Установить имя файла
 	 * @param declarationDataId идентификатор налоговой формы
@@ -154,4 +162,8 @@ public interface DeclarationDataDao {
 
 	DeclarationData findDeclarationDataByKppOktmoOfNdflPersonIncomes(int declarationTypeId, int departmentReportPeriodId, int departmentId, int reportPeriod, String oktmo, String kpp);
 
+	/**
+	 * Поиск ОНФ по имени файла и типу файла
+	 */
+	DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
 }

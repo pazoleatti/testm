@@ -63,5 +63,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Map<Integer, Department> getDepartments(List<Integer> departmentIds) {
         return departmentService.getDepartments(departmentIds);
     }
+
+    @Override
+    public String getParentsHierarchyShortNames(Integer departmentId) {
+        return departmentService.getParentsHierarchyShortNames(departmentId);
+    }
 }
 
