@@ -213,7 +213,7 @@ def buildNdflPerson(NdflPerson currentNdflPerson, Map<String, RefBookValue> pers
 
     ndflPerson.idDocNumber = identityDocumentRecord.get("DOC_NUMBER")?.getStringValue()
 
-    ndflPerson.status = taxpayerStatusCodes.get(identityDocumentRecord.get("TAXPAYER_STATE")?.getReferenceValue())
+    ndflPerson.status = taxpayerStatusCodes.get(personRecord.get("TAXPAYER_STATE")?.getReferenceValue())
 
     ndflPerson.postIndex = addressRecord.get("POSTAL_CODE")?.getStringValue()
     ndflPerson.regionCode = addressRecord.get("REGION_CODE")?.getStringValue()
@@ -1618,8 +1618,6 @@ def checkDataCommon(
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
 
-        println "ndflPerson.rowNum="+ndflPerson.rowNum
-
         rowNumPersonList.add(ndflPerson.rowNum)
 
         // Общ1 Корректность ИНН (Необязательное поле)
@@ -1904,13 +1902,6 @@ def checkDataCommon(
     for (NdflPersonPrepayment ndflPersonPrepayment: ndflPersonPrepaymentList){
         rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
     }
-
-    println "============================="
-    println "rowNumPersonList: "+rowNumPersonList
-    println "rowNumPersonIncomeList: "+rowNumPersonIncomeList
-    println "rowNumPersonDeductionList: "+rowNumPersonDeductionList
-    println "rowNumPersonPrepaymentList: "+rowNumPersonPrepaymentList
-    println "============================="
 
     // Общ8 Отсутствие пропусков и повторений в нумерации строк
     def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
