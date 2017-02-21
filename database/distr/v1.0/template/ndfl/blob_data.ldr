@@ -12,12 +12,16 @@ L_0 FILLER char,
 DATA LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
 CREATION_DATE DATE "DD.MM.RR")
 begindata
- bf172465-20b7-4ce2-ac43-5482ad310c08|report.jrxml|primary_rnu_ndfl/v2016/report.jrxml|01.01.2016|
- 58adc3c2-66a0-4f11-98a2-defe682a092f|袪袧校_袧袛肖袥_new6.xsd|primary_rnu_ndfl/v2016/袪袧校_袧袛肖袥_new6.xsd|01.01.2016|
- b8406636-beb1-41d8-8f8a-cf4971309962|report.jrxml|primary_rnu_ndfl/v2016/report.jrxml|01.01.2016|
- f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71|report.jrxml|report_2ndfl_1/v2016/report.jrxml|01.01.2016|
+ bf172465-20b7-4ce2-ac43-5482ad310c08|report_ndfl_primary.jrxml|primary_rnu_ndfl/v2016/report.jrxml|01.01.2016|
+ 58adc3c2-66a0-4f11-98a2-defe682a092f|rnu_ndfl_new6.xsd|primary_rnu_ndfl/v2016/型觃湍运_new6.xsd|01.01.2016|
+ b8406636-beb1-41d8-8f8a-cf4971309962|report_ndfl_consolidated.jrxml|primary_rnu_ndfl/v2016/report.jrxml|01.01.2016|
+ f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71|report_2ndfl_1.jrxml|report_2ndfl_1/v2016/report.jrxml|01.01.2016|
  790782e0-2282-41f4-8735-7b50904703ac|NO_NDFL2_1_399_00_05_04_02.xsd|report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_04_02.xsd|01.01.2016|
- 41303bf7-9765-463f-a34b-f0a280bfa7bf|report.jrxml|report_6ndfl/v2016/report.jrxml|01.01.2016|
+ 41303bf7-9765-463f-a34b-f0a280bfa7bf|report_6ndfl.jrxml|report_6ndfl/v2016/report.jrxml|01.01.2016|
  13765b29-f1b7-4ec0-a8a9-88196a6e45a1|NO_NDFL6_1_152_00_05_01_02.xsd|report_6ndfl/v2016/NO_NDFL6_1_152_00_05_01_02.xsd|01.01.2016|
- d372df40-e448-48f5-9879-994753822122|report.jrxml|report_2ndfl_1/v2016/report.jrxml|01.01.2016|
+ d372df40-e448-48f5-9879-994753822122|report_2ndfl_2.jrxml|report_2ndfl_1/v2016/report.jrxml|01.01.2016|
  77d802bf-e3b1-485b-ae52-41a21aac1034|NO_NDFL2_1_399_00_05_04_02.xsd|report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_04_02.xsd|01.01.2016|
+ 03f6d78d-bfd7-45bb-a16b-6c89131b76d1|report_person_primary.jrxml|primary_rnu_ndfl/v2016/report_person.jrxml|01.01.2016|
+ 042c50fc-a590-46b5-bb50-d04cc3a9424a|report_person_consolidated.jrxml|primary_rnu_ndfl/v2016/report_person.jrxml|01.01.2016|
+ 047f207c-113e-488d-8390-9afc248a3bc8|report_ndfl_ref_1.jrxml|report_2ndfl_1/v2016/report_ndfl_ref.jrxml|01.01.2016|
+ 04d9b114-1782-4d09-ad88-729e5605c6ff|report_ndfl_ref_2.jrxml|report_2ndfl_1/v2016/report_ndfl_ref.jrxml|01.01.2016|

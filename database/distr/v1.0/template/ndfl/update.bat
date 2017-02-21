@@ -12,4 +12,4 @@ ECHO -- template
 "%ORA_BIN%\sqlldr" userid=%AUTH% control="%BASE_DIR%/template.ldr" log="../../%LOG_DIR%/%PREFIX%_4_template.txt" bad="../../%BAD_DIR%/%PREFIX%_template.txt"
 CD %BASE_DIR%
 ECHO -- subreport
-REM "%ORA_BIN%\sqlplus" %AUTH% @"subreport.sql" > "../../%LOG_DIR%/%PREFIX%_5_subreport.txt"
+"%ORA_BIN%\sqlplus" %AUTH% @"subreport.sql" > "../../%LOG_DIR%/%PREFIX%_5_subreport.txt"
