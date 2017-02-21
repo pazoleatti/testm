@@ -19,6 +19,8 @@ prompt configuration_email
 prompt department_type
 @@depart_type;
 
+prompt department
+@@departments;
 
 prompt declaration_kind
 @@declaration_kind;
@@ -29,5 +31,5 @@ prompt states
 prompt roles and system user
 @@sec_user;
 
-COMMIT;
-EXIT;
+commit;
+exit;
