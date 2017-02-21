@@ -244,6 +244,16 @@ public interface DeclarationService {
     void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile);
 
     /**
+     * Метод передающий управление на проверку декларации сторонней утилите
+     * @param declarationData
+     * @param userInfo
+     * @param logger
+     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
+     * @param xsdBlobDataId
+     */
+    void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String xsdBlobDataId);
+
+    /**
      * Возвращает идентификатор действующего {@link DeclarationTemplate описания декларации} по виду декларации
      * Такое описание для каждого вида декларации в любой момент времени может быть только одно
      * @param declarationTypeId идентификатор вида декларации

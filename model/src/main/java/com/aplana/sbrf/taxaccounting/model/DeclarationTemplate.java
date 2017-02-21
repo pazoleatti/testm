@@ -30,6 +30,11 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
      */
     private Long declarationFormTypeId;
 
+    /**
+     * Файлы макета
+     */
+    private List<DeclarationTemplateFile> declarationTemplateFiles;
+
     public String getName() {
         return name;
     }
@@ -171,5 +176,13 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 
     public void setDeclarationFormTypeId(Long declarationFormTypeId) {
         this.declarationFormTypeId = declarationFormTypeId;
+    }
+
+    public List<DeclarationTemplateFile> getDeclarationTemplateFiles() {
+        return declarationTemplateFiles;
+    }
+
+    public void setDeclarationTemplateFiles(List<DeclarationTemplateFile> declarationTemplateFiles) {
+        this.declarationTemplateFiles = declarationTemplateFiles;
     }
 }

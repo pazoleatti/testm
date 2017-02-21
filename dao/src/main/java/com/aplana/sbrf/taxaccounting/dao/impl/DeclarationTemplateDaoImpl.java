@@ -72,6 +72,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             if (formType != null) {
                 d.setDeclarationFormTypeId(SqlUtils.getLong(rs, "form_type"));
             }
+            d.setDeclarationTemplateFiles(getFiles(d.getId()));
             return d;
 		}
 	}
@@ -545,5 +546,27 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#declarationTemplateId + new String(\"_script\")")
     public void updateScript(final int declarationTemplateId, final String script) {
         getJdbcTemplate().update("UPDATE DECLARATION_TEMPLATE SET CREATE_SCRIPT = ? WHERE ID = ?", script, declarationTemplateId);
+    }
+
+    private List<DeclarationTemplateFile> getFiles(long declarationTemplateId) {
+        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("declarationTemplateId", declarationTemplateId);
+        String sql = "select bd.id blobDataId, bd.name name " +
+                "from declaration_template_file dtf " +
+                "join blob_data bd on bd.id = dtf.blob_data_id " +
+                "where dtf.declaration_template_id = :declarationTemplateId";
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, valueMap, new RowMapper<DeclarationTemplateFile>() {
+                @Override
+                public DeclarationTemplateFile mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    DeclarationTemplateFile declarationTemplateFile = new DeclarationTemplateFile();
+                    declarationTemplateFile.setBlobDataId(rs.getString("blobDataId"));
+                    declarationTemplateFile.setFileName(rs.getString("name"));
+                    return declarationTemplateFile;
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<DeclarationTemplateFile>();
+        }
     }
 }
