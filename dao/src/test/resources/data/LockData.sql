@@ -1,4 +1,5 @@
 INSERT INTO department_type (id, name) VALUES (1, 'Банк');
+INSERT INTO ref_book_region (id, record_id, version, code, name) VALUES (1, 1, date '2016-01-01', '01', 'Адыгея');
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, code)
   VALUES (1, 'Банк', null, 1, null, null, '12', 1, 1);
 
