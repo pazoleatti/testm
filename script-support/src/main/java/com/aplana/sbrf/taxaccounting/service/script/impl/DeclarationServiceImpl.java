@@ -79,6 +79,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DeclarationDataFileDao declarationDataFileDao;
     @Autowired
     private ConfigurationService configurationService;
+    @Autowired
+    private ValidateXMLService validateXMLService;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -355,6 +357,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public void validateDeclaration(Logger logger, File xmlFile, String xsdBlobDataId) {
+        validateXMLService.validate(logger, xmlFile, xsdBlobDataId, false);
+    }
+
+    @Override
     public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
         return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
     }
@@ -385,7 +392,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
+    public List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
         return declarationDataDao.findDeclarationDataByFileNameAndFileType(fileName, fileTypeId);
     }
 

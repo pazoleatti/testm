@@ -254,6 +254,14 @@ public interface DeclarationService {
     void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String xsdBlobDataId);
 
     /**
+     * Метод передающий управление на проверку декларации сторонней утилите
+     * @param logger
+     * @param xmlFile
+     * @param xsdBlobDataId
+     */
+    void validateDeclaration(Logger logger, File xmlFile, String xsdBlobDataId);
+
+    /**
      * Возвращает идентификатор действующего {@link DeclarationTemplate описания декларации} по виду декларации
      * Такое описание для каждого вида декларации в любой момент времени может быть только одно
      * @param declarationTypeId идентификатор вида декларации
@@ -321,7 +329,7 @@ public interface DeclarationService {
      * Поиск ОНФ по имени файла и типу файла
      */
     @SuppressWarnings("unused")
-    DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
+    List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
 
     /**
      * Сохраняет отдельный файл
@@ -346,6 +354,7 @@ public interface DeclarationService {
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
      */
     void setDocStateId(long declarationDataId, Long docStateId);
+
     /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */

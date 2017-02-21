@@ -27,8 +27,16 @@ CD ..
 
 ECHO ## dml: refbook
 CD refbook_tables
-CALL fill.bat
+ECHO ## dml: oktmo
+CD oktmo
+call load_oktmo.bat
 CD ..
+ECHO ## dml: fill ref_book tables
+CALL fill.bat
+ECHO ## dml: ref_book_ndfl and ref_book_ndfl_detail
+CD deppar
+call fill.bat
+CD ../..
 
 ECHO ## dml: template
 CD template

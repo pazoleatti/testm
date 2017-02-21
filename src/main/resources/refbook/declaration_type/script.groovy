@@ -98,6 +98,7 @@ String ATTR_YEAR = "ОтчетГод";
 @Field final String NDFL2_UU_FILE_ATTR = "ИмяОбрабФайла"
 @Field final String NDFL2_1 = "2 НДФЛ (1)"
 @Field final String NDFL2_2 = "2 НДФЛ (2)"
+@Field final String NDFL6 = "6 НДФЛ"
 
 // Идентификаторы видов деклараций
 @Field final long DECLARATION_TYPE_RNU_NDFL_ID = 100
@@ -409,6 +410,11 @@ def isNdfl6Response(fileName) {
  */
 def isNdfl6AndNot11151111(fileName) {
     def contentMap = readNdfl6ResponseContent()
+
+    if (contentMap == null) {
+        return false
+    }
+
     def reportFileName = getFileName(contentMap, fileName)
 
     if (reportFileName == null) {
@@ -419,8 +425,12 @@ def isNdfl6AndNot11151111(fileName) {
     def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
     def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
 
-    def declarationData = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
-    if (declarationData == null) {
+    def declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
+    if (declarationDataList.isEmpty()) {
+        return false
+    }
+
+    if (declarationDataList.size() > 1) {
         return false
     }
 
@@ -487,7 +497,7 @@ def getDocWeight(fileName) {
 @Field final Pattern NDFL2_PROTOCOL_DATE_PATTERN = Pattern.compile("ПРОТОКОЛ № .+ от (\\d{2}\\.\\d{2}\\.\\d{4})")
 @Field final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
 @Field final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
-@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("(.{17})_(.{4})_(.{2})_(.{4})_(.{32})")
+@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
 
 /**
  * Чтение содержание файла 2 НДФЛ - протокол
@@ -629,7 +639,7 @@ def readNdfl2ResponseReestrContent() {
         String line = ""
         while (line != null) {
             if (line.contains(NDFL2_TO_FILE)) {
-                result.put(NDFL2_TO_FILE, line.replaceAll(NDFL2_FILE_NAME_PATTERN, "\$2"))
+                result.put(NDFL2_TO_FILE, line.replaceAll(NDFL2_STR_PATTERN, "\$2"))
             }
 
             if (line.contains(NDFL2_REGISTER_DATE)) {
@@ -659,13 +669,13 @@ def readNdfl6ResponseContent() {
     sett.put(NDFL2_IV_FILE_TAG, [NDFL2_IV_FILE_ATTR])
     sett.put(NDFL2_UU_FILE_TAG, [NDFL2_UU_FILE_ATTR])
 
+    SAXHandler handler = new SAXHandler(sett)
+    InputStream inputStream
     try {
+        inputStream = new FileInputStream(dataFile)
         SAXParserFactory factory = SAXParserFactory.newInstance()
         SAXParser saxParser = factory.newSAXParser()
-        SAXHandler handler = new SAXHandler(sett)
-        saxParser.parse(ImportInputStream, handler)
-
-        reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD)
+        saxParser.parse(inputStream, handler)
     } catch (IOException e) {
         e.printStackTrace()
         logger.error("Файл «%s» не загружен: Ошибка чтения файла", UploadFileName)
@@ -679,7 +689,7 @@ def readNdfl6ResponseContent() {
         logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
         return null
     } finally {
-        IOUtils.closeQuietly(ImportInputStream)
+        IOUtils.closeQuietly(inputStream)
     }
 
     return handler.getValues()
@@ -690,11 +700,6 @@ def readNdfl6ResponseContent() {
  * Загрузка ответов ФНС 2 и 6 НДФЛ
  */
 def importNdflResponse() {
-    // Выполнить проверку структуры файла ответа на соответствие XSD
-    if (isNdfl6Response(UploadFileName)) {
-        //TODO xsd
-    }
-
     // Прочитать Имя отчетного файла из файла ответа
     def ndfl2ContentMap = [:]
     def ndfl2ContentReestrMap = [:]
@@ -717,6 +722,11 @@ def importNdflResponse() {
         }
     } else {
         def ndfl6Content = readNdfl6ResponseContent()
+
+        if (ndfl6Content == null) {
+            return
+        }
+
         reportFileName = getFileName(ndfl6Content, UploadFileName)
     }
 
@@ -729,19 +739,25 @@ def importNdflResponse() {
     def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
     def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
 
-    def declarationData = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
-    if (declarationData == null) {
-        //TODO несколкько
-        logger.error("Файл ответа \"%s\", для которого сформирован ответ, не найден в отчетных формах", UploadFileName)
+    def declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
+    if (declarationDataList.isEmpty()) {
+        logger.error("Файл ответа \"%s\", для которого сформирован ответ, не найден в отчетных формах", reportFileName)
         return
     }
+    if (declarationDataList.size() > 1) {
+        def result = ""
+        declarationDataList.each { declData ->
+            result += "\"${AttachFileType.TYPE_2.title}\", \"${declData.kpp}\", \"${declData.oktmo}\"; "
+        }
+
+        logger.error("Файл ответа \"%s\", для которого сформирован ответ, найден в отчетных формах: %s", reportFileName, result)
+        return
+    }
+    def declarationData = declarationDataList.get(0)
 
     // Проверить ОНФ на отсутствие ранее загруженного Файла ответа по условию: "Имя Файла ответа" не найдено в ОНФ."Файлы и комментарии"
-    DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
-    declarationFilter.declarationDataId = declarationData.id
-    declarationFilter.fileName = UploadFileName
-    declarationFilter.searchOrdering = DeclarationDataSearchOrdering.ID
-    if (!declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false).isEmpty()) {
+    def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
+    if (!beforeUploadDeclarationDataList.isEmpty()) {
         logger.error("Файл ответа \"%s\" уже загружен", UploadFileName)
         return
     }
@@ -751,6 +767,46 @@ def importNdflResponse() {
     def formTypeTypeProvider = refBookFactory.getDataProvider(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId())
     def formType = formTypeTypeProvider.getRecordData(declarationFormTypeId)
     def formTypeCode = formType.CODE.stringValue
+
+    // Выполнить проверку структуры файла ответа на соответствие XSD
+    if (NDFL6 == formTypeCode) {
+        def templateFile = null
+
+        if (UploadFileName.startsWith(NDFL6_PATTERN_1)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(NDFL6_PATTERN_1)
+            }
+        }
+
+        if (UploadFileName.startsWith(NDFL6_PATTERN_2)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(NDFL6_PATTERN_2)
+            }
+        }
+
+        if (UploadFileName.startsWith(NDFL6_PATTERN_3)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(NDFL6_PATTERN_3)
+            }
+        }
+
+        if (UploadFileName.startsWith(NDFL6_PATTERN_4)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(NDFL6_PATTERN_4)
+            }
+        }
+
+        if (!templateFile) {
+            logger.error("Для файл ответа \"%s\" не найдена xsd схема", UploadFileName)
+            return
+        }
+
+        declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
+        }
+    }
 
     if (NDFL2_1 == formTypeCode || NDFL2_2 == formTypeCode) {
         if (isNdfl2ResponseReestr(UploadFileName)) {
@@ -824,7 +880,7 @@ def importNdflResponse() {
     def fileDate = null
 
     if (isNdfl6Response(UploadFileName)) {
-        fileDate = Date.parse("yyyy", UploadFileName.replaceAll(NDFL6_FILE_NAME_PATTERN, "\$4"))
+        fileDate = Date.parse("yyyyMMdd", UploadFileName.replaceAll(NDFL6_FILE_NAME_PATTERN, "\$10"))
     } else if (isNdfl2ResponseReestr(UploadFileName)) {
         fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE))
     } else if (isNdfl2ResponseProt(UploadFileName)) {

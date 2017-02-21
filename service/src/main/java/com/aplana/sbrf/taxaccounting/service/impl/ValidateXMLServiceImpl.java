@@ -103,6 +103,11 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 		return validate(data, userInfo, logger, isErrorFatal, xmlFile, xsdBlobDataId, VALIDATION_TIMEOUT);
 	}
 
+	@Override
+    public boolean validate(Logger logger, File xmlFile, String xsdBlobDataId, boolean isErrorFatal) {
+        return isValid(logger, isErrorFatal, xmlFile, xsdBlobDataId, VALIDATION_TIMEOUT);
+    }
+
 	boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String xsdBlobDataId, long timeout) {
         if (xsdBlobDataId == null) {
             xsdBlobDataId = declarationTemplateService.get(data.getDeclarationTemplateId()).getXsdId();

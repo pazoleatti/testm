@@ -14,7 +14,13 @@ public class RaschsvUplPerServiceImpl implements RaschsvUplPerService {
     @Autowired
     private RaschsvUplPerDao raschsvUplPerDao;
 
+    @Override
     public Integer insertUplPer(List<RaschsvUplPer> raschsvUplPerList) {
         return raschsvUplPerDao.insertUplPer(raschsvUplPerList);
+    }
+
+    @Override
+    public List<RaschsvUplPer> findUplPer(Long declarationDataId) {
+        return raschsvUplPerDao.findUplPer(declarationDataId);
     }
 }

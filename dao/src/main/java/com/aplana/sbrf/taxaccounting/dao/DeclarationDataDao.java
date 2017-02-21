@@ -173,5 +173,5 @@ public interface DeclarationDataDao {
 	/**
 	 * Поиск ОНФ по имени файла и типу файла
 	 */
-	DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
+    List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
 }

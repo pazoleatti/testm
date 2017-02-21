@@ -17,4 +17,11 @@ public interface RaschsvSvOpsOmsService {
      * @return
      */
     Integer insertRaschsvSvOpsOms(List<RaschsvSvOpsOms> raschsvSvOpsOmsList);
+
+    /**
+     * Выборка из РасчСВ_ОПС_ОМС
+     * @param declarationDataId
+     * @return
+     */
+    List<RaschsvSvOpsOms> findSvOpsOms(Long declarationDataId);
 }
