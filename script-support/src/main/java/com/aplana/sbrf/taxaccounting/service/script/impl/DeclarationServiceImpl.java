@@ -79,6 +79,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DeclarationDataFileDao declarationDataFileDao;
     @Autowired
     private ConfigurationService configurationService;
+    @Autowired
+    private ValidateXMLService validateXMLService;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -352,6 +354,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                 // ничего не делаем
             }
         });
+    }
+
+    @Override
+    public void validateDeclaration(Logger logger, File xmlFile, String xsdBlobDataId) {
+        validateXMLService.validate(logger, xmlFile, xsdBlobDataId, false);
     }
 
     @Override

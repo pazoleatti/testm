@@ -277,6 +277,9 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
         declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
+        DeclarationTemplateFile xsdFile = new DeclarationTemplateFile();
+        xsdFile.setFileName("IV_.xsd");
+        declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));
 
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE"), anyLong()))
                 .thenReturn(Arrays.asList(declarationData));
@@ -317,6 +320,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
 
         ArgumentCaptor<DeclarationDataFile> argumentSaveFile = ArgumentCaptor.forClass(DeclarationDataFile.class);
         verify(testHelper.getDeclarationService(), Mockito.times(1)).saveFile(argumentSaveFile.capture());
+        verify(testHelper.getDeclarationService(), Mockito.times(1)).validateDeclaration(any(Logger.class), any(File.class), anyString());
 
         DeclarationDataFile resultFile = argumentSaveFile.getValue();
         Assert.assertEquals(DECLARATION_DATA_ID.longValue(), resultFile.getDeclarationDataId());

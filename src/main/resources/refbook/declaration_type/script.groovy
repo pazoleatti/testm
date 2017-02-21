@@ -98,6 +98,7 @@ String ATTR_YEAR = "ОтчетГод";
 @Field final String NDFL2_UU_FILE_ATTR = "ИмяОбрабФайла"
 @Field final String NDFL2_1 = "2 НДФЛ (1)"
 @Field final String NDFL2_2 = "2 НДФЛ (2)"
+@Field final String NDFL6 = "6 НДФЛ"
 
 // Идентификаторы видов деклараций
 @Field final long DECLARATION_TYPE_RNU_NDFL_ID = 100
@@ -705,11 +706,6 @@ def importNdflResponse() {
     def reportFileName
     def docWeight = getDocWeight(UploadFileName)
 
-    // Выполнить проверку структуры файла ответа на соответствие XSD
-    if (isNdfl6Response(UploadFileName)) {
-        //TODO xsd проверки
-    }
-
     if (isNdfl2Response(UploadFileName)) {
         if (isNdfl2ResponseProt(UploadFileName)) {
             ndfl2ContentMap = readNdfl2ResponseContent()
@@ -771,6 +767,46 @@ def importNdflResponse() {
     def formTypeTypeProvider = refBookFactory.getDataProvider(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId())
     def formType = formTypeTypeProvider.getRecordData(declarationFormTypeId)
     def formTypeCode = formType.CODE.stringValue
+
+    // Выполнить проверку структуры файла ответа на соответствие XSD
+    if (NDFL6 == formTypeCode) {
+        def templateFile = null
+
+        if (UploadFileName.startsWith(NDFL6_PATTERN_1)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(NDFL6_PATTERN_1)
+            }
+        }
+
+        if (UploadFileName.startsWith(NDFL6_PATTERN_2)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(NDFL6_PATTERN_2)
+            }
+        }
+
+        if (UploadFileName.startsWith(NDFL6_PATTERN_3)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(NDFL6_PATTERN_3)
+            }
+        }
+
+        if (UploadFileName.startsWith(NDFL6_PATTERN_4)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(NDFL6_PATTERN_4)
+            }
+        }
+
+        if (!templateFile) {
+            logger.error("Для файл ответа \"%s\" не найдена xsd схема", UploadFileName)
+            return
+        }
+
+        declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
+        }
+    }
 
     if (NDFL2_1 == formTypeCode || NDFL2_2 == formTypeCode) {
         if (isNdfl2ResponseReestr(UploadFileName)) {
