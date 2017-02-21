@@ -1,11 +1,8 @@
-MERGE INTO tax_type t USING (
-  SELECT 'N' ID, 'НДФЛ' NAME FROM DUAL UNION ALL
-  SELECT 'F' ID, 'Фонды и Сборы' NAME FROM DUAL) s ON
+merge into tax_type t using (
+  select 'N' id, 'НДФЛ' name from dual union all
+  select 'F' id, 'Фонды и сборы' name from dual) s on
 (t.id = s.id)
-WHEN NOT MATCHED THEN
-  INSERT (t.id, t.name) VALUES (s.id, s.name)
-WHEN MATCHED THEN
-  UPDATE SET t.name = s.name;
-  
-COMMIT;
-EXIT;
+when not matched then
+  insert (t.id, t.name) values (s.id, s.name)
+when matched then
+  update set t.name = s.name;

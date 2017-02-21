@@ -18,4 +18,9 @@ public interface ValidateXMLService {
      * @return true-если валидация прошла успешно
      */
     boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String xsdBlobDataId);
+
+    /**
+     * Валидация xml-файла по xsd
+     */
+    boolean validate(Logger logger, File xmlFile, String xsdBlobDataId, boolean isErrorFatal);
 }
