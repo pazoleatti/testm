@@ -674,12 +674,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
+    public List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
         String sql =
                 "select " +
                     "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                     "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
-                    "drp.report_period_id, drp.department_id " +
+                    "drp.report_period_id, drp.department_id, dd.note " +
                 "from " +
                     "DECLARATION_DATA dd " +
                     "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
@@ -687,7 +687,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
                 "where " +
                     "bd.name = :fileName " +
-                    "and ddf.file_type_id = :fileTypeId ";
+                    (fileTypeId == null ? "" : "and ddf.file_type_id = :fileTypeId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("fileName", fileName);
@@ -695,10 +695,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             params.addValue("fileTypeId", fileTypeId);
         }
 
-        try {
-            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new DeclarationDataRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+        return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
+
     }
 }

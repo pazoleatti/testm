@@ -385,7 +385,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
+    public List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
         return declarationDataDao.findDeclarationDataByFileNameAndFileType(fileName, fileTypeId);
     }
 
