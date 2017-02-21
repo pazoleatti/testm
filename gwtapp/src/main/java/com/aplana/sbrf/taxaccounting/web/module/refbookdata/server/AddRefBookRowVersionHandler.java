@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentChangeOperationType;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
@@ -11,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.RegionSecurityService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws.DepartmentWS_Manager;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
@@ -46,9 +44,6 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
 
     @Autowired
     private RegionSecurityService regionSecurityService;
-
-    @Autowired
-    private DepartmentWS_Manager departmentWS_manager;
 
     @Override
     public AddRefBookRowVersionResult execute(AddRefBookRowVersionAction action, ExecutionContext executionContext) throws ActionException {
@@ -88,9 +83,6 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
 
         logger.setTaUserInfo(securityService.currentUserInfo());
         result.setNewIds(refBookDataProvider.createRecordVersion(logger, action.getVersionFrom(), action.getVersionTo(), records));
-        if (action.getRefBookId() == 30) {
-            departmentWS_manager.sendChange(DepartmentChangeOperationType.CREATE, result.getNewIds().get(0).intValue(), logger);
-        }
         result.setUuid(logEntryService.save(logger.getEntries()));
         result.setCheckRegion(true);
 

@@ -10,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.CheckAccessAction;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.CheckAccessResult;
-import com.aplana.sbrf.taxaccounting.web.module.department.ws.departmentws.DepartmentWS;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws.DepartmentWS_Manager;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -34,9 +32,6 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
     private EmailService emailService;
     @Autowired
     private AuditService auditService;
-
-    @Autowired
-    private DepartmentWS_Manager departmentWS_manager;
 
     public CheckAccessHandler() {
         super(CheckAccessAction.class);
@@ -112,17 +107,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
     }
 
     private void checkWebServiceParams(ConfigurationParamModel model, Logger logger) {
-        List<String> valuesList = model.get(ConfigurationParam.WSDL_ADDRESS_DEPARTMENT_WS_SUNR, 0);
-        if (valuesList != null) {
-            for (String value : valuesList) {
-                if (!departmentWS_manager.checkServiceAvailable(value)) {
-                    logger.error("Сервис " + DepartmentWS.class.getSimpleName() + " не доступен по адресу " + value);
-                } else {
-                    logger.info("Сервис " + DepartmentWS.class.getSimpleName() + " доступен по адресу " + value);
-                }
-            }
-        }
-        valuesList = model.get(ConfigurationParam.TIMEOUT_SUNR, 0);
+        List<String> valuesList = model.get(ConfigurationParam.TIMEOUT_SUNR, 0);
         if (valuesList != null) {
             for (String value : valuesList) {
                 try{

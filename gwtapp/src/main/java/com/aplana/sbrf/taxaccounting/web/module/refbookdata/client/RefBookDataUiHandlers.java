@@ -18,4 +18,6 @@ public interface RefBookDataUiHandlers extends UiHandlers {
     void onPrintClicked(String reportName);
     void showUploadDialogClicked();
     void editClicked();
+    void duplicateClicked();
+    Long getRefBookId();
 }

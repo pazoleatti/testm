@@ -5,7 +5,7 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.List;
 
 public class GetRefBookAttributesResult implements Result {
-	List<RefBookColumn> columns;
+	private List<RefBookColumn> columns;
     private String refBookName;
     private boolean readOnly;
     private Integer refBookType;
