@@ -105,7 +105,7 @@ alter table ref_book_detach_tax_pay add constraint chk_rbook_detach_tax_pay_st c
 alter table ref_book_make_calc add constraint chk_rbook_make_calc_st check(status between -1 and 2);
 
 --unique
-create unique index unq_ref_book_oktmo_code_vers on ref_book_oktmo(code,version);
+--create unique index unq_ref_book_oktmo_code_vers on ref_book_oktmo(code,version);
 --create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
 --------------------------------------------------------------------------------------------------------------------------
 --indexes
