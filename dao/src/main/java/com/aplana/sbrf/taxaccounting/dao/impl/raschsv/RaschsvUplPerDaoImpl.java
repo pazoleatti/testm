@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvUplPerDao;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPer;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -27,8 +28,10 @@ public class RaschsvUplPerDaoImpl extends AbstractDao implements RaschsvUplPerDa
     private static final String SQL_INSERT = "INSERT INTO " + RaschsvUplPer.TABLE_NAME +
             " (" + UPL_PER_COLS + ") VALUES (" + UPL_PER_FIELDS + ")";
 
-    private static final String SQL_SELECT = "SELECT " + UPL_PER_COLS + " FROM " + RaschsvUplPer.TABLE_NAME +
-            " WHERE " + RaschsvUplPer.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvUplPer.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvUplPer.COLUMNS, "up.") +
+            " FROM raschsv_upl_per up " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON up.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     public Integer insertUplPer(List<RaschsvUplPer> raschsvUplPerList) {
         // Генерация идентификаторов
@@ -55,9 +58,10 @@ public class RaschsvUplPerDaoImpl extends AbstractDao implements RaschsvUplPerDa
         return res.length;
     }
 
-    public List<RaschsvUplPer> findUplPer(Long obyazPlatSvId) {
+    @Override
+    public List<RaschsvUplPer> findUplPer(Long declarationDataId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvUplPer.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
 
         return getNamedParameterJdbcTemplate().query(SQL_SELECT, params, new RaschsvUplPerRowMapper());
     }

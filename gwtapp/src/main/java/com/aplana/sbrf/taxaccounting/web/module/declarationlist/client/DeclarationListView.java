@@ -40,7 +40,7 @@ public class DeclarationListView extends
     public static final String DECLARATION_CREATE_TITLE = "Создание налоговой формы";
     public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
 
-    public static final String DECLARATION_KIND_TITLE = "Тид налоговой формы";
+    public static final String DECLARATION_KIND_TITLE = "Тип налоговой формы";
     public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";

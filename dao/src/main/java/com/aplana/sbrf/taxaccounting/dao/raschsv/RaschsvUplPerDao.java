@@ -20,5 +20,5 @@ public interface RaschsvUplPerDao {
      * Выборка "УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО"
      * @return
      */
-    List<RaschsvUplPer> findUplPer(Long obyazPlatSvId);
+    List<RaschsvUplPer> findUplPer(Long declarationDataId);
 }

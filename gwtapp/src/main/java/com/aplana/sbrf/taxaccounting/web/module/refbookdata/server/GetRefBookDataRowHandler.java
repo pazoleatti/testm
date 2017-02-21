@@ -45,7 +45,6 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
     @Autowired
     private DepartmentService departmentService;
 
-    private Map<RefBookAttribute, Column> columnMap = new HashMap<RefBookAttribute, Column>();
 
     public GetRefBookDataRowHandler() {
         super(GetRefBookTableDataAction.class);
@@ -54,6 +53,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
     @Override
     public GetRefBookTableDataResult execute(GetRefBookTableDataAction action, ExecutionContext executionContext)
             throws ActionException {
+        Map<RefBookAttribute, Column> columnMap = new HashMap<RefBookAttribute, Column>();
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
@@ -80,6 +80,11 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             }
         }
 
+        if (filter != null && !filter.isEmpty()) {
+            filter = filter + " and " + action.getFilter();
+        } else {
+            filter = action.getFilter();
+        }
         String searchPattern = action.getSearchPattern();
         if (searchPattern != null && !searchPattern.isEmpty()) {
             if (filter != null && !filter.isEmpty()) {
@@ -120,7 +125,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 action.isAscSorting());
         List<RefBookDataRow> rows = new LinkedList<RefBookDataRow>();
 
-        dereference(refBook, refBookPage, rows);
+        dereference(refBook, refBookPage, rows, refBookHelper, columnMap);
 
         result.setTotalCount(refBookPage.getTotalCount());
         result.setDataRows(rows);
@@ -133,7 +138,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 	 * @param refBookPage исходные данные для разыменовывания
 	 * @param rows пустой список, в который должен быть записан результат
      */
-    private void dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> refBookPage, List<RefBookDataRow> rows) {
+    public static void dereference(RefBook refBook, List<Map<String, RefBookValue>> refBookPage, List<RefBookDataRow> rows, RefBookHelper refBookHelper, Map<RefBookAttribute, Column> columnMap) {
 		if (refBookPage.isEmpty()) {
 			return;
 		}
@@ -153,7 +158,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                         case NUMBER:
                             if (value.getNumberValue() == null) tableCell = "";
                             else {
-                                tableCell = getColumn(attribute).getFormatter().format(value.getNumberValue().toString());
+                                tableCell = getColumn(attribute, columnMap).getFormatter().format(value.getNumberValue().toString());
                             }
                             break;
                         case DATE:
@@ -179,7 +184,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 								if (row == null) {
 									throw new com.aplana.sbrf.taxaccounting.model.exception.ServiceException("Can't to dereference value");
 								}
-                                tableCell = getColumn(attribute).getFormatter().format(row.get(value.getReferenceValue()));
+                                tableCell = getColumn(attribute, columnMap).getFormatter().format(row.get(value.getReferenceValue()));
                             }
                             break;
                         default:
@@ -196,7 +201,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
         }
     }
 
-    private Column getColumn(RefBookAttribute attribute) {
+    private static Column getColumn(RefBookAttribute attribute, Map<RefBookAttribute, Column> columnMap) {
         if (columnMap.containsKey(attribute))
             return columnMap.get(attribute);
         switch (attribute.getAttributeType()) {

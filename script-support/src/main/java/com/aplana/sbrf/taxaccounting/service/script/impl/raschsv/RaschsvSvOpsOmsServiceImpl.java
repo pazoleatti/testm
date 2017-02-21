@@ -14,7 +14,13 @@ public class RaschsvSvOpsOmsServiceImpl implements RaschsvSvOpsOmsService {
     @Autowired
     private RaschsvSvOpsOmsDao raschsvSvOpsOmsDao;
 
+    @Override
     public Integer insertRaschsvSvOpsOms(List<RaschsvSvOpsOms> raschsvSvOpsOmsList) {
         return raschsvSvOpsOmsDao.insertRaschsvSvOpsOms(raschsvSvOpsOmsList);
+    }
+
+    @Override
+    public List<RaschsvSvOpsOms> findSvOpsOms(Long declarationDataId) {
+        return raschsvSvOpsOmsDao.findSvOpsOms(declarationDataId);
     }
 }
