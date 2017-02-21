@@ -3263,7 +3263,7 @@ def checkDataDB() {
     checkDataDBPerson()
 
     // Суммовые проверки
-    checkDataDBSum()
+//    checkDataDBSum()
 }
 
 /**
