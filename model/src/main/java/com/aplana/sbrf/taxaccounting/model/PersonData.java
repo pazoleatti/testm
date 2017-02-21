@@ -44,6 +44,11 @@ public class PersonData {
     private Date birthDate;
 
     /**
+     * Номер физлица, для 115 э то поле номер для РНУ это инп, используется при формировании сообщения в логах
+     */
+    private String personNumber;
+
+    /**
      * Статус физлица, сравнивается по идентификатору записи в справочнике, так как ссылается на не версионный справочник
      * Ссылка на справочник {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id#TAXPAYER_STATUS}
      */
@@ -92,6 +97,12 @@ public class PersonData {
     private String status;
 
     /**
+     * Признак что в результат запроса надо включить адрес
+     */
+    private boolean useAddress = true;
+
+
+    /**
      * Адрес физлица
      */
     private Integer addressType;
@@ -118,6 +129,14 @@ public class PersonData {
     private Integer medical;
     private Integer social;
     private Integer employee;
+
+    public boolean isUseAddress() {
+        return useAddress;
+    }
+
+    public void setUseAddress(boolean useAddress) {
+        this.useAddress = useAddress;
+    }
 
     public Long getId() {
         return id;
@@ -431,7 +450,11 @@ public class PersonData {
         this.documentTypeCode = documentTypeCode;
     }
 
+    public String getPersonNumber() {
+        return personNumber;
+    }
 
-
-
+    public void setPersonNumber(String personNumber) {
+        this.personNumber = personNumber;
+    }
 }

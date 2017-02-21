@@ -30,7 +30,6 @@ public class RefBookPersonDaoTest {
     @Autowired
     private RefBookSimpleDao dao;
 
-
     @Test
     public void getRecordsTest() {
         //...

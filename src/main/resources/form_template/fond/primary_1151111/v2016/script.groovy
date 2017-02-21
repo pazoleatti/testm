@@ -2612,6 +2612,8 @@ def calculateData() {
 
     logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size());
 
+    long time = System.currentTimeMillis();
+
     //Два списка для создания новых записей и для обновления существующих
     List<PersonData> createdPerson = new ArrayList<PersonData>();
     List<PersonData> updatedPerson = new ArrayList<PersonData>();
@@ -2620,8 +2622,13 @@ def calculateData() {
 
         PersonData personData = createPersonData(declarationFormPerson);
 
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, logger);
+        long identificatePersonTime = System.currentTimeMillis();
+
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, getReportPeriodEndDate(), logger);
         declarationFormPerson.setPersonId(refBookPersonId)
+
+        println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
+        //logger.info("identificate: (" + (System.currentTimeMillis() - identificatePersonTime) + " ms)");
 
         //после идентификации выставим ссылку на запись справочника
         personData.setRefBookPersonId(refBookPersonId)
@@ -2638,6 +2645,10 @@ def calculateData() {
         resultMap.put(declarationFormPerson.getId(), declarationFormPerson);
     }
 
+    println "find " + (System.currentTimeMillis() - time);
+    logger.info("find: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPerson.size() + ", подготовленно записей для обновления: " + updatedPerson.size());
 
     //Создание справочников
@@ -2646,14 +2657,25 @@ def calculateData() {
         updateReferenceToPersonId(resultMap, createdPerson);
     }
 
+    println "create " + (System.currentTimeMillis() - time);
+    logger.info("create: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     //Обновление справочников
     if (updatedPerson != null && !updatedPerson.isEmpty()) {
         updateRefbookPersonData(updatedPerson);
         updateReferenceToPersonId(resultMap, updatedPerson);
     }
 
+    println "refresh " + (System.currentTimeMillis() - time);
+    logger.info("refresh: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     //Обновление данных декларации
     raschsvPersSvStrahLicService.updatePersSvStrahLic(new ArrayList<RaschsvPersSvStrahLic>(resultMap.values()))
+
+    println "update " + (System.currentTimeMillis() - time);
+    logger.info("update: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -2688,6 +2710,9 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
     personData.citizenshipId = findCountryId(person.grazd);
     personData.citizenship = person.grazd;
     personData.sex = person.pol?.toInteger();
+
+    //Строка для вывода номера ФЛ в сообщениях
+    personData.personNumber = inp.nomer;
 
     //Документы
     personData.documentTypeCode = person.kodVidDoc;
