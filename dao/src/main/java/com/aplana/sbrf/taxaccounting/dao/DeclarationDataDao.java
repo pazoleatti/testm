@@ -19,6 +19,14 @@ public interface DeclarationDataDao {
 	DeclarationData get(long declarationDataId);
 
 	/**
+	 * Получить декларации
+	 * @param declarationDataIds идентификатор декларации
+	 * @return объект декларации
+	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
+	 */
+	List<DeclarationData> get(List<Long> declarationDataIds);
+
+	/**
 	 * Сохраняет новую декларацию в БД. 
 	 * Этот метод позволяет сохранять только новые декларации (т.е. те, у которых id == null). 
 	 * При попытке сохранить уже существующий объект (с непустым id) будет выброшен DaoException
@@ -165,5 +173,5 @@ public interface DeclarationDataDao {
 	/**
 	 * Поиск ОНФ по имени файла и типу файла
 	 */
-	DeclarationData findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
+    List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId);
 }

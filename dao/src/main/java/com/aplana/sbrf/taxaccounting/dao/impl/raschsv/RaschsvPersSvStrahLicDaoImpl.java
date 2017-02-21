@@ -19,6 +19,7 @@ import java.util.*;
 @Transactional
 public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements RaschsvPersSvStrahLicDao {
 
+    private static final String PERS_SV_STRAH_LIC_ALIAS = "p";
     private static final String SV_VYPL_ALIAS = "sv";
     private static final String SV_VYPL_MT_ALIAS = "svm";
     private static final String VYPL_SV_DOP_ALIAS = "svd";
@@ -34,6 +35,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
     // Перечень столбцов таблицы ПерсСвСтрахЛиц
     private static final String PERS_SV_STRAH_LIC_COLS = SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, null);
+    private static final String PERS_SV_STRAH_LIC_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, PERS_SV_STRAH_LIC_ALIAS + ".");
     private static final String PERS_SV_STRAH_LIC_FIELDS = SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, ":");
 
     // Перечень столбцов таблицы СвВыпл
@@ -487,6 +489,36 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         return res.length;
     }
 
+    @Override
+    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByDeclarationDataId(long declarationDataId) {
+        String sql = "select * from (" +
+                " select " + PERS_SV_STRAH_LIC_COLS +
+                " ,count(*) over (partition by person_id) cnt " +
+                " from RASCHSV_PERS_SV_STRAH_LIC " +
+                " where declaration_data_id = :declaration_data_id and person_id is not null " +
+                " ) where cnt > 1";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declaration_data_id", declarationDataId);
+        return getNamedParameterJdbcTemplate().query(sql, params, new RaschsvPersSvStrahLicDaoImpl.RaschsvPersSvStrahLicRowMapper());
+    }
+
+    @Override
+    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(List<Long> personIdList, long reportPeriodId) {
+        String sql = "select * from (" +
+                " select " + PERS_SV_STRAH_LIC_COLS_WITH_ALIAS +
+                " ,count(*) over (partition by p.person_id) cnt " +
+                " from RASCHSV_PERS_SV_STRAH_LIC p " +
+                " inner join DECLARATION_DATA dd on p.declaration_data_id = dd.id " +
+                " inner join DEPARTMENT_REPORT_PERIOD drp on dd.department_report_period_id = drp.id " +
+                " where drp.report_period_id = :report_period_id and (" + SqlUtils.transformToSqlInStatement("p.person_id", personIdList) + ") " +
+                " ) where cnt > 1";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("report_period_id", reportPeriodId);
+        return getNamedParameterJdbcTemplate().query(sql, params, new RaschsvPersSvStrahLicDaoImpl.RaschsvPersSvStrahLicRowMapper());
+    }
+
+    //>-------------------------<The DAO row mappers>-----------------------------<
+
     /**
      * Маппинг для ПерсСвСтрахЛиц
      */
@@ -514,7 +546,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             raschsvPersSvStrahLic.setFamilia(rs.getString(RaschsvPersSvStrahLic.COL_FAMILIA));
             raschsvPersSvStrahLic.setImya(rs.getString(RaschsvPersSvStrahLic.COL_IMYA));
             raschsvPersSvStrahLic.setOtchestvo(rs.getString(RaschsvPersSvStrahLic.COL_OTCHESTVO));
-            raschsvPersSvStrahLic.setPersonId(rs.getLong(RaschsvPersSvStrahLic.COL_PERSON_ID));
+            raschsvPersSvStrahLic.setPersonId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_PERSON_ID));
 
             return raschsvPersSvStrahLic;
         }

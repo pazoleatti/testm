@@ -525,6 +525,7 @@ alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key
 --alter table ref_book_person add constraint chk_ref_book_person_sex check (sex in (1,2)) disable;
 --alter table ref_book_person add constraint chk_ref_book_person_employee check (employee in (1,2)) disable;
 alter table ref_book_person add constraint chk_ref_book_person_status check (status between -1 and 2);
+alter table ref_book_person add constraint chk_ref_book_person_old_st check (old_status is null or old_status between -1 and 2);
 --alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1)) disable;
 --alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0)) disable;
 --alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1)) disable;
