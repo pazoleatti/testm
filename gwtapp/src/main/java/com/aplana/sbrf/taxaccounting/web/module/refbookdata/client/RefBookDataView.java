@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
@@ -35,7 +36,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@UiField
     DateMaskBoxPicker relevanceDate;
     @UiField
-    LinkButton addRow, deleteRow, edit, backToRefBookAnchor;
+    LinkButton addRow, deleteRow, edit, backToRefBookAnchor, duplicate;
     @UiField
     LinkAnchor backAnchor;
     @UiField
@@ -195,6 +196,11 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         getUiHandlers().editClicked();
     }
 
+    @UiHandler("duplicate")
+    void duplicateButtonClicked(ClickEvent event) {
+        getUiHandlers().duplicateClicked();
+    }
+
     @UiHandler("sendQuery")
     void sendQueryButtonClicked(ClickEvent event) {
         getUiHandlers().sendQuery();
@@ -233,6 +239,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(false);
                 upload.setVisible(uploadAvailable);
+                duplicate.setVisible(false);
                 break;
             case READ:
                 addRow.setVisible(false);
@@ -245,6 +252,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
                 upload.setVisible(false);
+                duplicate.setVisible(getUiHandlers().getRefBookId().equals(RefBook.Id.PERSON.getId()));
                 break;
             case VIEW:
                 edit.setVisible(true);
@@ -257,6 +265,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
                 upload.setVisible(false);
+                duplicate.setVisible(getUiHandlers().getRefBookId().equals(RefBook.Id.PERSON.getId()));
                 break;
             case CREATE:
                 addRow.setVisible(false);
@@ -268,6 +277,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 relevanceDate.setEnabled(false);
                 printAnchor.setVisible(false);
                 upload.setVisible(false);
+                duplicate.setVisible(false);
                 break;
         }
         cancelEdit.setVisible(!isVersion&&mode==FormMode.EDIT);
@@ -296,6 +306,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         separator1.setVisible(!isVersion&&isVersioned);
         cancelEdit.setVisible(!isVersion);
         printAnchor.setVisible(!isVersion);
+        duplicate.setVisible(!isVersion && getUiHandlers().getRefBookId().equals(RefBook.Id.PERSON.getId()));
     }
 
     @Override
