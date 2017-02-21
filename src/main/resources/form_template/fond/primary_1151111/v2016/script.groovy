@@ -1069,47 +1069,10 @@ def formatDate(final date, final pattern) {
 @Field final SPRAV_NOMER = "Номер"
 @Field final SPRAV_DATA = "Дата"
 
-// Шаблоны имен файлов
-@Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String KV_OTCH_PATTERN = "KV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UO_OTCH_PATTERN = "UO_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String IV_OTCH_PATTERN = "IV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UU_OTCH_PATTERN = "UU_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-
 /**
  * Разбор xml-файлов
  */
 void importData() {
-
-    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN);
-    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN);
-    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN);
-    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN);
-    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN);
-
-    if (patternNoRaschsv.matcher(UploadFileName).matches()) {
-        importPrimaryData()
-    } else if (patternKvOtch.matcher(UploadFileName).matches() ||
-            patternUoOtch.matcher(UploadFileName).matches() ||
-            patternIvOtch.matcher(UploadFileName).matches() ||
-            patternUuOtch.matcher(UploadFileName).matches()) {
-        importAnswerData()
-    }
-}
-
-/**
- * Разбор xml-файлов ответов ФНС
- */
-void importAnswerData() {
-    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-338
-    // ожидаю https://jira.aplana.com/browse/SBRFNDFL-381
-    // Установка состояния ЭД для декларации на основании веса документа и даты создания документа
-}
-
-/**
- * Разбор xml-файла ТФ 1151111 (первичный) с сохранением в БД
- */
-void importPrimaryData() {
 
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
