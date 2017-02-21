@@ -7,7 +7,11 @@ import groovy.xml.MarkupBuilder
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
@@ -128,6 +132,9 @@ final int NDFL_REFERENCES = 964
 
 @Field
 final int REF_BOOK_DOC_STATE = 929
+
+@Field
+final int REPORT_PERIOD_TYPE_ID = 8
 
 @Field
 final String NDFL_2_S_PRIZNAKOM_1 = "2 НДФЛ (1)"
@@ -273,11 +280,13 @@ def buildXml(def writer, boolean isForSpecificReport) {
         listKnf.each { np ->
             // Порядковый номер физического лица
             if (nomKorr != 0) {
-                nomspr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "PERSON_ID = ${np.personId}", null).get(0).num
+                nomSpr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "PERSON_ID = ${np.personId}", null).get(0).NUM.value
+            } else {
+                nomSpr++
             }
             Документ(КНД: KND,
                     ДатаДок: dateDoc,
-                    НомСпр: nomSpr++,
+                    НомСпр: nomSpr,
                     ОтчетГод: otchetGod,
                     Признак: priznakF,
                     НомКорр: sprintf('%02d', nomKorr),
@@ -449,7 +458,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                     }
                 }
             }
-
             ndflReferencess << createRefBookAttributesForNdflReference(np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
 
         }
@@ -463,8 +471,7 @@ def saveNdflRefences() {
     getProvider(NDFL_REFERENCES).createRecordVersion(logger, new Date(), null, ndflReferencess)
 }
 
-def createRefBookAttributesForNdflReference(
-        def personId, def nomSpr, def lastName, def firstName, def middleName, def birthDay) {
+def createRefBookAttributesForNdflReference(def personId, def nomSpr, def lastName, def firstName, def middleName, def birthDay) {
     Map<String, RefBookValue> row = new HashMap<String, RefBookValue>();
     row.put(NDFL_REFERENCES_DECLARATION_DATA_ID, new RefBookValue(RefBookAttributeType.NUMBER, declarationData.id))
     row.put(NDFL_REFERENCES_PERSON_ID, new RefBookValue(RefBookAttributeType.REFERENCE, personId))
@@ -565,7 +572,7 @@ def groupByTaxRate(def incomes) {
     def toReturn = []
     def rates = []
     incomes.each {
-        if(!rates.contains(it.taxRate)) {
+        if (!rates.contains(it.taxRate)) {
             rates << it.taxRate
         }
     }
@@ -776,39 +783,38 @@ final int RNU_NDFL_DECLARATION_TYPE = 101
 def departmentParamTableList = null;
 
 
-
 def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def pairKppOktmoList = []
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
-    def ndflReferencesWithError = null
+    def ndflReferencesWithError = []
     if (departmentReportPeriod.correctionDate != null) {
         def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
 
         def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
         def declarationsForRemove = []
         declarations.each { declaration ->
-            def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id
-            def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id
-            def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id
-            def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
 
-            if (declarationTemplate.declarationFormKind != DeclarationFormKind.REPORTS || (declaration.docState != stateDocReject
-            || declaration.docState != stateDocNeedClarify || declaration.docState != stateDocError)) {
+            def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id.value
+            def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id.value
+            def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id.value
+            def declarationTemplate = declarationService.getTemplate(declaration.declarationTemplateId)
+            if (!(declarationTemplate.declarationFormKind == DeclarationFormKind.REPORTS && (declaration.docState == stateDocReject
+                    || declaration.docState == stateDocNeedClarify || declaration.docState == stateDocError))) {
                 declarationsForRemove << declaration
             }
         }
         declarations.removeAll(declarationsForRemove)
-        declarations.each { declaration ->
-            pairKppOktmoList << new PairKppOktmo(Integer.valueOf(declaration.kpp), declaration.oktmo)
-        }
-        formType = getFormType(currDeclarationTemplate)
-        if (definePriznakF() != "0") {
-            ndflReferencesWithError = getNdflReferencesWithError()
 
+        declarations.each { declaration ->
+            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, null)
         }
+        declarations.each {
+            ndflReferencesWithError.addAll(getNdflReferencesWithError(it.id, it.reportPeriodId))
+        }
+
     } else {
 
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
@@ -817,30 +823,28 @@ def createForm() {
             pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, dep.OKTMO?.value, dep?.TAX_ORGAN_CODE?.value)
         }
     }
-
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
     allDeclarationData.each { declaration ->
-        pairKppOktmoList.each { np ->
-            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
+        pairKppOktmoList.each { pair ->
+            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, pair.kpp.toString(), pair.oktmo.toString())
             if (ndflPersons != null && ndflPersons.size != 0) {
                 if (departmentReportPeriod.correctionDate != null) {
                     def ndflPersonsPicked = []
                     ndflReferencesWithError.each { reference ->
                         ndflPersons.each { person ->
-                            if (reference.PERSON_ID?.value == person.id) {
+                            if (reference.PERSON_ID?.value == person.personId) {
                                 ndflPersonsPicked << person
                             }
                         }
                     }
                     ndflPersons = ndflPersonsPicked
                 }
-                ndflPersonsGroupedByKppOktmo[np] = ndflPersons
+                ndflPersonsGroupedByKppOktmo[pair] = ndflPersons
             }
         }
     }
-
     initNdflPersons(ndflPersonsGroupedByKppOktmo)
 
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
@@ -888,7 +892,7 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
     // удаление форм не со статусом принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
-        if (declaration.state != State.ACCEPTED) {
+        if (declaration.state != State.CREATED) {
             declarationsForRemove << declaration
         }
     }
@@ -997,7 +1001,7 @@ void getSources() {
         if (tmpDeclaration != null) {
             tmpDeclarationDataList << tmpDeclaration
         }
-   }
+    }
     def declarationsForRemove = []
     tmpDeclarationDataList.each { declaration ->
         if (declaration.state != State.ACCEPTED) {
@@ -1082,14 +1086,12 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
 }
 
 
-
 def getDepartmentReportPeriodById(def id) {
     if (id != null && departmentReportPeriodMap[id] == null) {
         departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
     }
     return departmentReportPeriodMap[id]
 }
-
 
 /** Получить полное название подразделения по id подразделения. */
 def getDepartmentFullName(def id) {
@@ -1113,9 +1115,17 @@ def getDepartmentParamTableList(def departmentParamId, def reportPeriodId) {
 }
 
 // Получить список из реестра справок с ошибкой ФНС
-def getNdflReferencesWithError() {
-    def filter = "DECLARATION_DATA_ID = ${declarationData.id} AND ERRTEXT IS NOT NULL"
-    getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
+def getNdflReferencesWithError(declarationDataId, reportPeriodId) {
+    def filter = "DECLARATION_DATA_ID = ${declarationDataId}"
+    def allNdflReferences = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
+    def ndflReferencesForRemove = []
+    allNdflReferences.each {
+        if (it.ERRTEXT?.value == null) {
+            ndflReferencesForRemove << it
+        }
+    }
+    allNdflReferences.removeAll(ndflReferencesForRemove)
+    return allNdflReferences
 }
 
 class PairKppOktmo {
@@ -1127,6 +1137,11 @@ class PairKppOktmo {
         this.kpp = kpp
         this.oktmo = oktmo
         this.taxOrganCode = taxOrganCode
+    }
+
+    @Override
+    String toString() {
+        return kpp + " " + oktmo + " " + taxOrganCode
     }
 }
 
@@ -1168,6 +1183,7 @@ def createPrimaryRnuWithErrors() {
     }
 
     ndflPersonIncomeFromRNUConsolidatedList.each {
+        println "iddd ${it.id}"
         NdflPersonIncome ndflPersonIncomePrimary = ndflPersonService.getIncome(it.sourceId)
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonIncomePrimary.ndflPersonId)
         ndflPersonPrimary.incomes.add(ndflPersonIncomePrimary)
@@ -1184,13 +1200,76 @@ def createPrimaryRnuWithErrors() {
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)
         ndflPersonPrimary.prepayments.add(ndflPersonPrepaymentPrimary)
     }
+    fillPrimaryRnuWithErrors()
+}
 
+/**
+ * Заполнение печатного представления спецотчета "Первичные РНУ с ошибками"
+ * @return
+ */
+def fillPrimaryRnuWithErrors() {
     def writer = scriptSpecificReportHolder.getFileOutputStream()
     def workbook = getSpecialReportTemplate()
+    fillGeneralData(workbook)
     workbook.write(writer)
     writer.close()
     scriptSpecificReportHolder
             .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+/**
+ * Заполнение шапки отчета
+ */
+def fillGeneralData(workbook) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    XSSFCellStyle style = makeStyleLeftAligned(workbook)
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    // Вид отчетности
+    String declarationTypeName = declarationTemplate.type.name
+    String note = declarationData.note
+    // Период
+    int year = departmentReportPeriod.reportPeriod.taxPeriod.year
+    String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).NAME.value
+    // Территориальный банк
+    String departmentName = department.name
+    // КПП
+    String kpp = declarationData.kpp
+    //	Дата сдачи корректировки
+    String dateDelivery = getProvider(REPORT_PERIOD_TYPE_ID)
+    .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).END_DATE.value?.format(DATE_FORMAT_DOTTED)
+    // ОКТМО
+    String oktmo = declarationData.oktmo
+    // Код НО (конечный)
+    String taxOrganCode = declarationData.taxOrganCode
+    // Дата формирования
+    String currentDate = new Date().format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
+    XSSFCell cell1 = sheet.getRow(2).createCell(1)
+    cell1.setCellValue(declarationTypeName + " " + note)
+    cell1.setCellStyle(style)
+    XSSFCell cell2 = sheet.getRow(3).createCell(1)
+    cell2.setCellValue(year + ":" + periodName)
+    cell2.setCellStyle(style)
+    XSSFCell cell3 = sheet.getRow(4).createCell(1)
+    cell3.setCellValue(dateDelivery)
+    cell3.setCellStyle(style)
+    XSSFCell cell4 = sheet.getRow(5).createCell(1)
+    cell4.setCellValue(departmentName)
+    cell4.setCellStyle(style)
+    XSSFCell cell5 = sheet.getRow(6).createCell(1)
+    cell5.setCellValue(kpp)
+    cell5.setCellStyle(style)
+    XSSFCell cell6 = sheet.getRow(7).createCell(1)
+    cell6.setCellValue(oktmo)
+    cell6.setCellStyle(style)
+    XSSFCell cell7 = sheet.getRow(8).createCell(1)
+    cell7.setCellValue(taxOrganCode)
+    cell7.setCellStyle(style)
+    XSSFCell cell8 = sheet.getRow(2).createCell(11)
+    cell8.setCellValue(currentDate)
+    cell8.setCellStyle(style)
 }
 
 def initNdflPersonPrimary(ndflPersonId) {
@@ -1200,13 +1279,73 @@ def initNdflPersonPrimary(ndflPersonId) {
         ndflPersonPrimary.incomes.clear()
         ndflPersonPrimary.deductions.clear()
         ndflPersonPrimary.prepayments.clear()
-        ndflpersonFromRNUPrimary[ndflPersonIncomePrimary.ndflPersonId] = ndflPersonPrimary
+        ndflpersonFromRNUPrimary[ndflPersonId] = ndflPersonPrimary
     }
     return ndflPersonPrimary
+}
+
+def fillPrimaryRNUNDFLWithErrorsTable(final XSSFWorkbook workbook) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    def startIndex = 12
+    ndflpersonFromRNUPrimary.values().each { ndflPerson ->
+        ndflPerson.incomes.each { income ->
+
+        }
+    }
+}
+
+def fillPrimaryRNUNDFLWithErrorsRow(final XSSFWorkbook workbook, declarationDataRnuPrimaryId) {
+    def styleLeftAligned = makeStyleLeftAligned(workbook)
+    styleLeftAligned = thinBorderStyle(styleLeftAligned)
+    def styleCenterAligned = makeStyleCenterAligned(workbook)
+    styleCenterAligned = thinBorderStyle(styleCenterAligned)
+    // Первичная НФ
+
+    // Период
+    int year = departmentReportPeriod.reportPeriod.taxPeriod.year
+    String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId) - 1, null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).NAME.value
 }
 
 // Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
 def getSpecialReportTemplate() {
     def blobData = blobDataServiceDaoImpl.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
     new XSSFWorkbook(blobData.getInputStream())
+}
+
+/**
+ * Создать стиль ячейки с выравниваем слева
+ * @param workbook
+ * @return
+ */
+
+def makeStyleLeftAligned(XSSFWorkbook workbook) {
+    def XSSFCellStyle style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_LEFT)
+    return style
+}
+
+/**
+ * Создать стиль ячейки с выравниваем по центру
+ * @param workbook
+ * @return
+ */
+
+def makeStyleCenterAligned(XSSFWorkbook workbook) {
+    def XSSFCellStyle style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_CENTER)
+    return style
+}
+
+/**
+ * Добавляет к стилю ячейки тонкие границы
+ * @param style
+ * @return
+ */
+def thinBorderStyle(final style) {
+    style.setBorderTop(CellStyle.BORDER_THIN)
+    style.setBorderBottom(CellStyle.BORDER_THIN)
+    style.setBorderLeft(CellStyle.BORDER_THIN)
+    style.setBorderRight(CellStyle.BORDER_THIN)
+    return style
 }

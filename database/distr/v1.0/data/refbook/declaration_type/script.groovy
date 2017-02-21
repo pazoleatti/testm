@@ -3,6 +3,7 @@ package refbook.declaration_type
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.service.impl.*
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
@@ -79,6 +80,25 @@ String ATTR_YEAR = "ОтчетГод";
 @Field final String IV_OTCH_PATTERN = "IV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
 @Field final String UU_OTCH_PATTERN = "UU_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
 
+@Field final String NDFL2_PATTERN_PROT_1 = "PROT_NO_NDFL2"
+@Field final String NDFL2_PATTERN_PROT_2 = "прот_NO_NDFL2"
+@Field final String NDFL2_PATTERN_REESTR_1 = "REESTR_NO_NDFL2"
+@Field final String NDFL2_PATTERN_REESTR_2 = "реестр_NO_NDFL2"
+@Field final String NDFL6_PATTERN_1 = "KV_"
+@Field final String NDFL6_PATTERN_2 = "UO_"
+@Field final String NDFL6_PATTERN_3 = "IV_"
+@Field final String NDFL6_PATTERN_4 = "UU_"
+@Field final String NDFL2_KV_FILE_TAG = "СвКвит"
+@Field final String NDFL2_KV_FILE_ATTR = "ИмяОбрабФайла"
+@Field final String NDFL2_UO_FILE_TAG = "ОбщСвУвед"
+@Field final String NDFL2_UO_FILE_ATTR = "ИмяОбрабФайла"
+@Field final String NDFL2_IV_FILE_TAG = "СвИзвещВ"
+@Field final String NDFL2_IV_FILE_ATTR = "ИмяОбрабФайла"
+@Field final String NDFL2_UU_FILE_TAG = "СвКвит"
+@Field final String NDFL2_UU_FILE_ATTR = "ИмяОбрабФайла"
+@Field final String NDFL2_1 = "2 НДФЛ (1)"
+@Field final String NDFL2_2 = "2 НДФЛ (2)"
+
 // Идентификаторы видов деклараций
 @Field final long DECLARATION_TYPE_RNU_NDFL_ID = 100
 @Field final long DECLARATION_TYPE_RASCHSV_NDFL_ID = 200
@@ -118,6 +138,10 @@ def importTF() {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
         import1151111()
+    } else if (isNdfl6Response(UploadFileName) && isNdfl6AndNot11151111(UploadFileName)) {
+        importNdflResponse()
+    } else if (isNdfl2Response(UploadFileName)) {
+        importNdflResponse()
     } else if (
         patternKvOtch.matcher(UploadFileName).matches() ||
         patternUoOtch.matcher(UploadFileName).matches() ||
@@ -344,6 +368,535 @@ def importOtch() {
 
     def declarationDataId = declarationDataList.get(0)?.id
     AttachFileType attachFileType = AttachFileType.TYPE_3
+}
+
+/**
+ * Проверяет является ли файл ответом от ФНС 2 НДФЛ
+ */
+def isNdfl2Response(fileName) {
+    return isNdfl2ResponseProt(fileName) || isNdfl2ResponseReestr(fileName)
+}
+
+/**
+ * Если файл ответа == "Протокол Приема 2НДФЛ"
+ */
+def isNdfl2ResponseProt(fileName) {
+    return fileName.toLowerCase().startsWith(NDFL2_PATTERN_PROT_1.toLowerCase()) ||
+            fileName.toLowerCase().startsWith(NDFL2_PATTERN_PROT_2.toLowerCase())
+}
+
+/**
+ * Если файл ответа == "Реестр Принятых Документов"
+ */
+def isNdfl2ResponseReestr(fileName) {
+    return fileName.toLowerCase().startsWith(NDFL2_PATTERN_REESTR_1.toLowerCase()) ||
+            fileName.toLowerCase().startsWith(NDFL2_PATTERN_REESTR_2.toLowerCase())
+}
+
+/**
+ * Проверяет является ли файл ответом от ФНС 6 НДФЛ
+ */
+def isNdfl6Response(fileName) {
+    return fileName.startsWith(NDFL6_PATTERN_1) ||
+            fileName.startsWith(NDFL6_PATTERN_2) ||
+            fileName.startsWith(NDFL6_PATTERN_3) ||
+            fileName.startsWith(NDFL6_PATTERN_4)
+}
+
+/**
+ * Проверяет что файл ответа принадлежит 6 НФДЛ и не пренадлежит 1151111
+ * Для этого надо проверить содеражание файла
+ */
+def isNdfl6AndNot11151111(fileName) {
+    def contentMap = readNdfl6ResponseContent()
+    def reportFileName = getFileName(contentMap, fileName)
+
+    if (reportFileName == null) {
+        return false
+    }
+
+    // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
+    def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
+    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
+
+    def declarationData = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
+    if (declarationData == null) {
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Возвращает имя отчетного файла для 6НДФЛ
+ */
+def getFileName(contentMap, fileName) {
+    if (fileName.startsWith(NDFL6_PATTERN_1)) {
+        return contentMap.get(NDFL2_KV_FILE_TAG).get(NDFL2_KV_FILE_ATTR)
+    }
+
+    if (fileName.startsWith(NDFL6_PATTERN_2)) {
+        return contentMap.get(NDFL2_UO_FILE_TAG).get(NDFL2_UO_FILE_ATTR)
+    }
+
+    if (fileName.startsWith(NDFL6_PATTERN_3)) {
+        return contentMap.get(NDFL2_IV_FILE_TAG).get(NDFL2_IV_FILE_ATTR)
+    }
+
+    if (fileName.startsWith(NDFL6_PATTERN_4)) {
+        return contentMap.get(NDFL2_UU_FILE_TAG).get(NDFL2_UU_FILE_ATTR)
+    }
+
+    return null
+}
+
+/**
+ * Определет вес документа
+ */
+def getDocWeight(fileName) {
+    if (isNdfl2Response(fileName)) {
+        return 1
+    }
+
+    if (fileName.startsWith(NDFL6_PATTERN_1) || fileName.startsWith(NDFL6_PATTERN_2)) {
+        return 1
+    }
+
+    return 2
+}
+
+@Field final String NDFL2_TO_FILE = "К ФАЙЛУ"
+@Field final String NDFL2_ERROR_COUNT = "КОЛИЧЕСТВО СВЕДЕНИЙ С ОШИБКАМИ"
+@Field final String NDFL2_NOT_CORRECT_ERROR = "ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ"
+@Field final String NDFL2_CORRECT_ADDRESS_COUNT = "КОЛИЧЕСТВО СВЕДЕНИЙ С ИСПРАВЛЕННЫМИ АДРЕСАМИ"
+@Field final String NDFL2_CORRECT_ADDRESS = "СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ"
+@Field final String NDFL2_FILE_NAME_PATTERN = "(.+)\\\\([^/\\\\]+\\.(xml|XML))\\s*"
+@Field final String NDFL2_NUMBER_PATTERN = "\\s*(.+):\\s*(\\d+)\\s*"
+@Field final String NDFL2_STR_PATTERN = "\\s*(.+):\\s*(.+)\\s*"
+@Field final String NDFL2_NOT_CORRECT_NUMB = "Номер п/п:"
+@Field final String NDFL2_NOT_CORRECT_NUMB_REF = "Номер справки:"
+@Field final String NDFL2_NOT_CORRECT_PATH = "Путь к реквизиту:"
+@Field final String NDFL2_NOT_CORRECT_VALUE = "Значение элемента:"
+@Field final String NDFL2_NOT_CORRECT_TEXT = "Текст ошибки:"
+@Field final String NDFL2_NOT_CORRECT_SKIP = "---"
+@Field final String NDFL2_CORRECT_NUMB_REF = "Номер справки:"
+@Field final Pattern NDFL2_CORRECT_ADDRESS_PATTERN_BEFORE = Pattern.compile("\\s*Адрес ДО исправления:.+")
+@Field final Pattern NDFL2_CORRECT_ADDRESS_PATTERN_AFTER = Pattern.compile("\\s*Адрес ПОСЛЕ исправления:.+")
+@Field final Pattern NDFL2_CORRECT_ADDRESS_PATTERN_VALID = Pattern.compile("\\s*Адрес ПРИЗНАН ВЕРНЫМ \\(ИФНСМЖ - (.+)\\)\\s*")
+@Field final String NDFL2_PROTOCOL_DATE ="ПРОТОКОЛ №"
+@Field final Pattern NDFL2_PROTOCOL_DATE_PATTERN = Pattern.compile("ПРОТОКОЛ № .+ от (\\d{2}\\.\\d{2}\\.\\d{4})")
+@Field final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
+@Field final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
+@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("(.{17})_(.{4})_(.{2})_(.{4})_(.{32})")
+
+/**
+ * Чтение содержание файла 2 НДФЛ - протокол
+ */
+def readNdfl2ResponseContent() {
+    def result = [:]
+    def notCorrectList = []
+    def correctList = []
+    result.put(NDFL2_NOT_CORRECT_ERROR, notCorrectList)
+    result.put(NDFL2_CORRECT_ADDRESS, correctList)
+
+    try {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ImportInputStream))
+
+        String line = ""
+        while (line != null) {
+            if (line.contains(NDFL2_TO_FILE)) {
+                result.put(NDFL2_TO_FILE, line.replaceAll(NDFL2_FILE_NAME_PATTERN, "\$2"))
+            }
+
+            if (line.contains(NDFL2_PROTOCOL_DATE)) {
+                result.put(NDFL2_PROTOCOL_DATE, line.replaceAll(NDFL2_PROTOCOL_DATE_PATTERN, "\$1"))
+            }
+
+            if (line.contains(NDFL2_ERROR_COUNT)) {
+                result.put(NDFL2_ERROR_COUNT, line.replaceAll(NDFL2_NUMBER_PATTERN, "\$2") as Integer)
+            }
+
+            if (line.contains(NDFL2_CORRECT_ADDRESS_COUNT)) {
+                result.put(NDFL2_CORRECT_ADDRESS_COUNT, line.replaceAll(NDFL2_NUMBER_PATTERN, "\$2") as Integer)
+            }
+
+            if (line.contains(NDFL2_NOT_CORRECT_ERROR)) {
+                def lastEntry = [:]
+                def isEndNotCorrect = false
+
+                while (!isEndNotCorrect) {
+                    line = bufferedReader.readLine()
+
+                    if (line.startsWith(NDFL2_NOT_CORRECT_SKIP)) {
+                        notCorrectList.add(lastEntry)
+                        lastEntry = [:]
+                        continue
+                    }
+
+                    if (line.startsWith(NDFL2_NOT_CORRECT_NUMB)) {
+                        continue
+                    }
+
+                    if (line.startsWith(NDFL2_NOT_CORRECT_NUMB_REF)) {
+                        lastEntry.ref = line.replaceAll(NDFL2_STR_PATTERN, "\$2")
+                        continue
+                    }
+
+                    if (line.startsWith(NDFL2_NOT_CORRECT_PATH)) {
+                        lastEntry.path = line.replaceAll(NDFL2_STR_PATTERN, "\$2")
+                        continue
+                    }
+
+                    if (line.startsWith(NDFL2_NOT_CORRECT_VALUE)) {
+                        lastEntry.val = line.replaceAll(NDFL2_STR_PATTERN, "\$2")
+                        continue
+                    }
+
+                    if (line.startsWith(NDFL2_NOT_CORRECT_TEXT)) {
+                        lastEntry.text = line.replaceAll(NDFL2_STR_PATTERN, "\$2")
+                        continue
+                    }
+
+                    isEndNotCorrect = true
+                }
+
+                // Блок "ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ" полносью прочитан
+                // Кроме блока прочитана еще последующая стрка "СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ" или какая-то другая
+                // Поэтому вызываем continue, чтобы повторно не вызвать bufferedReader.readLine()
+                continue
+            }
+
+            if (line.contains(NDFL2_CORRECT_ADDRESS)) {
+                def lastEntry = [:]
+                def isEndCorrect = false
+
+                while (!isEndCorrect) {
+                    line = bufferedReader.readLine()
+
+                    if (line.startsWith(NDFL2_CORRECT_NUMB_REF)) {
+                        lastEntry = [:]
+                        lastEntry.ref = line.replaceAll(NDFL2_STR_PATTERN, "\$2")
+                        correctList.add(lastEntry)
+                        continue
+                    }
+
+                    if (NDFL2_CORRECT_ADDRESS_PATTERN_BEFORE.matcher(line).matches()) {
+                        lastEntry.addressBefore = line.replaceAll(NDFL2_STR_PATTERN, "\$2")
+                        continue
+                    }
+
+                    if (NDFL2_CORRECT_ADDRESS_PATTERN_AFTER.matcher(line).matches()) {
+                        lastEntry.addressAfter = line.replaceAll(NDFL2_STR_PATTERN, "\$2")
+                        continue
+                    }
+
+                    if (NDFL2_CORRECT_ADDRESS_PATTERN_VALID.matcher(line).matches()) {
+                        lastEntry.valid = line.replaceAll(NDFL2_CORRECT_ADDRESS_PATTERN_VALID, "\$1")
+                        continue
+                    }
+
+                    isEndCorrect = true
+                }
+
+                // Блок "СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ " полносью прочитан
+                // Кроме блока прочитана еще последующая стрка "ФАЙЛ ПРИНЯТ. СПРАВКИ ЗАПИСАНЫ В БАЗУ ДАННЫХ ИНСПЕКЦИИ" или какая-то другая
+                // Поэтому вызываем continue, чтобы повторно не вызвать bufferedReader.readLine()
+                continue
+            }
+
+            line = bufferedReader.readLine()
+        }
+    } catch (Exception exception) {
+        exception.printStackTrace()
+        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
+        return null
+    } finally {
+        IOUtils.closeQuietly(ImportInputStream)
+    }
+
+    return result
+}
+
+/**
+ * Чтение содержание файла 2 НДФЛ - реестр
+ */
+def readNdfl2ResponseReestrContent() {
+    def result = [:]
+
+    try {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ImportInputStream))
+
+        String line = ""
+        while (line != null) {
+            if (line.contains(NDFL2_TO_FILE)) {
+                result.put(NDFL2_TO_FILE, line.replaceAll(NDFL2_FILE_NAME_PATTERN, "\$2"))
+            }
+
+            if (line.contains(NDFL2_REGISTER_DATE)) {
+                result.put(NDFL2_REGISTER_DATE, line.replaceAll(NDFL2_REGISTER_DATE_PATTERN, "\$1"))
+            }
+
+            line = bufferedReader.readLine()
+        }
+    } catch (Exception exception) {
+        exception.printStackTrace()
+        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
+        return null
+    } finally {
+        IOUtils.closeQuietly(ImportInputStream)
+    }
+
+    return result
+}
+
+/**
+ * Чтение содержание файла 6 НДФЛ
+ */
+def readNdfl6ResponseContent() {
+    def sett = [:]
+    sett.put(NDFL2_KV_FILE_TAG, [NDFL2_KV_FILE_ATTR])
+    sett.put(NDFL2_UO_FILE_TAG, [NDFL2_UO_FILE_ATTR])
+    sett.put(NDFL2_IV_FILE_TAG, [NDFL2_IV_FILE_ATTR])
+    sett.put(NDFL2_UU_FILE_TAG, [NDFL2_UU_FILE_ATTR])
+
+    try {
+        SAXParserFactory factory = SAXParserFactory.newInstance()
+        SAXParser saxParser = factory.newSAXParser()
+        SAXHandler handler = new SAXHandler(sett)
+        saxParser.parse(ImportInputStream, handler)
+
+        reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD)
+    } catch (IOException e) {
+        e.printStackTrace()
+        logger.error("Файл «%s» не загружен: Ошибка чтения файла", UploadFileName)
+        return null
+    } catch (ParserConfigurationException e) {
+        e.printStackTrace()
+        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
+        return null
+    } catch (SAXException e) {
+        e.printStackTrace()
+        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
+        return null
+    } finally {
+        IOUtils.closeQuietly(ImportInputStream)
+    }
+
+    return handler.getValues()
+}
+
+
+/**
+ * Загрузка ответов ФНС 2 и 6 НДФЛ
+ */
+def importNdflResponse() {
+    // Выполнить проверку структуры файла ответа на соответствие XSD
+    if (isNdfl6Response(UploadFileName)) {
+        //TODO xsd
+    }
+
+    // Прочитать Имя отчетного файла из файла ответа
+    def ndfl2ContentMap = [:]
+    def ndfl2ContentReestrMap = [:]
+    def reportFileName
+    def docWeight = getDocWeight(UploadFileName)
+
+    if (isNdfl2Response(UploadFileName)) {
+        if (isNdfl2ResponseProt(UploadFileName)) {
+            ndfl2ContentMap = readNdfl2ResponseContent()
+            if (ndfl2ContentMap == null) {
+                return
+            }
+            reportFileName = ndfl2ContentMap.get(NDFL2_TO_FILE)
+        } else if (isNdfl2ResponseReestr(UploadFileName)) {
+            ndfl2ContentReestrMap = readNdfl2ResponseReestrContent()
+            if (ndfl2ContentMap == null) {
+                return
+            }
+            reportFileName = ndfl2ContentReestrMap.get(NDFL2_TO_FILE)
+        }
+    } else {
+        def ndfl6Content = readNdfl6ResponseContent()
+        reportFileName = getFileName(ndfl6Content, UploadFileName)
+    }
+
+    if (reportFileName == null) {
+        logger.error("Не найдено имя отчетного файла в файле ответа  \"%s\"", UploadFileName)
+        return
+    }
+
+    // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
+    def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
+    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
+
+    def declarationData = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
+    if (declarationData == null) {
+        //TODO несколкько
+        logger.error("Файл ответа \"%s\", для которого сформирован ответ, не найден в отчетных формах", UploadFileName)
+        return
+    }
+
+    // Проверить ОНФ на отсутствие ранее загруженного Файла ответа по условию: "Имя Файла ответа" не найдено в ОНФ."Файлы и комментарии"
+    DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
+    declarationFilter.declarationDataId = declarationData.id
+    declarationFilter.fileName = UploadFileName
+    declarationFilter.searchOrdering = DeclarationDataSearchOrdering.ID
+    if (!declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false).isEmpty()) {
+        logger.error("Файл ответа \"%s\" уже загружен", UploadFileName)
+        return
+    }
+
+    def declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    def declarationFormTypeId = declarationTemplate.declarationFormTypeId
+    def formTypeTypeProvider = refBookFactory.getDataProvider(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId())
+    def formType = formTypeTypeProvider.getRecordData(declarationFormTypeId)
+    def formTypeCode = formType.CODE.stringValue
+
+    if (NDFL2_1 == formTypeCode || NDFL2_2 == formTypeCode) {
+        if (isNdfl2ResponseReestr(UploadFileName)) {
+            // Ничего не делаль: Переход к шагу 6 ОС
+        }
+
+        if (isNdfl2ResponseProt(UploadFileName)) {
+            def ndflRefProvider = refBookFactory.getDataProvider(RefBook.Id.NDFL_REFERENCES.getId())
+
+            def errorCount = ndfl2ContentMap.get(NDFL2_ERROR_COUNT)
+            def notCorrect = ndfl2ContentMap.get(NDFL2_NOT_CORRECT_ERROR)
+
+            // Если значение в строке "КОЛИЧЕСТВО СВЕДЕНИЙ С ОШИБКАМИ" > 0
+            if (errorCount > 0) {
+                if (!notCorrect) {
+                    logger.error("Не найден раздел \"ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ\" в файле ответа \"%s\"", UploadFileName)
+                } else {
+                    notCorrect.each { entry ->
+                        def ndflRefIds = ndflRefProvider.getUniqueRecordIds(
+                                new Date(),
+                                "DECLARATION_DATA_ID = ${declarationData.id} AND NUM = ${entry.ref}"
+                        )
+
+                        if (ndflRefIds.isEmpty()) {
+                            logger.error("В реестре справок формы \"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\" не найдено справки \"${entry.ref}\"", UploadFileName)
+                        } else {
+                            def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
+
+                            ndflRef.ERRTEXT.value = "Путь к реквизиту: \"${entry.path}\"; Значение элемента: \"${entry.val}\"; Текст ошибки: \"${entry.text}\"".toString()
+                            ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
+                        }
+                    }
+                }
+            }
+
+            def correctAddressCount = ndfl2ContentMap.get(NDFL2_CORRECT_ADDRESS_COUNT)
+            def correctAddresses = ndfl2ContentMap.get(NDFL2_CORRECT_ADDRESS)
+
+            if (correctAddressCount > 0) {
+                if (!correctAddresses) {
+                    logger.error("Не найден раздел \"СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ\" в файле ответа \"%s\"", UploadFileName)
+                } else {
+                    correctAddresses.each { entry ->
+                        def ndflRefIds = ndflRefProvider.getUniqueRecordIds(
+                                new Date(),
+                                "DECLARATION_DATA_ID = ${declarationData.id} AND NUM = ${entry.ref}"
+                        )
+
+                        if (ndflRefIds.isEmpty()) {
+                            logger.error("В реестре справок формы \"${formTypeCode}\" \"${declarationData.kpp}\" \"${declarationData.oktmo}\" не найдено справки \"${entry.ref}\"", UploadFileName)
+                        } else {
+                            def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
+
+                            if (entry.valid) {
+                                ndflRef.ERRTEXT.value = "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString()
+                            } else {
+                                ndflRef.ERRTEXT.value = "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString()
+                            }
+                            ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
+                        }
+                    }
+                }
+            }
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                return
+            }
+        }
+    }
+    // "Дата-время файла" = "Дата и время документа" раздела Параметры файла ответа
+    def fileDate = null
+
+    if (isNdfl6Response(UploadFileName)) {
+        fileDate = Date.parse("yyyy", UploadFileName.replaceAll(NDFL6_FILE_NAME_PATTERN, "\$4"))
+    } else if (isNdfl2ResponseReestr(UploadFileName)) {
+        fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE))
+    } else if (isNdfl2ResponseProt(UploadFileName)) {
+        fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentMap.get(NDFL2_PROTOCOL_DATE))
+    }
+
+    // Сохранение файла ответа в форме
+    def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
+    def createUser = declarationService.getSystemUserInfo().getUser()
+
+    def declarationDataFile = new DeclarationDataFile()
+    declarationDataFile.setDeclarationDataId(declarationData.id)
+    declarationDataFile.setUuid(fileUuid)
+    declarationDataFile.setUserName(createUser.getName())
+    declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
+    declarationDataFile.setFileTypeId(fileTypeId)
+    declarationDataFile.setDate(fileDate)
+
+    declarationService.saveFile(declarationDataFile)
+
+    def declarationDataFileMaxWeight = declarationService.findFileWithMaxWeight(declarationData.id)
+    def prevWeight
+
+    if (declarationDataFileMaxWeight != null) {
+        prevWeight = getDocWeight(declarationDataFileMaxWeight.fileName)
+    }
+
+    if (prevWeight == null || prevWeight <= docWeight) {
+        def nextKnd
+
+        def kndAccept = 1166002	// Принят
+        def kndRefuse = 1166006	// Отклонен
+        def kndSuccess = 1166007 //	Успешно отработан
+        def kndRequired = 1166009 // Требует уточнения
+
+        if (isNdfl2ResponseProt(UploadFileName)) {
+            def errorCount = ndfl2ContentMap.get(NDFL2_ERROR_COUNT)
+            if (errorCount && errorCount > 0) {
+                // Требует уточнения
+                nextKnd = kndRequired
+            } else {
+                //Принят
+                nextKnd = kndAccept
+            }
+        }
+
+        //Принят
+        if (UploadFileName.startsWith(NDFL6_PATTERN_1)) {
+            nextKnd = kndAccept
+        }
+
+        //Отклонен
+        if (UploadFileName.startsWith(NDFL6_PATTERN_2)) {
+            nextKnd = kndRefuse
+        }
+
+        //Успешно обработан
+        if (UploadFileName.startsWith(NDFL6_PATTERN_3)) {
+            nextKnd = kndSuccess
+        }
+
+        //Требует уточнения
+        if (UploadFileName.startsWith(NDFL6_PATTERN_4)) {
+            nextKnd = kndRequired
+        }
+
+        if (nextKnd != null) {
+            def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
+            def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
+            declarationService.setDocStateId(declarationData.id, docStateId)
+        }
+    }
 }
 
 @Deprecated

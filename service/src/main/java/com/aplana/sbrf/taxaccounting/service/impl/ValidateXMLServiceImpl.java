@@ -99,21 +99,23 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     }
 
     @Override
-    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile) {
-		return validate(data, userInfo, logger, isErrorFatal, xmlFile, VALIDATION_TIMEOUT);
+    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String xsdBlobDataId) {
+		return validate(data, userInfo, logger, isErrorFatal, xmlFile, xsdBlobDataId, VALIDATION_TIMEOUT);
 	}
 
-	boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, long timeout) {
-        if (xmlFile!=null){
-            return isValid(data, userInfo, logger, isErrorFatal, xmlFile, timeout);
+	boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String xsdBlobDataId, long timeout) {
+        if (xsdBlobDataId == null) {
+            xsdBlobDataId = declarationTemplateService.get(data.getDeclarationTemplateId()).getXsdId();
+        }
+        if (xmlFile != null){
+            return isValid(logger, isErrorFatal, xmlFile, xsdBlobDataId, timeout);
         } else {
-            return isValid(data, userInfo, logger, isErrorFatal, timeout);
+            return isValid(data, userInfo, logger, isErrorFatal, xsdBlobDataId, timeout);
         }
     }
 
-    boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, long timeout) {
+    boolean isValid(Logger logger, boolean isErrorFatal, File xmlFile, String xsdBlobDataId, long timeout) {
         String[] params = new String[3];
-        DeclarationTemplate template = declarationTemplateService.get(data.getDeclarationTemplateId());
 
         FileOutputStream outputStream;
         InputStream inputStream;
@@ -134,7 +136,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             //Получаем xsd файл
             xsdFile = File.createTempFile("validation_file",".xsd");
             outputStream = new FileOutputStream(xsdFile);
-            BlobData blobData = blobDataService.get(template.getXsdId());
+            BlobData blobData = blobDataService.get(xsdBlobDataId);
             inputStream = blobData.getInputStream();
 			try {
             	LOG.info("Xsd copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
@@ -182,7 +184,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
     }
 
-    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, long timeout) {
+    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, String xsdBlobDataId, long timeout) {
         BlobData xmlBlob = blobDataService.get(reportService.getDec(userInfo, data.getId(), DeclarationDataReportType.XML_DEC));
         File xmlFileBD = null;
         try {
@@ -191,7 +193,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             FileOutputStream outputStream = new FileOutputStream(xmlFileBD);
             InputStream inputStream = xmlBlob.getInputStream();
             unzip(outputStream, inputStream);
-            return isValid(data, userInfo, logger, isErrorFatal, xmlFileBD, timeout);
+            return isValid(logger, isErrorFatal, xmlFileBD, xsdBlobDataId, timeout);
         } catch (IOException e) {
             LOG.error("", e);
             throw new ServiceException("", e);

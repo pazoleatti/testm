@@ -26,6 +26,14 @@ public interface DeclarationService {
     DeclarationData getDeclarationData(long declarationDataId);
 
     /**
+     * Получить декларации
+     * @param declarationDataIds идентификатор декларации
+     * @return объект декларации
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
+     */
+    List<DeclarationData> getDeclarationData(List<Long> declarationDataIds);
+
+    /**
      * Поиск декларации в отчетном периоде подразделения
      */
     List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
@@ -234,6 +242,16 @@ public interface DeclarationService {
      * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
      */
     void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile);
+
+    /**
+     * Метод передающий управление на проверку декларации сторонней утилите
+     * @param declarationData
+     * @param userInfo
+     * @param logger
+     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
+     * @param xsdBlobDataId
+     */
+    void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String xsdBlobDataId);
 
     /**
      * Возвращает идентификатор действующего {@link DeclarationTemplate описания декларации} по виду декларации
