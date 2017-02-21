@@ -84,9 +84,9 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
             RaschsvObyazPlatSv raschsvObyazPlatSv =
                     getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvObyazPlatSvRowMapper());
 
-            raschsvObyazPlatSv.setRaschsvUplPerList(raschsvUplPerDao.findUplPer(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvUplPerList(raschsvUplPerDao.findUplPer(declarationDataId));
             raschsvObyazPlatSv.setRaschsvUplPrevOss(raschsvUplPrevOssDao.findUplPrevOss(raschsvObyazPlatSv.getId()));
-            raschsvObyazPlatSv.setRaschsvSvOpsOmsList(raschsvSvOpsOmsDao.findSvOpsOms(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvSvOpsOmsList(raschsvSvOpsOmsDao.findSvOpsOms(declarationDataId));
             raschsvObyazPlatSv.setRaschsvOssVnm(raschsvOssVnmDao.findOssVnm(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvRashOssZak(raschsvRashOssZakDao.findRaschsvRashOssZak(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvVyplFinFb(raschsvVyplFinFbDao.findRaschsvVyplFinFb(raschsvObyazPlatSv.getId()));
