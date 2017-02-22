@@ -167,7 +167,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 	</background>
 	<title>
 		<band height="199" splitType="Stretch">
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="2f22b327-7058-483e-baf5-5921b07a4602" x="0" y="55" width="812" height="20"/>
 				<box>
 					<bottomPen lineWidth="0.0"/>
@@ -179,14 +179,14 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 				<textFieldExpression><![CDATA[$F{REPNAME}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="ea445851-6fee-4dd4-9d12-bba91b2125f5" x="334" y="75" width="36" height="20"/>
+				<reportElement uuid="ea445851-6fee-4dd4-9d12-bba91b2125f5" x="182" y="75" width="36" height="20"/>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[за]]></text>
 			</staticText>
-			<textField>
-				<reportElement uuid="e713083b-bfec-408c-82ea-7f1834cb9c35" mode="Transparent" x="370" y="75" width="32" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e713083b-bfec-408c-82ea-7f1834cb9c35" mode="Transparent" x="218" y="75" width="184" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -196,7 +196,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PERNAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="4d0fe135-25bd-4270-ad49-618e0b0c1a3b" mode="Transparent" x="414" y="75" width="81" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
@@ -220,7 +220,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 				</textElement>
 				<text><![CDATA[ Всего застрахованных лиц]]></text>
 			</staticText>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="50a8822c-ddd5-4527-91ea-a753fb1023c7" mode="Transparent" x="338" y="162" width="142" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<topPen lineWidth="0.5"/>
@@ -294,7 +294,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="32bafbfc-a2b7-468b-8662-d4a600fbc80e" x="0" y="0" width="46" height="13"/>
 										<textElement textAlignment="Center">
 											<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
@@ -327,7 +327,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField pattern="" isBlankWhenNull="false">
+									<textField pattern="" isBlankWhenNull="true">
 										<reportElement uuid="b0a03f57-25df-41fa-940a-121a222a82e8" mode="Transparent" x="0" y="0" width="91" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -346,7 +346,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField evaluationTime="Group" evaluationGroup="grDecl" pattern="" isBlankWhenNull="false">
+								<textField evaluationTime="Group" evaluationGroup="grDecl" pattern="" isBlankWhenNull="true">
 									<reportElement uuid="c98c46be-3d27-47cf-9bc2-3b2e6c6f46a0" mode="Transparent" x="0" y="0" width="86" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -378,7 +378,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="377d3c01-4753-4d6a-9e13-a8e88ace739e" mode="Transparent" x="0" y="0" width="86" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -396,7 +396,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="b1f273f5-b8d7-48b1-b687-3fec908a1bba" mode="Transparent" x="0" y="0" width="116" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -429,7 +429,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="7f9c034a-710f-4dfc-84eb-21982492a81c" mode="Transparent" x="0" y="0" width="116" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -447,7 +447,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="5132b6e9-4a81-4e6a-8282-cb738b9ea847" mode="Transparent" x="0" y="0" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -483,7 +483,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="3c7ab2d9-e058-4d41-b81b-f8ba8fbd4ce5" mode="Transparent" x="0" y="0" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -501,7 +501,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="9647da0d-72eb-42e3-bd3e-abceab50767e" mode="Transparent" x="0" y="0" width="177" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -539,7 +539,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="f8145110-c172-4980-a493-07ea3b65a5ff" mode="Transparent" x="0" y="0" width="177" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -557,7 +557,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="0a4d6bbb-816c-462f-9997-d910e044babf" mode="Transparent" x="0" y="0" width="147" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -594,7 +594,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="7c4c9a07-e70d-42e0-aca9-26f4c2588b42" mode="Transparent" x="0" y="0" width="147" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -667,7 +667,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="53db76c7-0e2c-4fdc-aeeb-fcfe00a7e1f9" mode="Transparent" x="0" y="0" width="46" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -701,7 +701,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField pattern="" isBlankWhenNull="false">
+									<textField pattern="" isBlankWhenNull="true">
 										<reportElement uuid="4e4ffda5-62b8-4e24-ac17-89375ad1f45d" mode="Transparent" x="0" y="0" width="73" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -722,7 +722,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="405d57d3-b666-48dd-8ccf-1d1386c3ccb7" mode="Transparent" x="0" y="0" width="93" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -756,7 +756,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="cb2327c5-f085-4650-8f06-8dd6b9ff5d87" mode="Transparent" x="0" y="0" width="93" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -776,7 +776,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="9282f9cd-b996-4413-8e2d-2183acebf2fa" mode="Transparent" x="0" y="0" width="126" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -812,7 +812,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="64a6a6e5-26da-4d85-981b-1fe30a5a4d10" mode="Transparent" x="0" y="0" width="126" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -832,7 +832,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="d16fb29e-4c59-4ba9-8cb6-7d59b5368d33" mode="Transparent" x="0" y="0" width="172" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -868,7 +868,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="577e8624-14e5-47f8-85ba-26c0ebd6bb44" mode="Transparent" x="0" y="0" width="172" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -946,7 +946,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField isStretchWithOverflow="true">
+									<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 										<reportElement uuid="09ae5126-41b7-4b8f-85df-c629ce961a2d" stretchType="RelativeToTallestObject" x="0" y="0" width="251" height="23"/>
 										<textElement>
 											<font fontName="Arial" size="8"/>
@@ -981,7 +981,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField pattern="" isBlankWhenNull="false">
+									<textField pattern="" isBlankWhenNull="true">
 										<reportElement uuid="f5182fc9-bddb-43d0-8e9c-bb4d31dcd498" mode="Transparent" x="0" y="0" width="113" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1003,7 +1003,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="6e7185ef-e6f7-4f05-8bb9-55766bc1683f" mode="Transparent" x="0" y="0" width="144" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1041,7 +1041,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="d97d19b2-873d-4ba1-83c7-f5f927d674ee" mode="Transparent" x="0" y="0" width="144" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1062,7 +1062,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="57e1ff8b-d676-4a81-9e5d-8601cc8f2c42" mode="Transparent" x="0" y="0" width="163" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1101,7 +1101,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="db334642-562d-4eb8-bb22-dd96050605eb" mode="Transparent" x="0" y="0" width="163" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1122,7 +1122,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="0f4bdba2-c654-4402-8edb-797473a86b41" mode="Transparent" x="0" y="0" width="166" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1161,7 +1161,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="49a916ea-34e2-4b46-8e1f-958a7530e6fa" mode="Transparent" x="0" y="0" width="166" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1182,7 +1182,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
+									<textField isBlankWhenNull="true">
 										<reportElement uuid="2bff2e7f-6990-472d-a6a3-0fb7a9729b92" mode="Transparent" x="0" y="0" width="161" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1222,7 +1222,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="20f09a61-ed6d-424d-8dac-20dd2b6d44b1" mode="Transparent" x="0" y="0" width="161" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
