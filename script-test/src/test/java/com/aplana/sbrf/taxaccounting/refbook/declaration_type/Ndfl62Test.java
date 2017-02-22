@@ -46,6 +46,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
     private final static Long DOC_STATE_REQUIRED_ID = 100506L;
     private final static Long DOC_STATE_SUCCESS_ID = 100507L;
+    private final static Long ATTACH_FILE_TYPE_SAVE_ID = 100508L;
 
     @Before
     public void initMock() {
@@ -85,6 +86,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         RefBookDataProvider attachFileType = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.ATTACH_FILE_TYPE.getId()))).thenReturn(attachFileType);
         when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 2"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_ID));
+        when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 3"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_SAVE_ID));
 
         FormType formType = new FormType();
         formType.setId(DECLARATION_FORM_TYPE_ID.intValue());
@@ -181,7 +183,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         Assert.assertNotNull(resultFile.getUuid());
         Assert.assertEquals("uzer", resultFile.getUserName());
         Assert.assertEquals("dep/dep1", resultFile.getUserDepartmentName());
-        Assert.assertEquals(ATTACH_FILE_TYPE_ID.longValue(), resultFile.getFileTypeId());
+        Assert.assertEquals(ATTACH_FILE_TYPE_SAVE_ID.longValue(), resultFile.getFileTypeId());
         Assert.assertEquals(sdf.parse("20.04.2016"), resultFile.getDate());
 
         ArgumentCaptor<Long> declarationDataId = ArgumentCaptor.forClass(Long.class);
@@ -221,6 +223,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         RefBookDataProvider attachFileType = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.ATTACH_FILE_TYPE.getId()))).thenReturn(attachFileType);
         when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 2"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_ID));
+        when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 3"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_SAVE_ID));
 
         RefBookDataProvider declarationDataTypeRefProvider = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId()))).thenReturn(declarationDataTypeRefProvider);
@@ -254,7 +257,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         Assert.assertNotNull(resultFile.getUuid());
         Assert.assertEquals("uzer", resultFile.getUserName());
         Assert.assertEquals("dep/dep1", resultFile.getUserDepartmentName());
-        Assert.assertEquals(ATTACH_FILE_TYPE_ID.longValue(), resultFile.getFileTypeId());
+        Assert.assertEquals(ATTACH_FILE_TYPE_SAVE_ID.longValue(), resultFile.getFileTypeId());
         Assert.assertEquals(sdf.parse("10.06.2016"), resultFile.getDate());
 
         verify(testHelper.getDeclarationService(), Mockito.times(0)).setDocStateId(anyLong(), anyLong());
@@ -293,6 +296,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         RefBookDataProvider attachFileType = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.ATTACH_FILE_TYPE.getId()))).thenReturn(attachFileType);
         when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 2"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_ID));
+        when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 3"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_SAVE_ID));
 
         RefBookDataProvider declarationDataTypeRefProvider = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId()))).thenReturn(declarationDataTypeRefProvider);
@@ -327,7 +331,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         Assert.assertNotNull(resultFile.getUuid());
         Assert.assertEquals("uzer", resultFile.getUserName());
         Assert.assertEquals("dep/dep1", resultFile.getUserDepartmentName());
-        Assert.assertEquals(ATTACH_FILE_TYPE_ID.longValue(), resultFile.getFileTypeId());
+        Assert.assertEquals(ATTACH_FILE_TYPE_SAVE_ID.longValue(), resultFile.getFileTypeId());
         Assert.assertEquals(sdf.parse("30.12.2016"), resultFile.getDate());
 
         ArgumentCaptor<Long> declarationDataId = ArgumentCaptor.forClass(Long.class);

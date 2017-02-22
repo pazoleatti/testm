@@ -1026,13 +1026,14 @@ def importNdflResponse() {
     // Сохранение файла ответа в форме
     def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
     def createUser = declarationService.getSystemUserInfo().getUser()
+    def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
 
     def declarationDataFile = new DeclarationDataFile()
     declarationDataFile.setDeclarationDataId(declarationData.id)
     declarationDataFile.setUuid(fileUuid)
     declarationDataFile.setUserName(createUser.getName())
     declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
-    declarationDataFile.setFileTypeId(fileTypeId)
+    declarationDataFile.setFileTypeId(fileTypeSaveId)
     declarationDataFile.setDate(fileDate)
 
     declarationService.saveFile(declarationDataFile)
