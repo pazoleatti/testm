@@ -423,6 +423,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public void createPdfReport(Logger logger, DeclarationData declarationData, TAUserInfo userInfo) {
+        deleteReport(declarationData.getId(), Arrays.asList(DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
         declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
             @Override
             public void updateState(String state) {
