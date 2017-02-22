@@ -78,6 +78,8 @@ public class DeclarationDataPresenter
 
         void setFormKind(String formKype);
 
+        void setDeclarationDataId(Long declarationDataId);
+
 		void setTitle(String title, boolean isTaxTypeDeal);
 
 		void setDepartment(String department);
@@ -100,9 +102,11 @@ public class DeclarationDataPresenter
 
         void setAsnuName(String asnuName);
 
+        void setImportTf(String userName);
+
         void setFileName(String guid);
 
-        void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, TaxType taxType);
+        void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, boolean isVisibleTf, TaxType taxType);
 
         void startTimerReport(DeclarationDataReportType type);
 
@@ -164,7 +168,7 @@ public class DeclarationDataPresenter
 	 *            запрос
 	 */
 	@Override
-	public void prepareFromRequest(PlaceRequest request) {
+	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
 		final long id = ParamUtils.getLong(request,
 				DeclarationDataTokens.declarationId);
@@ -186,6 +190,7 @@ public class DeclarationDataPresenter
                                 //sourcesPresenter.setTaxType(taxType);
                                 getView().setType(result.getDeclarationFormType());
                                 getView().setFormKind(result.getDeclarationFormKind().getTitle());
+                                getView().setDeclarationDataId(declarationData.getId());
                                 String periodStr = result.getReportPeriodYear() + ", " + result.getReportPeriod();
                                 if (result.getCorrectionDate() != null) {
                                     periodStr += ", корр. (" + DATE_TIME_FORMAT.format(result.getCorrectionDate()) + ")";
@@ -198,22 +203,26 @@ public class DeclarationDataPresenter
                                 getView().setSubreports(result.getSubreports());
                                 if (taxType.equals(TaxType.NDFL)){
                                     if (DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind())) {
-                                        getView().setPropertyBlockVisible(true, true, true, result.getStateEDName() != null, false, taxType);
+                                        getView().setPropertyBlockVisible(true, true, true, result.getStateEDName() != null, false, false, taxType);
                                         getView().setKpp(declarationData.getKpp());
                                         getView().setOktmo(declarationData.getOktmo());
                                         getView().setTaxOrganCode(declarationData.getTaxOrganCode());
                                         getView().setStateED(result.getStateEDName());
+                                        getView().setImportTf(result.getUserLoginImportTf());
                                     } else {
                                         if (result.getAsnuName() != null && !result.getAsnuName().isEmpty()) {
-                                            getView().setPropertyBlockVisible(false, false, false, false, true, taxType);
+                                            getView().setPropertyBlockVisible(false, false, false, false, true, true, taxType);
                                             getView().setAsnuName(result.getAsnuName());
                                             getView().setFileName(result.getFileName());
+                                            getView().setImportTf(result.getUserLoginImportTf());
                                         } else {
-                                            getView().setPropertyBlockVisible(false, false, false, false, false, taxType);
+                                            getView().setImportTf(result.getUserLoginImportTf());
+                                            getView().setPropertyBlockVisible(false, false, false, false, false, true, taxType);
                                         }
                                     }
                                 } else {
-                                    getView().setPropertyBlockVisible(false, false, false, false, false, taxType);
+                                    getView().setImportTf(result.getUserLoginImportTf());
+                                    getView().setPropertyBlockVisible(false, false, false, false, false, true, taxType);
                                 }
 								getView()
 										.setBackButton(

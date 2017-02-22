@@ -81,6 +81,16 @@ public class DeclarationDataSearchResultItem implements Serializable {
      */
     private String note;
 
+    /**
+     * Дата и время создания формы
+     */
+    private Date declarationDataCreationDate;
+
+    /**
+     * Имя пользователя, загрузившего ТФ
+     */
+    private String importDeclarationDataUserLogin;
+
 	public Long getDeclarationDataId() {
 		return declarationDataId;
 	}
@@ -255,5 +265,21 @@ public class DeclarationDataSearchResultItem implements Serializable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public Date getDeclarationDataCreationDate() {
+        return declarationDataCreationDate;
+    }
+
+    public void setDeclarationDataCreationDate(Date declarationDataCreationDate) {
+        this.declarationDataCreationDate = declarationDataCreationDate;
+    }
+
+    public String getImportDeclarationDataUserLogin() {
+        return importDeclarationDataUserLogin;
+    }
+
+    public void setImportDeclarationDataUserLogin(String importDeclarationDataUserLogin) {
+        this.importDeclarationDataUserLogin = importDeclarationDataUserLogin;
     }
 }

@@ -50,6 +50,9 @@ public class GetDeclarationDataHandler
     @Autowired
     private RefBookFactory rbFactory;
 
+    @Autowired
+    private LogBusinessService logBusinessService;
+
     public GetDeclarationDataHandler() {
         super(GetDeclarationDataAction.class);
     }
@@ -62,8 +65,7 @@ public class GetDeclarationDataHandler
         GetDeclarationDataResult result = new GetDeclarationDataResult();
         Set<FormDataEvent> permittedEvents = declarationAccessService.getPermittedEvents(userInfo, action.getId());
 
-        DeclarationData declaration = declarationDataService.get(
-                action.getId(), userInfo);
+        DeclarationData declaration = declarationDataService.get(action.getId(), userInfo);
         Date docDate = declarationDataService.getXmlDataDocDate(action.getId(), userInfo);
         result.setDeclarationData(declaration);
         result.setDocDate(docDate != null ? docDate : new Date());
@@ -71,6 +73,7 @@ public class GetDeclarationDataHandler
         result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_CREATED_TO_ACCEPTED));
         result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
         result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
+        result.setUserLoginImportTf(logBusinessService.getUserLoginImportTf(declaration.getId()));
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         TaxType taxType = declarationTemplate.getType().getTaxType();
