@@ -104,7 +104,8 @@ def calculate() {
 
         long identificatePersonTime = System.currentTimeMillis();
 
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, getReportPeriodEndDate(), logger);
+        Date actualVersion = new Date();
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, actualVersion, logger);
 
         println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
         //logger.info("identificate: (" + (System.currentTimeMillis() - identificatePersonTime) + " ms)");
