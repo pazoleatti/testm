@@ -30,23 +30,27 @@ public class SAXHandler extends DefaultHandler {
     private Map<String, List<String>> findAttrNames;
 
     // Хранит содержимое узла
-    private String nodeValue;
-    private boolean isFindNodeName;
-    private String findNodeName;
+    private List<String> nodeValueList;
+    private boolean isNodeNameFind;
+    private boolean isParentNodeNameFind;
+    private String nodeNameFind;
+    private String parentNodeNameFind;
 
     public SAXHandler(Map<String, List<String>> findAttrNames) {
         this.findAttrNames = findAttrNames;
     }
-    public SAXHandler(String findNodeName) {
+    public SAXHandler(String nodeNameFind, String parentNodeNameFind) {
         this.findAttrNames = new HashMap<String, Map<String, String>>();
-        this.findNodeName = findNodeName;
+        this.nodeValueList = new ArrayList<>();
+        this.nodeNameFind = nodeNameFind;
+        this.parentNodeNameFind = parentNodeNameFind;
     }
 
     public Map<String, Map<String, String>> getAttrValues() {
         return attrValues;
     }
-    public String getNodeValue() {
-        return nodeValue;
+    public List<String> getNodeValueList() {
+        return nodeValueList;
     }
 
     @Override
@@ -66,19 +70,21 @@ public class SAXHandler extends DefaultHandler {
                 }
             }
         }
-        if(qName.equals(findNodeName)) { isFindNodeName = true; }
+        if(qName.equals(nodeNameFind)) { isNodeNameFind = true; }
+        if(qName.equals(parentNodeNameFind)) { isParentNodeNameFind = true; }
     }
 
     @Override
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
-        if(qName.equals(findNodeName)) { isFindNodeName = false; }
+        if(qName.equals(nodeNameFind)) { isNodeNameFind = false; }
+        if(qName.equals(parentNodeNameFind)) { isParentNodeNameFind = false; }
     }
 
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        if (isFindNodeName) {
-            nodeValue = new String(ch, start, length);
+        if (isNodeNameFind && isParentNodeNameFind) {
+            nodeValueList.add(new String(ch, start, length));
         }
     }
 }
@@ -320,40 +326,47 @@ def importAnswer1151111() {
 
     // 1. Определим тип документа по имени файла
     def String nodeNameFind = null
+    def String parentNodeNameFind = null
+    def String attrNameFind = null
     if (patternKvOtch.matcher(UploadFileName).matches()) {
         // Квитанция о приеме налоговой декларации
         fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(KV_PATTERN, "\$5").substring(0,8));
         nodeNameFind = "ИмяОбрабФайла"
+        parentNodeNameFind = "СвКвит"
     } else if (patternUoOtch.matcher(UploadFileName).matches()) {
         // Уведомление об отказе в приеме налоговой декларации
         fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UO_PATTERN, "\$5").substring(0,8));
         nodeNameFind = "ИмяОбрабФайла"
+        parentNodeNameFind = "ОбщСвУвед"
     } else if (patternIvOtch.matcher(UploadFileName).matches()) {
         // Извещение о вводе
         fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(IV_PATTERN, "\$5").substring(0,8));
         nodeNameFind = "СвИзвещВ"
+        attrNameFind = "ИмяОбрабФайла"
     } else if (patternUuOtch.matcher(UploadFileName).matches()) {
         // 	Уведомление об уточнении
         fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UU_PATTERN, "\$5").substring(0,8));
         nodeNameFind = "ОбщСвУвед"
+        attrNameFind = "ИмяОбрабФайла"
     }
 
     // 3. Выполним чтение Имени отчетного файла из элемента файла ответа
-    def String attrNameFind = "ИмяОбрабФайла"
-    def declarationDataFileNameReport = null
+    def declarationDataFileNameReportList = []
     try {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
-        if (nodeNameFind != attrNameFind) {
+        if (attrNameFind != null) {
+            // Ищем по имени атрибута
             def sett = new HashMap<String, List<String>>();
             sett.put(nodeNameFind, [attrNameFind]);
             SAXHandler handler = new SAXHandler(sett);
             saxParser.parse(ImportInputStream, handler);
-            declarationDataFileNameReport = handler.getAttrValues().get(nodeNameFind).get(attrNameFind);
+            declarationDataFileNameReportList.add(handler.getAttrValues().get(nodeNameFind).get(attrNameFind));
         } else {
-            SAXHandler handler = new SAXHandler(nodeNameFind);
+            // Ищем по имени узла
+            SAXHandler handler = new SAXHandler(nodeNameFind, parentNodeNameFind);
             saxParser.parse(ImportInputStream, handler);
-            declarationDataFileNameReport = handler.getNodeValue()
+            declarationDataFileNameReportList = handler.getNodeValueList()
         }
     } catch (IOException e) {
         e.printStackTrace();
@@ -372,122 +385,124 @@ def importAnswer1151111() {
     }
 
     // Не найдено имя файла, для которого сформирован ответ, в файле ответа
-    if (!declarationDataFileNameReport) {
+    if (!declarationDataFileNameReportList && declarationDataFileNameReportList?.isEmpty()) {
         throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FILE_NAME, UploadFileName));
     }
 
-    // 4. Поиск НФ, для которой пришел файл ответа по условию
-    def declarationDataList = declarationService.find(declarationDataFileNameReport)
-    if (declarationDataList == null || declarationDataList.size() == 0) {
-        // Ошибка: Не найдена форма, соответсвующая имени отчетного файла
-        throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FORM, declarationDataFileNameReport));
-    } else if (declarationDataList.size() != 1) {
-        // Ошибка: Найдено несколько форм, соответствующих имени отчетного файла
+    declarationDataFileNameReportList.each { declarationDataFileNameReport ->
+        // 4. Поиск НФ, для которой пришел файл ответа по условию
+        def declarationDataList = declarationService.find(declarationDataFileNameReport)
+        if (declarationDataList == null || declarationDataList.size() == 0) {
+            // Ошибка: Не найдена форма, соответсвующая имени отчетного файла
+            throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FORM, declarationDataFileNameReport));
+        } else if (declarationDataList.size() != 1) {
+            // Ошибка: Найдено несколько форм, соответствующих имени отчетного файла
 
-        // Выведем ошибку
-        def msgError = "Файл ответа \"" + declarationDataFileNameReport + "\" найден в формах: %s"
-        def msgErrorList = []
-        declarationDataList.each { declarationData ->
-            def declarationTypeName = declarationService.getTypeByTemplateId(declarationData.declarationTemplateId)?.name
-            def departmentName = departmentService.get(declarationData.departmentId)?.name
-            def reportPeriodName = reportPeriodService.get(declarationData.reportPeriodId)?.name
-            msgErrorList.add("\"" + declarationTypeName + "\".\"" + departmentName + "\".\"" + reportPeriodName + "\"")
+            // Выведем ошибку
+            def msgError = "Файл ответа \"" + declarationDataFileNameReport + "\" найден в формах: %s"
+            def msgErrorList = []
+            declarationDataList.each { declarationData ->
+                def declarationTypeName = declarationService.getTypeByTemplateId(declarationData.declarationTemplateId)?.name
+                def departmentName = departmentService.get(declarationData.departmentId)?.name
+                def reportPeriodName = reportPeriodService.get(declarationData.reportPeriodId)?.name
+                msgErrorList.add("\"" + declarationTypeName + "\".\"" + departmentName + "\".\"" + reportPeriodName + "\"")
+            }
+            throw new IllegalArgumentException(String.format(msgError, msgErrorList.join(", ")));
         }
-        throw new IllegalArgumentException(String.format(msgError, msgErrorList.join(", ")));
-    }
-    def declarationData = declarationDataList.get(0)
+        def declarationData = declarationDataList.get(0)
 
-    // 2. Выполним проверку структуры файла ответа на соответствие XSD
-    def declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-    def templateFile = null
-    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
-        templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
-            it.fileName.startsWith(ANSWER_PATTERN_1)
-        }
-    }
-    if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
-        templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
-            it.fileName.startsWith(ANSWER_PATTERN_2)
-        }
-    }
-    if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
-        templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
-            it.fileName.startsWith(ANSWER_PATTERN_3)
-        }
-    }
-    if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
-        templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
-            it.fileName.startsWith(ANSWER_PATTERN_4)
-        }
-    }
-    if (!templateFile) {
-        logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
-        return
-    }
-    declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
-    }
-
-    // 5. Проверка того, что файл ответа не был загружен ранее
-    def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
-    if (!beforeUploadDeclarationDataList.isEmpty()) {
-        logger.error("Файл ответа \"%s\" уже загружен", UploadFileName)
-        return
-    }
-
-    // 6. Сохранение файла ответа в форме
-    def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
-
-    def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
-    def createUser = declarationService.getSystemUserInfo().getUser()
-
-    def declarationDataFile = new DeclarationDataFile()
-    declarationDataFile.setDeclarationDataId(declarationData.id)
-    declarationDataFile.setUuid(fileUuid)
-    declarationDataFile.setUserName(createUser.getName())
-    declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
-    declarationDataFile.setFileTypeId(fileTypeId)
-    declarationDataFile.setDate(fileDate)
-
-    declarationService.saveFile(declarationDataFile)
-
-    def declarationDataFileMaxWeight = declarationService.findFileWithMaxWeight(declarationData.id)
-    def prevWeight
-
-    if (declarationDataFileMaxWeight != null) {
-        prevWeight = getDocWeight(declarationDataFileMaxWeight.fileName)
-    }
-
-    def docWeight = getDocWeight(UploadFileName)
-    if (prevWeight == null || prevWeight <= docWeight) {
-        def nextKnd
-
-        //Принят
+        // 2. Выполним проверку структуры файла ответа на соответствие XSD
+        def declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+        def templateFile = null
         if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
-            nextKnd = KND_ACCEPT
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+                it.fileName.startsWith(ANSWER_PATTERN_1)
+            }
         }
-
-        //Отклонен
         if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
-            nextKnd = KND_REFUSE
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+                it.fileName.startsWith(ANSWER_PATTERN_2)
+            }
         }
-
-        //Успешно обработан
         if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
-            nextKnd = KND_SUCCESS
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+                it.fileName.startsWith(ANSWER_PATTERN_3)
+            }
         }
-
-        //Требует уточнения
         if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
-            nextKnd = KND_REQUIRED
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+                it.fileName.startsWith(ANSWER_PATTERN_4)
+            }
+        }
+        if (!templateFile) {
+            logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
+            return
+        }
+        declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
         }
 
-        if (nextKnd != null) {
-            def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
-            def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
-            declarationService.setDocStateId(declarationData.id, docStateId)
+        // 5. Проверка того, что файл ответа не был загружен ранее
+        def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
+        if (!beforeUploadDeclarationDataList.isEmpty()) {
+            logger.error("Файл ответа \"%s\" уже загружен", UploadFileName)
+            return
+        }
+
+        // 6. Сохранение файла ответа в форме
+        def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
+        def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
+
+        def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
+        def createUser = declarationService.getSystemUserInfo().getUser()
+
+        def declarationDataFile = new DeclarationDataFile()
+        declarationDataFile.setDeclarationDataId(declarationData.id)
+        declarationDataFile.setUuid(fileUuid)
+        declarationDataFile.setUserName(createUser.getName())
+        declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
+        declarationDataFile.setFileTypeId(fileTypeId)
+        declarationDataFile.setDate(fileDate)
+
+        declarationService.saveFile(declarationDataFile)
+
+        def declarationDataFileMaxWeight = declarationService.findFileWithMaxWeight(declarationData.id)
+        def prevWeight
+
+        if (declarationDataFileMaxWeight != null) {
+            prevWeight = getDocWeight(declarationDataFileMaxWeight.fileName)
+        }
+
+        def docWeight = getDocWeight(UploadFileName)
+        if (prevWeight == null || prevWeight <= docWeight) {
+            def nextKnd
+
+            //Принят
+            if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+                nextKnd = KND_ACCEPT
+            }
+
+            //Отклонен
+            if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+                nextKnd = KND_REFUSE
+            }
+
+            //Успешно обработан
+            if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+                nextKnd = KND_SUCCESS
+            }
+
+            //Требует уточнения
+            if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+                nextKnd = KND_REQUIRED
+            }
+
+            if (nextKnd != null) {
+                def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
+                def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
+                declarationService.setDocStateId(declarationData.id, docStateId)
+            }
         }
     }
 }
