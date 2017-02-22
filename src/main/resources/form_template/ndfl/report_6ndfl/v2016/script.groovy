@@ -878,6 +878,7 @@ def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
         def kpp = npGroup.key.kpp
         npGroup.value.each {
             def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp.toString(), oktmo.toString())
+            resetId(incomes)
             def deductions = ndflPersonService.findDeductions(it.id)
             resetId(deductions)
             def prepayments = ndflPersonService.findPrepayments(it.id)
@@ -907,7 +908,7 @@ def resetId(def list) {
 
 def createReports() {
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
-    scriptParams.put("fileName", "reports.zip")
+    scriptParams.put("fileName" + ".xml", "reports.zip")
     try {
         Department department = departmentService.get(declarationData.departmentId);
         DeclarationTemplate declarationTemplate =  declarationService.getTemplate(declarationData.declarationTemplateId);
