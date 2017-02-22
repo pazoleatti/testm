@@ -6,6 +6,7 @@ DELETE FROM blob_data WHERE id IN (
 );
 
 DELETE FROM declaration_template WHERE id IN (200);
+DELETE FROM declaration_subreport WHERE id IN (2001, 2002);
 
 COMMIT;
 EXIT;

@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Andrey Drunk
@@ -25,20 +22,15 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     private RefBookPersonDao refBookPersonDao;
 
     @Override
-    public Long identificatePerson(PersonData personData, int tresholdValue) {
-        return identificatePerson(personData, tresholdValue, new Logger());
+    public Long identificatePerson(PersonData personData, int tresholdValue, Date version, Logger logger) {
+        return identificatePerson(personData, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()), version, logger);
     }
 
     @Override
-    public Long identificatePerson(PersonData personData, int tresholdValue, Logger logger) {
-        return identificatePerson(personData, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()), logger);
-    }
-
-
-    public Long identificatePerson(PersonData personData, int tresholdValue, WeigthCalculator<PersonData> weigthComporators, Logger logger) {
+    public Long identificatePerson(PersonData personData, int tresholdValue, WeigthCalculator<PersonData> weigthComporators, Date version, Logger logger) {
 
         double treshold = tresholdValue / 1000D;
-        List<PersonData> personDataList = refBookPersonDao.findPersonByPersonData(personData);
+        List<PersonData> personDataList = refBookPersonDao.findPersonByPersonData(personData, version);
         if (personDataList != null && !personDataList.isEmpty()) {
 
             calculateWeigth(personData, personDataList, weigthComporators);
@@ -55,7 +47,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             //Выбор из найденных записей одной записи с максимальной Степенью соответствия критериям
             PersonData identificatedPerson = Collections.max(personDataList, new PersonDataComparator());
             if (identificatedPerson.getWeigth() > treshold) {
-                //Если Степень соответствия записи выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
+                //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
                 msg.append(". Выбрана запись: [" + buildNotice(identificatedPerson)  + " ("+df.format(identificatedPerson.getWeigth())+")]");
                 logger.info(msg.toString());
                 return identificatedPerson.getId();
@@ -65,7 +57,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 return null;
             }
         } else {
-            logger.info("Для ФЛ " + buildNotice(personData) + " сходных записей не найдено");
+            //logger.info("Для ФЛ " + buildNotice(personData) + " сходных записей не найдено");
             return null;
         }
 
@@ -81,7 +73,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
      */
     public static String buildNotice(PersonData personData) {
         StringBuffer sb = new StringBuffer();
-        sb.append(personData.getInp()).append(": ");
+        sb.append(personData.getPersonNumber()).append(": ");
         sb.append(emptyIfNull(personData.getLastName())).append(" ");
         sb.append(emptyIfNull(personData.getFirstName())).append(" ");
         sb.append(emptyIfNull(personData.getMiddleName())).append(" ");

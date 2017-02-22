@@ -1069,47 +1069,10 @@ def formatDate(final date, final pattern) {
 @Field final SPRAV_NOMER = "Номер"
 @Field final SPRAV_DATA = "Дата"
 
-// Шаблоны имен файлов
-@Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String KV_OTCH_PATTERN = "KV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UO_OTCH_PATTERN = "UO_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String IV_OTCH_PATTERN = "IV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UU_OTCH_PATTERN = "UU_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-
 /**
  * Разбор xml-файлов
  */
 void importData() {
-
-    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN);
-    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN);
-    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN);
-    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN);
-    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN);
-
-    if (patternNoRaschsv.matcher(UploadFileName).matches()) {
-        importPrimaryData()
-    } else if (patternKvOtch.matcher(UploadFileName).matches() ||
-            patternUoOtch.matcher(UploadFileName).matches() ||
-            patternIvOtch.matcher(UploadFileName).matches() ||
-            patternUuOtch.matcher(UploadFileName).matches()) {
-        importAnswerData()
-    }
-}
-
-/**
- * Разбор xml-файлов ответов ФНС
- */
-void importAnswerData() {
-    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-338
-    // ожидаю https://jira.aplana.com/browse/SBRFNDFL-381
-    // Установка состояния ЭД для декларации на основании веса документа и даты создания документа
-}
-
-/**
- * Разбор xml-файла ТФ 1151111 (первичный) с сохранением в БД
- */
-void importPrimaryData() {
 
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
@@ -2649,6 +2612,8 @@ def calculateData() {
 
     logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size());
 
+    long time = System.currentTimeMillis();
+
     //Два списка для создания новых записей и для обновления существующих
     List<PersonData> createdPerson = new ArrayList<PersonData>();
     List<PersonData> updatedPerson = new ArrayList<PersonData>();
@@ -2657,8 +2622,13 @@ def calculateData() {
 
         PersonData personData = createPersonData(declarationFormPerson);
 
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, logger);
+        long identificatePersonTime = System.currentTimeMillis();
+
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, getReportPeriodEndDate(), logger);
         declarationFormPerson.setPersonId(refBookPersonId)
+
+        println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
+        //logger.info("identificate: (" + (System.currentTimeMillis() - identificatePersonTime) + " ms)");
 
         //после идентификации выставим ссылку на запись справочника
         personData.setRefBookPersonId(refBookPersonId)
@@ -2675,6 +2645,10 @@ def calculateData() {
         resultMap.put(declarationFormPerson.getId(), declarationFormPerson);
     }
 
+    println "find " + (System.currentTimeMillis() - time);
+    logger.info("find: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPerson.size() + ", подготовленно записей для обновления: " + updatedPerson.size());
 
     //Создание справочников
@@ -2683,14 +2657,25 @@ def calculateData() {
         updateReferenceToPersonId(resultMap, createdPerson);
     }
 
+    println "create " + (System.currentTimeMillis() - time);
+    logger.info("create: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     //Обновление справочников
     if (updatedPerson != null && !updatedPerson.isEmpty()) {
         updateRefbookPersonData(updatedPerson);
         updateReferenceToPersonId(resultMap, updatedPerson);
     }
 
+    println "refresh " + (System.currentTimeMillis() - time);
+    logger.info("refresh: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     //Обновление данных декларации
     raschsvPersSvStrahLicService.updatePersSvStrahLic(new ArrayList<RaschsvPersSvStrahLic>(resultMap.values()))
+
+    println "update " + (System.currentTimeMillis() - time);
+    logger.info("update: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -2725,6 +2710,9 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
     personData.citizenshipId = findCountryId(person.grazd);
     personData.citizenship = person.grazd;
     personData.sex = person.pol?.toInteger();
+
+    //Строка для вывода номера ФЛ в сообщениях
+    personData.personNumber = inp.nomer;
 
     //Документы
     personData.documentTypeCode = person.kodVidDoc;
@@ -3415,62 +3403,62 @@ def checkDataDBPerson() {
     }
 
     // 3.2.1 Дубли физического лица рамках формы
-    // todo Раскомментировать после обновления стенда https://jira.aplana.com/browse/SBRFNDFL-334
-//    def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByDeclarationDataId(declarationData.id)
-//    def msgError  = "Найдено несколько записей, идентифицированных как одно физическое лицо: "
-//    // Мапа для группировки дублей <personId, RaschsvPersSvStrahLic>
-//    def raschsvPersSvStrahLicDuplMap = [:]
-//    if (raschsvPersSvStrahLicDuplList != null && raschsvPersSvStrahLicDuplList.size > 0) {
-//        raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDuplicate ->
-//            raschsvPersSvStrahLicList = raschsvPersSvStrahLicDuplMap.get(raschsvPersSvStrahLicDuplicate.personId)
-//            if (raschsvPersSvStrahLicList == null) {
-//                raschsvPersSvStrahLicList = []
-//            }
-//            raschsvPersSvStrahLicList.add(raschsvPersSvStrahLicDuplicate)
-//            raschsvPersSvStrahLicDuplMap.put(raschsvPersSvStrahLicDuplicate.personId, raschsvPersSvStrahLicList)
-//        }
-//        // Для каждого дубля выводим свое сообщение об ошибке
-//        raschsvPersSvStrahLicDuplMap.each { key, value ->
-//            value.each { raschsvPersSvStrahLic ->
-//                msgError += raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.snils + "; "
-//            }
-//            logger.warn(msgError)
-//        }
-//    }
+    def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByDeclarationDataId(declarationData.id)
+    def msgError  = "Найдено несколько записей, идентифицированных как одно физическое лицо: "
+    // Мапа для группировки дублей <personId, RaschsvPersSvStrahLic>
+    def raschsvPersSvStrahLicDuplMap = [:]
+    if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
+        raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDuplicate ->
+            raschsvPersSvStrahLicList = raschsvPersSvStrahLicDuplMap.get(raschsvPersSvStrahLicDuplicate.personId)
+            if (raschsvPersSvStrahLicList == null) {
+                raschsvPersSvStrahLicList = []
+            }
+            raschsvPersSvStrahLicList.add(raschsvPersSvStrahLicDuplicate)
+            raschsvPersSvStrahLicDuplMap.put(raschsvPersSvStrahLicDuplicate.personId, raschsvPersSvStrahLicList)
+        }
+        // Для каждого дубля выводим свое сообщение об ошибке
+        raschsvPersSvStrahLicDuplMap.each { key, value ->
+            value.each { raschsvPersSvStrahLic ->
+                msgError += raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.snils + "; "
+            }
+            logger.warn(msgError)
+        }
+    }
 
     // 3.2.2 Дубли физического лица в разных формах
-    // todo Раскомментировать после обновления стенда https://jira.aplana.com/browse/SBRFNDFL-334
-//    raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByReportPeriodId(personIdList, declarationData.reportPeriodId)
-//    msgError = "ФЛ с идентификаторами: "
-//    if (raschsvPersSvStrahLicDuplList != null && raschsvPersSvStrahLicDuplList.size > 0) {
-//        def personIdDuplList = []
-//        def declarationDataIdDuplList = []
-//        raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDupl ->
-//            // Будем брать дубли из других DeclarationData
-//            if (raschsvPersSvStrahLicDupl.declarationDataId != declarationData.id) {
-//                if (!personIdDuplList.contains(raschsvPersSvStrahLicDupl.personId)) {
-//                    personIdDuplList.add(raschsvPersSvStrahLicDupl.personId)
-//                }
-//                if (!declarationDataIdDuplList.contains(raschsvPersSvStrahLicDupl.declarationDataId)
-//                        && raschsvPersSvStrahLicDupl.declarationDataId != declarationData.id) {
-//                    declarationDataIdDuplList.add(raschsvPersSvStrahLicDupl.declarationDataId)
-//                }
-//            }
-//        }
-//        if (declarationDataIdDuplList.size() > 0) {
-//            msgError += personIdDuplList.join(", ") + " найдены в других формах "
-//            def declarationDataList = declarationService.getDeclarationData(declarationDataIdDuplList)
-//            def declarationDataInfo = []
-//            declarationDataList.each { dd ->
-//                def declarationTypeName = declarationService.getTypeByTemplateId(dd.declarationTemplateId)?.name
-//                def departmentName = departmentService.get(dd.departmentId)?.name
-//                def startDate = reportPeriodService.getStartDate(dd.reportPeriodId)?.time?.format("dd.MM.yyyy")
-//                def endDate = reportPeriodService.getEndDate(dd.reportPeriodId)?.time?.format("dd.MM.yyyy")
-//                declarationDataInfo.add("\"$declarationTypeName\" \"$departmentName\" $startDate - $endDate")
-//            }
-//            logger.warn(msgError + declarationDataInfo.join(", "))
-//        }
-//    }
+    if (!personIdList.isEmpty()) {
+        raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByReportPeriodId(personIdList, declarationData.reportPeriodId)
+        msgError = "ФЛ с идентификаторами: "
+        if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
+            def personIdDuplList = []
+            def declarationDataIdDuplList = []
+            raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDupl ->
+                // Будем брать дубли из других DeclarationData
+                if (raschsvPersSvStrahLicDupl.declarationDataId != declarationData.id) {
+                    if (!personIdDuplList.contains(raschsvPersSvStrahLicDupl.personId)) {
+                        personIdDuplList.add(raschsvPersSvStrahLicDupl.personId)
+                    }
+                    if (!declarationDataIdDuplList.contains(raschsvPersSvStrahLicDupl.declarationDataId)
+                            && raschsvPersSvStrahLicDupl.declarationDataId != declarationData.id) {
+                        declarationDataIdDuplList.add(raschsvPersSvStrahLicDupl.declarationDataId)
+                    }
+                }
+            }
+            if (declarationDataIdDuplList.size() > 0) {
+                msgError += personIdDuplList.join(", ") + " найдены в других формах "
+                def declarationDataList = declarationService.getDeclarationData(declarationDataIdDuplList)
+                def declarationDataInfo = []
+                declarationDataList.each { dd ->
+                    def declarationTypeName = declarationService.getTypeByTemplateId(dd.declarationTemplateId)?.name
+                    def departmentName = departmentService.get(dd.departmentId)?.name
+                    def startDate = reportPeriodService.getStartDate(dd.reportPeriodId)?.time?.format("dd.MM.yyyy")
+                    def endDate = reportPeriodService.getEndDate(dd.reportPeriodId)?.time?.format("dd.MM.yyyy")
+                    declarationDataInfo.add("\"$declarationTypeName\" \"$departmentName\" $startDate - $endDate")
+                }
+                logger.warn(msgError + declarationDataInfo.join(", "))
+            }
+        }
+    }
 }
 
 /**

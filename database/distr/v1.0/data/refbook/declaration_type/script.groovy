@@ -1,8 +1,5 @@
 package refbook.declaration_type
 
-import com.aplana.sbrf.taxaccounting.model.*
-import com.aplana.sbrf.taxaccounting.model.refbook.*
-import com.aplana.sbrf.taxaccounting.service.impl.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
@@ -10,7 +7,6 @@ import org.xml.sax.helpers.DefaultHandler
 import org.apache.commons.io.IOUtils;
 import groovy.transform.Field
 
-import javax.script.ScriptException
 import java.util.*;
 import java.io.*;
 
@@ -29,33 +25,60 @@ switch (formDataEvent) {
 }
 
 public class SAXHandler extends DefaultHandler {
-    private Map<String, Map<String, String>> values;
-    private Map<String, List<String>> tagAttrNames;
+    // Хранит содержимое атрибута
+    private Map<String, Map<String, String>> attrValues;
+    private Map<String, List<String>> findAttrNames;
 
-    public SAXHandler(Map<String, List<String>> tagAttrNames) {
-        this.tagAttrNames = tagAttrNames;
+    // Хранит содержимое узла
+    private String nodeValue;
+    private boolean isFindNodeName;
+    private String findNodeName;
+
+    public SAXHandler(Map<String, List<String>> findAttrNames) {
+        this.findAttrNames = findAttrNames;
+    }
+    public SAXHandler(String findNodeName) {
+        this.findAttrNames = new HashMap<String, Map<String, String>>();
+        this.findNodeName = findNodeName;
     }
 
-    public Map<String, Map<String, String>> getValues() {
-        return values;
+    public Map<String, Map<String, String>> getAttrValues() {
+        return attrValues;
+    }
+    public String getNodeValue() {
+        return nodeValue;
     }
 
     @Override
     public void startDocument() throws SAXException {
-        values = new HashMap<String, Map<String, String>>();
-        for (Map.Entry<String, List<String>> entry : tagAttrNames.entrySet()) {
-            values.put(entry.getKey(), new HashMap<String, String>());
+        attrValues = new HashMap<String, Map<String, String>>();
+        for (Map.Entry<String, List<String>> entry : findAttrNames.entrySet()) {
+            attrValues.put(entry.getKey(), new HashMap<String, String>());
         }
     }
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        for (Map.Entry<String, List<String>> entry : tagAttrNames.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : findAttrNames.entrySet()) {
             if (entry.getKey().equals(qName)) {
                 for (String attrName: entry.getValue()) {
-                    values.get(qName).put(attrName, attributes.getValue(attrName));
+                    attrValues.get(qName).put(attrName, attributes.getValue(attrName));
                 }
             }
+        }
+        if(qName.equals(findNodeName)) { isFindNodeName = true; }
+    }
+
+    @Override
+    public void endElement(String uri, String localName, String qName)
+            throws SAXException {
+        if(qName.equals(findNodeName)) { isFindNodeName = false; }
+    }
+
+    @Override
+    public void characters(char[] ch, int start, int length) throws SAXException {
+        if (isFindNodeName) {
+            nodeValue = new String(ch, start, length);
         }
     }
 }
@@ -75,19 +98,19 @@ String ATTR_YEAR = "ОтчетГод";
 
 // Шаблоны имен файлов
 @Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)_(.*)\\.(xml|XML)";
-@Field final String KV_OTCH_PATTERN = "KV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UO_OTCH_PATTERN = "UO_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String IV_OTCH_PATTERN = "IV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UU_OTCH_PATTERN = "UU_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String KV_PATTERN = "KV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String UO_PATTERN = "UO_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String IV_PATTERN = "IV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String UU_PATTERN = "UU_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
 
 @Field final String NDFL2_PATTERN_PROT_1 = "PROT_NO_NDFL2"
 @Field final String NDFL2_PATTERN_PROT_2 = "прот_NO_NDFL2"
 @Field final String NDFL2_PATTERN_REESTR_1 = "REESTR_NO_NDFL2"
 @Field final String NDFL2_PATTERN_REESTR_2 = "реестр_NO_NDFL2"
-@Field final String NDFL6_PATTERN_1 = "KV_"
-@Field final String NDFL6_PATTERN_2 = "UO_"
-@Field final String NDFL6_PATTERN_3 = "IV_"
-@Field final String NDFL6_PATTERN_4 = "UU_"
+@Field final String ANSWER_PATTERN_1 = "KV_"
+@Field final String ANSWER_PATTERN_2 = "UO_"
+@Field final String ANSWER_PATTERN_3 = "IV_"
+@Field final String ANSWER_PATTERN_4 = "UU_"
 @Field final String NDFL2_KV_FILE_TAG = "СвКвит"
 @Field final String NDFL2_KV_FILE_ATTR = "ИмяОбрабФайла"
 @Field final String NDFL2_UO_FILE_TAG = "ОбщСвУвед"
@@ -98,6 +121,12 @@ String ATTR_YEAR = "ОтчетГод";
 @Field final String NDFL2_UU_FILE_ATTR = "ИмяОбрабФайла"
 @Field final String NDFL2_1 = "2 НДФЛ (1)"
 @Field final String NDFL2_2 = "2 НДФЛ (2)"
+@Field final String NDFL6 = "6 НДФЛ"
+
+@Field final KND_ACCEPT = 1166002	// Принят
+@Field final KND_REFUSE = 1166006	// Отклонен
+@Field final KND_SUCCESS = 1166007 //	Успешно отработан
+@Field final KND_REQUIRED = 1166009 // Требует уточнения
 
 // Идентификаторы видов деклараций
 @Field final long DECLARATION_TYPE_RNU_NDFL_ID = 100
@@ -126,10 +155,10 @@ def importTF() {
     logger.setMessageDecorator(null)
 
     Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN)
-    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN)
-    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN)
-    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN)
-    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN)
+    Pattern patternKvOtch = Pattern.compile(KV_PATTERN)
+    Pattern patternUoOtch = Pattern.compile(UO_PATTERN)
+    Pattern patternIvOtch = Pattern.compile(IV_PATTERN)
+    Pattern patternUuOtch = Pattern.compile(UU_PATTERN)
 
     if (UploadFileName != null
         && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
@@ -137,7 +166,7 @@ def importTF() {
     ) {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
-        import1151111()
+        importPrimary1151111()
     } else if (isNdfl6Response(UploadFileName) && isNdfl6AndNot11151111(UploadFileName)) {
         importNdflResponse()
     } else if (isNdfl2Response(UploadFileName)) {
@@ -148,7 +177,7 @@ def importTF() {
         patternIvOtch.matcher(UploadFileName).matches() ||
         patternUuOtch.matcher(UploadFileName).matches()
     ) {
-        importOtch()
+        importAnswer1151111()
     } else {
         throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName))
     }
@@ -165,7 +194,7 @@ def importNDFL() {
 /**
  * Импорт ТФ 1151111
  */
-def import1151111() {
+def importPrimary1151111() {
     // 2. Разбор имени файла
     String tranNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$1")
     String endNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$2")
@@ -279,48 +308,53 @@ def import1151111() {
  * Загрузка ответов ФНС по ТФ 1151111 (первичная)
  * @return
  */
-def importOtch() {
+def importAnswer1151111() {
 
-    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN)
-    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN)
-    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN)
-    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN)
-
-    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-383 Добавить xsd валидацию файлов ответа
-    // ожидаю https://jira.aplana.com/browse/SBRFNDFL-381
+    Pattern patternKvOtch = Pattern.compile(KV_PATTERN)
+    Pattern patternUoOtch = Pattern.compile(UO_PATTERN)
+    Pattern patternIvOtch = Pattern.compile(IV_PATTERN)
+    Pattern patternUuOtch = Pattern.compile(UU_PATTERN)
 
     // Дата создания файла
-    Date createDateFile = null
+    Date fileDate = null
 
+    // 1. Определим тип документа по имени файла
     def String nodeNameFind = null
-    def String attrNameFind = "ИмяОбрабФайла"
-
     if (patternKvOtch.matcher(UploadFileName).matches()) {
         // Квитанция о приеме налоговой декларации
-        createDateFile = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(KV_OTCH_PATTERN, "\$5").substring(0,8));
-        nodeNameFind = "СвКвит"
+        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(KV_PATTERN, "\$5").substring(0,8));
+        nodeNameFind = "ИмяОбрабФайла"
     } else if (patternUoOtch.matcher(UploadFileName).matches()) {
         // Уведомление об отказе в приеме налоговой декларации
-        createDateFile = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UO_OTCH_PATTERN, "\$5").substring(0,8));
-        nodeNameFind = "ОбщСвУвед"
+        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UO_PATTERN, "\$5").substring(0,8));
+        nodeNameFind = "ИмяОбрабФайла"
     } else if (patternIvOtch.matcher(UploadFileName).matches()) {
         // Извещение о вводе
-        createDateFile = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(IV_OTCH_PATTERN, "\$5").substring(0,8));
+        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(IV_PATTERN, "\$5").substring(0,8));
         nodeNameFind = "СвИзвещВ"
     } else if (patternUuOtch.matcher(UploadFileName).matches()) {
         // 	Уведомление об уточнении
-        createDateFile = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UU_OTCH_PATTERN, "\$5").substring(0,8));
+        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UU_PATTERN, "\$5").substring(0,8));
         nodeNameFind = "ОбщСвУвед"
     }
 
+    // 3. Выполним чтение Имени отчетного файла из элемента файла ответа
+    def String attrNameFind = "ИмяОбрабФайла"
+    def declarationDataFileNameReport = null
     try {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
-        def sett = new HashMap<String, List<String>>();
-        sett.put(nodeNameFind, [attrNameFind]);
-        SAXHandler handler = new SAXHandler(sett);
-        saxParser.parse(ImportInputStream, handler);
-        declarationDataFileNameReport = handler.getValues().get(nodeNameFind).get(attrNameFind);
+        if (nodeNameFind != attrNameFind) {
+            def sett = new HashMap<String, List<String>>();
+            sett.put(nodeNameFind, [attrNameFind]);
+            SAXHandler handler = new SAXHandler(sett);
+            saxParser.parse(ImportInputStream, handler);
+            declarationDataFileNameReport = handler.getAttrValues().get(nodeNameFind).get(attrNameFind);
+        } else {
+            SAXHandler handler = new SAXHandler(nodeNameFind);
+            saxParser.parse(ImportInputStream, handler);
+            declarationDataFileNameReport = handler.getNodeValue()
+        }
     } catch (IOException e) {
         e.printStackTrace();
         logger.error("Ошибка чтения файла \"%s\".", UploadFileName);
@@ -342,9 +376,8 @@ def importOtch() {
         throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FILE_NAME, UploadFileName));
     }
 
-    // Поиск формы по Имени файла ответа
+    // 4. Поиск НФ, для которой пришел файл ответа по условию
     def declarationDataList = declarationService.find(declarationDataFileNameReport)
-
     if (declarationDataList == null || declarationDataList.size() == 0) {
         // Ошибка: Не найдена форма, соответсвующая имени отчетного файла
         throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FORM, declarationDataFileNameReport));
@@ -362,12 +395,101 @@ def importOtch() {
         }
         throw new IllegalArgumentException(String.format(msgError, msgErrorList.join(", ")));
     }
+    def declarationData = declarationDataList.get(0)
 
-    // todo oshelepaev Проверка того, что файл ответа не был загружен ранее https://jira.aplana.com/browse/SBRFNDFL-338
-    // Ожидаю https://jira.aplana.com/browse/SBRFNDFL-381
+    // 2. Выполним проверку структуры файла ответа на соответствие XSD
+    def declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    def templateFile = null
+    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+        templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+            it.fileName.startsWith(ANSWER_PATTERN_1)
+        }
+    }
+    if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+        templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+            it.fileName.startsWith(ANSWER_PATTERN_2)
+        }
+    }
+    if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+        templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+            it.fileName.startsWith(ANSWER_PATTERN_3)
+        }
+    }
+    if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+        templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+            it.fileName.startsWith(ANSWER_PATTERN_4)
+        }
+    }
+    if (!templateFile) {
+        logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
+        return
+    }
+    declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
 
-    def declarationDataId = declarationDataList.get(0)?.id
-    AttachFileType attachFileType = AttachFileType.TYPE_3
+    // 5. Проверка того, что файл ответа не был загружен ранее
+    def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
+    if (!beforeUploadDeclarationDataList.isEmpty()) {
+        logger.error("Файл ответа \"%s\" уже загружен", UploadFileName)
+        return
+    }
+
+    // 6. Сохранение файла ответа в форме
+    def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
+    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
+
+    def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
+    def createUser = declarationService.getSystemUserInfo().getUser()
+
+    def declarationDataFile = new DeclarationDataFile()
+    declarationDataFile.setDeclarationDataId(declarationData.id)
+    declarationDataFile.setUuid(fileUuid)
+    declarationDataFile.setUserName(createUser.getName())
+    declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
+    declarationDataFile.setFileTypeId(fileTypeId)
+    declarationDataFile.setDate(fileDate)
+
+    declarationService.saveFile(declarationDataFile)
+
+    def declarationDataFileMaxWeight = declarationService.findFileWithMaxWeight(declarationData.id)
+    def prevWeight
+
+    if (declarationDataFileMaxWeight != null) {
+        prevWeight = getDocWeight(declarationDataFileMaxWeight.fileName)
+    }
+
+    def docWeight = getDocWeight(UploadFileName)
+    if (prevWeight == null || prevWeight <= docWeight) {
+        def nextKnd
+
+        //Принят
+        if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+            nextKnd = KND_ACCEPT
+        }
+
+        //Отклонен
+        if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+            nextKnd = KND_REFUSE
+        }
+
+        //Успешно обработан
+        if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+            nextKnd = KND_SUCCESS
+        }
+
+        //Требует уточнения
+        if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+            nextKnd = KND_REQUIRED
+        }
+
+        if (nextKnd != null) {
+            def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
+            def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
+            declarationService.setDocStateId(declarationData.id, docStateId)
+        }
+    }
 }
 
 /**
@@ -397,10 +519,10 @@ def isNdfl2ResponseReestr(fileName) {
  * Проверяет является ли файл ответом от ФНС 6 НДФЛ
  */
 def isNdfl6Response(fileName) {
-    return fileName.startsWith(NDFL6_PATTERN_1) ||
-            fileName.startsWith(NDFL6_PATTERN_2) ||
-            fileName.startsWith(NDFL6_PATTERN_3) ||
-            fileName.startsWith(NDFL6_PATTERN_4)
+    return fileName.startsWith(ANSWER_PATTERN_1) ||
+            fileName.startsWith(ANSWER_PATTERN_2) ||
+            fileName.startsWith(ANSWER_PATTERN_3) ||
+            fileName.startsWith(ANSWER_PATTERN_4)
 }
 
 /**
@@ -409,6 +531,11 @@ def isNdfl6Response(fileName) {
  */
 def isNdfl6AndNot11151111(fileName) {
     def contentMap = readNdfl6ResponseContent()
+
+    if (contentMap == null) {
+        return false
+    }
+
     def reportFileName = getFileName(contentMap, fileName)
 
     if (reportFileName == null) {
@@ -419,8 +546,12 @@ def isNdfl6AndNot11151111(fileName) {
     def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
     def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
 
-    def declarationData = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
-    if (declarationData == null) {
+    def declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
+    if (declarationDataList.isEmpty()) {
+        return false
+    }
+
+    if (declarationDataList.size() > 1) {
         return false
     }
 
@@ -431,19 +562,19 @@ def isNdfl6AndNot11151111(fileName) {
  * Возвращает имя отчетного файла для 6НДФЛ
  */
 def getFileName(contentMap, fileName) {
-    if (fileName.startsWith(NDFL6_PATTERN_1)) {
+    if (fileName.startsWith(ANSWER_PATTERN_1)) {
         return contentMap.get(NDFL2_KV_FILE_TAG).get(NDFL2_KV_FILE_ATTR)
     }
 
-    if (fileName.startsWith(NDFL6_PATTERN_2)) {
+    if (fileName.startsWith(ANSWER_PATTERN_2)) {
         return contentMap.get(NDFL2_UO_FILE_TAG).get(NDFL2_UO_FILE_ATTR)
     }
 
-    if (fileName.startsWith(NDFL6_PATTERN_3)) {
+    if (fileName.startsWith(ANSWER_PATTERN_3)) {
         return contentMap.get(NDFL2_IV_FILE_TAG).get(NDFL2_IV_FILE_ATTR)
     }
 
-    if (fileName.startsWith(NDFL6_PATTERN_4)) {
+    if (fileName.startsWith(ANSWER_PATTERN_4)) {
         return contentMap.get(NDFL2_UU_FILE_TAG).get(NDFL2_UU_FILE_ATTR)
     }
 
@@ -458,7 +589,7 @@ def getDocWeight(fileName) {
         return 1
     }
 
-    if (fileName.startsWith(NDFL6_PATTERN_1) || fileName.startsWith(NDFL6_PATTERN_2)) {
+    if (fileName.startsWith(ANSWER_PATTERN_1) || fileName.startsWith(ANSWER_PATTERN_2)) {
         return 1
     }
 
@@ -487,7 +618,7 @@ def getDocWeight(fileName) {
 @Field final Pattern NDFL2_PROTOCOL_DATE_PATTERN = Pattern.compile("ПРОТОКОЛ № .+ от (\\d{2}\\.\\d{2}\\.\\d{4})")
 @Field final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
 @Field final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
-@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("(.{17})_(.{4})_(.{2})_(.{4})_(.{32})")
+@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
 
 /**
  * Чтение содержание файла 2 НДФЛ - протокол
@@ -629,7 +760,7 @@ def readNdfl2ResponseReestrContent() {
         String line = ""
         while (line != null) {
             if (line.contains(NDFL2_TO_FILE)) {
-                result.put(NDFL2_TO_FILE, line.replaceAll(NDFL2_FILE_NAME_PATTERN, "\$2"))
+                result.put(NDFL2_TO_FILE, line.replaceAll(NDFL2_STR_PATTERN, "\$2"))
             }
 
             if (line.contains(NDFL2_REGISTER_DATE)) {
@@ -659,13 +790,13 @@ def readNdfl6ResponseContent() {
     sett.put(NDFL2_IV_FILE_TAG, [NDFL2_IV_FILE_ATTR])
     sett.put(NDFL2_UU_FILE_TAG, [NDFL2_UU_FILE_ATTR])
 
+    SAXHandler handler = new SAXHandler(sett)
+    InputStream inputStream
     try {
+        inputStream = new FileInputStream(dataFile)
         SAXParserFactory factory = SAXParserFactory.newInstance()
         SAXParser saxParser = factory.newSAXParser()
-        SAXHandler handler = new SAXHandler(sett)
-        saxParser.parse(ImportInputStream, handler)
-
-        reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD)
+        saxParser.parse(inputStream, handler)
     } catch (IOException e) {
         e.printStackTrace()
         logger.error("Файл «%s» не загружен: Ошибка чтения файла", UploadFileName)
@@ -679,10 +810,10 @@ def readNdfl6ResponseContent() {
         logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
         return null
     } finally {
-        IOUtils.closeQuietly(ImportInputStream)
+        IOUtils.closeQuietly(inputStream)
     }
 
-    return handler.getValues()
+    return handler.getAttrValues()
 }
 
 
@@ -690,11 +821,6 @@ def readNdfl6ResponseContent() {
  * Загрузка ответов ФНС 2 и 6 НДФЛ
  */
 def importNdflResponse() {
-    // Выполнить проверку структуры файла ответа на соответствие XSD
-    if (isNdfl6Response(UploadFileName)) {
-        //TODO xsd
-    }
-
     // Прочитать Имя отчетного файла из файла ответа
     def ndfl2ContentMap = [:]
     def ndfl2ContentReestrMap = [:]
@@ -717,6 +843,11 @@ def importNdflResponse() {
         }
     } else {
         def ndfl6Content = readNdfl6ResponseContent()
+
+        if (ndfl6Content == null) {
+            return
+        }
+
         reportFileName = getFileName(ndfl6Content, UploadFileName)
     }
 
@@ -729,19 +860,25 @@ def importNdflResponse() {
     def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
     def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
 
-    def declarationData = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
-    if (declarationData == null) {
-        //TODO несколкько
-        logger.error("Файл ответа \"%s\", для которого сформирован ответ, не найден в отчетных формах", UploadFileName)
+    def declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
+    if (declarationDataList.isEmpty()) {
+        logger.error("Файл ответа \"%s\", для которого сформирован ответ, не найден в отчетных формах", reportFileName)
         return
     }
+    if (declarationDataList.size() > 1) {
+        def result = ""
+        declarationDataList.each { declData ->
+            result += "\"${AttachFileType.TYPE_2.title}\", \"${declData.kpp}\", \"${declData.oktmo}\"; "
+        }
+
+        logger.error("Файл ответа \"%s\", для которого сформирован ответ, найден в отчетных формах: %s", reportFileName, result)
+        return
+    }
+    def declarationData = declarationDataList.get(0)
 
     // Проверить ОНФ на отсутствие ранее загруженного Файла ответа по условию: "Имя Файла ответа" не найдено в ОНФ."Файлы и комментарии"
-    DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
-    declarationFilter.declarationDataId = declarationData.id
-    declarationFilter.fileName = UploadFileName
-    declarationFilter.searchOrdering = DeclarationDataSearchOrdering.ID
-    if (!declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false).isEmpty()) {
+    def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
+    if (!beforeUploadDeclarationDataList.isEmpty()) {
         logger.error("Файл ответа \"%s\" уже загружен", UploadFileName)
         return
     }
@@ -751,6 +888,46 @@ def importNdflResponse() {
     def formTypeTypeProvider = refBookFactory.getDataProvider(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId())
     def formType = formTypeTypeProvider.getRecordData(declarationFormTypeId)
     def formTypeCode = formType.CODE.stringValue
+
+    // Выполнить проверку структуры файла ответа на соответствие XSD
+    if (NDFL6 == formTypeCode) {
+        def templateFile = null
+
+        if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(ANSWER_PATTERN_1)
+            }
+        }
+
+        if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(ANSWER_PATTERN_2)
+            }
+        }
+
+        if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(ANSWER_PATTERN_3)
+            }
+        }
+
+        if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+                it.fileName.startsWith(ANSWER_PATTERN_4)
+            }
+        }
+
+        if (!templateFile) {
+            logger.error("Для файл ответа \"%s\" не найдена xsd схема", UploadFileName)
+            return
+        }
+
+        declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
+        }
+    }
 
     if (NDFL2_1 == formTypeCode || NDFL2_2 == formTypeCode) {
         if (isNdfl2ResponseReestr(UploadFileName)) {
@@ -824,7 +1001,7 @@ def importNdflResponse() {
     def fileDate = null
 
     if (isNdfl6Response(UploadFileName)) {
-        fileDate = Date.parse("yyyy", UploadFileName.replaceAll(NDFL6_FILE_NAME_PATTERN, "\$4"))
+        fileDate = Date.parse("yyyyMMdd", UploadFileName.replaceAll(NDFL6_FILE_NAME_PATTERN, "\$10"))
     } else if (isNdfl2ResponseReestr(UploadFileName)) {
         fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE))
     } else if (isNdfl2ResponseProt(UploadFileName)) {
@@ -855,40 +1032,35 @@ def importNdflResponse() {
     if (prevWeight == null || prevWeight <= docWeight) {
         def nextKnd
 
-        def kndAccept = 1166002	// Принят
-        def kndRefuse = 1166006	// Отклонен
-        def kndSuccess = 1166007 //	Успешно отработан
-        def kndRequired = 1166009 // Требует уточнения
-
         if (isNdfl2ResponseProt(UploadFileName)) {
             def errorCount = ndfl2ContentMap.get(NDFL2_ERROR_COUNT)
             if (errorCount && errorCount > 0) {
                 // Требует уточнения
-                nextKnd = kndRequired
+                nextKnd = KND_REQUIRED
             } else {
                 //Принят
-                nextKnd = kndAccept
+                nextKnd = KND_ACCEPT
             }
         }
 
         //Принят
-        if (UploadFileName.startsWith(NDFL6_PATTERN_1)) {
-            nextKnd = kndAccept
+        if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+            nextKnd = KND_ACCEPT
         }
 
         //Отклонен
-        if (UploadFileName.startsWith(NDFL6_PATTERN_2)) {
-            nextKnd = kndRefuse
+        if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+            nextKnd = KND_REFUSE
         }
 
         //Успешно обработан
-        if (UploadFileName.startsWith(NDFL6_PATTERN_3)) {
-            nextKnd = kndSuccess
+        if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+            nextKnd = KND_SUCCESS
         }
 
         //Требует уточнения
-        if (UploadFileName.startsWith(NDFL6_PATTERN_4)) {
-            nextKnd = kndRequired
+        if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+            nextKnd = KND_REQUIRED
         }
 
         if (nextKnd != null) {
@@ -918,10 +1090,10 @@ def _importTF() {
     AttachFileType attachFileType = null
 
     Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN);
-    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN);
-    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN);
-    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN);
-    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN);
+    Pattern patternKvOtch = Pattern.compile(KV_PATTERN);
+    Pattern patternUoOtch = Pattern.compile(UO_PATTERN);
+    Pattern patternIvOtch = Pattern.compile(IV_PATTERN);
+    Pattern patternUuOtch = Pattern.compile(UU_PATTERN);
 
     Long declarationDataId = null
 
@@ -967,9 +1139,9 @@ def _importTF() {
             sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR]);
             SAXHandler handler = new SAXHandler(sett);
             saxParser.parse(ImportInputStream, handler);
-            reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD);
+            reportPeriodCode = handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_PERIOD);
             try {
-                year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
+                year = Integer.parseInt(handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
             } catch (NumberFormatException nfe) {
                 logger.error("Ошибка заполнения атрибутов транспортного файла \"%s\".", UploadFileName)
                 return
@@ -1115,9 +1287,9 @@ def readXml1151111() {
         SAXParser saxParser = factory.newSAXParser()
         SAXHandler handler = new SAXHandler(sett)
         saxParser.parse(ImportInputStream, handler)
-        reportPeriodCode = handler.getValues().get(TAG_DOCUMENT).get(ATTR_PERIOD)
+        reportPeriodCode = handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_PERIOD)
         try {
-            year = Integer.parseInt(handler.getValues().get(TAG_DOCUMENT).get(ATTR_YEAR))
+            year = Integer.parseInt(handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_YEAR))
         } catch (NumberFormatException nfe) {
             logger.error("Файл «%s» не загружен: Не удалось извлечь данные о календарном годе из элемента Файл.Документ.ОтчетГод", UploadFileName)
             return null

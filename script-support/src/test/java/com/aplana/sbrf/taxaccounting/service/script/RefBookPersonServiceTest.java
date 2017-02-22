@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class RefBookPersonServiceTest {
         personDataList.add(createPersonData(5L, "888", "2", "", "23", "", "1111", "Иванов", "Ивон", "Ивановиеч", "12.10.1954"));
         personDataList.add(createPersonData(6L, "888", "2", "", "23", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954"));
 
-        when(refBookPersonDao.findPersonByPersonData(any(PersonData.class))).thenReturn(personDataList);
+        when(refBookPersonDao.findPersonByPersonData(any(PersonData.class), any(Date.class))).thenReturn(personDataList);
 
         ReflectionTestUtils.setField(personService, "refBookPersonDao", refBookPersonDao);
 
@@ -57,7 +58,7 @@ public class RefBookPersonServiceTest {
     @Test
     public void identificatePersonTest() {
         PersonData person = createPersonData("888", "2", "", "23", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Long result = personService.identificatePerson(person, 900);
+        Long result = personService.identificatePerson(person, 900, new Date(), new Logger());
         assertEquals(Long.valueOf(6L), result);
 
     }

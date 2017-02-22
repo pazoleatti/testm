@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -64,24 +65,154 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         return SQL.toString();
     }
 
-    public List<PersonData> findPersonByPersonData(PersonData personData) {
+    /**
+     * Если задан номер и тип документа
+     *
+     * @param personData
+     * @return
+     */
+    private boolean isDocumentSet(PersonData personData) {
+        return (personData.getDocumentNumber() != null && !personData.getDocumentNumber().isEmpty() && personData.getDocumentTypeId() != null);
+    }
+
+    /**
+     * Если задан ИНП и код асну
+     *
+     * @param personData
+     * @return
+     */
+    private boolean isIdentitySet(PersonData personData) {
+        return (personData.getInp() != null && !personData.getInp().isEmpty() && personData.getAsnuId() != null);
+    }
+
+    private boolean isAddressSet(PersonData personData) {
+        return personData.isUseAddress();
+    }
+
+    private boolean isValueSet(String value) {
+        return value != null && !value.isEmpty();
+    }
+
+
+    private String buildQueryDynamical(PersonData personData) {
+
+        StringBuilder SQL = new StringBuilder();
+        SQL.append("WITH t AS \n");
+        SQL.append("  (SELECT MAX(version) version, record_id \n");
+        SQL.append("  FROM ref_book_person r \n");
+        SQL.append("  WHERE status = 0 \n");
+        SQL.append("  AND version <= :pVersion \n");
+        SQL.append("  AND NOT EXISTS \n");
+        SQL.append("    (SELECT 1 \n");
+        SQL.append("    FROM ref_book_person r2 \n");
+        SQL.append("    WHERE r2.record_id = r.record_id \n");
+        SQL.append("    AND r2.status     !=             -1 \n");
+        SQL.append("    AND r2.version BETWEEN r.version + interval '1' DAY AND :pVersion \n");
+        SQL.append("    ) \n");
+        SQL.append("  GROUP BY record_id \n");
+        SQL.append("  ) \n");
+        SQL.append("SELECT person.id AS person_id, person.record_id AS person_record_id, person.last_name AS last_name, person.first_name AS first_name, person.middle_name AS middle_name, person.sex AS sex, person.birth_date AS birth_date, person.inn AS inn, person.inn_foreign AS inn_foreign, person.snils AS snils, person.pension AS pension, person.medical AS midical, person.social AS social, person.employee AS employee, person.citizenship AS citizenship_ref_id, person.taxpayer_state AS status_ref_id, \n");
+
+        if (isDocumentSet(personData)) {
+            SQL.append("  person_doc.doc_number AS document_number, person_doc.doc_id AS document_type_ref_id, \n");
+        }
+
+        if (isIdentitySet(personData)) {
+            SQL.append("  taxpayer_id.inp AS inp, taxpayer_id.as_nu AS asnu_ref_id, \n");
+        }
+
+        if (isAddressSet(personData)) {
+            SQL.append("  addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id, addr.address, \n");
+        }
+        SQL.append("  person.version \n");
+        SQL.append("FROM t, ref_book_person person \n");
+
+        if (isAddressSet(personData)) {
+            SQL.append("  LEFT JOIN ref_book_address addr ON (addr.id = person.address) \n");
+        }
+
+        if (isDocumentSet(personData)) {
+            SQL.append("  LEFT JOIN ref_book_id_doc person_doc ON (person_doc.person_id = person.id) \n");
+        }
+
+        if (isIdentitySet(personData)) {
+            SQL.append("  LEFT JOIN ref_book_id_tax_payer taxpayer_id ON (taxpayer_id.person_id     = person.id) \n");
+        }
+
+        SQL.append("WHERE (person.version = t.version \n");
+        SQL.append("AND person.record_id  = t.record_id \n");
+        SQL.append("AND person.status     = 0) \n");
+        SQL.append("AND ( \n");
+
+        if (isIdentitySet(personData)) {
+            SQL.append("  (lower(taxpayer_id.inp) = :inp AND taxpayer_id.as_nu     = :asnuId) OR \n");
+        }
+
+        if (isValueSet(personData.getSnils())) {
+            SQL.append("  (REPLACE(REPLACE(person.snils, ' ', ''), '-', '') = :snils) OR \n");
+        }
+
+        if (isValueSet(personData.getInn())) {
+            SQL.append("  (REPLACE(person.inn, ' ', '') = :inn) OR \n");
+        }
+
+        if (isValueSet(personData.getInnForeign())) {
+            SQL.append("  (REPLACE(person.inn_foreign, ' ', '') = :innForeign) OR \n");
+        }
+
+        if (isDocumentSet(personData)) {
+            SQL.append("  (REPLACE(lower(person_doc.doc_number), ' ', '') = :docNumber AND person_doc.doc_id                             = :docTypeId) OR \n");
+        }
+
+        SQL.append("  (REPLACE(lower(person.last_name), ' ', '')    = :lastName \n");
+        SQL.append("AND REPLACE(lower(person.first_name), ' ', '')  = :firstName \n");
+        SQL.append("AND REPLACE(lower(person.middle_name), ' ', '') = :middleName \n");
+        SQL.append("AND person.birth_date                           = :birthDate))");
+        return SQL.toString();
+
+    }
+
+    public List<PersonData> findPersonByPersonData(PersonData personData, Date version) {
 
         MapSqlParameterSource param = new MapSqlParameterSource();
-        param.addValue("inp", clean(personData.getInp()));
-        param.addValue("asnuId", personData.getAsnuId());
-        param.addValue("snils", cleanSnils(personData.getSnils()));
-        param.addValue("inn", clean(personData.getInn()));
-        param.addValue("innForeign", clean(personData.getInnForeign()));
 
-        param.addValue("docNumber", clean(personData.getDocumentNumber()));
-        param.addValue("docTypeId", personData.getDocumentTypeId());
+        if (isIdentitySet(personData)) {
+            param.addValue("inp", clean(personData.getInp()));
+            param.addValue("asnuId", personData.getAsnuId());
+        }
+
+        if (isValueSet(personData.getSnils())) {
+            param.addValue("snils", cleanSnils(personData.getSnils()));
+        }
+
+        if (isValueSet(personData.getInn())) {
+            param.addValue("inn", clean(personData.getInn()));
+        }
+
+        if (isValueSet(personData.getInnForeign())) {
+            param.addValue("innForeign", clean(personData.getInnForeign()));
+        }
+
+        if (isDocumentSet(personData)) {
+            param.addValue("docNumber", clean(personData.getDocumentNumber()));
+            param.addValue("docTypeId", personData.getDocumentTypeId());
+        }
 
         param.addValue("lastName", clean(personData.getLastName()));
         param.addValue("firstName", clean(personData.getFirstName()));
         param.addValue("middleName", clean(personData.getMiddleName()));
         param.addValue("birthDate", personData.getBirthDate());
+        param.addValue("pVersion", version);
 
-        return getNamedParameterJdbcTemplate().query(FIND_PERSON_QUERY, param, new PersonDataMapper());
+        String query = buildQueryDynamical(personData);
+
+        long time = System.currentTimeMillis();
+
+        List<PersonData> result = getNamedParameterJdbcTemplate().query(query, param, new PersonDataMapper(personData));
+
+        System.out.println("findPersonByPersonData "+personData.getPersonNumber()+": "+personData.getLastName()+" "+personData.getFirstName()+" "+personData.getMiddleName() + " ("+(System.currentTimeMillis() - time)+" ms)");
+
+        return result;
     }
 
     private String clean(String string) {
@@ -101,6 +232,13 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     class PersonDataMapper implements RowMapper<PersonData> {
+
+        private final PersonData personData;
+
+        PersonDataMapper(PersonData personData) {
+            this.personData = personData;
+        }
+
         @Override
         public PersonData mapRow(ResultSet rs, int i) throws SQLException {
             PersonData person = new PersonData();
@@ -122,26 +260,31 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             person.setCitizenshipId(SqlUtils.getLong(rs, "citizenship_ref_id"));
 
             //identical
-            person.setInp(rs.getString("inp"));
-            person.setAsnuId(SqlUtils.getLong(rs, "asnu_ref_id"));
-
+            if (isIdentitySet(personData)) {
+                person.setInp(rs.getString("inp"));
+                person.setAsnuId(SqlUtils.getLong(rs, "asnu_ref_id"));
+            }
             //documents
-            person.setDocumentTypeId(SqlUtils.getLong(rs, "document_type_ref_id"));
-            person.setDocumentNumber(rs.getString("document_number"));
+            if (isDocumentSet(personData)) {
+                person.setDocumentTypeId(SqlUtils.getLong(rs, "document_type_ref_id"));
+                person.setDocumentNumber(rs.getString("document_number"));
+            }
 
             //address
-            person.setAddressType(SqlUtils.getInteger(rs, "address_type"));
-            person.setCountryId(SqlUtils.getLong(rs, "country_id"));
-            person.setRegionCode(rs.getString("region_code"));
-            person.setPostalCode(rs.getString("postal_code"));
-            person.setDistrict(rs.getString("district"));
-            person.setCity(rs.getString("city"));
-            person.setLocality(rs.getString("locality"));
-            person.setStreet(rs.getString("street"));
-            person.setHouse(rs.getString("house"));
-            person.setBuild(rs.getString("build"));
-            person.setAppartment(rs.getString("appartment"));
-            person.setAddressIno(rs.getString("address"));
+            if (personData.isUseAddress()) {
+                person.setAddressType(SqlUtils.getInteger(rs, "address_type"));
+                person.setCountryId(SqlUtils.getLong(rs, "country_id"));
+                person.setRegionCode(rs.getString("region_code"));
+                person.setPostalCode(rs.getString("postal_code"));
+                person.setDistrict(rs.getString("district"));
+                person.setCity(rs.getString("city"));
+                person.setLocality(rs.getString("locality"));
+                person.setStreet(rs.getString("street"));
+                person.setHouse(rs.getString("house"));
+                person.setBuild(rs.getString("build"));
+                person.setAppartment(rs.getString("appartment"));
+                person.setAddressIno(rs.getString("address"));
+            }
 
             //additional
             person.setPension(SqlUtils.getInteger(rs, "pension"));

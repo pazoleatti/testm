@@ -10,7 +10,7 @@ ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_decl_templat
 
 --declaration_subreport
 ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_decl_subreport;
-ALTER TABLE declaration_subreport_params DISABLE CONSTRAINT fk_decl_subrep_pars_subrep_id;
+--ALTER TABLE declaration_subreport_params DISABLE CONSTRAINT fk_decl_subrep_pars_subrep_id;
 
 --blob_data
 ALTER TABLE ref_book DISABLE CONSTRAINT ref_book_fk_script_id;
