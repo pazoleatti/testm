@@ -13,7 +13,7 @@ DATA LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null',
 CREATION_DATE DATE "DD.MM.RR")
 begindata
  bf172465-20b7-4ce2-ac43-5482ad310c08|report_ndfl_primary.jrxml|primary_rnu_ndfl/v2016/report.jrxml|01.01.2016|
- 58adc3c2-66a0-4f11-98a2-defe682a092f|rnu_ndfl_new6.xsd|primary_rnu_ndfl/v2016/–Õ”_Õƒ‘À_new6.xsd|01.01.2016|
+ 58adc3c2-66a0-4f11-98a2-defe682a092f|rnu_ndfl_light.xsd|primary_rnu_ndfl/v2016/rnu_ndfl_light.xsd|01.01.2016|
  b8406636-beb1-41d8-8f8a-cf4971309962|report_ndfl_consolidated.jrxml|primary_rnu_ndfl/v2016/report.jrxml|01.01.2016|
  f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71|report_2ndfl_1.jrxml|report_2ndfl_1/v2016/report.jrxml|01.01.2016|
  790782e0-2282-41f4-8735-7b50904703ac|NO_NDFL2_1_399_00_05_04_02.xsd|report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_04_02.xsd|01.01.2016|
