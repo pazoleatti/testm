@@ -2632,7 +2632,9 @@ def calculateData() {
 
         long identificatePersonTime = System.currentTimeMillis();
 
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, getReportPeriodEndDate(), logger);
+        //актуальная версия
+        Date actualVersion = new Date();
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, actualVersion, logger);
         declarationFormPerson.setPersonId(refBookPersonId)
 
         println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
