@@ -9,5 +9,8 @@ prompt fill ref_book_ndfl...
 --prompt drop tmp tables
 --@@drop_tmp.sql;
 
+prompt fill ref_book_fond...
+@@fill_ref_book_fond.sql;
+
 commit;
 exit;
