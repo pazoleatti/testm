@@ -50,6 +50,7 @@ public class DeclarationListView extends
     public static final String ASNU_TITLE = "Наименование АСНУ";
     public static final String STATE_TITLE = "Состояние";
     public static final String FILE_NAME_TITLE = "Файл ТФ";
+    public static final String FILE_NAME_TITLE_REPORT = "XML-файл формы";
     public static final String PERIOD_TITLE = "Период";
 
     private static final int TABLE_TOP3 = 75 + 27 + 30;
@@ -385,7 +386,7 @@ public class DeclarationListView extends
             declarationTable.addColumn(declarationTaxOrganColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
             declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
             declarationTable.addColumn(declarationCreateDateColumn, declarationTable.createResizableHeader(CREATE_DATE_TITLE, declarationCreateDateColumn));
-            declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
+            declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE_REPORT, fileNameColumn));
             declarationTable.addColumn(declarationNoteColumn, declarationTable.createResizableHeader(NOTE_TITLE, declarationNoteColumn));
         } else {
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
