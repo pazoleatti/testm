@@ -810,7 +810,7 @@ def createForm() {
     // удаление форм не со статусом принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
-        if (declaration.state != State.CREATED) {
+        if (declaration.state != State.ACCEPTED) {
             declarationsForRemove << declaration
         }
     }
@@ -819,14 +819,13 @@ def createForm() {
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
     allDeclarationData.each { declaration ->
-        pairKppOktmoList.each { np ->
-            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
-            if (ndflPersons != null && ndflPersons.size != 0) {
-                ndflPersonsGroupedByKppOktmo[np] = ndflPersons
+        pairKppOktmoList.each { pair ->
+            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, pair.kpp.toString(), pair.oktmo.toString())
+            if (ndflPersons != null && ndflPersons.size() != 0) {
+                addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
             }
         }
     }
-
     initNdflPersons(ndflPersonsGroupedByKppOktmo)
 
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
@@ -841,11 +840,27 @@ def createForm() {
         Long ddId
         params = new HashMap<String, Object>()
         ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo, null, null, null)
-        formMap.put(ddId, params)
+                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, null)
         appendNdflPersonsToForm(ddId, npGroup.value)
+        formMap.put(ddId, params)
     }
 
+}
+
+def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndflPersonList) {
+    boolean createNewGroup = true
+    ndflPersonsGroupedByKppOktmo.keySet().each { pairKppOktmo ->
+        if (pairKppOktmo.kpp == pairKppOktmoBeingComparing.kpp && pairKppOktmo.oktmo == pairKppOktmoBeingComparing.oktmo) {
+            if (pairKppOktmo.taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
+                logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
+            }
+            ndflPersonsGroupedByKppOktmo.get(pairKppOktmo).addAll(ndflPersonList)
+            createNewGroup = false
+        }
+    }
+    if (createNewGroup) {
+        ndflPersonsGroupedByKppOktmo[pairKppOktmoBeingComparing] = ndflPersonList
+    }
 }
 
 def getPrevDepartmentReportPeriod(departmentReportPeriod) {
@@ -862,7 +877,7 @@ def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
         def oktmo = npGroup.key.oktmo
         def kpp = npGroup.key.kpp
         npGroup.value.each {
-            def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp, oktmo)
+            def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp.toString(), oktmo.toString())
             def deductions = ndflPersonService.findDeductions(it.id)
             resetId(deductions)
             def prepayments = ndflPersonService.findPrepayments(it.id)
@@ -875,7 +890,6 @@ def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
 }
 
 def appendNdflPersonsToForm (def declarationDataId, def ndflPersons){
-    //TODO сделать batch insert
     ndflPersons.each {
         it.setId(null)
         it.setDeclarationDataId(declarationDataId)
