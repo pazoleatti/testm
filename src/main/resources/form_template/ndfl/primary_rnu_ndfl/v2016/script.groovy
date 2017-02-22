@@ -1548,7 +1548,9 @@ def getRefInpMap(def personIds) {
 // Кэш провайдеров cправочников
 @Field Map<Long, RefBookDataProvider> providerCache = [:]
 //Физлица
+@Field final long REF_BOOK_PERSON_ID = RefBook.Id.PERSON.id
 @Field Map<Long, Map<String, RefBookValue>> personsCache = [:]
+@Field Map<Long, Map<String, RefBookValue>> personsActualCache = [:]
 
 //Коды Асну
 @Field Map<Long, String> asnuCache = [:]
@@ -1579,8 +1581,6 @@ def getRefInpMap(def personIds) {
 // Мапа <ID_Данные о физическом лице - получателе дохода, Физическое лицо: <ФИО> ИНП:<ИНП>>
 @Field def ndflPersonFLMap = [:]
 @Field final TEMPLATE_PERSON_FL = "Физическое лицо: \"%s\", ИНП: \"%s\""
-
-// Страны Мапа <Идентификатор, Код>
 
 // Виды документов, удостоверяющих личность Мапа <Идентификатор, Код>
 @Field def documentCodesCache = [:]
@@ -1713,7 +1713,7 @@ def getRefPersons() {
  */
 Map<Long, Map<String, RefBookValue>> getRefPersons(def personIds) {
     if (personsCache.isEmpty()) {
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordIds(RefBook.Id.PERSON.getId(), personIds)
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
         refBookMap.each { personId, person ->
             personsCache.put(personId, person)
         }
@@ -1721,34 +1721,26 @@ Map<Long, Map<String, RefBookValue>> getRefPersons(def personIds) {
     return personsCache;
 }
 
-// todo добавить обработку дублей
-/*def getRefPersons(def personIds) {
-    if (personsCache.size() == 0) {
+/**
+ * Получить аутальные записи справочника "Физические лица"
+ * @param personIds
+ * @return
+ */
+Map<Long, Map<String, RefBookValue>> getActualRefPersons(def personIds) {
+    if (personsActualCache.size() == 0) {
         def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
-//        def dublMap = [:]
-//        def dublList = []
         refBookMap.each { personId, person ->
-            personsCache.put(personId, person)
-
-            // Добавим дубликат в Мапу
-//            if (person.get(RF_DUBLICATES).value != null && !dublMap.get(person.get(RF_DUBLICATES).value)) {
-//                dublMap.put(person.get(RF_DUBLICATES).value, personId)
-//                dublList.add(person.get(RF_DUBLICATES).value)
-//            }
+            // Получим актуальную версию на основании RECORD_ID найденной записи
+            def actualPersonMap = getRefBookByFilter(REF_BOOK_PERSON_ID, "RECORD_ID = " + person.get(RF_RECORD_ID).value)
+            if (actualPersonMap) {
+                actualPersonMap.each { actualPerson ->
+                    personsActualCache.put(personId, actualPerson)
+                }
+            }
         }
-        // Получим оригинальные записи, если имеются дубликаты
-//        if (dublMap.size() > 0) {
-//            def refBookDublMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, dublList)
-//            refBookDublMap.each { originalPersonId, person ->
-//                dublPersonId = dublMap.get(originalPersonId).value
-//            }
-//        }
     }
-    return personsCache;
-}*/
-
-
-
+    return personsActualCache;
+}
 
 /**
  * Получить "Страны"
@@ -2161,7 +2153,7 @@ def checkData() {
  * @return
  */
 def checkDataReference(
-        def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
+    def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
     // Страны
     def citizenshipCodeMap = getRefCountryCode()
     logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
@@ -2211,8 +2203,7 @@ def checkDataReference(
     def addressMap = [:]
 
     if (personIds.size() > 0) {
-        // todo Сделать получение записей оригиналов, если текущая запись - дубликат
-        personMap = getRefPersons(personIds)
+        personMap = getActualRefPersons(personIds)
         logger.info(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
 
         // Получим мапу ИНП

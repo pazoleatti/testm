@@ -144,7 +144,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 			<groupExpression><![CDATA[$F{DECLARATION_DATA_ID}]]></groupExpression>
 		</group>
 	</subDataset>
-	<parameter name="declarationId" class="java.lang.Integer">
+	<parameter name="declarationId" class="java.lang.Long">
 		<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
 	</parameter>
 	<queryString>

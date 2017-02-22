@@ -4,3 +4,5 @@ ECHO ## dml: load ref_book_oktmo
 
 ECHO ## dml: merge record_id in ref_book_oktmo
 "%ORA_BIN%\sqlplus" %AUTH% @"merge_oktmo_record_id.sql"> "../../%LOG_DIR%/merge_oktmo_record_id.txt"
+ECHO ## dml: correct dublicate record_id in ref_book_oktmo
+"%ORA_BIN%\sqlplus" %AUTH% @"correct_oktmo_record_id.sql"> "../../%LOG_DIR%/correct_oktmo_record_id.txt"
