@@ -846,17 +846,17 @@ def readNdfl6ResponseContent() {
 
     if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
         def value = [:]
-        value.put(NDFL2_KV_FILE_ATTR, handler.nodeValueList.get(0))
+        value.put(NDFL2_KV_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
         result.put(NDFL2_KV_FILE_TAG, value)
     } else if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
         def value = [:]
-        value.put(NDFL2_UO_FILE_ATTR, handler.nodeValueList.get(0))
+        value.put(NDFL2_UO_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
         result.put(NDFL2_UO_FILE_TAG, value)
     } else if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
         result = handler.getAttrValues()
     } else if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
         def value = [:]
-        value.put(NDFL2_UU_FILE_ATTR, handler.nodeValueList.get(0))
+        value.put(NDFL2_UU_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
         result.put(NDFL2_UU_FILE_TAG, value)
     }
 
