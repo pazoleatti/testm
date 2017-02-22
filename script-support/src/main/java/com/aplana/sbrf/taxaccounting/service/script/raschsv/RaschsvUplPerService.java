@@ -17,4 +17,10 @@ public interface RaschsvUplPerService {
      * @return
      */
     Integer insertUplPer(List<RaschsvUplPer> raschsvUplPerList);
+
+    /**
+     * Выборка "УплПерОПС, УплПерОМС, УплПерОПСДоп, УплПерДСО"
+     * @return
+     */
+    List<RaschsvUplPer> findUplPer(Long declarationDataId);
 }

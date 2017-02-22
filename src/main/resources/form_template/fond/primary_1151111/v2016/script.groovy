@@ -1069,47 +1069,10 @@ def formatDate(final date, final pattern) {
 @Field final SPRAV_NOMER = "Номер"
 @Field final SPRAV_DATA = "Дата"
 
-// Шаблоны имен файлов
-@Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String KV_OTCH_PATTERN = "KV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UO_OTCH_PATTERN = "UO_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String IV_OTCH_PATTERN = "IV_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UU_OTCH_PATTERN = "UU_OTCH_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-
 /**
  * Разбор xml-файлов
  */
 void importData() {
-
-    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN);
-    Pattern patternKvOtch = Pattern.compile(KV_OTCH_PATTERN);
-    Pattern patternUoOtch = Pattern.compile(UO_OTCH_PATTERN);
-    Pattern patternIvOtch = Pattern.compile(IV_OTCH_PATTERN);
-    Pattern patternUuOtch = Pattern.compile(UU_OTCH_PATTERN);
-
-    if (patternNoRaschsv.matcher(UploadFileName).matches()) {
-        importPrimaryData()
-    } else if (patternKvOtch.matcher(UploadFileName).matches() ||
-            patternUoOtch.matcher(UploadFileName).matches() ||
-            patternIvOtch.matcher(UploadFileName).matches() ||
-            patternUuOtch.matcher(UploadFileName).matches()) {
-        importAnswerData()
-    }
-}
-
-/**
- * Разбор xml-файлов ответов ФНС
- */
-void importAnswerData() {
-    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-338
-    // ожидаю https://jira.aplana.com/browse/SBRFNDFL-381
-    // Установка состояния ЭД для декларации на основании веса документа и даты создания документа
-}
-
-/**
- * Разбор xml-файла ТФ 1151111 (первичный) с сохранением в БД
- */
-void importPrimaryData() {
 
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
@@ -2649,6 +2612,8 @@ def calculateData() {
 
     logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size());
 
+    long time = System.currentTimeMillis();
+
     //Два списка для создания новых записей и для обновления существующих
     List<PersonData> createdPerson = new ArrayList<PersonData>();
     List<PersonData> updatedPerson = new ArrayList<PersonData>();
@@ -2657,8 +2622,13 @@ def calculateData() {
 
         PersonData personData = createPersonData(declarationFormPerson);
 
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, logger);
+        long identificatePersonTime = System.currentTimeMillis();
+
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, getReportPeriodEndDate(), logger);
         declarationFormPerson.setPersonId(refBookPersonId)
+
+        println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
+        //logger.info("identificate: (" + (System.currentTimeMillis() - identificatePersonTime) + " ms)");
 
         //после идентификации выставим ссылку на запись справочника
         personData.setRefBookPersonId(refBookPersonId)
@@ -2675,6 +2645,10 @@ def calculateData() {
         resultMap.put(declarationFormPerson.getId(), declarationFormPerson);
     }
 
+    println "find " + (System.currentTimeMillis() - time);
+    logger.info("find: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPerson.size() + ", подготовленно записей для обновления: " + updatedPerson.size());
 
     //Создание справочников
@@ -2683,14 +2657,25 @@ def calculateData() {
         updateReferenceToPersonId(resultMap, createdPerson);
     }
 
+    println "create " + (System.currentTimeMillis() - time);
+    logger.info("create: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     //Обновление справочников
     if (updatedPerson != null && !updatedPerson.isEmpty()) {
         updateRefbookPersonData(updatedPerson);
         updateReferenceToPersonId(resultMap, updatedPerson);
     }
 
+    println "refresh " + (System.currentTimeMillis() - time);
+    logger.info("refresh: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
     //Обновление данных декларации
     raschsvPersSvStrahLicService.updatePersSvStrahLic(new ArrayList<RaschsvPersSvStrahLic>(resultMap.values()))
+
+    println "update " + (System.currentTimeMillis() - time);
+    logger.info("update: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -2725,6 +2710,9 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
     personData.citizenshipId = findCountryId(person.grazd);
     personData.citizenship = person.grazd;
     personData.sex = person.pol?.toInteger();
+
+    //Строка для вывода номера ФЛ в сообщениях
+    personData.personNumber = inp.nomer;
 
     //Документы
     personData.documentTypeCode = person.kodVidDoc;
@@ -3259,6 +3247,18 @@ def checkData() {
  * @return
  */
 def checkDataDB() {
+    // Проверки по плательщику страховых взносов
+    checkDataDBPerson()
+
+    // Суммовые проверки
+//    checkDataDBSum()
+}
+
+/**
+ * Проверки по плательщику страховых взносов
+ * @return
+ */
+def checkDataDBPerson() {
 
     def raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
 
@@ -3286,6 +3286,7 @@ def checkDataDB() {
     // Идентификаторы ссылок на справочник Физические лица
     def personIdList = []
 
+    // Проверки по плательщику страховых взносов
     raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
         def fioBirthday = raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.dataRozd
 
@@ -3458,6 +3459,165 @@ def checkDataDB() {
 //            logger.warn(msgError + declarationDataInfo.join(", "))
 //        }
 //    }
+}
+
+/**
+ * Суммовые проверки
+ * @return
+ */
+def checkDataDBSum() {
+
+    def svVyplMkSum1 = 0
+    def svVyplMkSum2 = 0
+    def svVyplMkSum3 = 0
+    // Перебор ПерсСвСтрахЛиц
+    List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
+    for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
+        // СвВыпл.СвВыплМК
+        def raschsvSvVyplMkList = raschsvPersSvStrahLic?.raschsvSvVypl?.raschsvSvVyplMkList
+        if (raschsvSvVyplMkList != null) {
+            raschsvSvVyplMkList.each { raschsvSvVyplMk ->
+                if (raschsvSvVyplMk.mesyac != null) {
+                    def numberMonth = getNumberMonth(Integer.parseInt(raschsvSvVyplMk.mesyac), getReportPeriodEndDate())
+                    if (numberMonth == 1) {
+                        svVyplMkSum1 += raschsvSvVyplMk.sumVypl ?: 0
+                    } else if (numberMonth == 2) {
+                        svVyplMkSum2 += raschsvSvVyplMk.sumVypl ?: 0
+                    } else if (numberMonth == 3) {
+                        svVyplMkSum3 += raschsvSvVyplMk.sumVypl ?: 0
+                    }
+                }
+            }
+        }
+    }
+
+    // УплПерОПС
+    def uplPerSum1 = 0
+    def uplPerSum2 = 0
+    def uplPerSum3 = 0
+    List<RaschsvUplPer> raschsvUplPerList = raschsvUplPerService.findUplPer(declarationData.id)
+    for (RaschsvUplPer raschsvUplPer : raschsvUplPerList) {
+        if (raschsvUplPer.nodeName == NODE_NAME_UPL_PER_OPS) {
+            uplPerSum1 = raschsvUplPer.sumSbUpl1m ?: 0
+            uplPerSum2 = raschsvUplPer.sumSbUpl2m ?: 0
+            uplPerSum3 = raschsvUplPer.sumSbUpl3m ?: 0
+        }
+    }
+
+    // Перебор РасчСВ_ОПС_ОМС
+    List<RaschsvSvOpsOms> raschsvSvOpsOmsList = raschsvSvOpsOmsService.findSvOpsOms(declarationData.id)
+    for (RaschsvSvOpsOms raschsvSvOpsOms : raschsvSvOpsOmsList) {
+        List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList = raschsvSvOpsOms.raschsvSvOpsOmsRaschList
+        for (RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch : raschsvSvOpsOmsRaschList) {
+            // РасчСВ_ОПС
+            if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OPS) {
+                def nachislSvSum1 = 0
+                def nachislSvSum2 = 0
+                def nachislSvSum3 = 0
+                def nachislSvPrevSum1 = 0
+                def nachislSvPrevSum2 = 0
+                def nachislSvPrevSum3 = 0
+                def nachislSvNePrevSum1 = 0
+                def nachislSvNePrevSum2 = 0
+                def nachislSvNePrevSum3 = 0
+
+                List<RaschsvSvOpsOmsRaschSum> raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList
+                for (RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum : raschsvSvOpsOmsRaschSumList) {
+                    RaschsvSvSum1Tip raschsvSvSum1Tip = raschsvSvOpsOmsRaschSum.raschsvSvSum1Tip
+                    // НачислСВ
+                    if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV) {
+                        nachislSvSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                        nachislSvSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                        nachislSvSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                    } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_NE_PREV) {
+                        // НачислСВНеПрев
+                        nachislSvNePrevSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                        nachislSvNePrevSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                        nachislSvNePrevSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                    } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_PREV) {
+                        // НачислСВПрев
+                        nachislSvPrevSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                        nachislSvPrevSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                        nachislSvPrevSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                    }
+                }
+
+                def pathAttr = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС"
+
+                // 3.3.1.1 Сумма исчисленных взносов на ОПС равна сумме не превышающих и превышающих предельную величину базы
+                if (nachislSvSum1 != nachislSvNePrevSum1 + nachislSvPrevSum1) {
+                    def pathAttrVal = pathAttr + ".НачислСВ.Сум1Посл3М = \"$nachislSvSum1\""
+                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\", " + pathAttr + ".НачислСВПрев.Сум1Посл3М = \"$nachislSvPrevSum1\"."
+                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+                }
+                if (nachislSvSum2 != nachislSvNePrevSum2 + nachislSvPrevSum2) {
+                    def pathAttrVal = pathAttr + ".НачислСВ.Сум2Посл3М = \"$nachislSvSum2\""
+                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\", " + pathAttr + ".НачислСВПрев.Сум2Посл3М = \"$nachislSvPrevSum2\"."
+                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+                }
+                if (nachislSvSum3 != nachislSvNePrevSum3 + nachislSvPrevSum3) {
+                    def pathAttrVal = pathAttr + ".НачислСВ.Сум3Посл3М = \"$nachislSvSum3\""
+                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\", " + pathAttr + ".НачислСВПрев.Сум3Посл3М = \"$nachislSvPrevSum3\"."
+                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+                }
+
+                // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину)
+                if (nachislSvNePrevSum1 != svVyplMkSum1) {
+                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
+                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+                }
+                if (nachislSvNePrevSum2 != svVyplMkSum2) {
+                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
+                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+                }
+                if (nachislSvNePrevSum3 != svVyplMkSum3) {
+                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
+                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+                }
+
+                // 3.3.1.3 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов
+                if (nachislSvSum1 != uplPerSum1) {
+                    def pathAttrVal = pathAttr + ".НачислСВ.Сум1Посл3М = \"$nachislSvSum1\""
+                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл1М = \"$uplPerSum1\""
+                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+                }
+                if (nachislSvSum2 != uplPerSum2) {
+                    def pathAttrVal = pathAttr + ".НачислСВ.Сум2Посл3М = \"$nachislSvSum2\""
+                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл2М = \"$uplPerSum2\""
+                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+                }
+                if (nachislSvSum3 != uplPerSum3) {
+                    def pathAttrVal = pathAttr + ".НачислСВ.Сум3Посл3М = \"$nachislSvSum3\""
+                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл3М = \"$uplPerSum3\""
+                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Возвращает порядковый номер месяца в списке последних трех месяцев отчетного периода,
+ * если данный месяц принадлежит к последним трем месяцам отчетного периода
+ * @return
+ */
+def getNumberMonth(def currMonth, def endDate) {
+    def result = null
+    def endMonth = endDate[Calendar.MONTH] + 1
+    if (currMonth >= endMonth - 2 && currMonth <= endMonth) {
+        switch (endMonth - currMonth) {
+            case 0:
+                result = 3
+                break
+            case 1:
+                result = 2
+                break
+            case 2:
+                result = 1
+                break
+        }
+    }
+    return result
 }
 
 /**

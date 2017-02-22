@@ -18,8 +18,8 @@ public interface RaschsvSvOpsOmsDao {
 
     /**
      * Выборка из РасчСВ_ОПС_ОМС
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    List<RaschsvSvOpsOms> findSvOpsOms(Long obyazPlatSvId);
+    List<RaschsvSvOpsOms> findSvOpsOms(Long declarationDataId);
 }

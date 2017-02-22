@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteI
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OnTimerEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.person.PersonPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.upload.UploadDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
@@ -42,9 +43,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
@@ -87,17 +86,19 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private IRefBookExecutor dataInterface;
     private boolean isVersioned;
     protected Map<FormDataEvent, Boolean> eventScriptStatus;
+    private List<RefBookColumn> columns;
 
     private String lockId;
 
     private boolean timerEnabled;
     private Timer timer;
 
-    AbstractEditPresenter editFormPresenter;
-    RefBookVersionPresenter versionPresenter;
-    DialogPresenter dialogPresenter;
-    RefBookLinearPresenter refBookLinearPresenter;
-    UploadDialogPresenter uploadDialogPresenter;
+    private final AbstractEditPresenter editFormPresenter;
+    private final RefBookVersionPresenter versionPresenter;
+    private final DialogPresenter dialogPresenter;
+    private final RefBookLinearPresenter refBookLinearPresenter;
+    private final UploadDialogPresenter uploadDialogPresenter;
+    private final PersonPresenter personPresenter;
 
     private final HandlerRegistration[] registrations = new HandlerRegistration[2];
 
@@ -141,6 +142,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public RefBookDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter,
                                 RefBookVersionPresenter versionPresenter, DialogPresenter dialogPresenter,
                                 RefBookLinearPresenter refBookLinearPresenter, UploadDialogPresenter uploadDialogPresenter,
+                                PersonPresenter personPresenter,
                                 PlaceManager placeManager, final MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
@@ -150,6 +152,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         this.dialogPresenter = dialogPresenter;
         this.refBookLinearPresenter = refBookLinearPresenter;
         this.uploadDialogPresenter = uploadDialogPresenter;
+        this.personPresenter = personPresenter;
         getView().setUiHandlers(this);
         this.timer = new Timer() {
             @Override
@@ -258,6 +261,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             getView().setRefBookNameDesc(result.getRefBookName());
                                                             getView().setSpecificReportTypes(result.getSpecificReportTypes());
                                                             refBookLinearPresenter.setTableColumns(result.getColumns());
+                                                            columns = result.getColumns();
                                                             getView().updateSendQuery(result.isSendQuery());
                                                             editFormPresenter.createFields(result.getColumns());
                                                             if (result.isReadOnly()) {
@@ -552,6 +556,16 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                         }, RefBookDataPresenter.this));
     }
 
+    @Override
+    public void duplicateClicked() {
+        personPresenter.init(refBookLinearPresenter.getSelectedRow(), columns);
+        addToPopupSlot(personPresenter);
+    }
+
+    @Override
+    public Long getRefBookId() {
+        return refBookId;
+    }
 
     protected void startTimer() {
         timerEnabled = true;

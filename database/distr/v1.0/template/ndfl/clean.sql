@@ -7,10 +7,15 @@ DELETE FROM blob_data WHERE id IN (
 '41303bf7-9765-463f-a34b-f0a280bfa7bf',
 '13765b29-f1b7-4ec0-a8a9-88196a6e45a1',
 'd372df40-e448-48f5-9879-994753822122',
-'77d802bf-e3b1-485b-ae52-41a21aac1034'
+'77d802bf-e3b1-485b-ae52-41a21aac1034',
+'03f6d78d-bfd7-45bb-a16b-6c89131b76d1',
+'042c50fc-a590-46b5-bb50-d04cc3a9424a',
+'047f207c-113e-488d-8390-9afc248a3bc8',
+'04d9b114-1782-4d09-ad88-729e5605c6ff'
 );
 
 DELETE FROM declaration_template WHERE id IN (100, 101, 102, 103, 104);
+DELETE FROM declaration_subreport WHERE id IN (1001, 1011, 1021, 1041);
 
 COMMIT;
 EXIT;

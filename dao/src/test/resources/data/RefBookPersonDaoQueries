@@ -1,0 +1,71 @@
+with t as
+(select
+   MAX(version) version,
+   record_id
+ from ref_book_person r
+ where status = 0
+       and version <= :pVersion
+       and not EXISTS(select 1
+                      from ref_book_person r2
+                      where r2.record_id = r.record_id
+                            and r2.status != -1
+                            and r2.version between r.version + interval '1' DAY and :pVersion)
+ group by record_id
+)
+select
+  person.id             as person_id,
+  person.record_id      as person_record_id,
+  person.last_name      as last_name,
+  person.first_name     as first_name,
+  person.middle_name    as middle_name,
+  person.sex            as sex,
+  person.birth_date     as birth_date,
+  person.inn            as inn,
+  person.inn_foreign    as inn_foreign,
+  person.snils          as snils,
+  person.pension        as pension,
+  person.medical        as midical,
+  person.social         as social,
+  person.employee       as employee,
+  person.citizenship    as citizenship_ref_id,
+  person.taxpayer_state as status_ref_id,
+  --if (docNumber!=null && docTypeId != null)
+  --person_doc.doc_number AS document_number, person_doc.doc_id AS document_type_ref_id,
+  -- end
+  -- if (inp and asnu)
+  --taxpayer_id.inp AS inp, taxpayer_id.as_nu AS asnu_ref_id,
+  -- end
+  -- if (address)
+  --addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id, addr.address,
+  -- end
+  person.version
+from t, ref_book_person person
+-- if (address)
+--LEFT JOIN ref_book_address addr ON (addr.id = person.address)
+-- end
+--if (docNumber!=null && docTypeId != null)
+--LEFT JOIN ref_book_id_doc person_doc ON (person_doc.person_id = person.id)
+-- if (inp and asnu)
+--LEFT JOIN ref_book_id_tax_payer taxpayer_id ON (taxpayer_id.person_id     = person.id)
+-- end
+where (person.version = t.version
+       and person.record_id = t.record_id
+       and person.status = 0)
+      and (-- if (inp and asnu)
+        --(lower(taxpayer_id.inp) = :inp AND taxpayer_id.as_nu     = :asnuId) OR
+        -- end
+        -- if (snils != null)
+        (REPLACE(REPLACE(person.snils, ' ', ''), '-', '') = :snils) or
+        -- if (inn != null)
+        --(REPLACE(person.inn, ' ', '') = :inn) OR
+        -- end
+        -- if (innForeign != null)
+        --(REPLACE(person.inn_foreign, ' ', '') = :innForeign) OR
+        -- end
+        -- if (docNumber!=null && docTypeId != null)
+        --(REPLACE(lower(person_doc.doc_number), ' ', '') = :docNumber AND person_doc.doc_id                             = :docTypeId) OR
+        -- end
+        (REPLACE(lower(person.last_name), ' ', '') = :lastName
+         and REPLACE(lower(person.first_name), ' ', '') = :firstName
+         and REPLACE(lower(person.middle_name), ' ', '') = :middleName
+         and person.birth_date = :birthDate))

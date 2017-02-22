@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,11 +17,9 @@ import java.util.List;
 @ScriptExposed
 public interface RefBookPersonService {
 
-    Long identificatePerson(PersonData personData, int tresholdValue);
+    Long identificatePerson(PersonData personData, int tresholdValue, Date version, Logger logger);
 
-    Long identificatePerson(PersonData personData, int tresholdValue, Logger logger);
-
-    Long identificatePerson(PersonData personData, int tresholdValue, WeigthCalculator<PersonData> weigthComporators, Logger logger);
+    Long identificatePerson(PersonData personData, int tresholdValue, WeigthCalculator<PersonData> weigthComporators, Date version, Logger logger);
 
     List<BaseWeigthCalculator> getBaseCalculateList();
 }

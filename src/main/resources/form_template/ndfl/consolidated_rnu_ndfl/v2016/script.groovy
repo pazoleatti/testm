@@ -46,6 +46,15 @@ switch (formDataEvent) {
 @Field
 def PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
 
+/**
+ * Вид формы "Консолидированная", используется при определении проверок в частях
+ * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataReference(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
+ * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataCommon(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
+ * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataIncome(java.lang.Object, java.lang.Object)}
+ *
+ */
+@Field final FormDataKind FORM_DATA_KIND = FormDataKind.CONSOLIDATED;
+
 //>------------------< CONSOLIDATION >----------------------<
 
 /**
@@ -145,14 +154,37 @@ void consolidation() {
         }
 
         //Создание консолидированной записи NdflPerson
-        def consolidatePerson = buildNdflPerson(ndflPerson, personRecord, identityDocumentRecord, addressRecord);
+        def consolidatePerson = buildNdflPerson(personRecord, identityDocumentRecord, addressRecord);
 
         consolidatePerson.rowNum = ndflPersonNum;
         consolidatePerson.declarationDataId = declarationDataId
-        consolidatePerson.incomes = incomes.withIndex().collect { detail, i -> consolidateDetail(detail, incomesRowNum) }
 
-        consolidatePerson.deductions = deductions.withIndex().collect { detail, i -> consolidateDetail(detail, deductionRowNum) }
-        consolidatePerson.prepayments = prepayments.withIndex().collect { detail, i -> consolidateDetail(detail, prepaymentRowNum) }
+        //Доходы
+        List<NdflPersonIncome> consolidatedIncomesList = new ArrayList<NdflPersonIncome>();
+        for (NdflPersonIncome income : incomes) {
+            NdflPersonIncome consolidatedIncome = consolidateDetail(income, incomesRowNum);
+            consolidatedIncomesList.add(consolidatedIncome);
+            incomesRowNum++;
+        }
+        consolidatePerson.setIncomes(consolidatedIncomesList);
+
+        //Вычеты
+        List<NdflPersonIncome> consolidatedDeductionsList = new ArrayList<NdflPersonIncome>();
+        for (NdflPersonDeduction deduction : deductions) {
+            NdflPersonDeduction consolidatedDeduction = consolidateDetail(deduction, deductionRowNum);
+            consolidatedDeductionsList.add(consolidatedDeduction);
+            deductionRowNum++;
+        }
+        consolidatePerson.setDeductions(consolidatedDeductionsList);
+
+        //Авансы
+        List<NdflPersonPrepayment> consolidatedPrepaymentsList = new ArrayList<NdflPersonPrepayment>();
+        for (NdflPersonPrepayment prepayment : prepayments) {
+            NdflPersonPrepayment consolidatedPrepayment = consolidateDetail(prepayment, prepaymentRowNum);
+            consolidatedPrepaymentsList.add(consolidatedPrepayment);
+            prepaymentRowNum++;
+        }
+        consolidatePerson.setPrepayments(consolidatedPrepaymentsList);
 
         ndflPersonService.save(consolidatePerson)
         ndflPersonNum++
@@ -183,7 +215,7 @@ def collectRefBookPersonIds(List<NdflPerson> ndflPersonList) {
 /**
  * Создает объект NdlPerson заполненный данными из справочника
  */
-def buildNdflPerson(NdflPerson currentNdflPerson, Map<String, RefBookValue> personRecord, Map<String, RefBookValue> identityDocumentRecord, Map<String, RefBookValue> addressRecord) {
+def buildNdflPerson(Map<String, RefBookValue> personRecord, Map<String, RefBookValue> identityDocumentRecord, Map<String, RefBookValue> addressRecord) {
 
     Map<Long, String> countryCodes = getRefCountryCode();
     Map<Long, Map<String, RefBookValue>> documentTypeRefBook = getRefDocumentType();
@@ -226,7 +258,7 @@ def buildNdflPerson(NdflPerson currentNdflPerson, Map<String, RefBookValue> pers
     ndflPerson.flat = addressRecord.get("APPARTMENT")?.getStringValue()
     ndflPerson.countryCode = countryCodes.get(addressRecord.get("COUNTRY_ID")?.getReferenceValue())
     ndflPerson.address = addressRecord.get("ADDRESS")?.getStringValue()
-    ndflPerson.additionalData = currentNdflPerson.additionalData
+    //ndflPerson.additionalData = currentNdflPerson.additionalData
     return ndflPerson
 }
 
@@ -236,14 +268,12 @@ def buildNdflPerson(NdflPerson currentNdflPerson, Map<String, RefBookValue> pers
  * @param i
  * @return
  */
-def consolidateDetail(ndflPersonDetail, i) {
+def consolidateDetail(ndflPersonDetail, rowNum) {
     def sourceId = ndflPersonDetail.id;
     ndflPersonDetail.id = null
     ndflPersonDetail.ndflPersonId = null
-    ndflPersonDetail.rowNum = i
+    ndflPersonDetail.rowNum = rowNum
     ndflPersonDetail.sourceId = sourceId;
-    i++;
-
     return ndflPersonDetail
 }
 
@@ -844,9 +874,6 @@ Map<Long, Map<String, RefBookValue>> getRefPersons(def personIds) {
     return personsCache;
 }*/
 
-
-
-
 /**
  * Получить "Страны"
  * @return
@@ -1391,7 +1418,7 @@ def checkDataReference(
             }
 
 
-            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)){
+            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                 // Спр12 ИНП первичная (Обязательное поле)
                 def inpList = inpMap.get(ndflPerson.personId)
                 if (!ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
@@ -1432,7 +1459,7 @@ def checkDataReference(
             }
 
 
-            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)){
+            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                 // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
                 def allDocList = dulMap.get(ndflPerson.personId)
                 // Вид документа
@@ -1472,7 +1499,6 @@ def checkDataReference(
                     }
                 }
             }
-
 
             // Спр18 Статус налогоплательщика (Обязательное поле)
             def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
@@ -1627,8 +1653,6 @@ def checkDataCommon(
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
-
-        println "ndflPerson.rowNum="+ndflPerson.rowNum
 
         rowNumPersonList.add(ndflPerson.rowNum)
 
@@ -1934,7 +1958,7 @@ def checkDataCommon(
 //        }
     }
 
-    for (NdflPersonDeduction ndflPersonDeduction: ndflPersonDeductionList){
+    for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
@@ -1963,7 +1987,7 @@ def checkDataCommon(
         }
     }
 
-    for (NdflPersonPrepayment ndflPersonPrepayment: ndflPersonPrepaymentList){
+    for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
         rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
     }
 
@@ -2002,14 +2026,10 @@ def checkDataIncome(ndflPersonList, ndflPersonIncomeList) {
         // СведДох1 Дата начисления дохода
 
 
-
     }
 }
 
-
 //>------------------< CHECK DATA UTILS >----------------------<
-
-
 
 /**
  * Получить параметры для конкретного тербанка

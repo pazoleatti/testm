@@ -15,8 +15,8 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
     private boolean exactSearch;
     private Long recordId;
     private int sortColumnIndex;
-
     private boolean ascSorting;
+    private String filter;
 
     public long getRefBookId() {
 		return refBookId;
@@ -80,6 +80,14 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 
     public void setExactSearch(boolean exactSearch) {
         this.exactSearch = exactSearch;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
     }
 
     @Override

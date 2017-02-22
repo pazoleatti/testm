@@ -21,7 +21,6 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.ws.DepartmentWS_Manager;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.UnitEditingAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.UnitEditingResult;
@@ -63,8 +62,6 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
     private LogEntryService logEntryService;
     @Autowired
     private RefBookFactory refBookFactory;
-    @Autowired
-    private DepartmentWS_Manager departmentWS_manager;
     @Autowired
     private DepartmentService departmentService;
 
@@ -133,7 +130,6 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                                 updateFDTBNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), action.isChangeType(), securityService.currentUserInfo());
                     }
                 }
-                departmentWS_manager.sendChange(DepartmentChangeOperationType.UPDATE, action.getDepId(), logger);
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);

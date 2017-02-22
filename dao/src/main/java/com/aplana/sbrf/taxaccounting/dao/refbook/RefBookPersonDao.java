@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PersonData;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -11,6 +12,6 @@ import java.util.List;
  */
 public interface RefBookPersonDao {
 
-    List<PersonData> findPersonByPersonData(PersonData personData);
+    List<PersonData> findPersonByPersonData(PersonData personData, Date version);
 
 }

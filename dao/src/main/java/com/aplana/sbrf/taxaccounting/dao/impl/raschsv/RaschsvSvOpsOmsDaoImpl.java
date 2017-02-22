@@ -32,37 +32,21 @@ public class RaschsvSvOpsOmsDaoImpl extends AbstractDao implements RaschsvSvOpsO
     @Autowired
     private RaschsvKolLicTipDao raschsvKolLicTipDao;
 
-    private static final String OPS_OMS_ALIAS = "os";
-    private static final String RASCH_ALIAS = "r";
-    private static final String RASCH_SUM_ALIAS = "rs";
-    private static final String RASCH_KOL_ALIAS = "rk";
-    private static final String SUM_ALIAS = "s";
-    private static final String KOL_ALIAS = "k";
-
     // Перечень столбцов таблицы РасчСВ_ОПС_ОМС
     private static final String OPS_OMS_COLS = SqlUtils.getColumnsToString(RaschsvSvOpsOms.COLUMNS, null);
     private static final String OPS_OMS_FIELDS = SqlUtils.getColumnsToString(RaschsvSvOpsOms.COLUMNS, ":");
 
     // Перечень столбцов таблицы "Вид расчета"
     private static final String RASCH_COLS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRasch.COLUMNS, null);
-    private static final String RASCH_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRasch.COLUMNS, RASCH_ALIAS + ".");
     private static final String RASCH_FIELDS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRasch.COLUMNS, ":");
 
     // Перечень столбцов таблицы "Связь РасчСВ_ОПС, РасчСВ_ОМС, РасчСВ_428.1-2, РасчСВ_428.3, РасчСВ_ДСО и СвСум1Тип"
     private static final String RASCH_SUM_COLS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRaschSum.COLUMNS, null);
-    private static final String RASCH_SUM_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRaschSum.COLUMNS, RASCH_SUM_ALIAS + ".");
     private static final String RASCH_SUM_FIELDS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRaschSum.COLUMNS, ":");
 
     // Перечень столбцов таблицы "Связь РасчСВ_ОПС, РасчСВ_ОМС, РасчСВ_428.1-2, РасчСВ_428.3, РасчСВ_ДСО и КолЛицТип"
     private static final String RASCH_KOL_COLS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRaschKol.COLUMNS, null);
-    private static final String RASCH_KOL_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRaschKol.COLUMNS, RASCH_KOL_ALIAS + ".");
     private static final String RASCH_KOL_FIELDS = SqlUtils.getColumnsToString(RaschsvSvOpsOmsRaschKol.COLUMNS, ":");
-
-    // Перечень столбцов таблицы "СвСум1Тип"
-    private static final String SUM_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvSvSum1Tip.COLUMNS, SUM_ALIAS + ".");
-
-    // Перечень столбцов таблицы "КолЛицТип"
-    private static final String KOL_COLS_WITH_ALIAS = SqlUtils.getColumnsToString(RaschsvKolLicTip.COLUMNS, KOL_ALIAS + ".");
 
     private static final String SQL_INSERT_OPS_OMS = "INSERT INTO " + RaschsvSvOpsOms.TABLE_NAME +
             " (" + OPS_OMS_COLS + ") VALUES (" + OPS_OMS_FIELDS + ")";
@@ -76,50 +60,46 @@ public class RaschsvSvOpsOmsDaoImpl extends AbstractDao implements RaschsvSvOpsO
     private static final String SQL_INSERT_RASCH_KOL = "INSERT INTO " + RaschsvSvOpsOmsRaschKol.TABLE_NAME +
             " (" + RASCH_KOL_COLS + ") VALUES (" + RASCH_KOL_FIELDS + ")";
 
-    private static final String SQL_SELECT_OPS_OMS = "SELECT " + OPS_OMS_COLS + " FROM " + RaschsvSvOpsOms.TABLE_NAME +
-            " WHERE " + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT_OPS_OMS = "SELECT " + SqlUtils.getColumnsToString(RaschsvSvOpsOms.COLUMNS, "os.") +
+        " FROM raschsv_sv_ops_oms os " +
+        " INNER JOIN raschsv_obyaz_plat_sv ob ON os.raschsv_obyaz_plat_sv_id = ob.id " +
+        " WHERE ob.declaration_data_id = :declaration_data_id";
 
-    private static final StringBuilder SQL_SELECT_RASCH = new StringBuilder()
-            .append("SELECT " + RASCH_COLS_WITH_ALIAS + " FROM " + RaschsvSvOpsOmsRasch.TABLE_NAME + " " + RASCH_ALIAS)
-            .append(" INNER JOIN " + RaschsvSvOpsOms.TABLE_NAME + " " + OPS_OMS_ALIAS +
-                    " ON " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_RASCHSV_SV_OPS_OMS_ID + " = " + OPS_OMS_ALIAS + "." + RaschsvSvOpsOms.COL_ID)
-            .append(" WHERE " + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID);
+    private static final String SQL_SELECT_RASCH = "SELECT " + SqlUtils.getColumnsToString(RaschsvSvOpsOmsRasch.COLUMNS, "r.") +
+            " FROM raschsv_sv_ops_oms_rasch r " +
+            " INNER JOIN raschsv_sv_ops_oms os ON r.raschsv_sv_ops_oms_id = os.id " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON os.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
-    private static final StringBuilder SQL_SELECT_RASCH_SUM = new StringBuilder()
-            .append("SELECT " + RASCH_SUM_COLS_WITH_ALIAS + " FROM " + RaschsvSvOpsOmsRaschSum.TABLE_NAME + " " + RASCH_SUM_ALIAS)
-            .append(" INNER JOIN " + RaschsvSvOpsOmsRasch.TABLE_NAME + " " + RASCH_ALIAS +
-                    " ON " + RASCH_SUM_ALIAS + "." + RaschsvSvOpsOmsRaschSum.COL_RASCHSV_OPS_OMS_RASCH_SUM_ID + " = " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_ID)
-            .append(" INNER JOIN " + RaschsvSvOpsOms.TABLE_NAME + " " + OPS_OMS_ALIAS +
-                    " ON " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_RASCHSV_SV_OPS_OMS_ID + " = " + OPS_OMS_ALIAS + "." + RaschsvSvOpsOms.COL_ID)
-            .append(" WHERE " + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID);
+    private static final String SQL_SELECT_RASCH_SUM = "SELECT " + SqlUtils.getColumnsToString(RaschsvSvOpsOmsRaschSum.COLUMNS, "rs.") +
+            " FROM raschsv_ops_oms_rasch_sum rs " +
+            " INNER JOIN raschsv_sv_ops_oms_rasch r ON rs.raschsv_ops_oms_rasch_sum_id = r.id " +
+            " INNER JOIN raschsv_sv_ops_oms os ON r.raschsv_sv_ops_oms_id = os.id " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON os.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
-    private static final StringBuilder SQL_SELECT_SUM = new StringBuilder()
-            .append("SELECT " + SUM_COLS_WITH_ALIAS + " FROM " + RaschsvSvSum1Tip.TABLE_NAME + " " + SUM_ALIAS)
-            .append(" INNER JOIN " + RaschsvSvOpsOmsRaschSum.TABLE_NAME + " " + RASCH_SUM_ALIAS +
-                    " ON " + SUM_ALIAS + "." + RaschsvSvSum1Tip.COL_ID + " = " + RASCH_SUM_ALIAS + "." + RaschsvSvOpsOmsRaschSum.COL_RASCHSV_SV_SUM1_TIP_ID)
-            .append(" INNER JOIN " + RaschsvSvOpsOmsRasch.TABLE_NAME + " " + RASCH_ALIAS +
-                    " ON " + RASCH_SUM_ALIAS + "." + RaschsvSvOpsOmsRaschSum.COL_RASCHSV_OPS_OMS_RASCH_SUM_ID + " = " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_ID)
-            .append(" INNER JOIN " + RaschsvSvOpsOms.TABLE_NAME + " " + OPS_OMS_ALIAS +
-                    " ON " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_RASCHSV_SV_OPS_OMS_ID + " = " + OPS_OMS_ALIAS + "." + RaschsvSvOpsOms.COL_ID)
-            .append(" WHERE " + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID);
+    private static final String SQL_SELECT_SUM = "SELECT " + SqlUtils.getColumnsToString(RaschsvSvSum1Tip.COLUMNS, "s.") +
+            " FROM raschsv_sv_sum_1tip s " +
+            " INNER JOIN raschsv_ops_oms_rasch_sum rs ON s.id = rs.raschsv_sv_sum1_tip_id " +
+            " INNER JOIN raschsv_sv_ops_oms_rasch r ON rs.raschsv_ops_oms_rasch_sum_id = r.id " +
+            " INNER JOIN raschsv_sv_ops_oms os ON r.raschsv_sv_ops_oms_id = os.id " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON os.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
-    private static final StringBuilder SQL_SELECT_RASCH_KOL = new StringBuilder()
-            .append("SELECT " + RASCH_KOL_COLS_WITH_ALIAS + " FROM " + RaschsvSvOpsOmsRaschKol.TABLE_NAME + " " + RASCH_KOL_ALIAS)
-            .append(" INNER JOIN " + RaschsvSvOpsOmsRasch.TABLE_NAME + " " + RASCH_ALIAS +
-                    " ON " + RASCH_KOL_ALIAS + "." + RaschsvSvOpsOmsRaschKol.COL_RASCHSV_OPS_OMS_RASCH_KOL_ID + " = " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_ID)
-            .append(" INNER JOIN " + RaschsvSvOpsOms.TABLE_NAME + " " + OPS_OMS_ALIAS +
-                    " ON " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_RASCHSV_SV_OPS_OMS_ID + " = " + OPS_OMS_ALIAS + "." + RaschsvSvOpsOms.COL_ID)
-            .append(" WHERE " + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID);
+    private static final String SQL_SELECT_RASCH_KOL = "SELECT " + SqlUtils.getColumnsToString(RaschsvSvOpsOmsRaschKol.COLUMNS, "rk.") +
+            " FROM raschsv_ops_oms_rasch_kol rk " +
+            " INNER JOIN raschsv_sv_ops_oms_rasch r ON rk.raschsv_ops_oms_rasch_kol_id = r.id " +
+            " INNER JOIN raschsv_sv_ops_oms os ON r.raschsv_sv_ops_oms_id = os.id " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON os.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
-    private static final StringBuilder SQL_SELECT_KOL = new StringBuilder()
-            .append("SELECT " + KOL_COLS_WITH_ALIAS + " FROM " + RaschsvKolLicTip.TABLE_NAME + " " + KOL_ALIAS)
-            .append(" INNER JOIN " + RaschsvSvOpsOmsRaschKol.TABLE_NAME + " " + RASCH_KOL_ALIAS +
-                    " ON " + KOL_ALIAS + "." + RaschsvKolLicTip.COL_ID + " = " + RASCH_KOL_ALIAS + "." + RaschsvSvOpsOmsRaschKol.COL_RASCHSV_KOL_LIC_TIP_ID)
-            .append(" INNER JOIN " + RaschsvSvOpsOmsRasch.TABLE_NAME + " " + RASCH_ALIAS +
-                    " ON " + RASCH_KOL_ALIAS + "." + RaschsvSvOpsOmsRaschKol.COL_RASCHSV_OPS_OMS_RASCH_KOL_ID + " = " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_ID)
-            .append(" INNER JOIN " + RaschsvSvOpsOms.TABLE_NAME + " " + OPS_OMS_ALIAS +
-                    " ON " + RASCH_ALIAS + "." + RaschsvSvOpsOmsRasch.COL_RASCHSV_SV_OPS_OMS_ID + " = " + OPS_OMS_ALIAS + "." + RaschsvSvOpsOms.COL_ID)
-            .append(" WHERE " + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID);
+    private static final String SQL_SELECT_KOL = "select " + SqlUtils.getColumnsToString(RaschsvKolLicTip.COLUMNS, "k.") +
+            " FROM raschsv_kol_lic_tip k " +
+            " INNER JOIN raschsv_ops_oms_rasch_kol rk ON k.id = rk.raschsv_kol_lic_tip_id " +
+            " INNER JOIN raschsv_sv_ops_oms_rasch r ON rk.raschsv_ops_oms_rasch_kol_id = r.id " +
+            " INNER JOIN raschsv_sv_ops_oms os ON r.raschsv_sv_ops_oms_id = os.id " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON os.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     public Integer insertRaschsvSvOpsOms(List<RaschsvSvOpsOms> raschsvSvOpsOmsList) {
         // Генерация идентификаторов
@@ -256,23 +236,22 @@ public class RaschsvSvOpsOmsDaoImpl extends AbstractDao implements RaschsvSvOpsO
         return res.length;
     }
 
-    public List<RaschsvSvOpsOms> findSvOpsOms(Long obyazPlatSvId) {
+    @Override
+    public List<RaschsvSvOpsOms> findSvOpsOms(Long declarationDataId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
         // Выборка из РасчСВ_ОПС_ОМС
         List<RaschsvSvOpsOms> raschsvSvOpsOmsList =
                 getNamedParameterJdbcTemplate().query(SQL_SELECT_OPS_OMS, params, new RaschsvSvOpsOmsRowMapper());
 
         if (!raschsvSvOpsOmsList.isEmpty()) {
             Map<Long, RaschsvSvOpsOms> mapSvOpsOms = new HashMap<Long, RaschsvSvOpsOms>();
-            List<Long> raschsvSvOpsOmsIds = new ArrayList<Long>(raschsvSvOpsOmsList.size());
             for (RaschsvSvOpsOms raschsvSvOpsOms : raschsvSvOpsOmsList) {
                 mapSvOpsOms.put(raschsvSvOpsOms.getId(), raschsvSvOpsOms);
-                raschsvSvOpsOmsIds.add(raschsvSvOpsOms.getId());
             }
 
             // Выборка из таблицы Вида расчета
-            List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList = findSvOpsOmsRasch(obyazPlatSvId);
+            List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList = findSvOpsOmsRasch(declarationDataId);
             Map<Long, RaschsvSvOpsOmsRasch> mapSvOpsOmsRasch = new HashMap<Long, RaschsvSvOpsOmsRasch>();
             for (RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch : raschsvSvOpsOmsRaschList) {
                 RaschsvSvOpsOms raschsvSvOpsOms = mapSvOpsOms.get(raschsvSvOpsOmsRasch.getRaschsvSvOpsOmsId());
@@ -281,14 +260,14 @@ public class RaschsvSvOpsOmsDaoImpl extends AbstractDao implements RaschsvSvOpsO
             }
 
             // Выборка из СвСум1Тип
-            List<RaschsvSvSum1Tip> raschsvSvSum1TipList = findSvSum1Tip(obyazPlatSvId);
+            List<RaschsvSvSum1Tip> raschsvSvSum1TipList = findSvSum1Tip(declarationDataId);
             Map<Long, RaschsvSvSum1Tip> mapSvSum1Tip = new HashMap<Long, RaschsvSvSum1Tip>();
             for (RaschsvSvSum1Tip raschsvSvSum1Tip : raschsvSvSum1TipList) {
                 mapSvSum1Tip.put(raschsvSvSum1Tip.getId(), raschsvSvSum1Tip);
             }
 
             // Выборка из таблицы-связки Вида расчета с СвСум1Тип
-            List<RaschsvSvOpsOmsRaschSum> raschsvSvOpsOmsRaschSumList = findSvOpsOmsRaschSum(obyazPlatSvId);
+            List<RaschsvSvOpsOmsRaschSum> raschsvSvOpsOmsRaschSumList = findSvOpsOmsRaschSum(declarationDataId);
             for (RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum : raschsvSvOpsOmsRaschSumList) {
                 RaschsvSvSum1Tip raschsvSvSum1Tip = mapSvSum1Tip.get(raschsvSvOpsOmsRaschSum.getRaschsvSvSum1TipId());
                 raschsvSvOpsOmsRaschSum.setRaschsvSvSum1Tip(raschsvSvSum1Tip);
@@ -298,14 +277,14 @@ public class RaschsvSvOpsOmsDaoImpl extends AbstractDao implements RaschsvSvOpsO
             }
 
             // Выборка из КолЛицТип
-            List<RaschsvKolLicTip> raschsvKolLicTipList = findKolLicTip(obyazPlatSvId);
+            List<RaschsvKolLicTip> raschsvKolLicTipList = findKolLicTip(declarationDataId);
             Map<Long, RaschsvKolLicTip> mapKolLicTip = new HashMap<Long, RaschsvKolLicTip>();
             for (RaschsvKolLicTip raschsvKolLicTip : raschsvKolLicTipList) {
                 mapKolLicTip.put(raschsvKolLicTip.getId(), raschsvKolLicTip);
             }
 
             // Выборка из таблицы-связки Вида расчета с КолЛицТип
-            List<RaschsvSvOpsOmsRaschKol> raschsvSvOpsOmsRaschKolList = findSvOpsOmsRaschKol(obyazPlatSvId);
+            List<RaschsvSvOpsOmsRaschKol> raschsvSvOpsOmsRaschKolList = findSvOpsOmsRaschKol(declarationDataId);
             for (RaschsvSvOpsOmsRaschKol raschsvSvOpsOmsRaschKol : raschsvSvOpsOmsRaschKolList) {
                 RaschsvKolLicTip raschsvKolLicTip = mapKolLicTip.get(raschsvSvOpsOmsRaschKol.getRaschsvKolLicTipId());
                 raschsvSvOpsOmsRaschKol.setRaschsvKolLicTip(raschsvKolLicTip);
@@ -319,56 +298,56 @@ public class RaschsvSvOpsOmsDaoImpl extends AbstractDao implements RaschsvSvOpsO
 
     /**
      * Выборка из таблицы Вида расчета
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    private List<RaschsvSvOpsOmsRasch> findSvOpsOmsRasch(Long obyazPlatSvId) {
+    private List<RaschsvSvOpsOmsRasch> findSvOpsOmsRasch(Long declarationDataId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_RASCH.toString(), params, new RaschsvSvOpsOmsRaschRowMapper());
     }
 
     /**
      * Выборка из таблицы-связки Вида расчета с СвСум1Тип
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    private List<RaschsvSvOpsOmsRaschSum> findSvOpsOmsRaschSum(Long obyazPlatSvId) {
+    private List<RaschsvSvOpsOmsRaschSum> findSvOpsOmsRaschSum(Long declarationDataId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_RASCH_SUM.toString(), params, new RaschsvSvOpsOmsRaschSumRowMapper());
     }
 
     /**
      * Выборка из СвСум1Тип
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    private List<RaschsvSvSum1Tip> findSvSum1Tip(Long obyazPlatSvId) {
+    private List<RaschsvSvSum1Tip> findSvSum1Tip(Long declarationDataId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_SUM.toString(), params, new RaschsvSvSum1TipRowMapper());
     }
 
     /**
      * Выборка из таблицы-связки Вида расчета с КолЛицТип
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    private List<RaschsvSvOpsOmsRaschKol> findSvOpsOmsRaschKol(Long obyazPlatSvId) {
+    private List<RaschsvSvOpsOmsRaschKol> findSvOpsOmsRaschKol(Long declarationDataId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_RASCH_KOL.toString(), params, new RaschsvSvOpsOmsRaschKolRowMapper());
     }
 
     /**
      * Выборка из КолЛицТип
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    private List<RaschsvKolLicTip> findKolLicTip(Long obyazPlatSvId) {
+    private List<RaschsvKolLicTip> findKolLicTip(Long declarationDataId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvSvOpsOms.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_KOL.toString(), params, new RaschsvKolLicTipRowMapper());
     }
 
