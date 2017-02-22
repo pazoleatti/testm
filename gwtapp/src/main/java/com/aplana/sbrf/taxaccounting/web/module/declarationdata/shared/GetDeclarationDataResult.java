@@ -25,6 +25,7 @@ public class GetDeclarationDataResult implements Result {
     private boolean isVisiblePDF;
     private DeclarationData declarationData;
     private DeclarationFormKind declarationFormKind;
+    private String userLoginImportTf;
     /**
      * Тип формы, пока не используем
      */
@@ -184,5 +185,13 @@ public class GetDeclarationDataResult implements Result {
 
     public void setDeclarationFormKind(DeclarationFormKind declarationFormKind) {
         this.declarationFormKind = declarationFormKind;
+    }
+
+    public String getUserLoginImportTf() {
+        return userLoginImportTf;
+    }
+
+    public void setUserLoginImportTf(String userLoginImportTf) {
+        this.userLoginImportTf = userLoginImportTf;
     }
 }

@@ -6,9 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.*;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -24,10 +22,7 @@ import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
@@ -39,8 +34,10 @@ public class DeclarationListView extends
     public static final String DECLARATION_CREATE_D = "Создать уведомление...";
     public static final String DECLARATION_CREATE_TITLE = "Создание налоговой формы";
     public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
-
     public static final String DECLARATION_KIND_TITLE = "Тип налоговой формы";
+    public static final String DECLARATION_DATA_ID_TITLE = "Номер формы";
+    public static final String DECLARATION_DATA_CREATION_DATE_TITLE = "Дата и время создания формы";
+    public static final String DECLARATION_DATA_IMPORT_TF_TITLE = "ТФ загружен";
     public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
@@ -74,7 +71,9 @@ public class DeclarationListView extends
 
     private MultiSelectionModel<DeclarationDataSearchResultItem> selectionModel;
 
-    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
+    private final static DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
+
+    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy'T'hh:mm:ss");
 
     @UiField
     Label declarationHeader;
@@ -140,7 +139,7 @@ public class DeclarationListView extends
     private String getReportPeriodName(DeclarationDataSearchResultItem item) {
         String str = item.getReportPeriodYear() + ": " + item.getReportPeriodName();
         if (item.getCorrectionDate() != null) {
-            str += ", корр. (" + DATE_TIME_FORMAT.format(item.getCorrectionDate()) + ")";
+            str += ", корр. (" + DATE_FORMAT.format(item.getCorrectionDate()) + ")";
         }
         return str;
     }
@@ -181,6 +180,13 @@ public class DeclarationListView extends
                 updateButton();
             }
         });
+
+        TextColumn<DeclarationDataSearchResultItem> declarationDataIdColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getDeclarationDataId().toString();
+            }
+        };
 
         TextColumn<DeclarationDataSearchResultItem> declarationKindColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
@@ -257,7 +263,7 @@ public class DeclarationListView extends
         TextColumn<DeclarationDataSearchResultItem> declarationCreateDateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
-                return object.getCreateDate() != null ? DATE_TIME_FORMAT.format(object.getCreateDate()) : null;
+                return object.getCreateDate() != null ? DATE_FORMAT.format(object.getCreateDate()) : null;
             }
         };
         TextColumn<DeclarationDataSearchResultItem> declarationDocStateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
@@ -278,6 +284,28 @@ public class DeclarationListView extends
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
                 return object.getState().getTitle();
+            }
+        };
+
+        TextColumn<DeclarationDataSearchResultItem> declarationDataCreationDateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                if (object.getDeclarationDataCreationDate() != null) {
+                    return DATE_TIME_FORMAT.format(object.getDeclarationDataCreationDate());
+                } else {
+                    return "";
+                }
+            }
+        };
+
+        TextColumn<DeclarationDataSearchResultItem> importTfUserLoginColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                if (object.getImportDeclarationDataUserLogin() != null) {
+                    return object.getImportDeclarationDataUserLogin();
+                } else {
+                    return "";
+                }
             }
         };
 
@@ -312,6 +340,7 @@ public class DeclarationListView extends
             }
         };
 
+        declarationDataIdColumn.setSortable(true);
         declarationKindColumn.setSortable(true);
         departmentColumn.setSortable(true);
         reportPeriodYearColumn.setSortable(true);
@@ -326,11 +355,15 @@ public class DeclarationListView extends
         declarationAsnuColumn.setSortable(true);
         stateColumn.setSortable(true);
         fileNameColumn.setSortable(true);
+        declarationDataCreationDateColumn.setSortable(true);
+        importTfUserLoginColumn.setSortable(true);
 
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
         declarationTable.addColumn(checkColumn, declarationTable.createResizableHeader("", checkColumn));
         declarationTable.setColumnWidth(checkColumn, 2, Style.Unit.EM);
+
+        declarationTable.addColumn(declarationDataIdColumn, declarationTable.createResizableHeader(DECLARATION_DATA_ID_TITLE, declarationKindColumn));
 
         if (!isReports) {
             declarationTable.addColumn(declarationKindColumn, declarationTable.createResizableHeader(DECLARATION_KIND_TITLE, declarationKindColumn));
@@ -358,8 +391,9 @@ public class DeclarationListView extends
         } else {
             declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
+            declarationTable.addColumn(declarationDataCreationDateColumn, declarationTable.createResizableHeader(DECLARATION_DATA_CREATION_DATE_TITLE, declarationDataCreationDateColumn));
+            declarationTable.addColumn(importTfUserLoginColumn, declarationTable.createResizableHeader(DECLARATION_DATA_IMPORT_TF_TITLE, importTfUserLoginColumn));
         }
-
     }
 
     @UiHandler("recalculateButton")
@@ -556,6 +590,12 @@ public class DeclarationListView extends
             this.sortByColumn = DeclarationDataSearchOrdering.DOC_STATE;
         } else if(NOTE_TITLE.equals(sortByColumn)){
             this.sortByColumn = DeclarationDataSearchOrdering.NOTE;
+        } else if(DECLARATION_DATA_ID_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.ID;
+        } else if(DECLARATION_DATA_CREATION_DATE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_DATA_CREATE_DATE;
+        } else if(DECLARATION_DATA_IMPORT_TF_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.IMPORT_USER_LOGIN;
         } else {
 			this.sortByColumn = DeclarationDataSearchOrdering.ID;
 		}

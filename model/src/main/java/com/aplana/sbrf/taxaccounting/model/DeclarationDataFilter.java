@@ -30,6 +30,8 @@ public class DeclarationDataFilter implements Serializable {
 
     private Long declarationDataId;
 
+    private String declarationDataIdStr;
+
     private DeclarationDataSearchOrdering searchOrdering;
 
     private String taxOrganCode;
@@ -213,5 +215,13 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getDeclarationDataIdStr() {
+        return declarationDataIdStr;
+    }
+
+    public void setDeclarationDataIdStr(String declarationDataIdStr) {
+        this.declarationDataIdStr = declarationDataIdStr;
     }
 }

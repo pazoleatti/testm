@@ -107,6 +107,18 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	}
 
 	@Override
+	public String getUserLoginImportTf(long declarationData) {
+		try {
+			return getJdbcTemplate().queryForObject(
+					"select user_login from log_business where declaration_data_id = ? and event_id = ? ",
+					new Object[]{declarationData, FormDataEvent.IMPORT_TRANSPORT_FILE.getCode()}, String.class
+			);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
 	public void add(LogBusiness logBusiness) {
 		JdbcTemplate jt = getJdbcTemplate();
 

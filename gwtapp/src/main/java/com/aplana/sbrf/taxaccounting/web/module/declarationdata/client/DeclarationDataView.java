@@ -32,6 +32,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     private static final int TABLE_TOP2 = 103;
     private static final int TABLE_TOP3 = 108;
     private static final int TABLE_TOP4 = 125;
+    private static final int TABLE_TOP5 = 142;
 
 	@UiField
 	Button recalculateButton;
@@ -68,9 +69,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
     HorizontalPanel propertyBlock;
     @UiField
-    Label kpp, oktmo, taxOrganCode, stateED, asnu;
+    Label kpp, oktmo, taxOrganCode, stateED, asnu, importTf;
     @UiField
-    Label kppLabel, oktmoLabel, taxOrganCodeLabel, stateEDLabel, asnuLabel;
+    Label kppLabel, oktmoLabel, taxOrganCodeLabel, stateEDLabel, asnuLabel, importTfLabel;
 
 	@UiField
 	PdfViewerView pdfViewer;
@@ -296,7 +297,13 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, TaxType taxType) {
+    public void setImportTf(String userName) {
+        importTf.setText(userName);
+        importTfLabel.setTitle(userName);
+    }
+
+    @Override
+    public void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, boolean isVisibleImportTf, TaxType taxType) {
         kpp.setVisible(isVisibleKpp);
         kppLabel.setVisible(isVisibleKpp);
 
@@ -312,9 +319,18 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         asnu.setVisible(isVisibleAsnu);
         asnuLabel.setVisible(isVisibleAsnu);
 
-        int num = (isVisibleKpp?1:0) + (isVisibleOktmo?1:0) + (isVisibleTaxOrgan?1:0) + (isVisibleStateED?1:0) + (isVisibleAsnu?1:0);
-        int top = (num == 4) ?
-                TABLE_TOP4 : ((num == 3) ? TABLE_TOP3 : TABLE_TOP2);
+        importTf.setVisible(isVisibleImportTf);
+        importTfLabel.setVisible(isVisibleImportTf);
+
+        int num = (isVisibleKpp?1:0) +
+                (isVisibleOktmo?1:0) +
+                (isVisibleTaxOrgan?1:0) +
+                (isVisibleStateED?1:0) +
+                (isVisibleAsnu?1:0) +
+                (isVisibleImportTf?1:0);
+
+        int top = (num == 5) ? TABLE_TOP5 :  (num == 4) ? TABLE_TOP4 :
+                  ((num == 3) ? TABLE_TOP3 : TABLE_TOP2);
         noPdfPanel.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
     }
 
