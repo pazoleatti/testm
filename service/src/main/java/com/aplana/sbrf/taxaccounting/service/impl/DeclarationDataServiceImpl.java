@@ -883,7 +883,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private JasperPrint fillReport(InputStream xml, InputStream jasperTemplate, JRSwapFile jrSwapFile, Map<String, Object> params) {
         try {
             if (params == null) {
@@ -899,7 +898,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             });
             virtualizer.setReadOnly(false);
             params.put(JRParameter.REPORT_VIRTUALIZER, virtualizer);
-            Connection connection = ((DataSource) applicationContext.getBean("dataSource")).getConnection();
+            Connection connection = getReportConnection();
             return JasperFillManager.fillReport(jasperTemplate, params, connection);
         } catch (Exception e) {
             throw new ServiceException("Невозможно заполнить отчет", e);

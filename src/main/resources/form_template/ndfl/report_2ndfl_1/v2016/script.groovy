@@ -348,8 +348,10 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 def deductionsSelectedGroupedByDeductionTypeCode = groupByDeductionTypeCode(deductionsSelectedForDeductionsSum)
 
                 def ndflPersonPrepayments = findPrepayments(np.id, startDate, endDate, ndflPersonIncomes)
+
                 ndflPersonIncomesGroupedByTaxRate.keySet().each { taxRateKey ->
                     СведДох(Ставка: taxRateKey) {
+
                         def ndflpersonIncomesForTaxRate = ndflPersonIncomesGroupedByTaxRate.get(taxRateKey)
                         // Сведения о доходах сгруппированные по коду дохода
                         def ndflPersonIncomesGroupedByIncomeCode = groupByIncomeCode(ndflpersonIncomesForTaxRate)
@@ -378,12 +380,10 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                             СвСумДох(Месяц: incomeCodeNdflPersonIncome.taxDate?.format(DATE_FORMAT_MONTH),
                                                     КодДоход: key,
                                                     СумДоход: ScriptUtils.round(getSumDohod(incomeCodeGroup), 2)) {
-                                                deductionsGroupedByTypeCodeForDeductionsInfo.each { deductionByTypeCodeGroup ->
-                                                    def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionByTypeCodeGroup)
-
-                                                    СвСумВыч(КодВычет: deductionsFilteredByIncomeCode.get(0)?.typeCode,
-                                                            СумВычет: ScriptUtils.round(deductionsFilteredByIncomeCode.sum().periodCurrSumm, 2)) {
-                                                    }
+                                                deductionsGroupedByTypeCodeForDeductionsInfo.keySet().each { deductionTypeKey ->
+                                                    def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionsGroupedByTypeCodeForDeductionsInfo.get(deductionTypeKey))
+                                                    СвСумВыч(КодВычет: deductionTypeKey,
+                                                            СумВычет: ScriptUtils.round(getDeductionCurrPeriodSum(deductionsFilteredByIncomeCode), 2)) {}
                                                 }
                                             }
                                         }
@@ -403,36 +403,40 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                     }
                                     for (int line = 0; line < linesCount; line++) {
                                         Строка() {
-                                            deductionsSelectedGroupedByDeductionTypeCode.eachWithIndex { group, index ->
+                                            deductionsSelectedGroupedByDeductionTypeCode.eachWithIndex { deductionTypeKey, index ->
                                                 def lowestIndex = countInLine * line
                                                 if (index >= lowestIndex && index < lowestIndex + countInLine) {
-                                                    ПредВычССИ(КодВычет: group.head().typeCode,
-                                                            СумВычет: group.sum().periodCurrSumm) {
+                                                    ПредВычССИ(КодВычет: deductionTypeKey,
+                                                            СумВычет: ScriptUtils.round(getDeductionCurrPeriodSum(deductionsSelectedGroupedByDeductionTypeCode.get(deductionTypeKey)), 2)) {
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 } else {
-                                    deductionsSelectedGroupedByDeductionTypeCode.each { group ->
-                                        ПредВычССИ(КодВычет: group.head().typeCode,
-                                                СумВычет: group.sum().periodCurrSumm) {
+                                    deductionsSelectedGroupedByDeductionTypeCode.each { deductionTypeKey ->
+                                        ПредВычССИ(КодВычет: deductionTypeKey,
+                                                СумВычет: ScriptUtils.round(getDeductionCurrPeriodSum(deductionsSelectedGroupedByDeductionTypeCode.get(deductionTypeKey)), 2)) {
                                         }
                                     }
                                 }
-                                deductionsSelectedGroupedByDeductionTypeCode.find { group ->
-                                    getDeductionMark(getDeductionType(group.head()?.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_SOTSIALNIY)
-                                }.each {
-                                    УведСоцВыч(НомерУвед: it.notifNum,
-                                            ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
-                                            ИФНСУвед: it.notifSource)
+                                deductionsSelectedGroupedByDeductionTypeCode.keySet().findAll { deductionTypeKey ->
+                                    getDeductionMark(getDeductionType(deductionTypeKey)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_SOTSIALNIY)
+                                }.each { selected ->
+                                    deductionsSelectedGroupedByDeductionTypeCode.get(selected).each {
+                                        УведСоцВыч(НомерУвед: it.notifNum,
+                                                ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
+                                                ИФНСУвед: it.notifSource)
+                                    }
                                 }
-                                deductionsSelectedGroupedByDeductionTypeCode.find { group ->
-                                    getDeductionMark(getDeductionType(group.head()?.typeCode)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY)
-                                }.each {
-                                    УведИмущВыч(НомерУвед: it.notifNum,
-                                            ДатаУвед: it.notifDate.format(DATE_FORMAT_DOTTED),
-                                            ИФНСУвед: it.notifSource)
+                                deductionsSelectedGroupedByDeductionTypeCode.keySet().findAll { deductionTypeKey ->
+                                    getDeductionMark(getDeductionType(deductionTypeKey)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY)
+                                }.each { selected ->
+                                    deductionsSelectedGroupedByDeductionTypeCode.get(selected).each {
+                                        УведИмущВыч(НомерУвед: it.notifNum,
+                                                ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
+                                                ИФНСУвед: it.notifSource)
+                                    }
                                 }
                             }
                         }
@@ -596,14 +600,14 @@ def groupByIncomeCode(def incomes) {
 
 // Группировка по коду вычета
 def groupByDeductionTypeCode(def deductions) {
-    def toReturn = []
+    def toReturn = [:]
     def typeCodes = []
     deductions.each {
         if (!typeCodes.contains(it.typeCode)) {
             typeCodes << it.typeCode
         }
     }
-    typeCodes.each { typeCode -> toReturn << deductions.findAll { it.typeCode.equals(typeCode) } }
+    typeCodes.each { typeCode -> toReturn[typeCode] = deductions.findAll { it.typeCode.equals(typeCode) } }
     return toReturn
 }
 
@@ -646,6 +650,17 @@ def getAvansPlatFix(def prepayments) {
     prepayments.each {
         if (it.summ != null) {
             toReturn = toReturn.add(it.summ)
+        }
+    }
+    return toReturn
+}
+
+//Вычислить сумму вычеа в текущем периоде
+def getDeductionCurrPeriodSum(def deductions) {
+    def toReturn = new BigDecimal(0)
+    deductions.each {
+        if (it.periodCurrSumm != null) {
+            toReturn = toReturn.add(it.periodCurrSumm)
         }
     }
     return toReturn
@@ -975,7 +990,7 @@ def resetId(def list) {
 
 def createReports() {
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
-    scriptParams.put("fileName", "reports.zip")
+    scriptParams.put("fileName" + ".xml", "reports.zip")
     try {
         Department department = departmentService.get(declarationData.departmentId);
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);

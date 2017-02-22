@@ -15,3 +15,5 @@ bin
 libpeerconnection.log
 *.ipr
 .shelf
+database/distr/*/_logs
+database/distr/*/_bad

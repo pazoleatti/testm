@@ -412,6 +412,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             if (filter.getDocStateId() != null) {
                 sql.append(" AND dec.doc_state_id = ").append(filter.getDocStateId());
             }
+
+            if (!StringUtils.isBlank(filter.getDeclarationDataIdStr())) {
+                sql.append(" AND TO_CHAR(dec.id) like lower(:declarationDataIdStr)");
+                values.put("declarationDataIdStr", "%" + filter.getDeclarationDataIdStr() + "%");
+            }
         }
     }
 
@@ -423,7 +428,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
                 .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type,")
                 .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
-                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state");
+                .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,")
+                .append(" (select lb.log_date from log_business lb where lb.event_id = " + FormDataEvent.CREATE.getCode() + " and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date,")
+                .append(" (select lb.user_login from log_business lb where lb.event_id = " + FormDataEvent.IMPORT_TRANSPORT_FILE.getCode() + " and lb.declaration_data_id = dec.id and rownum = 1) as import_decl_data_user_login");
     }
 
     public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
@@ -475,6 +482,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 break;
             case DOC_STATE:
                 column = "doc_state";
+                break;
+            case DECLARATION_DATA_CREATE_DATE:
+                column = "decl_data_creation_date";
+                break;
+            case IMPORT_USER_LOGIN:
+                column = "import_decl_data_user_login";
                 break;
         }
 

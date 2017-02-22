@@ -52,6 +52,11 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	}
 
     @Override
+    public String getUserLoginImportTf(long declarationDataId) {
+        return logBusinessDao.getUserLoginImportTf(declarationDataId);
+    }
+
+    @Override
 	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
 		return logBusinessDao.getDeclarationLogsBusiness(declarationId, ordering, isAscSorting);
 	}

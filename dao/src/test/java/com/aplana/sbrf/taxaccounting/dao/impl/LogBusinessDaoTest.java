@@ -117,4 +117,19 @@ public class LogBusinessDaoTest {
 		return logBusiness;
 	}
 
+	@Test
+	public void testGetUserLoginImportTf() {
+		LogBusiness logBusiness = new LogBusiness();
+		logBusiness.setId(5L);
+		logBusiness.setLogDate(new Date());
+		logBusiness.setDeclarationId(1l);
+		logBusiness.setEventId(401);
+		logBusiness.setUserLogin(LOGIN_CONTROL_BANK);
+		logBusiness.setRoles("operator");
+		logBusiness.setDepartmentName("Б - департамент");
+		logBusiness.setNote("the best note");
+		logBusinessDao.add(logBusiness);
+
+		assertEquals(LOGIN_CONTROL_BANK, logBusinessDao.getUserLoginImportTf(1));
+	}
 }

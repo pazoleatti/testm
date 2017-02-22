@@ -359,4 +359,12 @@ public interface DeclarationService {
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */
     ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
+
+    /**
+     * Формирует Pdf отчет формы
+     * @param logger
+     * @param declarationData
+     * @param userInfo
+     */
+    void createPdfReport(Logger logger, DeclarationData declarationData, TAUserInfo userInfo);
 }
