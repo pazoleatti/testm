@@ -1235,31 +1235,32 @@ void importData() {
 @Field final CHECK_FILE_NAME_NO = "код НО в имени не совпадает с кодом НО внутри файла"
 @Field final CHECK_FILE_NAME_INN = "ИНН в имени не совпадает с ИНН внутри файла"
 @Field final CHECK_FILE_NAME_KPP = "КПП в имени не совпадает с КПП внутри файла"
-@Field final CHECK_PAYMENT_OKVED_NOT_FOUND = "Файл.Документ.СвНП.ОКВЭД = \"%s\" не найден в справочнике ОКВЭД"
-@Field final CHECK_PAYMENT_INN = "Некорректный Файл.Документ.СвНП.НПЮП.ИННЮЛ = \"%s\" для организации - плательщика страховых взносов в транспортном файле \"%s\""
-@Field final CHECK_PAYMENT_REORG_INN = "Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
-@Field final CHECK_PAYMENT_REORG_KPP = "Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
-@Field final CHECK_PAYMENT_REORG_INN_VALUE = "Некорректный Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ = \"%s\" реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
-@Field final CHECK_PAYMENT_IP_INN_VALUE = "Некорректный Файл.Документ.СвНП.НПИП.ИННФЛ = \"%s\" индивидуального предпринимателя - плательщика страховых взносов в транспортном файле \"%s\""
-@Field final CHECK_PAYMENT_IP_COUNTRY = "Файл.Документ.СвНП.НПИП.СвНПФЛ.Гражд = \"%s\" ФЛ с ИНН \"%s\" не найден в справочнике ОКСМ"
-@Field final CHECK_PAYMENT_IP_DOC = "Файл.Документ.СвНП.НПФЛ.СвНПФЛ.УдЛичнФЛ.КодВидДок = \"%s\" ФЛ с ИНН %s не найден в справочнике \"Коды документов, удостоверяющих личность\""
-@Field final CHECK_PAYMENT_FL_INN_VALUE = "Некорректный Файл.Документ.СвНП.НПФЛ.ИННФЛ = \"%s\" физического лица - плательщика страховых взносов в транспортном файле \"%s\""
-@Field final CHECK_PAYMENT_FL_ADDR = "В справочнике отсутствует Файл.Документ.СвНП.НПФЛ.СвНПФЛ.АдрМЖРФ = \"'%s'/'%s'/'%s'/'%s'/'%s'\" для ФЛ с ИНН \"%s\""
-@Field final CHECK_PODPISANT_EMPTY_FIO = "Не заполнено Файл.Документ.Подписант.ФИО=\"'%s'/'%s'\" в транспортном файле \"%s\""
-@Field final CHECK_PODPISANT_EMPTY_DOC = "Не заполнено Файл.Документ.Подписант.СвПред.НаимДок = \"%s\" в транспортном файле \"%s\""
-@Field final CHECK_CALCULATION_OBZ = "Не заполнены Файл.Документ.РасчетСВ.ОбязПлатСВ в транспортном файле \"%s\""
-@Field final CHECK_CALCULATION_OBZ_OKTMO = "Файл.Документ.РасчетСВ.ОбязПлатСВ.OKTMO = \"%s\" транспортного файла \"%s\" не найден в справочнике"
-@Field final CHECK_CALCULATION_KBK = "%s = \"%s\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""
-@Field final CHECK_CALCULATION_SUMM = "Не заполнено %s в транспортном файле \"%s\""
-@Field final CHECK_TARIFF_INN = "Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.ИННФЛ = \"%s\" иностранного гражданина в транспортном файле \"%s\""
-@Field final CHECK_TARIFF_SNILS = "Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.СНИЛС = \"%s\" иностранного гражданина в транспортном файле \"%s\""
-@Field final CHECK_TARIFF_COUNTRY = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.Гражд = \"%s\" иностранного гражданина с ИНН \"%s\" не найден в справочнике ОКСМ"
-@Field final CHECK_PERSON_INN = "Некорректный Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ = \"%s\" для получателя доходов в транспортном файле \"%s\""
-@Field final CHECK_PERSON_SNILS = "Некорректный Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС = \"%s\" для получателя доходов"
-@Field final CHECK_PERSON_DOCTYPE = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок = \"%s\" получателя доходов с СНИЛС \"%s\" не найден в справочнике \"Коды документов, удостоверяющих личность\""
-@Field final CHECK_PERSON_OKSM = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд = \"%s\" получателя доходов с СНИЛС  \"%s\" не найден в справочнике ОКСМ"
-@Field final CHECK_PERSON_PERIOD = "Период расчетных сведений Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц = \"'%s'/'%s'\" в транспортном файле \"%s\" не входит в отчетный период формы"
+@Field final CHECK_PAYMENT_OKVED_NOT_FOUND = "Файл.Документ.СвНП.ОКВЭД = \"%s\" транспортного файла \"%s\" не найден в справочнике ОКВЭД"
+@Field final CHECK_PAYMENT_INN = "Файл.Документ.СвНП.НПЮП.ИННЮЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PAYMENT_REORG_INN = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как форма реорганизации = \"%s\""
+@Field final CHECK_PAYMENT_REORG_KPP = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как форма реорганизации = \"%s\""
+@Field final CHECK_PAYMENT_REORG_INN_VALUE = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PAYMENT_IP_INN_VALUE = "Файл.Документ.СвНП.НПИП.ИННФЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PAYMENT_FL_INN_VALUE = "Файл.Документ.СвНП.НПФЛ.ИННФЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PAYMENT_FL_ADDR = "Файл.Документ.СвНП.НПФЛ.СвНПФЛ.АдрМЖРФ = \"'%s'/'%s'/'%s'/'%s'/'%s'\" транспортного файла \"%s\" не найден в справочнике"
+@Field final CHECK_PAYMENT_IP_COUNTRY = "Файл.Документ.СвНП.НПИП.СвНПФЛ.Гражд = \"%s\" транспортного файла \"%s\" не найден в справочнике ОКСМ"
+@Field final CHECK_PAYMENT_IP_DOC = "Файл.Документ.СвНП.НПФЛ.СвНПФЛ.УдЛичнФЛ.КодВидДок = \"%s\" транспортного файла \"%s\" не найден в справочнике \"Коды документов, удостоверяющих личность\""
+@Field final CHECK_PODPISANT_EMPTY_FIO = "Файл.Документ.Подписант.ФИО = \"'%s'/'%s'\" в транспортном файле \"%s\" не заполнен, элемент является обязательным, если признак лица, подписавшего документ = 2 или 1 и плательщиком является ЮЛ"
+@Field final CHECK_PODPISANT_EMPTY_DOC = "Файл.Документ.Подписант.СвПред.НаимДок = \"%s\" в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как признак лица, подписавшего документ = 2"
+@Field final CHECK_CALCULATION_OBZ = "Файл.Документ.РасчетСВ.ОбязПлатСВ в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как код места = \"%s\""
+@Field final CHECK_CALCULATION_OBZ_OKTMO = "Файл.Документ.РасчетСВ.ОбязПлатСВ.OKTMO = \"%s\" транспортного файла \"%s\" не найден в справочнике \"Общероссийский классификатор территорий муниципальных образований (ОКТМО)\""
+@Field final CHECK_CALCULATION_KBK = "%s = \"%s\" транспортного файла \"%s\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""
+@Field final CHECK_CALCULATION_SUMM = "%s в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как не заполнен %s"
+@Field final CHECK_TARIFF_INN = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.ИННФЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_TARIFF_SNILS = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.СНИЛС = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_TARIFF_COUNTRY = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.Гражд = \"%s\" иностранного гражданина \"%s %s\" не найден в справочнике ОКСМ"
+@Field final CHECK_PERSON_INN = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PERSON_SNILS = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PERSON_DOCTYPE = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок = \"%s\" получателя доходов с СНИЛС \"%s\" транспортного файла \"%s\" не найден в справочнике \"Коды документов, удостоверяющих личность\""
+@Field final CHECK_PERSON_OKSM = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд = \"%s\" ФЛ с СНИЛС \"%s\" транспортного файла \"%s\" не найден в справочнике ОКСМ"
+@Field final CHECK_PERSON_PERIOD = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц = \"'%s'/'%s'\" в транспортном файле \"%s\" не входит в отчетный период формы"
 @Field final CHECK_PERSON_DUL = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок = \"%s\" не соответствует порядку заполнения: знак \"N\" не проставляется, серия и номер документа отделяются знаком \" \" (\"пробел\")"
+
 /**
  * Существует ли CODE в справочнике ОКВЭД
  */
@@ -1398,7 +1399,7 @@ def checkPaymentJL(fileNode, fileName) {
 
         // 1.2.1 Поиск ОКВЭД в справочнике
         if (documentOkved && !isExistsOkved(documentOkved)) {
-            logger.warn(CHECK_PAYMENT_OKVED_NOT_FOUND, documentOkved)
+            logger.warn(CHECK_PAYMENT_OKVED_NOT_FOUND, documentOkved, fileName)
         }
 
         // 1.2.2 Корректность ИНН ЮЛ
@@ -1415,17 +1416,17 @@ def checkPaymentJL(fileNode, fileName) {
             if (['1', '2', '3', '4', '5', '6', '7'].contains(documentReorgForm)) {
                 // 1.2.4 Наличие ИНН реорганизованной организации
                 if (!documentReorgInn) {
-                    logger.warn(CHECK_PAYMENT_REORG_INN, documentInn)
+                    logger.warn(CHECK_PAYMENT_REORG_INN, fileName, documentReorgForm)
                 }
                 // 1.2.5 Наличие КПП реорганизованной организации
                 if (!documentReorgKpp) {
-                    logger.warn(CHECK_PAYMENT_REORG_KPP, documentInn)
+                    logger.warn(CHECK_PAYMENT_REORG_KPP, fileName, documentReorgForm)
                 }
             }
 
             // 1.2.6 Корректность ИНН реорганизованной организации
             if (INN_JUR_LENGTH != documentReorgInn.length() || !ScriptUtils.checkControlSumInn(documentReorgInn)) {
-                logger.warn(CHECK_PAYMENT_REORG_INN_VALUE, documentReorgInn, documentInn)
+                logger.warn(CHECK_PAYMENT_REORG_INN_VALUE, documentReorgInn, fileName)
             }
         }
     }
@@ -1473,18 +1474,18 @@ def checkPaymentFL(fileNode, fileName) {
         if (!isExistsAddress(documentFlAddrRegion, documentFlAddrArea, documentFlAddrCity, documentFlAddrLocality, documentFlAddrStreet)) {
             logger.warn(CHECK_PAYMENT_FL_ADDR,
                     documentFlAddrRegion, documentFlAddrArea, documentFlAddrCity, documentFlAddrLocality, documentFlAddrStreet,
-                    documentFlInn
+                    fileName
             )
         }
 
         // 1.2.11 Поиск кода гражданства в справочнике
         if (documentFlCountry && !isExistsOKSM(documentFlCountry)) {
-            logger.warn(CHECK_PAYMENT_IP_COUNTRY, documentFlCountry, documentFlInn)
+            logger.warn(CHECK_PAYMENT_IP_COUNTRY, documentFlCountry, fileName)
         }
 
         // 1.2.12 Поиск кода вида документа
         if (documentFlDocCode && !isExistsDocType(documentFlDocCode)) {
-            logger.warn(CHECK_PAYMENT_IP_DOC, documentFlDocCode, documentFlInn)
+            logger.warn(CHECK_PAYMENT_IP_DOC, documentFlDocCode, fileName)
         }
     }
 }
@@ -1528,7 +1529,7 @@ def checkPayer(fileNode, fileName) {
 
         // 1.4.1 Наличие сводных данных об обязательствах плательщика страховых взносов
         if ('124' != documentPlaceCode && payments.isEmpty()) {
-            logger.error(CHECK_CALCULATION_OBZ, fileName)
+            logger.error(CHECK_CALCULATION_OBZ, fileName, documentPlaceCode)
         }
 
         payments.each { payment ->
@@ -1543,7 +1544,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PER_OPS".each { ops ->
                 def kbkCode = ops?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1551,7 +1552,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PER_OMS".each { oms ->
                 def kbkCode = oms?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОМС.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОМС.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1559,7 +1560,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PER_OPS_DOP".each { dop ->
                 def kbkCode = dop?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПСДоп.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПСДоп.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1567,7 +1568,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PER_DSO".each { dso ->
                 def kbkCode = dso?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерДСО.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерДСО.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1575,7 +1576,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PREV_OSS".each { uplPrevOss ->
                 def kbkCode = uplPrevOss?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1585,36 +1586,36 @@ def checkPayer(fileNode, fileName) {
                 def uplPer = uplPrevOss?."$NODE_NAME_UPL_PER_OSS"?."@СумСВУплПер" as String
                 if (prevPer?.isEmpty() && uplPer?.isEmpty()) {
                     // 1.4.4 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУплПер", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУплПер", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВПер")
                     // 1.4.8 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВПер", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВПер", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУплПер")
                 }
 
                 def prev1M = uplPrevOss?."$NODE_NAME_PREV_RASH_OSS"?."@ПревРасхСВ1М" as String
                 def upl1M = uplPrevOss?."$NODE_NAME_UPL_PER_OSS"?."@СумСВУпл1М" as String
                 if (prev1M?.isEmpty() && upl1M?.isEmpty()) {
                     // 1.4.5 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл1М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл1М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ1М")
                     // 1.4.9 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ1М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ1М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл1М")
                 }
 
                 def prev2M = uplPrevOss?."$NODE_NAME_PREV_RASH_OSS"?."@ПревРасхСВ2М" as String
                 def upl2M = uplPrevOss?."$NODE_NAME_UPL_PER_OSS"?."@СумСВУпл2М" as String
                 if (prev2M?.isEmpty() && upl2M?.isEmpty()) {
                     // 1.4.6 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл2М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл2М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ2М")
                     // 1.4.10 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ2М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ2М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл2М")
                 }
 
                 def prev3M = uplPrevOss?."$NODE_NAME_PREV_RASH_OSS"?."@ПревРасхСВ3М" as String
                 def upl3M = uplPrevOss?."$NODE_NAME_UPL_PER_OSS"?."@СумСВУпл3М" as String
                 if (prev3M?.isEmpty() && upl3M?.isEmpty()) {
                     // 1.4.7 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл3М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл3М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ3М")
                     // 1.4.11 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ3М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ3М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл3М")
                 }
             }
         }
@@ -1634,6 +1635,8 @@ def checkTariff_2_2_425(fileNode, fileName) {
                     def innFl = inGra?."@ИННФЛ" as String
                     def snils = inGra?."@СНИЛС" as String
                     def countryCode = inGra?."@Гражд" as String
+                    def surname = inGra?."$NODE_NAME_FIO"?."@Фамилия" as String
+                    def firstName = inGra?."$NODE_NAME_FIO"?."@Имя" as String
 
                     // 1.5.1 Корректность ИНН иностранного гражданина и лица без гражданства
                     if (innFl && (INN_IP_LENGTH != innFl?.length() || !ScriptUtils.checkControlSumInn(innFl))) {
@@ -1647,7 +1650,7 @@ def checkTariff_2_2_425(fileNode, fileName) {
 
                     // 1.5.3 Поиск кода гражданства иностранного гражданина и лица без гражданства в справочнике
                     if (countryCode && !isExistsOKSM(countryCode)) {
-                        logger.error(CHECK_TARIFF_COUNTRY, countryCode, innFl)
+                        logger.error(CHECK_TARIFF_COUNTRY, countryCode, surname, firstName)
                     }
                 }
             }
@@ -1687,17 +1690,17 @@ def checkFL(fileNode, fileName) {
 
                 // 1.6.2 Корректность СНИЛС ФЛ - получателя дохода
                 if (snils && !ScriptUtils.checkSnils(snils)) {
-                    logger.error(CHECK_PERSON_SNILS, snils)
+                    logger.error(CHECK_PERSON_SNILS, snils, fileName)
                 }
 
                 // 1.6.3 Поиск кода вида документа ФЛ - получателя дохода
                 if (docTypeCode && !isExistsDocType(docTypeCode)) {
-                    logger.error(CHECK_PERSON_DOCTYPE, docTypeCode, snils,)
+                    logger.error(CHECK_PERSON_DOCTYPE, docTypeCode, snils, fileName)
                 }
 
                 // 1.6.4 Поиск кода гражданства ФЛ - получателя дохода в справочнике
                 if (national && !isExistsOKSM(national)) {
-                    logger.error(CHECK_PERSON_OKSM, national, snils)
+                    logger.error(CHECK_PERSON_OKSM, national, snils, fileName)
                 }
 
                 // 1.6.6 Корректность серии и номера ДУЛ
