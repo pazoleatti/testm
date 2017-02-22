@@ -113,10 +113,14 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         println "!IMPORT_TRANSPORT_FILE!"
         importData()
+        // Формирование pdf-отчета формы
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.CALCULATE:
         println "!CALCULATE!"
         calculateData()
+        // Формирование pdf-отчета формы
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break;
     case FormDataEvent.CHECK:
         println "!CHECK!"
@@ -2712,7 +2716,7 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
     personData.sex = person.pol?.toInteger();
 
     //Строка для вывода номера ФЛ в сообщениях
-    personData.personNumber = inp.nomer;
+    personData.personNumber = person.nomer;
 
     //Документы
     personData.documentTypeCode = person.kodVidDoc;
