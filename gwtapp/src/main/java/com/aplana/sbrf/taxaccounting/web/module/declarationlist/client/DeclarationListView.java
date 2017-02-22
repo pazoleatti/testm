@@ -363,9 +363,8 @@ public class DeclarationListView extends
         declarationTable.addColumn(checkColumn, declarationTable.createResizableHeader("", checkColumn));
         declarationTable.setColumnWidth(checkColumn, 2, Style.Unit.EM);
 
-        declarationTable.addColumn(declarationDataIdColumn, declarationTable.createResizableHeader(DECLARATION_DATA_ID_TITLE, declarationKindColumn));
-
         if (!isReports) {
+            declarationTable.addColumn(declarationDataIdColumn, declarationTable.createResizableHeader(DECLARATION_DATA_ID_TITLE, declarationKindColumn));
             declarationTable.addColumn(declarationKindColumn, declarationTable.createResizableHeader(DECLARATION_KIND_TITLE, declarationKindColumn));
         }
         declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
@@ -391,6 +390,9 @@ public class DeclarationListView extends
         } else {
             declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
+        }
+
+        if (!isReports) {
             declarationTable.addColumn(declarationDataCreationDateColumn, declarationTable.createResizableHeader(DECLARATION_DATA_CREATION_DATE_TITLE, declarationDataCreationDateColumn));
             declarationTable.addColumn(importTfUserLoginColumn, declarationTable.createResizableHeader(DECLARATION_DATA_IMPORT_TF_TITLE, importTfUserLoginColumn));
         }

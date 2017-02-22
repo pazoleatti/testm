@@ -508,9 +508,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel2.add(departmentPicker);
         verticalPanel3.add(correctionTag);
 
-        label = getLabel("Номер формы:", false);
-        verticalPanel1.add(label);
-        verticalPanel2.add(declarationDataIdPicker);
+        if (!isReports) {
+            label = getLabel("Номер формы:", false);
+            verticalPanel1.add(label);
+            verticalPanel2.add(declarationDataIdPicker);
+        }
 
         if (!isReports) {
             label = getLabel("Тип налоговой формы:");

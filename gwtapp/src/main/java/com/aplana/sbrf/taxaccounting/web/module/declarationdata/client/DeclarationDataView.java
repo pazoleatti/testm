@@ -54,6 +54,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     LinkButton filesComments;
 
     @UiField
+    Label declarationDataIdLabel;
+    @UiField
+    Label declarationDataId;
+
+    @UiField
     Label formKindLabel;
     @UiField
     Label formKind;
@@ -243,6 +248,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
+    public void setDeclarationDataId(Long declarationDataId) {
+        this.declarationDataId.setText(declarationDataId.toString());
+    }
+
+    @Override
 	public void setTitle(String title, boolean isTaxTypeDeal) {
 		this.title.setText(title);
 		this.title.setTitle(title);
@@ -321,6 +331,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
         importTf.setVisible(isVisibleImportTf);
         importTfLabel.setVisible(isVisibleImportTf);
+
+        declarationDataId.setVisible(isVisibleImportTf);
+        declarationDataIdLabel.setVisible(isVisibleImportTf);
 
         int num = (isVisibleKpp?1:0) +
                 (isVisibleOktmo?1:0) +

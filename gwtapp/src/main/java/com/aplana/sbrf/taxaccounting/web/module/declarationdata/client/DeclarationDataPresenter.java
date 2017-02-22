@@ -78,6 +78,8 @@ public class DeclarationDataPresenter
 
         void setFormKind(String formKype);
 
+        void setDeclarationDataId(Long declarationDataId);
+
 		void setTitle(String title, boolean isTaxTypeDeal);
 
 		void setDepartment(String department);
@@ -188,6 +190,7 @@ public class DeclarationDataPresenter
                                 //sourcesPresenter.setTaxType(taxType);
                                 getView().setType(result.getDeclarationFormType());
                                 getView().setFormKind(result.getDeclarationFormKind().getTitle());
+                                getView().setDeclarationDataId(declarationData.getId());
                                 String periodStr = result.getReportPeriodYear() + ", " + result.getReportPeriod();
                                 if (result.getCorrectionDate() != null) {
                                     periodStr += ", корр. (" + DATE_TIME_FORMAT.format(result.getCorrectionDate()) + ")";
