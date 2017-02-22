@@ -135,10 +135,16 @@
                     <g:cell>
                         <g:HorizontalPanel spacing="2" height="58px" addStyleNames="{style.depatmentBlock}">
                             <g:cell width="95px">
-                                <g:Label text="Подразделение:" addStyleNames="{style.headerAttrName}"/>
+                                <g:VerticalPanel horizontalAlignment="right" width="95px">
+                                    <g:Label text="Подразделение:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label text="Номер формы:" ui:field="declarationDataIdLabel" addStyleNames="{style.headerAttrName}"/>
+                                </g:VerticalPanel>
                             </g:cell>
                             <g:cell horizontalAlignment="left">
-                                <g:Label ui:field="department" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                <g:VerticalPanel addStyleNames="{style.infoValuesBlock}">
+                                    <g:Label ui:field="department" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                    <g:Label ui:field="declarationDataId" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                </g:VerticalPanel>
                             </g:cell>
                         </g:HorizontalPanel>
                     </g:cell>
@@ -170,6 +176,7 @@
                                     <g:Label ui:field="taxOrganCodeLabel" text="Код НО:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label ui:field="stateEDLabel" text="Состояние ЭД:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label ui:field="asnuLabel" text="АСНУ:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="importTfLabel" text="ТФ загружен:" addStyleNames="{style.headerAttrName}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                             <g:cell>
@@ -179,6 +186,7 @@
                                     <g:Label ui:field="taxOrganCode" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                     <g:Label ui:field="stateED" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                     <g:Label ui:field="asnu" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                    <g:Label ui:field="importTf" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                         </g:HorizontalPanel>

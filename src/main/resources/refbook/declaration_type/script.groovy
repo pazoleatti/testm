@@ -804,12 +804,26 @@ def readNdfl2ResponseReestrContent() {
  */
 def readNdfl6ResponseContent() {
     def sett = [:]
-    sett.put(NDFL2_KV_FILE_TAG, [NDFL2_KV_FILE_ATTR])
-    sett.put(NDFL2_UO_FILE_TAG, [NDFL2_UO_FILE_ATTR])
-    sett.put(NDFL2_IV_FILE_TAG, [NDFL2_IV_FILE_ATTR])
-    sett.put(NDFL2_UU_FILE_TAG, [NDFL2_UU_FILE_ATTR])
 
-    SAXHandler handler = new SAXHandler(sett)
+    SAXHandler handler
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+        handler = new SAXHandler('ИмяОбрабФайла', 'СвКвит')
+    }
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+        handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлНарФайл')
+    }
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+        sett.put(NDFL2_IV_FILE_TAG, [NDFL2_IV_FILE_ATTR])
+        handler = new SAXHandler(sett)
+    }
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+        handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлОшФайл')
+    }
+
     InputStream inputStream
     try {
         inputStream = new FileInputStream(dataFile)
@@ -832,7 +846,25 @@ def readNdfl6ResponseContent() {
         IOUtils.closeQuietly(inputStream)
     }
 
-    return handler.getAttrValues()
+    def result = [:]
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+        def value = [:]
+        value.put(NDFL2_KV_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+        result.put(NDFL2_KV_FILE_TAG, value)
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+        def value = [:]
+        value.put(NDFL2_UO_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+        result.put(NDFL2_UO_FILE_TAG, value)
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+        result = handler.getAttrValues()
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+        def value = [:]
+        value.put(NDFL2_UU_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+        result.put(NDFL2_UU_FILE_TAG, value)
+    }
+
+    return result
 }
 
 
@@ -1030,13 +1062,14 @@ def importNdflResponse() {
     // Сохранение файла ответа в форме
     def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
     def createUser = declarationService.getSystemUserInfo().getUser()
+    def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
 
     def declarationDataFile = new DeclarationDataFile()
     declarationDataFile.setDeclarationDataId(declarationData.id)
     declarationDataFile.setUuid(fileUuid)
     declarationDataFile.setUserName(createUser.getName())
     declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
-    declarationDataFile.setFileTypeId(fileTypeId)
+    declarationDataFile.setFileTypeId(fileTypeSaveId)
     declarationDataFile.setDate(fileDate)
 
     declarationService.saveFile(declarationDataFile)

@@ -64,5 +64,13 @@ public enum DeclarationDataSearchOrdering {
     /**
      * Статус ЭД
      */
-    DOC_STATE
+    DOC_STATE,
+    /**
+     * Имя пользователя, загрузившего ТФ
+     */
+    IMPORT_USER_LOGIN,
+    /**
+     * Дата и время создания формы
+     */
+    DECLARATION_DATA_CREATE_DATE;
 }

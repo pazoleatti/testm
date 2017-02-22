@@ -37,4 +37,10 @@ public interface LogBusinessService {
 	 * @param note текст
 	 */
 	void add(Long formDataId, Long declarationId, TAUserInfo userInfo, FormDataEvent event, String note);
+
+	/**
+	 * Получить имя пользователя, загрузившего ТФ
+     * @param declarationDataId код декларации
+	 */
+	String getUserLoginImportTf(long declarationDataId);
 }

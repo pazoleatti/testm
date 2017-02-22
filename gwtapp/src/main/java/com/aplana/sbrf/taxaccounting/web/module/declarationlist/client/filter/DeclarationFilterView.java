@@ -34,6 +34,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     @UiField
     HTML separator;
 
+    private TextBox declarationDataIdPicker;
+
     private PeriodPickerPopupWidget reportPeriodPicker;
 
     private DepartmentPickerPopupWidget departmentPicker;
@@ -64,6 +66,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@UiConstructor
     public DeclarationFilterView(final MyBinder binder) {
         super();
+
+        declarationDataIdPicker = new TextBox();
+        declarationDataIdPicker.setTitle("Номер формы");
 
         reportPeriodPicker = new PeriodPickerPopupWidget(true);
         reportPeriodPicker.setSetDefaultValue(true);
@@ -192,6 +197,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         formDataFilter.setTaxOrganKpp(kppPicker.getValue());
         formDataFilter.setCorrectionTag(correctionTag.getValue());
         formDataFilter.setNote(notePicker.getValue());
+        formDataFilter.setDeclarationDataIdStr(declarationDataIdPicker.getValue());
         List<Long> asnuPickerValues = asnuPicker.getValue();
         if (asnuPickerValues != null && !asnuPickerValues.isEmpty()) {
             formDataFilter.setAsnuId(asnuPickerValues.get(0));
@@ -501,6 +507,12 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel2.add(reportPeriodPicker);
         verticalPanel2.add(departmentPicker);
         verticalPanel3.add(correctionTag);
+
+        if (!isReports) {
+            label = getLabel("Номер формы:", false);
+            verticalPanel1.add(label);
+            verticalPanel2.add(declarationDataIdPicker);
+        }
 
         if (!isReports) {
             label = getLabel("Тип налоговой формы:");
