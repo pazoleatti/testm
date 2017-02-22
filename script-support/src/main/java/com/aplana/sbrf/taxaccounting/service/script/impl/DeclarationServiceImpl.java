@@ -415,8 +415,19 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public void setDocStateId(long declarationDataId, Long docStateId) {
         declarationDataDao.setDocStateId(declarationDataId, docStateId);
     }
+
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
         return configurationService.getAllConfig(userInfo);
+    }
+
+    @Override
+    public void createPdfReport(Logger logger, DeclarationData declarationData, TAUserInfo userInfo) {
+        declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+                // ничего не делаем
+            }
+        });
     }
 }
