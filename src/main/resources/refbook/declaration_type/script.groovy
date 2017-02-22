@@ -1,5 +1,8 @@
 package refbook.declaration_type
 
+import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.refbook.*
+import com.aplana.sbrf.taxaccounting.service.impl.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
@@ -7,6 +10,7 @@ import org.xml.sax.helpers.DefaultHandler
 import org.apache.commons.io.IOUtils;
 import groovy.transform.Field
 
+import javax.script.ScriptException
 import java.util.*;
 import java.io.*;
 
