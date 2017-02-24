@@ -22,15 +22,25 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     private RefBookPersonDao refBookPersonDao;
 
     @Override
-    public Long identificatePerson(PersonData personData, int tresholdValue, Date version, Logger logger) {
-        return identificatePerson(personData, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()), version, logger);
+    public Map<Long, List<PersonData>> findRefBookPersonByPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version) {
+        return refBookPersonDao.findRefBookPersonByPrimaryRnuNdfl(declarationDataId, asnuId, version);
     }
 
     @Override
-    public Long identificatePerson(PersonData personData, int tresholdValue, WeigthCalculator<PersonData> weigthComporators, Date version, Logger logger) {
+    public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version) {
+        return refBookPersonDao.findRefBookPersonByPrimary1151111(declarationDataId, asnuId, version);
+    }
+
+    @Override
+    public Long identificatePerson(PersonData personData, List<PersonData> refBookPersonList, int tresholdValue, Logger logger) {
+        return identificatePerson(personData, refBookPersonList, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()), logger);
+    }
+
+    @Override
+    public Long identificatePerson(PersonData personData, List<PersonData> refBookPersonList, int tresholdValue, WeigthCalculator<PersonData> weigthComporators, Logger logger) {
 
         double treshold = tresholdValue / 1000D;
-        List<PersonData> personDataList = refBookPersonDao.findPersonByPersonData(personData, version);
+        List<PersonData> personDataList = refBookPersonList;
         if (personDataList != null && !personDataList.isEmpty()) {
 
             calculateWeigth(personData, personDataList, weigthComporators);
@@ -73,7 +83,15 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
      */
     public static String buildNotice(PersonData personData) {
         StringBuffer sb = new StringBuffer();
-        sb.append(personData.getPersonNumber()).append(": ");
+
+        if (personData.getPersonNumber() != null){
+            sb.append("Номер: "+personData.getPersonNumber()).append(": ");
+        } else if (personData.getInp() != null){
+            sb.append("ИНП: "+personData.getInp()).append(": ");
+        } else if (personData.getSnils() != null){
+            sb.append("СНИЛС: "+personData.getSnils()).append(": ");
+        }
+
         sb.append(emptyIfNull(personData.getLastName())).append(" ");
         sb.append(emptyIfNull(personData.getFirstName())).append(" ");
         sb.append(emptyIfNull(personData.getMiddleName())).append(" ");
@@ -83,6 +101,13 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         sb.append(emptyIfNull(personData.getDocumentNumber()));
         return sb.toString();
     }
+
+//    private static String getPersonNumber(PersonData personData){
+//
+//        if (personData != null ){
+//
+//        }
+//    }
 
     private static String emptyIfNull(String string){
         if (string != null){

@@ -35,11 +35,7 @@ public class RefBookPersonServiceTest {
     @Autowired
     RefBookPersonService personService;
 
-    @Before
-    public void init() {
-
-        RefBookPersonDao refBookPersonDao = mock(RefBookPersonDao.class);
-
+    private List<PersonData> getList(){
         List<PersonData> personDataList = new ArrayList<PersonData>();
 
         personDataList.add(createPersonData(1L, "999", "1", "", "23", "", "1111", "Иванов", "Иван", "Иванович", null));
@@ -48,8 +44,17 @@ public class RefBookPersonServiceTest {
         personDataList.add(createPersonData(4L, "888", "2", "", "23", null, "1111", "Иванов", "Иван", "Иванович", "12.10.1954"));
         personDataList.add(createPersonData(5L, "888", "2", "", "23", "", "1111", "Иванов", "Ивон", "Ивановиеч", "12.10.1954"));
         personDataList.add(createPersonData(6L, "888", "2", "", "23", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954"));
+        return personDataList;
+    }
 
-        when(refBookPersonDao.findPersonByPersonData(any(PersonData.class), any(Date.class))).thenReturn(personDataList);
+    @Before
+    public void init() {
+
+        RefBookPersonDao refBookPersonDao = mock(RefBookPersonDao.class);
+
+
+
+        when(refBookPersonDao.findPersonByPersonData(any(PersonData.class), any(Date.class))).thenReturn(getList());
 
         ReflectionTestUtils.setField(personService, "refBookPersonDao", refBookPersonDao);
 
@@ -57,8 +62,11 @@ public class RefBookPersonServiceTest {
 
     @Test
     public void identificatePersonTest() {
+
+
+
         PersonData person = createPersonData("888", "2", "", "23", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Long result = personService.identificatePerson(person, 900, new Date(), new Logger());
+        Long result = personService.identificatePerson(person, getList(), 900, new Logger());
         assertEquals(Long.valueOf(6L), result);
 
     }
