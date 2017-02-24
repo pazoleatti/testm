@@ -33,7 +33,7 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
     /**
      * Файлы макета
      */
-    private List<DeclarationTemplateFile> declarationTemplateFiles;
+    private List<DeclarationTemplateFile> declarationTemplateFiles = new ArrayList<DeclarationTemplateFile>();
 
     public String getName() {
         return name;
