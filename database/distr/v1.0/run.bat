@@ -45,6 +45,10 @@ CD ..
 ECHO ## ddl: create all constraint
 "%ORA_BIN%\sqlplus" %AUTH% @"create_all_constraints.sql" > "%LOG_DIR%/create_all_constraints.txt"
 
+ECHO ## ddl: create indexes
+"%ORA_BIN%\sqlplus" %AUTH% @"create_indexes.sql" > "%LOG_DIR%/create_indexes.txt"
+
+
 ECHO ## ddl: create triggers
 "%ORA_BIN%\sqlplus" %AUTH% @"create_triggers.sql" > "%LOG_DIR%/create_triggers.txt"
 

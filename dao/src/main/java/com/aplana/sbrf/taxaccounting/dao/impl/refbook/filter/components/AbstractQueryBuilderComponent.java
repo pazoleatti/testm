@@ -14,6 +14,11 @@ import java.util.regex.Pattern;
  */
 abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerComponent {
 
+    /**
+     * Максимальный размер строки
+     */
+    public static int MAX_STRING_LENGTH = 2000;
+
     @Override public void enterNobrakets(FilterTreeParser.NobraketsContext ctx) {
         if (ctx.link_type() != null){
             ps.appendQuery(" ");
@@ -46,7 +51,8 @@ abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerCompone
     public void enterString(FilterTreeParser.StringContext ctx) {
         ps.appendQuery("?");
         // Строка по умолчанию содерижт символы кавычек. Пример " 'Текст' "
-        ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1).replaceAll("\\\\\'", "\'"));
+        String originalText = ctx.getText().substring(1, ctx.getText().length() - 1).replaceAll("\\\\\'", "\'");
+        ps.addParam(trimString(originalText));
     }
 
 
@@ -99,5 +105,27 @@ abstract class AbstractQueryBuilderComponent extends AbstractTreeListenerCompone
         c.add(Calendar.YEAR, 1);
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         return format.format(c.getTime());
+    }
+
+    /**
+     * Обрезает строку до {@link AbstractQueryBuilderComponent#MAX_STRING_LENGTH}
+     * У строки "%VERY_LONG_STR_2000%" обрезается только внутренняя часть:"%VERY_LONG_STR_1998%"
+     *
+     * @param originalText строка, которую надо обрезать
+     */
+    private String trimString(String originalText) {
+        if (originalText.length() <= MAX_STRING_LENGTH) {
+            return originalText;
+        } else {
+            boolean isLikeStart = originalText.startsWith("%");
+            boolean isLikeEnd = originalText.endsWith("%");
+
+            String text = originalText;
+            text = text.substring(isLikeStart ? 1 : 0, isLikeEnd ? (text.length() - 1) : text.length());
+            text = text.substring(0, MAX_STRING_LENGTH - (isLikeStart ? 1 : 0) - (isLikeEnd ? 1 : 0));
+            text = (isLikeStart ? "%" : "") + text + (isLikeEnd ? "%" : "");
+
+            return text;
+        }
     }
 }
