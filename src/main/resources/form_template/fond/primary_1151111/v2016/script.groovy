@@ -3318,61 +3318,61 @@ def checkDataDBPerson() {
                     // 3.1.2 Соответствие фамилии ФЛ и справочника
                     if (raschsvPersSvStrahLic.familia != person.get(RF_LAST_NAME).value) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Фамилия"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.familia}\" не равен фамилии = \"${person.get(RF_LAST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.3 Соответствие имени ФЛ и справочника
                     if (raschsvPersSvStrahLic.imya != person.get(RF_FIRST_NAME).value) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Имя"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.imya}\" не равен имени = \"${person.get(RF_FIRST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.4 Соответствие отчества ФЛ и справочника
                     if (raschsvPersSvStrahLic.otchestvo != null && raschsvPersSvStrahLic.otchestvo != person.get(RF_MIDDLE_NAME).value) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Отчество"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.otchestvo}\" не равен отчеству = \"${person.get(RF_MIDDLE_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.5 Соответствие даты рождения ФЛ и справочника
                     if (raschsvPersSvStrahLic.dataRozd != person.get(RF_BIRTH_DATE).value) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ДатаРожд"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.dataRozd}\" не равен дате рождения = \"${person.get(RF_BIRTH_DATE).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.6 Соответствие пола ФЛ и справочника
                     if (raschsvPersSvStrahLic.pol != person.get(RF_SEX)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Пол"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.pol}\" не равен полу = \"${person.get(RF_SEX)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.7 Соответствие признака ОПС ФЛ и справочника
                     if (raschsvPersSvStrahLic.prizOps != person.get(RF_PENSION)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОПС"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOps}\" не равен признаку ОПС = \"${person.get(RF_PENSION)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.8 Соответствие признака ОМС ФЛ и справочника
                     if (raschsvPersSvStrahLic.prizOms != person.get(RF_MEDICAL)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОМС"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOms}\" не равен признаку ОМС = \"${person.get(RF_MEDICAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.9 Соответствие признака ОСС
                     if (raschsvPersSvStrahLic.prizOss != person.get(RF_SOCIAL)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОСС"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOss}\" не равен признаку ОСС = \"${person.get(RF_SOCIAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.10 Соответсвие ИНН ФЛ - получателя дохода
                     if (raschsvPersSvStrahLic.innfl != null && raschsvPersSvStrahLic.innfl != person.get(RF_INN)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ"
-                        logger.warn("Не совпадает " + pathValue + " для ФЛ получателя доходов со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.innfl}\" не равен ИНН = \"${person.get(RF_INN)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.11 Соответствие СНИЛС ФЛ - получателя дохода
                     if (raschsvPersSvStrahLic.snils != person.get(RF_SNILS)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС"
-                        logger.warn("Не совпадает " + pathValue + " для ФЛ получателя доходов со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.snils}\" не равен СНИЛС = \"${person.get(RF_SNILS)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
@@ -3388,32 +3388,32 @@ def checkDataDBPerson() {
                     }
                     if (!personDocTypeList.contains(raschsvPersSvStrahLic.kodVidDoc)) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.kodVidDoc}\" не равен документу, удостоверяющему личность = \"${personDocTypeList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.13 Актуальность кода вида документа ФЛ - получателя дохода
                     personDocTypeList.each { personDocType ->
                         if (!documentTypeActualList.contains(personDocType)) {
-                            logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указаны неактуальные коды документов для ФЛ с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\".")
+                            logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указаны неактуальные коды документов для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                         }
                     }
 
                     // 3.1.14 Соответствие серии и номера документа
                     if (!personDocNumberList.contains(raschsvPersSvStrahLic.serNomDoc)) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.serNomDoc}\" не равен серии и номеру ДУЛ = \"${personDocNumberList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.15 Соответсвие кода гражданства ФЛ - получателя дохода в справочнике
                     if (raschsvPersSvStrahLic.grazd != citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд"
-                        logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.grazd}\" не равен гражданству = \"${citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
 
                     // 3.1.16 Актуальность кода гражданства ФЛ
                     citizenship = getRefBookByRecordIds(REF_BOOK_COUNTRY_ID, person.get(RF_CITIZENSHIP)?.value)
                     if (!citizenshipCodeActualList.contains(citizenship?.CODE?.stringValue)) {
-                        logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указан неактуальный код гражданства для ФЛ с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\".")
+                        logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указан неактуальный код гражданства для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
                 }
             }
@@ -3422,7 +3422,7 @@ def checkDataDBPerson() {
 
     // 3.2.1 Дубли физического лица рамках формы
     def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByDeclarationDataId(declarationData.id)
-    def msgError  = "Найдено несколько записей, идентифицированных как одно физическое лицо: "
+    def msgError  = "Найдено несколько записей, идентифицированных как одно физическое лицо с идентификаторами ФЛ: "
     // Мапа для группировки дублей <personId, RaschsvPersSvStrahLic>
     def raschsvPersSvStrahLicDuplMap = [:]
     if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
@@ -3436,10 +3436,8 @@ def checkDataDBPerson() {
         }
         // Для каждого дубля выводим свое сообщение об ошибке
         raschsvPersSvStrahLicDuplMap.each { key, value ->
-            value.each { raschsvPersSvStrahLic ->
-                msgError += raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.snils + "; "
-            }
-            logger.warn(msgError)
+            def ids =  value*.personId.join(", ")
+            logger.warn(msgError + ids)
         }
     }
 
@@ -3831,7 +3829,7 @@ def checkDataXml() {
                             def oktmoParam = getRefBookValue(REF_BOOK_OKTMO_ID, departmentParamIncomeRow?.OKTMO?.referenceValue)
                             if (oktmoXml != oktmoParam?.CODE?.stringValue) {
                                 def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_OBYAZ_PLAT_SV, OBYAZ_PLAT_SV_OKTMO].join(".")
-                                logger.warn(sprintf(msgErrNotEquals, pathAttr, oktmoXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
+                                logger.warn("$pathAttr = \"$oktmoXml\" не совпадает с ОКТМО = \"$oktmoParam\"")
                             }
 
                             // 2.2.2 Актуальность ОКТМО (справочник ОКТМО очень большой, поэтому обращаться к нему будем по записи)
@@ -3849,7 +3847,7 @@ def checkDataXml() {
                                     def tariffPayerParam = mapActualTariffPayerCode.get(tariffPayerCodeXml)
                                     if (tariffPayerParam != null && !tariffPayerParam?.get(RF_FOR_OPS_OMS)?.value) {
                                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_OBYAZ_PLAT_SV, NODE_NAME_RASCH_SV_OPS_OMS, RASCH_SV_OPS_OMS_TARIF_PLAT].join(".")
-                                        logger.warn("Код тарифа плательщика " + pathAttr + " = \"" + tariffPayerCodeXml + "\" не найден (не действует) в справочнике \"Коды тарифа плательщика\".")
+                                        logger.warn("$pathAttr = \"$tariffPayerCodeXml\" не найден (не действует) в справочнике \"Коды тарифа плательщика\"")
                                     }
 
                                     // РасчСВ_ОПС428
@@ -3867,7 +3865,7 @@ def checkDataXml() {
                                                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV,
                                                                         NODE_NAME_OBYAZ_PLAT_SV, NODE_NAME_RASCH_SV_OPS_OMS, NODE_NAME_RASCH_SV_OPS428,
                                                                         NODE_NAME_RASCH_SV_428_3, RASCH_SV_OPS428_3_OSNOV_ZAP].join(".")
-                                                        logger.warn("Код основания заполнения " + pathAttr + "\" = " + fillBaseXml + "\" не найден (не действует) в справочнике \"Основания заполнения\".")
+                                                        logger.warn("$pathAttr = \"$fillBaseXml\" не найден (не действует) в справочнике \"Основания заполнения\"")
                                                     }
 
                                                     // 2.2.5 Значение кода класса условий труда
@@ -3875,7 +3873,7 @@ def checkDataXml() {
                                                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV,
                                                                         NODE_NAME_OBYAZ_PLAT_SV, NODE_NAME_RASCH_SV_OPS_OMS, NODE_NAME_RASCH_SV_OPS428,
                                                                         NODE_NAME_RASCH_SV_428_3, RASCH_SV_OPS428_3_KLAS_USL_TRUD].join(".")
-                                                        logger.warn("Код класса условий труда " + pathAttr + "\" = " + hardWorkXml + "\" не найден (не действует) в справочнике \"Коды классов условий труда\".")
+                                                        logger.warn("$pathAttr = \"$hardWorkXml\" не найден (не действует) в справочнике \"Коды классов условий труда\"")
                                                     }
                                                 }
                                             }
