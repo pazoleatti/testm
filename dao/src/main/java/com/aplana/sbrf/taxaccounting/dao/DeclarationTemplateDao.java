@@ -185,4 +185,20 @@ public interface DeclarationTemplateDao {
      * @param script скрипт
      */
     void updateScript(int declarationTemplateId, String script);
+
+    /**
+     * Удаляет из макета файлы DECLARATION_TEMPLATE_FILE
+     *
+     * @param declarationTemplateId идентификатор макета
+     * @param blobDataIds идентификатор файла
+     */
+    void deleteTemplateFile(Long declarationTemplateId, List<String> blobDataIds);
+
+    /**
+     * Добавляет к макету файлы DECLARATION_TEMPLATE_FILE
+     *
+     * @param declarationTemplateId идентификатор макета
+     * @param blobDataIds идентификатор файла
+     */
+    void createTemplateFile(Long declarationTemplateId, List<String> blobDataIds);
 }
