@@ -9,7 +9,7 @@
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
 	<subDataset name="dsTab1" uuid="0d625995-fc75-4d01-aab2-cc1470fd1bc9">
-		<parameter name="declarationId" class="java.lang.Integer">
+		<parameter name="declarationId" class="java.lang.Long">
 			<defaultValueExpression><![CDATA[14889]]></defaultValueExpression>
 		</parameter>
 		<queryString>
@@ -56,7 +56,7 @@
 		</group>
 	</subDataset>
 	<subDataset name="dsTab2" uuid="1b0332f1-b730-4544-b4d1-9e3742ff4169">
-		<parameter name="declarationId" class="java.lang.Integer">
+		<parameter name="declarationId" class="java.lang.Long">
 			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
 		</parameter>
 		<queryString>
@@ -94,7 +94,7 @@
 		</group>
 	</subDataset>
 	<subDataset name="dsTab3" uuid="47d7a52b-77d5-4d68-bf59-55570a0450ed">
-		<parameter name="declarationId" class="java.lang.Integer">
+		<parameter name="declarationId" class="java.lang.Long">
 			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
 		</parameter>
 		<queryString>
@@ -144,7 +144,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 			<groupExpression><![CDATA[$F{DECLARATION_DATA_ID}]]></groupExpression>
 		</group>
 	</subDataset>
-	<parameter name="declarationId" class="java.lang.Integer">
+	<parameter name="declarationId" class="java.lang.Long">
 		<defaultValueExpression><![CDATA[14889]]></defaultValueExpression>
 	</parameter>
 	<queryString>
