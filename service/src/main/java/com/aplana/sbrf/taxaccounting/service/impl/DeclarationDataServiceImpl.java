@@ -547,6 +547,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private InputStream getJasper(String jrxmlTemplate) {
+		if (jrxmlTemplate == null) {
+			throw new ServiceException("Шаблон отчета не найден");
+		}
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(jrxmlTemplate.getBytes(ENCODING));
             return compileReport(inputStream);
@@ -591,7 +594,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     zipXmlIn.getNextEntry();
                     Map<String, Object> params = new HashMap<String, Object>();
 
-                    params.put("declarationId", declarationData.getId().intValue());
+                    params.put("declarationId", declarationData.getId());
                     return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile, params);
                 } catch (IOException e) {
                     throw new ServiceException(e.getLocalizedMessage(), e);

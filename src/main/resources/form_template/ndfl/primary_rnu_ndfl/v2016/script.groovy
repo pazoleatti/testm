@@ -1,10 +1,14 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.PagingResult
+import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
@@ -55,6 +59,8 @@ def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
+        // Формирование pdf-отчета формы
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
         prepareSpecificReport()
@@ -67,6 +73,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calculate();
+        // Формирование pdf-отчета формы
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
 }
 
@@ -75,12 +83,12 @@ switch (formDataEvent) {
  * Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
  */
 @Field
-def SIMILARITY_THRESHOLD = 700;
+int SIMILARITY_THRESHOLD = 700;
 
 def calculate() {
 
-    def asnuId = declarationData.asnuId;
-
+    Long asnuId = declarationData.asnuId;
+    Long declarationDataId = declarationData.id;
     if (asnuId == null) {
         throw new ServiceException("Для " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
     }
@@ -88,11 +96,20 @@ def calculate() {
     //выставляем параметр что скрипт не формирует новый xml-файл
     calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
-    List<NdflPerson> declarationFormPersonList = ndflPersonService.findNdflPerson(declarationData.id)
-
-    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size());
-
     long time = System.currentTimeMillis();
+
+    List<NdflPerson> declarationFormPersonList = ndflPersonService.findNdflPerson(declarationDataId)
+
+    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size() + "(" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
+
+    Date actualVersion = new Date();
+    Map<Long, List<PersonData>> refbookPersonData = refBookPersonService.findRefBookPersonByPrimaryRnuNdfl(declarationDataId, asnuId, actualVersion)
+
+    logger.info("findRefBookPersonByPrimaryRnuNdfl: "+refbookPersonData.size()+" (" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
 
     //Два списка для создания новых записей и для обновления существующих
     List<PersonData> createdPerson = new ArrayList<PersonData>();
@@ -102,13 +119,9 @@ def calculate() {
 
         PersonData personData = createPersonData(declarationFormPerson, asnuId);
 
-        long identificatePersonTime = System.currentTimeMillis();
+        List<PersonData> refBookPersonList = refbookPersonData.get(declarationFormPerson.id);
 
-        Date actualVersion = new Date();
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, actualVersion, logger);
-
-        println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
-        //logger.info("identificate: (" + (System.currentTimeMillis() - identificatePersonTime) + " ms)");
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, refBookPersonList, SIMILARITY_THRESHOLD, logger);
 
         declarationFormPerson.setPersonId(refBookPersonId)
 
