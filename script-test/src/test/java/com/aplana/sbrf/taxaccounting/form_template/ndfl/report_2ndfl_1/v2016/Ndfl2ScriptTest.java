@@ -18,7 +18,6 @@ import org.custommonkey.xmlunit.Validator;
 import org.custommonkey.xmlunit.exceptions.XpathException;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -38,7 +37,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-@Ignore
 public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
     private static final int DEPARTMENT_ID = 1254;
@@ -49,6 +47,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
     private static final long REB_BOOK_FORM_TYPE_ID = 931L;
     private  static final long REF_BOOK_DEDUCTION_TYPE_ID = 921L;
     private static final long REF_BOOK_DEDUCTION_MARK_ID = 927L;
+    private static final long REF_BOOK_OKTMO_ID = 96L;
 
     private DeclarationData declarationData = new DeclarationData();
 
@@ -64,6 +63,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         declarationData.setDepartmentId(DEPARTMENT_ID);
         declarationData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         declarationData.setDeclarationTemplateId(DECLARATION_TEMPLATE_ID);
+        declarationData.setOktmo("11223344");
         return declarationData;
     }
 
@@ -96,6 +96,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
 
         initNdflRefBook(1, "Сбербанк", "+74955555555");
+        initOktmoRefBook();
         initFormDataRefBook("2 НДФЛ (1)");
         initOther();
 
@@ -141,6 +142,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
 
         initNdflRefBook(1, "Сбербанк", "+74955555555");
+        initOktmoRefBook();
         initFormDataRefBook("2 НДФЛ (1)");
         initOther();
 
@@ -160,6 +162,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
 
         initNdflRefBook(1, "Сбербанк", "+74955555555");
+        initOktmoRefBook();
         initFormDataRefBook("2 НДФЛ (2)");
         initOther();
 
@@ -173,7 +176,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         PagingResult<Map<String, RefBookValue>> ndflPagingResult = new PagingResult<Map<String, RefBookValue>>();
         Map<String, RefBookValue> ndflPagingResultItem = new HashMap<String, RefBookValue>();
         when(ndflRefBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(ndflPagingResult);
-        ndflPagingResultItem.put("OKTMO", new RefBookValue(RefBookAttributeType.STRING, "11223344"));
+        ndflPagingResultItem.put("OKTMO", new RefBookValue(RefBookAttributeType.REFERENCE, 123L));
         ndflPagingResultItem.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "110101001"));
         ndflPagingResultItem.put("TAX_ORGAN_CODE", new RefBookValue(RefBookAttributeType.STRING, "1684"));
         ndflPagingResultItem.put("SIGNATORY_FIRSTNAME", new RefBookValue(RefBookAttributeType.STRING, "Иванов"));
@@ -186,6 +189,18 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         ndflPagingResultItem.put("SIGNATORY_ID", new RefBookValue(RefBookAttributeType.NUMBER, signatoryId));
         ndflPagingResult.add(ndflPagingResultItem);
         when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_NDFL_DETAIL_ID)).thenReturn(ndflRefBookDataProvider);
+    }
+
+    private void initOktmoRefBook() {
+        RefBookDataProvider oktmoRefBookDataProvider = mock(RefBookDataProvider.class);
+        PagingResult<Map<String, RefBookValue>> oktmoPagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> oktmoPagingResultItem = new HashMap<String, RefBookValue>();
+        when(oktmoRefBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(oktmoPagingResult);
+        oktmoPagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "11223344"));
+        oktmoPagingResultItem.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "NoNameCity"));
+        oktmoPagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 123L));
+        oktmoPagingResult.add(oktmoPagingResultItem);
+        when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_OKTMO_ID)).thenReturn(oktmoRefBookDataProvider);
     }
 
     private void initFormDataRefBook(String code) {
@@ -225,12 +240,12 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
         RefBookDataProvider deductionMarkRefBookDataProvider = mock(RefBookDataProvider.class);
         PagingResult<Map<String, RefBookValue>> deduction5MarkPagingResult = new PagingResult<Map<String, RefBookValue>>();
-        when(deductionMarkRefBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), eq("CODE = 5"), any(RefBookAttribute.class))).thenReturn(deduction5MarkPagingResult);
+        when(deductionMarkRefBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), eq("ID = 5"), any(RefBookAttribute.class))).thenReturn(deduction5MarkPagingResult);
         Map<String, RefBookValue> deductionMark5PagingResultItem = new HashMap<String, RefBookValue>();
         deductionMark5PagingResultItem.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "Остальные"));
         deduction5MarkPagingResult.add(deductionMark5PagingResultItem);
         PagingResult<Map<String, RefBookValue>> deduction1MarkPagingResult = new PagingResult<Map<String, RefBookValue>>();
-        when(deductionMarkRefBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), eq("CODE = 1"), any(RefBookAttribute.class))).thenReturn(deduction1MarkPagingResult);
+        when(deductionMarkRefBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), eq("ID = 1"), any(RefBookAttribute.class))).thenReturn(deduction1MarkPagingResult);
         Map<String, RefBookValue> deductionMark1PagingResultItem = new HashMap<String, RefBookValue>();
         deductionMark1PagingResultItem.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "Имущественный"));
         deduction1MarkPagingResult.add(deductionMark1PagingResultItem);
