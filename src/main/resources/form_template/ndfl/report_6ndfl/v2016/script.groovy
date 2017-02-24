@@ -53,6 +53,8 @@ switch (formDataEvent) {
 // Настройки подразделений по НДФЛ (таблица)
 @Field final long REF_BOOK_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
 
+@Field int REF_BOOK_OKTMO_ID = 96;
+
 @Field final FORM_NAME_NDFL6 = "НДФЛ6"
 @Field final FORM_NAME_NDFL2 = "НДФЛ2"
 @Field final int DECLARATION_TYPE_RNU_NDFL_ID = 101
@@ -106,6 +108,9 @@ switch (formDataEvent) {
 
 // Кэш для справочников
 @Field def refBookCache = [:]
+
+@Field
+final OKTMO_CACHE = [:]
 
 /************************************* СОЗДАНИЕ XML *****************************************************************/
 def buildXml(def writer) {
@@ -795,7 +800,13 @@ def createForm() {
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList.each { dep ->
-            pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, dep.OKTMO?.value, dep?.TAX_ORGAN_CODE?.value)
+            if (dep.OKTMO?.value != null) {
+                def oktmo = getOktmoById(dep.OKTMO?.value)
+                if (oktmo != null) {
+                    pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, oktmo.CODE.value, dep?.TAX_ORGAN_CODE?.value)
+                }
+
+            }
         }
     }
 
@@ -822,10 +833,13 @@ def createForm() {
         pairKppOktmoList.each { pair ->
             def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, pair.kpp.toString(), pair.oktmo.toString())
             if (ndflPersons != null && ndflPersons.size() != 0) {
+                //logger.info(ndflPersons.toString())
                 addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
             }
         }
     }
+    //logger.info(ndflPersonsGroupedByKppOktmo.toString())
+
     initNdflPersons(ndflPersonsGroupedByKppOktmo)
 
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
@@ -908,7 +922,7 @@ def resetId(def list) {
 
 def createReports() {
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
-    scriptParams.put("fileName" + ".xml", "reports.zip")
+    scriptParams.put("fileName", "reports.zip")
     try {
         Department department = departmentService.get(declarationData.departmentId);
         DeclarationTemplate declarationTemplate =  declarationService.getTemplate(declarationData.declarationTemplateId);
@@ -926,7 +940,7 @@ def createReports() {
             if (it.fileName == null) {
                 return
             }
-            ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName);
+            ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName + ".xml");
             zos.putArchiveEntry(ze);
             IOUtils.copy(declarationService.getXmlStream(it.id), zos)
             zos.closeArchiveEntry();
@@ -1139,6 +1153,20 @@ def getDepartmentParamTable(def departmentParamId) {
         departmentParamTable = departmentParamTableList.get(0)
     }
     return departmentParamTable
+}
+
+def getOktmoById(id) {
+    def oktmo = OKTMO_CACHE.get(id)
+    if (oktmo == null) {
+        def rpe = getReportPeriodEndDate(declarationData.reportPeriodId)
+        def oktmoList = getProvider(REF_BOOK_OKTMO_ID).getRecords(rpe, null, "ID = ${id}", null)
+        if (oktmoList.size() != 0) {
+            oktmo = oktmoList.get(0)
+            OKTMO_CACHE[id] = oktmo
+        }
+
+    }
+    return oktmo
 }
 
 def getReportPeriodEndDate(def reportPeriodId) {

@@ -137,6 +137,8 @@ final int REF_BOOK_DOC_STATE = 929
 @Field
 final int REPORT_PERIOD_TYPE_ID = 8
 
+@Field int REF_BOOK_OKTMO_ID = 96;
+
 @Field
 final String NDFL_2_S_PRIZNAKOM_1 = "2 НДФЛ (1)"
 
@@ -203,6 +205,9 @@ final NDFL_REFERENCES_BIRTHDAY = "BIRTHDAY"
 @Field
 final NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
 
+@Field
+final OKTMO_CACHE = [:]
+
 
 def buildXml(def writer) {
     buildXml(writer, false)
@@ -234,7 +239,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
     formType = getFormType(declarationTemplate.declarationFormTypeId)
 
     // Данные для Файл.СвРекв
-    def oktmo = departmentParamRow?.OKTMO?.value
+    def oktmo = getOktmoById(departmentParamRow?.OKTMO?.value).CODE.value
     // Данные для Файл.СвРекв.СвЮЛ
     def kpp = departmentParamRow?.KPP?.value
     def otchetGod = reportPeriod.taxPeriod.year
@@ -334,6 +339,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 def ndflPersonIncomes = findIncomes(np.id, priznakF, startDate, endDate)
                 // Сведения о вычетах
                 def ndflPersonDeductions = findDeductions(np.id, startDate, endDate, ndflPersonIncomes)
+
                 // Сведения о доходах сгруппированные по ставке
                 def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomes)
 
@@ -343,7 +349,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 }
                 // Сведения о вычетах сгруппированные по коду вычета
                 def deductionsGroupedByTypeCodeForDeductionsInfo = groupByDeductionTypeCode(deductionsSelectedForDeductionsInfo)
-
                 def deductionsSelectedForDeductionsSum = selectDeductionsForDeductionsSum(ndflPersonDeductions)
                 def deductionsSelectedGroupedByDeductionTypeCode = groupByDeductionTypeCode(deductionsSelectedForDeductionsSum)
 
@@ -356,40 +361,41 @@ def buildXml(def writer, boolean isForSpecificReport) {
                         // Сведения о доходах сгруппированные по коду дохода
                         def ndflPersonIncomesGroupedByIncomeCode = groupByIncomeCode(ndflpersonIncomesForTaxRate)
                         //ndflPersonIncomesGroupedByTaxRate.get(taxRateKey).each { ndflPersonIncome ->
-                            ДохВыч() {
-                                ndflPersonIncomesGroupedByIncomeCode.keySet().each { key ->
-                                    def incomeCodeGroup = ndflPersonIncomesGroupedByIncomeCode.get(key)
-                                    def sortedIncomeCodeGroup = incomeCodeGroup.toSorted { item1, item2 -> item1.taxDate <=> item2.taxDate }
-                                    incomeCodeGroup.eachWithIndex { incomeCodeNdflPersonIncome, index ->
-                                        if (isForSpecificReport) {
-                                            СвСумДох(Месяц: incomeCodeNdflPersonIncome.taxDate?.format(DATE_FORMAT_MONTH),
-                                                    КодДоход: key,
-                                                    СумДоход: ScriptUtils.round(getSumDohod(incomeCodeGroup), 2),
-                                                    Страница: index < incomeCodeGroup.size() / 2 ? 1 : 2
-                                            ) {
+                        ДохВыч() {
+                            ndflPersonIncomesGroupedByIncomeCode.keySet().each { key ->
+                                def incomeCodeGroup = ndflPersonIncomesGroupedByIncomeCode.get(key)
+                                def sortedIncomeCodeGroup = incomeCodeGroup.toSorted { item1, item2 -> item1.taxDate <=> item2.taxDate }
+                                incomeCodeGroup.eachWithIndex { incomeCodeNdflPersonIncome, index ->
+                                    if (isForSpecificReport) {
+                                        СвСумДох(Месяц: incomeCodeNdflPersonIncome.taxDate?.format(DATE_FORMAT_MONTH),
+                                                КодДоход: key,
+                                                СумДоход: ScriptUtils.round(getSumDohod(incomeCodeGroup), 2),
+                                                Страница: index < incomeCodeGroup.size() / 2 ? 1 : 2
+                                        ) {
 
-                                                deductionsGroupedByTypeCodeForDeductionsInfo.each { deductionByTypeCodeGroup ->
-                                                    def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionByTypeCodeGroup)
+                                            deductionsGroupedByTypeCodeForDeductionsInfo.each { deductionByTypeCodeGroup ->
+                                                def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionByTypeCodeGroup)
 
-                                                    СвСумВыч(КодВычет: deductionsFilteredByIncomeCode.get(0)?.typeCode,
-                                                            СумВычет: ScriptUtils.round(deductionsFilteredByIncomeCode.sum().periodCurrSumm, 2)) {
-                                                    }
+                                                СвСумВыч(КодВычет: deductionsFilteredByIncomeCode.get(0)?.typeCode,
+                                                        СумВычет: ScriptUtils.round(deductionsFilteredByIncomeCode.sum().periodCurrSumm, 2)) {
                                                 }
                                             }
-                                        } else {
-                                            СвСумДох(Месяц: incomeCodeNdflPersonIncome.taxDate?.format(DATE_FORMAT_MONTH),
-                                                    КодДоход: key,
-                                                    СумДоход: ScriptUtils.round(getSumDohod(incomeCodeGroup), 2)) {
-                                                deductionsGroupedByTypeCodeForDeductionsInfo.keySet().each { deductionTypeKey ->
-                                                    def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionsGroupedByTypeCodeForDeductionsInfo.get(deductionTypeKey))
-                                                    СвСумВыч(КодВычет: deductionTypeKey,
-                                                            СумВычет: ScriptUtils.round(getDeductionCurrPeriodSum(deductionsFilteredByIncomeCode), 2)) {}
+                                        }
+                                    } else {
+                                        СвСумДох(Месяц: incomeCodeNdflPersonIncome.taxDate?.format(DATE_FORMAT_MONTH),
+                                                КодДоход: key,
+                                                СумДоход: ScriptUtils.round(getSumDohod(incomeCodeGroup), 2)) {
+                                            deductionsGroupedByTypeCodeForDeductionsInfo.keySet().each { deductionTypeKey ->
+                                                def deductionsFilteredByIncomeCode = filterDeductionsByIncomeCode(sortedIncomeCodeGroup, deductionsGroupedByTypeCodeForDeductionsInfo.get(deductionTypeKey))
+                                                СвСумВыч(КодВычет: deductionTypeKey,
+                                                        СумВычет: ScriptUtils.round(getDeductionCurrPeriodSum(deductionsFilteredByIncomeCode), 2)) {
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
+                        }
 
                         if (taxRateKey == 13) {
                             НалВычССИ() {
@@ -403,7 +409,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                     }
                                     for (int line = 0; line < linesCount; line++) {
                                         Строка() {
-                                            deductionsSelectedGroupedByDeductionTypeCode.eachWithIndex { deductionTypeKey, index ->
+                                            deductionsSelectedGroupedByDeductionTypeCode.keySet().eachWithIndex { deductionTypeKey, index ->
                                                 def lowestIndex = countInLine * line
                                                 if (index >= lowestIndex && index < lowestIndex + countInLine) {
                                                     ПредВычССИ(КодВычет: deductionTypeKey,
@@ -414,7 +420,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                         }
                                     }
                                 } else {
-                                    deductionsSelectedGroupedByDeductionTypeCode.each { deductionTypeKey ->
+                                    deductionsSelectedGroupedByDeductionTypeCode.keySet().each { deductionTypeKey ->
                                         ПредВычССИ(КодВычет: deductionTypeKey,
                                                 СумВычет: ScriptUtils.round(getDeductionCurrPeriodSum(deductionsSelectedGroupedByDeductionTypeCode.get(deductionTypeKey)), 2)) {
                                         }
@@ -519,9 +525,9 @@ def getNdflPersons() {
 def findIncomes(def ndflPersonId, def priznakF, def startDate, def endDate) {
     def selectedIncomeRows = ndflPersonService.findIncomesByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate)
     if (priznakF == "1") {
-        selectedIncomeRows.removeAll { it.incomeAccruedSumm == 0 }
+        selectedIncomeRows.removeAll { it.incomeAccruedSumm == null || it.incomeAccruedSumm == 0 }
     } else if (priznakF == "2") {
-        selectedIncomeRows.removeAll { it.notHoldingTax < 0 }
+        selectedIncomeRows.removeAll { it.notHoldingTax == null || it.notHoldingTax < 0 }
     }
     return selectedIncomeRows
 }
@@ -669,7 +675,13 @@ def getDeductionCurrPeriodSum(def deductions) {
 //Вычислить сумму для НалУдерж
 def getNalUderzh(def priznakF, def incomes) {
     if (priznakF == "1") {
-        return incomes.sum { it.withholdingTax }
+        toReturn = 0L
+        incomes.each {
+            if (it.withholdingTax != null) {
+                toReturn += it.withholdingTax
+            }
+        }
+        return toReturn
     } else if (priznakF == "2") {
         return 0
     }
@@ -678,7 +690,13 @@ def getNalUderzh(def priznakF, def incomes) {
 //Вычислить сумму для НалПеречисл
 def getNalPerechisl(def priznakF, def incomes) {
     if (priznakF == "1") {
-        return incomes.sum { it.taxSumm }
+        def toReturn = 0L
+        incomes.each {
+            if (it.taxSumm != null) {
+                toReturn += it.taxSumm
+            }
+        }
+        return toReturn
     } else if (priznakF == "2") {
         return 0
     }
@@ -687,7 +705,13 @@ def getNalPerechisl(def priznakF, def incomes) {
 //Вычислить сумму для НалУдержЛиш
 def getNalUderzhLish(def priznakF, def incomes) {
     if (priznakF == "1") {
-        return incomes.sum { it.overholdingTax }
+        def toReturn = 0L
+        incomes.each {
+            if (it.overholdingTax != null) {
+                toReturn += it.overholdingTax
+            }
+        }
+        return toReturn
     } else if (priznakF == "2") {
         return 0
     }
@@ -695,7 +719,38 @@ def getNalUderzhLish(def priznakF, def incomes) {
 
 //Вычислить сумму для 	НалНеУдерж
 def getNalNeUderzh(def incomes) {
-    incomes.sum { it.notHoldingTax }
+    def toReturn = 0L
+    incomes.each {
+        if (it.notHoldingTax != null) {
+            toReturn += it.notHoldingTax
+        }
+    }
+    return toReturn
+}
+def getOktmoById(id) {
+    def oktmo = OKTMO_CACHE.get(id)
+    if (oktmo == null) {
+        def rpe = getReportPeriodEndDate(declarationData.reportPeriodId)
+        def oktmoList = getProvider(REF_BOOK_OKTMO_ID).getRecords(rpe, null, "ID = ${id}", null)
+        if (oktmoList.size() != 0) {
+            oktmo = oktmoList.get(0)
+            OKTMO_CACHE[id] = oktmo
+        }
+
+    }
+    return oktmo
+}
+
+
+def getOktmoByCode(code) {
+    def oktmo = null
+    def rpe = getReportPeriodEndDate(declarationData.reportPeriodId)
+    def oktmoList = getProvider(REF_BOOK_OKTMO_ID).getRecords(rpe, null, "CODE = '${code}'", null)
+    if (oktmoList.size() != 0) {
+        oktmo = oktmoList.get(0)
+        OKTMO_CACHE[oktmo.id.value] = oktmo
+    }
+    return oktmo
 }
 
 // Получить параметры подразделения (из справочника 950)
@@ -715,8 +770,9 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
 def getDepartmentParamTable(def departmentParamId, def reportPeriodId) {
     if (departmentParamRow == null) {
         def filter = null
+        def oktmo = getOktmoByCode(declarationData.oktmo).id.value
         if (declarationData.oktmo != null) {
-            filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}' and OKTMO = ${declarationData.oktmo}"
+            filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}' and OKTMO = ${oktmo}"
         } else {
             filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
         }
@@ -795,16 +851,16 @@ def getDeductionType(def code) {
 }
 
 //Получить признак вычета
-def getDeductionMark(def code) {
-    def toReturn = deductionMarks["$code"]
+def getDeductionMark(def id) {
+    def toReturn = deductionMarks[id]
     if (toReturn == null) {
-        def filter = "CODE = $code"
+        def filter = "ID = $id"
         def deductionMarkList = getProvider(REF_BOOK_DEDUCTION_MARK_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, filter, null)
         if (deductionMarkList == null || deductionMarkList.size() == 0 || deductionMarkList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
-        deductionMarks["$code"] = deductionMarkList.get(0).NAME?.value
-        toReturn = deductionMarks["$code"]
+        deductionMarks[id] = deductionMarkList.get(0).NAME?.value
+        toReturn = deductionMarks[id]
     }
     return toReturn
 }
@@ -851,21 +907,27 @@ def createForm() {
         }
 
     } else {
-
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList.each { dep ->
-            pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, dep.OKTMO?.value, dep?.TAX_ORGAN_CODE?.value)
+            if (dep.OKTMO?.value != null) {
+                def oktmo = getOktmoById(dep.OKTMO?.value)
+                if (oktmo != null) {
+                    pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, oktmo.CODE.value, dep?.TAX_ORGAN_CODE?.value)
+                }
+
+            }
         }
     }
+
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
     allDeclarationData.each { declaration ->
         pairKppOktmoList.each { pair ->
             def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, pair.kpp.toString(), pair.oktmo.toString())
-
             if (ndflPersons != null && ndflPersons.size() != 0) {
+                //logger.info(ndflPersons.toString())
                 if (departmentReportPeriod.correctionDate != null) {
                     def ndflPersonsPicked = []
                     ndflReferencesWithError.each { reference ->
@@ -881,6 +943,7 @@ def createForm() {
             }
         }
     }
+    //logger.info(ndflPersonsGroupedByKppOktmo.toString())
     initNdflPersons(ndflPersonsGroupedByKppOktmo)
 
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
@@ -941,7 +1004,7 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
     allDepartmentReportPeriodIds.each {
         allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
     }
-    // удаление форм не со статусом Создана
+    // удаление форм не со статусом Принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
         if (declaration.state != State.ACCEPTED) {
@@ -990,7 +1053,7 @@ def resetId(def list) {
 
 def createReports() {
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
-    scriptParams.put("fileName" + ".xml", "reports.zip")
+    scriptParams.put("fileName", "reports.zip")
     try {
         Department department = departmentService.get(declarationData.departmentId);
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
@@ -1008,7 +1071,7 @@ def createReports() {
             if (it.fileName == null) {
                 return
             }
-            ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName);
+            ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName + ".xml");
             zos.putArchiveEntry(ze);
             IOUtils.copy(declarationService.getXmlStream(it.id), zos)
             zos.closeArchiveEntry();
