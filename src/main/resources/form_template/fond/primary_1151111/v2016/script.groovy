@@ -113,10 +113,14 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         println "!IMPORT_TRANSPORT_FILE!"
         importData()
+        // Формирование pdf-отчета формы
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.CALCULATE:
         println "!CALCULATE!"
         calculateData()
+        // Формирование pdf-отчета формы
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break;
     case FormDataEvent.CHECK:
         println "!CHECK!"
@@ -182,7 +186,8 @@ switch (formDataEvent) {
 @Field final long REF_BOOK_COUNTRY_ID = RefBook.Id.COUNTRY.id
 
 // Физ. лица
-@Field def personsCache = [:]
+@Field Map<Long, Map<String, RefBookValue>> personsCache = [:]
+@Field Map<Long, Map<String, RefBookValue>> personsActualCache = [:]
 @Field final long REF_BOOK_PERSON_ID = RefBook.Id.PERSON.id
 
 // Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
@@ -838,6 +843,7 @@ def formatDate(final date, final pattern) {
 @Field final NODE_NAME_RASCH_SV_OPS = "РасчСВ_ОПС"
 @Field final NODE_NAME_RASCH_SV_OMS = "РасчСВ_ОМС"
 @Field final NODE_NAME_RASCH_SV_OPS428 = "РасчСВ_ОПС428"
+@Field final NODE_NAME_RASCH_SV_428_12 = "РасчСВ_428.1-2"
 @Field final NODE_NAME_RASCH_SV_428_3 = "РасчСВ_428.3"
 @Field final NODE_NAME_RASCH_SV_DSO = "РасчСВ_ДСО"
 @Field final NODE_NAME_KOL_STRAH_LIC_VS = "КолСтрахЛицВс"
@@ -1230,31 +1236,32 @@ void importData() {
 @Field final CHECK_FILE_NAME_NO = "код НО в имени не совпадает с кодом НО внутри файла"
 @Field final CHECK_FILE_NAME_INN = "ИНН в имени не совпадает с ИНН внутри файла"
 @Field final CHECK_FILE_NAME_KPP = "КПП в имени не совпадает с КПП внутри файла"
-@Field final CHECK_PAYMENT_OKVED_NOT_FOUND = "Файл.Документ.СвНП.ОКВЭД = \"%s\" не найден в справочнике ОКВЭД"
-@Field final CHECK_PAYMENT_INN = "Некорректный Файл.Документ.СвНП.НПЮП.ИННЮЛ = \"%s\" для организации - плательщика страховых взносов в транспортном файле \"%s\""
-@Field final CHECK_PAYMENT_REORG_INN = "Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
-@Field final CHECK_PAYMENT_REORG_KPP = "Не заполнен Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
-@Field final CHECK_PAYMENT_REORG_INN_VALUE = "Некорректный Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ = \"%s\" реорганизованной организации для организации плательщика страховых взносов с ИНН %s"
-@Field final CHECK_PAYMENT_IP_INN_VALUE = "Некорректный Файл.Документ.СвНП.НПИП.ИННФЛ = \"%s\" индивидуального предпринимателя - плательщика страховых взносов в транспортном файле \"%s\""
-@Field final CHECK_PAYMENT_IP_COUNTRY = "Файл.Документ.СвНП.НПИП.СвНПФЛ.Гражд = \"%s\" ФЛ с ИНН \"%s\" не найден в справочнике ОКСМ"
-@Field final CHECK_PAYMENT_IP_DOC = "Файл.Документ.СвНП.НПФЛ.СвНПФЛ.УдЛичнФЛ.КодВидДок = \"%s\" ФЛ с ИНН %s не найден в справочнике \"Коды документов, удостоверяющих личность\""
-@Field final CHECK_PAYMENT_FL_INN_VALUE = "Некорректный Файл.Документ.СвНП.НПФЛ.ИННФЛ = \"%s\" физического лица - плательщика страховых взносов в транспортном файле \"%s\""
-@Field final CHECK_PAYMENT_FL_ADDR = "В справочнике отсутствует Файл.Документ.СвНП.НПФЛ.СвНПФЛ.АдрМЖРФ = \"'%s'/'%s'/'%s'/'%s'/'%s'\" для ФЛ с ИНН \"%s\""
-@Field final CHECK_PODPISANT_EMPTY_FIO = "Не заполнено Файл.Документ.Подписант.ФИО=\"'%s'/'%s'\" в транспортном файле \"%s\""
-@Field final CHECK_PODPISANT_EMPTY_DOC = "Не заполнено Файл.Документ.Подписант.СвПред.НаимДок = \"%s\" в транспортном файле \"%s\""
-@Field final CHECK_CALCULATION_OBZ = "Не заполнены Файл.Документ.РасчетСВ.ОбязПлатСВ в транспортном файле \"%s\""
-@Field final CHECK_CALCULATION_OBZ_OKTMO = "Файл.Документ.РасчетСВ.ОбязПлатСВ.OKTMO = \"%s\" транспортного файла \"%s\" не найден в справочнике"
-@Field final CHECK_CALCULATION_KBK = "%s = \"%s\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""
-@Field final CHECK_CALCULATION_SUMM = "Не заполнено %s в транспортном файле \"%s\""
-@Field final CHECK_TARIFF_INN = "Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.ИННФЛ = \"%s\" иностранного гражданина в транспортном файле \"%s\""
-@Field final CHECK_TARIFF_SNILS = "Некорректный Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.СНИЛС = \"%s\" иностранного гражданина в транспортном файле \"%s\""
-@Field final CHECK_TARIFF_COUNTRY = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.Гражд = \"%s\" иностранного гражданина с ИНН \"%s\" не найден в справочнике ОКСМ"
-@Field final CHECK_PERSON_INN = "Некорректный Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ = \"%s\" для получателя доходов в транспортном файле \"%s\""
-@Field final CHECK_PERSON_SNILS = "Некорректный Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС = \"%s\" для получателя доходов"
-@Field final CHECK_PERSON_DOCTYPE = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок = \"%s\" получателя доходов с СНИЛС \"%s\" не найден в справочнике \"Коды документов, удостоверяющих личность\""
-@Field final CHECK_PERSON_OKSM = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд = \"%s\" получателя доходов с СНИЛС  \"%s\" не найден в справочнике ОКСМ"
-@Field final CHECK_PERSON_PERIOD = "Период расчетных сведений Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц = \"'%s'/'%s'\" в транспортном файле \"%s\" не входит в отчетный период формы"
+@Field final CHECK_PAYMENT_OKVED_NOT_FOUND = "Файл.Документ.СвНП.ОКВЭД = \"%s\" транспортного файла \"%s\" не найден в справочнике ОКВЭД"
+@Field final CHECK_PAYMENT_INN = "Файл.Документ.СвНП.НПЮП.ИННЮЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PAYMENT_REORG_INN = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как форма реорганизации = \"%s\""
+@Field final CHECK_PAYMENT_REORG_KPP = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.КПП в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как форма реорганизации = \"%s\""
+@Field final CHECK_PAYMENT_REORG_INN_VALUE = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮР.ИННЮЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PAYMENT_IP_INN_VALUE = "Файл.Документ.СвНП.НПИП.ИННФЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PAYMENT_FL_INN_VALUE = "Файл.Документ.СвНП.НПФЛ.ИННФЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PAYMENT_FL_ADDR = "Файл.Документ.СвНП.НПФЛ.СвНПФЛ.АдрМЖРФ = \"'%s'/'%s'/'%s'/'%s'/'%s'\" транспортного файла \"%s\" не найден в справочнике"
+@Field final CHECK_PAYMENT_IP_COUNTRY = "Файл.Документ.СвНП.НПИП.СвНПФЛ.Гражд = \"%s\" транспортного файла \"%s\" не найден в справочнике ОКСМ"
+@Field final CHECK_PAYMENT_IP_DOC = "Файл.Документ.СвНП.НПФЛ.СвНПФЛ.УдЛичнФЛ.КодВидДок = \"%s\" транспортного файла \"%s\" не найден в справочнике \"Коды документов, удостоверяющих личность\""
+@Field final CHECK_PODPISANT_EMPTY_FIO = "Файл.Документ.Подписант.ФИО = \"'%s'/'%s'\" в транспортном файле \"%s\" не заполнен, элемент является обязательным, если признак лица, подписавшего документ = 2 или 1 и плательщиком является ЮЛ"
+@Field final CHECK_PODPISANT_EMPTY_DOC = "Файл.Документ.Подписант.СвПред.НаимДок = \"%s\" в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как признак лица, подписавшего документ = 2"
+@Field final CHECK_CALCULATION_OBZ = "Файл.Документ.РасчетСВ.ОбязПлатСВ в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как код места = \"%s\""
+@Field final CHECK_CALCULATION_OBZ_OKTMO = "Файл.Документ.РасчетСВ.ОбязПлатСВ.OKTMO = \"%s\" транспортного файла \"%s\" не найден в справочнике \"Общероссийский классификатор территорий муниципальных образований (ОКТМО)\""
+@Field final CHECK_CALCULATION_KBK = "%s = \"%s\" транспортного файла \"%s\" не найден в справочнике \"Классификатор кодов классификации доходов бюджетов Российской Федерации\""
+@Field final CHECK_CALCULATION_SUMM = "%s в транспортном файле \"%s\" не заполнен, элемент является обязательным, так как не заполнен %s"
+@Field final CHECK_TARIFF_INN = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.ИННФЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_TARIFF_SNILS = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.СНИЛС = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_TARIFF_COUNTRY = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СВПримТариф2.2.425.СвИноГражд.Гражд = \"%s\" иностранного гражданина \"%s %s\" не найден в справочнике ОКСМ"
+@Field final CHECK_PERSON_INN = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PERSON_SNILS = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС = \"%s\" в транспортном файле \"%s\" некорректный"
+@Field final CHECK_PERSON_DOCTYPE = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок = \"%s\" получателя доходов с СНИЛС \"%s\" транспортного файла \"%s\" не найден в справочнике \"Коды документов, удостоверяющих личность\""
+@Field final CHECK_PERSON_OKSM = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд = \"%s\" ФЛ с СНИЛС \"%s\" транспортного файла \"%s\" не найден в справочнике ОКСМ"
+@Field final CHECK_PERSON_PERIOD = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц = \"'%s'/'%s'\" в транспортном файле \"%s\" не входит в отчетный период формы"
 @Field final CHECK_PERSON_DUL = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок = \"%s\" не соответствует порядку заполнения: знак \"N\" не проставляется, серия и номер документа отделяются знаком \" \" (\"пробел\")"
+
 /**
  * Существует ли CODE в справочнике ОКВЭД
  */
@@ -1393,7 +1400,7 @@ def checkPaymentJL(fileNode, fileName) {
 
         // 1.2.1 Поиск ОКВЭД в справочнике
         if (documentOkved && !isExistsOkved(documentOkved)) {
-            logger.warn(CHECK_PAYMENT_OKVED_NOT_FOUND, documentOkved)
+            logger.warn(CHECK_PAYMENT_OKVED_NOT_FOUND, documentOkved, fileName)
         }
 
         // 1.2.2 Корректность ИНН ЮЛ
@@ -1410,17 +1417,17 @@ def checkPaymentJL(fileNode, fileName) {
             if (['1', '2', '3', '4', '5', '6', '7'].contains(documentReorgForm)) {
                 // 1.2.4 Наличие ИНН реорганизованной организации
                 if (!documentReorgInn) {
-                    logger.warn(CHECK_PAYMENT_REORG_INN, documentInn)
+                    logger.warn(CHECK_PAYMENT_REORG_INN, fileName, documentReorgForm)
                 }
                 // 1.2.5 Наличие КПП реорганизованной организации
                 if (!documentReorgKpp) {
-                    logger.warn(CHECK_PAYMENT_REORG_KPP, documentInn)
+                    logger.warn(CHECK_PAYMENT_REORG_KPP, fileName, documentReorgForm)
                 }
             }
 
             // 1.2.6 Корректность ИНН реорганизованной организации
             if (INN_JUR_LENGTH != documentReorgInn.length() || !ScriptUtils.checkControlSumInn(documentReorgInn)) {
-                logger.warn(CHECK_PAYMENT_REORG_INN_VALUE, documentReorgInn, documentInn)
+                logger.warn(CHECK_PAYMENT_REORG_INN_VALUE, documentReorgInn, fileName)
             }
         }
     }
@@ -1468,18 +1475,18 @@ def checkPaymentFL(fileNode, fileName) {
         if (!isExistsAddress(documentFlAddrRegion, documentFlAddrArea, documentFlAddrCity, documentFlAddrLocality, documentFlAddrStreet)) {
             logger.warn(CHECK_PAYMENT_FL_ADDR,
                     documentFlAddrRegion, documentFlAddrArea, documentFlAddrCity, documentFlAddrLocality, documentFlAddrStreet,
-                    documentFlInn
+                    fileName
             )
         }
 
         // 1.2.11 Поиск кода гражданства в справочнике
         if (documentFlCountry && !isExistsOKSM(documentFlCountry)) {
-            logger.warn(CHECK_PAYMENT_IP_COUNTRY, documentFlCountry, documentFlInn)
+            logger.warn(CHECK_PAYMENT_IP_COUNTRY, documentFlCountry, fileName)
         }
 
         // 1.2.12 Поиск кода вида документа
         if (documentFlDocCode && !isExistsDocType(documentFlDocCode)) {
-            logger.warn(CHECK_PAYMENT_IP_DOC, documentFlDocCode, documentFlInn)
+            logger.warn(CHECK_PAYMENT_IP_DOC, documentFlDocCode, fileName)
         }
     }
 }
@@ -1523,7 +1530,7 @@ def checkPayer(fileNode, fileName) {
 
         // 1.4.1 Наличие сводных данных об обязательствах плательщика страховых взносов
         if ('124' != documentPlaceCode && payments.isEmpty()) {
-            logger.error(CHECK_CALCULATION_OBZ, fileName)
+            logger.error(CHECK_CALCULATION_OBZ, fileName, documentPlaceCode)
         }
 
         payments.each { payment ->
@@ -1538,7 +1545,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PER_OPS".each { ops ->
                 def kbkCode = ops?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1546,7 +1553,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PER_OMS".each { oms ->
                 def kbkCode = oms?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОМС.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОМС.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1554,7 +1561,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PER_OPS_DOP".each { dop ->
                 def kbkCode = dop?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПСДоп.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПСДоп.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1562,7 +1569,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PER_DSO".each { dso ->
                 def kbkCode = dso?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерДСО.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерДСО.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1570,7 +1577,7 @@ def checkPayer(fileNode, fileName) {
             payment?."$NODE_NAME_UPL_PREV_OSS".each { uplPrevOss ->
                 def kbkCode = uplPrevOss?."@КБК" as String
                 if (kbkCode && !isExistsKBK(kbkCode)) {
-                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.КБК", kbkCode)
+                    logger.error(CHECK_CALCULATION_KBK, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.КБК", kbkCode, fileName)
                 }
             }
 
@@ -1580,36 +1587,36 @@ def checkPayer(fileNode, fileName) {
                 def uplPer = uplPrevOss?."$NODE_NAME_UPL_PER_OSS"?."@СумСВУплПер" as String
                 if (prevPer?.isEmpty() && uplPer?.isEmpty()) {
                     // 1.4.4 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУплПер", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУплПер", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВПер")
                     // 1.4.8 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВПер", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВПер", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУплПер")
                 }
 
                 def prev1M = uplPrevOss?."$NODE_NAME_PREV_RASH_OSS"?."@ПревРасхСВ1М" as String
                 def upl1M = uplPrevOss?."$NODE_NAME_UPL_PER_OSS"?."@СумСВУпл1М" as String
                 if (prev1M?.isEmpty() && upl1M?.isEmpty()) {
                     // 1.4.5 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл1М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл1М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ1М")
                     // 1.4.9 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ1М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ1М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл1М")
                 }
 
                 def prev2M = uplPrevOss?."$NODE_NAME_PREV_RASH_OSS"?."@ПревРасхСВ2М" as String
                 def upl2M = uplPrevOss?."$NODE_NAME_UPL_PER_OSS"?."@СумСВУпл2М" as String
                 if (prev2M?.isEmpty() && upl2M?.isEmpty()) {
                     // 1.4.6 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл2М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл2М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ2М")
                     // 1.4.10 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ2М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ2М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл2М")
                 }
 
                 def prev3M = uplPrevOss?."$NODE_NAME_PREV_RASH_OSS"?."@ПревРасхСВ3М" as String
                 def upl3M = uplPrevOss?."$NODE_NAME_UPL_PER_OSS"?."@СумСВУпл3М" as String
                 if (prev3M?.isEmpty() && upl3M?.isEmpty()) {
                     // 1.4.7 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл3М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл3М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ3М")
                     // 1.4.11 Наличие суммы страховых взносов
-                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ3М", fileName)
+                    logger.error(CHECK_CALCULATION_SUMM, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.ПревРасхОСС.ПревРасхСВ3М", fileName, "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПревОСС.УплПерОСС.СумСВУпл3М")
                 }
             }
         }
@@ -1629,6 +1636,8 @@ def checkTariff_2_2_425(fileNode, fileName) {
                     def innFl = inGra?."@ИННФЛ" as String
                     def snils = inGra?."@СНИЛС" as String
                     def countryCode = inGra?."@Гражд" as String
+                    def surname = inGra?."$NODE_NAME_FIO"?."@Фамилия" as String
+                    def firstName = inGra?."$NODE_NAME_FIO"?."@Имя" as String
 
                     // 1.5.1 Корректность ИНН иностранного гражданина и лица без гражданства
                     if (innFl && (INN_IP_LENGTH != innFl?.length() || !ScriptUtils.checkControlSumInn(innFl))) {
@@ -1642,7 +1651,7 @@ def checkTariff_2_2_425(fileNode, fileName) {
 
                     // 1.5.3 Поиск кода гражданства иностранного гражданина и лица без гражданства в справочнике
                     if (countryCode && !isExistsOKSM(countryCode)) {
-                        logger.error(CHECK_TARIFF_COUNTRY, countryCode, innFl)
+                        logger.error(CHECK_TARIFF_COUNTRY, countryCode, surname, firstName)
                     }
                 }
             }
@@ -1682,17 +1691,17 @@ def checkFL(fileNode, fileName) {
 
                 // 1.6.2 Корректность СНИЛС ФЛ - получателя дохода
                 if (snils && !ScriptUtils.checkSnils(snils)) {
-                    logger.error(CHECK_PERSON_SNILS, snils)
+                    logger.error(CHECK_PERSON_SNILS, snils, fileName)
                 }
 
                 // 1.6.3 Поиск кода вида документа ФЛ - получателя дохода
                 if (docTypeCode && !isExistsDocType(docTypeCode)) {
-                    logger.error(CHECK_PERSON_DOCTYPE, docTypeCode, snils,)
+                    logger.error(CHECK_PERSON_DOCTYPE, docTypeCode, snils, fileName)
                 }
 
                 // 1.6.4 Поиск кода гражданства ФЛ - получателя дохода в справочнике
                 if (national && !isExistsOKSM(national)) {
-                    logger.error(CHECK_PERSON_OKSM, national, snils)
+                    logger.error(CHECK_PERSON_OKSM, national, snils, fileName)
                 }
 
                 // 1.6.6 Корректность серии и номера ДУЛ
@@ -2624,7 +2633,9 @@ def calculateData() {
 
         long identificatePersonTime = System.currentTimeMillis();
 
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, getReportPeriodEndDate(), logger);
+        //актуальная версия
+        Date actualVersion = new Date();
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, actualVersion, logger);
         declarationFormPerson.setPersonId(refBookPersonId)
 
         println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
@@ -2712,7 +2723,7 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
     personData.sex = person.pol?.toInteger();
 
     //Строка для вывода номера ФЛ в сообщениях
-    personData.personNumber = inp.nomer;
+    personData.personNumber = person.nomer;
 
     //Документы
     personData.documentTypeCode = person.kodVidDoc;
@@ -3219,6 +3230,7 @@ def fillIdentityDocAttr(Map<String, RefBookValue> values, PersonData person, Att
 @Field final String RF_FOR_OPS_OMS = "FOR_OPS_OMS"
 
 // Поля справочника Физические лица
+@Field final String RF_RECORD_ID = "RECORD_ID"
 @Field final String RF_LAST_NAME = "LAST_NAME"
 @Field final String RF_FIRST_NAME = "FIRST_NAME"
 @Field final String RF_MIDDLE_NAME = "MIDDLE_NAME"
@@ -3251,7 +3263,7 @@ def checkDataDB() {
     checkDataDBPerson()
 
     // Суммовые проверки
-//    checkDataDBSum()
+    checkDataDBSum()
 }
 
 /**
@@ -3273,8 +3285,11 @@ def checkDataDBPerson() {
     // ДУЛ <person_id, массив_ДУЛ>
     def dulMap = [:]
 
-    if (personIds.size() > 0) {
-        personMap = getRefPersons(personIds)
+    if (!personIds.isEmpty()) {
+        personMap = getActualRefPersons(personIds)
+        if (personMap.isEmpty()) {
+            logger.error("Не найдены актуальные записи в справочнике \"Физические лица\".")
+        }
 
         // Получим мапу ДУЛ
         dulMap = getRefDul(personIds)
@@ -3295,108 +3310,112 @@ def checkDataDBPerson() {
         if (raschsvPersSvStrahLic.personId == null || raschsvPersSvStrahLic.personId == 0) {
             logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" для ФЛ " + fioBirthday)
         } else {
-            if (personMap.size() > 0) {
+            if (!personMap.isEmpty()) {
                 personIdList.add(raschsvPersSvStrahLic.personId)
                 def person = personMap.get(raschsvPersSvStrahLic.personId)
-                // 3.1.2 Соответствие фамилии ФЛ и справочника
-                if (raschsvPersSvStrahLic.familia != person.get(RF_LAST_NAME).value) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Фамилия"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.3 Соответствие имени ФЛ и справочника
-                if (raschsvPersSvStrahLic.imya != person.get(RF_FIRST_NAME).value) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Имя"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.4 Соответствие отчества ФЛ и справочника
-                if (raschsvPersSvStrahLic.otchestvo != null && raschsvPersSvStrahLic.otchestvo != person.get(RF_MIDDLE_NAME).value) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Отчество"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.5 Соответствие даты рождения ФЛ и справочника
-                if (raschsvPersSvStrahLic.dataRozd != person.get(RF_BIRTH_DATE).value) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ДатаРожд"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.6 Соответствие пола ФЛ и справочника
-                if (raschsvPersSvStrahLic.pol != person.get(RF_SEX)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Пол"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.7 Соответствие признака ОПС ФЛ и справочника
-                if (raschsvPersSvStrahLic.prizOps != person.get(RF_PENSION)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОПС"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.8 Соответствие признака ОМС ФЛ и справочника
-                if (raschsvPersSvStrahLic.prizOms != person.get(RF_MEDICAL)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОМС"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.9 Соответствие признака ОСС
-                if (raschsvPersSvStrahLic.prizOss != person.get(RF_SOCIAL)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОСС"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.10 Соответсвие ИНН ФЛ - получателя дохода
-                if (raschsvPersSvStrahLic.innfl != null && raschsvPersSvStrahLic.innfl != person.get(RF_INN)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ"
-                    logger.warn("Не совпадает " + pathValue + " для ФЛ получателя доходов со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.11 Соответствие СНИЛС ФЛ - получателя дохода
-                if (raschsvPersSvStrahLic.snils != person.get(RF_SNILS)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС"
-                    logger.warn("Не совпадает " + pathValue + " для ФЛ получателя доходов со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
-                def allDocList = dulMap.get(raschsvPersSvStrahLic.personId)
-                // Вид документа
-                def personDocTypeList = []
-                // Серия и номер документа
-                def personDocNumberList = []
-                allDocList.each { dul ->
-                    personDocType = getRefBookByRecordIds(REF_BOOK_DOCUMENT_CODES_ID, (dul.get(RF_DOC_ID).value))
-                    personDocTypeList.add(personDocType?.CODE?.stringValue)
-                    personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
-                }
-                if (!personDocTypeList.contains(raschsvPersSvStrahLic.kodVidDoc)) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
-
-                // 3.1.13 Актуальность кода вида документа ФЛ - получателя дохода
-                personDocTypeList.each { personDocType ->
-                    if (!documentTypeActualList.contains(personDocType)) {
-                        logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указаны неактуальные коды документов для ФЛ с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\".")
+                if (!person) {
+                    logger.error("Не найдена актуальная запись в справочнике \"Физические лица\" для ФЛ " + fioBirthday)
+                } else {
+                    // 3.1.2 Соответствие фамилии ФЛ и справочника
+                    if (raschsvPersSvStrahLic.familia != person.get(RF_LAST_NAME).value) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Фамилия"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.familia}\" не равен фамилии = \"${person.get(RF_LAST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
                     }
-                }
 
-                // 3.1.14 Соответствие серии и номера документа
-                if (!personDocNumberList.contains(raschsvPersSvStrahLic.serNomDoc)) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
+                    // 3.1.3 Соответствие имени ФЛ и справочника
+                    if (raschsvPersSvStrahLic.imya != person.get(RF_FIRST_NAME).value) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Имя"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.imya}\" не равен имени = \"${person.get(RF_FIRST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
 
-                // 3.1.15 Соответсвие кода гражданства ФЛ - получателя дохода в справочнике
-                if (raschsvPersSvStrahLic.grazd != citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд"
-                    logger.warn("Не совпадает " + pathValue + " для получателя дохода с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\" со значением в справочнике \"Физические лица\".")
-                }
+                    // 3.1.4 Соответствие отчества ФЛ и справочника
+                    if (raschsvPersSvStrahLic.otchestvo != null && raschsvPersSvStrahLic.otchestvo != person.get(RF_MIDDLE_NAME).value) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Отчество"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.otchestvo}\" не равен отчеству = \"${person.get(RF_MIDDLE_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
 
-                // 3.1.16 Актуальность кода гражданства ФЛ
-                citizenship = getRefBookByRecordIds(REF_BOOK_COUNTRY_ID, person.get(RF_CITIZENSHIP)?.value)
-                if (!citizenshipCodeActualList.contains(citizenship?.CODE?.stringValue)) {
-                    logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указан неактуальный код гражданства для ФЛ с СНИЛС = \"" + raschsvPersSvStrahLic.snils + "\".")
+                    // 3.1.5 Соответствие даты рождения ФЛ и справочника
+                    if (raschsvPersSvStrahLic.dataRozd != person.get(RF_BIRTH_DATE).value) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ДатаРожд"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.dataRozd}\" не равен дате рождения = \"${person.get(RF_BIRTH_DATE).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.6 Соответствие пола ФЛ и справочника
+                    if (raschsvPersSvStrahLic.pol != person.get(RF_SEX)?.value?.toString()) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Пол"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.pol}\" не равен полу = \"${person.get(RF_SEX)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.7 Соответствие признака ОПС ФЛ и справочника
+                    if (raschsvPersSvStrahLic.prizOps != person.get(RF_PENSION)?.value?.toString()) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОПС"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOps}\" не равен признаку ОПС = \"${person.get(RF_PENSION)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.8 Соответствие признака ОМС ФЛ и справочника
+                    if (raschsvPersSvStrahLic.prizOms != person.get(RF_MEDICAL)?.value?.toString()) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОМС"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOms}\" не равен признаку ОМС = \"${person.get(RF_MEDICAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.9 Соответствие признака ОСС
+                    if (raschsvPersSvStrahLic.prizOss != person.get(RF_SOCIAL)?.value?.toString()) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОСС"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOss}\" не равен признаку ОСС = \"${person.get(RF_SOCIAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.10 Соответсвие ИНН ФЛ - получателя дохода
+                    if (raschsvPersSvStrahLic.innfl != null && raschsvPersSvStrahLic.innfl != person.get(RF_INN)?.value?.toString()) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.innfl}\" не равен ИНН = \"${person.get(RF_INN)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.11 Соответствие СНИЛС ФЛ - получателя дохода
+                    if (raschsvPersSvStrahLic.snils != person.get(RF_SNILS)?.value?.toString()) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.snils}\" не равен СНИЛС = \"${person.get(RF_SNILS)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
+                    def allDocList = dulMap.get(raschsvPersSvStrahLic.personId)
+                    // Вид документа
+                    def personDocTypeList = []
+                    // Серия и номер документа
+                    def personDocNumberList = []
+                    allDocList.each { dul ->
+                        personDocType = getRefBookByRecordIds(REF_BOOK_DOCUMENT_CODES_ID, (dul.get(RF_DOC_ID).value))
+                        personDocTypeList.add(personDocType?.CODE?.stringValue)
+                        personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
+                    }
+                    if (!personDocTypeList.contains(raschsvPersSvStrahLic.kodVidDoc)) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.kodVidDoc}\" не равен документу, удостоверяющему личность = \"${personDocTypeList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.13 Актуальность кода вида документа ФЛ - получателя дохода
+                    personDocTypeList.each { personDocType ->
+                        if (!documentTypeActualList.contains(personDocType)) {
+                            logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указаны неактуальные коды документов для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        }
+                    }
+
+                    // 3.1.14 Соответствие серии и номера документа
+                    if (!personDocNumberList.contains(raschsvPersSvStrahLic.serNomDoc)) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.serNomDoc}\" не равен серии и номеру ДУЛ = \"${personDocNumberList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.15 Соответсвие кода гражданства ФЛ - получателя дохода в справочнике
+                    if (raschsvPersSvStrahLic.grazd != citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)) {
+                        def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд"
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.grazd}\" не равен гражданству = \"${citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
+
+                    // 3.1.16 Актуальность кода гражданства ФЛ
+                    citizenship = getRefBookByRecordIds(REF_BOOK_COUNTRY_ID, person.get(RF_CITIZENSHIP)?.value)
+                    if (!citizenshipCodeActualList.contains(citizenship?.CODE?.stringValue)) {
+                        logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указан неактуальный код гражданства для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                    }
                 }
             }
         }
@@ -3404,7 +3423,7 @@ def checkDataDBPerson() {
 
     // 3.2.1 Дубли физического лица рамках формы
     def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByDeclarationDataId(declarationData.id)
-    def msgError  = "Найдено несколько записей, идентифицированных как одно физическое лицо: "
+    def msgError  = "Найдено несколько записей, идентифицированных как одно физическое лицо с идентификаторами ФЛ: "
     // Мапа для группировки дублей <personId, RaschsvPersSvStrahLic>
     def raschsvPersSvStrahLicDuplMap = [:]
     if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
@@ -3418,10 +3437,8 @@ def checkDataDBPerson() {
         }
         // Для каждого дубля выводим свое сообщение об ошибке
         raschsvPersSvStrahLicDuplMap.each { key, value ->
-            value.each { raschsvPersSvStrahLic ->
-                msgError += raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.snils + "; "
-            }
-            logger.warn(msgError)
+            def ids =  value*.personId.join(", ")
+            logger.warn(msgError + ids)
         }
     }
 
@@ -3467,9 +3484,14 @@ def checkDataDBPerson() {
  */
 def checkDataDBSum() {
 
-    def svVyplMkSum1 = 0
-    def svVyplMkSum2 = 0
-    def svVyplMkSum3 = 0
+    BigDecimal svVyplMkSum1 = 0
+    BigDecimal svVyplMkSum2 = 0
+    BigDecimal svVyplMkSum3 = 0
+    BigDecimal svVyplMkDopSum1 = 0
+    BigDecimal svVyplMkDopSum2 = 0
+    BigDecimal svVyplMkDopSum3 = 0
+    // Сведения о сумме выплат по доп.тарифам
+    Map<Integer, BigDecimal> vyplSvDopMtMap = [:]
     // Перебор ПерсСвСтрахЛиц
     List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
     for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
@@ -3480,119 +3502,340 @@ def checkDataDBSum() {
                 if (raschsvSvVyplMk.mesyac != null) {
                     def numberMonth = getNumberMonth(Integer.parseInt(raschsvSvVyplMk.mesyac), getReportPeriodEndDate())
                     if (numberMonth == 1) {
-                        svVyplMkSum1 += raschsvSvVyplMk.sumVypl ?: 0
+                        svVyplMkSum1 += raschsvSvVyplMk.nachislSv ?: 0
                     } else if (numberMonth == 2) {
-                        svVyplMkSum2 += raschsvSvVyplMk.sumVypl ?: 0
+                        svVyplMkSum2 += raschsvSvVyplMk.nachislSv ?: 0
                     } else if (numberMonth == 3) {
-                        svVyplMkSum3 += raschsvSvVyplMk.sumVypl ?: 0
+                        svVyplMkSum3 += raschsvSvVyplMk.nachislSv ?: 0
                     }
                 }
             }
         }
-    }
+        // ВыплСВДоп.ВыплСВДопМТ
+        def raschsvVyplSvDopMtList = raschsvPersSvStrahLic?.raschsvVyplSvDop?.raschsvVyplSvDopMtList
+        if (raschsvVyplSvDopMtList != null) {
+            raschsvVyplSvDopMtList.each { raschsvVyplSvDopMt ->
+                if (raschsvVyplSvDopMt.mesyac != null) {
+                    def numberMonth = getNumberMonth(Integer.parseInt(raschsvVyplSvDopMt.mesyac), getReportPeriodEndDate())
+                    if (numberMonth == 1) {
+                        svVyplMkDopSum1 += raschsvVyplSvDopMt.nachislSv ?: 0
+                    } else if (numberMonth == 2) {
+                        svVyplMkDopSum2 += raschsvVyplSvDopMt.nachislSv ?: 0
+                    } else if (numberMonth == 3) {
+                        svVyplMkDopSum3 += raschsvVyplSvDopMt.nachislSv ?: 0
+                    }
+                }
 
-    // УплПерОПС
-    def uplPerSum1 = 0
-    def uplPerSum2 = 0
-    def uplPerSum3 = 0
-    List<RaschsvUplPer> raschsvUplPerList = raschsvUplPerService.findUplPer(declarationData.id)
-    for (RaschsvUplPer raschsvUplPer : raschsvUplPerList) {
-        if (raschsvUplPer.nodeName == NODE_NAME_UPL_PER_OPS) {
-            uplPerSum1 = raschsvUplPer.sumSbUpl1m ?: 0
-            uplPerSum2 = raschsvUplPer.sumSbUpl2m ?: 0
-            uplPerSum3 = raschsvUplPer.sumSbUpl3m ?: 0
+                BigDecimal vyplSvDopMtSum = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: 0
+                vyplSvDopMtSum += raschsvVyplSvDopMt.nachislSv ?: 0
+                vyplSvDopMtMap.put(raschsvVyplSvDopMt.tarif, vyplSvDopMtSum)
+            }
         }
     }
+
+    BigDecimal uplPerOpsSum1 = 0
+    BigDecimal uplPerOpsSum2 = 0
+    BigDecimal uplPerOpsSum3 = 0
+    BigDecimal uplPerOmsSum1 = 0
+    BigDecimal uplPerOmsSum2 = 0
+    BigDecimal uplPerOmsSum3 = 0
+    List<RaschsvUplPer> raschsvUplPerList = raschsvUplPerService.findUplPer(declarationData.id)
+    for (RaschsvUplPer raschsvUplPer : raschsvUplPerList) {
+        // УплПерОПС
+        if (raschsvUplPer.nodeName == NODE_NAME_UPL_PER_OPS) {
+            uplPerOpsSum1 = raschsvUplPer.sumSbUpl1m ?: 0
+            uplPerOpsSum2 = raschsvUplPer.sumSbUpl2m ?: 0
+            uplPerOpsSum3 = raschsvUplPer.sumSbUpl3m ?: 0
+        } else if (raschsvUplPer.nodeName == NODE_NAME_UPL_PER_OMS) {
+            // УплПерОМС
+            uplPerOmsSum1 = raschsvUplPer.sumSbUpl1m ?: 0
+            uplPerOmsSum2 = raschsvUplPer.sumSbUpl2m ?: 0
+            uplPerOmsSum3 = raschsvUplPer.sumSbUpl3m ?: 0
+        }
+    }
+
+    BigDecimal nachislSvOpsSum1 = 0
+    BigDecimal nachislSvOpsSum2 = 0
+    BigDecimal nachislSvOpsSum3 = 0
+
+    BigDecimal nachislSvOmsSum1 = 0
+    BigDecimal nachislSvOmsSum2 = 0
+    BigDecimal nachislSvOmsSum3 = 0
+
+    // РасчСВ_ОПС.НачислСВНеПрев
+    BigDecimal nachislSvNePrevSum1 = 0
+    BigDecimal nachislSvNePrevSum2 = 0
+    BigDecimal nachislSvNePrevSum3 = 0
+
+    // РасчСВ_428.1-2.НачислСВДоп
+    BigDecimal nachislSvDop428_12Sum1 = 0
+    BigDecimal nachislSvDop428_12Sum2 = 0
+    BigDecimal nachislSvDop428_12Sum3 = 0
+
+    // РасчСВ_428.3.НачислСВДоп
+    BigDecimal nachislSvDop428_3Sum1 = 0
+    BigDecimal nachislSvDop428_3Sum2 = 0
+    BigDecimal nachislSvDop428_3Sum3 = 0
+
+    Map<String, BigDecimal> nachisl428_12Sum1Map = [:]
+    Map<String, BigDecimal> nachisl428_12Sum2Map = [:]
+    Map<String, BigDecimal> nachisl428_12Sum3Map = [:]
+
+    Map<String, BigDecimal> nachisl428_3Sum1Map = [:]
+    Map<String, BigDecimal> nachisl428_3Sum2Map = [:]
+    Map<String, BigDecimal> nachisl428_3Sum3Map = [:]
+
+    def pathAttrOps = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС"
 
     // Перебор РасчСВ_ОПС_ОМС
     List<RaschsvSvOpsOms> raschsvSvOpsOmsList = raschsvSvOpsOmsService.findSvOpsOms(declarationData.id)
     for (RaschsvSvOpsOms raschsvSvOpsOms : raschsvSvOpsOmsList) {
+
+        BigDecimal nachislSvOpsCurr1 = 0
+        BigDecimal nachislSvOpsCurr2 = 0
+        BigDecimal nachislSvOpsCurr3 = 0
+
+        // РасчСВ_ОПС.НачислСВПрев
+        BigDecimal nachislSvPrevCurr1 = 0
+        BigDecimal nachislSvPrevCurr2 = 0
+        BigDecimal nachislSvPrevCurr3 = 0
+
+        // РасчСВ_ОПС.НачислСВНеПрев
+        BigDecimal nachislSvNePrevCurr1 = 0
+        BigDecimal nachislSvNePrevCurr2 = 0
+        BigDecimal nachislSvNePrevCurr3 = 0
+
         List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList = raschsvSvOpsOms.raschsvSvOpsOmsRaschList
         for (RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch : raschsvSvOpsOmsRaschList) {
-            // РасчСВ_ОПС
-            if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OPS) {
-                def nachislSvSum1 = 0
-                def nachislSvSum2 = 0
-                def nachislSvSum3 = 0
-                def nachislSvPrevSum1 = 0
-                def nachislSvPrevSum2 = 0
-                def nachislSvPrevSum3 = 0
-                def nachislSvNePrevSum1 = 0
-                def nachislSvNePrevSum2 = 0
-                def nachislSvNePrevSum3 = 0
-
+            if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OPS ||
+                    raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OMS ||
+                    raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_428_12 ||
+                    raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_428_3) {
                 List<RaschsvSvOpsOmsRaschSum> raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList
                 for (RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum : raschsvSvOpsOmsRaschSumList) {
                     RaschsvSvSum1Tip raschsvSvSum1Tip = raschsvSvOpsOmsRaschSum.raschsvSvSum1Tip
-                    // НачислСВ
-                    if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV) {
-                        nachislSvSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
-                        nachislSvSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
-                        nachislSvSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
-                    } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_NE_PREV) {
-                        // НачислСВНеПрев
-                        nachislSvNePrevSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
-                        nachislSvNePrevSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
-                        nachislSvNePrevSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
-                    } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_PREV) {
-                        // НачислСВПрев
-                        nachislSvPrevSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
-                        nachislSvPrevSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
-                        nachislSvPrevSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+
+                    if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OPS) {
+                        // РасчСВ_ОПС
+                        if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV) {
+                            // НачислСВ
+                            nachislSvOpsCurr1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvOpsSum1 += nachislSvOpsCurr1
+                            nachislSvOpsCurr2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvOpsSum2 += nachislSvOpsCurr2
+                            nachislSvOpsCurr3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                            nachislSvOpsSum3 += nachislSvOpsCurr3
+                        } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_NE_PREV) {
+                            // НачислСВНеПрев
+                            nachislSvNePrevCurr1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvNePrevSum1 += nachislSvNePrevCurr1
+                            nachislSvNePrevCurr2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvNePrevSum2 += nachislSvNePrevCurr2
+                            nachislSvNePrevCurr3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                            nachislSvNePrevSum3 += nachislSvNePrevCurr3
+                        } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_PREV) {
+                            // НачислСВПрев
+                            nachislSvPrevCurr1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvPrevCurr2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvPrevCurr3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                        }
+                    } else if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OMS) {
+                        // РасчСВ_ОМС
+                        if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV) {
+                            // НачислСВ
+                            nachislSvOmsSum1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvOmsSum2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvOmsSum3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                        }
+                    } else if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_428_12) {
+                        // РасчСВ_428.1-2
+                        if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_DOP) {
+                            // НачислСВДоп
+                            nachislSvDop428_12Sum1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvDop428_12Sum2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvDop428_12Sum3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+
+                            BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(raschsvSvOpsOmsRasch.prOsnSvDop) ?: 0
+                            nachisl428_12Sum_1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachisl428_12Sum1Map.put(raschsvSvOpsOmsRasch.prOsnSvDop, nachisl428_12Sum_1)
+
+                            BigDecimal nachisl428_12Sum_2 = nachisl428_12Sum2Map.get(raschsvSvOpsOmsRasch.prOsnSvDop) ?: 0
+                            nachisl428_12Sum_2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachisl428_12Sum2Map.put(raschsvSvOpsOmsRasch.prOsnSvDop, nachisl428_12Sum_2)
+
+                            BigDecimal nachisl428_12Sum_3 = nachisl428_12Sum3Map.get(raschsvSvOpsOmsRasch.prOsnSvDop) ?: 0
+                            nachisl428_12Sum_3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                            nachisl428_12Sum3Map.put(raschsvSvOpsOmsRasch.prOsnSvDop, nachisl428_12Sum_3)
+                        }
+
+                    } else if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_428_3) {
+                        // РасчСВ_428.3
+                        if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_DOP) {
+                            // НачислСВДоп
+                            nachislSvDop428_3Sum1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvDop428_3Sum2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvDop428_3Sum3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+
+                            BigDecimal nachisl428_3Sum_1 = nachisl428_3Sum1Map.get(raschsvSvOpsOmsRasch.klasUslTrud) ?: 0
+                            nachisl428_3Sum_1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachisl428_3Sum1Map.put(raschsvSvOpsOmsRasch.klasUslTrud, nachisl428_3Sum_1)
+
+                            BigDecimal nachisl428_3Sum_2 = nachisl428_3Sum2Map.get(raschsvSvOpsOmsRasch.klasUslTrud) ?: 0
+                            nachisl428_3Sum_2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachisl428_3Sum2Map.put(raschsvSvOpsOmsRasch.klasUslTrud, nachisl428_3Sum_2)
+
+                            BigDecimal nachisl428_3Sum_3 = nachisl428_3Sum3Map.get(raschsvSvOpsOmsRasch.klasUslTrud) ?: 0
+                            nachisl428_3Sum_3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                            nachisl428_3Sum3Map.put(raschsvSvOpsOmsRasch.klasUslTrud, nachisl428_3Sum_3)
+                        }
                     }
-                }
-
-                def pathAttr = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС"
-
-                // 3.3.1.1 Сумма исчисленных взносов на ОПС равна сумме не превышающих и превышающих предельную величину базы
-                if (nachislSvSum1 != nachislSvNePrevSum1 + nachislSvPrevSum1) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум1Посл3М = \"$nachislSvSum1\""
-                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\", " + pathAttr + ".НачислСВПрев.Сум1Посл3М = \"$nachislSvPrevSum1\"."
-                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
-                }
-                if (nachislSvSum2 != nachislSvNePrevSum2 + nachislSvPrevSum2) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум2Посл3М = \"$nachislSvSum2\""
-                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\", " + pathAttr + ".НачислСВПрев.Сум2Посл3М = \"$nachislSvPrevSum2\"."
-                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
-                }
-                if (nachislSvSum3 != nachislSvNePrevSum3 + nachislSvPrevSum3) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум3Посл3М = \"$nachislSvSum3\""
-                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\", " + pathAttr + ".НачислСВПрев.Сум3Посл3М = \"$nachislSvPrevSum3\"."
-                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
-                }
-
-                // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину)
-                if (nachislSvNePrevSum1 != svVyplMkSum1) {
-                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
-                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
-                }
-                if (nachislSvNePrevSum2 != svVyplMkSum2) {
-                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
-                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
-                }
-                if (nachislSvNePrevSum3 != svVyplMkSum3) {
-                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
-                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
-                }
-
-                // 3.3.1.3 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов
-                if (nachislSvSum1 != uplPerSum1) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум1Посл3М = \"$nachislSvSum1\""
-                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл1М = \"$uplPerSum1\""
-                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
-                }
-                if (nachislSvSum2 != uplPerSum2) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум2Посл3М = \"$nachislSvSum2\""
-                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл2М = \"$uplPerSum2\""
-                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
-                }
-                if (nachislSvSum3 != uplPerSum3) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум3Посл3М = \"$nachislSvSum3\""
-                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл3М = \"$uplPerSum3\""
-                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
                 }
             }
         }
+
+        // 3.3.1.1 Сумма исчисленных взносов на ОПС равна сумме не превышающих и превышающих предельную величину базы (Проверки выполняются для каждого РасчСВ_ОПС)
+        if (nachislSvOpsCurr1 != nachislSvNePrevCurr1 + nachislSvPrevCurr1) {
+            def pathAttrVal = pathAttrOps + ".НачислСВ.Сум1Посл3М = \"$nachislSvOpsCurr1\""
+            def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevCurr1\", " + pathAttrOps + ".НачислСВПрев.Сум1Посл3М = \"$nachislSvPrevCurr1\"."
+            logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+        }
+        if (nachislSvOpsCurr2 != nachislSvNePrevCurr2 + nachislSvPrevCurr2) {
+            def pathAttrVal = pathAttrOps + ".НачислСВ.Сум2Посл3М = \"$nachislSvOpsCurr2\""
+            def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevCurr2\", " + pathAttrOps + ".НачислСВПрев.Сум2Посл3М = \"$nachislSvPrevCurr2\"."
+            logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+        }
+        if (nachislSvOpsCurr3 != nachislSvNePrevCurr3 + nachislSvPrevCurr3) {
+            def pathAttrVal = pathAttrOps + ".НачислСВ.Сум3Посл3М = \"$nachislSvOpsCurr3\""
+            def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevCurr3\", " + pathAttrOps + ".НачислСВПрев.Сум3Посл3М = \"$nachislSvPrevCurr3\"."
+            logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+        }
+    }
+
+    // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину) (Проверки выполняются по всем РасчСВ_ОПС)
+    if (nachislSvNePrevSum1 != svVyplMkSum1) {
+        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
+        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+    }
+    if (nachislSvNePrevSum2 != svVyplMkSum2) {
+        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
+        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+    }
+    if (nachislSvNePrevSum3 != svVyplMkSum3) {
+        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
+        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+    }
+
+    // 3.3.1.3 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОПС)
+    if (nachislSvOpsSum1 != uplPerOpsSum1) {
+        def pathAttrVal = pathAttrOps + ".НачислСВ.Сум1Посл3М = \"$nachislSvOpsSum1\""
+        def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл1М = \"$uplPerOpsSum1\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+    if (nachislSvOpsSum2 != uplPerOpsSum2) {
+        def pathAttrVal = pathAttrOps + ".НачислСВ.Сум2Посл3М = \"$nachislSvOpsSum2\""
+        def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл2М = \"$uplPerOpsSum2\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+    if (nachislSvOpsSum3 != uplPerOpsSum3) {
+        def pathAttrVal = pathAttrOps + ".НачислСВ.Сум3Посл3М = \"$nachislSvOpsSum3\""
+        def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл3М = \"$uplPerOpsSum3\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+
+    // 3.3.2.1 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу в целом (Проверки выполняются по всем РасчСВ_ОПС428)
+    def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
+    def pathAttr428_3 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.3.НачислСВДоп"
+    if (nachislSvDop428_12Sum1 + nachislSvDop428_3Sum1 != svVyplMkDopSum1) {
+        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум1Посл3М = \"$nachislSvDop428_12Sum1\", " + pathAttr428_3 + ".Сум1Посл3М = \"$nachislSvDop428_3Sum1\"")
+    }
+    if (nachislSvDop428_12Sum2 + nachislSvDop428_3Sum2 != svVyplMkDopSum2) {
+        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум2Посл3М = \"$nachislSvDop428_12Sum2\", " + pathAttr428_3 + ".Сум2Посл3М = \"$nachislSvDop428_3Sum2\"")
+    }
+    if (nachislSvDop428_12Sum3 + nachislSvDop428_3Sum3 != svVyplMkDopSum3) {
+        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум3Посл3М = \"$nachislSvDop428_12Sum3\", " + pathAttr428_3 + ".Сум3Посл3М = \"$nachislSvDop428_3Sum3\"")
+    }
+
+    vyplSvDopMtMap.each { tarif, vyplSvDopMtSum ->
+        // 3.3.2.2 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу (п 1 и 2 статьи 428)
+        ["22", "21"].each {
+            def prOsnSvDop = null
+            switch (it) {
+                case "22":
+                    prOsnSvDop = "1"
+                    break
+                case "21":
+                    prOsnSvDop = "2"
+                    break
+            }
+            if (tarif == it) {
+                BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(prOsnSvDop)
+                if (nachisl428_12Sum_1 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум1Посл3М = \"$nachisl428_12Sum_1\"")
+                }
+                BigDecimal nachisl428_12Sum_2 = nachisl428_12Sum2Map.get(prOsnSvDop)
+                if (nachisl428_12Sum_2 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум2Посл3М = \"$nachisl428_12Sum_2\"")
+                }
+                BigDecimal nachisl428_12Sum_3 = nachisl428_12Sum3Map.get(prOsnSvDop)
+                if (nachisl428_12Sum_3 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум3Посл3М = \"$nachisl428_12Sum_3\"")
+                }
+            }
+        }
+
+        // 3.3.2.3 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛравна значению исчисленных страховых взносов по доп. тарифу (п 3 428)
+        ["23", "24", "25", "26", "27"].each {
+            def klasUslTrud = null
+            switch (it) {
+                case "23":
+                    klasUslTrud = "1"
+                    break
+                case "24":
+                    klasUslTrud = "2"
+                    break
+                case "25":
+                    klasUslTrud = "3"
+                    break
+                case "26":
+                    klasUslTrud = "4"
+                    break
+                case "27":
+                    klasUslTrud = "5"
+                    break
+            }
+            if (tarif == it) {
+                BigDecimal nachisl428_3Sum_1 = nachisl428_3Sum1Map.get(klasUslTrud)
+                if (nachisl428_3Sum_1 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум1Посл3М = \"$nachisl428_3Sum_1\"")
+                }
+                BigDecimal nachisl428_3Sum_2 = nachisl428_3Sum2Map.get(klasUslTrud)
+                if (nachisl428_3Sum_2 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум2Посл3М = \"$nachisl428_3Sum_2\"")
+                }
+                BigDecimal nachisl428_3Sum_3 = nachisl428_3Sum3Map.get(klasUslTrud)
+                if (nachisl428_3Sum_3 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум3Посл3М = \"$nachisl428_3Sum_3\"")
+                }
+            }
+        }
+    }
+
+    // 3.3.3.1 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОМС428)
+    def pathAttrOms = "Файл.Документ.РасчетСВ.ОбязПлатСВ"
+    if (uplPerOmsSum1 != nachislSvOmsSum1) {
+        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум1Посл3М = \"$uplPerOmsSum1\""
+        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум1Посл3М = \"$nachislSvNePrevSum1\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+    if (uplPerOmsSum2 != nachislSvOmsSum2) {
+        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум2Посл3М = \"$uplPerOmsSum2\""
+        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум2Посл3М = \"$nachislSvNePrevSum2\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+    if (uplPerOmsSum3 != nachislSvOmsSum3) {
+        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум3Посл3М = \"$uplPerOmsSum3\""
+        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум3Посл3М = \"$nachislSvNePrevSum3\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
     }
 }
 
@@ -3696,7 +3939,7 @@ def checkDataXml() {
             def poMestuCodeParam = poMestuParam?.get(RF_CODE)?.value
             if (poMestuCodeXml != poMestuCodeParam) {
                 def pathAttr = "Файл.Документ.ПоМесту"
-                logger.warn("Код места, по которому предоставляется документ $pathAttr = \"" + poMestuCodeXml + "\" не совпадает с настройками подразделения.")
+                logger.warn("$pathAttr = \"" + poMestuCodeXml + "\" не совпадает с настройками подразделения.")
             }
 
             // 2.1.2 Актуальность кода места
@@ -3753,27 +3996,28 @@ def checkDataXml() {
                     def okvedCodeParam = mapOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
                     if (okvedCodeXml != okvedCodeParam) {
                         def pathAttr = "Файл.Документ.СвНП.ОКВЭД"
-                        logger.warn("Не совпадает значение $pathAttr плательщика страховых взносов КПП = \"$kppXml\"")
+                        logger.warn("$pathAttr = \"$okvedCodeXml\" не совпадает с ОКВЭД = \"$okvedCodeParam\"")
                     }
 
                     // 2.1.4 Актуальность ОКВЭД
                     // При оценке актуальности значения справочника берутся НЕ на последний день отчетного периода, а на ТЕКУЩУЮ СИСТЕМНУЮ ДАТУ.
                     def okvedCodeActualParam = mapActualOkvedCode.get(departmentParamIncomeRow?.OKVED?.referenceValue)
                     if (okvedCodeParam != okvedCodeActualParam) {
-                        logger.warn("В настройках подразделений указан неактуальный ОКВЭД = \"$okvedCodeParam\" с настройками подразделения")
+                        def pathAttr = "Файл.Документ.СвНП.ОКВЭД"
+                        logger.warn("$pathAttr = \"$okvedCodeParam\" неактуаленый")
                     }
 
                     // 2.1.5 Соответсвие ИНН ЮЛ Общим параметрам
                     if (sberbankInnXml != sberbankInnParam) {
                         def pathAttr = "Файл.Документ.СвНП.НПЮЛ.ИННЮЛ"
-                        logger.warn("Не совпадает $pathAttr для организации - плательщика страховых взносов с Общим параметром \"ИНН ПАО Сбербанк\" = \"$sberbankInnParam\"")
+                        logger.warn("$pathAttr = \"$sberbankInnXml\" не совпадает с Общим параметром \"ИНН ПАО Сбербанк\" = \"$sberbankInnParam\"")
                     }
 
                     // 2.1.6 Соответсвие КПП ЮЛ настройкам подразделения
                     def kppParam = departmentParamIncomeRow?.KPP?.stringValue
                     if (kppXml != kppParam) {
                         def pathAttr = "Файл.Документ.СвНП.НПЮЛ.КПП"
-                        logger.warn("Не совпадает $pathAttr для организации - плательщика страховых взносов с КПП = \"$kppParam\"")
+                        logger.warn("$pathAttr = \"$kppXml\" не совпадает с КПП = \"$kppParam\"")
                     }
 
                     // Если узел СвРеоргЮЛ существует
@@ -3782,21 +4026,21 @@ def checkDataXml() {
                         def sVReorgYLFormParam = mapReorgFormCode.get(departmentParamIncomeRow?.REORG_FORM_CODE?.referenceValue)
                         if (sVReorgYLFormXml != sVReorgYLFormParam) {
                             def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ФормРеорг"
-                            logger.warn("Не совпадает $pathAttr для организации - плательщика страховых c формой реорганизации = \"$sVReorgYLFormParam\"")
+                            logger.warn("$pathAttr = \"$sVReorgYLFormXml\" не совпадает c формой реорганизации = \"$sVReorgYLFormParam\"")
                         }
 
                         // 2.1.8 Соответствие ИНН реорганизованной организации
                         def sVReorgYLInnParam = departmentParamIncomeRow?.REORG_INN?.stringValue
                         if (sVReorgYLInnXml != sVReorgYLInnParam) {
                             def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.ИННЮЛ"
-                            logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с ИНН реорганизованной организации = \"$sVReorgYLInnParam\"")
+                            logger.warn("$pathAttr = \"$sVReorgYLInnXml\" для организации плательщика страховых взносов не совпадает с ИНН реорганизованной организации = \"$sVReorgYLInnParam\"")
                         }
 
                         // 2.1.9 Соответствие КПП реорганизованной организации
                         def sVReorgYLKppParam = departmentParamIncomeRow?.REORG_KPP?.stringValue
                         if (sVReorgYLKppXml != sVReorgYLKppParam) {
                             def pathAttr = "Файл.Документ.СвНП.НПЮЛ.СвРеоргЮЛ.КПП"
-                            logger.warn("Не совпадает $pathAttr для организации плательщика страховых взносов с КПП реорганизованной организации = \"$sVReorgYLKppParam\"")
+                            logger.warn("$pathAttr = \"sVReorgYLKppXml\" не совпадает с КПП реорганизованной организации = \"$sVReorgYLKppParam\"")
                         }
                     }
 
@@ -3812,7 +4056,7 @@ def checkDataXml() {
                             def oktmoParam = getRefBookValue(REF_BOOK_OKTMO_ID, departmentParamIncomeRow?.OKTMO?.referenceValue)
                             if (oktmoXml != oktmoParam?.CODE?.stringValue) {
                                 def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_OBYAZ_PLAT_SV, OBYAZ_PLAT_SV_OKTMO].join(".")
-                                logger.warn(sprintf(msgErrNotEquals, pathAttr, oktmoXml, "КПП = \"" + kppXml + "\" с настройками подразделения"))
+                                logger.warn("$pathAttr = \"$oktmoXml\" не совпадает с ОКТМО = \"$oktmoParam\"")
                             }
 
                             // 2.2.2 Актуальность ОКТМО (справочник ОКТМО очень большой, поэтому обращаться к нему будем по записи)
@@ -3830,7 +4074,7 @@ def checkDataXml() {
                                     def tariffPayerParam = mapActualTariffPayerCode.get(tariffPayerCodeXml)
                                     if (tariffPayerParam != null && !tariffPayerParam?.get(RF_FOR_OPS_OMS)?.value) {
                                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_OBYAZ_PLAT_SV, NODE_NAME_RASCH_SV_OPS_OMS, RASCH_SV_OPS_OMS_TARIF_PLAT].join(".")
-                                        logger.warn("Код тарифа плательщика " + pathAttr + " = \"" + tariffPayerCodeXml + "\" не найден (не действует) в справочнике \"Коды тарифа плательщика\".")
+                                        logger.warn("$pathAttr = \"$tariffPayerCodeXml\" не найден (не действует) в справочнике \"Коды тарифа плательщика\"")
                                     }
 
                                     // РасчСВ_ОПС428
@@ -3848,7 +4092,7 @@ def checkDataXml() {
                                                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV,
                                                                         NODE_NAME_OBYAZ_PLAT_SV, NODE_NAME_RASCH_SV_OPS_OMS, NODE_NAME_RASCH_SV_OPS428,
                                                                         NODE_NAME_RASCH_SV_428_3, RASCH_SV_OPS428_3_OSNOV_ZAP].join(".")
-                                                        logger.warn("Код основания заполнения " + pathAttr + "\" = " + fillBaseXml + "\" не найден (не действует) в справочнике \"Основания заполнения\".")
+                                                        logger.warn("$pathAttr = \"$fillBaseXml\" не найден (не действует) в справочнике \"Основания заполнения\"")
                                                     }
 
                                                     // 2.2.5 Значение кода класса условий труда
@@ -3856,7 +4100,7 @@ def checkDataXml() {
                                                         def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV,
                                                                         NODE_NAME_OBYAZ_PLAT_SV, NODE_NAME_RASCH_SV_OPS_OMS, NODE_NAME_RASCH_SV_OPS428,
                                                                         NODE_NAME_RASCH_SV_428_3, RASCH_SV_OPS428_3_KLAS_USL_TRUD].join(".")
-                                                        logger.warn("Код класса условий труда " + pathAttr + "\" = " + hardWorkXml + "\" не найден (не действует) в справочнике \"Коды классов условий труда\".")
+                                                        logger.warn("$pathAttr = \"$hardWorkXml\" не найден (не действует) в справочнике \"Коды классов условий труда\"")
                                                     }
                                                 }
                                             }
@@ -4080,30 +4324,35 @@ Double getDouble(String val) {
  * @param personIds
  * @return
  */
-// todo добавить обработку дублей
-def getRefPersons(def personIds) {
-    if (personsCache.size() == 0) {
-        def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
-//        def dublMap = [:]
-//        def dublList = []
+Map<Long, Map<String, RefBookValue>> getRefPersons(def personIds) {
+    if (personsCache.isEmpty()) {
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
         refBookMap.each { personId, person ->
             personsCache.put(personId, person)
-
-            // Добавим дубликат в Мапу
-//            if (person.get(RF_DUBLICATES).value != null && !dublMap.get(person.get(RF_DUBLICATES).value)) {
-//                dublMap.put(person.get(RF_DUBLICATES).value, personId)
-//                dublList.add(person.get(RF_DUBLICATES).value)
-//            }
         }
-        // Получим оригинальные записи, если имеются дубликаты
-//        if (dublMap.size() > 0) {
-//            def refBookDublMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, dublList)
-//            refBookDublMap.each { originalPersonId, person ->
-//                dublPersonId = dublMap.get(originalPersonId).value
-//            }
-//        }
     }
     return personsCache;
+}
+
+/**
+ * Получить аутальные записи справочника "Физические лица"
+ * @param personIds
+ * @return
+ */
+Map<Long, Map<String, RefBookValue>> getActualRefPersons(def personIds) {
+    if (personsActualCache.size() == 0) {
+        def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
+        refBookMap.each { personId, person ->
+            // Получим актуальную версию на основании RECORD_ID найденной записи
+            def actualPersonMap = getRefBookByFilter(REF_BOOK_PERSON_ID, "RECORD_ID = " + person.get(RF_RECORD_ID).value)
+            if (actualPersonMap) {
+                actualPersonMap.each { actualPerson ->
+                    personsActualCache.put(personId, actualPerson)
+                }
+            }
+        }
+    }
+    return personsActualCache;
 }
 
 /**
@@ -4156,7 +4405,7 @@ def getActualRefBook(def long refBookId) {
 /**
  * Получить все записи справочника по его идентификатору и коллекции идентификаторов записей справочника
  * @param refBookId - идентификатор справочника
- * @param recordIds - коллекция идентификаторов записей справочника
+ * @param recordIds - коллекция идентификаторов (поле id) записей справочника
  * @return - возвращает мапу
  */
 def getRefBookByRecordIds(def long refBookId, def recordIds) {

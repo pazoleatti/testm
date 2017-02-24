@@ -1,5 +1,8 @@
 package refbook.declaration_type
 
+import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.refbook.*
+import com.aplana.sbrf.taxaccounting.service.impl.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
@@ -7,6 +10,7 @@ import org.xml.sax.helpers.DefaultHandler
 import org.apache.commons.io.IOUtils;
 import groovy.transform.Field
 
+import javax.script.ScriptException
 import java.util.*;
 import java.io.*;
 
@@ -800,12 +804,26 @@ def readNdfl2ResponseReestrContent() {
  */
 def readNdfl6ResponseContent() {
     def sett = [:]
-    sett.put(NDFL2_KV_FILE_TAG, [NDFL2_KV_FILE_ATTR])
-    sett.put(NDFL2_UO_FILE_TAG, [NDFL2_UO_FILE_ATTR])
-    sett.put(NDFL2_IV_FILE_TAG, [NDFL2_IV_FILE_ATTR])
-    sett.put(NDFL2_UU_FILE_TAG, [NDFL2_UU_FILE_ATTR])
 
-    SAXHandler handler = new SAXHandler(sett)
+    SAXHandler handler
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+        handler = new SAXHandler('ИмяОбрабФайла', 'СвКвит')
+    }
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+        handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлНарФайл')
+    }
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+        sett.put(NDFL2_IV_FILE_TAG, [NDFL2_IV_FILE_ATTR])
+        handler = new SAXHandler(sett)
+    }
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+        handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлОшФайл')
+    }
+
     InputStream inputStream
     try {
         inputStream = new FileInputStream(dataFile)
@@ -828,7 +846,25 @@ def readNdfl6ResponseContent() {
         IOUtils.closeQuietly(inputStream)
     }
 
-    return handler.getAttrValues()
+    def result = [:]
+
+    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+        def value = [:]
+        value.put(NDFL2_KV_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+        result.put(NDFL2_KV_FILE_TAG, value)
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+        def value = [:]
+        value.put(NDFL2_UO_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+        result.put(NDFL2_UO_FILE_TAG, value)
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+        result = handler.getAttrValues()
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+        def value = [:]
+        value.put(NDFL2_UU_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
+        result.put(NDFL2_UU_FILE_TAG, value)
+    }
+
+    return result
 }
 
 

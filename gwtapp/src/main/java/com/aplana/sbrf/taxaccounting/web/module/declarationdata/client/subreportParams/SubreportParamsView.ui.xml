@@ -46,7 +46,7 @@
 
             <g:Label ui:field="horSep" addStyleNames="{style.horSep}"/>
 
-            <g:Label ui:field="selectRecordLabel" text="Выбор запсиси:"  addStyleNames="{style.label}"/>
+            <g:Label ui:field="selectRecordLabel" text="Выбор записи:"  addStyleNames="{style.label}"/>
 
             <g:ResizeLayoutPanel ui:field="resultPanel" addStyleNames="{style.table}" visible="false" width="540px">
                 <t:GenericDataGrid height="100%" width="100%" ui:field="resultTable"/>

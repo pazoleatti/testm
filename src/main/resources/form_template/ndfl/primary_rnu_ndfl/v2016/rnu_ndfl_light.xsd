@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1251"?>
-<!-- edited with XMLSpy v2011 rel. 2 (http://www.altova.com) by TeaM DJiNN (TeaM DJiNN) -->
+<!-- edited with XMLSpy v2007 (http://www.altova.com) by Ovchinnikova-EW (SBRF) -->
 <!-- Версия 2.1. от 08.12.2011 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:element name="Файл">
@@ -115,7 +115,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="36"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -126,7 +125,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="36"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -137,15 +135,19 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="36"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
-									<xs:attribute name="ДатаРожд" type="ДатаТип" use="required">
+									<xs:attribute name="ДатаРожд" use="required">
 										<xs:annotation>
 											<xs:documentation>Дата рождения</xs:documentation>
 										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:string">
+												<xs:maxLength value="10"/>
+											</xs:restriction>
+										</xs:simpleType>
 									</xs:attribute>
 									<xs:attribute name="Гражд" use="required">
 										<xs:annotation>
@@ -153,7 +155,7 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:length value="3"/>
+												<xs:maxLength value="3"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
@@ -163,7 +165,7 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:length value="12"/>
+												<xs:maxLength value="12"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
@@ -184,7 +186,7 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:length value="2"/>
+												<xs:maxLength value="2"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
@@ -194,7 +196,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="25"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -215,7 +216,7 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:length value="6"/>
+												<xs:maxLength value="6"/>
 												<xs:pattern value="[0-9]{6}"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -226,7 +227,7 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:length value="2"/>
+												<xs:maxLength value="2"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
@@ -236,7 +237,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="50"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -248,7 +248,6 @@ GUID</xs:documentation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
 												<xs:maxLength value="50"/>
-												<xs:minLength value="1"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
@@ -258,7 +257,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="50"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -269,7 +267,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="50"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -280,7 +277,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="20"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -291,7 +287,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="20"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -302,7 +297,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="8"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -313,7 +307,7 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:length value="3"/>
+												<xs:maxLength value="3"/>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:attribute>
@@ -323,7 +317,6 @@ GUID</xs:documentation>
 										</xs:annotation>
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:minLength value="1"/>
 												<xs:maxLength value="255"/>
 											</xs:restriction>
 										</xs:simpleType>
@@ -360,7 +353,7 @@ GUID</xs:documentation>
 													</xs:annotation>
 													<xs:simpleType>
 														<xs:restriction base="xs:string">
-															<xs:length value="4"/>
+															<xs:maxLength value="4"/>
 														</xs:restriction>
 													</xs:simpleType>
 												</xs:attribute>
@@ -370,7 +363,7 @@ GUID</xs:documentation>
 													</xs:annotation>
 													<xs:simpleType>
 														<xs:restriction base="xs:string">
-															<xs:length value="2"/>
+															<xs:maxLength value="2"/>
 														</xs:restriction>
 													</xs:simpleType>
 												</xs:attribute>

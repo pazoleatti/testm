@@ -125,7 +125,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             SQL.append("  addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id, addr.address, \n");
         }
         SQL.append("  person.version \n");
-        SQL.append("FROM t, ref_book_person person \n");
+        SQL.append("from t join ref_book_person person ON (person.status = 0 and person.version = t.version and person.record_id = t.record_id) \n");
 
         if (isAddressSet(personData)) {
             SQL.append("  LEFT JOIN ref_book_address addr ON (addr.id = person.address) \n");

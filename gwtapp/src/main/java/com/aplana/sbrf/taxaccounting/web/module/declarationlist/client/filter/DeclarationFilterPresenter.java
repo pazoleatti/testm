@@ -90,7 +90,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                             getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 							getView().setReportPeriods(result.getPeriods());
 							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));
-                            getView().setFormStateList(asList(null, State.CREATED, State.ACCEPTED));
+                            getView().setFormStateList(asList(null, State.CREATED, State.PREPARED, State.ACCEPTED));
                             getView().setCorrectionTagList(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
                             getView().clearFilter();
                             if (dataFilter != null){

@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -32,6 +33,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -544,6 +547,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private InputStream getJasper(String jrxmlTemplate) {
+		if (jrxmlTemplate == null) {
+			throw new ServiceException("Шаблон отчета не найден");
+		}
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(jrxmlTemplate.getBytes(ENCODING));
             return compileReport(inputStream);
@@ -588,7 +594,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     zipXmlIn.getNextEntry();
                     Map<String, Object> params = new HashMap<String, Object>();
 
-                    params.put("declarationId", declarationData.getId().intValue());
+                    params.put("declarationId", declarationData.getId());
                     return createJasperReport(zipXmlIn, declarationTemplateService.getJrxml(declarationData.getDeclarationTemplateId()), jrSwapFile, params);
                 } catch (IOException e) {
                     throw new ServiceException(e.getLocalizedMessage(), e);
@@ -1572,8 +1578,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public Connection getReportConnection() {
         try {
-            return ((DataSource) applicationContext.getBean("dataSource")).getConnection();
-        } catch (SQLException e) {
+            return DataSourceUtils.getConnection(((DataSource) applicationContext.getBean("dataSource")));
+        } catch (CannotGetJdbcConnectionException e) {
             throw new ServiceException("Ошибка при попытке получить соединение с БД!", e);
         }
     }
