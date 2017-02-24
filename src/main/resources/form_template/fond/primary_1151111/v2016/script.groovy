@@ -843,6 +843,7 @@ def formatDate(final date, final pattern) {
 @Field final NODE_NAME_RASCH_SV_OPS = "РасчСВ_ОПС"
 @Field final NODE_NAME_RASCH_SV_OMS = "РасчСВ_ОМС"
 @Field final NODE_NAME_RASCH_SV_OPS428 = "РасчСВ_ОПС428"
+@Field final NODE_NAME_RASCH_SV_428_12 = "РасчСВ_428.1-2"
 @Field final NODE_NAME_RASCH_SV_428_3 = "РасчСВ_428.3"
 @Field final NODE_NAME_RASCH_SV_DSO = "РасчСВ_ДСО"
 @Field final NODE_NAME_KOL_STRAH_LIC_VS = "КолСтрахЛицВс"
@@ -3262,7 +3263,7 @@ def checkDataDB() {
     checkDataDBPerson()
 
     // Суммовые проверки
-//    checkDataDBSum()
+    checkDataDBSum()
 }
 
 /**
@@ -3483,9 +3484,14 @@ def checkDataDBPerson() {
  */
 def checkDataDBSum() {
 
-    def svVyplMkSum1 = 0
-    def svVyplMkSum2 = 0
-    def svVyplMkSum3 = 0
+    BigDecimal svVyplMkSum1 = 0
+    BigDecimal svVyplMkSum2 = 0
+    BigDecimal svVyplMkSum3 = 0
+    BigDecimal svVyplMkDopSum1 = 0
+    BigDecimal svVyplMkDopSum2 = 0
+    BigDecimal svVyplMkDopSum3 = 0
+    // Сведения о сумме выплат по доп.тарифам
+    Map<Integer, BigDecimal> vyplSvDopMtMap = [:]
     // Перебор ПерсСвСтрахЛиц
     List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
     for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
@@ -3496,119 +3502,340 @@ def checkDataDBSum() {
                 if (raschsvSvVyplMk.mesyac != null) {
                     def numberMonth = getNumberMonth(Integer.parseInt(raschsvSvVyplMk.mesyac), getReportPeriodEndDate())
                     if (numberMonth == 1) {
-                        svVyplMkSum1 += raschsvSvVyplMk.sumVypl ?: 0
+                        svVyplMkSum1 += raschsvSvVyplMk.nachislSv ?: 0
                     } else if (numberMonth == 2) {
-                        svVyplMkSum2 += raschsvSvVyplMk.sumVypl ?: 0
+                        svVyplMkSum2 += raschsvSvVyplMk.nachislSv ?: 0
                     } else if (numberMonth == 3) {
-                        svVyplMkSum3 += raschsvSvVyplMk.sumVypl ?: 0
+                        svVyplMkSum3 += raschsvSvVyplMk.nachislSv ?: 0
                     }
                 }
             }
         }
-    }
+        // ВыплСВДоп.ВыплСВДопМТ
+        def raschsvVyplSvDopMtList = raschsvPersSvStrahLic?.raschsvVyplSvDop?.raschsvVyplSvDopMtList
+        if (raschsvVyplSvDopMtList != null) {
+            raschsvVyplSvDopMtList.each { raschsvVyplSvDopMt ->
+                if (raschsvVyplSvDopMt.mesyac != null) {
+                    def numberMonth = getNumberMonth(Integer.parseInt(raschsvVyplSvDopMt.mesyac), getReportPeriodEndDate())
+                    if (numberMonth == 1) {
+                        svVyplMkDopSum1 += raschsvVyplSvDopMt.nachislSv ?: 0
+                    } else if (numberMonth == 2) {
+                        svVyplMkDopSum2 += raschsvVyplSvDopMt.nachislSv ?: 0
+                    } else if (numberMonth == 3) {
+                        svVyplMkDopSum3 += raschsvVyplSvDopMt.nachislSv ?: 0
+                    }
+                }
 
-    // УплПерОПС
-    def uplPerSum1 = 0
-    def uplPerSum2 = 0
-    def uplPerSum3 = 0
-    List<RaschsvUplPer> raschsvUplPerList = raschsvUplPerService.findUplPer(declarationData.id)
-    for (RaschsvUplPer raschsvUplPer : raschsvUplPerList) {
-        if (raschsvUplPer.nodeName == NODE_NAME_UPL_PER_OPS) {
-            uplPerSum1 = raschsvUplPer.sumSbUpl1m ?: 0
-            uplPerSum2 = raschsvUplPer.sumSbUpl2m ?: 0
-            uplPerSum3 = raschsvUplPer.sumSbUpl3m ?: 0
+                BigDecimal vyplSvDopMtSum = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: 0
+                vyplSvDopMtSum += raschsvVyplSvDopMt.nachislSv ?: 0
+                vyplSvDopMtMap.put(raschsvVyplSvDopMt.tarif, vyplSvDopMtSum)
+            }
         }
     }
+
+    BigDecimal uplPerOpsSum1 = 0
+    BigDecimal uplPerOpsSum2 = 0
+    BigDecimal uplPerOpsSum3 = 0
+    BigDecimal uplPerOmsSum1 = 0
+    BigDecimal uplPerOmsSum2 = 0
+    BigDecimal uplPerOmsSum3 = 0
+    List<RaschsvUplPer> raschsvUplPerList = raschsvUplPerService.findUplPer(declarationData.id)
+    for (RaschsvUplPer raschsvUplPer : raschsvUplPerList) {
+        // УплПерОПС
+        if (raschsvUplPer.nodeName == NODE_NAME_UPL_PER_OPS) {
+            uplPerOpsSum1 = raschsvUplPer.sumSbUpl1m ?: 0
+            uplPerOpsSum2 = raschsvUplPer.sumSbUpl2m ?: 0
+            uplPerOpsSum3 = raschsvUplPer.sumSbUpl3m ?: 0
+        } else if (raschsvUplPer.nodeName == NODE_NAME_UPL_PER_OMS) {
+            // УплПерОМС
+            uplPerOmsSum1 = raschsvUplPer.sumSbUpl1m ?: 0
+            uplPerOmsSum2 = raschsvUplPer.sumSbUpl2m ?: 0
+            uplPerOmsSum3 = raschsvUplPer.sumSbUpl3m ?: 0
+        }
+    }
+
+    BigDecimal nachislSvOpsSum1 = 0
+    BigDecimal nachislSvOpsSum2 = 0
+    BigDecimal nachislSvOpsSum3 = 0
+
+    BigDecimal nachislSvOmsSum1 = 0
+    BigDecimal nachislSvOmsSum2 = 0
+    BigDecimal nachislSvOmsSum3 = 0
+
+    // РасчСВ_ОПС.НачислСВНеПрев
+    BigDecimal nachislSvNePrevSum1 = 0
+    BigDecimal nachislSvNePrevSum2 = 0
+    BigDecimal nachislSvNePrevSum3 = 0
+
+    // РасчСВ_428.1-2.НачислСВДоп
+    BigDecimal nachislSvDop428_12Sum1 = 0
+    BigDecimal nachislSvDop428_12Sum2 = 0
+    BigDecimal nachislSvDop428_12Sum3 = 0
+
+    // РасчСВ_428.3.НачислСВДоп
+    BigDecimal nachislSvDop428_3Sum1 = 0
+    BigDecimal nachislSvDop428_3Sum2 = 0
+    BigDecimal nachislSvDop428_3Sum3 = 0
+
+    Map<String, BigDecimal> nachisl428_12Sum1Map = [:]
+    Map<String, BigDecimal> nachisl428_12Sum2Map = [:]
+    Map<String, BigDecimal> nachisl428_12Sum3Map = [:]
+
+    Map<String, BigDecimal> nachisl428_3Sum1Map = [:]
+    Map<String, BigDecimal> nachisl428_3Sum2Map = [:]
+    Map<String, BigDecimal> nachisl428_3Sum3Map = [:]
+
+    def pathAttrOps = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС"
 
     // Перебор РасчСВ_ОПС_ОМС
     List<RaschsvSvOpsOms> raschsvSvOpsOmsList = raschsvSvOpsOmsService.findSvOpsOms(declarationData.id)
     for (RaschsvSvOpsOms raschsvSvOpsOms : raschsvSvOpsOmsList) {
+
+        BigDecimal nachislSvOpsCurr1 = 0
+        BigDecimal nachislSvOpsCurr2 = 0
+        BigDecimal nachislSvOpsCurr3 = 0
+
+        // РасчСВ_ОПС.НачислСВПрев
+        BigDecimal nachislSvPrevCurr1 = 0
+        BigDecimal nachislSvPrevCurr2 = 0
+        BigDecimal nachislSvPrevCurr3 = 0
+
+        // РасчСВ_ОПС.НачислСВНеПрев
+        BigDecimal nachislSvNePrevCurr1 = 0
+        BigDecimal nachislSvNePrevCurr2 = 0
+        BigDecimal nachislSvNePrevCurr3 = 0
+
         List<RaschsvSvOpsOmsRasch> raschsvSvOpsOmsRaschList = raschsvSvOpsOms.raschsvSvOpsOmsRaschList
         for (RaschsvSvOpsOmsRasch raschsvSvOpsOmsRasch : raschsvSvOpsOmsRaschList) {
-            // РасчСВ_ОПС
-            if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OPS) {
-                def nachislSvSum1 = 0
-                def nachislSvSum2 = 0
-                def nachislSvSum3 = 0
-                def nachislSvPrevSum1 = 0
-                def nachislSvPrevSum2 = 0
-                def nachislSvPrevSum3 = 0
-                def nachislSvNePrevSum1 = 0
-                def nachislSvNePrevSum2 = 0
-                def nachislSvNePrevSum3 = 0
-
+            if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OPS ||
+                    raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OMS ||
+                    raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_428_12 ||
+                    raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_428_3) {
                 List<RaschsvSvOpsOmsRaschSum> raschsvSvOpsOmsRaschSumList = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList
                 for (RaschsvSvOpsOmsRaschSum raschsvSvOpsOmsRaschSum : raschsvSvOpsOmsRaschSumList) {
                     RaschsvSvSum1Tip raschsvSvSum1Tip = raschsvSvOpsOmsRaschSum.raschsvSvSum1Tip
-                    // НачислСВ
-                    if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV) {
-                        nachislSvSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
-                        nachislSvSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
-                        nachislSvSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
-                    } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_NE_PREV) {
-                        // НачислСВНеПрев
-                        nachislSvNePrevSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
-                        nachislSvNePrevSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
-                        nachislSvNePrevSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
-                    } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_PREV) {
-                        // НачислСВПрев
-                        nachislSvPrevSum1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
-                        nachislSvPrevSum2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
-                        nachislSvPrevSum3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+
+                    if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OPS) {
+                        // РасчСВ_ОПС
+                        if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV) {
+                            // НачислСВ
+                            nachislSvOpsCurr1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvOpsSum1 += nachislSvOpsCurr1
+                            nachislSvOpsCurr2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvOpsSum2 += nachislSvOpsCurr2
+                            nachislSvOpsCurr3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                            nachislSvOpsSum3 += nachislSvOpsCurr3
+                        } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_NE_PREV) {
+                            // НачислСВНеПрев
+                            nachislSvNePrevCurr1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvNePrevSum1 += nachislSvNePrevCurr1
+                            nachislSvNePrevCurr2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvNePrevSum2 += nachislSvNePrevCurr2
+                            nachislSvNePrevCurr3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                            nachislSvNePrevSum3 += nachislSvNePrevCurr3
+                        } else if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_PREV) {
+                            // НачислСВПрев
+                            nachislSvPrevCurr1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvPrevCurr2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvPrevCurr3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                        }
+                    } else if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_OMS) {
+                        // РасчСВ_ОМС
+                        if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV) {
+                            // НачислСВ
+                            nachislSvOmsSum1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvOmsSum2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvOmsSum3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                        }
+                    } else if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_428_12) {
+                        // РасчСВ_428.1-2
+                        if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_DOP) {
+                            // НачислСВДоп
+                            nachislSvDop428_12Sum1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvDop428_12Sum2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvDop428_12Sum3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+
+                            BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(raschsvSvOpsOmsRasch.prOsnSvDop) ?: 0
+                            nachisl428_12Sum_1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachisl428_12Sum1Map.put(raschsvSvOpsOmsRasch.prOsnSvDop, nachisl428_12Sum_1)
+
+                            BigDecimal nachisl428_12Sum_2 = nachisl428_12Sum2Map.get(raschsvSvOpsOmsRasch.prOsnSvDop) ?: 0
+                            nachisl428_12Sum_2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachisl428_12Sum2Map.put(raschsvSvOpsOmsRasch.prOsnSvDop, nachisl428_12Sum_2)
+
+                            BigDecimal nachisl428_12Sum_3 = nachisl428_12Sum3Map.get(raschsvSvOpsOmsRasch.prOsnSvDop) ?: 0
+                            nachisl428_12Sum_3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                            nachisl428_12Sum3Map.put(raschsvSvOpsOmsRasch.prOsnSvDop, nachisl428_12Sum_3)
+                        }
+
+                    } else if (raschsvSvOpsOmsRasch.nodeName == NODE_NAME_RASCH_SV_428_3) {
+                        // РасчСВ_428.3
+                        if (raschsvSvOpsOmsRaschSum.nodeName == NODE_NAME_NACHISL_SV_DOP) {
+                            // НачислСВДоп
+                            nachislSvDop428_3Sum1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachislSvDop428_3Sum2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachislSvDop428_3Sum3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+
+                            BigDecimal nachisl428_3Sum_1 = nachisl428_3Sum1Map.get(raschsvSvOpsOmsRasch.klasUslTrud) ?: 0
+                            nachisl428_3Sum_1 += raschsvSvSum1Tip.sum1mPosl3m ?: 0
+                            nachisl428_3Sum1Map.put(raschsvSvOpsOmsRasch.klasUslTrud, nachisl428_3Sum_1)
+
+                            BigDecimal nachisl428_3Sum_2 = nachisl428_3Sum2Map.get(raschsvSvOpsOmsRasch.klasUslTrud) ?: 0
+                            nachisl428_3Sum_2 += raschsvSvSum1Tip.sum2mPosl3m ?: 0
+                            nachisl428_3Sum2Map.put(raschsvSvOpsOmsRasch.klasUslTrud, nachisl428_3Sum_2)
+
+                            BigDecimal nachisl428_3Sum_3 = nachisl428_3Sum3Map.get(raschsvSvOpsOmsRasch.klasUslTrud) ?: 0
+                            nachisl428_3Sum_3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
+                            nachisl428_3Sum3Map.put(raschsvSvOpsOmsRasch.klasUslTrud, nachisl428_3Sum_3)
+                        }
                     }
-                }
-
-                def pathAttr = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС"
-
-                // 3.3.1.1 Сумма исчисленных взносов на ОПС равна сумме не превышающих и превышающих предельную величину базы
-                if (nachislSvSum1 != nachislSvNePrevSum1 + nachislSvPrevSum1) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум1Посл3М = \"$nachislSvSum1\""
-                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\", " + pathAttr + ".НачислСВПрев.Сум1Посл3М = \"$nachislSvPrevSum1\"."
-                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
-                }
-                if (nachislSvSum2 != nachislSvNePrevSum2 + nachislSvPrevSum2) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум2Посл3М = \"$nachislSvSum2\""
-                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\", " + pathAttr + ".НачислСВПрев.Сум2Посл3М = \"$nachislSvPrevSum2\"."
-                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
-                }
-                if (nachislSvSum3 != nachislSvNePrevSum3 + nachislSvPrevSum3) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум3Посл3М = \"$nachislSvSum3\""
-                    def pathAttrComp = pathAttr + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\", " + pathAttr + ".НачислСВПрев.Сум3Посл3М = \"$nachislSvPrevSum3\"."
-                    logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
-                }
-
-                // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину)
-                if (nachislSvNePrevSum1 != svVyplMkSum1) {
-                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
-                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
-                }
-                if (nachislSvNePrevSum2 != svVyplMkSum2) {
-                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
-                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
-                }
-                if (nachislSvNePrevSum3 != svVyplMkSum3) {
-                    def pathAttrVal = pathAttr + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
-                    logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
-                }
-
-                // 3.3.1.3 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов
-                if (nachislSvSum1 != uplPerSum1) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум1Посл3М = \"$nachislSvSum1\""
-                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл1М = \"$uplPerSum1\""
-                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
-                }
-                if (nachislSvSum2 != uplPerSum2) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум2Посл3М = \"$nachislSvSum2\""
-                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл2М = \"$uplPerSum2\""
-                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
-                }
-                if (nachislSvSum3 != uplPerSum3) {
-                    def pathAttrVal = pathAttr + ".НачислСВ.Сум3Посл3М = \"$nachislSvSum3\""
-                    def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл3М = \"$uplPerSum3\""
-                    logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
                 }
             }
         }
+
+        // 3.3.1.1 Сумма исчисленных взносов на ОПС равна сумме не превышающих и превышающих предельную величину базы (Проверки выполняются для каждого РасчСВ_ОПС)
+        if (nachislSvOpsCurr1 != nachislSvNePrevCurr1 + nachislSvPrevCurr1) {
+            def pathAttrVal = pathAttrOps + ".НачислСВ.Сум1Посл3М = \"$nachislSvOpsCurr1\""
+            def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevCurr1\", " + pathAttrOps + ".НачислСВПрев.Сум1Посл3М = \"$nachislSvPrevCurr1\"."
+            logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+        }
+        if (nachislSvOpsCurr2 != nachislSvNePrevCurr2 + nachislSvPrevCurr2) {
+            def pathAttrVal = pathAttrOps + ".НачислСВ.Сум2Посл3М = \"$nachislSvOpsCurr2\""
+            def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevCurr2\", " + pathAttrOps + ".НачислСВПрев.Сум2Посл3М = \"$nachislSvPrevCurr2\"."
+            logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+        }
+        if (nachislSvOpsCurr3 != nachislSvNePrevCurr3 + nachislSvPrevCurr3) {
+            def pathAttrVal = pathAttrOps + ".НачислСВ.Сум3Посл3М = \"$nachislSvOpsCurr3\""
+            def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevCurr3\", " + pathAttrOps + ".НачислСВПрев.Сум3Посл3М = \"$nachislSvPrevCurr3\"."
+            logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
+        }
+    }
+
+    // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину) (Проверки выполняются по всем РасчСВ_ОПС)
+    if (nachislSvNePrevSum1 != svVyplMkSum1) {
+        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
+        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+    }
+    if (nachislSvNePrevSum2 != svVyplMkSum2) {
+        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
+        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+    }
+    if (nachislSvNePrevSum3 != svVyplMkSum3) {
+        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
+        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+    }
+
+    // 3.3.1.3 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОПС)
+    if (nachislSvOpsSum1 != uplPerOpsSum1) {
+        def pathAttrVal = pathAttrOps + ".НачислСВ.Сум1Посл3М = \"$nachislSvOpsSum1\""
+        def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл1М = \"$uplPerOpsSum1\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+    if (nachislSvOpsSum2 != uplPerOpsSum2) {
+        def pathAttrVal = pathAttrOps + ".НачислСВ.Сум2Посл3М = \"$nachislSvOpsSum2\""
+        def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл2М = \"$uplPerOpsSum2\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+    if (nachislSvOpsSum3 != uplPerOpsSum3) {
+        def pathAttrVal = pathAttrOps + ".НачислСВ.Сум3Посл3М = \"$nachislSvOpsSum3\""
+        def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл3М = \"$uplPerOpsSum3\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+
+    // 3.3.2.1 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу в целом (Проверки выполняются по всем РасчСВ_ОПС428)
+    def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
+    def pathAttr428_3 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.3.НачислСВДоп"
+    if (nachislSvDop428_12Sum1 + nachislSvDop428_3Sum1 != svVyplMkDopSum1) {
+        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум1Посл3М = \"$nachislSvDop428_12Sum1\", " + pathAttr428_3 + ".Сум1Посл3М = \"$nachislSvDop428_3Sum1\"")
+    }
+    if (nachislSvDop428_12Sum2 + nachislSvDop428_3Sum2 != svVyplMkDopSum2) {
+        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум2Посл3М = \"$nachislSvDop428_12Sum2\", " + pathAttr428_3 + ".Сум2Посл3М = \"$nachislSvDop428_3Sum2\"")
+    }
+    if (nachislSvDop428_12Sum3 + nachislSvDop428_3Sum3 != svVyplMkDopSum3) {
+        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум3Посл3М = \"$nachislSvDop428_12Sum3\", " + pathAttr428_3 + ".Сум3Посл3М = \"$nachislSvDop428_3Sum3\"")
+    }
+
+    vyplSvDopMtMap.each { tarif, vyplSvDopMtSum ->
+        // 3.3.2.2 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу (п 1 и 2 статьи 428)
+        ["22", "21"].each {
+            def prOsnSvDop = null
+            switch (it) {
+                case "22":
+                    prOsnSvDop = "1"
+                    break
+                case "21":
+                    prOsnSvDop = "2"
+                    break
+            }
+            if (tarif == it) {
+                BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(prOsnSvDop)
+                if (nachisl428_12Sum_1 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум1Посл3М = \"$nachisl428_12Sum_1\"")
+                }
+                BigDecimal nachisl428_12Sum_2 = nachisl428_12Sum2Map.get(prOsnSvDop)
+                if (nachisl428_12Sum_2 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум2Посл3М = \"$nachisl428_12Sum_2\"")
+                }
+                BigDecimal nachisl428_12Sum_3 = nachisl428_12Sum3Map.get(prOsnSvDop)
+                if (nachisl428_12Sum_3 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум3Посл3М = \"$nachisl428_12Sum_3\"")
+                }
+            }
+        }
+
+        // 3.3.2.3 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛравна значению исчисленных страховых взносов по доп. тарифу (п 3 428)
+        ["23", "24", "25", "26", "27"].each {
+            def klasUslTrud = null
+            switch (it) {
+                case "23":
+                    klasUslTrud = "1"
+                    break
+                case "24":
+                    klasUslTrud = "2"
+                    break
+                case "25":
+                    klasUslTrud = "3"
+                    break
+                case "26":
+                    klasUslTrud = "4"
+                    break
+                case "27":
+                    klasUslTrud = "5"
+                    break
+            }
+            if (tarif == it) {
+                BigDecimal nachisl428_3Sum_1 = nachisl428_3Sum1Map.get(klasUslTrud)
+                if (nachisl428_3Sum_1 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум1Посл3М = \"$nachisl428_3Sum_1\"")
+                }
+                BigDecimal nachisl428_3Sum_2 = nachisl428_3Sum2Map.get(klasUslTrud)
+                if (nachisl428_3Sum_2 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум2Посл3М = \"$nachisl428_3Sum_2\"")
+                }
+                BigDecimal nachisl428_3Sum_3 = nachisl428_3Sum3Map.get(klasUslTrud)
+                if (nachisl428_3Sum_3 != vyplSvDopMtSum) {
+                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум3Посл3М = \"$nachisl428_3Sum_3\"")
+                }
+            }
+        }
+    }
+
+    // 3.3.3.1 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОМС428)
+    def pathAttrOms = "Файл.Документ.РасчетСВ.ОбязПлатСВ"
+    if (uplPerOmsSum1 != nachislSvOmsSum1) {
+        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум1Посл3М = \"$uplPerOmsSum1\""
+        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум1Посл3М = \"$nachislSvNePrevSum1\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+    if (uplPerOmsSum2 != nachislSvOmsSum2) {
+        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум2Посл3М = \"$uplPerOmsSum2\""
+        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум2Посл3М = \"$nachislSvNePrevSum2\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+    }
+    if (uplPerOmsSum3 != nachislSvOmsSum3) {
+        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум3Посл3М = \"$uplPerOmsSum3\""
+        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум3Посл3М = \"$nachislSvNePrevSum3\""
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
     }
 }
 
