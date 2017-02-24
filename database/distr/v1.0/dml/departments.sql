@@ -812,3 +812,8 @@ insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,regi
 insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (2077,'Клиентские операции (АС ЕКС)',2042,5,'Клиентские операции (АС ЕКС)',null,'52_0001_00_02_01',null,1,1100201,0,0);
 insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (2078,'Клиентские операции (КЗ УПД)',2042,5,'Клиентские операции (КЗ УПД)',null,'52_0001_00_02_02',null,1,1100202,0,0);
 insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (2079,'Хозяйственные операции (АС SAP УВХД)',2042,5,'Хозяйственные операции (АС SAP УВХД)',null,'52_0001_00_02_03',null,1,1100203,0,0);
+
+insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (2080,'РЦСВОНУиФО ПЦП ОЦ в г. Новосибирск',0,3,'РЦСВОНУиФО ПЦП ОЦ в г. Новосибирск',null,null,null,1,'999993',0,0);
+insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (2081,'РЦСВОНУиФО Тестовое',0,3,'РЦСВОНУиФО Тестовое',null,null,null,1,'999994',0,0);
+insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (2082,'РЦСВОНУиФО ПЦП ОЦ г. Москва',0,3,'РЦСВОНУиФО ПЦП ОЦ г. Москва',null,null,null,1,'999991',0,0);
+insert into department (id,name,parent_id,type,shortname,tb_index,sbrf_code,region_id,is_active,code,garant_use,sunr_use) values (2083,'РЦСВОНУиФО ПЦП ОЦ в г. Самара',0,3,'РЦСВОНУиФО ПЦП ОЦ в г. Самара',null,null,null,1,'999992',0,0);
