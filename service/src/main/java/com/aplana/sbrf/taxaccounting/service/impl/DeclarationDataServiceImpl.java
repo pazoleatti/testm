@@ -544,6 +544,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private InputStream getJasper(String jrxmlTemplate) {
+		if (jrxmlTemplate == null) {
+			throw new ServiceException("Шаблон отчета не найден");
+		}
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(jrxmlTemplate.getBytes(ENCODING));
             return compileReport(inputStream);
