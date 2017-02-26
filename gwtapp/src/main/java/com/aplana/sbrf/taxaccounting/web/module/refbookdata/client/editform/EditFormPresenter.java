@@ -23,9 +23,12 @@ import java.util.*;
 
 public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.MyView>{
 
+    private Long uniqueRecordId;
+
     @ProxyEvent
     @Override
     public void onShowItem(ShowItemEvent event) {
+        uniqueRecordId = event.getRecordId();
         super.show(event.getRecordId());
     }
 
@@ -101,6 +104,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
         action.setRecords(valuesToAdd);
         action.setVersionFrom(getView().getVersionFrom());
         action.setVersionTo(getView().getVersionTo());
+        action.setSourceUniqueRecordId(uniqueRecordId);
 
         final RecordChanges recordChanges = fillRecordChanges(recordId, map, action.getVersionFrom(), action.getVersionTo());
         recordChanges.setCreate(true);
