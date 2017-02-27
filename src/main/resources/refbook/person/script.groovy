@@ -27,7 +27,6 @@ switch (formDataEvent) {
  * Создадим дубли ДУЛ и ИНП с привязкой к новой записи
  */
 void save() {
-    return
 
     // Если работаем с версиями записей
     if (sourceUniqueRecordId && uniqueRecordId && isNewRecords) {
@@ -108,8 +107,6 @@ def fillIdentityTaxpayerRecord(Map<String, RefBookValue> values, def oldRefInp) 
     putOrUpdate(values, "PERSON_ID", RefBookAttributeType.REFERENCE, uniqueRecordId);
     putOrUpdate(values, "INP", RefBookAttributeType.STRING, oldRefInp?.INP?.stringValue);
     putOrUpdate(values, "AS_NU", RefBookAttributeType.REFERENCE, oldRefInp?.AS_NU?.referenceValue);
-    record.setValues(values);
-    return record;
 }
 
 /**
