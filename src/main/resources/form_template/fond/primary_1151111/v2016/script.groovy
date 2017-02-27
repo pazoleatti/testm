@@ -6,8 +6,10 @@ import java.text.SimpleDateFormat
 
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.util.CellRangeAddress
+import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.xssf.usermodel.XSSFColor
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.commons.io.IOUtils
@@ -417,17 +419,24 @@ def fillGeneralList(final XSSFWorkbook workbook) {
 
     def departmentParam = getDepartmentParam(declarationData.departmentId)
     def departmentParamIncomeRow = getDepartmentParamTable(departmentParam?.id.value)
+    println departmentParamIncomeRow
+    //def presentPlaceReference = departmentParamIncomeRow?.PRESENT_PLACE?.value
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
+    /*if (presentPlaceReference != null) {
+        poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
+
+    }*/
     // Место предоставления
     def poMestuCodeParam = poMestuParam?.get(RF_CODE)?.value
     sheet.getRow(3).getCell(1).setCellValue(declarationData.fileName)
     sheet.getRow(4).getCell(1).setCellValue(applicationVersion)
     sheet.getRow(5).getCell(1).setCellValue("5.01")
     sheet.getRow(8).getCell(1).setCellValue("1151111")
+    // TODO уточнить получение значения
     sheet.getRow(9).getCell(1).setCellValue(new Date().format("dd.MM.yyyy"))
-    sheet.getRow(10).getCell(1).setCellValue(nomCorr)
+    sheet.getRow(10).getCell(1).setCellValue(nomCorr?.toString())
     sheet.getRow(11).getCell(1).setCellValue(period)
-    sheet.getRow(12).getCell(1).setCellValue(reportYear)
+    sheet.getRow(12).getCell(1).setCellValue(reportYear?.toString())
     sheet.getRow(13).getCell(1).setCellValue(taxOrganCode)
     sheet.getRow(14).getCell(1).setCellValue(poMestuCodeParam)
     sheet.getRow(18).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpOkved)
@@ -439,7 +448,10 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     sheet.getRow(26).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpSvReorgInnyl)
     sheet.getRow(27).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpSvReorgKpp)
     sheet.getRow(30).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantPrPodp)
-    sheet.getRow(31).getCell(1).setCellValue(raschsvSvnpPodpisant.familia + " " + raschsvSvnpPodpisant.imya + " " + raschsvSvnpPodpisant.otchestvo)
+    def familia = raschsvSvnpPodpisant.familia != null ? raschsvSvnpPodpisant.familia + " ": ""
+    def imya = raschsvSvnpPodpisant.imya != null ? raschsvSvnpPodpisant.imya + " " : ""
+    def otchestvo = raschsvSvnpPodpisant.otchestvo != null ? raschsvSvnpPodpisant.otchestvo : ""
+    sheet.getRow(31).getCell(1).setCellValue(familia + imya + otchestvo)
     sheet.getRow(33).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantNaimDoc)
     sheet.getRow(34).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantNaimOrg)
 }
@@ -497,7 +509,7 @@ def fillCellsOfRaschsvPersSvStrahLicRow(RaschsvPersSvStrahLic raschsvPersSvStrah
     cell0.setCellValue(raschsvPersSvStrahLic.getNomer())
     def cell1 = row.createCell(1)
     cell1.setCellStyle(leftStyle)
-    cell1.setCellValue(formatDate(raschsvPersSvStrahLic.getSvData(), "dd.MM.yyyy"))
+    cell1.setCellValue(raschsvPersSvStrahLic.getSvData()?.format("dd.MM.yyyy"))
     def cell2 = row.createCell(2)
     cell2.setCellStyle(centerStyle)
     cell2.setCellValue(raschsvPersSvStrahLic.getNomKorr())
@@ -524,7 +536,7 @@ def fillCellsOfRaschsvPersSvStrahLicRow(RaschsvPersSvStrahLic raschsvPersSvStrah
     cell9.setCellValue(raschsvPersSvStrahLic.getSnils())
     def cell10 = row.createCell(10)
     cell10.setCellStyle(defaultStyle)
-    cell10.setCellValue(raschsvPersSvStrahLic.getDataRozd())
+    cell10.setCellValue(raschsvPersSvStrahLic.getDataRozd()?.format("dd.MM.yyyy"))
     def cell11 = row.createCell(11)
     cell11.setCellStyle(defaultStyle)
     cell11.setCellValue(raschsvPersSvStrahLic.getGrazd())
@@ -579,11 +591,13 @@ int fillRaschSvVyplat(
  */
 def fillCellsOfRaschSvVyplatMt(
         final RaschsvPersSvStrahLic raschsvPersSvStrahLic, final RaschsvSvVyplMk raschsvSvVyplMk, final XSSFRow row) {
-    def styleCenter = normalWithBorderStyleCenterAligned(row.getSheet().getWorkbook())
-    def styleLeft = normalWithBorderStyleLeftAligned(row.getSheet().getWorkbook())
+    def workbook = row.getSheet().getWorkbook()
+    def styleCenter = normalWithBorderStyleCenterAligned(workbook)
+    def styleRight = normalWithBorderStyleRightAligned(workbook)
+    styleRight.setDataFormat(workbook.createDataFormat().getFormat("0.00"))
 
     addFillingToStyle(styleCenter, ROWS_FILL_COLOR)
-    addFillingToStyle(styleLeft, ROWS_FILL_COLOR)
+    addFillingToStyle(styleRight, ROWS_FILL_COLOR)
 
     def cell0 = row.createCell(0)
     cell0.setCellStyle(styleCenter)
@@ -595,16 +609,16 @@ def fillCellsOfRaschSvVyplatMt(
     cell2.setCellStyle(styleCenter)
     cell2.setCellValue(raschsvSvVyplMk.kodKatLic)
     def cell3 = row.createCell(3)
-    cell3.setCellStyle(styleLeft)
+    cell3.setCellStyle(styleRight)
     cell3.setCellValue(raschsvSvVyplMk.sumVypl)
     def cell4 = row.createCell(4)
-    cell4.setCellStyle(styleLeft)
+    cell4.setCellStyle(styleRight)
     cell4.setCellValue(raschsvSvVyplMk.vyplOps)
     def cell5 = row.createCell(5)
-    cell5.setCellStyle(styleLeft)
+    cell5.setCellStyle(styleRight)
     cell5.setCellValue(raschsvSvVyplMk.vyplOpsDog)
     def cell6 = row.createCell(6)
-    cell6.setCellStyle(styleLeft)
+    cell6.setCellStyle(styleRight)
     cell6.setCellValue(raschsvSvVyplMk.nachislSv)
 }
 
@@ -615,23 +629,25 @@ def fillCellsOfRaschSvVyplatMt(
  * @return
  */
 def fillCellsOfRaschSvVyplat(final RaschsvSvVypl raschsvSvVypl, final XSSFRow row) {
-    def styleLeft = normalWithBorderStyleLeftAligned(row.getSheet().getWorkbook())
-    addFillingToStyle(styleLeft, TOTAL_ROW_FILL_COLOR)
+    def workbook = row.getSheet().getWorkbook()
+    def styleRight = boldWithBorderStyleRightAligned(workbook)
+    styleRight.setDataFormat(workbook.createDataFormat().getFormat("0.00"))
+    addFillingToStyle(styleRight, TOTAL_ROW_FILL_COLOR)
     def cell0 = row.createCell(0)
-    cell0.setCellStyle(styleLeft)
+    cell0.setCellStyle(styleRight)
     cell0.setCellValue(PERSONAL_DATA_TOTAL_ROW_LABEL)
     row.getSheet().addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, 2));
     def cell3 = row.createCell(3)
-    cell3.setCellStyle(styleLeft)
+    cell3.setCellStyle(styleRight)
     cell3.setCellValue(raschsvSvVypl?.sumVyplVs3)
     def cell4 = row.createCell(4)
-    cell4.setCellStyle(styleLeft)
+    cell4.setCellStyle(styleRight)
     cell4.setCellValue(raschsvSvVypl?.vyplOpsVs3)
     def cell5 = row.createCell(5)
-    cell5.setCellStyle(styleLeft)
+    cell5.setCellStyle(styleRight)
     cell5.setCellValue(raschsvSvVypl?.vyplOpsDogVs3)
     def cell6 = row.createCell(6)
-    cell6.setCellStyle(styleLeft)
+    cell6.setCellStyle(styleRight)
     cell6.setCellValue(raschsvSvVypl?.nachislSvVs3)
 }
 
@@ -661,10 +677,12 @@ int fillRaschSvVyplatDop(
 def fillCellsOfRaschSvVyplatDopMt(
         final RaschsvPersSvStrahLic raschsvPersSvStrahLic,
         final RaschsvVyplSvDopMt raschsvSvVyplDopMt, final XSSFRow row) {
-    def styleCenter = normalWithBorderStyleCenterAligned(row.getSheet().getWorkbook())
-    def styleLeft = normalWithBorderStyleLeftAligned(row.getSheet().getWorkbook())
+    def workbook = row.getSheet().getWorkbook()
+    def styleCenter = normalWithBorderStyleCenterAligned(workbook)
+    def styleRight = normalWithBorderStyleRightAligned(workbook)
+    styleRight.setDataFormat(workbook.createDataFormat().getFormat("0.00"))
     addFillingToStyle(styleCenter, ROWS_FILL_COLOR)
-    addFillingToStyle(styleLeft, ROWS_FILL_COLOR)
+    addFillingToStyle(styleRight, ROWS_FILL_COLOR)
     def cell0 = row.createCell(0)
     cell0.setCellStyle(styleCenter)
     cell0.setCellValue(raschsvPersSvStrahLic?.getNomer())
@@ -675,10 +693,10 @@ def fillCellsOfRaschSvVyplatDopMt(
     cell2.setCellStyle(styleCenter)
     cell2.setCellValue(raschsvSvVyplDopMt?.tarif)
     def cell3 = row.createCell(3)
-    cell3.setCellStyle(styleLeft)
+    cell3.setCellStyle(styleRight)
     cell3.setCellValue(raschsvSvVyplDopMt?.vyplSv)
     def cell4 = row.createCell(4)
-    cell4.setCellStyle(styleLeft)
+    cell4.setCellStyle(styleRight)
     cell4.setCellValue(raschsvSvVyplDopMt?.nachislSv)
 }
 
@@ -689,17 +707,19 @@ def fillCellsOfRaschSvVyplatDopMt(
  * @return
  */
 def fillCellsOfRaschSvVyplatDop(final RaschsvVyplSvDop raschsvVyplSvDop, final XSSFRow row) {
-    def styleLeft = normalWithBorderStyleLeftAligned(row.getSheet().getWorkbook())
-    addFillingToStyle(styleLeft, TOTAL_ROW_FILL_COLOR)
+    def workbook = row.getSheet().getWorkbook()
+    def styleRight = boldWithBorderStyleRightAligned(workbook)
+    styleRight.setDataFormat(workbook.createDataFormat().getFormat("0.00"))
+    addFillingToStyle(styleRight, TOTAL_ROW_FILL_COLOR)
     def cell0 = row.createCell(0)
-    cell0.setCellStyle(styleLeft)
+    cell0.setCellStyle(styleRight)
     cell0.setCellValue(PERSONAL_DATA_TOTAL_ROW_LABEL)
     row.getSheet().addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, 2));
     def cell3 = row.createCell(3)
-    cell3.setCellStyle(styleLeft)
+    cell3.setCellStyle(styleRight)
     cell3.setCellValue(raschsvVyplSvDop?.vyplSvVs3)
     def cell4 = row.createCell(4)
-    cell4.setCellStyle(styleLeft)
+    cell4.setCellStyle(styleRight)
     cell4.setCellValue(raschsvVyplSvDop?.nachislSvVs3)
 }
 
@@ -718,6 +738,33 @@ def fillCellsOfRaschSvVyplatDop(final RaschsvVyplSvDop raschsvVyplSvDop, final X
 def normalWithBorderStyleLeftAligned(workbook) {
     def style = workbook.createCellStyle()
     style.setAlignment(CellStyle.ALIGN_LEFT)
+    thinBorderStyle(style)
+    return style
+}
+
+/**
+ * Создать стиль ячейки с полужирным шрифотм с тонкими границами и выравниванием справа
+ * @param workbook
+ * @return
+ */
+def boldWithBorderStyleRightAligned(workbook) {
+    def style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_RIGHT)
+    XSSFFont font = workbook.createFont()
+    font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+    style.setFont(font)
+    thinBorderStyle(style)
+    return style
+}
+
+/**
+ * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем справа
+ * @param workbook
+ * @return
+ */
+def normalWithBorderStyleRightAligned(workbook) {
+    def style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_RIGHT)
     thinBorderStyle(style)
     return style
 }
@@ -785,6 +832,14 @@ def getSpecialReportTemplate() {
 def formatDate(final date, final pattern) {
     def formatter = new SimpleDateFormat(pattern)
     formatter.format(date)
+}
+
+def getRefBookPresentPlaces(filter) {
+    def refBookPresentPlaces = getProvider(REF_BOOK_PRESENT_PLACE_ID).getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (refBookPresentPlaces == null || refBookPresentPlaces.size() == 0) {
+        throw new RuntimeException("Ошибка при получении записей справочника \"Коды места представления расчета\"")
+    }
+    return refBookPresentPlaces
 }
 
 //----------------------------------------------------------------------------------------------------------------------
