@@ -367,14 +367,14 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         SQL.append("LEFT JOIN ref_book_id_doc person_doc \n");
         SQL.append("ON (person_doc.person_id                            = person.id) \n");
         SQL.append("WHERE ( (person_doc.doc_id                          = dubl.id_doc_type \n");
-        SQL.append("AND (REPLACE(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));");
+        SQL.append("AND (REPLACE(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)))");
         return SQL.toString();
 
     }
 
 
     @Override
-    public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(long declarationDataId, long asnuId, Date version) {
+    public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(long declarationDataId, Long asnuId, Date version) {
 
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("pDeclarationId", declarationDataId);
