@@ -1,0 +1,45 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'>
+    <ui:style>
+        .marginLeft {
+            margin-left: 50px;
+        }
+        .marginTop {
+            margin-top: 17px
+        }
+        .marginLeftContainer {
+            margin-left: 17px;
+        }
+        .btnPanel2 td {
+            margin-top: 25px;
+            margin-left: 25px;
+            vertical-align: middle !important;
+        }
+    </ui:style>
+
+    <g:FlowPanel width="100%" height="100%" addStyleNames="{style.marginLeftContainer} {style.marginTop}">
+        <g:HorizontalPanel width="100%" height="100%">
+            <g:cell width="25%" height="100%">
+                <g:VerticalPanel width="25%" height="100%">
+                    <g:HorizontalPanel height="15px">
+                        <t:LinkAnchor text="Добавить" ui:field="file" img="resources/img/up_cc.png"
+                                      title="Добавить"/>
+                        <t:LinkAnchor text="Скачать" ui:field="downloadFile" img="resources/img/down_cc.png"
+                                      addStyleNames="{style.marginLeft}" title="Скачать"/>
+                        <t:LinkButton text="Удалить" ui:field="deleteFile" img="resources/img/row-delete.png"
+                                      addStyleNames="{style.marginLeft}" title="Удалить"/>
+                    </g:HorizontalPanel>
+
+                    <g:cell>
+                        <g:ListBox width="100%" height="100%" visibleItemCount="30" ui:field="fileListBox"/>
+                    </g:cell>
+                </g:VerticalPanel>
+            </g:cell>
+        </g:HorizontalPanel>
+
+        <g:FormPanel ui:field="formPanel" encoding="multipart/form-data" method="post">
+            <g:FileUpload ui:field="uploader" name="uploader" visible="false"/>
+        </g:FormPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

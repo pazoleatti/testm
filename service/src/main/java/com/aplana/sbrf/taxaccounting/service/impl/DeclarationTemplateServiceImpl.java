@@ -99,7 +99,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	@Override
 	public int save(DeclarationTemplate declarationTemplate) {
         if (declarationTemplate.getId() == null){
-            return declarationTemplateDao.create(declarationTemplate);
+            int declarationTemplateId = declarationTemplateDao.create(declarationTemplate);
+            saveDeclarationTemplateFile((long)declarationTemplateId, new ArrayList<DeclarationTemplateFile>(), declarationTemplate.getDeclarationTemplateFiles());
+            return declarationTemplateId;
         }
         checkScript(declarationTemplate, new Logger());
         DeclarationTemplate declarationTemplateBase = declarationTemplateDao.get(declarationTemplate.getId());
@@ -108,8 +110,29 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             blobDataService.delete(declarationTemplateBase.getXsdId());
         if (declarationTemplate.getJrxmlBlobId() != null && !declarationTemplate.getJrxmlBlobId().equals(declarationTemplateBase.getJrxmlBlobId()))
             blobDataService.delete(declarationTemplateBase.getJrxmlBlobId());
+        saveDeclarationTemplateFile((long) savedId, declarationTemplateBase.getDeclarationTemplateFiles(), declarationTemplate.getDeclarationTemplateFiles());
         return savedId;
 	}
+
+	private void saveDeclarationTemplateFile(Long declarationTemplateId, List<DeclarationTemplateFile> oldFiles, List<DeclarationTemplateFile> newFiles) {
+        List<String> deleteBlobIds = new ArrayList<String>();
+        List<String> createBlobIds = new ArrayList<String>();
+
+        for (DeclarationTemplateFile oldFile : oldFiles) {
+            if (!newFiles.contains(oldFile)) {
+                deleteBlobIds.add(oldFile.getBlobDataId());
+            }
+        }
+
+        for (DeclarationTemplateFile newFile : newFiles) {
+            if (!oldFiles.contains(newFile)) {
+                createBlobIds.add(newFile.getBlobDataId());
+            }
+        }
+
+        declarationTemplateDao.deleteTemplateFile(declarationTemplateId, deleteBlobIds);
+        declarationTemplateDao.createTemplateFile(declarationTemplateId, createBlobIds);
+    }
 
     private void checkScript(DeclarationTemplate declarationTemplate, Logger logger) {
         if (declarationTemplate.getCreateScript() == null || declarationTemplate.getCreateScript().isEmpty())

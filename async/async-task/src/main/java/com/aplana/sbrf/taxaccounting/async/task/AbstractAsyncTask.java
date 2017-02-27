@@ -9,6 +9,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
@@ -50,6 +54,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private LogEntryService logEntryService;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
+    @Autowired
+    private RefBookFactory refBookFactory;
 
     protected class TaskStatus {
         private final String reportId;
@@ -336,5 +342,34 @@ public abstract class AbstractAsyncTask implements AsyncTask {
             }
         }
         LOG.info(String.format("Для задачи с ключом %s закончена рассылка уведомлений", lock));
+    }
+
+    /**
+     * Формирует сообщение:
+     * Налоговый орган: "%s", КПП: "%s", ОКТМО: "%s", АСНУ: "%s"
+     */
+    public String formatDeclarationDataInfo(DeclarationData declarationData) {
+        List<String> messages = new ArrayList<String>();
+
+        if (declarationData.getTaxOrganCode() != null) {
+            messages.add(String.format("Налоговый орган: \"%s\"", declarationData.getTaxOrganCode()));
+        }
+
+        if (declarationData.getKpp() != null) {
+            messages.add(String.format("КПП: \"%s\"", declarationData.getKpp()));
+        }
+
+        if (declarationData.getOktmo() != null) {
+            messages.add(String.format("ОКТМО: \"%s\"", declarationData.getOktmo()));
+        }
+
+        if (declarationData.getAsnuId() != null) {
+            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+            String asnuName = asnuProvider.getRecordData(declarationData.getAsnuId()).get("NAME").getStringValue();
+
+            messages.add(String.format("АСНУ: \"%s\"", asnuName));
+        }
+
+        return StringUtils.join(messages.toArray(), ", ", null);
     }
 }

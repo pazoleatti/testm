@@ -1101,6 +1101,15 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public void updateDDTPerformers(int id, List<Integer> performerIds) {
+        //Удаляем всех исполнителей и назначаем новых
+        departmentDeclarationTypeDao.deletePerformers(id);
+        if (performerIds != null && !performerIds.isEmpty()) {
+            departmentDeclarationTypeDao.savePerformers(id, performerIds);
+        }
+    }
+
+    @Override
     public void deleteDFT(Collection<Long> ids) {
         for (Long id : ids) {
             //TODO dloshkarev: можно переделать на in запрос
@@ -1109,8 +1118,9 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void saveDDT(Long departmentId, int declarationId) {
-        departmentDeclarationTypeDao.save(departmentId.intValue(), declarationId);
+    public void saveDDT(Long departmentId, int declarationId, List<Integer> performerIds) {
+        long ddtId = departmentDeclarationTypeDao.save(departmentId.intValue(), declarationId);
+        departmentDeclarationTypeDao.savePerformers(ddtId, performerIds);
     }
 
     @Override

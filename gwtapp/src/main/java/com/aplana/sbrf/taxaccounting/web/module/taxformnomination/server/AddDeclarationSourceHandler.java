@@ -41,25 +41,29 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 	@Override
 	public AddDeclarationSourceResult execute(AddDeclarationSourceAction action, ExecutionContext executionContext) throws ActionException {
 		List<LogEntry> logs = new ArrayList<LogEntry>();
-		for (Integer depId : action.getDepartmentId()) {
+        boolean detectRelations = false;
+
+        for (Integer depId : action.getDepartmentId()) {
 			for (Long dt : action.getDeclarationTypeId()) {
 				boolean canAssign = true;
                 //TODO тоже надо откуда то брать период
 				for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType(), new Date(), new Date())) {
 					if (ddt.getDeclarationTypeId() == dt) {
+                        detectRelations = true;
 						canAssign = false;
 						logs.add(new LogEntry(LogLevel.WARNING, "Для \"" + departmentService.getDepartment(depId).getName() +
 								"\" уже существует назначение \"" + declarationTypeService.get(ddt.getDeclarationTypeId()).getName() + "\""));
 					}
 				}
 				if (canAssign) {
-					departmentFormTypeService.saveDDT((long)depId, dt.intValue());
+					departmentFormTypeService.saveDDT((long)depId, dt.intValue(), action.getPerformers());
 				}
 			}
 		}
 		AddDeclarationSourceResult result = new AddDeclarationSourceResult();
 		result.setUuid(logEntryService.save(logs));
-		return result;
+        result.setIssetRelations(detectRelations);
+        return result;
 	}
 
 	@Override

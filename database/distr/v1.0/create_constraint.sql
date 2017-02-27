@@ -599,3 +599,6 @@ alter table declaration_template_file add constraint fk_decl_templ_file_template
 alter table declaration_template_file add constraint fk_decl_templ_file_blob foreign key (blob_data_id) references blob_data(id);
 
 
+alter table department_decl_type_performer add constraint pk_department_decl_type_perf primary key (department_decl_type_id, performer_dep_id);
+alter table department_decl_type_performer add constraint fk_dept_decl_type_perf_perf foreign key (performer_dep_id) references department (id);
+alter table department_decl_type_performer add constraint fk_dept_decl_type_perf_id foreign key (department_decl_type_id) references department_declaration_type (id) on delete cascade; 

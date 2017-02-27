@@ -59,6 +59,8 @@ def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
+        // Формирование pdf-отчета формы
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
         prepareSpecificReport()
@@ -71,6 +73,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calculate();
+        // Формирование pdf-отчета формы
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
 }
 
@@ -79,12 +83,12 @@ switch (formDataEvent) {
  * Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
  */
 @Field
-def SIMILARITY_THRESHOLD = 700;
+int SIMILARITY_THRESHOLD = 700;
 
 def calculate() {
 
-    def asnuId = declarationData.asnuId;
-
+    Long asnuId = declarationData.asnuId;
+    Long declarationDataId = declarationData.id;
     if (asnuId == null) {
         throw new ServiceException("Для " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
     }
@@ -92,11 +96,20 @@ def calculate() {
     //выставляем параметр что скрипт не формирует новый xml-файл
     calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
-    List<NdflPerson> declarationFormPersonList = ndflPersonService.findNdflPerson(declarationData.id)
-
-    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size());
-
     long time = System.currentTimeMillis();
+
+    List<NdflPerson> declarationFormPersonList = ndflPersonService.findNdflPerson(declarationDataId)
+
+    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size() + "(" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
+
+    Date actualVersion = new Date();
+    Map<Long, List<PersonData>> refbookPersonData = refBookPersonService.findRefBookPersonByPrimaryRnuNdfl(declarationDataId, asnuId, actualVersion)
+
+    logger.info("findRefBookPersonByPrimaryRnuNdfl: "+refbookPersonData.size()+" (" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
 
     //Два списка для создания новых записей и для обновления существующих
     List<PersonData> createdPerson = new ArrayList<PersonData>();
@@ -106,13 +119,9 @@ def calculate() {
 
         PersonData personData = createPersonData(declarationFormPerson, asnuId);
 
-        long identificatePersonTime = System.currentTimeMillis();
+        List<PersonData> refBookPersonList = refbookPersonData.get(declarationFormPerson.id);
 
-        Date actualVersion = new Date();
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, actualVersion, logger);
-
-        println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
-        //logger.info("identificate: (" + (System.currentTimeMillis() - identificatePersonTime) + " ms)");
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, refBookPersonList, SIMILARITY_THRESHOLD, logger);
 
         declarationFormPerson.setPersonId(refBookPersonId)
 
@@ -286,6 +295,8 @@ def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb) {
  */
 def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
 
+    long time = System.currentTimeMillis();
+
     List<RefBookRecord> addressRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
         PersonData person = personList.get(i)
@@ -293,7 +304,13 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
         addressRecords.add(refBookRecord);
     }
 
+    println "create address "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
     List<Long> addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, addressRecords)
+
+    println "insert address "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
@@ -304,8 +321,14 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
         personRecords.add(refBookRecord);
     }
 
+    println "create person "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
     //сгенерированные идентификаторы справочника физлиц
     List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, personRecords)
+
+    println "insert person "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //создание записей справочников документы и идентфикаторы физлиц
     List<RefBookRecord> documentsRecords = new ArrayList<RefBookRecord>()
@@ -319,7 +342,14 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
     }
 
     List<Long> docIds = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, documentsRecords)
+
+    println "insert doc "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
     List<Long> taxIds = getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, taxpayerIdsRecords)
+
+    println "insert taxids "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //RefBook refBook = refBookFactory.get(RefBook.Id.PERSON.getId())
     //List<RefBookAttribute> attributes = refBook.getAttributes()

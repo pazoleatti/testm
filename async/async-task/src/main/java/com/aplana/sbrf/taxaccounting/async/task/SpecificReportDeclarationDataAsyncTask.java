@@ -147,10 +147,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
                             strSubreportParamValues.append(SDF_DD_MM_YYYY.get().format((Date) value));
                             break;
                         case REFBOOK:
-                            String strVal = "";
-                            if (value != null) {
-                                strVal = refBookHelper.dereferenceValue((Long) value, declarationSubreportParam.getRefBookAttributeId());
-                            }
+                            String strVal = refBookHelper.dereferenceValue((Long) value, declarationSubreportParam.getRefBookAttributeId());
                             strSubreportParamValues.append(strVal);
                             break;
                     }
@@ -158,12 +155,14 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
                 strSubreportParamValues.append("\"");
                 strSubreportParamValues.append(", ");
             }
-            strSubreportParamValues = strSubreportParamValues.delete(strSubreportParamValues.length() - 2, strSubreportParamValues.length());
         }
+
+        strSubreportParamValues = strSubreportParamValues.delete(strSubreportParamValues.length() - 2, strSubreportParamValues.length());
+
         if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\", %s.", declaration.getTaxOrganCode(), declaration.getKpp(), strSubreportParamValues.toString());
+            str = String.format(", %s%s.", formatDeclarationDataInfo(declaration), strSubreportParamValues.toString());
         } else {
-            str = strSubreportParamValues.toString()+".";
+            str = strSubreportParamValues.toString() + ".";
         }
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
@@ -221,9 +220,9 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
             strSubreportParamValues = strSubreportParamValues.delete(strSubreportParamValues.length() - 2, strSubreportParamValues.length());
         }
         if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\"%s.", declaration.getTaxOrganCode(), declaration.getKpp(), strSubreportParamValues.toString());
+            str = String.format(", %s%s.", formatDeclarationDataInfo(declaration), strSubreportParamValues.toString());
         } else {
-            str = strSubreportParamValues.toString()+".";
+            str = strSubreportParamValues.toString() + ".";
         }
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
