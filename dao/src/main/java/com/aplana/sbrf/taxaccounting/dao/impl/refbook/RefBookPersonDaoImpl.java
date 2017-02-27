@@ -373,7 +373,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
 
     @Override
-    public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(long declarationDataId, long asnuId, Date version) {
+    public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(long declarationDataId, Long asnuId, Date version) {
 
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("pDeclarationId", declarationDataId);
