@@ -11,5 +11,6 @@
 		<jdbc:script location="classpath:data/ReportPeriod.sql" encoding="UTF-8"/>
 		<jdbc:script location="classpath:data/DeclarationType.sql" encoding="UTF-8"/>
 		<jdbc:script location="classpath:data/DeclarationTemplate.sql" encoding="UTF-8"/>
+		<jdbc:script location="classpath:data/BlobData.sql" encoding="UTF-8"/>
 	</jdbc:initialize-database>
 </beans>

@@ -295,6 +295,8 @@ def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb) {
  */
 def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
 
+    long time = System.currentTimeMillis();
+
     List<RefBookRecord> addressRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
         PersonData person = personList.get(i)
@@ -302,7 +304,13 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
         addressRecords.add(refBookRecord);
     }
 
+    println "create address "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
     List<Long> addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, addressRecords)
+
+    println "insert address "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
@@ -313,8 +321,14 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
         personRecords.add(refBookRecord);
     }
 
+    println "create person "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
     //сгенерированные идентификаторы справочника физлиц
     List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, personRecords)
+
+    println "insert person "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //создание записей справочников документы и идентфикаторы физлиц
     List<RefBookRecord> documentsRecords = new ArrayList<RefBookRecord>()
@@ -328,7 +342,14 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
     }
 
     List<Long> docIds = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, documentsRecords)
+
+    println "insert doc "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
     List<Long> taxIds = getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, taxpayerIdsRecords)
+
+    println "insert taxids "+(System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //RefBook refBook = refBookFactory.get(RefBook.Id.PERSON.getId())
     //List<RefBookAttribute> attributes = refBook.getAttributes()

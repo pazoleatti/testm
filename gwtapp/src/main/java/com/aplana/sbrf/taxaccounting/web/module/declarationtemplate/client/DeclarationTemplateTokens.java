@@ -24,6 +24,9 @@ public final class DeclarationTemplateTokens {
     public static final String declarationTemplateSubreportsLabel = "Специфические отчеты";
     public static final int declarationTemplateSubreportsPriority = 2;
 
+    public static final String declarationTemplateFiles = "!declarationTemplateFiles";
+    public static final String declarationTemplateFilesLabel = "Файлы";
+    public static final int declarationTemplateFilesPriority = 3;
 
     public static final String declarationTemplate = "!declarationTemplate";
     public static final String declarationVersionList = "!declarationVersionList";

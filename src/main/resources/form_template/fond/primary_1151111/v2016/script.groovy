@@ -2623,6 +2623,14 @@ def calculateData() {
 
     long time = System.currentTimeMillis();
 
+    Date actualVersion = new Date();
+    Map<Long, List<PersonData>> refbookPersonData = refBookPersonService.findRefBookPersonByPrimaryRnuNdfl(declarationDataId, asnuId, actualVersion)
+
+    logger.info("findRefBookPersonByPrimaryRnuNdfl: "+refbookPersonData.size()+" (" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
+
+
     //Два списка для создания новых записей и для обновления существующих
     List<PersonData> createdPerson = new ArrayList<PersonData>();
     List<PersonData> updatedPerson = new ArrayList<PersonData>();
@@ -2633,9 +2641,9 @@ def calculateData() {
 
         long identificatePersonTime = System.currentTimeMillis();
 
-        //актуальная версия
-        Date actualVersion = new Date();
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, actualVersion, logger);
+        List<PersonData> refBookPersonList = refbookPersonData.get(declarationFormPerson.id);
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, refBookPersonList, SIMILARITY_THRESHOLD, logger);
+
         declarationFormPerson.setPersonId(refBookPersonId)
 
         println "identificate " + (System.currentTimeMillis() - identificatePersonTime);

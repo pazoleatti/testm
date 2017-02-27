@@ -569,4 +569,40 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             return new ArrayList<DeclarationTemplateFile>();
         }
     }
+
+    @Override
+    public void deleteTemplateFile(final Long declarationTemplateId, final List<String> blobDataIds) {
+        getJdbcTemplate().batchUpdate("delete from DECLARATION_TEMPLATE_FILE where blob_data_id = ? and declaration_template_id = ?",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setString(1, blobDataIds.get(i));
+                        ps.setLong(2, declarationTemplateId);
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return blobDataIds.size();
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void createTemplateFile(final Long declarationTemplateId, final List<String> blobDataIds) {
+        getJdbcTemplate().batchUpdate("insert into DECLARATION_TEMPLATE_FILE(blob_data_id, declaration_template_id) values(?, ?)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setString(1, blobDataIds.get(i));
+                        ps.setLong(2, declarationTemplateId);
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return blobDataIds.size();
+                    }
+                }
+        );
+    }
 }

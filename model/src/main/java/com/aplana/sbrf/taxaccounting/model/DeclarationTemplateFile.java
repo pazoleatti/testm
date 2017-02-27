@@ -27,4 +27,22 @@ public class DeclarationTemplateFile implements Serializable{
     public void setBlobDataId(String blobDataId) {
         this.blobDataId = blobDataId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DeclarationTemplateFile that = (DeclarationTemplateFile) o;
+
+        if (!fileName.equals(that.fileName)) return false;
+        return blobDataId.equals(that.blobDataId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = fileName.hashCode();
+        result = 31 * result + blobDataId.hashCode();
+        return result;
+    }
 }

@@ -18,6 +18,7 @@ public class AddRefBookRowVersionAction  extends UnsecuredActionImpl<AddRefBookR
     Long recordId;
     Date versionFrom;
     Date versionTo;
+    private Long sourceUniqueRecordId;
 
     public List<Map<String, RefBookValueSerializable>> getRecords() {
         return records;
@@ -57,6 +58,14 @@ public class AddRefBookRowVersionAction  extends UnsecuredActionImpl<AddRefBookR
 
     public void setRecordId(Long recordId) {
         this.recordId = recordId;
+    }
+
+    public Long getSourceUniqueRecordId() {
+        return sourceUniqueRecordId;
+    }
+
+    public void setSourceUniqueRecordId(Long sourceUniqueRecordId) {
+        this.sourceUniqueRecordId = sourceUniqueRecordId;
     }
 
     @Override
