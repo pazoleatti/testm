@@ -57,7 +57,7 @@ public interface DepartmentDeclarationTypeDao {
     /**
      * Добавляет назначения декларации
      */
-    void save(int departmentId, int declarationTypeId);
+    long save(int departmentId, int declarationTypeId);
     
     /**
      * Удаляет назначение декларации
@@ -87,4 +87,8 @@ public interface DepartmentDeclarationTypeDao {
      * @return список назначенных деклараций для выбранного налога и подразделений
      */
     int getAssignedDeclarationsCount(List<Long> departmentsIds, char taxType);
+
+    void savePerformers(final long ddtId, final List<Integer> performerIds);
+
+    void deletePerformers(int ddtId);
 }

@@ -6,9 +6,10 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 import java.util.List;
 
 public class AddDeclarationSourceAction  extends UnsecuredActionImpl<AddDeclarationSourceResult> {
-	List<Integer> departmentId;
-	List<Long> declarationTypeId;
-	TaxType taxType;
+    private List<Integer> departmentId;
+    private List<Long> declarationTypeId;
+    private TaxType taxType;
+    private List<Integer> performers;
 
 	public TaxType getTaxType() {
 		return taxType;
@@ -33,4 +34,12 @@ public class AddDeclarationSourceAction  extends UnsecuredActionImpl<AddDeclarat
 	public void setDeclarationTypeId(List<Long> declarationTypeId) {
 		this.declarationTypeId = declarationTypeId;
 	}
+
+    public List<Integer> getPerformers() {
+        return performers;
+    }
+
+    public void setPerformers(List<Integer> performers) {
+        this.performers = performers;
+    }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 public class EditFormsAction extends UnsecuredActionImpl<EditFormResult> implements ActionName {
     private List<FormTypeKind> formTypeKinds;
     private List<Integer> performers;
+    private boolean isForm = true;
 
     public List<FormTypeKind> getFormTypeKinds() {
         return formTypeKinds;
@@ -27,6 +28,14 @@ public class EditFormsAction extends UnsecuredActionImpl<EditFormResult> impleme
 
     public void setPerformers(List<Integer> performers) {
         this.performers = performers;
+    }
+
+    public boolean isForm() {
+        return isForm;
+    }
+
+    public void setForm(boolean isForm) {
+        this.isForm = isForm;
     }
 
     @Override
