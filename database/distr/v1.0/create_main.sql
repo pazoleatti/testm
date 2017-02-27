@@ -1115,31 +1115,31 @@ comment on table ndfl_person is 'Данные о физическом лице -
 comment on column ndfl_person.id is 'Суррогатный ключ';
 comment on column ndfl_person.declaration_data_id is 'Идентификатор налоговой формы к которой относятся данные';
 comment on column ndfl_person.person_id is 'Идентификатор в справочнике физлиц';
-comment on column ndfl_person.row_num is 'Порядковый номер строки';
-comment on column ndfl_person.inp is 'Уникальный код клиента';
-comment on column ndfl_person.snils is 'Страховой номер индивидуального лицевого счёта';
-comment on column ndfl_person.last_name is 'Фамилия';
-comment on column ndfl_person.first_name is 'Имя';
-comment on column ndfl_person.middle_name is 'Отчество';
-comment on column ndfl_person.birth_day is 'Дата рождения';
+comment on column ndfl_person.person_id is 'Физическое лицо';
+comment on column ndfl_person.row_num is '№пп';
+comment on column ndfl_person.inp is 'Налогоплательщик.ИНП';
+comment on column ndfl_person.snils is 'Налогоплательщик.СНИЛС';
+comment on column ndfl_person.last_name is 'Налогоплательщик.Фамилия';
+comment on column ndfl_person.first_name is 'Налогоплательщик.Имя';
+comment on column ndfl_person.middle_name is 'Налогоплательщик.Отчество';
+comment on column ndfl_person.birth_day is 'Налогоплательщик.Дата рождения';
 comment on column ndfl_person.citizenship is 'Гражданство (код страны)';
-comment on column ndfl_person.inn_np is 'ИНН  физического лица';
-comment on column ndfl_person.inn_foreign is 'ИНН  иностранного гражданина';
-comment on column ndfl_person.id_doc_type is 'Код вида документа';
-comment on column ndfl_person.id_doc_number is 'Серия и номер документа';
-comment on column ndfl_person.status is 'Статус';
-comment on column ndfl_person.post_index is 'Индекс';
-comment on column ndfl_person.region_code is 'Код Региона';
-comment on column ndfl_person.area is 'Район';
-comment on column ndfl_person.city is 'Город';
-comment on column ndfl_person.locality is 'Населенный пункт';
-comment on column ndfl_person.street is 'Улица';
-comment on column ndfl_person.house is 'Дом';
-comment on column ndfl_person.building is 'Корпус';
-comment on column ndfl_person.flat is 'Квартира';
-comment on column ndfl_person.country_code is 'Код страны';
-comment on column ndfl_person.address is 'Адрес';
-comment on column ndfl_person.additional_data is 'Дополнительная информация';
+comment on column ndfl_person.inn_np is 'ИНН.В Российской федерации';
+comment on column ndfl_person.inn_foreign is 'ИНН.В стране гражданства';
+comment on column ndfl_person.id_doc_type is 'Документ удостоверяющий личность.Код';
+comment on column ndfl_person.id_doc_number is 'Документ удостоверяющий личность.Номер';
+comment on column ndfl_person.status is 'Статус (Код)';
+comment on column ndfl_person.post_index is 'Адрес регистрации в Российской Федерации.Индекс';
+comment on column ndfl_person.region_code is 'Адрес регистрации в Российской Федерации.Код субъекта';
+comment on column ndfl_person.area is 'Адрес регистрации в Российской Федерации.Район';
+comment on column ndfl_person.city is 'Адрес регистрации в Российской Федерации.Город';
+comment on column ndfl_person.locality is 'Адрес регистрации в Российской Федерации.Населенный пункт';
+comment on column ndfl_person.street is 'Адрес регистрации в Российской Федерации.Улица';
+comment on column ndfl_person.house is 'Адрес регистрации в Российской Федерации.Дом';
+comment on column ndfl_person.building is 'Адрес регистрации в Российской Федерации.Корпус';
+comment on column ndfl_person.flat is 'Адрес регистрации в Российской Федерации.Квартира';
+comment on column ndfl_person.country_code is 'Код страны проживания вне РФ';
+comment on column ndfl_person.address is 'Адрес проживания вне РФ';
 
 create sequence seq_ndfl_person start with 1000;
 ------------------------------------------------------------------------------------------------------
@@ -1176,29 +1176,29 @@ create table ndfl_person_income
 
 comment on table ndfl_person_income is 'Сведения о доходах физического лица';
 comment on column ndfl_person_income.source_id is 'Cсылка на запись которая является источником при формирование консолидированной формы';
-comment on column ndfl_person_income.row_num is 'Порядковый номер строки';
-comment on column ndfl_person_income.income_code is 'Код вида дохода';
-comment on column ndfl_person_income.income_type is 'Признак вида дохода';
-comment on column ndfl_person_income.operation_id is 'Номер операции';
-comment on column ndfl_person_income.oktmo is 'ОКТМО';
-comment on column ndfl_person_income.kpp is 'КПП';
-comment on column ndfl_person_income.income_accrued_date is 'Дата начисления дохода';
-comment on column ndfl_person_income.income_payout_date is 'Дата выплаты дохода';
-comment on column ndfl_person_income.income_accrued_summ is 'Сумма начисленного дохода';
-comment on column ndfl_person_income.income_payout_summ is 'Сумма выплаченного дохода';
-comment on column ndfl_person_income.total_deductions_summ is 'Общая сумма вычетов';
+comment on column ndfl_person_income.row_num is '№пп';
+comment on column ndfl_person_income.operation_id is 'ID операции';
+comment on column ndfl_person_income.income_code is 'Доход.Вид.Код';
+comment on column ndfl_person_income.income_type is 'Доход.Вид.Признак';
+comment on column ndfl_person_income.oktmo is 'Доход.Источник выплаты.ОКТМО';
+comment on column ndfl_person_income.kpp is 'Доход.Источник выплаты.КПП';
+comment on column ndfl_person_income.income_accrued_date is 'Доход.Дата.Начисление';
+comment on column ndfl_person_income.income_payout_date is 'Доход.Дата.Выплата';
+comment on column ndfl_person_income.income_accrued_summ is 'Доход.Сумма.Начисление';
+comment on column ndfl_person_income.income_payout_summ is 'Доход.Сумма.Выплата';
+comment on column ndfl_person_income.total_deductions_summ is 'Сумма вычета';
 comment on column ndfl_person_income.tax_base is 'Налоговая база';
-comment on column ndfl_person_income.tax_rate is 'Ставка налога';
-comment on column ndfl_person_income.tax_date is 'Дата налога';
-comment on column ndfl_person_income.calculated_tax is 'Сумма налога исчисленная';
-comment on column ndfl_person_income.withholding_tax is 'Сумма налога удержанная';
-comment on column ndfl_person_income.not_holding_tax is 'Сумма налога, не удержанная налоговым агентом';
-comment on column ndfl_person_income.overholding_tax is 'Сумма налога, излишне удержанная налоговым агентом';
-comment on column ndfl_person_income.refound_tax is 'Сумма возвращенного налога';
-comment on column ndfl_person_income.tax_transfer_date is 'Срок перечисления налога';
-comment on column ndfl_person_income.payment_date is 'Дата платежного поручения';
-comment on column ndfl_person_income.payment_number is 'Номер платежного поручения перечисления налога в бюджет';
-comment on column ndfl_person_income.tax_summ is 'Сумма налога перечисленная';
+comment on column ndfl_person_income.tax_rate is 'НДФЛ.Процентная ставка';
+comment on column ndfl_person_income.tax_date is 'НДФЛ.Расчет.Дата';
+comment on column ndfl_person_income.calculated_tax is 'НДФЛ.Расчет.Сумма.Исчисленный';
+comment on column ndfl_person_income.withholding_tax is 'НДФЛ.Расчет.Сумма.Удержанный';
+comment on column ndfl_person_income.not_holding_tax is 'НДФЛ.Расчет.Сумма.Не удержанный';
+comment on column ndfl_person_income.overholding_tax is 'НДФЛ.Расчет.Сумма.Излишне удержанный';
+comment on column ndfl_person_income.refound_tax is 'НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику';
+comment on column ndfl_person_income.tax_transfer_date is 'НДФЛ.Перечисление в бюджет.Срок';
+comment on column ndfl_person_income.payment_date is 'НДФЛ.Перечисление в бюджет.Платежное поручение.Дата';
+comment on column ndfl_person_income.payment_number is 'НДФЛ.Перечисление в бюджет.Платежное поручение.Номер';
+comment on column ndfl_person_income.tax_summ is 'НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма';
 
 create sequence seq_ndfl_person_income start with 1000;
 ------------------------------------------------------------------------------------------------------
@@ -1228,24 +1228,21 @@ comment on table ndfl_person_deduction is 'Стандартные, социал�
 
 comment on column ndfl_person_deduction.source_id is 'Cсылка на запись которая является источником при формирование консолидированной формы';
 
-comment on column ndfl_person_deduction.row_num is 'Порядковый номер строки';
-comment on column ndfl_person_deduction.operation_id is 'Номер операции';
+comment on column ndfl_person_deduction.row_num is '№пп';
+comment on column ndfl_person_deduction.operation_id is 'Начисленный доход.ID операции';
 comment on column ndfl_person_deduction.type_code is 'Код вычета';
-
-comment on column ndfl_person_deduction.notif_type is 'Тип уведомления (Документа о праве на налоговый вычет)';
-comment on column ndfl_person_deduction.notif_date is 'Дата выдачи уведомления';
-comment on column ndfl_person_deduction.notif_num is 'Номер уведомления, подтверждающего право на имущественный налоговый вычет';
-comment on column ndfl_person_deduction.notif_source is 'Код налогового органа, выдавшего уведомление';
-comment on column ndfl_person_deduction.notif_summ is 'Сумма в соответствии с документом на вычет';
-
-comment on column ndfl_person_deduction.income_accrued is 'Дата начисления дохода';
-comment on column ndfl_person_deduction.income_code is 'Код дохода';
-comment on column ndfl_person_deduction.income_summ is 'Сумма начисленного дохода';
-
-comment on column ndfl_person_deduction.period_prev_date is 'Дата применения вычета в предыдущем периоде';
-comment on column ndfl_person_deduction.period_prev_summ is 'Сумма вычета применения вычета в предыдущем периоде';
-comment on column ndfl_person_deduction.period_curr_date is 'Дата применения вычета в текущем периоде';
-comment on column ndfl_person_deduction.period_curr_summ is 'Сумма вычета применения вычета в текущкм периоде';
+comment on column ndfl_person_deduction.notif_type is 'Документ о праве на налоговый вычет.Тип';
+comment on column ndfl_person_deduction.notif_date is 'Документ о праве на налоговый вычет.Дата';
+comment on column ndfl_person_deduction.notif_num is 'Документ о праве на налоговый вычет.Номер';
+comment on column ndfl_person_deduction.notif_source is 'Документ о праве на налоговый вычет.Код источника';
+comment on column ndfl_person_deduction.notif_summ is 'Документ о праве на налоговый вычет.Сумма';
+comment on column ndfl_person_deduction.income_accrued is 'Начисленный доход.Дата';
+comment on column ndfl_person_deduction.income_code is 'Начисленный доход.Код дохода';
+comment on column ndfl_person_deduction.income_summ is 'Начисленный доход.Сумма';
+comment on column ndfl_person_deduction.period_prev_date is 'Применение вычета.Предыдущий период.Дата';
+comment on column ndfl_person_deduction.period_prev_summ is 'Применение вычета.Предыдущий период.Сумма';
+comment on column ndfl_person_deduction.period_curr_date is 'Применение вычета.Текущий период.Дата';
+comment on column ndfl_person_deduction.period_curr_summ is 'Применение вычета.Текущий период.Сумма';
 
 create sequence seq_ndfl_person_deduction start with 1000;
 ------------------------------------------------------------------------------------------------------
@@ -1264,13 +1261,12 @@ create table ndfl_person_prepayment
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
 
-comment on column ndfl_person_prepayment.source_id is  'Cсылка на запись которая является источником при формирование консолидированной формы';
-comment on column ndfl_person_prepayment.row_num is 'Порядковый номер строки';
-comment on column ndfl_person_prepayment.operation_id is 'Номер операции';
+comment on column ndfl_person_prepayment.row_num is '№пп';
+comment on column ndfl_person_prepayment.operation_id is 'ID операции';
 comment on column ndfl_person_prepayment.summ is 'Сумма фиксированного авансового платежа';
-comment on column ndfl_person_prepayment.notif_num is 'Номер уведомления, подтверждающего право на имущественный налоговый вычет';
-comment on column ndfl_person_prepayment.notif_date is 'Дата выдачи уведомления';
-comment on column ndfl_person_prepayment.notif_source is 'Код налогового органа, выдавшего уведомление';
+comment on column ndfl_person_prepayment.notif_num is 'Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Номер уведомления';
+comment on column ndfl_person_prepayment.notif_date is 'Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Дата выдачи уведомления';
+comment on column ndfl_person_prepayment.notif_source is 'Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление';
 
 create sequence seq_ndfl_person_prepayment start with 1000;
 ------------------------------------------------------------------------------------------------------
