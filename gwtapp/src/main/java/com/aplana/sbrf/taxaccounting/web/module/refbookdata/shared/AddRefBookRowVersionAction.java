@@ -13,19 +13,19 @@ import java.util.Map;
  */
 public class AddRefBookRowVersionAction  extends UnsecuredActionImpl<AddRefBookRowVersionResult> implements ActionName {
 
-    List<Map<String, RefBookValueSerializable>> records;
+    Map<String, RefBookValueSerializable> record;
     long refBookId;
     Long recordId;
     Date versionFrom;
     Date versionTo;
     private Long sourceUniqueRecordId;
 
-    public List<Map<String, RefBookValueSerializable>> getRecords() {
-        return records;
+    public Map<String, RefBookValueSerializable> getRecord() {
+        return record;
     }
 
-    public void setRecords(List<Map<String, RefBookValueSerializable>> records) {
-        this.records = records;
+    public void setRecord(Map<String, RefBookValueSerializable> record) {
+        this.record = record;
     }
 
     public long getRefBookId() {
