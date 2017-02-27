@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.sql.Ref;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,24 +47,26 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 
 	@Override
 	public GetDeclarationListResult execute(GetDeclarationList action, ExecutionContext executionContext) throws ActionException {
-		if(action == null || action.getDeclarationFilter() == null){
+		if (action == null || action.getDeclarationFilter() == null){
 			return null;
 		}
 
         boolean wasEmpty = false;
 
+        TAUser currentUser = securityService.currentUserInfo().getUser();
+
         if (action.getDeclarationFilter().getDepartmentIds() == null || action.getDeclarationFilter().getDepartmentIds().isEmpty()) {
             action.getDeclarationFilter().setDepartmentIds(departmentService.getTaxFormDepartments(
-                    securityService.currentUserInfo().getUser(), asList(action.getDeclarationFilter().getTaxType()), null, null));
+                    currentUser, asList(action.getDeclarationFilter().getTaxType()), null, null));
             wasEmpty = true;
         }
 
         // Для всех пользователей, кроме пользователей с ролью "Контролер УНП" происходит принудительная фильтрация
         // деклараций по подразделениям
-        if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP) && !wasEmpty) {
+        if (!currentUser.hasRole(TARole.ROLE_CONTROL_UNP) && !wasEmpty) {
             // Список доступных подразделений
             List<Integer> availableList = departmentService.getTaxFormDepartments(
-                    securityService.currentUserInfo().getUser(), asList(action.getDeclarationFilter().getTaxType()), null, null);
+                    currentUser, asList(action.getDeclarationFilter().getTaxType()), null, null);
 
             // Если пользовательская фильтрация не задана, то выбираем по всем доступным подразделениям
             // Если пользовательская фильтрация задана, то выбираем по всем доступным подразделениям,
@@ -92,6 +94,8 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
                 }
             }
         }
+
+        action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
 
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();

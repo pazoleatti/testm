@@ -110,9 +110,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo) {
-        String sql = "select " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
+        String sql = "select /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
                 " from NDFL_PERSON_INCOME npi where " +
-                "npi.NDFL_PERSON_ID = :ndflPersonId and (npi.OKTMO is null or npi.OKTMO = :oktmo) and npi.KPP = :kpp";
+                "npi.NDFL_PERSON_ID = :ndflPersonId and npi.OKTMO = :oktmo and npi.KPP = :kpp";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
                 .addValue("oktmo", oktmo)
@@ -150,9 +150,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " WHERE npi.ndfl_person_id = :ndflPersonId" +
-                " AND (((npi.tax_date between :startDate AND :endDate) OR npi.tax_date IS NULL)" +
-                " OR (npi.payment_date between :startDate AND :endDate) OR npi.payment_date IS NULL)" +
-                " AND (npi.tax_date IS NOT NULL OR npi.payment_date IS NOT NULL)";
+                " AND npi.tax_date between :startDate AND :endDate" +
+                " UNION SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
+                " WHERE npi.ndfl_person_id = :ndflPersonId" +
+                " AND npi.payment_date between :startDate AND :endDate";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
                 .addValue("startDate", startDate)
@@ -306,11 +307,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
-        String sql = "SELECT DISTINCT " + createColumns(NdflPerson.COLUMNS, "np") + " FROM ndfl_person np " +
+        String sql = "SELECT DISTINCT /*+rule */" + createColumns(NdflPerson.COLUMNS, "np") + " FROM ndfl_person np " +
                 "INNER JOIN ndfl_person_income npi " +
                 "ON np.id = npi.ndfl_person_id " +
-                "WHERE (npi.kpp = :kpp or npi.kpp is null) " +
-                "AND (npi.oktmo = :oktmo or npi.oktmo is null) " +
+                "WHERE npi.kpp = :kpp " +
+                "AND npi.oktmo = :oktmo " +
                 "AND np.DECLARATION_DATA_ID in (select id from DECLARATION_DATA where id = :declarationDataId)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declarationDataId", declarationDataId)

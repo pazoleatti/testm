@@ -112,6 +112,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("User found, login = " + user.getLogin() + ", id = " + user.getId());
 			}
+
 			List<TARole> userRoles = getJdbcTemplate().query(
 				"select id, alias, name from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?)",
 				new Object[] { user.getId() },
@@ -119,7 +120,20 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				TA_ROLE_MAPPER
 			);
 			user.setRoles(userRoles);
-		}
+
+            List<Long> asnuIds = getJdbcTemplate().query(
+                    "select asnu_id from sec_user_asnu sua where sua.user_id = ?",
+                    new Object[] { user.getId() },
+                    new int[] { Types.NUMERIC },
+                    new RowMapper<Long>() {
+                        @Override
+                        public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return SqlUtils.getLong(rs, "asnu_id");
+                        }
+                    }
+            );
+            user.setAsnuIds(asnuIds);
+        }
 	}
 
 	@Override

@@ -25,6 +25,9 @@ prompt department
 prompt declaration_kind
 @@declaration_kind;
 
+prompt declaration_type
+@@declaration_type;
+
 prompt states
 @@states;
 

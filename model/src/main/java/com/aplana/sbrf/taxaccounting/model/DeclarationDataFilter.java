@@ -50,6 +50,8 @@ public class DeclarationDataFilter implements Serializable {
 
     private String note;
 
+    private List<Long> asnuIds;
+
     /*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
 
@@ -223,5 +225,13 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setDeclarationDataIdStr(String declarationDataIdStr) {
         this.declarationDataIdStr = declarationDataIdStr;
+    }
+
+    public List<Long> getAsnuIds() {
+        return asnuIds;
+    }
+
+    public void setAsnuIds(List<Long> asnuIds) {
+        this.asnuIds = asnuIds;
     }
 }
