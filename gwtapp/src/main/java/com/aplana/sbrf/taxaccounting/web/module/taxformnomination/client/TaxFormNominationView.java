@@ -255,19 +255,41 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			}
 		};
 
-		decGrid.addColumn(checkBoxColumn);
+        TextColumn<FormTypeKind> performerColumn = new TextColumn<FormTypeKind>() {
+            @Override
+            public String getValue(FormTypeKind object) {
+                if (object.getPerformers() != null && !object.getPerformers().isEmpty()) {
+                    StringBuilder performers = new StringBuilder();
+                    for (Department performer : object.getPerformers()) {
+                        if (performers.length() > 0 ) {
+                            performers.append("; ");
+                        }
+                        performers.append(performer.getFullName());
+                    }
+                    return performers.toString();
+                } else {
+                    return "";
+                }
+            }
+        };
+
+        decGrid.addColumn(checkBoxColumn);
 		decGrid.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
 
 		decGrid.addResizableColumn(departmentColumn, "Подразделение");
 
-		declarationTypeHeader = decGrid.createResizableHeader("Вид налоговой формы", declarationType);
+		declarationTypeHeader = decGrid.createResizableHeader("Макет", declarationType);
 		decGrid.addColumn(declarationType, declarationTypeHeader);
 
-		departmentColumn.setSortable(true);
+        decGrid.addResizableColumn(performerColumn, "Исполнитель");
+
+        departmentColumn.setSortable(true);
 		declarationType.setSortable(true);
+        performerColumn.setSortable(true);
 
 		departmentColumn.setDataStoreName(TaxNominationColumnEnum.DEPARTMENT_FULL_NAME.name());
 		declarationType.setDataStoreName(TaxNominationColumnEnum.DEC_TYPE.name());
+        performerColumn.setDataStoreName(TaxNominationColumnEnum.PERFORMER.name());
 
 		decGrid.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(decGrid));
 		decGrid.getColumnSortList().setLimit(1);
@@ -282,7 +304,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			editAnchor.setEnabled(selectedCount > 0);
 		} else {
 			int selectedCount = getSelectedItemsOnDeclarationGrid().size();
-			cancelAnchor.setEnabled(selectedCount > 0);
+            cancelAnchor.setEnabled(selectedCount > 0);
+            editAnchor.setEnabled(selectedCount > 0);
 		}
 	}
 
@@ -324,9 +347,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	 * и применить изменения к представлению
 	 */
 	private void initView(boolean isForm) {
-		receiverSourcesKindTitle.setTitle(taxType.isTax() ? "Тип налоговой формы" : "Тип формы");
-		receiverSourcesTypeTitle.setTitle(taxType.isTax() ? "Вид налоговой формы" : "Вид формы");
-		declarationTypeHeader.setTitle("Вид налоговой формы");
 		formGrid.redrawHeaders();
 		decGrid.redrawHeaders();
 
@@ -353,10 +373,10 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			declarationPager.setVisible(false);
 		} else {
 			this.isForm = false;
-			// Кнопка "Редактировать" — не отображается
-			editAnchor.setVisible(false);
-			// Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
-			cancelAnchor.setEnabled(false);
+            editAnchor.setEnabled(false);
+            editAnchor.setVisible(true);
+            // Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
+            cancelAnchor.setEnabled(false);
 			// показать соответствующую таблицу
 			formGridWrapper.setVisible(false);
 			declarationGridWrapper.setVisible(true);
@@ -453,7 +473,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	@UiHandler("editAnchor")
 	public void clickEdit(ClickEvent event) {
 		if(getUiHandlers() != null){
-			getUiHandlers().onClickEditFormDestinations(getSelectedItemsOnFormGrid());
+			getUiHandlers().onClickEditFormDestinations(getSelectedItemsOnDeclarationGrid());
 		}
 	}
 

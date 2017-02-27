@@ -147,7 +147,7 @@ public class TaxFormNominationPresenter
                                 TaxFormNominationPresenter.this.taxType = nType;
                                 boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
                                 getView().init(nType, isForm);
-                                formDestinationsPresenter.initForm(nType);
+                                declarationDestinationsPresenter.initForm(nType);
 
                             }
                         }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));
@@ -176,7 +176,7 @@ public class TaxFormNominationPresenter
 
     @Override
     public void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds) {
-        formDestinationsPresenter.initAndShowEditDialog(this, formTypeKinds, taxType);
+        declarationDestinationsPresenter.initAndShowEditDialog(this, formTypeKinds, taxType);
     }
 
     @Override

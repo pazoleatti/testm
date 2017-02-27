@@ -4,7 +4,7 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:a="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
+             xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
         >
     <ui:style>
         .content {
@@ -32,40 +32,41 @@
             padding-right: 5px;
         }
 
-        /*.datePo{
-            padding-left:  10px;
+        .datePo {
+            padding-left: 10px;
             padding-right: 10px;
-        }*/
+        }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения налоговых форм" ui:field="modalWindowTitle">
+    <dw:ModalWindow iconUrl="resources/img/add.png" ui:field="modalWindowTitle">
         <g:VerticalPanel height="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
+
             <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
-                <!-- эта штука понадобится в 0.3.7
-                    <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}" visible="false">
-                        <g:Label text="Период с" addStyleNames="{style.labels}"/>
-                        <d:DateMaskBoxPicker width="110px"/>
-                        <g:Label text="по " addStyleNames="{style.datePo}"/>
-                        <d:DateMaskBoxPicker width="104px"/>
-                    </g:HorizontalPanel>
-                -->
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Подразделение" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="250px"/>
+                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="300px"
+                                                    labelWordWrap="false"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
-                    <g:Label ui:field="declarationTypeTitle" text="Вид налоговой формы" addStyleNames="{style.labels}"/>
-                    <r:RefBookPickerWidget ui:field="declarationTypeId" attributeIdInt="2071" searchEnabled="false" versionEnabled="false"
-                                           isHierarchical="false" multiSelect="true" width="250px" title="Выбор налоговой формы"/>
+                    <g:Label ui:field="formTypeLabel" text="Макет" addStyleNames="{style.labels}"/>
+                    <r:RefBookPickerWidget labelWordWrap="false" ui:field="formTypeId" attributeIdInt="2071" versionEnabled="false"
+                                           isHierarchical="false" multiSelect="true" width="300px" title="Макеты"/>
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel spacing="1" verticalAlignment="middle">
+                    <g:Label text="Исполнитель" addStyleNames="{style.labels}"/>
+                    <a:DepartmentPickerPopupWidget ui:field="performersPickerWidget" multiselection="true" width="300px"
+                                                   labelWordWrap="false"/>
                 </g:HorizontalPanel>
 
             </g:VerticalPanel>
 
             <style:Bar addStyleNames="{style.footerPanel}">
                 <style:RightBar>
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="editButton" text="Изменить"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="createButton" text="Создать"/>
                     <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
                 </style:RightBar>
             </style:Bar>
@@ -73,4 +74,4 @@
         </g:VerticalPanel>
     </dw:ModalWindow>
 
-</ui:UiBinder>
+</ui:UiBinder> 
