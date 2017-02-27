@@ -336,7 +336,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         SQL.append("  ) \n");
         SQL.append("SELECT \n");
         SQL.append("  --фл \n");
-        SQL.append("  person.id AS person_id, person.record_id AS person_record_id, person.last_name AS last_name, person.first_name AS first_name, person.middle_name AS middle_name, person.sex AS sex, person.birth_date AS birth_date, person.inn AS inn, person.inn_foreign AS inn_foreign, person.snils AS snils, person.pension AS pension, person.medical AS midical, person.social AS social, person.employee AS employee, \n");
+        SQL.append("  dubl.last_name AS ndfl_person_ln, dubl.id AS ndfl_person_id, person.id AS person_id, person.record_id AS person_record_id, person.last_name AS last_name, person.first_name AS first_name, person.middle_name AS middle_name, person.sex AS sex, person.birth_date AS birth_date, person.inn AS inn, person.inn_foreign AS inn_foreign, person.snils AS snils, person.pension AS pension, person.medical AS midical, person.social AS social, person.employee AS employee, \n");
         SQL.append("  --ссылки на записи \n");
         SQL.append("  person.citizenship AS citizenship_ref_id, person.taxpayer_state AS status_ref_id, person.version, \n");
         SQL.append("  --документы \n");
@@ -345,7 +345,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         SQL.append("  addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id, addr.address \n");
         SQL.append("FROM t \n");
         SQL.append("JOIN \n");
-        SQL.append("  (SELECT lower(np.FAMILIA) last_name, lower(np.IMYA) first_name, lower(np.OTCHESTVO) middle_name, np.DATA_ROZD birthday, REPLACE(REPLACE(lower(np.SNILS), ' ', ''), '-', '') snils, np.INNFL inn, dt.id id_doc_type, REPLACE(lower(np.SER_NOM_DOC), ' ', '') id_doc_number, :pVersion calc_date \n");
+        SQL.append("  (SELECT np.id id, lower(np.FAMILIA) last_name, lower(np.IMYA) first_name, lower(np.OTCHESTVO) middle_name, np.DATA_ROZD birthday, REPLACE(REPLACE(lower(np.SNILS), ' ', ''), '-', '') snils, np.INNFL inn, dt.id id_doc_type, REPLACE(lower(np.SER_NOM_DOC), ' ', '') id_doc_number, :pVersion calc_date \n");
         SQL.append("  FROM raschsv_pers_sv_strah_lic np \n");
         SQL.append("  LEFT JOIN ref_book_doc_type dt \n");
         SQL.append("  ON (dt.code               = np.KOD_VID_DOC \n");
@@ -361,15 +361,14 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         SQL.append("AND REPLACE(lower(person.middle_name), ' ', '')      = dubl.middle_name \n");
         SQL.append("AND person.birth_date                                = dubl.birthday \n");
         SQL.append("OR (REPLACE(REPLACE(person.snils, ' ', ''), '-', '') = dubl.snils) \n");
-        SQL.append("OR (REPLACE(person.inn, ' ', '')                     = dubl.inn) ))) \n");
+        SQL.append("OR (REPLACE(person.inn, ' ', '')                     = dubl.inn)))) \n");
         SQL.append("LEFT JOIN ref_book_address addr \n");
         SQL.append("ON (addr.id = person.address) \n");
         SQL.append("LEFT JOIN ref_book_id_doc person_doc \n");
         SQL.append("ON (person_doc.person_id                            = person.id) \n");
-        SQL.append("WHERE ( (person_doc.doc_id                          = dubl.id_doc_type \n");
-        SQL.append("AND (REPLACE(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));");
+        SQL.append("WHERE ((person_doc.doc_id                           = dubl.id_doc_type \n");
+        SQL.append("AND (REPLACE(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)))");
         return SQL.toString();
-
     }
 
 

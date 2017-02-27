@@ -172,6 +172,8 @@ with t as (select
            group by record_id)
 select
   --фл
+  dubl.last_name        as ndfl_person_ln,
+  dubl.id               as ndfl_person_id,
   person.id             as person_id,
   person.record_id      as person_record_id,
   person.last_name      as last_name,
@@ -211,6 +213,7 @@ select
   addr.address
 from t
   join (select
+          np.id                                               id,
           lower(np.FAMILIA)                                   last_name,
           lower(np.IMYA)                                      first_name,
           lower(np.OTCHESTVO)                                 middle_name,
@@ -232,7 +235,8 @@ from t
   left join ref_book_address addr on (addr.id = person.address)
   left join ref_book_id_doc person_doc on (person_doc.person_id = person.id)
 where
-  ((person_doc.doc_id = dubl.id_doc_type and (replace(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));
+  ((person_doc.doc_id = dubl.id_doc_type and (replace(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)))
+
 
 
 
