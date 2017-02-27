@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -2655,6 +2656,9 @@ public final class ScriptUtils {
         }
     }
 
-
-
+    public static void checkInterrupted() {
+        if (Thread.interrupted()) {
+            throw new TAInterruptedException();
+        }
+    }
 }
