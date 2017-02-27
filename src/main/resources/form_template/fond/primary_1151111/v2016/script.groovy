@@ -2624,9 +2624,9 @@ def calculateData() {
     long time = System.currentTimeMillis();
 
     Date actualVersion = new Date();
-    Map<Long, List<PersonData>> refbookPersonData = refBookPersonService.findRefBookPersonByPrimaryRnuNdfl(declarationDataId, asnuId, actualVersion)
+    Map<Long, List<PersonData>> refbookPersonData = refBookPersonService.findRefBookPersonByPrimary1151111(declarationDataId, null, actualVersion)
 
-    logger.info("findRefBookPersonByPrimaryRnuNdfl: "+refbookPersonData.size()+" (" + (System.currentTimeMillis() - time) + " ms)");
+    //logger.info("findRefBookPersonByPrimary1151111: "+refbookPersonData.size()+" (" + (System.currentTimeMillis() - time) + " ms)");
 
     time = System.currentTimeMillis();
 

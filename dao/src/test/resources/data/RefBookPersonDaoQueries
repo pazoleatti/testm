@@ -156,3 +156,83 @@ where (taxpayer_id.as_nu = :asnuId and (lower(taxpayer_id.inp) = dubl.inp)
        or (person_doc.doc_id = dubl.id_doc_type and
            (replace(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));
 
+--/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+with t as (select
+             max(version) version,
+             record_id,
+             :pVersion    calc_date
+           from ref_book_person r
+           where status = 0 and version <= :pVersion and not exists(select 1
+                                                                    from ref_book_person r2
+                                                                    where
+                                                                      r2.record_id = r.record_id and r2.status != -1 and
+                                                                      r2.version between r.version +
+                                                                                         interval '1' day and :pVersion)
+           group by record_id)
+select
+  --фл
+  person.id             as person_id,
+  person.record_id      as person_record_id,
+  person.last_name      as last_name,
+  person.first_name     as first_name,
+  person.middle_name    as middle_name,
+  person.sex            as sex,
+  person.birth_date     as birth_date,
+  person.inn            as inn,
+  person.inn_foreign    as inn_foreign,
+  person.snils          as snils,
+  person.pension        as pension,
+  person.medical        as midical,
+  person.social         as social,
+  person.employee       as employee,
+  --ссылки на записи
+  person.citizenship    as citizenship_ref_id,
+  person.taxpayer_state as status_ref_id,
+  person.version,
+  --документы
+  person_doc.doc_number as document_number,
+  person_doc.doc_id     as document_type_ref_id,
+  -- адрес
+  addr.id               as addr_id,
+  addr.address_type,
+  addr.country_id,
+  addr.region_code,
+  addr.postal_code,
+  addr.district,
+  addr.city,
+  addr.locality,
+  addr.street,
+  addr.house,
+  addr.build,
+  addr.appartment,
+  addr.status,
+  addr.record_id,
+  addr.address
+from t
+  join (select
+          lower(np.FAMILIA)                                   last_name,
+          lower(np.IMYA)                                      first_name,
+          lower(np.OTCHESTVO)                                 middle_name,
+          np.DATA_ROZD                                        birthday,
+          replace(replace(lower(np.SNILS), ' ', ''), '-', '') snils,
+          np.INNFL                                            inn,
+          dt.id                                               id_doc_type,
+          replace(lower(np.SER_NOM_DOC), ' ', '')             id_doc_number,
+          :pVersion                                           calc_date
+        from raschsv_pers_sv_strah_lic np left join ref_book_doc_type dt on (dt.code = np.KOD_VID_DOC and dt.status = 0)
+        where declaration_data_id = :pDeclarationId) dubl on (dubl.calc_date = t.calc_date)
+  join ref_book_person person on (person.status = 0 and person.version = t.version and person.record_id = t.record_id
+                                  and ((replace(lower(person.last_name), ' ', '') = dubl.last_name and
+                                        replace(lower(person.first_name), ' ', '') = dubl.first_name and
+                                        replace(lower(person.middle_name), ' ', '') = dubl.middle_name and
+                                        person.birth_date = dubl.birthday
+                                        or (replace(replace(person.snils, ' ', ''), '-', '') = dubl.snils)
+                                        or (replace(person.inn, ' ', '') = dubl.inn))))
+  left join ref_book_address addr on (addr.id = person.address)
+  left join ref_book_id_doc person_doc on (person_doc.person_id = person.id)
+where
+  ((person_doc.doc_id = dubl.id_doc_type and (replace(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));
+
+
+

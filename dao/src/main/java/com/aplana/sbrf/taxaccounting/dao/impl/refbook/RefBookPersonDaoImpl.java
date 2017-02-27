@@ -295,7 +295,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
 
     }
 
-
     public Map<Long, List<PersonData>> findRefBookPersonByPrimaryRnuNdfl(long declarationDataId, long asnuId, Date version) {
 
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -304,23 +303,95 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         param.addValue("asnuId", asnuId);
         param.addValue("pVersion", version);
 
-        long time = System.currentTimeMillis();
+        //long time = System.currentTimeMillis();
+        //System.out.println("================================================================");
+        //System.out.println(FIND_REFBOOK_PERSON_BY_PRIMARY_RNU_NDFL_QUERY);
+        //System.out.println("================================================================");
 
         Map<Long, List<PersonData>> result = getNamedParameterJdbcTemplate().query(FIND_REFBOOK_PERSON_BY_PRIMARY_RNU_NDFL_QUERY, param, new PersonDataExtractor());
 
-        System.out.println("findRefBookPersonByPrimaryRnuNdfl size: " + result.size() + " (" + (System.currentTimeMillis() - time) + " ms)");
+        //System.out.println("findRefBookPersonByPrimaryRnuNdfl size: " + result.size() + " (" + (System.currentTimeMillis() - time) + " ms)");
 
         return result;
 
     }
 
-    @Override
-    public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(long declarationDataId, long asnuId, Date version) {
-        return null;
+    private static final String FIND_REFBOOK_PERSON_BY_PRIMARY_1151111_QUERY = buildFindRefBookPersonByPrimary1151111lQuery();
+
+    private static String buildFindRefBookPersonByPrimary1151111lQuery() {
+        StringBuilder SQL = new StringBuilder();
+        SQL.append("WITH t AS \n");
+        SQL.append("  (SELECT MAX(version) version, record_id, :pVersion calc_date \n");
+        SQL.append("  FROM ref_book_person r \n");
+        SQL.append("  WHERE status = 0 \n");
+        SQL.append("  AND version <= :pVersion \n");
+        SQL.append("  AND NOT EXISTS \n");
+        SQL.append("    (SELECT 1 \n");
+        SQL.append("    FROM ref_book_person r2 \n");
+        SQL.append("    WHERE r2.record_id = r.record_id \n");
+        SQL.append("    AND r2.status     !=             -1 \n");
+        SQL.append("    AND r2.version BETWEEN r.version + interval '1' DAY AND :pVersion \n");
+        SQL.append("    ) \n");
+        SQL.append("  GROUP BY record_id \n");
+        SQL.append("  ) \n");
+        SQL.append("SELECT \n");
+        SQL.append("  --фл \n");
+        SQL.append("  person.id AS person_id, person.record_id AS person_record_id, person.last_name AS last_name, person.first_name AS first_name, person.middle_name AS middle_name, person.sex AS sex, person.birth_date AS birth_date, person.inn AS inn, person.inn_foreign AS inn_foreign, person.snils AS snils, person.pension AS pension, person.medical AS midical, person.social AS social, person.employee AS employee, \n");
+        SQL.append("  --ссылки на записи \n");
+        SQL.append("  person.citizenship AS citizenship_ref_id, person.taxpayer_state AS status_ref_id, person.version, \n");
+        SQL.append("  --документы \n");
+        SQL.append("  person_doc.doc_number AS document_number, person_doc.doc_id AS document_type_ref_id, \n");
+        SQL.append("  -- адрес \n");
+        SQL.append("  addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id, addr.address \n");
+        SQL.append("FROM t \n");
+        SQL.append("JOIN \n");
+        SQL.append("  (SELECT lower(np.FAMILIA) last_name, lower(np.IMYA) first_name, lower(np.OTCHESTVO) middle_name, np.DATA_ROZD birthday, REPLACE(REPLACE(lower(np.SNILS), ' ', ''), '-', '') snils, np.INNFL inn, dt.id id_doc_type, REPLACE(lower(np.SER_NOM_DOC), ' ', '') id_doc_number, :pVersion calc_date \n");
+        SQL.append("  FROM raschsv_pers_sv_strah_lic np \n");
+        SQL.append("  LEFT JOIN ref_book_doc_type dt \n");
+        SQL.append("  ON (dt.code               = np.KOD_VID_DOC \n");
+        SQL.append("  AND dt.status             = 0) \n");
+        SQL.append("  WHERE declaration_data_id = :pDeclarationId \n");
+        SQL.append("  ) dubl ON (dubl.calc_date = t.calc_date) \n");
+        SQL.append("JOIN ref_book_person person \n");
+        SQL.append("ON (person.status                                    = 0 \n");
+        SQL.append("AND person.version                                   = t.version \n");
+        SQL.append("AND person.record_id                                 = t.record_id \n");
+        SQL.append("AND ((REPLACE(lower(person.last_name), ' ', '')      = dubl.last_name \n");
+        SQL.append("AND REPLACE(lower(person.first_name), ' ', '')       = dubl.first_name \n");
+        SQL.append("AND REPLACE(lower(person.middle_name), ' ', '')      = dubl.middle_name \n");
+        SQL.append("AND person.birth_date                                = dubl.birthday \n");
+        SQL.append("OR (REPLACE(REPLACE(person.snils, ' ', ''), '-', '') = dubl.snils) \n");
+        SQL.append("OR (REPLACE(person.inn, ' ', '')                     = dubl.inn) ))) \n");
+        SQL.append("LEFT JOIN ref_book_address addr \n");
+        SQL.append("ON (addr.id = person.address) \n");
+        SQL.append("LEFT JOIN ref_book_id_doc person_doc \n");
+        SQL.append("ON (person_doc.person_id                            = person.id) \n");
+        SQL.append("WHERE ( (person_doc.doc_id                          = dubl.id_doc_type \n");
+        SQL.append("AND (REPLACE(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));");
+        return SQL.toString();
+
     }
 
 
+    @Override
+    public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(long declarationDataId, long asnuId, Date version) {
 
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("pDeclarationId", declarationDataId);
+        param.addValue("asnuId", asnuId);
+        param.addValue("pVersion", version);
+
+        //long time = System.currentTimeMillis();
+        //System.out.println("================================================================");
+        //System.out.println(FIND_REFBOOK_PERSON_BY_PRIMARY_1151111_QUERY);
+        //System.out.println("================================================================");
+
+        Map<Long, List<PersonData>> result = getNamedParameterJdbcTemplate().query(FIND_REFBOOK_PERSON_BY_PRIMARY_1151111_QUERY, param, new PersonDataExtractor());
+
+        //System.out.println("findRefBookPersonByPrimary1151111 size: " + result.size() + " (" + (System.currentTimeMillis() - time) + " ms)");
+
+        return result;
+    }
 
 
     private class PersonDataExtractor implements ResultSetExtractor<Map<Long, List<PersonData>>> {
