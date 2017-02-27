@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -248,6 +249,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
     }
 
     private void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent scriptEvent, Set<String> checkedSet) {
+        if (Thread.interrupted()) {
+            throw new TAInterruptedException();
+        }
         switch (scriptEvent) {
             case MOVE_CREATED_TO_ACCEPTED:
                 canAccept(userInfo, declarationDataId, checkedSet);
@@ -278,6 +282,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
     private void checkEvents(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod,
                              FormDataEvent scriptEvent, Set<String> checkedSet, Logger logger) {
+        if (Thread.interrupted()) {
+            throw new TAInterruptedException();
+        }
         switch (scriptEvent) {
             case CREATE:
                 canCreate(userInfo, declarationTemplateId, departmentReportPeriod, checkedSet, logger);
