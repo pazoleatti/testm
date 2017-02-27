@@ -61,7 +61,7 @@ void importData() {
             QName.valueOf('Object'),
             RefBook.Table.FIAS_ADDR_OBJECT.getTable(),
             { generatedId, attr ->
-                addressObjectRowMapper(addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
+                addressObjectRowMapper(generatedId, addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
             })
 
     startImport(getInputStream(archive, itemsMap, "AS_HOUSE_"),
@@ -246,15 +246,17 @@ Map addressObjectTypeRowMapper(generatedId, attrMap) {
 }
 
 
-Map addressObjectRowMapper(addressObjectGuidsMap, attrMap) {
+Map addressObjectRowMapper(generatedId, addressObjectGuidsMap, attrMap) {
     def Map recordsMap = new HashMap<String, Object>();
     def addressObjectGuid = attrMap.get(QName.valueOf('AOGUID'))
     def parentGuid = attrMap.get(QName.valueOf('PARENTGUID'))
 
     //меняем AOGUID и PARENTGUID на целочисленный идентификатор
-    recordsMap.put('ID', addressObjectGuidsMap.get(addressObjectGuid))
+    recordsMap.put('ID', generatedId)
+    recordsMap.put('AOID', addressObjectGuidsMap.get(addressObjectGuid))
     recordsMap.put('PARENTGUID', addressObjectGuidsMap.get(parentGuid))
     recordsMap.put('FORMALNAME', attrMap.get(QName.valueOf('FORMALNAME')))
+    recordsMap.put('SHORTNAME', attrMap.get(QName.valueOf('SHORTNAME')))
     recordsMap.put('REGIONCODE', attrMap.get(QName.valueOf('REGIONCODE')))
     recordsMap.put('AUTOCODE', attrMap.get(QName.valueOf('AUTOCODE')))
     recordsMap.put('AREACODE', attrMap.get(QName.valueOf('AREACODE')))
@@ -272,8 +274,8 @@ Map addressObjectRowMapper(addressObjectGuidsMap, attrMap) {
     //Поле тип адресации. Хотя поле обязательное в выгрузке его нет, ставим значение 0 - не определено
     recordsMap.put('DIVTYPE', getInteger(attrMap.get(QName.valueOf('DIVTYPE')), 0))
     recordsMap.put('OFFNAME', attrMap.get(QName.valueOf('OFFNAME')))
+    recordsMap.put('AOLEVEL', attrMap.get(QName.valueOf('AOLEVEL')))
     recordsMap.put('POSTALCODE', attrMap.get(QName.valueOf('POSTALCODE')))
-
 
     return recordsMap;
 }
@@ -324,7 +326,6 @@ Map roomRowMapper(generatedId, houseGuidMap, attrMap) {
     //меняем ROOMGUID на целочисленный идентификатор
     recordsMap.put('ID', generatedId)
     recordsMap.put('HOUSEGUID', houseGuidMap.get(attrMap.get(QName.valueOf('HOUSEGUID'))))
-
     recordsMap.put('REGIONCODE', attrMap.get(QName.valueOf('REGIONCODE')))
     recordsMap.put('FLATNUMBER', attrMap.get(QName.valueOf('FLATNUMBER')))
     recordsMap.put('FLATTYPE', getInteger(attrMap.get(QName.valueOf('FLATTYPE'))))

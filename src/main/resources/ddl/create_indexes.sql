@@ -23,4 +23,4 @@ create index idx_ndfl_person_ded_ppcurrdt on ndfl_person_deduction(ndfl_person_i
 
 create index idx_ndfl_person_prep_pnotdt on ndfl_person_prepayment(ndfl_person_id,notif_date);
 
-exit;
+--exit;
