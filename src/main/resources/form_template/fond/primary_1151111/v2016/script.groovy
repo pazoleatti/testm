@@ -114,13 +114,13 @@ switch (formDataEvent) {
         println "!IMPORT_TRANSPORT_FILE!"
         importData()
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.CALCULATE:
         println "!CALCULATE!"
         calculateData()
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break;
     case FormDataEvent.CHECK:
         println "!CHECK!"

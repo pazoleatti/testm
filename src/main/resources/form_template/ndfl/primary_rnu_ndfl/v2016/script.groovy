@@ -60,7 +60,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
         prepareSpecificReport()
@@ -74,7 +74,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calculate();
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
 }
 
