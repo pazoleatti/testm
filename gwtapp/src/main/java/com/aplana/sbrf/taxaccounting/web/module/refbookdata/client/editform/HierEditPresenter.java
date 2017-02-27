@@ -97,10 +97,8 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
         }
 
         Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
-        List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
-        valuesToAdd.add(map);
 
-        action.setRecords(valuesToAdd);
+        action.setRecord(map);
         action.setVersionFrom(getView().getVersionFrom());
         action.setVersionTo(getView().getVersionTo());
 

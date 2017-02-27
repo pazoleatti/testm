@@ -155,23 +155,23 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 Object paramValue = subreportParams.get(alias);
                 if (paramValue != null) {
                     if (alias.equalsIgnoreCase(SUBREPORT_PARAM_LASTNAME_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_FAMILIA + ") = LOWER(:" + RaschsvPersSvStrahLic.COL_FAMILIA + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_FAMILIA, paramValue);
+                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_FAMILIA + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_FAMILIA + ")";
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_FAMILIA, paramValue + "%");
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_NAME_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_IMYA + ") = LOWER(:" + RaschsvPersSvStrahLic.COL_IMYA + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, paramValue);
+                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_IMYA + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_IMYA + ")";
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, paramValue + "%");
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_MIDDLENAME_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_OTCHESTVO + ") = LOWER(:" + RaschsvPersSvStrahLic.COL_OTCHESTVO + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, paramValue);
+                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_OTCHESTVO + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_OTCHESTVO + ")";
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, paramValue + "%");
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_SNILS_ALIAS)) {
-                        query += " AND " + RaschsvPersSvStrahLic.COL_SNILS + " = :" + RaschsvPersSvStrahLic.COL_SNILS;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, paramValue);
+                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_SNILS + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_SNILS + ")";
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, paramValue + "%");
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_INN_ALIAS)) {
-                        query += " AND " + RaschsvPersSvStrahLic.COL_INNFL + " = :" + RaschsvPersSvStrahLic.COL_INNFL;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_INNFL, paramValue);
+                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_INNFL + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_INNFL + ")";
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_INNFL, paramValue + "%");
                     } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_DOC_ALIAS)) {
-                        query += " AND " + RaschsvPersSvStrahLic.COL_SER_NOM_DOC + " = :" + RaschsvPersSvStrahLic.COL_SER_NOM_DOC;
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SER_NOM_DOC, paramValue);
+                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_SER_NOM_DOC + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_SER_NOM_DOC + ")";
+                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SER_NOM_DOC, paramValue + "%");
                     }
                 }
             }

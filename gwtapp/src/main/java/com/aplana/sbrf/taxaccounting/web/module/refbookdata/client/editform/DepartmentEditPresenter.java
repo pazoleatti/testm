@@ -172,10 +172,8 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
         }
 
         Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
-        List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
-        valuesToAdd.add(map);
 
-        action.setRecords(valuesToAdd);
+        action.setRecord(map);
 
         final RecordChanges recordChanges = fillRecordChanges(recordId, map, action.getVersionFrom(), action.getVersionTo());
 
