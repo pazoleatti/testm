@@ -1085,7 +1085,7 @@ create table ndfl_person (
   declaration_data_id number(18)        not null,
   person_id           number(18),
   row_num             number(10),
-  inp                 varchar2(14 char),
+  inp                 varchar2(25 char),
   snils               varchar2(14 char),
   last_name           varchar2(36 char),
   first_name          varchar2(36 char),
@@ -1107,7 +1107,7 @@ create table ndfl_person (
   building            varchar2(20 char),
   flat                varchar2(10 char),
   country_code        varchar2(10 char),
-  address             varchar2(200 char),
+  address             varchar2(255 char),
   additional_data     varchar2(4000 char)
 );
 
