@@ -23,7 +23,6 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 
 /**
  * Компонент для построения SQL запросов для DAO {@link com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDaoImpl}
- *
  */
 @Component
 public class RefBookSimpleQueryBuilderComponent {
@@ -33,17 +32,15 @@ public class RefBookSimpleQueryBuilderComponent {
     private DBInfo dbInfo;
 
     /**
-     *
-     * @param refBook справочник
-     * @param parentId уникальный идентификатор версии записи справочника (фактически поле ID). Используется только при получении всех версий записи
-     * @param version дата актуальности, по которой определяется период актуальности и соответственно версия записи, которая в нем действует
-     *                Если = null, значит будет выполняться получение всех версий записи
-     *                Иначе выполняется получение всех записей справочника, активных на указанную дату
+     * @param refBook         справочник
+     * @param parentId        уникальный идентификатор версии записи справочника (фактически поле ID). Используется только при получении всех версий записи
+     * @param version         дата актуальности, по которой определяется период актуальности и соответственно версия записи, которая в нем действует
+     *                        Если = null, значит будет выполняться получение всех версий записи
+     *                        Иначе выполняется получение всех записей справочника, активных на указанную дату
      * @param sortAttribute
      * @param filter
      * @param pagingParams
      * @param isSortAscending
-
      * @return
      */
     public PreparedStatementData psGetChildrenRecordsQuery(RefBook refBook, Long parentId, Date version, RefBookAttribute sortAttribute,
@@ -123,7 +120,7 @@ public class RefBookSimpleQueryBuilderComponent {
         if (parentId != null) {
             ps.appendQuery(fields.toString());
             ps.append(", CASE WHEN EXISTS(SELECT 1 FROM t WHERE t.record_id = rbo.record_id AND lvl > 1) THEN 1 ELSE 0 END AS \"")
-            .append(RefBook.RECORD_HAS_CHILD_ALIAS).append("\" ");
+                    .append(RefBook.RECORD_HAS_CHILD_ALIAS).append("\" ");
             ps.appendQuery(" FROM t rbo ");
         } else {
             ps.appendQuery(" frb.id as \"RECORD_ID\"");
@@ -207,16 +204,17 @@ public class RefBookSimpleQueryBuilderComponent {
 
     /**
      * Формирует простой sql-запрос по принципу: один справочник - одна таблица
-     * @param refBook справочник
-     * @param uniqueRecordId уникальный идентификатор версии записи справочника (фактически поле ID). Используется только при получении всех версий записи
-     * @param version дата актуальности, по которой определяется период актуальности и соответственно версия записи, которая в нем действует
-     *                Если = null, значит будет выполняться получение всех версий записи
-     *                Иначе выполняется получение всех записей справочника, активных на указанную дату
-     * @param sortAttribute атррибут по которому сортируется выборка
-     * @param filter параметры фильтрации
-     * @param pagingParams параметры пагинации
+     *
+     * @param refBook         справочник
+     * @param uniqueRecordId  уникальный идентификатор версии записи справочника (фактически поле ID). Используется только при получении всех версий записи
+     * @param version         дата актуальности, по которой определяется период актуальности и соответственно версия записи, которая в нем действует
+     *                        Если = null, значит будет выполняться получение всех версий записи
+     *                        Иначе выполняется получение всех записей справочника, активных на указанную дату
+     * @param sortAttribute   атррибут по которому сортируется выборка
+     * @param filter          параметры фильтрации
+     * @param pagingParams    параметры пагинации
      * @param isSortAscending порядок сортировки
-     * @param onlyId флаг указывающий на то что в выборке будет только record_id а не полный список полей
+     * @param onlyId          флаг указывающий на то что в выборке будет только record_id а не полный список полей
      * @return
      */
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, Long recordId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
@@ -231,7 +229,7 @@ public class RefBookSimpleQueryBuilderComponent {
                 ps.appendQuery(String.format(sqlRecordVersions(), refBook.getTableName(), refBook.getTableName()));
                 ps.addParam(uniqueRecordId);
                 ps.addParam(VersionedObjectStatus.NORMAL.getId());
-            } else if (recordId != null){
+            } else if (recordId != null) {
                 ps.appendQuery(String.format(sqlRecordVersionsByRecordId(), refBook.getTableName(), recordId));
                 ps.addParam(VersionedObjectStatus.NORMAL.getId());
             } else {
@@ -242,9 +240,9 @@ public class RefBookSimpleQueryBuilderComponent {
 
         ps.appendQuery("SELECT * FROM (");
         if (onlyId) {
-			ps.appendQuery("SELECT ");
-			ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-			ps.appendQuery(" FROM ");
+            ps.appendQuery("SELECT ");
+            ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+            ps.appendQuery(" FROM ");
         } else {
             ps.appendQuery("SELECT res.*, rownum row_number_over FROM ");
         }
@@ -272,12 +270,12 @@ public class RefBookSimpleQueryBuilderComponent {
         ps.appendQuery(" frb ");
 
         PreparedStatementData filterPS = new PreparedStatementData();
-        SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
         simpleFilterTreeListener.setRefBook(refBook);
         simpleFilterTreeListener.setPs(filterPS);
 
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
-        if (filterPS.getJoinPartsOfQuery() != null){
+        if (filterPS.getJoinPartsOfQuery() != null) {
             ps.appendQuery(filterPS.getJoinPartsOfQuery());
         }
         if (filterPS.getQuery().length() > 0) {
@@ -289,7 +287,7 @@ public class RefBookSimpleQueryBuilderComponent {
             ps.appendQuery(") ");
         }
 
-        if (filterPS.getQuery().length() > 0 ) {
+        if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" AND ");
         } else {
             ps.appendQuery(" WHERE ");
@@ -299,7 +297,7 @@ public class RefBookSimpleQueryBuilderComponent {
         if (sortAttribute != null) {
             ps.appendQuery(" ORDER BY ");
             ps.appendQuery("frb." + sortAttribute.getAlias());
-            ps.appendQuery(isSortAscending ? " ASC":" DESC");
+            ps.appendQuery(isSortAscending ? " ASC" : " DESC");
         } else {
             ps.appendQuery(" ORDER BY frb.id");
         }
@@ -376,29 +374,29 @@ public class RefBookSimpleQueryBuilderComponent {
 
     private static final String CHECK_CONFLICT_VALUES_VERSIONS =
             "with conflictRecord as (select id, record_id from %1$s where %2$s),\n" +
-            "allRecordsInConflictGroup AS (SELECT distinct r.id, r.record_id, r.version "+
-            "FROM %1$s r JOIN conflictRecord cr ON (r.RECORD_ID = cr.RECORD_ID AND r.status != -1)" +
-            "),\n" +
-            "recordsByVersion as (select ar.id, ar.record_id, ar.version, row_number() over(%3$s) rn from allRecordsInConflictGroup ar),\n" +
-            "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv " +
-            "left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
-            "select ID from versionInfo where (\n" +
-            "\tversionTo IS NOT NULL and (\n" +
-            "\t\t(:versionTo IS NULL and versionTo >= :versionFrom) or\n" +
-            "\t\t(versionFrom <= :versionFrom and versionTo >= :versionFrom) or \n" +
-            "\t\t(versionFrom >= :versionFrom and versionFrom <= :versionTo)\n" +
-            "\t)\n" +
-            ") or (\n" +
-            "\tversionTo IS NULL and (\n" +
-            "\t\tversionFrom <= :versionFrom or\n" +
-            "\t\t(versionFrom >= :versionFrom and (:versionTo IS NULL or versionFrom <= :versionTo))\n" +
-            "\t)\n" +
-            ")";
+                    "allRecordsInConflictGroup AS (SELECT distinct r.id, r.record_id, r.version " +
+                    "FROM %1$s r JOIN conflictRecord cr ON (r.RECORD_ID = cr.RECORD_ID AND r.status != -1)" +
+                    "),\n" +
+                    "recordsByVersion as (select ar.id, ar.record_id, ar.version, row_number() over(%3$s) rn from allRecordsInConflictGroup ar),\n" +
+                    "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv " +
+                    "left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
+                    "select ID from versionInfo where (\n" +
+                    "\tversionTo IS NOT NULL and (\n" +
+                    "\t\t(:versionTo IS NULL and versionTo >= :versionFrom) or\n" +
+                    "\t\t(versionFrom <= :versionFrom and versionTo >= :versionFrom) or \n" +
+                    "\t\t(versionFrom >= :versionFrom and versionFrom <= :versionTo)\n" +
+                    "\t)\n" +
+                    ") or (\n" +
+                    "\tversionTo IS NULL and (\n" +
+                    "\t\tversionFrom <= :versionFrom or\n" +
+                    "\t\t(versionFrom >= :versionFrom and (:versionTo IS NULL or versionFrom <= :versionTo))\n" +
+                    "\t)\n" +
+                    ")";
 
     private static final String CHECK_CONFLICT_VALUES_VERSIONS_PARTITION = "partition by ar.RECORD_ID order by ar.version";
 
 
-    public PreparedStatementData psCheckConflictValuesVersions(RefBook refBook, List<Long> recordIds, Date versionFrom, Date versionTo){
+    public PreparedStatementData psCheckConflictValuesVersions(RefBook refBook, List<Long> recordIds, Date versionFrom, Date versionTo) {
         String partition = isSupportOver() ? CHECK_CONFLICT_VALUES_VERSIONS_PARTITION : "";
         String query = String.format(CHECK_CONFLICT_VALUES_VERSIONS, refBook.getTableName(),
                 transformToSqlInStatement("ID", recordIds), partition);
@@ -421,7 +419,7 @@ public class RefBookSimpleQueryBuilderComponent {
             "end as result\n" +
             "from allRecords";
 
-    public PreparedStatementData psCheckParentConflict(RefBook refBook, Long parentId, Date versionFrom, Date versionTo){
+    public PreparedStatementData psCheckParentConflict(RefBook refBook, Long parentId, Date versionFrom, Date versionTo) {
         PreparedStatementData sql = new PreparedStatementData(String.format(CHECK_PARENT_CONFLICT, refBook.getTableName()));
         sql.addNamedParam("parentId", parentId);
         sql.addNamedParam("versionFrom", versionFrom);
@@ -431,48 +429,48 @@ public class RefBookSimpleQueryBuilderComponent {
 
     private static final String CHECK_CROSS_VERSIONS =
             "with allVersions as (select r.id, r.record_id, r.version from %1$s r where status != -1 and record_id=:recordId and (:excludedRecordId is null or id != :excludedRecordId)),\n" +
-            "recordsByVersion as (select r.id, r.record_id, r.status, r.version, row_number() over(%2$s) rn from %1$s r, allVersions av where r.id=av.id and r.status != -1),\n" +
-            "versionInfo as (select rv.rn NUM, rv.ID, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn)\n" +
-            "select num, id, version, status, nextversion, nextstatus, \n" +
-            "case\n" +
-            "  when (status=0 and (\n" +
-            "  \t(:versionTo is null and (\n" +
-            "  \t\t(nextversion is not null and nextversion >= :versionFrom) or \n" +
-            "\t\t(nextversion is null and version >= :versionFrom)\n" +
-            "  \t)) or (:versionTo is not null and (\n" +
-            "  \t\t(version <= :versionFrom and nextversion is not null and nextversion >= :versionFrom) or \n" +
-            "  \t\t(version >= :versionFrom and version <= :versionTo)\n" +
-            "  \t))\n" +
-            "  )) then 1\n" +
-            "  when (status=0 and nextversion is null and version < :versionFrom) then 2\n" +
-            "  when (status=2 and (:versionTo is not null and version >= :versionFrom and version < :versionTo and nextversion is not null and nextversion > :versionTo)) then 3 \n" +
-            "  when (status=2 and (\n" +
-            "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or  \n" +
-            "  \t(version = :versionFrom) or \n" +
-            "  \t(nextversion is null and version >= :versionFrom and (:versionTo is null or :versionTo >= version))\n" +
-            "  )) then 4\n" +
-            "  else 0\n" +
-            "end as result\n" +
-            "from versionInfo";
+                    "recordsByVersion as (select r.id, r.record_id, r.status, r.version, row_number() over(%2$s) rn from %1$s r, allVersions av where r.id=av.id and r.status != -1),\n" +
+                    "versionInfo as (select rv.rn NUM, rv.ID, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn)\n" +
+                    "select num, id, version, status, nextversion, nextstatus, \n" +
+                    "case\n" +
+                    "  when (status=0 and (\n" +
+                    "  \t(:versionTo is null and (\n" +
+                    "  \t\t(nextversion is not null and nextversion >= :versionFrom) or \n" +
+                    "\t\t(nextversion is null and version >= :versionFrom)\n" +
+                    "  \t)) or (:versionTo is not null and (\n" +
+                    "  \t\t(version <= :versionFrom and nextversion is not null and nextversion >= :versionFrom) or \n" +
+                    "  \t\t(version >= :versionFrom and version <= :versionTo)\n" +
+                    "  \t))\n" +
+                    "  )) then 1\n" +
+                    "  when (status=0 and nextversion is null and version < :versionFrom) then 2\n" +
+                    "  when (status=2 and (:versionTo is not null and version >= :versionFrom and version < :versionTo and nextversion is not null and nextversion > :versionTo)) then 3 \n" +
+                    "  when (status=2 and (\n" +
+                    "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or  \n" +
+                    "  \t(version = :versionFrom) or \n" +
+                    "  \t(nextversion is null and version >= :versionFrom and (:versionTo is null or :versionTo >= version))\n" +
+                    "  )) then 4\n" +
+                    "  else 0\n" +
+                    "end as result\n" +
+                    "from versionInfo";
 
     private static final String CHECK_CROSS_VERSIONS_PARTITION = "partition by r.record_id order by r.version";
 
-    public PreparedStatementData psCheckCrossVersions(RefBook refBook){
+    public PreparedStatementData psCheckCrossVersions(RefBook refBook) {
         String partition = isSupportOver() ? CHECK_CROSS_VERSIONS_PARTITION : "";
         return new PreparedStatementData(String.format(CHECK_CROSS_VERSIONS, refBook.getTableName(), partition));
     }
 
     private static final String IS_VERSION_USED_LIKE_PARENT =
             "select r.version as version, \n" +
-            "  (SELECT min(version) - interval '1' DAY FROM %1$s rn WHERE rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
-            "from %1$s r where r.%2$s = :parentId and r.version >= :versionFrom and r.status != -1";
+                    "  (SELECT min(version) - interval '1' DAY FROM %1$s rn WHERE rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
+                    "from %1$s r where r.%2$s = :parentId and r.version >= :versionFrom and r.status != -1";
 
-    public PreparedStatementData psVersionUsedLikeParent(RefBook refBook){
+    public PreparedStatementData psVersionUsedLikeParent(RefBook refBook) {
         String query = String.format(IS_VERSION_USED_LIKE_PARENT, refBook.getTableName(), RefBook.RECORD_PARENT_ID_ALIAS);
         return new PreparedStatementData(query);
     }
 
-    public PreparedStatementData psGetNextVersion(RefBook refBook, Date version, String filter){
+    public PreparedStatementData psGetNextVersion(RefBook refBook, Date version, String filter) {
 
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -563,7 +561,7 @@ public class RefBookSimpleQueryBuilderComponent {
 
     private List<RefBookAttribute> getRequiredAttributesListFromBook(RefBook refBook) {
         List<RefBookAttribute> requiredAttributes = new ArrayList<RefBookAttribute>();
-        for(RefBookAttribute attribute : refBook.getAttributes()){
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (attribute.isRequired()) {
                 requiredAttributes.add(attribute);
             }
@@ -598,13 +596,8 @@ public class RefBookSimpleQueryBuilderComponent {
     WHERE id = <id>
      */
     public PreparedStatementData psGetRecordData(RefBook refBook) {
-        PreparedStatementData sql = new PreparedStatementData("SELECT id ");
-        sql.append(RefBook.RECORD_ID_ALIAS);
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            sql.append(", ").append(attribute.getAlias());
-        }
-        sql.append("\nFROM ").append(refBook.getTableName()).append("\nWHERE id = :id");
-        return sql;
+        String whereClause = "id = :id";
+        return psGetRecordsData(refBook, whereClause);
     }
 
     /*
@@ -614,15 +607,24 @@ public class RefBookSimpleQueryBuilderComponent {
      */
     public PreparedStatementData psGetRecordsData(RefBook refBook, List<Long> recordIds) {
         String inStatement = SqlUtils.transformToSqlInStatement("id", recordIds);
+        return psGetRecordsData(refBook, inStatement);
+    }
 
+    /**
+     * SELECT id <id_alias>, <attribute1>, <attributeN>
+     * FROM <ref_book_table_name>
+     * WHERE <whereClause>
+     */
+    public PreparedStatementData psGetRecordsData(RefBook refBook, String whereClause) {
         PreparedStatementData sql = new PreparedStatementData("SELECT id ");
         sql.append(RefBook.RECORD_ID_ALIAS);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             sql.append(", ").append(attribute.getAlias());
         }
-        sql.append("\nFROM ").append(refBook.getTableName()).append("\nWHERE ").append(inStatement);
+        sql.append("\nFROM ").append(refBook.getTableName()).append("\nWHERE ").append(whereClause);
         return sql;
     }
+
 
     /*
     UPDATE <ref_book_table_name> SET
@@ -648,10 +650,10 @@ public class RefBookSimpleQueryBuilderComponent {
         return sql;
     }
 
-    private <K,V> List<Pair<K, V>> convertMapToPairsList(Map<K,V> map) {
+    private <K, V> List<Pair<K, V>> convertMapToPairsList(Map<K, V> map) {
         List<Pair<K, V>> pairsList = new ArrayList<Pair<K, V>>();
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            Pair<K,V> pair = new Pair<K, V>(entry.getKey(), entry.getValue());
+            Pair<K, V> pair = new Pair<K, V>(entry.getKey(), entry.getValue());
             pairsList.add(pair);
         }
         return pairsList;

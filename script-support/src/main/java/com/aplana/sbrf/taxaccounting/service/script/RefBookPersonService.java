@@ -27,4 +27,5 @@ public interface RefBookPersonService {
     Long identificatePerson(PersonData personData, List<PersonData> refBookPersonList, int tresholdValue, WeigthCalculator<PersonData> weigthComporators, Logger logger);
 
     List<BaseWeigthCalculator> getBaseCalculateList();
+
 }

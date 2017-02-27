@@ -153,6 +153,11 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         return refBookDao.getValue(recordId, attributeId);
     }

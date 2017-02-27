@@ -70,7 +70,7 @@ where (person.version = t.version
          and REPLACE(lower(person.middle_name), ' ', '') = :middleName
          and person.birth_date = :birthDate));
 
---//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+--//////////////////////////////////////////////////// РНУ //////////////////////////////////////////////////////////////////
 
 with t as (select
              max(version) version,
@@ -86,6 +86,8 @@ with t as (select
            group by record_id)
 select
   --фл
+  dubl.last_name        as ndfl_person_ln,
+  dubl.id               as ndfl_person_id,
   person.id             as person_id,
   person.record_id      as person_record_id,
   person.last_name      as last_name,
@@ -128,6 +130,7 @@ select
   addr.address
 from t
   join (select
+          np.id                                               id,
           lower(np.last_name)                                 last_name,
           lower(np.first_name)                                first_name,
           lower(np.middle_name)                               middle_name,
@@ -156,7 +159,7 @@ where (taxpayer_id.as_nu = :asnuId and (lower(taxpayer_id.inp) = dubl.inp)
        or (person_doc.doc_id = dubl.id_doc_type and
            (replace(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));
 
---/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+--///////////////////////////////////////////////////// 115 ////////////////////////////////////////////////////////////////
 
 with t as (select
              max(version) version,
@@ -235,7 +238,7 @@ from t
   left join ref_book_address addr on (addr.id = person.address)
   left join ref_book_id_doc person_doc on (person_doc.person_id = person.id)
 where
-  ((person_doc.doc_id = dubl.id_doc_type and (replace(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)))
+  ((person_doc.doc_id = dubl.id_doc_type and (replace(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));
 
 
 

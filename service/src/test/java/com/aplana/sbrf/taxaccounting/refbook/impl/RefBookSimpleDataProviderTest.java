@@ -200,6 +200,12 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
+    public void getRecordDataWhereClause() throws Exception {
+        provider.getRecordDataWhere("id in (1, 2)");
+        verify(daoMock).getRecordDataWhere(any(RefBook.class), eq("id in (1, 2)"));
+    }
+
+    @Test
     public void getRecords() throws Exception {
 
     }
