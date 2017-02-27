@@ -1997,12 +1997,13 @@ comment on column fias_socrbase.socrname  is 'Полное наименован�
 comment on column fias_socrbase.kod_t_st  is 'Ключевое поле';
 
 
-
 -- Сведения
 create table fias_addrobj
 (
     id number(18) not null,
+    aoid number(18) not null,
     formalname varchar2(120 char) not null,
+    shortname varchar2(10 char),
     regioncode varchar2(2 char) not null,
     autocode varchar2(1 char) not null,
     areacode varchar2(3 char) not null,
@@ -2019,12 +2020,15 @@ create table fias_addrobj
     currstatus number(2) not null,
     divtype number(1) not null,
     offname varchar2(120 char),
+    aolevel number(10) not null,
     postalcode varchar2(6 char),
     parentguid number(18)
 );
 
-comment on column fias_addrobj.id is 'Глобальный уникальный идентификатор адресного объекта';
+comment on column fias_addrobj.id is 'Суррогатный ключ';
+comment on column fias_addrobj.aoid is 'Глобальный уникальный идентификатор адресного объекта';
 comment on column fias_addrobj.formalname is 'Формализованное наименование';
+comment on column fias_addrobj.shortname is 'Краткое наименование типа объекта';
 comment on column fias_addrobj.regioncode is 'Код региона';
 comment on column fias_addrobj.autocode is 'Код автономии';
 comment on column fias_addrobj.areacode is 'Код района';
@@ -2041,6 +2045,7 @@ comment on column fias_addrobj.operstatus is 'Статус действия на
 comment on column fias_addrobj.currstatus is 'Статус актуальности КЛАДР 4 (последние две цифры в коде)';
 comment on column fias_addrobj.divtype is 'Тип деления: 0 – не определено, 1 – муниципальное, 2 – административное';
 comment on column fias_addrobj.offname is 'Официальное наименование';
+comment on column fias_addrobj.aolevel is 'Уровень адресного объекта';
 comment on column fias_addrobj.postalcode is 'Почтовый индекс';
 comment on column fias_addrobj.parentguid is 'Идентификатор объекта родительского объекта';
 
