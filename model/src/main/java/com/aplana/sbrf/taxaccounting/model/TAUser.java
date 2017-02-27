@@ -11,11 +11,12 @@ public class TAUser implements Serializable {
 
 	/** Код учетной записи для пользователя "Система" */
 	public static final int SYSTEM_USER_ID = 0;
-	
+
 	private int id;
 	private String login;
 	private String name;
 	private List<TARole> roles;
+	private List<Long> asnuIds;
 	private int departmentId;
 	private boolean active;
 	private String email;
@@ -50,7 +51,6 @@ public class TAUser implements Serializable {
 	public void setRoles(List<TARole> roles) {
 		this.roles = roles;
 	}
-	
 	public boolean isActive() {
 		return active;
 	}
@@ -63,7 +63,14 @@ public class TAUser implements Serializable {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	/**
+    public List<Long> getAsnuIds() {
+        return asnuIds;
+    }
+    public void setAsnuIds(List<Long> asnuIds) {
+        this.asnuIds = asnuIds;
+    }
+
+    /**
 	 * Проверяет, что у пользователя есть роль с заданным {@link TARole#getAlias() алиасом}
 	 * @param roleAlias алиас роли
 	 * @return true - если у пользователя есть такая роль, false - в противном случае
@@ -72,11 +79,11 @@ public class TAUser implements Serializable {
 		if (roles == null) {
 			throw new IllegalStateException("Roles list is not initialized properly!");
 		}
-		
+
 		if (roleAlias == null) {
 			throw new IllegalArgumentException("roleAlias cannot be null");
 		}
-		
+
 		for (TARole role: roles) {
 			if (roleAlias.equals(role.getAlias())) {
 				return true;
