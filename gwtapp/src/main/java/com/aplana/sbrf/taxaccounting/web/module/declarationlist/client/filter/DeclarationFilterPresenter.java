@@ -52,6 +52,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
         void setReportPeriodType(String type);
 
         void setUserDepartmentId(Integer userDepartmentId);
+
+		void setAsnuFilter(List<Long> asnuIds);
     }
 
 	private final DispatchAsync dispatchAsync;
@@ -92,6 +94,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));
                             getView().setFormStateList(asList(null, State.CREATED, State.PREPARED, State.ACCEPTED));
                             getView().setCorrectionTagList(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
+                            getView().setAsnuFilter(result.getAsnuIds());
                             getView().clearFilter();
                             if (dataFilter != null){
                                 getView().setDataFilter(dataFilter);

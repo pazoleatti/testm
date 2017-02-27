@@ -11,7 +11,7 @@ create index srch_ref_book_person_inn_f on ref_book_person(replace(inn_foreign, 
 
 create index idx_ref_book_doc_type_code_srv on ref_book_doc_type (code, status, version);
 create index idx_ref_book_doc_type_rec_vers on ref_book_doc_type (record_id, version); 
-create unique index idx_ref_person_st_ver_rec on ref_book_person (status, version, record_id);
+create index idx_ref_person_st_ver_rec on ref_book_person (status, version, record_id);
 
 create index idx_ref_book_person_address on ref_book_person(address);
 

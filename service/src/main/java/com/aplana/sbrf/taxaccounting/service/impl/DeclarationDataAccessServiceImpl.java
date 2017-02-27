@@ -57,12 +57,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	 * логика вынесена в отдельный метод, так как используется в нескольких
 	 * местах данного сервиса
 	 * 
-	 * @param userInfo
-	 *            информация о пользователе
+	 * @param userInfo информация о пользователе
 	 * @param departmentReportPeriod Отчетный период подразделения
-	 *
-     * @param checkedSet
-     *            необязательный параметр — набор проверенных наборов параметров, используется для оптимизации
+     * @param checkedSet необязательный параметр — набор проверенных наборов параметров, используется для оптимизации
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, Set<String> checkedSet, Logger logger) {
         if (checkedSet != null) {
@@ -107,7 +104,13 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
 	private void canRead(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
-		// Просматривать декларацию может только контролёр УНП и контролёр
+
+        // Нет прав на АСНУ
+        if (!checkUserAsnu(userInfo, declaration)) {
+            throw new AccessDeniedException("Нет прав на АСНУ декларации");
+        }
+
+        // Просматривать декларацию может только контролёр УНП и контролёр
 		// текущего уровня для обособленных подразделений
 		checkRolesForReading(userInfo, departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId()), checkedSet, null);
 	}
@@ -158,6 +161,12 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException("Период закрыт");
         }
+
+        // Нет прав на АСНУ
+        if (!checkUserAsnu(userInfo, declaration)) {
+            throw new AccessDeniedException("Нет прав на АСНУ декларации");
+        }
+
 		// Принять декларацию могут только контолёр текущего уровня
 		// обособленного подразделения и контролёр УНП
 		checkRolesForReading(userInfo, departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId()), checkedSet, null);
@@ -176,6 +185,12 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException("Период закрыт");
         }
+
+        // Нет прав на АСНУ
+        if (!checkUserAsnu(userInfo, declaration)) {
+            throw new AccessDeniedException("Нет прав на АСНУ декларации");
+        }
+
 		// Отменить принятие декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
 		checkRolesForReading(userInfo, departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId()), checkedSet, null);
@@ -194,6 +209,12 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException("Период закрыт");
         }
+
+        // Нет прав на АСНУ
+        if (!checkUserAsnu(userInfo, declaration)) {
+            throw new AccessDeniedException("Нет прав на АСНУ декларации");
+        }
+
 		// Удалять могут только контролёр текущего уровня и контролёр УНП
         checkRolesForReading(userInfo, departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId()), checkedSet, null);
     }
@@ -211,6 +232,12 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException("Период закрыт");
         }
+
+        // Нет прав на АСНУ
+        if (!checkUserAsnu(userInfo, declaration)) {
+            throw new AccessDeniedException("Нет прав на АСНУ декларации");
+        }
+
         // Обновлять декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
 		checkRolesForReading(userInfo, departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId()), checkedSet, null);
@@ -268,8 +295,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
     }
 
 	@Override
-	public Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo,
-			Long declarationDataId) {
+	public Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo, Long declarationDataId) {
 		Set<FormDataEvent> result = new HashSet<FormDataEvent>();
         Set<String> checkedSet = new HashSet<String>();
 		for (FormDataEvent scriptEvent : FormDataEvent.values()) {
@@ -311,5 +337,20 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         } else {
             logger.error(msg);
         }
+    }
+
+    /**
+     * Проверяет есть у пользователя права на АСНУ декларации.
+     * Если табличка SEC_USER_ASNU пустая, то права есть на все записи.
+     *
+     * @param userInfo пользователь
+     * @param declarationData проверяемая налоговая деркалация
+     */
+    private boolean checkUserAsnu(TAUserInfo userInfo, DeclarationData declarationData) {
+        if (userInfo.getUser().getAsnuIds() == null || userInfo.getUser().getAsnuIds().isEmpty()) {
+            return true;
+        }
+
+        return userInfo.getUser().getAsnuIds().contains(declarationData.getAsnuId());
     }
 }

@@ -169,12 +169,6 @@ public class DeclarationListPresenter extends
         filter.setSearchOrdering(getView().getSearchOrdering());
         if (isReports) {
             filter.setFormKindIds(Arrays.asList(DeclarationFormKind.REPORTS.getId()));
-        } else {
-            if (filter.getFormKindIds() != null && filter.getFormKindIds().isEmpty()) {
-                filter.getFormKindIds().remove(DeclarationFormKind.REPORTS.getId());
-            } else {
-                filter.setFormKindIds(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
-            }
         }
         GetDeclarationList requestData = new GetDeclarationList();
         requestData.setDeclarationFilter(filter);
