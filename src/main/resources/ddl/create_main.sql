@@ -2413,3 +2413,14 @@ create table declaration_template_file
 comment on table declaration_template_file is 'Файлы макета налоговой формы';
 comment on column declaration_template_file.declaration_template_id is 'Ссылка на макет налоговой формы';
 comment on column declaration_template_file.blob_data_id is 'Ссылка на файл в таблице BLOB_DATA';
+
+
+create table department_decl_type_performer
+(
+  department_decl_type_id number(9) not null,
+  performer_dep_id number(9) not null
+);
+
+comment on table department_decl_type_performer is 'Назначения нескольких исполнителей для связки НФ-подразделение';
+comment on column department_decl_type_performer.department_decl_type_id is 'Идентификатор связи подразделения с формой';
+comment on column department_decl_type_performer.performer_dep_id is 'Исполнитель'; 
