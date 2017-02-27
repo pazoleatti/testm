@@ -108,7 +108,7 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         String str;
         if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
+            str = String.format(", %s.", formatDeclarationDataInfo(declaration));
         } else {
             str = ".";
         }
@@ -134,7 +134,7 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         String str;
         if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\"", declaration.getTaxOrganCode(), declaration.getKpp());
+            str = String.format(", %s", formatDeclarationDataInfo(declaration));
         } else {
             str = "";
         }
