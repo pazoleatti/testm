@@ -92,7 +92,7 @@ public abstract class CreateReportsAsyncTask extends AbstractAsyncTask {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
         }
 
-        return String.format("Выполнено формирование отчетности форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
+        return String.format("Подготовлена к выгрузке отчетность \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
                 declarationTemplate.getName(),
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod,
                 department.getName());
