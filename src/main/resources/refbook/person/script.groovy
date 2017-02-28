@@ -28,7 +28,11 @@ switch (formDataEvent) {
  */
 void save() {
 
-    // Если работаем с версиями записей
+    /*
+    sourceUniqueRecordId - идентификатор старой записи
+    uniqueRecordId - идентификатор новой записи
+    isNewRecords - признак новой записи
+     */
     if (sourceUniqueRecordId && uniqueRecordId && isNewRecords) {
 
         // Перенесем ДУЛ из старой версии в новую
