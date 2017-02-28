@@ -380,6 +380,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         if (filter.getAsnuId() != null) {
             sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
         }
+        if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
+            sql.append(" AND ( dec.asnu_id is NULL ");
+            sql.append(" or ");
+            sql.append(SqlUtils.transformToSqlInStatement("dec.asnu_id", filter.getAsnuIds()));
+            sql.append(" ) ");
+        }
         if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
             sql.append(" AND ")
                     .append(SqlUtils.transformToSqlInStatement("dectemplate.form_kind", filter.getFormKindIds()));

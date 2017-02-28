@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -54,6 +55,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         private String[] params;
         private Logger logger;
         private boolean isErrorFatal;
+        private Process process;
 
         private ProcessRunner(String[] params, Logger logger, boolean isErrorFatal) {
             this.params = params;
@@ -61,31 +63,41 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             this.isErrorFatal = isErrorFatal;
         }
 
+        private void processDestroy() {
+            if (process != null) {
+                process.destroy();
+            }
+        }
+
         @Override
         public void run() {
-            Process process;
             try {
                 LOG.info("Запускаем проверку xml.");
                 process = (new ProcessBuilder(params)).start();
-                /*process.waitFor();*/
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
                 try {
+                    if (Thread.interrupted()) {
+                        throw new TAInterruptedException();
+                    }
                     String s = reader.readLine();
                     if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
                         logger.info("Проверка xml по xsd завершена успешно.");
                     } else if(s!=null) {
                         while ((s = reader.readLine()) != null) {
+                            if (Thread.interrupted()) {
+                                throw new TAInterruptedException();
+                            }
                             if (!s.startsWith("Execution time:")) {
-                                if (isErrorFatal)
+                                if (isErrorFatal) {
                                     logger.error(s);
-                                else
+                                } else {
                                     logger.warn(s);
+                                }
                             }
                         }
                     }
-                    /*lock.notify();*/
                 } finally {
-                    process.destroy();
+                    processDestroy();
                     reader.close();
                 }
             } catch (UnsupportedEncodingException e) {
@@ -158,12 +170,11 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                 long startTime = new Date().getTime();
                 while (true) {
                     try {
-                        Thread.sleep(3000);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        throw new TAInterruptedException();
                     }
                     if (Math.abs(new Date().getTime() - startTime) > timeout) {
-                        threadRunner.interrupt();
                         logger.warn(String.format("Истекло время выполнения проверки. Проверка длилась более %d мс.", timeout));
                         return false;
                     }
@@ -171,8 +182,16 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                         return !logger.containsLevel(LogLevel.ERROR);
                     }
                 }
-
             } finally {
+                if (threadRunner.isAlive()) {
+                    runner.processDestroy();
+                    threadRunner.interrupt();
+                    try {
+                        threadRunner.join();
+                    } catch (InterruptedException e) {
+                        throw new TAInterruptedException();
+                    }
+                }
                 logger.info("Проверка выполнена по файлу xsd %s", blobData.getName());
                 fileInfo(logger, vsax3File);
             }

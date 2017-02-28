@@ -64,7 +64,12 @@ public class RefBookAuditFieldList extends AbstractPermanentRefBook {
         return records;
     }
 
-	@Override
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
 	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
 		throw new UnsupportedOperationException();
 	}

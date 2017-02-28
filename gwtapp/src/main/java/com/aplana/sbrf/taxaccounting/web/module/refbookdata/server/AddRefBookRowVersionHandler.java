@@ -19,6 +19,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -46,43 +47,45 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
     private RegionSecurityService regionSecurityService;
 
     @Override
+    @Transactional
     public AddRefBookRowVersionResult execute(AddRefBookRowVersionAction action, ExecutionContext executionContext) throws ActionException {
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
         TAUser user = securityService.currentUserInfo().getUser();
 
-        List<RefBookRecord> records = new ArrayList<RefBookRecord>();
-        List<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
-        for (Map<String, RefBookValueSerializable> map : action.getRecords()) {
-            Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
-            for(Map.Entry<String, RefBookValueSerializable> v : map.entrySet()) {
-                RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
-                values.put(v.getKey(), value);
-            }
-            Boolean check = regionSecurityService.check(user, action.getRefBookId(), null,
-                    action.getRecordId(), values, action.getVersionFrom(), action.getVersionTo());
-            if (!check) {
-                result.setCheckRegion(false);
-                return result;
-            }
-
-            saveRecords.add(values);
-            RefBookRecord record = new RefBookRecord();
-            record.setValues(values);
-            record.setRecordId(action.getRecordId());
-            records.add(record);
+        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+        for(Map.Entry<String, RefBookValueSerializable> v : action.getRecord().entrySet()) {
+            RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
+            values.put(v.getKey(), value);
         }
+        Boolean check = regionSecurityService.check(user, action.getRefBookId(), null,
+                action.getRecordId(), values, action.getVersionFrom(), action.getVersionTo());
+        if (!check) {
+            result.setCheckRegion(false);
+            return result;
+        }
+
+        RefBookRecord record = new RefBookRecord();
+        record.setValues(values);
+        record.setRecordId(action.getRecordId());
 
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
 
         // проверка новых значений по БЛ
-        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), null, action.getRecordId(), action.getSourceUniqueRecordId(), saveRecords, action.getVersionFrom(),
+        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), null, action.getRecordId(), action.getSourceUniqueRecordId(), Arrays.asList(values), action.getVersionFrom(),
                 action.getVersionTo(), true, securityService.currentUserInfo(), logger);
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
         logger.setTaUserInfo(securityService.currentUserInfo());
-        result.setNewIds(refBookDataProvider.createRecordVersion(logger, action.getVersionFrom(), action.getVersionTo(), records));
+        // По фактц сохраняем по одной записи
+        result.setNewIds(refBookDataProvider.createRecordVersion(logger, action.getVersionFrom(), action.getVersionTo(), Arrays.asList(record)));
+
+        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), result.getNewIds().get(0), action.getRecordId(), action.getSourceUniqueRecordId(), Arrays.asList(values), action.getVersionFrom(),
+                action.getVersionTo(), true, securityService.currentUserInfo(), logger);
+
+        refBookDataProvider.updateRecordVersion(logger, result.getNewIds().get(0), action.getVersionFrom(), action.getVersionTo(), values);
+
         result.setUuid(logEntryService.save(logger.getEntries()));
         result.setCheckRegion(true);
 

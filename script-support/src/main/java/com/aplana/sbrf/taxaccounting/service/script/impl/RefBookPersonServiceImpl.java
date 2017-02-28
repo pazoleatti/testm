@@ -332,14 +332,12 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         return result;
     }
 
-
     private class PersonDataComparator implements Comparator<PersonData> {
         @Override
         public int compare(PersonData a, PersonData b) {
             return Double.compare(a.getWeigth(), b.getWeigth());
         }
     }
-
 
     public class PersonDataWeigthCalculator implements WeigthCalculator<PersonData> {
 

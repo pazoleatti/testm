@@ -66,6 +66,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
         dataFilter.setTaxType(action.getTaxType());
         res.setDefaultDecFilterData(dataFilter);
         res.setUserDepartmentId(currentUser.getUser().getDepartmentId());
+        res.setAsnuIds(currentUser.getUser().getAsnuIds());
 
 		return res;
 	}

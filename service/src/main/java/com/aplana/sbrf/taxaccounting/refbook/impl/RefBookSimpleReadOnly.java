@@ -60,6 +60,11 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
         return refBookDao.getAttributesValues(attributePairs);
     }

@@ -100,12 +100,33 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(RefBook refBook, List<Long> recordIds) {
         PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, recordIds);
-        List<Map<String, RefBookValue>> recordsList;
+
         try {
-            recordsList = getJdbcTemplate().query(ps.getQueryString(), new RefBookValueMapper(refBook));
+            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), new RefBookValueMapper(refBook)));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+
+    }
+
+    /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк. Используется для возможности передачи курсора в in
+     * @param refBook справочник
+     * @param whereClause условие для подстановки в where
+     * @return
+     */
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(RefBook refBook, String whereClause) {
+        PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, whereClause);
+
+        try {
+            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), new RefBookValueMapper(refBook)));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    private Map<Long, Map<String, RefBookValue>> mapListToData(List<Map<String, RefBookValue>> recordsList){
         Map<Long, Map<String, RefBookValue>> recordData = new HashMap<Long, Map<String, RefBookValue>>();
         for (Map<String, RefBookValue> record : recordsList) {
             recordData.put(record.get("id").getNumberValue().longValue(), record);

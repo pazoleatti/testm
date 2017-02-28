@@ -251,6 +251,19 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationKindPicker.setFilter(StringUtils.join(list.toArray(), " or ", null));
     }
 
+    @Override
+    public void setAsnuFilter(List<Long> asnuIds) {
+	    if (!asnuIds.isEmpty()) {
+            List<String> list = new ArrayList<String>(asnuIds.size());
+
+            for (Long asnuId : asnuIds) {
+                list.add(RefBook.RECORD_ID_ALIAS + "=" + asnuId);
+            }
+
+            asnuPicker.setFilter(StringUtils.join(list.toArray(), " or ", null));
+        }
+    }
+
     @UiHandler("apply")
 	void onApplyButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {

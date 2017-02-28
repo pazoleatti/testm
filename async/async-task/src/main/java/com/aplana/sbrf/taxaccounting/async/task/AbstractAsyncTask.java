@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -21,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  * В ней реализована общая часть логики взаимодействия с блокировками объектов, для которых выполняется бизнес-логика конкретных задач
  * @author dloshkarev
  */
+@Transactional
 public abstract class AbstractAsyncTask implements AsyncTask {
 
     private static final Log LOG = LogFactory.getLog(AbstractAsyncTask.class);
@@ -141,6 +144,48 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      */
     protected abstract String getErrorMsg(Map<String, Object> params, boolean unexpected);
 
+    private void checkLock(String lock, Date lockDate) {
+        if (!lockService.isLockExists(lock, lockDate)) {
+            throw new RuntimeException(String.format("Задача с ключом %s и датой начала %s (%s) больше не актуальна", lock, sdf.get().format(lockDate), lockDate.getTime()));
+        }
+    }
+
+    @Transactional
+    private final class ProcessRunner implements Runnable {
+        private Map<String, Object> params;
+        private Logger logger;
+        private TaskStatus taskStatus;
+        private boolean success = false;
+        private Exception exception;
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        private ProcessRunner(Map<String, Object> params, Logger logger) {
+            this.params = params;
+            this.logger = logger;
+        }
+
+        public Exception getException() {
+            return exception;
+        }
+
+        public TaskStatus getTaskStatus() {
+            return taskStatus;
+        }
+
+        @Override
+        public void run() {
+            try {
+                taskStatus = executeBusinessLogic(params, logger);
+                success = true;
+            } catch (Exception e) {
+                this.exception = e;
+            }
+        }
+    }
+
     protected BalancingVariants checkTask(ReportType reportType, Long value, String taskName, String msg) throws AsyncTaskException {
         AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId());
         if (taskTypeData == null) {
@@ -170,19 +215,45 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         try {
             taskStatus = transactionHelper.executeInNewTransaction(new TransactionLogic<TaskStatus>() {
                 @Override
+                @Transactional
                 public TaskStatus execute() {
                     try {
                         if (lockService.isLockExists(lock, lockDate)) {
                             LOG.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
                             lockService.updateState(lock, lockDate, getBusinessLogicTitle());
                             //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                            TaskStatus taskStatus = executeBusinessLogic(params, logger);
+                            ProcessRunner runner = new ProcessRunner(params, logger);
+                            Thread threadRunner = new Thread(Thread.currentThread().getThreadGroup(), runner);
+                            threadRunner.start();
+                            try {
+                                while (true) {
+                                    checkLock(lock, lockDate);
+                                    try {
+                                        Thread.sleep(500);
+                                    } catch (InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    if (!threadRunner.isAlive()){
+                                        if (runner.getException() != null) {
+                                            throw new ServiceException(runner.getException().getMessage(), runner.getException());
+                                        } else if (!runner.isSuccess()) {
+                                            throw new ServiceException("Невозможно выполнить задачу %s", lock);
+                                        }
+                                        break;
+                                    }
+                                }
+                            } finally {
+                                if (threadRunner != null && threadRunner.isAlive()) {
+                                    threadRunner.interrupt();
+                                    threadRunner.join();
+                                }
+                            }
                             if (!lockService.isLockExists(lock, lockDate)) {
                                 //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                                 //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                                 throw new RuntimeException(String.format("Результат выполнения задачи %s больше не актуален. Выполняется переход к следующей задаче в очереди", lock));
                             }
-                            return taskStatus;
+                            return runner.getTaskStatus();
                         } else {
                             throw new RuntimeException(String.format("Задача %s больше не актуальна.", lock));
                         }
