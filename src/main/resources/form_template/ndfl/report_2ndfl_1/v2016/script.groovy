@@ -35,7 +35,7 @@ switch (formDataEvent) {
         println "!CALCULATE!"
         buildXml(xml)
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -241,7 +241,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
     formType = getFormType(declarationTemplate.declarationFormTypeId)
 
     // Данные для Файл.СвРекв
-    def oktmo = getOktmoById(departmentParamRow?.OKTMO?.value).CODE.value
+    def oktmo = getOktmoById(departmentParamRow?.OKTMO?.value)?.CODE?.value
     // Данные для Файл.СвРекв.СвЮЛ
     def kpp = departmentParamRow?.KPP?.value
     def otchetGod = reportPeriod.taxPeriod.year
@@ -731,7 +731,7 @@ def getNalNeUderzh(def incomes) {
 }
 def getOktmoById(id) {
     def oktmo = OKTMO_CACHE.get(id)
-    if (oktmo == null) {
+    if (oktmo == null && id != null) {
         def rpe = getReportPeriodEndDate(declarationData.reportPeriodId)
         def oktmoList = getProvider(REF_BOOK_OKTMO_ID).getRecords(rpe, null, "ID = ${id}", null)
         if (oktmoList.size() != 0) {
@@ -772,8 +772,8 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
 def getDepartmentParamTable(def departmentParamId, def reportPeriodId) {
     if (departmentParamRow == null) {
         def filter = null
-        def oktmo = getOktmoByCode(declarationData.oktmo).id.value
         if (declarationData.oktmo != null) {
+            def oktmo = getOktmoByCode(declarationData.oktmo)?.id?.value
             filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}' and OKTMO = ${oktmo}"
         } else {
             filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
