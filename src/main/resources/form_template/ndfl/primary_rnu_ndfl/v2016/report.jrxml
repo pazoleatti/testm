@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="repform" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="585" leftMargin="10" rightMargin="0" topMargin="10" bottomMargin="10" isFloatColumnFooter="true" uuid="4487ae25-5c53-429a-8f89-b8df12083233">
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="30"/>
+	<property name="ireport.x" value="147"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="declarationId" class="java.lang.Long">
 		<defaultValueExpression><![CDATA[14730]]></defaultValueExpression>
@@ -138,7 +138,7 @@
 	</columnHeader>
 	<detail>
 		<band height="13" splitType="Immediate">
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="677cc6dd-ebb2-41a6-ad97-41eba62074eb" x="0" y="0" width="55" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -153,7 +153,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{R}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="d96f1f92-803d-48b5-9eee-6b6c49706a5f" x="55" y="0" width="89" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -168,7 +168,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{KPP}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="677ad700-25ab-4731-ba72-0086ae9660c1" x="144" y="0" width="100" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -183,7 +183,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{OKTMO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="f83d353e-8449-4a25-b8c4-ac42342b9aad" x="450" y="0" width="125" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -198,7 +198,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{INC_CALCTAX}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="eba98b1e-92ff-47d0-9e07-c77dd36fba73" x="324" y="0" width="126" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -213,7 +213,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{INC_ACCURED}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="e2237a14-af0e-404d-8d06-6075738cdb8d" x="244" y="0" width="80" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -232,7 +232,7 @@
 	</detail>
 	<columnFooter>
 		<band height="13" splitType="Stretch">
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="4aeb33bf-7c23-4b32-9bf2-77d6f2d84bfa" x="244" y="0" width="80" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -247,7 +247,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{vTotalCntPers}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="b7b58801-5272-4aff-92fb-a061def25783" x="324" y="0" width="126" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -262,7 +262,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{vTotalIncAccure}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="47e39b8d-9488-4976-95d0-76767becb389" x="450" y="0" width="125" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
