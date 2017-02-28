@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -22,8 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +36,6 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  * В ней реализована общая часть логики взаимодействия с блокировками объектов, для которых выполняется бизнес-логика конкретных задач
  * @author dloshkarev
  */
-@Transactional
 public abstract class AbstractAsyncTask implements AsyncTask {
 
     private static final Log LOG = LogFactory.getLog(AbstractAsyncTask.class);
@@ -144,44 +142,37 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      */
     protected abstract String getErrorMsg(Map<String, Object> params, boolean unexpected);
 
-    private void checkLock(String lock, Date lockDate) {
-        if (!lockService.isLockExists(lock, lockDate)) {
-            throw new RuntimeException(String.format("Задача с ключом %s и датой начала %s (%s) больше не актуальна", lock, sdf.get().format(lockDate), lockDate.getTime()));
-        }
+    private interface CheckLockHandler {
+        void checkLock();
     }
 
-    @Transactional
     private final class ProcessRunner implements Runnable {
-        private Map<String, Object> params;
-        private Logger logger;
-        private TaskStatus taskStatus;
-        private boolean success = false;
-        private Exception exception;
+        private Thread thread;
+        private CheckLockHandler checkLockHandler;
 
-        public boolean isSuccess() {
-            return success;
-        }
-
-        private ProcessRunner(Map<String, Object> params, Logger logger) {
-            this.params = params;
-            this.logger = logger;
-        }
-
-        public Exception getException() {
-            return exception;
-        }
-
-        public TaskStatus getTaskStatus() {
-            return taskStatus;
+        private ProcessRunner(Thread thread, CheckLockHandler checkLockHandler) {
+            this.thread = thread;
+            this.checkLockHandler = checkLockHandler;
         }
 
         @Override
         public void run() {
             try {
-                taskStatus = executeBusinessLogic(params, logger);
-                success = true;
+                while (true) {
+                    if (Thread.interrupted()) {
+                        return;
+                    }
+                    checkLockHandler.checkLock();
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                }
             } catch (Exception e) {
-                this.exception = e;
+                if (thread.isAlive()) {
+                    thread.interrupt();
+                }
             }
         }
     }
@@ -215,45 +206,33 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         try {
             taskStatus = transactionHelper.executeInNewTransaction(new TransactionLogic<TaskStatus>() {
                 @Override
-                @Transactional
                 public TaskStatus execute() {
                     try {
                         if (lockService.isLockExists(lock, lockDate)) {
                             LOG.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
                             lockService.updateState(lock, lockDate, getBusinessLogicTitle());
                             //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                            ProcessRunner runner = new ProcessRunner(params, logger);
+                            ProcessRunner runner = new ProcessRunner(Thread.currentThread(), new CheckLockHandler() {
+                                @Override
+                                public void checkLock() {
+                                    if (!lockService.isLockExists(lock, lockDate)) {
+                                        throw new RuntimeException(String.format("Задача с ключом %s и датой начала %s (%s) больше не актуальна", lock, sdf.get().format(lockDate), lockDate.getTime()));
+                                    }
+                                }
+                            });
                             Thread threadRunner = new Thread(Thread.currentThread().getThreadGroup(), runner);
                             threadRunner.start();
-                            try {
-                                while (true) {
-                                    checkLock(lock, lockDate);
-                                    try {
-                                        Thread.sleep(500);
-                                    } catch (InterruptedException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                    if (!threadRunner.isAlive()){
-                                        if (runner.getException() != null) {
-                                            throw new ServiceException(runner.getException().getMessage(), runner.getException());
-                                        } else if (!runner.isSuccess()) {
-                                            throw new ServiceException("Невозможно выполнить задачу %s", lock);
-                                        }
-                                        break;
-                                    }
-                                }
-                            } finally {
-                                if (threadRunner != null && threadRunner.isAlive()) {
-                                    threadRunner.interrupt();
-                                    threadRunner.join();
-                                }
+                            TaskStatus taskStatus = executeBusinessLogic(params, logger);
+                            if (threadRunner.isAlive()) {
+                                threadRunner.interrupt();
+                                threadRunner.join();
                             }
                             if (!lockService.isLockExists(lock, lockDate)) {
                                 //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                                 //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                                 throw new RuntimeException(String.format("Результат выполнения задачи %s больше не актуален. Выполняется переход к следующей задаче в очереди", lock));
                             }
-                            return runner.getTaskStatus();
+                            return taskStatus;
                         } else {
                             throw new RuntimeException(String.format("Задача %s больше не актуальна.", lock));
                         }
@@ -314,8 +293,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         try {
                             String msg = getErrorMsg(params, true);
                             logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
-                            if (e.getMessage() != null && !e.getMessage().isEmpty())
-                            logger.error(e);
+                            if (e.getMessage() != null && !e.getMessage().isEmpty()) {
+                                logger.error(e);
+                            }
                             sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
                         } finally {
                             lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
