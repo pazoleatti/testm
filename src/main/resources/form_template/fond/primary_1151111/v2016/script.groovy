@@ -1019,6 +1019,9 @@ def getSpecialReportTemplate() {
     new XSSFWorkbook(blobData.getInputStream())
 }
 
+
+
+
 /****************************************************************************
  *  Тестовые данные                                                         *
  *                                                                          *
@@ -1064,21 +1067,21 @@ class TestDataHolder {
         VYPL.setVyplOpsVs3(300)
         VYPL.setVyplOpsDogVs3(300)
         VYPL.setNachislSvVs3(400)
-        final VYPL_MT1 = new RaschsvSvVyplMt();
+        final VYPL_MT1 = new RaschsvSvVyplMk();
         VYPL_MT1.setMesyac("Январь")
         VYPL_MT1.setKodKatLic("1")
         VYPL_MT1.setSumVypl(300)
         VYPL_MT1.setVyplOps(100)
         VYPL_MT1.setVyplOpsDog(100)
         VYPL_MT1.setNachislSv(150)
-        final VYPL_MT2 = new RaschsvSvVyplMt();
+        final VYPL_MT2 = new RaschsvSvVyplMk();
         VYPL_MT2.setMesyac("Февраль")
         VYPL_MT2.setKodKatLic("1")
         VYPL_MT2.setSumVypl(300)
         VYPL_MT2.setVyplOps(100)
         VYPL_MT2.setVyplOpsDog(100)
         VYPL_MT2.setNachislSv(100)
-        final VYPL_MT3 = new RaschsvSvVyplMt();
+        final VYPL_MT3 = new RaschsvSvVyplMk();
         VYPL_MT3.setMesyac("Март")
         VYPL_MT3.setKodKatLic("1")
         VYPL_MT3.setSumVypl(400)

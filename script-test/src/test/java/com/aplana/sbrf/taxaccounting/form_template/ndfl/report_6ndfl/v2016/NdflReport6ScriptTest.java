@@ -50,6 +50,7 @@ import static org.mockito.Mockito.*;
 /**
  * Скрипт для тестирования Формирования xml-файла ЭД "1151099 (6 НДФЛ) Расчет сумм налога на доходы физических лиц, исчисленных и удержанных налоговым агентом"
  */
+@Ignore
 public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
 
     private RefBookFactory refBookFactory;

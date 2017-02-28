@@ -228,6 +228,14 @@ def buildXml(def writer, boolean isForSpecificReport) {
     if (hasProperty(PART_NUMBER)) {
         pageNumber = formMap[PART_NUMBER]
     }
+
+
+    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+    // Получим ИНН из справочника "Общие параметры"
+    def sberbankInnParam = configurationParamModel?.get(ConfigurationParam.SBERBANK_INN)?.get(0)?.get(0)
+    // Получим код НО пром из справочника "Общие параметры"
+    def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
+
     //Текущая страница представляющая порядковый номер файла
     def currentPageNumber = pageNumber
 
@@ -280,13 +288,13 @@ def buildXml(def writer, boolean isForSpecificReport) {
     def builder = new MarkupBuilder(writer)
 
     builder.setOmitNullAttributes(true)
-    builder.Файл(ИдФайл: generateXmlFileId(),
+    builder.Файл(ИдФайл: generateXmlFileId(sberbankInnParam, kodNoProm),
             ВерсПрог: applicationVersion,
             ВерсФорм: VERS_FORM) {
         СвРекв(ОКТМО: oktmo,
                 ОтчетГод: otchetGod,
                 ПризнакФ: priznakF) {
-            СвЮЛ(ИННЮЛ: INN_YUR,
+            СвЮЛ(ИННЮЛ: sberbankInnParam,
                     КПП: kpp) {}
         }
         listKnf.each { np ->
@@ -315,7 +323,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 СвНА(ОКТМО: oktmo,
                         Тлф: tlf) {
                     СвНАЮЛ(НаимОрг: naimOrg,
-                            ИННЮЛ: INN_YUR,
+                            ИННЮЛ: sberbankInnParam,
                             КПП: kpp)
                 }
                 ПолучДох(ИННФЛ: np.innNp,
@@ -534,12 +542,12 @@ def createRefBookAttributesForNdflReference(
  * Генерация имени файла
  * @return
  */
-def generateXmlFileId() {
+def generateXmlFileId(inn, kodNoProm) {
     def departmentParamRow = departmentParam ? getDepartmentParamDetails(departmentParam?.record_id?.value, declarationData.reportPeriodId) : null
     def r_t = "NO_NDFL2"
-    def a = departmentParamRow?.TAX_ORGAN_CODE_MID?.value
+    def a = kodNoProm
     def k = departmentParamRow?.TAX_ORGAN_CODE?.value
-    def o = "7707083893" + declarationData.kpp
+    def o = inn + declarationData.kpp
     def date = Calendar.getInstance().getTime()?.format(DATE_FORMAT_FLATTEN)
     def n = UUID.randomUUID().toString().toUpperCase()
     // R_T_A_K_O_GGGGMMDD_N
