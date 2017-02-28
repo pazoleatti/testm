@@ -34,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,13 +41,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -137,6 +134,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private TAUserService userService;
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private BDUtils bdUtils;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -329,13 +328,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataDao.setStatus(id, State.CREATED);
             }
         } else {
-            logger.info("Проверка завершена, ошибок не обнаружено");
             if (departmentReportPeriodService.get(dd.getDepartmentReportPeriodId()).isActive()) {
                 if (State.CREATED.equals(dd.getState())) {
                     // Переводим в состояние подготовлено
                     declarationDataDao.setStatus(id, State.PREPARED);
                 }
             }
+            logger.info("Проверка завершена, ошибок не обнаружено");
         }
     }
 
@@ -1578,7 +1577,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public Connection getReportConnection() {
         try {
-            return DataSourceUtils.getConnection(((DataSource) applicationContext.getBean("dataSource")));
+            return bdUtils.getConnection();
         } catch (CannotGetJdbcConnectionException e) {
             throw new ServiceException("Ошибка при попытке получить соединение с БД!", e);
         }
