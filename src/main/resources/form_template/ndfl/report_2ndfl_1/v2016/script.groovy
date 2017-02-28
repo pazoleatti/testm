@@ -338,9 +338,10 @@ def buildXml(def writer, boolean isForSpecificReport) {
                             Дом: np.house,
                             Корпус: np.building,
                             Кварт: np.flat)
-                    // TODO уточнить может ли countryCode быть 643
-                    АдрИНО(КодСтр: np.countryCode,
-                            АдрТекст: np.address)
+                    if (np.countryCode != null) {
+                        АдрИНО(КодСтр: np.countryCode,
+                                АдрТекст: np.address)
+                    }
                 }
 
                 // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
