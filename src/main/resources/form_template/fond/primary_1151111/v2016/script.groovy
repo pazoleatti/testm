@@ -1700,12 +1700,18 @@ boolean isExistsKBK(String code) {
  *      Все проверки  раздела 1.6 Проверки по каждому физическому лицу - получателю доходов
  */
 void checkImportRaschsv(fileNode, fileName) {
+
+    long time = System.currentTimeMillis();
+
     checkRaschsvFileName(fileNode, fileName)
     checkPayment(fileNode, fileName)
     checkPodpisant(fileNode, fileName)
     checkPayer(fileNode, fileName)
     checkTariff_2_2_425(fileNode, fileName)
     checkFL(fileNode, fileName)
+
+    println "checkImportRaschsv " + (System.currentTimeMillis() - time);
+    logger.info("checkImportRaschsv: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -3823,7 +3829,10 @@ def checkDataDB() {
     checkDataDBPerson()
 
     // Суммовые проверки
+    long time = System.currentTimeMillis();
     checkDataDBSum()
+    println "Суммовые проверки " + (System.currentTimeMillis() - time);
+    logger.info("Суммовые проверки: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -3833,6 +3842,8 @@ def checkDataDB() {
 def checkDataDBPerson() {
 
     def raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
+
+    long time = System.currentTimeMillis();
 
     // Гражданство
     def citizenshipCodeMap = getRefCitizenship();
@@ -3858,8 +3869,13 @@ def checkDataDBPerson() {
     // Коды видов документов
     def documentTypeActualList = getActualRefDocument()
 
+    println "Загрузка справочников для проверок записей в БД / Проверки по плательщику страховых взносов " + (System.currentTimeMillis() - time);
+    logger.info("Загрузка справочников для проверок записей в БД / Проверки по плательщику страховых взносов: (" + (System.currentTimeMillis() - time) + " ms)");
+
     // Идентификаторы ссылок на справочник Физические лица
     def personIdList = []
+
+    time = System.currentTimeMillis();
 
     // Проверки по плательщику страховых взносов
     raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
@@ -3981,6 +3997,11 @@ def checkDataDBPerson() {
         }
     }
 
+    println "Проверки по плательщику страховых взносов " + (System.currentTimeMillis() - time);
+    logger.info("Проверки по плательщику страховых взносов: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
+
     // 3.2.1 Дубли физического лица рамках формы
     def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByDeclarationDataId(declarationData.id)
     def msgError  = "Найдено несколько записей, идентифицированных как одно физическое лицо с идентификаторами ФЛ: "
@@ -4001,6 +4022,11 @@ def checkDataDBPerson() {
             logger.warn(msgError + ids)
         }
     }
+
+    println "Дубли физического лица рамках формы " + (System.currentTimeMillis() - time);
+    logger.info("Дубли физического лица рамках формы: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
 
     // 3.2.2 Дубли физического лица в разных формах
     if (!personIdList.isEmpty()) {
@@ -4036,6 +4062,9 @@ def checkDataDBPerson() {
             }
         }
     }
+
+    println "Дубли физического лица в разных формах " + (System.currentTimeMillis() - time);
+    logger.info("Дубли физического лица в разных формах: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -4453,8 +4482,9 @@ def checkDataXml() {
         return
     }
 
-
     def msgErrNotEquals = "Не совпадает значение %s = \"%s\" плательщика страховых взносов %s."
+
+    long time = System.currentTimeMillis();
 
     // Параметры подразделения
     def departmentParam = getDepartmentParam(declarationData.departmentId)
@@ -4487,8 +4517,11 @@ def checkDataXml() {
     // Коды категорий застрахованных лиц
     def listPersonCategory = getActualPersonCategory()
 
-    // ------------Проверки по плательщику страховых взносов RASCHSV_SVNP_PODPISANT
+    println "Загрузка справочников для xml-проверок: " + (System.currentTimeMillis() - time);
+    logger.info("Загрузка справочников для xml-проверок: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    // ------------Проверки по плательщику страховых взносов RASCHSV_SVNP_PODPISANT
+    time = System.currentTimeMillis();
     fileNode.childNodes().each { documentNode ->
         // Документ
         if (documentNode.name == NODE_NAME_DOCUMENT) {
@@ -4741,6 +4774,8 @@ def checkDataXml() {
             }
         }
     }
+    println "Проверки xml: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки xml: (" + (System.currentTimeMillis() - time) + " ms)");
 
     // ------------Сводные данные об обязательствах плательщика
 }
