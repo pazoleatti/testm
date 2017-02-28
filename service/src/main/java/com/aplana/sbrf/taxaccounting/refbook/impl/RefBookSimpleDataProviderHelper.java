@@ -9,12 +9,19 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookLinkModel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
@@ -23,7 +30,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Transactional
@@ -82,7 +95,9 @@ public class RefBookSimpleDataProviderHelper {
             if (refBook.isHierarchic() && refBook.isVersioned()) {
                 checkParentConflict(refBook, logger, versionFrom, records);
             }
+			// Проверяем каждую запись по-отдельности на уникальность значений
             for (RefBookRecord record : records) {
+				// Cписок пар "идентификатор записи"-"имя атрибута"
                 List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, uniqueRecordId, record);
                 if (matchedRecords != null && !matchedRecords.isEmpty()) {
                     List<Long> conflictedIds = dao.checkConflictValuesVersions(refBook, matchedRecords, versionFrom, record.getVersionTo());
@@ -135,7 +150,7 @@ public class RefBookSimpleDataProviderHelper {
         StringBuilder attrNames = new StringBuilder();
         Map<String, Integer> map = new HashMap<String, Integer>();
         if (conflictedIds != null) {
-            //Если было ограничение по периоду то отираем нужные
+            //Если было ограничение по периоду, то отбираем нужные
             for (Long id : conflictedIds) {
                 for (Pair<Long, String> pair : matchedRecords) {
                     if (pair.getFirst().equals(id)) {

@@ -38,6 +38,7 @@ import java.util.*;
  *
  * @author dloshkarev
  */
+@Deprecated
 @Repository
 public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao {
 

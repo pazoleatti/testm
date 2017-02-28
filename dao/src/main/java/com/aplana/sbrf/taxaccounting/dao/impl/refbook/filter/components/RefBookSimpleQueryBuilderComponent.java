@@ -328,9 +328,10 @@ public class RefBookSimpleQueryBuilderComponent {
 
     public PreparedStatementData psGetMatchedRecordsByUniqueAttributes(@NotNull RefBook refBook, Long uniqueRecordId, @NotNull RefBookRecord record,
                                                                        @NotNull Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues) {
-        List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupsUniqueAttributesValues.get(1);
+        //TODO !!! неправильно, так как групп уникальности может быть несколько
+		List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupsUniqueAttributesValues.get(1);
 
-        PreparedStatementData sql = new PreparedStatementData("SELECT r.").append(RefBook.RECORD_ID_ALIAS).append(" as id, ");
+        PreparedStatementData sql = new PreparedStatementData("SELECT r.").append(RefBook.RECORD_ID_ALIAS).append(" AS id, ");
         appendNameColumn(sql, uniqueAttributesValues);
         sql.append("FROM ").append(refBook.getTableName()).append(" r\n");
         sql.append("WHERE r.status = 0\nAND (\n");
