@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util;
 
+import java.sql.Connection;
 import java.util.List;
 
 /**
@@ -51,4 +52,15 @@ public interface BDUtils {
      * @return Идентификаторы из последовательности
      */
     List<Long> getNextIds(Sequence sequence, Long count);
+
+    /**
+     * Получение текущего соединения
+     * @return
+     */
+    Connection getConnection();
+
+    /**
+     * Проверяет соседиенение с БД
+     */
+    void checkConnection();
 }

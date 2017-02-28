@@ -130,4 +130,7 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.util.BDUtils"/>
+    </bean>
 </beans>

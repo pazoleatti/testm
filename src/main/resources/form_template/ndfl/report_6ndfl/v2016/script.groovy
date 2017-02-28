@@ -17,7 +17,7 @@ switch (formDataEvent) {
         println "!CALCULATE!"
         buildXml(xml)
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        //declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -124,6 +124,11 @@ def buildXmlForSpecificReport(def writer) {
 }
 
 def buildXml(def writer, boolean isForSpecificReport) {
+    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+    // Получим ИНН из справочника "Общие параметры"
+    def sberbankInnParam = configurationParamModel?.get(ConfigurationParam.SBERBANK_INN)?.get(0)?.get(0)
+    // Получим код НО пром из справочника "Общие параметры"
+    def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
 
     // Параметры подразделения
     def departmentParam = getDepartmentParam(declarationData.departmentId)
@@ -150,7 +155,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
     def builder = new MarkupBuilder(writer)
     builder.Файл(
-            ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, declarationData.kpp),
+            ИдФайл: generateXmlFileId(departmentParamIncomeRow, sberbankInnParam, declarationData.kpp, kodNoProm),
             ВерсПрог: applicationVersion,
             ВерсФорм: "5.01"
     ) {
@@ -171,7 +176,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
             СвНП(svNP) {
                 НПЮЛ(
                         НаимОрг: departmentParamIncomeRow.NAME,
-                        ИННЮЛ: departmentParam.INN,
+                        ИННЮЛ: sberbankInnParam,
                         КПП: declarationData.kpp
                 )
             }
@@ -707,11 +712,11 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
  * DD - День формирования передаваемого файла
  * N - Идентификационный номер файла должен обеспечивать уникальность файла, длина - от 1 до 36 знаков
  */
-def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP) {
+def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP, def kodNoProm) {
     def R_T = "NO_NDFL6"
-    def A = departmentParamIncomeRow?.TAX_ORGAN_CODE_MID?.value
+    def A = kodNoProm
     def K = departmentParamIncomeRow?.TAX_ORGAN_CODE?.value
-    def O = INN?.value + KPP
+    def O = INN + KPP
     def currDate = new Date().format(DATE_FORMAT_UNDERLINE)
     def N = UUID.randomUUID().toString().toUpperCase()
     def res = R_T + "_" + A + "_" + K + "_" + O + "_" + currDate + "_" + N
