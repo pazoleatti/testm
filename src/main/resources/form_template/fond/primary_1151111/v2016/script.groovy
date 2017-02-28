@@ -211,6 +211,11 @@ switch (formDataEvent) {
 @Field final String COMMON_SHEET = "Общее"
 @Field final String PERSONAL_DATA = "Сведения о ФЛ"
 @Field final String CONS_PERSONAL_DATA = "3.Персониф. Сведения"
+@Field final String SUM_STRAH_VZN = "Суммы страховых взносов"
+
+// Имена псевдонима спецотчета
+@Field final String PERSON_REPORT = "person_rep_param"
+@Field final String CONSOLIDATED_REPORT = "consolidated_report"
 
 @Field final Color ROWS_FILL_COLOR = new Color(255, 243, 203)
 @Field final Color TOTAL_ROW_FILL_COLOR = new Color(186, 208, 80)
@@ -221,9 +226,17 @@ def createSpecificReport() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     raschsvPersSvStrahLic = getrRaschsvPersSvStrahLic(row.id.longValue())
     def writer = scriptSpecificReportHolder.getFileOutputStream()
+    def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
     def workbook = getSpecialReportTemplate()
+
     fillGeneralList(workbook)
-    fillPersSvSheet(workbook)
+    if (alias.equalsIgnoreCase(PERSON_REPORT)) {
+        fillPersSvSheet(workbook)
+    } else if (alias.equalsIgnoreCase(CONSOLIDATED_REPORT)) {
+        fillPersSvConsSheet(workbook)
+        fillSumStrahVzn(workbook)
+    }
+
     workbook.write(writer)
     writer.close()
     scriptSpecificReportHolder
@@ -243,6 +256,29 @@ List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicList() {
     def declarationId = declarationData.getId()
     def params = scriptSpecificReportHolder.getSubreportParamValues()
     raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
+}
+
+// Находит в базе данных список List RaschsvPersSvStrahLic
+// TODO временный метод для получения физлиц для сводного спецотчета
+List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicListForConsSpecReport() {
+    [TestDataHolder.getInstance().FL_DATA, TestDataHolder.getInstance().FL_DATA, TestDataHolder.getInstance().FL_DATA]
+}
+
+// Находит в БД RaschsvObyazPlatSv
+RaschsvObyazPlatSv getRaschsvObyazPlatSv() {
+    // TODO нужен в RaschsvObyazPlatSvDao select по declarationDataId
+    TestDataHolder.getInstance().RASCHSV_OOBYAZ_PLAT_SV
+}
+
+// Находит в БД RaschsvUplPer
+List<RaschsvUplPer> getRaschsvUplPer() {
+    // TODO нужен RaschsvUplPerDao select по obyazPlatSvId и nodeName, лучше бы сделать nodeName в виде enum
+    [TestDataHolder.getInstance().RASCHSV_UPL_PER]
+}
+
+RaschsvUplPrevOss getRaschsvUplPrevOss() {
+    // TODO Нужен select в RaschsvUplPrevOssDao по obyazPlatSvId
+    TestDataHolder.getInstance().RASCHSV_UPL_PREV_OSS
 }
 
 def prepareSpecificReport() {
@@ -723,6 +759,156 @@ def fillCellsOfRaschSvVyplatDop(final RaschsvVyplSvDop raschsvVyplSvDop, final X
     cell4.setCellValue(raschsvVyplSvDop?.nachislSvVs3)
 }
 
+/******************************** СВОДНЫЙ ОТЧЕТ **************************************************/
+/****************************************************************************
+ *  Блок заполнения данными листа 3.Персониф. Сведения                      *
+ *                                                                          *
+ * **************************************************************************/
+
+// Заполняет данными лист 3.Персониф. Сведения
+def fillPersSvConsSheet(final XSSFWorkbook workbook) {
+    def startIndex = 3
+    def pointer = startIndex
+    def raschsvPersSvStrahLic = getrRaschsvPersSvStrahLicListForConsSpecReport()
+    pointer += fillRaschsvPersSvStrahLicTable(pointer, raschsvPersSvStrahLic, workbook, CONS_PERSONAL_DATA)
+}
+
+/****************************************************************************
+ *  Блок заполнения данными листа Суммы страховых взносов                   *
+ *                                                                          *
+ * **************************************************************************/
+
+// Заполняет данными лист "Суммы страховых взносов"
+def fillSumStrahVzn(final XSSFWorkbook workbook) {
+    def startIndex = 2
+    def pointer = startIndex
+    def raschsvObyazPlatSv = getRaschsvObyazPlatSv()
+    def raschsvUplPerOps = getRaschsvUplPer()
+    def raschsvUplPerOms = getRaschsvUplPer()
+    def raschsvUplPerOpsDop = getRaschsvUplPer()
+    def raschsvUplPerOssDop = getRaschsvUplPer()
+    def raschsvUplPrevOss = getRaschsvUplPrevOss()
+    fillRaschsvObyazPlatSv(pointer, raschsvObyazPlatSv, workbook)
+    pointer += 4
+    pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOps, workbook)
+    pointer += 4
+    pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOms, workbook)
+    pointer += 4
+    pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOpsDop, workbook)
+    pointer += 4
+    pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOssDop, workbook)
+    pointer += 5
+    fillSumStrahVznNetrud(pointer, raschsvUplPrevOss, workbook)
+}
+
+// Заполняет ОКТМО
+def fillRaschsvObyazPlatSv(
+        final int startIndex, final RaschsvObyazPlatSv raschsvObyazPlatSv, final XSSFWorkbook workbook) {
+    def sheet = workbook.getSheet(SUM_STRAH_VZN)
+    def row = sheet.getRow(startIndex)
+    row.createCell(1).setCellValue(raschsvObyazPlatSv.oktmo)
+}
+
+/* Создает строки таблиц "Сумма страховых взносов на обязательное пенсионное страхование, подлежащая уплате за
+ * расчетный (отчетный) период", "Сумма страховых взносов на обязательное медицинское страхование, подлежащая уплате за
+ * расчетный (отчетный) период", "Сумма страховых взносов на обязательное пенсионное страхование по дополнительному
+ * тарифу, подлежащая уплате за расчетный (отчетный) период", "Сумма страховых взносов на дополнительное социальное
+ * обеспечение, подлежащая уплате за расчетный (отчетный) период"
+ **/
+
+int fillSumStrahVznOPSTable(
+        final int startIndex, final List<RaschsvUplPer> raschsvUplPerList, final XSSFWorkbook workbook) {
+    def raschsvUplPerListSize = raschsvUplPerList.size()
+    def sheet = workbook.getSheet(SUM_STRAH_VZN)
+    sheet.shiftRows(startIndex, sheet.getLastRowNum(), raschsvUplPerListSize + 1)
+    for (int i = 0; i < raschsvUplPerListSize; i++) {
+        def row = sheet.createRow(i + startIndex)
+        fillCellsOfRaschsvUplPerRow(raschsvUplPerList[i], row)
+    }
+    return raschsvUplPerListSize
+}
+
+/* Заполняет строку таблиц "Сумма страховых взносов на обязательное пенсионное страхование, подлежащая уплате за
+ * расчетный (отчетный) период", "Сумма страховых взносов на обязательное медицинское страхование, подлежащая уплате за
+ * расчетный (отчетный) период", "Сумма страховых взносов на обязательное пенсионное страхование по дополнительному
+ * тарифу, подлежащая уплате за расчетный (отчетный) период", "Сумма страховых взносов на дополнительное социальное
+ * обеспечение, подлежащая уплате за расчетный (отчетный) период"
+ **/
+
+def fillCellsOfRaschsvUplPerRow(final RaschsvUplPer raschsvUplPer, final XSSFRow row) {
+    def style = normalWithBorderStyle(row.getSheet().getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell0 = row.createCell(0)
+    cell0.setCellStyle(style)
+    cell0.setCellValue(raschsvUplPer.kbk)
+    def cell1 = row.createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvUplPer.sumSbUplPer)
+    def cell2 = row.createCell(2)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvUplPer.sumSbUpl1m)
+    def cell3 = row.createCell(3)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvUplPer.sumSbUpl2m)
+    def cell4 = row.createCell(4)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvUplPer.sumSbUpl3m)
+}
+
+/* Создает строки таблицы "Сумма страховых взносов на обязательное социальное страхование на случай временной
+ *  нетрудоспособности и в связи с материнством, подлежащая уплате за расчетный (отчетный) период / Сумма превышения
+ *  произведенных плательщиком расходов"
+ */
+
+def fillSumStrahVznNetrud(
+        final int startIndex, final RaschsvUplPrevOss raschsvUplPrevOss, final XSSFWorkbook workbook) {
+    def sheet = workbook.getSheet(SUM_STRAH_VZN)
+    def row = sheet.createRow(startIndex)
+    fillCellsOfRaschsvUplPrevOss(raschsvUplPrevOss, row)
+}
+
+/* Заполняет стироку таблицы "Сумма страховых взносов на обязательное социальное страхование на случай временной
+ *  нетрудоспособности и в связи с материнством, подлежащая уплате за расчетный (отчетный) период / Сумма превышения
+ *  произведенных плательщиком расходов"
+ */
+
+def fillCellsOfRaschsvUplPrevOss(final RaschsvUplPrevOss raschsvUplPrevOss, final XSSFRow row) {
+    def style = normalWithBorderStyle(row.getSheet().getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell0 = row.createCell(0)
+    cell0.setCellStyle(style)
+    cell0.setCellValue(raschsvUplPrevOss.kbk)
+    def cell1 = row.createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvUplPrevOss.sumSbUplPer)
+    def cell2 = row.createCell(2)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvUplPrevOss.sumSbUpl1m)
+    def cell3 = row.createCell(3)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvUplPrevOss.sumSbUpl2m)
+    def cell4 = row.createCell(4)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvUplPrevOss.sumSbUpl3m)
+    def cell5 = row.createCell(5)
+    cell5.setCellStyle(style)
+    cell5.setCellValue(raschsvUplPrevOss.prevRashSvPer)
+    def cell6 = row.createCell(6)
+    cell6.setCellStyle(style)
+    cell6.setCellValue(raschsvUplPrevOss.prevRashSv1m)
+    def cell7 = row.createCell(7)
+    cell7.setCellStyle(style)
+    cell7.setCellValue(raschsvUplPrevOss.prevRashSv2m)
+    def cell8 = row.createCell(8)
+    cell8.setCellStyle(style)
+    cell8.setCellValue(raschsvUplPrevOss.prevRashSv3m)
+}
+
+
+
+
 /****************************************************************************
  *  Блок стилизации                                                         *
  *                                                                          *
@@ -828,20 +1014,138 @@ def getSpecialReportTemplate() {
     new XSSFWorkbook(blobData.getInputStream())
 }
 
-// Создает отформатироованную строку из объекта даты на основе передаваемого шаблона
-def formatDate(final date, final pattern) {
-    def formatter = new SimpleDateFormat(pattern)
-    formatter.format(date)
-}
+/****************************************************************************
+ *  Тестовые данные                                                         *
+ *                                                                          *
+ * **************************************************************************/
+class TestDataHolder {
+    final static testDataHolder = new TestDataHolder()
 
-def getRefBookPresentPlaces(filter) {
-    def refBookPresentPlaces = getProvider(REF_BOOK_PRESENT_PLACE_ID).getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (refBookPresentPlaces == null || refBookPresentPlaces.size() == 0) {
-        throw new RuntimeException("Ошибка при получении записей справочника \"Коды места представления расчета\"")
+    final PODPISANT
+    final FL_DATA
+    final RASCHSV_OOBYAZ_PLAT_SV
+    final RASCHSV_UPL_PER
+    final RASCHSV_UPL_PREV_OSS
+
+    static getInstance() {
+        return testDataHolder
     }
-    return refBookPresentPlaces
-}
 
+    private TestDataHolder() {
+        // Инициализация RaschsvPersSvStrahLic
+        FL_DATA = new RaschsvPersSvStrahLic()
+        FL_DATA.nomer = 1
+        FL_DATA.svData = new Date()
+        FL_DATA.nomKorr = 0
+        FL_DATA.period = "21"
+        FL_DATA.otchetGod = "2016"
+        FL_DATA.familia = "Иванов"
+        FL_DATA.imya = "Егор"
+        FL_DATA.middleName = "Семенович"
+        FL_DATA.innfl = "111222333444"
+        FL_DATA.snils = "123-456"
+        FL_DATA.dataRozd = new Date(1970, Calendar.JANUARY, 1)
+        FL_DATA.grazd = "Россия"
+        FL_DATA.pol = "м"
+        FL_DATA.kodVidDoc = "1"
+        FL_DATA.serNomDoc = "1234 567890"
+        FL_DATA.prizOps = "1"
+        FL_DATA.prizOms = "1"
+        FL_DATA.prizOss = "1"
+
+
+        final VYPL = new RaschsvSvVypl()
+        VYPL.setSumVyplVs3(1000)
+        VYPL.setVyplOpsVs3(300)
+        VYPL.setVyplOpsDogVs3(300)
+        VYPL.setNachislSvVs3(400)
+        final VYPL_MT1 = new RaschsvSvVyplMt();
+        VYPL_MT1.setMesyac("Январь")
+        VYPL_MT1.setKodKatLic("1")
+        VYPL_MT1.setSumVypl(300)
+        VYPL_MT1.setVyplOps(100)
+        VYPL_MT1.setVyplOpsDog(100)
+        VYPL_MT1.setNachislSv(150)
+        final VYPL_MT2 = new RaschsvSvVyplMt();
+        VYPL_MT2.setMesyac("Февраль")
+        VYPL_MT2.setKodKatLic("1")
+        VYPL_MT2.setSumVypl(300)
+        VYPL_MT2.setVyplOps(100)
+        VYPL_MT2.setVyplOpsDog(100)
+        VYPL_MT2.setNachislSv(100)
+        final VYPL_MT3 = new RaschsvSvVyplMt();
+        VYPL_MT3.setMesyac("Март")
+        VYPL_MT3.setKodKatLic("1")
+        VYPL_MT3.setSumVypl(400)
+        VYPL_MT3.setVyplOps(100)
+        VYPL_MT3.setVyplOpsDog(100)
+        VYPL_MT3.setNachislSv(150)
+        VYPL.raschsvSvVyplMtList = [VYPL_MT1, VYPL_MT2, VYPL_MT3]
+        FL_DATA.raschsvSvVypl = VYPL
+
+        final VYPL_DOP = new RaschsvVyplSvDop()
+        VYPL_DOP.nachislSvVs3 = 500
+        VYPL_DOP.vyplSvVs3 = 500
+        final VYPL_DOP_MT1 = new RaschsvVyplSvDopMt()
+        VYPL_DOP_MT1.mesyac = "Январь"
+        VYPL_DOP_MT1.tarif = "abc"
+        VYPL_DOP_MT1.nachislSv = 200
+        VYPL_DOP_MT1.vyplSv = 200
+        final VYPL_DOP_MT2 = new RaschsvVyplSvDopMt()
+        VYPL_DOP_MT2.mesyac = "Февраль"
+        VYPL_DOP_MT2.tarif = "xyz"
+        VYPL_DOP_MT2.nachislSv = 100
+        VYPL_DOP_MT2.vyplSv = 100
+        final VYPL_DOP_MT3 = new RaschsvVyplSvDopMt()
+        VYPL_DOP_MT3.mesyac = "Март"
+        VYPL_DOP_MT3.tarif = "abc"
+        VYPL_DOP_MT3.nachislSv = 200
+        VYPL_DOP_MT3.vyplSv = 200
+        VYPL_DOP.raschsvVyplSvDopMtList = [VYPL_DOP_MT1, VYPL_DOP_MT2, VYPL_DOP_MT3]
+        FL_DATA.raschsvVyplSvDop = VYPL_DOP
+
+        // Инициализация RaschsvSvnpPodpisant
+        PODPISANT = new RaschsvSvnpPodpisant()
+        PODPISANT.setSvnpOkved("okved_test")
+        PODPISANT.setSvnpTlph("phone_test")
+        PODPISANT.setSvnpNaimOrg("nazvanie_test")
+        PODPISANT.setSvnpInnyl("innYl_test")
+        PODPISANT.setSvnpKpp("kpp_test")
+        PODPISANT.setSvnpSvReorgForm("reorgForm_test")
+        PODPISANT.setSvnpSvReorgInnyl("reorgInn_test")
+        PODPISANT.setSvnpSvReorgKpp("reorgKpp_test")
+        PODPISANT.setFamilia("familia_test")
+        PODPISANT.setImya("imya_test")
+        PODPISANT.setMiddleName("otchestvo_test")
+        PODPISANT.setPodpisantPrPodp("pravoPodpis_test")
+        PODPISANT.setPodpisantNaimDoc("docName_test")
+        PODPISANT.setPodpisantNaimOrg("orgName_test")
+
+        // Инициализация RaschsvObyazPlatSv
+        RASCHSV_OOBYAZ_PLAT_SV = new RaschsvObyazPlatSv()
+        RASCHSV_OOBYAZ_PLAT_SV.oktmo = "oktmo_test"
+
+        // Инициализация RaschsvUplPer
+        RASCHSV_UPL_PER = new RaschsvUplPer()
+        RASCHSV_UPL_PER.kbk = "kbk_test"
+        RASCHSV_UPL_PER.sumSbUplPer = 1.00
+        RASCHSV_UPL_PER.sumSbUpl1m = 2.00
+        RASCHSV_UPL_PER.sumSbUpl2m = 3.00
+        RASCHSV_UPL_PER.sumSbUpl3m = 4.00
+
+        // Инициализация RaschsvUplPrevOss
+        RASCHSV_UPL_PREV_OSS = new RaschsvUplPrevOss()
+        RASCHSV_UPL_PREV_OSS.kbk = "kbk_test"
+        RASCHSV_UPL_PREV_OSS.sumSbUplPer = 1
+        RASCHSV_UPL_PREV_OSS.sumSbUpl1m = 2
+        RASCHSV_UPL_PREV_OSS.sumSbUpl2m = 3
+        RASCHSV_UPL_PREV_OSS.sumSbUpl3m = 4
+        RASCHSV_UPL_PREV_OSS.prevRashSvPer = 5
+        RASCHSV_UPL_PREV_OSS.prevRashSv1m = 6
+        RASCHSV_UPL_PREV_OSS.prevRashSv2m = 7
+        RASCHSV_UPL_PREV_OSS.prevRashSv3m = 8
+    }
+}
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
