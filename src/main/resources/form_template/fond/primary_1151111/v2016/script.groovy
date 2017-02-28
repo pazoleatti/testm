@@ -3719,9 +3719,9 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
 
     personData.useAddress = false;
 
-    personData.pension = 2;
-    personData.medical = 2;
-    personData.social = 2;
+    personData.pension = person.prizOps ? Integer.parseInt(person.prizOps) : 2;
+    personData.medical = person.prizOms ? Integer.parseInt(person.prizOms) : 2;
+    personData.social = person.prizOss ? Integer.parseInt(person.prizOss) : 2;
     personData.employee = 2;
 
     return personData;
