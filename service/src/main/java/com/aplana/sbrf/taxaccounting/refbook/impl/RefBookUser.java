@@ -105,6 +105,11 @@ public class RefBookUser extends AbstractRefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         List<Date> list = new ArrayList<Date>();
         list.add(Calendar.getInstance().getTime());

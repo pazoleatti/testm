@@ -52,12 +52,9 @@ public class RefBookPersonServiceTest {
 
         RefBookPersonDao refBookPersonDao = mock(RefBookPersonDao.class);
 
-
-
-        when(refBookPersonDao.findPersonByPersonData(any(PersonData.class), any(Date.class))).thenReturn(getList());
+        //when(refBookPersonDao.findPersonByPersonData(any(PersonData.class), any(Date.class))).thenReturn(getList());
 
         ReflectionTestUtils.setField(personService, "refBookPersonDao", refBookPersonDao);
-
     }
 
     @Test

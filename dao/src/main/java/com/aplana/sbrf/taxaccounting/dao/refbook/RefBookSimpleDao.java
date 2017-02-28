@@ -48,6 +48,15 @@ public interface RefBookSimpleDao {
      */
     Map<Long, Map<String, RefBookValue>> getRecordData(RefBook refBook, List<Long> recordIds);
 
+
+    /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     * @param refBook справочник
+     * @param whereClause список кодов строк справочника
+     * @return
+     */
+    Map<Long, Map<String, RefBookValue>> getRecordDataWhere(RefBook refBook, String whereClause);
+
     /**
      * Загружает данные иерархического справочника на определенную дату актуальности
      * @param version дата актуальности

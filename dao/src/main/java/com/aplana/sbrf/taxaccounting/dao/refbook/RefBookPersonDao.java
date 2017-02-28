@@ -13,9 +13,8 @@ import java.util.Map;
  */
 public interface RefBookPersonDao {
 
-    List<PersonData> findPersonByPersonData(PersonData personData, Date version);
+    Map<Long, List<PersonData>> findRefBookPersonByPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version);
 
-    Map<Long, List<PersonData>> findRefBookPersonByPrimaryRnuNdfl(long declarationDataId, long asnuId, Date version);
+    Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version);
 
-    Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(long declarationDataId, Long asnuId, Date version);
 }

@@ -100,6 +100,11 @@ public class RefBookEmailConfigProvider extends AbstractRefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         throw new UnsupportedOperationException();
     }

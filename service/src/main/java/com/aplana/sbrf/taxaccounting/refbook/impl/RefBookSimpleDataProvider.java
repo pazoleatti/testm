@@ -135,6 +135,12 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where) {
+        return dao.getRecordDataWhere(getRefBook(), where);
+    }
+
+
+    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
 		RefBookAttribute attribute = refBook.getAttribute(attributeId);
 		Map<String, RefBookValue> value = dao.getRecordData(refBook, recordId);
@@ -722,4 +728,6 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
         RefBook refBook = refBookDao.get(refBookId);
         return isRefBookSupported(refBook);
     }
+
+
 }
