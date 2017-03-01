@@ -21,7 +21,7 @@ public interface RefBookSimpleDao {
 
     /**
      * Загружает данные справочника из отдельной таблицы на определенную дату актуальности
-     * @param refBookId код справочника
+     * @param refBook справочник
      * @param version дата актуальности
      * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
      * @param filter условие фильтрации строк. Может быть не задано
@@ -56,6 +56,15 @@ public interface RefBookSimpleDao {
      * @return
      */
     Map<Long, Map<String, RefBookValue>> getRecordDataWhere(RefBook refBook, String whereClause);
+
+    /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     * @param refBook справочник
+     * @param whereClause список кодов строк справочника
+     * @param version версия справочника
+     * @return
+     */
+    Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(RefBook refBook, String whereClause, Date version);
 
     /**
      * Загружает данные иерархического справочника на определенную дату актуальности

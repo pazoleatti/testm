@@ -126,6 +126,27 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         }
     }
 
+    /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк. Используется для возможности передачи курсора в in
+     * @param refBook справочник
+     * @param whereClause условие для подстановки в where
+     * @param version версия справочника
+     * @return
+     */
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(RefBook refBook, String whereClause, Date version) {
+        PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, whereClause, version);
+
+        String sql = ps.getQueryString();
+        System.out.println(sql);
+
+        try {
+            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), ps.getParams().toArray(), new RefBookValueMapper(refBook)));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
     private Map<Long, Map<String, RefBookValue>> mapListToData(List<Map<String, RefBookValue>> recordsList){
         Map<Long, Map<String, RefBookValue>> recordData = new HashMap<Long, Map<String, RefBookValue>>();
         for (Map<String, RefBookValue> record : recordsList) {

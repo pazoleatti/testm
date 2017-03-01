@@ -177,6 +177,11 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(String where, Date version) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         // версионирования нет, только одна версия
 		return Arrays.asList(new Date(0));

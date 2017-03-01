@@ -139,6 +139,11 @@ public class RefBookSimpleDataProvider extends AbstractRefBookDataProvider {
         return dao.getRecordDataWhere(getRefBook(), where);
     }
 
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(String where, Date version) {
+        RefBook rf = getRefBook();
+        return dao.getRecordDataVersionWhere(rf, where, version);
+    }
 
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {

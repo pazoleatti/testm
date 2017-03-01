@@ -178,6 +178,15 @@ public interface RefBookDataProvider {
     Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where);
 
     /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк
+     *
+     * @param where коды строк справочника в виде запроса
+     * @param version версия справочника
+     * @return
+     */
+    Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(String where, Date version);
+
+    /**
      * Значение справочника по Id записи и Id атрибута
      *
      * @param recordId
