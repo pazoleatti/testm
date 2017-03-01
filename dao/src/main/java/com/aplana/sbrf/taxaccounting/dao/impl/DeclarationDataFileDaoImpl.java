@@ -203,4 +203,23 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
             return null;
         }
     }
+
+    @Override
+    public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
+	    String query = "select " +
+                "declaration_data_id, blob_data_id, user_name, user_department_name, note, " +
+                "bd.creation_date file_creation_date, bd.name file_name, ft.name file_type_name, ft.id file_type_id " +
+                "from declaration_data_file " +
+                "left join blob_data bd on (bd.id = declaration_data_file.blob_data_id) " +
+                "left join ref_book_attach_file_type ft on (ft.id = declaration_data_file.file_type_id) " +
+                "where declaration_data_id = :declarationDataId and ft.name = :fileTypeName";
+	    MapSqlParameterSource params = new MapSqlParameterSource();
+	    params.addValue("declarationDataId", declarationDataId)
+                .addValue("fileTypeName", fileTypeName);
+	    try {
+	        return getNamedParameterJdbcTemplate().query(query, params, new DeclarationDataFilesMapper());
+        } catch (EmptyResultDataAccessException e) {
+	        return new ArrayList<DeclarationDataFile>();
+        }
+    }
 }

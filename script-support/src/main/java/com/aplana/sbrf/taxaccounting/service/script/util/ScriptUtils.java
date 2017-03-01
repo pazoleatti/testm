@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.util;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
@@ -21,15 +22,15 @@ import groovy.util.slurpersupport.GPathResult;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.BuiltinFormats;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -1699,6 +1700,23 @@ public final class ScriptUtils {
             throw new IllegalArgumentException(WRONG_XLS_COLUMN_INDEX);
         }
         return CellReference.convertNumToColString(index - 1);
+    }
+
+    /**
+     * Получить индекс формата, для форматирования даты в Excel2007 в формат ДД.ММ.ГГГГ
+     * Поскольку apache poi не работает с русской локалью, используется французская как наиболее близкая по стандарту к русской
+     * Пример применения результата:
+     * cellStyle.setDataFormat(createXlsDateFormat(workbook));
+     * cell.setCellValue(new Date());
+     * cell.setCellStyle(cellStyle);
+     * @param workbook
+     * @return
+     */
+    @SuppressWarnings("unused")
+    public static short createXlsDateFormat(XSSFWorkbook workbook) {
+        String excelFormatPattern = DateFormatConverter.convert(Locale.FRANCE, "dd.MM.yyyy");
+        DataFormat poiFormat = workbook.createDataFormat();
+        return poiFormat.getFormat(excelFormatPattern);
     }
 
     /**

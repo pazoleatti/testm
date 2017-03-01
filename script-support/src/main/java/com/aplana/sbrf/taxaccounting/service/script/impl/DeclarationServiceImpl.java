@@ -431,4 +431,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             }
         });
     }
+
+    @Override
+    public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
+        return declarationDataFileDao.findFilesWithSpecificType(declarationDataId, fileTypeName);
+    }
 }
