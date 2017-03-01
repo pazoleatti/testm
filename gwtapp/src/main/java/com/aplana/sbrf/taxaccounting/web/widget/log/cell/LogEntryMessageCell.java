@@ -30,13 +30,13 @@ public class LogEntryMessageCell extends AbstractCell<LogEntry> {
 		}
 		SafeHtml safeValue = SafeHtmlUtils.fromString(value.getMessage());
 		
-		String color = null;
+		String color;
 		if (LogLevel.ERROR.equals(value.getLevel())) {
-			color = "red"; 
+			color = "Red";
 		} else if (LogLevel.WARNING.equals(value.getLevel())) {
-			color = "orange";
+			color = "DarkViolet";
 		} else {
-			color = "green";
+			color = "Green";
 		}
 		SafeStyles styles = SafeStylesUtils.forTrustedColor(color);
 		SafeHtml rendered = templates.cell(styles, safeValue);
