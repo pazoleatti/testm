@@ -290,7 +290,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
     def builder = new MarkupBuilder(writer)
 
     builder.setOmitNullAttributes(true)
-    builder.set
     builder.Файл(ИдФайл: generateXmlFileId(sberbankInnParam, kodNoProm),
             ВерсПрог: applicationVersion,
             ВерсФорм: VERS_FORM) {
@@ -331,7 +330,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 }
                 ПолучДох(ИННФЛ: np.innNp,
                         ИННИно: np.innForeign,
-                        // TODO если аттрибут null, он опускается, но он обязательный. уточнить что делать
                         Статус: np.status,
                         ДатаРожд: np.birthDay?.format(DATE_FORMAT_DOTTED),
                         Гражд: np.citizenship) {
@@ -355,6 +353,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
                     }
                 }
                 def allNdflPersonIncomes = findAllIncomes(np.id, startDate, endDate)
+                /*allNdflPersonIncomes.each {
+                    logger.info(it.id.toString())
+                }*/
                 // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
                 def ndflPersonIncomesFiltered = filterIncomes(allNdflPersonIncomes, priznakF)
 
@@ -500,7 +501,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 }
             }
             ndflReferencess << createRefBookAttributesForNdflReference(np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
-
         }
     }
     saveNdflRefences()
