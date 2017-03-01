@@ -1,6 +1,6 @@
 package form_template.fond.primary_1151111.v2016
 
-
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 
 import javax.script.ScriptException
@@ -3194,10 +3194,12 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
         }
 
         if (personAttrCnt.isUpdate() || documentAttrCnt.isUpdate()) {
-            logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", personId,
+
+            def recordId = refBookPersonValues.get("RECORD_ID")?.getNumberValue()?.longValue();
+            logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
                     person.getLastName(),
                     person.getFirstName(),
-                    person.getMiddleName()) + ". Изменения внесены в справочники: " + buildRefreshNotice(null, personAttrCnt, documentAttrCnt, null));
+                    person.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
             updCnt++;
         }
     }
@@ -3208,16 +3210,58 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
 
 def buildRefreshNotice(AttrCounter addressAttrCnt, AttrCounter personAttrCnt, AttrCounter documentAttrCnt, AttrCounter taxpayerIdentityAttrCnt) {
     StringBuffer sb = new StringBuffer();
-    appendAttrInfo("Адреса ФЛ", addressAttrCnt, sb);
-    appendAttrInfo("ФЛ", personAttrCnt, sb);
-    appendAttrInfo("Документы ФЛ", documentAttrCnt, sb);
-    appendAttrInfo("ИНП", taxpayerIdentityAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.PERSON_ADDRESS.getId(), addressAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.PERSON.getId(), personAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.ID_DOC.getId(), documentAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.ID_TAX_PAYER.getId(), taxpayerIdentityAttrCnt, sb);
     return sb.toString();
 }
 
-def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb) {
+@Field HashMap<Long, RefBook> mapRefBookToIdCache = new HashMap<Long, RefBook>();
+def getRefBookFromCache(Long id){
+    RefBook refBook = mapRefBookToIdCache.get(id);
+    if (refBook != null){
+        return refBook;
+    } else {
+        refBook = refBookFactory.get(id);
+        mapRefBookToIdCache.put(id, refBook);
+        return refBook;
+    }
+}
+
+@Field Map<Long, Map<String, String>> refBookAttrCache = new HashMap<Long, Map<String, String>>();
+def getAttrNameFromRefBook(Long id, String alias){
+    Map<String, String> attrMap = refBookAttrCache.get(id);
+    if (attrMap != null){
+        return attrMap.get(alias);
+    } else {
+        attrMap = new HashMap<String, String>();
+        RefBook refBook = getRefBookFromCache(id);
+        List<RefBookAttribute> refBookAttributeList = refBook.getAttributes();
+        for (RefBookAttribute attr: refBookAttributeList){
+            attrMap.put(attr.getAlias(), attr.getName());
+        }
+        refBookAttrCache.put(id, attrMap);
+        return attrMap.get(alias);
+    }
+}
+
+def appendAttrInfo(Long refBookId, AttrCounter attrCounter, StringBuffer sb) {
+
     if (attrCounter != null && attrCounter.isUpdate()) {
-        sb.append(name).append(attrCounter.buildInfo()).append(", ");
+
+        List<String> msgList = new ArrayList<String>();
+
+        for (Map.Entry<String, String> msgEntry: attrCounter.getMessages()){
+            String aliasKey = msgEntry.getKey();
+            String msg = msgEntry.getValue();
+            msgList.add(new StringBuffer(getAttrNameFromRefBook(refBookId, aliasKey)).append(": ").append(msg).toString())
+        }
+
+        if (!msgList.isEmpty()){
+            sb.append(Arrays.toString(msgList.toArray()));
+        }
+
     }
 }
 
@@ -3619,11 +3663,11 @@ public class AttributeChangeEvent {
 
 class AttrCounter implements AttributeChangeListener {
 
-    StringBuilder sb = new StringBuilder();
-
     private int refreshed = 0;
     private int created = 0;
     private int ignored = 0;
+
+    Map<String, String> msg = new HashMap<String, String>();
 
     @Override
     void processAttr(AttributeChangeEvent event) {
@@ -3632,14 +3676,14 @@ class AttrCounter implements AttributeChangeListener {
             //if (event.getValue() != null) {sb.append("[").append(event.getAttrName()).append(": ").append(event.getValue()).append("]")}
         } else if (EventType.REFRESHED.equals(event.type)) {
             refreshed++;
-            sb.append("[").append(event.getAttrName()).append(":").append(event.getCurrentValue()).append("->").append(event.getValue()).append("]")
+            msg.put(event.getAttrName(), new StringBuilder().append(event.getCurrentValue()).append("->").append(event.getValue()))
         } else if (EventType.IGNORED.equals(event.type)) {
             ignored++;
         }
     }
 
-    public String buildInfo() {
-        return sb.toString();
+    public Map<String, String> getMessages() {
+        return msg;
     }
 
     public boolean isUpdate() {
