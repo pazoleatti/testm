@@ -1085,7 +1085,7 @@ create table ndfl_person (
   declaration_data_id number(18)        not null,
   person_id           number(18),
   row_num             number(10),
-  inp                 varchar2(14 char),
+  inp                 varchar2(25 char),
   snils               varchar2(14 char),
   last_name           varchar2(36 char),
   first_name          varchar2(36 char),
@@ -2256,7 +2256,7 @@ create table ref_book_id_tax_payer
   version       date                not null,
   status        number(1) default 0 not null,
   person_id     number(18)          not null,
-  inp           varchar2(14 char)   not null,
+  inp           varchar2(25 char)   not null,
   as_nu         number(18)          not null
 );
 comment on table ref_book_id_tax_payer is 'Идентификатор налогоплательщика';
