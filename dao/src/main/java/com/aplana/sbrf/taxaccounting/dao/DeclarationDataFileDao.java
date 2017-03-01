@@ -32,4 +32,12 @@ public interface DeclarationDataFileDao {
      * https://conf.aplana.com/pages/viewpage.action?pageId=27184983
      */
     DeclarationDataFile findFileWithMaxWeight(Long declarationDataId);
+
+    /**
+     * Найти данные по файлам НФ имеющие указаныый тип
+     * @param declarationDataId
+     * @param fileTypeName
+     * @return
+     */
+    List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName);
 }

@@ -367,4 +367,12 @@ public interface DeclarationService {
      * @param userInfo
      */
     void createPdfReport(Logger logger, DeclarationData declarationData, TAUserInfo userInfo);
+
+    /**
+     * Найти данные по файлам НФ имеющие указаныый тип
+     * @param declarationDataId
+     * @param fileTypeName
+     * @return
+     */
+    List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName);
 }

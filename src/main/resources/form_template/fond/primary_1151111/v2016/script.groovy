@@ -1,6 +1,6 @@
 package form_template.fond.primary_1151111.v2016
 
-
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 
 import javax.script.ScriptException
@@ -217,6 +217,7 @@ switch (formDataEvent) {
 @Field final String PERSONAL_DATA = "Сведения о ФЛ"
 @Field final String CONS_PERSONAL_DATA = "3.Персониф. Сведения"
 @Field final String SUM_STRAH_VZN = "Суммы страховых взносов"
+@Field final String OPS_OMS = "П1.Расчет ОПС ОМС"
 
 // Имена псевдонима спецотчета
 @Field final String PERSON_REPORT = "person_rep_param"
@@ -227,25 +228,45 @@ switch (formDataEvent) {
 
 @Field final String PERSONAL_DATA_TOTAL_ROW_LABEL = "Всего за последние три месяца расчетного (отчетного) периода"
 
+// TODO Серия/номер ДУЛ, ИНН, СНИЛС должны быть текстовыми ячейками. Иначе пропадают ведущие нули.
+// TODO варнинг ДА-НЕТ при открытие файла
+// TODO долго на 20к
 def createSpecificReport() {
-    def row = scriptSpecificReportHolder.getSelectedRecord()
-    raschsvPersSvStrahLic = getrRaschsvPersSvStrahLic(row.id.longValue())
-    def writer = scriptSpecificReportHolder.getFileOutputStream()
-    def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
     def workbook = getSpecialReportTemplate()
 
-    fillGeneralList(workbook)
+    def row = scriptSpecificReportHolder.getSelectedRecord()
+    def writer = scriptSpecificReportHolder.getFileOutputStream()
+    def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
+
     if (alias.equalsIgnoreCase(PERSON_REPORT)) {
+        raschsvPersSvStrahLic = getrRaschsvPersSvStrahLic(row.id.longValue())
+        fillGeneralList(workbook)
         fillPersSvSheet(workbook)
     } else if (alias.equalsIgnoreCase(CONSOLIDATED_REPORT)) {
+        logger.info("Начало формирование")
+
+        logger.info("Извелечение данных из БД")
+        def raschsvObyazPlatSv = raschsvObyazPlatSvService.findObyazPlatSv(declarationData.id)
+        logger.info("Данные из БД получены")
+
+        logger.info("Заполнение листа \"Общие\"")
+        fillGeneralList(workbook)
+
+        logger.info("Заполнение листа \"3.Персониф. Сведения\"")
         fillPersSvConsSheet(workbook)
-        fillSumStrahVzn(workbook)
+
+        logger.info("Заполнение листа \"Суммы страховых взносов\"")
+        fillSumStrahVzn(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П1.Расчет ОПС ОМС\"")
+        fillOpsOms(raschsvObyazPlatSv, workbook)
+
+        logger.info("Отчет сформирован")
     }
 
     workbook.write(writer)
     writer.close()
-    scriptSpecificReportHolder
-            .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + "_" + new Date().format("yyyyMMdd_HHmmss") + ".xlsx")
 }
 
 // Персонифицированные данные о ФЛ
@@ -261,29 +282,6 @@ List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicList() {
     def declarationId = declarationData.getId()
     def params = scriptSpecificReportHolder.getSubreportParamValues()
     raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
-}
-
-// Находит в базе данных список List RaschsvPersSvStrahLic
-// TODO временный метод для получения физлиц для сводного спецотчета
-List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicListForConsSpecReport() {
-    [TestDataHolder.getInstance().FL_DATA, TestDataHolder.getInstance().FL_DATA, TestDataHolder.getInstance().FL_DATA]
-}
-
-// Находит в БД RaschsvObyazPlatSv
-RaschsvObyazPlatSv getRaschsvObyazPlatSv() {
-    // TODO нужен в RaschsvObyazPlatSvDao select по declarationDataId
-    TestDataHolder.getInstance().RASCHSV_OOBYAZ_PLAT_SV
-}
-
-// Находит в БД RaschsvUplPer
-List<RaschsvUplPer> getRaschsvUplPer() {
-    // TODO нужен RaschsvUplPerDao select по obyazPlatSvId и nodeName, лучше бы сделать nodeName в виде enum
-    [TestDataHolder.getInstance().RASCHSV_UPL_PER]
-}
-
-RaschsvUplPrevOss getRaschsvUplPrevOss() {
-    // TODO Нужен select в RaschsvUplPrevOssDao по obyazPlatSvId
-    TestDataHolder.getInstance().RASCHSV_UPL_PREV_OSS
 }
 
 def prepareSpecificReport() {
@@ -469,30 +467,44 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     }*/
     // Место предоставления
     def poMestuCodeParam = poMestuParam?.get(RF_CODE)?.value
+
+    // Сведения о файле
     sheet.getRow(3).getCell(1).setCellValue(declarationData.fileName)
     sheet.getRow(4).getCell(1).setCellValue(applicationVersion)
     sheet.getRow(5).getCell(1).setCellValue("5.01")
-    sheet.getRow(8).getCell(1).setCellValue("1151111")
+
+    // Сведения о документе
     // TODO уточнить получение значения
+    sheet.getRow(8).getCell(1).setCellValue("1151111")
     sheet.getRow(9).getCell(1).setCellValue(new Date().format("dd.MM.yyyy"))
     sheet.getRow(10).getCell(1).setCellValue(nomCorr?.toString())
     sheet.getRow(11).getCell(1).setCellValue(period)
     sheet.getRow(12).getCell(1).setCellValue(reportYear?.toString())
     sheet.getRow(13).getCell(1).setCellValue(taxOrganCode)
     sheet.getRow(14).getCell(1).setCellValue(poMestuCodeParam)
+
+    // Сведения о плательщике страховых взносов
     sheet.getRow(18).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpOkved)
     sheet.getRow(19).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpTlph)
+
+    // Плательщик страховых взносов - организация
     sheet.getRow(21).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpNaimOrg)
     sheet.getRow(22).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpInnyl)
     sheet.getRow(23).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpKpp)
+
+    // Сведения о реорганизованной (ликвидированной) организации
     sheet.getRow(25).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpSvReorgForm)
     sheet.getRow(26).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpSvReorgInnyl)
     sheet.getRow(27).getCell(1).setCellValue(raschsvSvnpPodpisant.svnpSvReorgKpp)
+
+    // Сведения о лице, подписавшем документ
     sheet.getRow(30).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantPrPodp)
     def familia = raschsvSvnpPodpisant.familia != null ? raschsvSvnpPodpisant.familia + " ": ""
     def imya = raschsvSvnpPodpisant.imya != null ? raschsvSvnpPodpisant.imya + " " : ""
     def otchestvo = raschsvSvnpPodpisant.otchestvo != null ? raschsvSvnpPodpisant.otchestvo : ""
     sheet.getRow(31).getCell(1).setCellValue(familia + imya + otchestvo)
+
+    // Сведения о представителе
     sheet.getRow(33).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantNaimDoc)
     sheet.getRow(34).getCell(1).setCellValue(raschsvSvnpPodpisant.podpisantNaimOrg)
 }
@@ -771,11 +783,14 @@ def fillCellsOfRaschSvVyplatDop(final RaschsvVyplSvDop raschsvVyplSvDop, final X
  * **************************************************************************/
 
 // Заполняет данными лист 3.Персониф. Сведения
-def fillPersSvConsSheet(final XSSFWorkbook workbook) {
-    def startIndex = 3
-    def pointer = startIndex
-    def raschsvPersSvStrahLic = getrRaschsvPersSvStrahLicListForConsSpecReport()
-    pointer += fillRaschsvPersSvStrahLicTable(pointer, raschsvPersSvStrahLic, workbook, CONS_PERSONAL_DATA)
+def fillPersSvConsSheet(XSSFWorkbook workbook) {
+    def sheet = workbook.getSheet(CONS_PERSONAL_DATA)
+    def raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
+
+    raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
+        sheet.shiftRows(sheet.getLastRowNum() + 1, sheet.getLastRowNum() + 2, 1)
+        fillCellsOfRaschsvPersSvStrahLicRow(raschsvPersSvStrahLic, sheet.createRow(sheet.getLastRowNum() + 1))
+    }
 }
 
 /****************************************************************************
@@ -783,64 +798,75 @@ def fillPersSvConsSheet(final XSSFWorkbook workbook) {
  *                                                                          *
  * **************************************************************************/
 
-// Заполняет данными лист "Суммы страховых взносов"
-def fillSumStrahVzn(final XSSFWorkbook workbook) {
-    def startIndex = 2
-    def pointer = startIndex
-    def raschsvObyazPlatSv = getRaschsvObyazPlatSv()
-    def raschsvUplPerOps = getRaschsvUplPer()
-    def raschsvUplPerOms = getRaschsvUplPer()
-    def raschsvUplPerOpsDop = getRaschsvUplPer()
-    def raschsvUplPerOssDop = getRaschsvUplPer()
-    def raschsvUplPrevOss = getRaschsvUplPrevOss()
+/**
+ * Заполняет данными лист "Сумма страховых взносов"
+ */
+def fillSumStrahVzn(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+    def pointer = 2
+
+    // ОКТМО
     fillRaschsvObyazPlatSv(pointer, raschsvObyazPlatSv, workbook)
+
+    // Сумма страховых взносов на обязательное пенсионное страхование
+    def raschsvUplPerOps = raschsvObyazPlatSv.raschsvUplPerList.findAll {NODE_NAME_UPL_PER_OPS == it.nodeName}
     pointer += 4
     pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOps, workbook)
+
+    // Сумма страховых взносов на обязательное медицинское страхование
+    def raschsvUplPerOms = raschsvObyazPlatSv.raschsvUplPerList.findAll {NODE_NAME_UPL_PER_OMS == it.nodeName}
     pointer += 4
     pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOms, workbook)
+
+    // Сумма страховых взносов на обязательное пенсионное страхование по дополнительному тарифу
+    def raschsvUplPerOpsDop = raschsvObyazPlatSv.raschsvUplPerList.findAll {NODE_NAME_UPL_PER_OPS_DOP == it.nodeName}
     pointer += 4
     pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOpsDop, workbook)
+
+    // Сумма страховых взносов на дополнительное социальное обеспечение
+    def raschsvUplPerOssDop = raschsvObyazPlatSv.raschsvUplPerList.findAll {NODE_NAME_UPL_PER_DSO == it.nodeName}
     pointer += 4
     pointer += fillSumStrahVznOPSTable(pointer, raschsvUplPerOssDop, workbook)
+
+    // Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности
     pointer += 5
-    fillSumStrahVznNetrud(pointer, raschsvUplPrevOss, workbook)
+    fillSumStrahVznNetrud(pointer, raschsvObyazPlatSv.raschsvUplPrevOss, workbook)
 }
 
 // Заполняет ОКТМО
-def fillRaschsvObyazPlatSv(
-        final int startIndex, final RaschsvObyazPlatSv raschsvObyazPlatSv, final XSSFWorkbook workbook) {
+def fillRaschsvObyazPlatSv(int startIndex, RaschsvObyazPlatSv raschsvObyazPlatSv, XSSFWorkbook workbook) {
     def sheet = workbook.getSheet(SUM_STRAH_VZN)
     def row = sheet.getRow(startIndex)
     row.createCell(1).setCellValue(raschsvObyazPlatSv.oktmo)
 }
 
-/* Создает строки таблиц "Сумма страховых взносов на обязательное пенсионное страхование, подлежащая уплате за
- * расчетный (отчетный) период", "Сумма страховых взносов на обязательное медицинское страхование, подлежащая уплате за
- * расчетный (отчетный) период", "Сумма страховых взносов на обязательное пенсионное страхование по дополнительному
- * тарифу, подлежащая уплате за расчетный (отчетный) период", "Сумма страховых взносов на дополнительное социальное
- * обеспечение, подлежащая уплате за расчетный (отчетный) период"
- **/
-
-int fillSumStrahVznOPSTable(
-        final int startIndex, final List<RaschsvUplPer> raschsvUplPerList, final XSSFWorkbook workbook) {
-    def raschsvUplPerListSize = raschsvUplPerList.size()
+/**
+ * Создает строки таблиц:
+ * "Сумма страховых взносов на обязательное пенсионное страхование, подлежащая уплате за расчетный (отчетный) период",
+ * "Сумма страховых взносов на обязательное медицинское страхование, подлежащая уплате за расчетный (отчетный) период",
+ * "Сумма страховых взносов на обязательное пенсионное страхование по дополнительному тарифу, подлежащая уплате за расчетный (отчетный) период",
+ * "Сумма страховых взносов на дополнительное социальное обеспечение, подлежащая уплате за расчетный (отчетный) период"
+ */
+int fillSumStrahVznOPSTable(int startIndex, List<RaschsvUplPer> raschsvUplPerList, XSSFWorkbook workbook) {
     def sheet = workbook.getSheet(SUM_STRAH_VZN)
+    def raschsvUplPerListSize = raschsvUplPerList.size()
+
     sheet.shiftRows(startIndex, sheet.getLastRowNum(), raschsvUplPerListSize + 1)
+
     for (int i = 0; i < raschsvUplPerListSize; i++) {
-        def row = sheet.createRow(i + startIndex)
-        fillCellsOfRaschsvUplPerRow(raschsvUplPerList[i], row)
+        fillCellsOfRaschsvUplPerRow(raschsvUplPerList[i], sheet.createRow(i + startIndex))
     }
+
     return raschsvUplPerListSize
 }
 
-/* Заполняет строку таблиц "Сумма страховых взносов на обязательное пенсионное страхование, подлежащая уплате за
- * расчетный (отчетный) период", "Сумма страховых взносов на обязательное медицинское страхование, подлежащая уплате за
- * расчетный (отчетный) период", "Сумма страховых взносов на обязательное пенсионное страхование по дополнительному
- * тарифу, подлежащая уплате за расчетный (отчетный) период", "Сумма страховых взносов на дополнительное социальное
- * обеспечение, подлежащая уплате за расчетный (отчетный) период"
- **/
-
-def fillCellsOfRaschsvUplPerRow(final RaschsvUplPer raschsvUplPer, final XSSFRow row) {
+/**
+ * Заполняет строку таблиц:
+ * "Сумма страховых взносов на обязательное пенсионное страхование, подлежащая уплате за расчетный (отчетный) период",
+ * "Сумма страховых взносов на обязательное медицинское страхование, подлежащая уплате за расчетный (отчетный) период",
+ * "Сумма страховых взносов на обязательное пенсионное страхование по дополнительному тарифу, подлежащая уплате за расчетный (отчетный) период",
+ * "Сумма страховых взносов на дополнительное социальное обеспечение, подлежащая уплате за расчетный (отчетный) период"
+ */
+def fillCellsOfRaschsvUplPerRow(RaschsvUplPer raschsvUplPer, XSSFRow row) {
     def style = normalWithBorderStyle(row.getSheet().getWorkbook())
     addFillingToStyle(style, ROWS_FILL_COLOR)
 
@@ -861,24 +887,25 @@ def fillCellsOfRaschsvUplPerRow(final RaschsvUplPer raschsvUplPer, final XSSFRow
     cell4.setCellValue(raschsvUplPer.sumSbUpl3m)
 }
 
-/* Создает строки таблицы "Сумма страховых взносов на обязательное социальное страхование на случай временной
- *  нетрудоспособности и в связи с материнством, подлежащая уплате за расчетный (отчетный) период / Сумма превышения
- *  произведенных плательщиком расходов"
+/**
+ * Создает строки таблицы:
+ * "Сумма страховых взносов на обязательное социальное страхование
+ * на случай временной нетрудоспособности и в связи с материнством,
+ * подлежащая уплате за расчетный (отчетный) период / Сумма превышения произведенных плательщиком расходов"
  */
-
-def fillSumStrahVznNetrud(
-        final int startIndex, final RaschsvUplPrevOss raschsvUplPrevOss, final XSSFWorkbook workbook) {
+def fillSumStrahVznNetrud(int startIndex, RaschsvUplPrevOss raschsvUplPrevOss, XSSFWorkbook workbook) {
     def sheet = workbook.getSheet(SUM_STRAH_VZN)
     def row = sheet.createRow(startIndex)
     fillCellsOfRaschsvUplPrevOss(raschsvUplPrevOss, row)
 }
 
-/* Заполняет стироку таблицы "Сумма страховых взносов на обязательное социальное страхование на случай временной
- *  нетрудоспособности и в связи с материнством, подлежащая уплате за расчетный (отчетный) период / Сумма превышения
- *  произведенных плательщиком расходов"
+/**
+ * Заполняет стироку таблицы:
+ * "Сумма страховых взносов на обязательное социальное страхование
+ * на случай временной нетрудоспособности и в связи с материнством,
+ * подлежащая уплате за расчетный (отчетный) период / Сумма превышения произведенных плательщиком расходов"
  */
-
-def fillCellsOfRaschsvUplPrevOss(final RaschsvUplPrevOss raschsvUplPrevOss, final XSSFRow row) {
+def fillCellsOfRaschsvUplPrevOss(RaschsvUplPrevOss raschsvUplPrevOss, XSSFRow row) {
     def style = normalWithBorderStyle(row.getSheet().getWorkbook())
     addFillingToStyle(style, ROWS_FILL_COLOR)
 
@@ -911,7 +938,96 @@ def fillCellsOfRaschsvUplPrevOss(final RaschsvUplPrevOss raschsvUplPrevOss, fina
     cell8.setCellValue(raschsvUplPrevOss.prevRashSv3m)
 }
 
+/**
+ * Заполняет данными лист "Расчет ОПС ОМС"
+ */
+def fillOpsOms(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+    raschsvObyazPlatSv.raschsvSvOpsOmsList.each { svOpsOms ->
+        //TODO clone sheet
+        def sheet = workbook.getSheet(OPS_OMS)
 
+        def raschsvSvOpsOmsRasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_OPS == it.nodeName}
+        def raschsvSvOpsOmsRaschKolOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
+        def raschsvSvOpsOmsRaschKolNach = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_LIC_NACH_SV_VS == it.nodeName}?.raschsvKolLicTip
+        def raschsvSvOpsOmsRaschKolBas = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_PREV_BAZ_OPS == it.nodeName}?.raschsvKolLicTip
+
+        fillOpsOmsKolRow(sheet, 14, raschsvSvOpsOmsRaschKolOverall)
+        fillOpsOmsKolRow(sheet, 15, raschsvSvOpsOmsRaschKolNach)
+        fillOpsOmsKolRow(sheet, 16, raschsvSvOpsOmsRaschKolBas)
+
+        def raschsvSvOpsOmsRaschSumNachislFl= raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumOblozen = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumBazNachisl = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumBazPrevysh = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumNachisl = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumNachislNePrev = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_NE_PREV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumNachislPrev = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_PREV == it.nodeName}?.raschsvSvSum1Tip
+
+        fillOpsOmsSumRow(sheet, 21, raschsvSvOpsOmsRaschSumNachislFl)
+        fillOpsOmsSumRow(sheet, 22, raschsvSvOpsOmsRaschSumOblozen)
+        fillOpsOmsSumRow(sheet, 23, raschsvSvOpsOmsRaschSumBazNachisl)
+        fillOpsOmsSumRow(sheet, 24, raschsvSvOpsOmsRaschSumBazPrevysh)
+        fillOpsOmsSumRow(sheet, 25, raschsvSvOpsOmsRaschSumNachisl)
+        fillOpsOmsSumRow(sheet, 26, raschsvSvOpsOmsRaschSumNachislNePrev)
+        fillOpsOmsSumRow(sheet, 27, raschsvSvOpsOmsRaschSumNachislPrev)
+    }
+}
+
+/**
+ * Заполняет значениями строки для количеств
+ */
+def fillOpsOmsKolRow(sheet, pointer, kolLicTip) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = sheet.getRow(pointer).createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(kolLicTip?.kolVsegoPer ?: "")
+
+    def cell2 = sheet.getRow(pointer).createCell(2)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(kolLicTip?.kolVsegoPosl3m ?: "")
+
+    def cell3 = sheet.getRow(pointer).createCell(3)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(kolLicTip?.kol1mPosl3m ?: "")
+
+    def cell4 = sheet.getRow(pointer).createCell(4)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(kolLicTip?.kol2mPosl3m ?: "")
+
+    def cell5 = sheet.getRow(pointer).createCell(5)
+    cell5.setCellStyle(style)
+    cell5.setCellValue(kolLicTip?.kol3mPosl3m ?: "")
+}
+
+/**
+ * Заполняет значениями строки для сумм
+ */
+def fillOpsOmsSumRow(sheet, pointer, sumLicTip) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = sheet.getRow(pointer).createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(sumLicTip?.sumVsegoPer ?: "")
+
+    def cell2 = sheet.getRow(pointer).createCell(2)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(sumLicTip?.sumVsegoPosl3m ?: "")
+
+    def cell3 = sheet.getRow(pointer).createCell(3)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(sumLicTip?.sum1mPosl3m ?: "")
+
+    def cell4 = sheet.getRow(pointer).createCell(4)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(sumLicTip?.sum2mPosl3m ?: "")
+
+    def cell5 = sheet.getRow(pointer).createCell(5)
+    cell5.setCellStyle(style)
+    cell5.setCellValue(sumLicTip?.sum3mPosl3m ?: "")
+}
 
 
 /****************************************************************************
@@ -1020,8 +1136,6 @@ def getSpecialReportTemplate() {
 }
 
 
-
-
 /****************************************************************************
  *  Тестовые данные                                                         *
  *                                                                          *
@@ -1049,7 +1163,7 @@ class TestDataHolder {
         FL_DATA.otchetGod = "2016"
         FL_DATA.familia = "Иванов"
         FL_DATA.imya = "Егор"
-        FL_DATA.middleName = "Семенович"
+        FL_DATA.otchestvo = "Семенович"
         FL_DATA.innfl = "111222333444"
         FL_DATA.snils = "123-456"
         FL_DATA.dataRozd = new Date(1970, Calendar.JANUARY, 1)
@@ -1067,48 +1181,51 @@ class TestDataHolder {
         VYPL.setVyplOpsVs3(300)
         VYPL.setVyplOpsDogVs3(300)
         VYPL.setNachislSvVs3(400)
-        final VYPL_MT1 = new RaschsvSvVyplMk();
+
+        final VYPL_MT1 = new RaschsvSvVyplMk()
         VYPL_MT1.setMesyac("Январь")
         VYPL_MT1.setKodKatLic("1")
         VYPL_MT1.setSumVypl(300)
         VYPL_MT1.setVyplOps(100)
         VYPL_MT1.setVyplOpsDog(100)
         VYPL_MT1.setNachislSv(150)
-        final VYPL_MT2 = new RaschsvSvVyplMk();
+
+        final VYPL_MT2 = new RaschsvSvVyplMk()
         VYPL_MT2.setMesyac("Февраль")
         VYPL_MT2.setKodKatLic("1")
         VYPL_MT2.setSumVypl(300)
         VYPL_MT2.setVyplOps(100)
         VYPL_MT2.setVyplOpsDog(100)
         VYPL_MT2.setNachislSv(100)
-        final VYPL_MT3 = new RaschsvSvVyplMk();
+
+        final VYPL_MT3 = new RaschsvSvVyplMk()
         VYPL_MT3.setMesyac("Март")
         VYPL_MT3.setKodKatLic("1")
         VYPL_MT3.setSumVypl(400)
         VYPL_MT3.setVyplOps(100)
         VYPL_MT3.setVyplOpsDog(100)
         VYPL_MT3.setNachislSv(150)
-        VYPL.raschsvSvVyplMtList = [VYPL_MT1, VYPL_MT2, VYPL_MT3]
+        VYPL.raschsvSvVyplMkList = [VYPL_MT1, VYPL_MT2, VYPL_MT3]
         FL_DATA.raschsvSvVypl = VYPL
 
         final VYPL_DOP = new RaschsvVyplSvDop()
         VYPL_DOP.nachislSvVs3 = 500
         VYPL_DOP.vyplSvVs3 = 500
-        final VYPL_DOP_MT1 = new RaschsvVyplSvDopMt()
+        final VYPL_DOP_MT1 = new RaschsvSvVyplMk()
         VYPL_DOP_MT1.mesyac = "Январь"
-        VYPL_DOP_MT1.tarif = "abc"
+//        VYPL_DOP_MT1.tarif = "abc"
         VYPL_DOP_MT1.nachislSv = 200
-        VYPL_DOP_MT1.vyplSv = 200
-        final VYPL_DOP_MT2 = new RaschsvVyplSvDopMt()
+        VYPL_DOP_MT1.sumVypl = 200
+        final VYPL_DOP_MT2 = new RaschsvSvVyplMk()
         VYPL_DOP_MT2.mesyac = "Февраль"
-        VYPL_DOP_MT2.tarif = "xyz"
+//        VYPL_DOP_MT2.tarif = "xyz"
         VYPL_DOP_MT2.nachislSv = 100
-        VYPL_DOP_MT2.vyplSv = 100
-        final VYPL_DOP_MT3 = new RaschsvVyplSvDopMt()
+        VYPL_DOP_MT2.sumVypl = 100
+        final VYPL_DOP_MT3 = new RaschsvSvVyplMk()
         VYPL_DOP_MT3.mesyac = "Март"
-        VYPL_DOP_MT3.tarif = "abc"
+//        VYPL_DOP_MT3.tarif = "abc"
         VYPL_DOP_MT3.nachislSv = 200
-        VYPL_DOP_MT3.vyplSv = 200
+        VYPL_DOP_MT3.sumVypl = 200
         VYPL_DOP.raschsvVyplSvDopMtList = [VYPL_DOP_MT1, VYPL_DOP_MT2, VYPL_DOP_MT3]
         FL_DATA.raschsvVyplSvDop = VYPL_DOP
 
@@ -1124,7 +1241,7 @@ class TestDataHolder {
         PODPISANT.setSvnpSvReorgKpp("reorgKpp_test")
         PODPISANT.setFamilia("familia_test")
         PODPISANT.setImya("imya_test")
-        PODPISANT.setMiddleName("otchestvo_test")
+        PODPISANT.setOtchestvo("otchestvo_test")
         PODPISANT.setPodpisantPrPodp("pravoPodpis_test")
         PODPISANT.setPodpisantNaimDoc("docName_test")
         PODPISANT.setPodpisantNaimOrg("orgName_test")
@@ -3194,10 +3311,12 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
         }
 
         if (personAttrCnt.isUpdate() || documentAttrCnt.isUpdate()) {
-            logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", personId,
+
+            def recordId = refBookPersonValues.get("RECORD_ID")?.getNumberValue()?.longValue();
+            logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
                     person.getLastName(),
                     person.getFirstName(),
-                    person.getMiddleName()) + ". Изменения внесены в справочники: " + buildRefreshNotice(null, personAttrCnt, documentAttrCnt, null));
+                    person.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
             updCnt++;
         }
     }
@@ -3208,16 +3327,58 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
 
 def buildRefreshNotice(AttrCounter addressAttrCnt, AttrCounter personAttrCnt, AttrCounter documentAttrCnt, AttrCounter taxpayerIdentityAttrCnt) {
     StringBuffer sb = new StringBuffer();
-    appendAttrInfo("Адреса ФЛ", addressAttrCnt, sb);
-    appendAttrInfo("ФЛ", personAttrCnt, sb);
-    appendAttrInfo("Документы ФЛ", documentAttrCnt, sb);
-    appendAttrInfo("ИНП", taxpayerIdentityAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.PERSON_ADDRESS.getId(), addressAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.PERSON.getId(), personAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.ID_DOC.getId(), documentAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.ID_TAX_PAYER.getId(), taxpayerIdentityAttrCnt, sb);
     return sb.toString();
 }
 
-def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb) {
+@Field HashMap<Long, RefBook> mapRefBookToIdCache = new HashMap<Long, RefBook>();
+def getRefBookFromCache(Long id){
+    RefBook refBook = mapRefBookToIdCache.get(id);
+    if (refBook != null){
+        return refBook;
+    } else {
+        refBook = refBookFactory.get(id);
+        mapRefBookToIdCache.put(id, refBook);
+        return refBook;
+    }
+}
+
+@Field Map<Long, Map<String, String>> refBookAttrCache = new HashMap<Long, Map<String, String>>();
+def getAttrNameFromRefBook(Long id, String alias){
+    Map<String, String> attrMap = refBookAttrCache.get(id);
+    if (attrMap != null){
+        return attrMap.get(alias);
+    } else {
+        attrMap = new HashMap<String, String>();
+        RefBook refBook = getRefBookFromCache(id);
+        List<RefBookAttribute> refBookAttributeList = refBook.getAttributes();
+        for (RefBookAttribute attr: refBookAttributeList){
+            attrMap.put(attr.getAlias(), attr.getName());
+        }
+        refBookAttrCache.put(id, attrMap);
+        return attrMap.get(alias);
+    }
+}
+
+def appendAttrInfo(Long refBookId, AttrCounter attrCounter, StringBuffer sb) {
+
     if (attrCounter != null && attrCounter.isUpdate()) {
-        sb.append(name).append(attrCounter.buildInfo()).append(", ");
+
+        List<String> msgList = new ArrayList<String>();
+
+        for (Map.Entry<String, String> msgEntry: attrCounter.getMessages()){
+            String aliasKey = msgEntry.getKey();
+            String msg = msgEntry.getValue();
+            msgList.add(new StringBuffer(getAttrNameFromRefBook(refBookId, aliasKey)).append(": ").append(msg).toString())
+        }
+
+        if (!msgList.isEmpty()){
+            sb.append(Arrays.toString(msgList.toArray()));
+        }
+
     }
 }
 
@@ -3619,11 +3780,11 @@ public class AttributeChangeEvent {
 
 class AttrCounter implements AttributeChangeListener {
 
-    StringBuilder sb = new StringBuilder();
-
     private int refreshed = 0;
     private int created = 0;
     private int ignored = 0;
+
+    Map<String, String> msg = new HashMap<String, String>();
 
     @Override
     void processAttr(AttributeChangeEvent event) {
@@ -3632,14 +3793,14 @@ class AttrCounter implements AttributeChangeListener {
             //if (event.getValue() != null) {sb.append("[").append(event.getAttrName()).append(": ").append(event.getValue()).append("]")}
         } else if (EventType.REFRESHED.equals(event.type)) {
             refreshed++;
-            sb.append("[").append(event.getAttrName()).append(":").append(event.getCurrentValue()).append("->").append(event.getValue()).append("]")
+            msg.put(event.getAttrName(), new StringBuilder().append(event.getCurrentValue()).append("->").append(event.getValue()))
         } else if (EventType.IGNORED.equals(event.type)) {
             ignored++;
         }
     }
 
-    public String buildInfo() {
-        return sb.toString();
+    public Map<String, String> getMessages() {
+        return msg;
     }
 
     public boolean isUpdate() {

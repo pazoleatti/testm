@@ -10,11 +10,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
@@ -35,7 +37,7 @@ switch (formDataEvent) {
         println "!CALCULATE!"
         buildXml(xml)
         // Формирование pdf-отчета формы
-        declarationService.createPdfReport(logger, declarationData, userInfo)
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -328,7 +330,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 }
                 ПолучДох(ИННФЛ: np.innNp,
                         ИННИно: np.innForeign,
-                        // TODO если аттрибут null, он опускается, но он обязательный. уточнить что делать
                         Статус: np.status,
                         ДатаРожд: np.birthDay?.format(DATE_FORMAT_DOTTED),
                         Гражд: np.citizenship) {
@@ -352,6 +353,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
                     }
                 }
                 def allNdflPersonIncomes = findAllIncomes(np.id, startDate, endDate)
+                /*allNdflPersonIncomes.each {
+                    logger.info(it.id.toString())
+                }*/
                 // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
                 def ndflPersonIncomesFiltered = filterIncomes(allNdflPersonIncomes, priznakF)
 
@@ -416,63 +420,65 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                 }
                             }
                         }
-
-                        if (taxRateKey == 13) {
-                            НалВычССИ() {
-                                if (isForSpecificReport) {
-                                    int countInLine = 4
-                                    int linesCount
-                                    if (deductionsSelectedGroupedByDeductionTypeCode.size() % countInLine == 0) {
-                                        linesCount = deductionsSelectedGroupedByDeductionTypeCode.size() / countInLine
-                                    } else {
-                                        linesCount = deductionsSelectedGroupedByDeductionTypeCode.size() / countInLine + 1
-                                    }
-                                    for (int line = 0; line < linesCount; line++) {
-                                        Строка() {
-                                            deductionsSelectedGroupedByDeductionTypeCode.keySet().eachWithIndex { deductionTypeKey, index ->
-                                                def lowestIndex = countInLine * line
-                                                if (index >= lowestIndex && index < lowestIndex + countInLine) {
-                                                    def deductionCurrPeriodSum = ScriptUtils.round(getDeductionCurrPeriodSum(deductionsSelectedGroupedByDeductionTypeCode.get(deductionTypeKey)), 2)
-                                                    if (deductionCurrPeriodSum != 0) {
-                                                        ПредВычССИ(КодВычет: deductionTypeKey,
-                                                                СумВычет: deductionCurrPeriodSum) {
+                        if (!deductionsSelectedGroupedByDeductionTypeCode.isEmpty()) {
+                            if (taxRateKey == 13) {
+                                НалВычССИ() {
+                                    if (isForSpecificReport) {
+                                        int countInLine = 4
+                                        int linesCount
+                                        if (deductionsSelectedGroupedByDeductionTypeCode.size() % countInLine == 0) {
+                                            linesCount = deductionsSelectedGroupedByDeductionTypeCode.size() / countInLine
+                                        } else {
+                                            linesCount = deductionsSelectedGroupedByDeductionTypeCode.size() / countInLine + 1
+                                        }
+                                        for (int line = 0; line < linesCount; line++) {
+                                            Строка() {
+                                                deductionsSelectedGroupedByDeductionTypeCode.keySet().eachWithIndex { deductionTypeKey, index ->
+                                                    def lowestIndex = countInLine * line
+                                                    if (index >= lowestIndex && index < lowestIndex + countInLine) {
+                                                        def deductionCurrPeriodSum = ScriptUtils.round(getDeductionCurrPeriodSum(deductionsSelectedGroupedByDeductionTypeCode.get(deductionTypeKey)), 2)
+                                                        if (deductionCurrPeriodSum != 0) {
+                                                            ПредВычССИ(КодВычет: deductionTypeKey,
+                                                                    СумВычет: deductionCurrPeriodSum) {
+                                                            }
                                                         }
-                                                    }
 
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        deductionsSelectedGroupedByDeductionTypeCode.keySet().each { deductionTypeKey ->
+                                            def deductionCurrPeriodSum = ScriptUtils.round(getDeductionCurrPeriodSum(deductionsSelectedGroupedByDeductionTypeCode.get(deductionTypeKey)), 2)
+                                            if (deductionCurrPeriodSum != 0) {
+                                                ПредВычССИ(КодВычет: deductionTypeKey,
+                                                        СумВычет: deductionCurrPeriodSum) {
                                                 }
                                             }
                                         }
                                     }
-                                } else {
-                                    deductionsSelectedGroupedByDeductionTypeCode.keySet().each { deductionTypeKey ->
-                                        def deductionCurrPeriodSum = ScriptUtils.round(getDeductionCurrPeriodSum(deductionsSelectedGroupedByDeductionTypeCode.get(deductionTypeKey)), 2)
-                                        if (deductionCurrPeriodSum != 0) {
-                                            ПредВычССИ(КодВычет: deductionTypeKey,
-                                                    СумВычет: deductionCurrPeriodSum) {
-                                            }
+                                    unionDeductions.keySet().findAll { deductionTypeKey ->
+                                        getDeductionMark(getDeductionType(deductionTypeKey)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_SOTSIALNIY)
+                                    }.each { selected ->
+                                        unionDeductions.get(selected).each {
+                                            УведСоцВыч(НомерУвед: it.notifNum,
+                                                    ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
+                                                    ИФНСУвед: it.notifSource)
                                         }
                                     }
-                                }
-                                unionDeductions.keySet().findAll { deductionTypeKey ->
-                                    getDeductionMark(getDeductionType(deductionTypeKey)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_SOTSIALNIY)
-                                }.each { selected ->
-                                    unionDeductions.get(selected).each {
-                                        УведСоцВыч(НомерУвед: it.notifNum,
-                                                ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
-                                                ИФНСУвед: it.notifSource)
-                                    }
-                                }
-                                unionDeductions.keySet().findAll { deductionTypeKey ->
-                                    getDeductionMark(getDeductionType(deductionTypeKey)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY)
-                                }.each { selected ->
-                                    unionDeductions.get(selected).each {
-                                        УведИмущВыч(НомерУвед: it.notifNum,
-                                                ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
-                                                ИФНСУвед: it.notifSource)
+                                    unionDeductions.keySet().findAll { deductionTypeKey ->
+                                        getDeductionMark(getDeductionType(deductionTypeKey)).equalsIgnoreCase(PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY)
+                                    }.each { selected ->
+                                        unionDeductions.get(selected).each {
+                                            УведИмущВыч(НомерУвед: it.notifNum,
+                                                    ДатаУвед: it.notifDate?.format(DATE_FORMAT_DOTTED),
+                                                    ИФНСУвед: it.notifSource)
+                                        }
                                     }
                                 }
                             }
                         }
+
                         СумИтНалПер(СумДохОбщ: ScriptUtils.round(getSumDohod(allNdflPersonIncomes), 2),
                                 НалБаза: ScriptUtils.round(getNalBaza(allNdflPersonIncomes), 2),
                                 НалИсчисл: getNalIschisl(allNdflPersonIncomes),
@@ -495,7 +501,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 }
             }
             ndflReferencess << createRefBookAttributesForNdflReference(np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
-
         }
     }
     saveNdflRefences()
@@ -1427,6 +1432,8 @@ class PairKppOktmo {
 
 @Field final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
 
+@Field final String TRANSPORT_FILE_TEMPLATE = "ТФ"
+
 // Мапа где ключ идентификатор NdflPerson, значение NdflPerson соответствующий идентификатору
 @Field Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
 
@@ -1457,7 +1464,7 @@ def createSpecificReport() {
  */
 def createPrimaryRnuWithErrors() {
     // Сведения о доходах из КНФ, которая является источником для входящей ОНФ и записи в реестре справок соответствующим доходам физлицам имеют ошибки
-    List<NdflPersonIncome> ndflPersonIncomeFromRNUConsolidatedList = ndflPersonService.findNdflPersonIncomeConsolidatedRNU(declarationData.id, declarationData.kpp, declarationData.oktmo)
+    List<NdflPersonIncome> ndflPersonIncomeFromRNUConsolidatedList = ndflPersonService.findNdflPersonIncomeConsolidatedRNU2Ndfl(declarationData.id, declarationData.kpp, declarationData.oktmo)
     // Сведения о вычетах имеющие такой же operationId как и сведения о доходах
     List<NdflPersonDeduction> ndflPersonDeductionFromRNUConsolidatedList = []
     // Сведения об авансах имеющие такой же operationId как и сведения о доходах
@@ -1496,6 +1503,7 @@ def fillPrimaryRnuWithErrors() {
     def writer = scriptSpecificReportHolder.getFileOutputStream()
     def workbook = getSpecialReportTemplate()
     fillGeneralData(workbook)
+    fillPrimaryRnuNDFLWithErrorsTable(workbook)
     workbook.write(writer)
     writer.close()
     scriptSpecificReportHolder
@@ -1580,7 +1588,7 @@ def fillPrimaryRnuNDFLWithErrorsTable(final XSSFWorkbook workbook) {
     def startIndex = 12
     ndflpersonFromRNUPrimary.values().each { ndflPerson ->
         ndflPerson.incomes.each { income ->
-            fillPrimaryRnuNDFLWithErrorsRow(workbook, ndflpersonFromRNUPrimary, income, "Свед о дох", startIndex)
+            fillPrimaryRnuNDFLWithErrorsRow(workbook, ndflPerson, income, "Свед о дох", startIndex)
             startIndex++
         }
     }
@@ -1597,12 +1605,15 @@ def fillPrimaryRnuNDFLWithErrorsTable(final XSSFWorkbook workbook) {
  */
 def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, ndflPerson, operation, sectionName, index) {
     XSSFSheet sheet = workbook.getSheetAt(0)
+    XSSFRow row = sheet.createRow(index)
     def styleLeftAligned = makeStyleLeftAligned(workbook)
     styleLeftAligned = thinBorderStyle(styleLeftAligned)
     def styleCenterAligned = makeStyleCenterAligned(workbook)
     styleCenterAligned = thinBorderStyle(styleCenterAligned)
+    styleCenterAligned.setDataFormat(ScriptUtils.createXlsDateFormat(workbook))
     // Первичная НФ
     DeclarationData primaryRnuDeclarationData = declarationService.getDeclarationData(ndflPerson.declarationDataId)
+    DeclarationDataFile primaryRnuDeclarationDataFile = declarationService.findFilesWithSpecificType(ndflPerson.declarationDataId, TRANSPORT_FILE_TEMPLATE).get(0)
     DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(primaryRnuDeclarationData.departmentReportPeriodId)
     Department department = departmentService.get(departmentReportPeriod.departmentId)
     // Период
@@ -1614,11 +1625,11 @@ def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, ndflPerson, ope
     // АСНУ
     String asnu = getProvider(REF_BOOK_ASNU_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
     // Имя ТФ
-    String transportFileName = primaryRnuDeclarationData.fileName
+    String transportFileName = primaryRnuDeclarationDataFile.fileName
     // Загрузил ТФ
-    // TODO уточнить откуда брать данные
+    String userName = primaryRnuDeclarationDataFile.userName
     // Дата загрузки ТФ
-    // TODO уточнить откуда брать данные
+    Date uploadDate = primaryRnuDeclarationDataFile.date
     // Строка с ошибкой.Строка
     String rowNum = operation.rowNum.toString()
     // Строка с ошибкой.ID операции
@@ -1626,45 +1637,47 @@ def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, ndflPerson, ope
     // 	Физическое лицо, к которому относится ошибочная строка. Документ
     String idDocNumber = ndflPerson.idDocNumber
     // Физическое лицо, к которому относится ошибочная строка. ФИО
-    String fio = ndflPerson.lastName != null ? ndflPerson.lastName : "" + " " + ndflPerson.firstName != null ?
-            ndflPerson.firstName : "" + " " + ndflPerson.middleName != null ? ndflPerson.middleName : ""
+    String lastname = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
+    String firstname = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
+    String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
+    String fio = lastname + firstname + middlename
     // Физическое лицо, к которому относится ошибочная строка. Дата рождения
     Date birthDay = ndflPerson.birthDay
 
-    XSSFCell cell1 = sheet.getRow(index).createCell(0)
+    XSSFCell cell1 = row.createCell(0)
     cell1.setCellValue(periodName + ":" + year)
     cell1.setCellStyle(styleCenterAligned)
-    XSSFCell cell2 = sheet.getRow(index).createCell(1)
+    XSSFCell cell2 = row.createCell(1)
     cell2.setCellValue(departmentName)
     cell2.setCellStyle(styleLeftAligned)
-    XSSFCell cell3 = sheet.getRow(index).createCell(2)
+    XSSFCell cell3 = row.createCell(2)
     cell3.setCellValue(asnu)
     cell3.setCellStyle(styleCenterAligned)
-    XSSFCell cell4 = sheet.getRow(index).createCell(3)
+    XSSFCell cell4 = row.createCell(3)
     cell4.setCellValue(transportFileName)
     cell4.setCellStyle(styleLeftAligned)
-    XSSFCell cell5 = sheet.getRow(index).createCell(4)
-    cell5.setCellValue("")
+    XSSFCell cell5 = row.createCell(4)
+    cell5.setCellValue(userName)
     cell5.setCellStyle(styleCenterAligned)
-    XSSFCell cell6 = sheet.getRow(index).createCell(5)
-    cell6.setCellValue("")
+    XSSFCell cell6 = row.createCell(5)
+    cell6.setCellValue(uploadDate)
     cell6.setCellStyle(styleCenterAligned)
-    XSSFCell cell7 = sheet.getRow(index).createCell(6)
+    XSSFCell cell7 = row.createCell(6)
     cell7.setCellValue(sectionName)
     cell7.setCellStyle(styleCenterAligned)
-    XSSFCell cell8 = sheet.getRow(index).createCell(7)
+    XSSFCell cell8 = row.createCell(7)
     cell8.setCellValue(rowNum)
     cell8.setCellStyle(styleCenterAligned)
-    XSSFCell cell9 = sheet.getRow(index).createCell(8)
+    XSSFCell cell9 = row.createCell(8)
     cell9.setCellValue(operationId)
     cell9.setCellStyle(styleCenterAligned)
-    XSSFCell cell10 = sheet.getRow(index).createCell(9)
+    XSSFCell cell10 = row.createCell(9)
     cell10.setCellValue(idDocNumber)
     cell10.setCellStyle(styleCenterAligned)
-    XSSFCell cell11 = sheet.getRow(index).createCell(10)
+    XSSFCell cell11 = row.createCell(10)
     cell11.setCellValue(fio)
     cell11.setCellStyle(styleCenterAligned)
-    XSSFCell cell12 = sheet.getRow(index).createCell(11)
+    XSSFCell cell12 = row.createCell(11)
     cell12.setCellValue(birthDay)
     cell12.setCellStyle(styleCenterAligned)
 }
