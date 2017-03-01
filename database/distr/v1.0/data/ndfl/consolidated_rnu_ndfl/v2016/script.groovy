@@ -20,6 +20,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 import groovy.xml.MarkupBuilder
 
+import java.text.SimpleDateFormat
+
 /**
  * Скрипт макета декларации РНУ-НДФЛ(консолидированная)
  */
@@ -31,12 +33,17 @@ switch (formDataEvent) {
         clearData()
         consolidation()
         generateXml()
+        // Формирование pdf-отчета формы
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesList()
         break
-    case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
-        createSpecificReport();
+    case FormDataEvent.PREPARE_SPECIFIC_REPORT:
+        prepareSpecificReport()
+        break
+    case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        createSpecificReport()
         break
 }
 
@@ -649,15 +656,297 @@ def getRelation(DeclarationData declarationData, Department department, ReportPe
 
 }
 
-//>------------------< CREATE SPECIFIC REPORT >----------------------<
+//------------------ PREPARE_SPECIFIC_REPORT ----------------------
+
+def prepareSpecificReport() {
+    PrepareSpecificReportResult result = new PrepareSpecificReportResult();
+    List<Column> tableColumns = createTableColumns();
+    List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+    def rowColumns = createRowColumns()
+
+    //Проверка, подготовка данных
+    def params = scriptSpecificReportHolder.subreportParamValues
+    def reportParameters = scriptSpecificReportHolder.getSubreportParamValues();
+
+    if (reportParameters.isEmpty()) {
+        throw new ServiceException("Для поиска физического лица необходимо задать один из критериев.");
+    }
+
+    def resultReportParameters = [:]
+    reportParameters.each { key, value ->
+        if (value != null) {
+            resultReportParameters.put(key, value)
+        }
+    }
+    PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters);
+
+    if (pagingResult.isEmpty()) {
+        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + resultReportParameters);
+    }
+
+    pagingResult.getRecords().each() { ndflPerson ->
+        DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
+        row.getCell("id").setStringValue(ndflPerson.id.toString())
+        row.lastName = ndflPerson.lastName
+        row.firstName = ndflPerson.firstName
+        row.middleName = ndflPerson.middleName
+        row.snils = ndflPerson.snils
+        row.innNp = ndflPerson.innNp
+        row.birthDay = ndflPerson.birthDay
+        row.idDocNumber = ndflPerson.idDocNumber
+        dataRows.add(row)
+    }
+
+    result.setTableColumns(tableColumns);
+    result.setDataRows(dataRows);
+    scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
+    scriptSpecificReportHolder.setSubreportParamValues(params)
+}
+
+def createTableColumns() {
+    List<Column> tableColumns = new ArrayList<Column>()
+
+    Column column1 = new StringColumn()
+    column1.setAlias("lastName")
+    column1.setName("Фамилия")
+    column1.setWidth(10)
+    tableColumns.add(column1)
+
+    Column column2 = new StringColumn()
+    column2.setAlias("firstName")
+    column2.setName("Имя")
+    column2.setWidth(10)
+    tableColumns.add(column2)
+
+    Column column3 = new StringColumn()
+    column3.setAlias("middleName")
+    column3.setName("Отчество")
+    column3.setWidth(10)
+    tableColumns.add(column3)
+
+    Column column4 = new StringColumn()
+    column4.setAlias("snils")
+    column4.setName("СНИЛС")
+    column4.setWidth(10)
+    tableColumns.add(column4)
+
+    Column column5 = new StringColumn()
+    column5.setAlias("innNp")
+    column5.setName("ИНН")
+    column5.setWidth(10)
+    tableColumns.add(column5)
+
+    Column column6 = new DateColumn()
+    column6.setAlias("birthDay")
+    column6.setName("Дата рождения")
+    column6.setWidth(10)
+    tableColumns.add(column6)
+
+    Column column7 = new StringColumn()
+    column7.setAlias("idDocNumber")
+    column7.setName("ДУЛ")
+    column7.setWidth(10)
+    tableColumns.add(column7)
+
+    return tableColumns;
+}
+
+def createRowColumns() {
+    List<Column> tableColumns = new ArrayList<Column>();
+
+    Column columnId = new StringColumn()
+    columnId.setAlias("id")
+    columnId.setName("id")
+    columnId.setWidth(10)
+    tableColumns.add(columnId)
+
+    Column column1 = new StringColumn()
+    column1.setAlias("lastName")
+    column1.setName("Фамилия")
+    column1.setWidth(10)
+    tableColumns.add(column1)
+
+    Column column2 = new StringColumn()
+    column2.setAlias("firstName")
+    column2.setName("Имя")
+    column2.setWidth(10)
+    tableColumns.add(column2)
+
+    Column column3 = new StringColumn()
+    column3.setAlias("middleName")
+    column3.setName("Отчество")
+    column3.setWidth(10)
+    tableColumns.add(column3)
+
+    Column column4 = new StringColumn()
+    column4.setAlias("snils")
+    column4.setName("СНИЛС")
+    column4.setWidth(10)
+    tableColumns.add(column4)
+
+    Column column5 = new StringColumn()
+    column5.setAlias("innNp")
+    column5.setName("ИНН")
+    column5.setWidth(10)
+    tableColumns.add(column5)
+
+    Column column6 = new DateColumn()
+    column6.setAlias("birthDay")
+    column6.setName("Дата рождения")
+    column6.setWidth(10)
+    tableColumns.add(column6)
+
+    Column column7 = new StringColumn()
+    column7.setAlias("idDocNumber")
+    column7.setName("ДУЛ")
+    column7.setWidth(10)
+    tableColumns.add(column7)
+
+    return tableColumns;
+}
+
+//------------------ Create Report ----------------------
 
 def createSpecificReport() {
-    def writer = new PrintWriter(scriptSpecificReportHolder.getFileOutputStream());
-    scriptSpecificReportHolder.getSubreportParamValues().each { k, v ->
-        writer.write(k + "::" + v + "\n")
+
+    def params = scriptSpecificReportHolder.subreportParamValues
+    def row = scriptSpecificReportHolder.getSelectedRecord()
+    def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
+
+    if (ndflPerson != null) {
+        //формирование отчета
+        def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
+            calculateReportData(it, ndflPerson)
+        });
+
+        declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+
+        scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
+
+    } else {
+        throw new ServiceException("Не найдены данные для формирования отчета!");
     }
-    writer.close()
-    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".txt")
+}
+
+/**
+ * Формат имени файла: РНУ_НДФЛ_<ИД формы>_<ФамилияИО>_<ДУЛ>_<ДатаВремя выгрузки>, где
+ * <ИД формы> - ID формы из БД
+ * <ФамилияИО> - Фамилия ФЛ полностью + первая буква имени + первая буква отчества (при наличии). Пример: ИвановаИИ
+ * <ДУЛ> - Серия и номер документа, удостоверяющего личность в формате "Серия№Номер", Серия и Номер ДУЛ не должны содержать разделителей. Пример: 8888№123321
+ * <ДатаВремя выгрузки> - дата и время выгрузки в формате ГГГГММДД_ЧЧММ. Пример: 20160216_1842
+ * @return
+ */
+def createFileName(NdflPerson ndflPerson) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("РНУ_НДФЛ_");
+    sb.append(declarationData.id).append("_");
+    sb.append(capitalize(ndflPerson.lastName));
+    sb.append(firstChar(ndflPerson.firstName));
+    sb.append(firstChar(ndflPerson.middleName)).append("_");
+    sb.append(ndflPerson.idDocNumber?.replaceAll("\\s", "")?.toLowerCase()).append("_");
+    sb.append(new SimpleDateFormat("yyyy.MM.dd_HHmm").format(new Date()));
+    return sb.toString();
+}
+
+
+String firstChar(String str){
+    if (str != null && !str.isEmpty()) {
+        return String.valueOf(Character.toUpperCase(str.charAt(0)));
+    } else {
+        return "";
+    }
+}
+
+String capitalize(String str) {
+    int strLen;
+    if (str == null || (strLen = str.length()) == 0) {
+        return str;
+    }
+    return new StringBuilder(strLen)
+            .append(Character.toTitleCase(str.charAt(0)))
+            .append(str.substring(1).toLowerCase())
+            .toString();
+}
+
+void calculateReportData(writer, ndflPerson) {
+
+    //отчетный период
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+
+    //Идентификатор подразделения
+    def departmentId = declarationData.departmentId
+
+    //Подразделение
+    def department = departmentService.get(departmentId)
+
+    def reportPeriodCode = findReportPeriodCode(reportPeriod)
+
+    // Подготовка данных для СведОпер
+    def incomes = ndflPerson.incomes.sort { a, b -> (a.rowNum <=> b.rowNum) }
+    def deductions = ndflPerson.deductions.sort { a, b -> a.rowNum <=> b.rowNum }
+    def prepayments = ndflPerson.prepayments.sort { a, b -> a.rowNum <=> b.rowNum }
+    def operationList = incomes.collectEntries { personIncome ->
+        def key = personIncome.operationId
+        def value = ["ИдОпер": personIncome.operationId, "КПП": personIncome.kpp, "ОКТМО": personIncome.oktmo]
+        return [key, value]
+    }
+    def incomeOperations = mapToOperationId(incomes);
+    def deductionOperations = mapToOperationId(deductions);
+    def prepaymentOperations = mapToOperationId(prepayments);
+
+    def builder = new MarkupBuilder(writer)
+    builder.Файл() {
+        СлЧасть('КодПодр': department.sbrfCode) {}
+        ИнфЧасть('ПериодОтч': reportPeriodCode, 'ОтчетГод': reportPeriod?.taxPeriod?.year) {
+            ПолучДох(ndflPersonAttr(ndflPerson)) {}
+            operationList.each { key, value ->
+                СведОпер(value) {
+                    //доходы
+                    incomeOperations.get(key).each { personIncome ->
+                        СведДохНал(incomeAttr(personIncome)) {}
+                    }
+
+                    //Вычеты
+                    deductionOperations.get(key).each { personDeduction ->
+                        СведВыч(deductionAttr(personDeduction)) {}
+                    }
+
+                    //Авансовые платежи
+                    prepaymentOperations.get(key).each { personPrepayment ->
+                        СведАванс(prepaymentAttr(personPrepayment)) {}
+                    }
+                }
+            }
+        }
+    }
+}
+
+def mapToOperationId(collection) {
+    def result = [:]
+    collection.collectEntries(result) { personOperation ->
+        def key = personOperation.operationId
+        def value
+        if (result.containsKey(key)) {
+            value = result.get(key);
+        } else {
+            value = [].toList()
+        }
+        value.add(personOperation)
+        return [key, value]
+    }
+    return result;
+}
+
+/**
+ * Находит код периода из справочника "Коды, определяющие налоговый (отчётный) период"
+ */
+def findReportPeriodCode(reportPeriod) {
+    RefBookDataProvider dataProvider = refBookFactory.getDataProvider(RefBook.Id.PERIOD_CODE.getId())
+    Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
+    if (refBookValueMap.isEmpty()) {
+        throw new ServiceException("Некорректные данные в справочнике \"Коды, определяющие налоговый (отчётный) период\"");
+    }
+    return refBookValueMap.get("CODE").getStringValue();
 }
 
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,

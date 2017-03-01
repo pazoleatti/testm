@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerSubreportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerSubreportResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;

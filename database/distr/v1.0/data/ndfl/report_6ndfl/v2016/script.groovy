@@ -3,6 +3,26 @@ package form_template.ndfl.report_6ndfl.v2016
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
+import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFRow
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
+import com.aplana.sbrf.taxaccounting.model.DeclarationData
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
+import com.aplana.sbrf.taxaccounting.model.Relation
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils;
@@ -16,6 +36,8 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE: //формирование xml
         println "!CALCULATE!"
         buildXml(xml)
+        // Формирование pdf-отчета формы
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -52,6 +74,8 @@ switch (formDataEvent) {
 
 // Настройки подразделений по НДФЛ (таблица)
 @Field final long REF_BOOK_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
+
+@Field int REF_BOOK_OKTMO_ID = 96;
 
 @Field final FORM_NAME_NDFL6 = "НДФЛ6"
 @Field final FORM_NAME_NDFL2 = "НДФЛ2"
@@ -107,6 +131,9 @@ switch (formDataEvent) {
 // Кэш для справочников
 @Field def refBookCache = [:]
 
+@Field
+final OKTMO_CACHE = [:]
+
 /************************************* СОЗДАНИЕ XML *****************************************************************/
 def buildXml(def writer) {
     buildXml(writer, false)
@@ -117,6 +144,11 @@ def buildXmlForSpecificReport(def writer) {
 }
 
 def buildXml(def writer, boolean isForSpecificReport) {
+    ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+    // Получим ИНН из справочника "Общие параметры"
+    def sberbankInnParam = configurationParamModel?.get(ConfigurationParam.SBERBANK_INN)?.get(0)?.get(0)
+    // Получим код НО пром из справочника "Общие параметры"
+    def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
 
     // Параметры подразделения
     def departmentParam = getDepartmentParam(declarationData.departmentId)
@@ -143,7 +175,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
     def builder = new MarkupBuilder(writer)
     builder.Файл(
-            ИдФайл: generateXmlFileId(departmentParamIncomeRow, departmentParam.INN, declarationData.kpp),
+            ИдФайл: generateXmlFileId(departmentParamIncomeRow, sberbankInnParam, declarationData.kpp, kodNoProm),
             ВерсПрог: applicationVersion,
             ВерсФорм: "5.01"
     ) {
@@ -164,7 +196,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
             СвНП(svNP) {
                 НПЮЛ(
                         НаимОрг: departmentParamIncomeRow.NAME,
-                        ИННЮЛ: departmentParam.INN,
+                        ИННЮЛ: sberbankInnParam,
                         КПП: declarationData.kpp
                 )
             }
@@ -700,11 +732,11 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
  * DD - День формирования передаваемого файла
  * N - Идентификационный номер файла должен обеспечивать уникальность файла, длина - от 1 до 36 знаков
  */
-def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP) {
+def generateXmlFileId(def departmentParamIncomeRow, def INN, def KPP, def kodNoProm) {
     def R_T = "NO_NDFL6"
-    def A = departmentParamIncomeRow?.TAX_ORGAN_CODE_MID?.value
+    def A = kodNoProm
     def K = departmentParamIncomeRow?.TAX_ORGAN_CODE?.value
-    def O = INN?.value + KPP
+    def O = INN + KPP
     def currDate = new Date().format(DATE_FORMAT_UNDERLINE)
     def N = UUID.randomUUID().toString().toUpperCase()
     def res = R_T + "_" + A + "_" + K + "_" + O + "_" + currDate + "_" + N
@@ -795,7 +827,13 @@ def createForm() {
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
         departmentParamTableList.each { dep ->
-            pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, dep.OKTMO?.value, dep?.TAX_ORGAN_CODE?.value)
+            if (dep.OKTMO?.value != null) {
+                def oktmo = getOktmoById(dep.OKTMO?.value)
+                if (oktmo != null) {
+                    pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, oktmo.CODE.value, dep?.TAX_ORGAN_CODE?.value)
+                }
+
+            }
         }
     }
 
@@ -810,7 +848,7 @@ def createForm() {
     // удаление форм не со статусом принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
-        if (declaration.state != State.CREATED) {
+        if (declaration.state != State.ACCEPTED) {
             declarationsForRemove << declaration
         }
     }
@@ -819,13 +857,15 @@ def createForm() {
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
     allDeclarationData.each { declaration ->
-        pairKppOktmoList.each { np ->
-            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, np.kpp.toString(), np.oktmo.toString())
-            if (ndflPersons != null && ndflPersons.size != 0) {
-                ndflPersonsGroupedByKppOktmo[np] = ndflPersons
+        pairKppOktmoList.each { pair ->
+            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, pair.kpp.toString(), pair.oktmo.toString())
+            if (ndflPersons != null && ndflPersons.size() != 0) {
+                //logger.info(ndflPersons.toString())
+                addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
             }
         }
     }
+    //logger.info(ndflPersonsGroupedByKppOktmo.toString())
 
     initNdflPersons(ndflPersonsGroupedByKppOktmo)
 
@@ -841,11 +881,27 @@ def createForm() {
         Long ddId
         params = new HashMap<String, Object>()
         ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo, null, null, null)
-        formMap.put(ddId, params)
+                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, null)
         appendNdflPersonsToForm(ddId, npGroup.value)
+        formMap.put(ddId, params)
     }
 
+}
+
+def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndflPersonList) {
+    boolean createNewGroup = true
+    ndflPersonsGroupedByKppOktmo.keySet().each { pairKppOktmo ->
+        if (pairKppOktmo.kpp == pairKppOktmoBeingComparing.kpp && pairKppOktmo.oktmo == pairKppOktmoBeingComparing.oktmo) {
+            if (pairKppOktmo.taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
+                logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
+            }
+            ndflPersonsGroupedByKppOktmo.get(pairKppOktmo).addAll(ndflPersonList)
+            createNewGroup = false
+        }
+    }
+    if (createNewGroup) {
+        ndflPersonsGroupedByKppOktmo[pairKppOktmoBeingComparing] = ndflPersonList
+    }
 }
 
 def getPrevDepartmentReportPeriod(departmentReportPeriod) {
@@ -862,7 +918,8 @@ def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
         def oktmo = npGroup.key.oktmo
         def kpp = npGroup.key.kpp
         npGroup.value.each {
-            def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp, oktmo)
+            def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp.toString(), oktmo.toString())
+            resetId(incomes)
             def deductions = ndflPersonService.findDeductions(it.id)
             resetId(deductions)
             def prepayments = ndflPersonService.findPrepayments(it.id)
@@ -875,7 +932,6 @@ def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
 }
 
 def appendNdflPersonsToForm (def declarationDataId, def ndflPersons){
-    //TODO сделать batch insert
     ndflPersons.each {
         it.setId(null)
         it.setDeclarationDataId(declarationDataId)
@@ -911,7 +967,7 @@ def createReports() {
             if (it.fileName == null) {
                 return
             }
-            ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName);
+            ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName + ".xml");
             zos.putArchiveEntry(ze);
             IOUtils.copy(declarationService.getXmlStream(it.id), zos)
             zos.closeArchiveEntry();
@@ -1126,6 +1182,20 @@ def getDepartmentParamTable(def departmentParamId) {
     return departmentParamTable
 }
 
+def getOktmoById(id) {
+    def oktmo = OKTMO_CACHE.get(id)
+    if (oktmo == null) {
+        def rpe = getReportPeriodEndDate(declarationData.reportPeriodId)
+        def oktmoList = getProvider(REF_BOOK_OKTMO_ID).getRecords(rpe, null, "ID = ${id}", null)
+        if (oktmoList.size() != 0) {
+            oktmo = oktmoList.get(0)
+            OKTMO_CACHE[id] = oktmo
+        }
+
+    }
+    return oktmo
+}
+
 def getReportPeriodEndDate(def reportPeriodId) {
     if (reportPeriodEndDate == null) {
         reportPeriodEndDate = reportPeriodService.getEndDate(reportPeriodId)?.time
@@ -1174,8 +1244,19 @@ class PairKppOktmo {
         return result
     }
 }
+/************************************* СПЕЦОТЧЕТ **********************************************************************/
+
+@Field final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
+
+@Field final String TRANSPORT_FILE_TEMPLATE = "ТФ"
 
 def createSpecificReport() {
+    def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
+    if (alias == ALIAS_PRIMARY_RNU_W_ERRORS) {
+        createPrimaryRnuWithErrors()
+        return
+    }
+
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
 
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
@@ -1184,4 +1265,271 @@ def createSpecificReport() {
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+/**
+ * Создать Спецотчет Первичные РНУ с ошибками
+ * @return
+ */
+def createPrimaryRnuWithErrors() {
+    // Сведения о доходах из КНФ, которая является источником для входящей ОНФ и записи в реестре справок соответствующим доходам физлицам имеют ошибки
+    List<NdflPersonIncome> ndflPersonIncomeFromRNUConsolidatedList = ndflPersonService.findNdflPersonIncomeConsolidatedRNU6Ndfl(declarationData.id, declarationData.kpp, declarationData.oktmo)
+    // Сведения о вычетах имеющие такой же operationId как и сведения о доходах
+    List<NdflPersonDeduction> ndflPersonDeductionFromRNUConsolidatedList = []
+    // Сведения об авансах имеющие такой же operationId как и сведения о доходах
+    List<NdflPersonPrepayment> ndflPersonPrepaymentFromRNUConsolidatedList = []
+
+    ndflPersonIncomeFromRNUConsolidatedList.each {
+        ndflPersonDeductionFromRNUConsolidatedList.addAll(ndflPersonService.findDeductionsByNdflPersonAndOperation(it.ndflPersonId, it.operationId))
+        ndflPersonPrepaymentFromRNUConsolidatedList.addAll(ndflPersonService.findPrepaymentsByNdflPersonAndOperation(it.ndflPersonId, it.operationId))
+    }
+
+    ndflPersonIncomeFromRNUConsolidatedList.each {
+        NdflPersonIncome ndflPersonIncomePrimary = ndflPersonService.getIncome(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonIncomePrimary.ndflPersonId)
+        ndflPersonPrimary.incomes.add(ndflPersonIncomePrimary)
+    }
+
+    ndflPersonDeductionFromRNUConsolidatedList.each {
+        NdflPersonDeduction ndflPersonDeductionPrimary = ndflPersonService.getDeduction(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonDeductionPrimary.ndflPersonId)
+        ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)
+    }
+
+    ndflPersonDeductionFromRNUConsolidatedList.each {
+        NdflPersonPrepayment ndflPersonPrepaymentPrimary = ndflPersonService.getPrepayment(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)
+        ndflPersonPrimary.prepayments.add(ndflPersonPrepaymentPrimary)
+    }
+    fillPrimaryRnuWithErrors()
+}
+
+/**
+ * Заполнение печатного представления спецотчета "Первичные РНУ с ошибками"
+ * @return
+ */
+def fillPrimaryRnuWithErrors() {
+    def writer = scriptSpecificReportHolder.getFileOutputStream()
+    def workbook = getSpecialReportTemplate()
+    fillGeneralData(workbook)
+    fillPrimaryRnuNDFLWithErrorsTable(workbook)
+    workbook.write(writer)
+    writer.close()
+    scriptSpecificReportHolder
+            .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+/**
+ * Заполнение шапки Спецотчета Первичные РНУ с ошибками
+ */
+def fillGeneralData(workbook) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    XSSFCellStyle style = makeStyleLeftAligned(workbook)
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    // Вид отчетности
+    String declarationTypeName = declarationTemplate.type.name
+    String note = declarationData.note
+    // Период
+    int year = departmentReportPeriod.reportPeriod.taxPeriod.year
+    String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).NAME.value
+    // Территориальный банк
+    String departmentName = department.name
+    // КПП
+    String kpp = declarationData.kpp
+    //	Дата сдачи корректировки
+    String dateDelivery = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).END_DATE.value?.format(DATE_FORMAT_DOTTED)
+    // ОКТМО
+    String oktmo = declarationData.oktmo
+    // Код НО (конечный)
+    String taxOrganCode = declarationData.taxOrganCode
+    // Дата формирования
+    String currentDate = new Date().format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
+
+    XSSFCell cell1 = sheet.getRow(2).createCell(1)
+    cell1.setCellValue(declarationTypeName + " " + note)
+    cell1.setCellStyle(style)
+    XSSFCell cell2 = sheet.getRow(3).createCell(1)
+    cell2.setCellValue(year + ":" + periodName)
+    cell2.setCellStyle(style)
+    XSSFCell cell3 = sheet.getRow(4).createCell(1)
+    cell3.setCellValue(dateDelivery)
+    cell3.setCellStyle(style)
+    XSSFCell cell4 = sheet.getRow(5).createCell(1)
+    cell4.setCellValue(departmentName)
+    cell4.setCellStyle(style)
+    XSSFCell cell5 = sheet.getRow(6).createCell(1)
+    cell5.setCellValue(kpp)
+    cell5.setCellStyle(style)
+    XSSFCell cell6 = sheet.getRow(7).createCell(1)
+    cell6.setCellValue(oktmo)
+    cell6.setCellStyle(style)
+    XSSFCell cell7 = sheet.getRow(8).createCell(1)
+    cell7.setCellValue(taxOrganCode)
+    cell7.setCellStyle(style)
+    XSSFCell cell8 = sheet.getRow(2).createCell(11)
+    cell8.setCellValue(currentDate)
+    cell8.setCellStyle(style)
+}
+
+def initNdflPersonPrimary(ndflPersonId) {
+    NdflPerson ndflPersonPrimary = ndflpersonFromRNUPrimary[ndflPersonId]
+    if (ndflPersonPrimary == null) {
+        ndflPersonPrimary = ndflPersonService.get(ndflPersonId)
+        ndflPersonPrimary.incomes.clear()
+        ndflPersonPrimary.deductions.clear()
+        ndflPersonPrimary.prepayments.clear()
+        ndflpersonFromRNUPrimary[ndflPersonId] = ndflPersonPrimary
+    }
+    return ndflPersonPrimary
+}
+
+/**
+ * Заполнить таблицу Спецотчета Первичные РНУ с ошибками
+ * @param workbook
+ * @return
+ */
+def fillPrimaryRnuNDFLWithErrorsTable(final XSSFWorkbook workbook) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    def startIndex = 12
+    ndflpersonFromRNUPrimary.values().each { ndflPerson ->
+        ndflPerson.incomes.each { income ->
+            fillPrimaryRnuNDFLWithErrorsRow(workbook, ndflPerson, income, "Свед о дох", startIndex)
+            startIndex++
+        }
+    }
+}
+
+/**
+ * Заполнение строки для таблицы Спецотчета Первичные РНУ с ошибками
+ * @param workbook
+ * @param ndflPerson
+ * @param operation операция отражающая доход, вычет или аванс
+ * @param sectionName Название раздела, в котором содержится операция
+ * @param index текущий индекс строки таблицы
+ * @return
+ */
+def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, ndflPerson, operation, sectionName, index) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    XSSFRow row = sheet.createRow(index)
+    def styleLeftAligned = makeStyleLeftAligned(workbook)
+    styleLeftAligned = thinBorderStyle(styleLeftAligned)
+    def styleCenterAligned = makeStyleCenterAligned(workbook)
+    styleCenterAligned = thinBorderStyle(styleCenterAligned)
+    styleCenterAligned.setDataFormat(ScriptUtils.createXlsDateFormat(workbook))
+    // Первичная НФ
+    DeclarationData primaryRnuDeclarationData = declarationService.getDeclarationData(ndflPerson.declarationDataId)
+    DeclarationDataFile primaryRnuDeclarationDataFile = declarationService.findFilesWithSpecificType(ndflPerson.declarationDataId, TRANSPORT_FILE_TEMPLATE).get(0)
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(primaryRnuDeclarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    // Период
+    int year = departmentReportPeriod.reportPeriod.taxPeriod.year
+    String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(primaryRnuDeclarationData.reportPeriodId), null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).NAME.value
+    // Подразделение
+    String departmentName = department.shortName
+    // АСНУ
+    String asnu = getProvider(REF_BOOK_ASNU_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
+    // Имя ТФ
+    String transportFileName = primaryRnuDeclarationDataFile.fileName
+    // Загрузил ТФ
+    String userName = primaryRnuDeclarationDataFile.userName
+    // Дата загрузки ТФ
+    Date uploadDate = primaryRnuDeclarationDataFile.date
+    // Строка с ошибкой.Строка
+    String rowNum = operation.rowNum.toString()
+    // Строка с ошибкой.ID операции
+    String operationId = operation.operationId.toString()
+    // 	Физическое лицо, к которому относится ошибочная строка. Документ
+    String idDocNumber = ndflPerson.idDocNumber
+    // Физическое лицо, к которому относится ошибочная строка. ФИО
+    String lastname = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
+    String firstname = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
+    String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
+    String fio = lastname + firstname + middlename
+    // Физическое лицо, к которому относится ошибочная строка. Дата рождения
+    Date birthDay = ndflPerson.birthDay
+
+    XSSFCell cell1 = row.createCell(0)
+    cell1.setCellValue(periodName + ":" + year)
+    cell1.setCellStyle(styleCenterAligned)
+    XSSFCell cell2 = row.createCell(1)
+    cell2.setCellValue(departmentName)
+    cell2.setCellStyle(styleLeftAligned)
+    XSSFCell cell3 = row.createCell(2)
+    cell3.setCellValue(asnu)
+    cell3.setCellStyle(styleCenterAligned)
+    XSSFCell cell4 = row.createCell(3)
+    cell4.setCellValue(transportFileName)
+    cell4.setCellStyle(styleLeftAligned)
+    XSSFCell cell5 = row.createCell(4)
+    cell5.setCellValue(userName)
+    cell5.setCellStyle(styleCenterAligned)
+    XSSFCell cell6 = row.createCell(5)
+    cell6.setCellValue(uploadDate)
+    cell6.setCellStyle(styleCenterAligned)
+    XSSFCell cell7 = row.createCell(6)
+    cell7.setCellValue(sectionName)
+    cell7.setCellStyle(styleCenterAligned)
+    XSSFCell cell8 = row.createCell(7)
+    cell8.setCellValue(rowNum)
+    cell8.setCellStyle(styleCenterAligned)
+    XSSFCell cell9 = row.createCell(8)
+    cell9.setCellValue(operationId)
+    cell9.setCellStyle(styleCenterAligned)
+    XSSFCell cell10 = row.createCell(9)
+    cell10.setCellValue(idDocNumber)
+    cell10.setCellStyle(styleCenterAligned)
+    XSSFCell cell11 = row.createCell(10)
+    cell11.setCellValue(fio)
+    cell11.setCellStyle(styleCenterAligned)
+    XSSFCell cell12 = row.createCell(11)
+    cell12.setCellValue(birthDay)
+    cell12.setCellStyle(styleCenterAligned)
+}
+
+// Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
+def getSpecialReportTemplate() {
+    def blobData = blobDataServiceDaoImpl.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
+    new XSSFWorkbook(blobData.getInputStream())
+}
+
+/**
+ * Создать стиль ячейки с выравниваем слева
+ * @param workbook
+ * @return
+ */
+
+def makeStyleLeftAligned(XSSFWorkbook workbook) {
+    def XSSFCellStyle style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_LEFT)
+    return style
+}
+
+/**
+ * Создать стиль ячейки с выравниваем по центру
+ * @param workbook
+ * @return
+ */
+
+def makeStyleCenterAligned(XSSFWorkbook workbook) {
+    def XSSFCellStyle style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_CENTER)
+    return style
+}
+
+/**
+ * Добавляет к стилю ячейки тонкие границы
+ * @param style
+ * @return
+ */
+def thinBorderStyle(final style) {
+    style.setBorderTop(CellStyle.BORDER_THIN)
+    style.setBorderBottom(CellStyle.BORDER_THIN)
+    style.setBorderLeft(CellStyle.BORDER_THIN)
+    style.setBorderRight(CellStyle.BORDER_THIN)
+    return style
 }

@@ -27,7 +27,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
 			result.setDeclarationDataId(rs.getLong("declaration_data_id"));
             result.setUuid(rs.getString("blob_data_id"));
             result.setFileName(rs.getString("file_name"));
-            result.setDate(new Date(rs.getTimestamp("file_creation_date").getTime()));
+			result.setDate(rs.getTimestamp("file_creation_date"));
             result.setUserName(rs.getString("user_name"));
             result.setUserDepartmentName(rs.getString("user_department_name"));
             result.setNote(rs.getString("note"));
@@ -42,7 +42,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
         public DeclarationDataFile mapRow(ResultSet rs, int index) throws SQLException {
             final DeclarationDataFile result = new DeclarationDataFile();
             result.setFileName(rs.getString("file_name"));
-            result.setDate(new Date(rs.getTimestamp("file_creation_date").getTime()));
+            result.setDate(rs.getTimestamp("file_creation_date"));
             return result;
         }
     }

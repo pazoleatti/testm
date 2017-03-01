@@ -1,10 +1,14 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.PagingResult
+import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
@@ -18,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.model.PersonData
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 // com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
 import groovy.transform.Field
@@ -55,6 +60,8 @@ def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
+        // Формирование pdf-отчета формы
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
         prepareSpecificReport()
@@ -67,6 +74,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         calculate();
+        // Формирование pdf-отчета формы
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
 }
 
@@ -75,12 +84,22 @@ switch (formDataEvent) {
  * Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
  */
 @Field
-def SIMILARITY_THRESHOLD = 700;
+int SIMILARITY_THRESHOLD = 700;
+
+def calcTimeMillis(long time){
+    long currTime = System.currentTimeMillis();
+    return " (" + (currTime - time) + " ms)";
+}
 
 def calculate() {
 
-    def asnuId = declarationData.asnuId;
+    long timeFull = System.currentTimeMillis();
+    long time = System.currentTimeMillis();
 
+    logger.info("Начало расчета ПНФ");
+
+    Long asnuId = declarationData.asnuId;
+    Long declarationDataId = declarationData.id;
     if (asnuId == null) {
         throw new ServiceException("Для " + declarationData.id + ", " + declarationData.fileName + " не указан код АСНУ загрузившей данные!");
     }
@@ -88,76 +107,83 @@ def calculate() {
     //выставляем параметр что скрипт не формирует новый xml-файл
     calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
-    List<NdflPerson> declarationFormPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    List<NdflPerson> declarationFormPersonList = ndflPersonService.findNdflPerson(declarationDataId)
 
-    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size());
+    logger.info("В ПНФ номер "+declarationDataId+" найдено записей о физ.лицах: " + declarationFormPersonList.size() + "(" + (System.currentTimeMillis() - time) + " ms)");
 
-    long time = System.currentTimeMillis();
+    time = System.currentTimeMillis();
+
+    Date actualVersion = new Date();
+    Map<Long, List<PersonData>> refbookPersonData = refBookPersonService.findRefBookPersonByPrimaryRnuNdfl(declarationDataId, asnuId, actualVersion)
+
+    logger.info("Поиск сходных записей завершен, найдено записей: " + refbookPersonData.size() + " "+ calcTimeMillis(time));
+
+    time = System.currentTimeMillis();
 
     //Два списка для создания новых записей и для обновления существующих
-    List<PersonData> createdPerson = new ArrayList<PersonData>();
-    List<PersonData> updatedPerson = new ArrayList<PersonData>();
+    List<PersonData> createdPersonList = new ArrayList<PersonData>();
+    List<PersonData> updatedPersonList = new ArrayList<PersonData>();
+
     Map<Long, NdflPerson> resultMap = new HashMap<Long, NdflPerson>();
     for (NdflPerson declarationFormPerson : declarationFormPersonList) {
 
         PersonData personData = createPersonData(declarationFormPerson, asnuId);
 
-        long identificatePersonTime = System.currentTimeMillis();
+        List<PersonData> refBookPersonList = refbookPersonData.get(declarationFormPerson.id);
 
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, SIMILARITY_THRESHOLD, getReportPeriodEndDate(), logger);
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, refBookPersonList, SIMILARITY_THRESHOLD, logger);
 
-        println "identificate " + (System.currentTimeMillis() - identificatePersonTime);
-        //logger.info("identificate: (" + (System.currentTimeMillis() - identificatePersonTime) + " ms)");
-
-        declarationFormPerson.setPersonId(refBookPersonId)
-
-        //после идентификации выставим ссылку на запись справочника
+        //после идентификации выставим ссылку на запись справочника, если есть
         personData.setRefBookPersonId(refBookPersonId)
         personData.setSourceId(declarationFormPerson.getId());
 
         if (refBookPersonId != null) {
             //обновление записи
-            updatedPerson.add(personData);
+            updatedPersonList.add(personData);
         } else {
             //Новые записи помещаем в список для пакетного создания
-            createdPerson.add(personData);
+            createdPersonList.add(personData);
         }
 
         resultMap.put(declarationFormPerson.getId(), declarationFormPerson);
     }
 
-    println "find " + (System.currentTimeMillis() - time);
-    logger.info("find: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPersonList.size() + ", подготовленно записей для обновления: " + updatedPersonList.size()+" "+ calcTimeMillis(time));
     time = System.currentTimeMillis();
 
-    logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPerson.size() + ", подготовленно записей для обновления: " + updatedPerson.size());
-
     //Создание справочников
-    if (createdPerson != null && !createdPerson.isEmpty()) {
-        createRefbookPersonData(createdPerson, asnuId);
-        updateReferenceToPersonId(resultMap, createdPerson);
+    if (!createdPersonList.isEmpty()) {
+        createRefbookPersonData(createdPersonList, asnuId);
     }
 
     println "create " + (System.currentTimeMillis() - time);
     logger.info("create: (" + (System.currentTimeMillis() - time) + " ms)");
     time = System.currentTimeMillis();
-    //Обновление справочников
-    if (updatedPerson != null && !updatedPerson.isEmpty()) {
-        updateRefbookPersonData(updatedPerson, asnuId);
-        updateReferenceToPersonId(resultMap, updatedPerson);
-    }
 
-    println "refresh " + (System.currentTimeMillis() - time);
-    logger.info("refresh: (" + (System.currentTimeMillis() - time) + " ms)");
-    time = System.currentTimeMillis();
-
-    //Обновление данных декларации
+    //обновление ссылок на записи справочника
+    updateReferenceToPersonId(resultMap, createdPersonList);
+    updateReferenceToPersonId(resultMap, updatedPersonList);
+    //сохранение обновленных ссылок
     ndflPersonService.updatePersonRefBookReferences(new ArrayList<NdflPerson>(resultMap.values()));
 
     println "update " + (System.currentTimeMillis() - time);
     logger.info("update: (" + (System.currentTimeMillis() - time) + " ms)");
+    time = System.currentTimeMillis();
+
+    //Обновление справочников
+    if (!updatedPersonList.isEmpty()) {
+        updateRefbookPersonData(updatedPersonList, asnuId);
+    }
+
+    println "refresh " + (System.currentTimeMillis() - time);
+    logger.info("refresh: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    logger.info("Завершение расчета ПНФ "+" "+ calcTimeMillis(timeFull));
 
 }
+
+//---------------- identification ----------------
 
 /**
  * Обноаляет ссылки на справочник ФЛ
@@ -170,15 +196,12 @@ def updateReferenceToPersonId(Map<Long, NdflPerson> resultMap, List<PersonData> 
     }
 }
 
-//--- сохранение/обновление полученных данных по физлицам
-
 /**
  * Получить Записи справочника адреса физлиц, по записям из справочника физлиц
  * @param personMap
  * @return
  */
 def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
-    Map<Long, Map<String, RefBookValue>> addressMap = Collections.emptyMap();
     def addressIds = [];
     personMap.each { personId, person ->
         if (person.get(RF_ADDRESS).value != null) {
@@ -186,30 +209,95 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
         }
     }
 
-    if (addressIds.size() > 0) {
-        addressMap = getRefAddress(addressIds)
-        logger.info(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
+    Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).getRecordData(addressIds)
+    if (refBookMap != null && !addressIds.isEmpty()) {
+        return refBookMap;
+    } else {
+        return Collections.emptyMap();
     }
-    return addressMap;
 }
+
+/**
+ * Получить "Физические лица" getRefPersons
+ * @param personIds
+ * @return
+ */
+Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
+    Long declarationDataId = declarationData.id;
+    String whereClause = String.format("id in(select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
+    return getRefBookByRecordWhere(RefBook.Id.PERSON.id, whereClause)
+}
+
+//Приоритет документов удостоверяющих личность <Идентификатор, Приоритет(int)>
+@Field def documentPriorityCache = [:]
+
+def getRefDocumentPriority() {
+    if (documentPriorityCache.size() == 0) {
+        def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
+        refBookList.each { refBook ->
+            documentPriorityCache.put(refBook?.id?.numberValue, refBook?.PRIORITY?.numberValue?.intValue())
+        }
+    }
+    return documentPriorityCache;
+}
+
+@Field Map<Long, List<Map<String, RefBookValue>>> inpPersonRefBookCache = [:]
+
+def getRefInpMapByDeclarationDataId() {
+
+    if (inpPersonRefBookCache.isEmpty()) {
+        Long declarationDataId = declarationData.id;
+
+        String whereClause = String.format("person_id in(select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_TAX_PAYER.id, whereClause)
+
+        refBookMap.each { personId, refBookValues ->
+            Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
+            def inpList = inpPersonRefBookCache.get(refBookPersonId);
+            if (inpList == null) {
+                inpList = [];
+                inpPersonRefBookCache.put(refBookPersonId, inpList)
+            }
+            inpList.add(refBookValues);
+        }
+    }
+    return inpPersonRefBookCache;
+}
+
 
 def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
 
-    Date versionFrom = getVersionFrom();
+    long time = System.currentTimeMillis();
 
-    List<Long> personIds = collectPersonIds(personList);
+    Date versionFrom = getVersionFrom();
 
     //-----<INITIALIZE_CACHE_DATA>-----
     //PersonId : Физлица
-    Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersons(personIds);
+    Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersonsByDeclarationDataId();
+
+    println "getRefPersons " + (System.currentTimeMillis() - time);
+    time = System.currentTimeMillis();
+
     //Id : Адрес
     Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPerson);
+
+    println "getRefAddressByPersons " + (System.currentTimeMillis() - time);
+    time = System.currentTimeMillis();
+
     //PersonId : UniqId: ИНП
-    Map<Long, List<Map<String, RefBookValue>>> inpMap = getRefInpMap(personIds)
+    Map<Long, List<Map<String, RefBookValue>>> inpMap = getRefInpMapByDeclarationDataId()
+
+    println "getRefInpMap " + (System.currentTimeMillis() - time);
+    time = System.currentTimeMillis();
+
     //PersonId :  UniqId:Документы
-    Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDul(personIds)
+    Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDulByDeclarationDataId()
+
+    println "getRefDul " + (System.currentTimeMillis() - time);
+    time = System.currentTimeMillis();
     //-----<INITIALIZE_CACHE_DATA_END>-----
 
+    int updCnt = 0;
     for (PersonData person : personList) {
         def personId = person.getRefBookPersonId();
 
@@ -218,16 +306,20 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
         def addressId = refBookPersonValues.get("ADDRESS")?.getReferenceValue();
 
         AttrCounter addressAttrCnt = new AttrCounter();
-        if (addressMap.containsKey(addressId)) {
-            Map<String, RefBookValue> addressValues = addressMap.get(addressId);
-            fillAddressAttr(addressValues, person, addressAttrCnt);
-            if (addressAttrCnt.isUpdate()) {
-                getProvider(RefBook.Id.PERSON_ADDRESS.getId()).updateRecordVersionWithoutLock(logger, addressId, versionFrom, null, addressValues);
+
+        if (person.useAddress) {
+            if (addressMap.containsKey(addressId)) {
+                Map<String, RefBookValue> addressValues = addressMap.get(addressId);
+                fillAddressAttr(addressValues, person, addressAttrCnt);
+                if (addressAttrCnt.isUpdate()) {
+                    getProvider(RefBook.Id.PERSON_ADDRESS.getId()).updateRecordVersionWithoutLock(logger, addressId, versionFrom, null, addressValues);
+                }
+            } else {
+                //атрибуты могут быть вообще не заполнены, проверять заполненость атрибутов?
+                RefBookRecord refBookRecord = creatAddressRecord(person, addressAttrCnt);
+                List<Long> addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, Arrays.asList(refBookRecord));
+                addressId = addressIds.first();
             }
-        } else {
-            RefBookRecord refBookRecord = creatAddressRecord(person);
-            List<Long> addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, Arrays.asList(refBookRecord));
-            addressId = addressIds.first();
         }
 
         AttrCounter personAttrCnt = new AttrCounter();
@@ -247,30 +339,86 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
 
         AttrCounter taxpayerIdentityAttrCnt = new AttrCounter();
         //Обновление идентификаторов АСНУ - ИНП
-        updateTaxpayerIdentity(inpMap.get(personId), person, asnuId, taxpayerIdentityAttrCnt);
+
+        List<Map<String, RefBookValue>> taxpayerIdentityRefBook = inpMap.get(personId);
+
+        if (taxpayerIdentityRefBook != null && !taxpayerIdentityRefBook.isEmpty()) {
+            updateTaxpayerIdentity(taxpayerIdentityRefBook, person, asnuId, taxpayerIdentityAttrCnt);
+        }
 
         if (addressAttrCnt.isUpdate() || personAttrCnt.isUpdate() || documentAttrCnt.isUpdate() || taxpayerIdentityAttrCnt.isUpdate()) {
 
-            logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", personId,
+            def recordId = refBookPersonValues.get("RECORD_ID")?.getNumberValue()?.longValue();
+
+            logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
                     person.getLastName(),
                     person.getFirstName(),
-                    person.getMiddleName()) + ". Изменения внесены в справочники: " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
+                    person.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
+            updCnt++;
         }
     }
+
+    logger.info("Обновлено записей: " + updCnt);
+
+    println "updateRefbookPersonData " + (System.currentTimeMillis() - time);
+
 }
 
 def buildRefreshNotice(AttrCounter addressAttrCnt, AttrCounter personAttrCnt, AttrCounter documentAttrCnt, AttrCounter taxpayerIdentityAttrCnt) {
     StringBuffer sb = new StringBuffer();
-    appendAttrInfo("Адреса ФЛ", addressAttrCnt, sb);
-    appendAttrInfo("ФЛ", personAttrCnt, sb);
-    appendAttrInfo("Документы ФЛ", documentAttrCnt, sb);
-    appendAttrInfo("ИНП", taxpayerIdentityAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.PERSON_ADDRESS.getId(), addressAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.PERSON.getId(), personAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.ID_DOC.getId(), documentAttrCnt, sb);
+    appendAttrInfo(RefBook.Id.ID_TAX_PAYER.getId(), taxpayerIdentityAttrCnt, sb);
     return sb.toString();
 }
 
-def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb) {
-    if (attrCounter.isUpdate()) {
-        sb.append(name).append(attrCounter.buildInfo()).append(", ");
+
+@Field HashMap<Long, RefBook> mapRefBookToIdCache = new HashMap<Long, RefBook>();
+def getRefBookFromCache(Long id){
+    RefBook refBook = mapRefBookToIdCache.get(id);
+    if (refBook != null){
+        return refBook;
+    } else {
+        refBook = refBookFactory.get(id);
+        mapRefBookToIdCache.put(id, refBook);
+        return refBook;
+    }
+}
+
+@Field Map<Long, Map<String, String>> refBookAttrCache = new HashMap<Long, Map<String, String>>();
+def getAttrNameFromRefBook(Long id, String alias){
+    Map<String, String> attrMap = refBookAttrCache.get(id);
+    if (attrMap != null){
+        return attrMap.get(alias);
+    } else {
+        attrMap = new HashMap<String, String>();
+        RefBook refBook = getRefBookFromCache(id);
+        List<RefBookAttribute> refBookAttributeList = refBook.getAttributes();
+        for (RefBookAttribute attr: refBookAttributeList){
+            attrMap.put(attr.getAlias(), attr.getName());
+        }
+        refBookAttrCache.put(id, attrMap);
+        return attrMap.get(alias);
+    }
+}
+
+def appendAttrInfo(Long refBookId, AttrCounter attrCounter, StringBuffer sb) {
+
+    if (attrCounter != null && attrCounter.isUpdate()) {
+
+        List<String> msgList = new ArrayList<String>();
+
+        for (Map.Entry<String, String> msgEntry: attrCounter.getMessages()){
+            String aliasKey = msgEntry.getKey();
+            String msg = msgEntry.getValue();
+            msgList.add(new StringBuffer(getAttrNameFromRefBook(refBookId, aliasKey)).append(": ").append(msg).toString())
+        }
+
+        if (!msgList.isEmpty()){
+            sb.append(Arrays.toString(msgList.toArray()));
+        }
+
     }
 }
 
@@ -281,14 +429,25 @@ def appendAttrInfo(String name, AttrCounter attrCounter, StringBuffer sb) {
  */
 def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
 
+    long time = System.currentTimeMillis();
+
     List<RefBookRecord> addressRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
         PersonData person = personList.get(i)
-        RefBookRecord refBookRecord = creatAddressRecord(person);
+        RefBookRecord refBookRecord = creatAddressRecord(person, new EmptyChangedListener());
         addressRecords.add(refBookRecord);
     }
 
-    List<Long> addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, addressRecords)
+    println "create address " + (System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
+    List<Long> addressIds = Collections.emptyList();
+    if (!addressRecords.isEmpty()) {
+        addressIds = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, addressRecords)
+    }
+
+    println "insert address " + (System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
@@ -299,8 +458,14 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
         personRecords.add(refBookRecord);
     }
 
+    println "create person " + (System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
     //сгенерированные идентификаторы справочника физлиц
     List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, personRecords)
+
+    println "insert person " + (System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //создание записей справочников документы и идентфикаторы физлиц
     List<RefBookRecord> documentsRecords = new ArrayList<RefBookRecord>()
@@ -310,11 +475,25 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
         Long generatedId = personIds.get(i);
         person.setRefBookPersonId(generatedId); // выставляем присвоенный Id
         documentsRecords.add(createIdentityDocRecord(person, new EmptyChangedListener()));
-        taxpayerIdsRecords.add(createIdentityTaxpayerRecord(person, asnuId, new EmptyChangedListener()));
+
+        if (asnuId != null) {
+            taxpayerIdsRecords.add(createIdentityTaxpayerRecord(person, asnuId, new EmptyChangedListener()));
+        }
+
     }
 
     List<Long> docIds = getProvider(RefBook.Id.ID_DOC.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, documentsRecords)
-    List<Long> taxIds = getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, taxpayerIdsRecords)
+
+    println "insert doc " + (System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
+
+    List<Long> taxIds = Collections.emptyList();
+    if (!taxpayerIdsRecords.isEmpty()) {
+        taxIds = getProvider(RefBook.Id.ID_TAX_PAYER.getId()).createRecordVersionWithoutLock(logger, versionFrom, null, taxpayerIdsRecords)
+    }
+
+    println "insert taxids " + (System.currentTimeMillis() - time)
+    time = System.currentTimeMillis();
 
     //RefBook refBook = refBookFactory.get(RefBook.Id.PERSON.getId())
     //List<RefBookAttribute> attributes = refBook.getAttributes()
@@ -336,10 +515,17 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
         logger.info(noticeMsg);
     }
 
-    logger.info("В справочнике 'Адреса физических лиц' создано записей: " + addressIds.size());
+    if (!addressIds.isEmpty()) {
+        logger.info("В справочнике 'Адреса физических лиц' создано записей: " + addressIds.size());
+    }
+
     logger.info("В справочнике 'Физические лица' создано записей: " + personIds.size());
     logger.info("В справочнике 'Документы физических лиц' создано записей: " + docIds.size());
-    logger.info("В справочнике 'Идентификаторы налогоплательщика' создано записей: " + taxIds.size());
+
+    if (!taxIds.isEmpty()) {
+        logger.info("В справочнике 'Идентификаторы налогоплательщика' создано записей: " + taxIds.size());
+    }
+
 
 }
 
@@ -348,10 +534,10 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
  * @param person
  * @return
  */
-RefBookRecord creatAddressRecord(PersonData person) {
+RefBookRecord creatAddressRecord(PersonData person, AttributeChangeListener attributeChangeListener) {
     RefBookRecord record = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
-    fillAddressAttr(values, person, new EmptyChangedListener());
+    fillAddressAttr(values, person, attributeChangeListener);
     record.setValues(values);
     return record;
 }
@@ -432,10 +618,10 @@ def fillPersonAttr(Map<String, RefBookValue> values, PersonData person, Long asn
     putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate(), attributeChangeListener);
     putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null, attributeChangeListener);
     putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, addressId, attributeChangeListener);
-    putOrUpdate(values, "PENSION", RefBookAttributeType.NUMBER, 2, attributeChangeListener);
-    putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, 2, attributeChangeListener);
-    putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, 2, attributeChangeListener);
-    putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, 2, attributeChangeListener);
+    putOrUpdate(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension(), attributeChangeListener);
+    putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical(), attributeChangeListener);
+    putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial(), attributeChangeListener);
+    putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee(), attributeChangeListener);
     putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, countryId, attributeChangeListener);
     putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, statusId, attributeChangeListener);
     putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, asnuId, attributeChangeListener);
@@ -604,7 +790,6 @@ def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAtt
 
 /**
  * Если не заполнен входной параметр, то никаких изменений в соответствующий атрибут записи справочника не вносится
- * @return 0 - изменений нет, 1-создание записи, 2 - обновление
  */
 def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value, AttributeChangeListener attributeChangedListener) {
 
@@ -686,11 +871,11 @@ public class AttributeChangeEvent {
 
 class AttrCounter implements AttributeChangeListener {
 
-    StringBuilder sb = new StringBuilder();
-
     private int refreshed = 0;
     private int created = 0;
     private int ignored = 0;
+
+    Map<String, String> msg = new HashMap<String, String>();
 
     @Override
     void processAttr(AttributeChangeEvent event) {
@@ -699,14 +884,14 @@ class AttrCounter implements AttributeChangeListener {
             //if (event.getValue() != null) {sb.append("[").append(event.getAttrName()).append(": ").append(event.getValue()).append("]")}
         } else if (EventType.REFRESHED.equals(event.type)) {
             refreshed++;
-            sb.append("[").append(event.getAttrName()).append(":").append(event.getCurrentValue()).append("->").append(event.getValue()).append("]")
+            msg.put(event.getAttrName(), new StringBuilder().append(event.getCurrentValue()).append("->").append(event.getValue()))
         } else if (EventType.IGNORED.equals(event.type)) {
             ignored++;
         }
     }
 
-    public String buildInfo() {
-        return sb.toString();
+    public Map<String, String> getMessages() {
+        return msg;
     }
 
     public boolean isUpdate() {
@@ -758,7 +943,7 @@ PersonData createPersonData(NdflPerson person, Long asnuId) {
     personData.taxPayerStatusId = findTaxpayerStatusByCode(person.getStatus());
     personData.citizenshipId = findCountryId(person.getCitizenship());
     personData.citizenship = person.getCitizenship();
-    person.status = person.getStatus();
+    personData.status = person.getStatus();
 
     //Идентификаторы
     personData.inp = person.getInp();
@@ -794,6 +979,12 @@ PersonData createPersonData(NdflPerson person, Long asnuId) {
     personData.countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
     personData.countryCode = person.getCountryCode();
     personData.addressIno = person.getAddress();
+    personData.useAddress = true;
+
+    personData.pension = 2;
+    personData.medical = 2;
+    personData.social = 2;
+    personData.employee = 2;
 
     return personData;
 }
@@ -1050,7 +1241,7 @@ def createFileName(NdflPerson ndflPerson) {
 }
 
 
-String firstChar(String str){
+String firstChar(String str) {
     if (str != null && !str.isEmpty()) {
         return String.valueOf(Character.toUpperCase(str.charAt(0)));
     } else {
@@ -1501,38 +1692,6 @@ def prepaymentAttr(personPrepayment) {
     ]
 }
 
-
-//Кэши и методы инициализации/получения используемые только в первичной
-
-//Приоритет документов удостоверяющих личность <Идентификатор, Приоритет(int)>
-@Field def documentPriorityCache = [:]
-def getRefDocumentPriority() {
-    if (documentPriorityCache.size() == 0) {
-        def refBookList = getRefBook(REF_BOOK_DOCUMENT_ID)
-        refBookList.each { refBook ->
-            documentPriorityCache.put(refBook?.id?.numberValue, refBook?.PRIORITY?.numberValue?.intValue())
-        }
-    }
-    return documentPriorityCache;
-}
-
-@Field def inpPersonRefBookCache = [:]
-def getRefInpMap(def personIds) {
-    if (inpPersonRefBookCache.size() == 0) {
-        personIds.each { personId ->
-            def refBookMap = getRefBookByFilter(REF_BOOK_ID_TAX_PAYER_ID, "PERSON_ID = " + personId.toString())
-            def inpList = []
-            refBookMap.each { refBook ->
-                inpList.add(refBook)
-            }
-            inpPersonRefBookCache.put(personId, inpList)
-        }
-    }
-    return inpPersonRefBookCache;
-}
-
-
-
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
 //если проверки различаются то используется параметр {@link #FORM_DATA_KIND}
 //При внесении изменений учитывается что эта чать скрипта используется(копируется) и в первичной и в консолидированной
@@ -1548,7 +1707,8 @@ def getRefInpMap(def personIds) {
 // Кэш провайдеров cправочников
 @Field Map<Long, RefBookDataProvider> providerCache = [:]
 //Физлица
-@Field Map<Long, Map<String, RefBookValue>> personsCache = [:]
+@Field final long REF_BOOK_PERSON_ID = RefBook.Id.PERSON.id
+@Field Map<Long, Map<String, RefBookValue>> personsActualCache = [:]
 
 //Коды Асну
 @Field Map<Long, String> asnuCache = [:]
@@ -1579,8 +1739,6 @@ def getRefInpMap(def personIds) {
 // Мапа <ID_Данные о физическом лице - получателе дохода, Физическое лицо: <ФИО> ИНП:<ИНП>>
 @Field def ndflPersonFLMap = [:]
 @Field final TEMPLATE_PERSON_FL = "Физическое лицо: \"%s\", ИНП: \"%s\""
-
-// Страны Мапа <Идентификатор, Код>
 
 // Виды документов, удостоверяющих личность Мапа <Идентификатор, Код>
 @Field def documentCodesCache = [:]
@@ -1697,58 +1855,39 @@ Date getReportPeriodEndDate() {
 
 /**
  *
+ * @param refBookId
+ * @param whereClause
  * @return
  */
-def getRefPersons() {
-    if (personsCache.size() == 0) {
-        throw new ServiceException("Не проинициализированны данные кэша справочника 'Физических лиц'!")
+def getRefBookByRecordWhere(def long refBookId, def whereClause) {
+    Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataWhere(whereClause)
+    if (refBookMap == null || refBookMap.size() == 0) {
+        //throw new ScriptException("Не найдены записи справочника " + refBookId)
+        return Collections.emptyMap();
     }
-    return personsCache;
+    return refBookMap
 }
 
 /**
- * Получить "Физические лица"
+ * Получить аутальные записи справочника "Физические лица"
  * @param personIds
  * @return
  */
-Map<Long, Map<String, RefBookValue>> getRefPersons(def personIds) {
-    if (personsCache.isEmpty()) {
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordIds(RefBook.Id.PERSON.getId(), personIds)
-        refBookMap.each { personId, person ->
-            personsCache.put(personId, person)
-        }
-    }
-    return personsCache;
-}
-
-// todo добавить обработку дублей
-/*def getRefPersons(def personIds) {
-    if (personsCache.size() == 0) {
+Map<Long, Map<String, RefBookValue>> getActualRefPersons(def personIds) {
+    if (personsActualCache.size() == 0) {
         def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
-//        def dublMap = [:]
-//        def dublList = []
         refBookMap.each { personId, person ->
-            personsCache.put(personId, person)
-
-            // Добавим дубликат в Мапу
-//            if (person.get(RF_DUBLICATES).value != null && !dublMap.get(person.get(RF_DUBLICATES).value)) {
-//                dublMap.put(person.get(RF_DUBLICATES).value, personId)
-//                dublList.add(person.get(RF_DUBLICATES).value)
-//            }
+            // Получим актуальную версию на основании RECORD_ID найденной записи
+            def actualPersonMap = getRefBookByFilter(REF_BOOK_PERSON_ID, "RECORD_ID = " + person.get(RF_RECORD_ID).value)
+            if (actualPersonMap) {
+                actualPersonMap.each { actualPerson ->
+                    personsActualCache.put(personId, actualPerson)
+                }
+            }
         }
-        // Получим оригинальные записи, если имеются дубликаты
-//        if (dublMap.size() > 0) {
-//            def refBookDublMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, dublList)
-//            refBookDublMap.each { originalPersonId, person ->
-//                dublPersonId = dublMap.get(originalPersonId).value
-//            }
-//        }
     }
-    return personsCache;
-}*/
-
-
-
+    return personsActualCache;
+}
 
 /**
  * Получить "Страны"
@@ -1892,7 +2031,7 @@ def getRefNotifSource() {
 }
 
 /**
- * Получить "Статусы налогоплательщика"
+ * Получить "Адреса налогоплательщика"
  * @return
  */
 def getRefAddress(def addressIds) {
@@ -1908,15 +2047,21 @@ def getRefAddress(def addressIds) {
 /**
  * Получить "Документ, удостоверяющий личность (ДУЛ)"
  */
-def getRefDul(def personIds) {
-    if (dulCache.size() == 0) {
-        personIds.each { personId ->
-            def refBookMap = getRefBookByFilter(RefBook.Id.ID_DOC.getId(), "PERSON_ID = " + personId.toString())
-            def dulList = []
-            refBookMap.each { refBook ->
-                dulList.add(refBook)
+def getRefDulByDeclarationDataId() {
+
+    if (dulCache.isEmpty()) {
+        Long declarationDataId = declarationData.id;
+        String whereClause = String.format("person_id in(select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_DOC.getId(), whereClause)
+
+        refBookMap.each { personId, refBookValues ->
+            Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
+            def dulList = dulCache.get(refBookPersonId);
+            if (dulList == null) {
+                dulList = [];
+                dulCache.put(refBookPersonId, dulList)
             }
-            dulCache.put(personId, dulList)
+            dulList.add(refBookValues);
         }
     }
     return dulCache;
@@ -2021,7 +2166,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String T_PERSON_PREPAYMENT = "Сведения о доходах в виде авансовых платежей"
 
 // Справочники
-@Field final String R_FIAS = "ФИАС"
+@Field final String R_FIAS = "КЛАДР" //TODO замена
 @Field final String R_PERSON = "Физические лица"
 @Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
 @Field final String R_ID_DOC_TYPE = "Коды документов"
@@ -2130,6 +2275,7 @@ RefBookDataProvider getProvider(def long providerId) {
  * @return
  */
 def checkData() {
+    long time = System.currentTimeMillis();
     // Реквизиты
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
     logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
@@ -2146,6 +2292,9 @@ def checkData() {
     List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
     logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
 
+    println "Получение записей из таблиц НФДЛ: " + (System.currentTimeMillis() - time);
+    logger.info("Получение записей из таблиц НФДЛ: (" + (System.currentTimeMillis() - time) + " ms)");
+
     // Проверки на соответствие справочникам
     checkDataReference(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
@@ -2161,7 +2310,9 @@ def checkData() {
  * @return
  */
 def checkDataReference(
-        def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
+    def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
+
+    long time = System.currentTimeMillis();
     // Страны
     def citizenshipCodeMap = getRefCountryCode()
     logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
@@ -2194,7 +2345,7 @@ def checkDataReference(
     def taxInspectionList = getRefNotifSource()
     logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
-    // Физические лица
+    // Массив идентификаторов Физических лиц
     def personIds = collectNdflPersonIds(ndflPersonList)
 
     //Map<Long, Map<String, RefBookValue>>
@@ -2211,8 +2362,7 @@ def checkDataReference(
     def addressMap = [:]
 
     if (personIds.size() > 0) {
-        // todo Сделать получение записей оригиналов, если текущая запись - дубликат
-        personMap = getRefPersons(personIds)
+        personMap = getActualRefPersons(personIds)
         logger.info(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
 
         // Получим мапу ИНП
@@ -2220,7 +2370,7 @@ def checkDataReference(
         logger.info(SUCCESS_GET_TABLE, R_INP, inpMap.size())
 
         // Получим мапу ДУЛ
-        dulMap = getRefDul(personIds)
+        dulMap = getRefDulByDeclarationDataId()
         logger.info(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
 
         // Получим Мапу адресов
@@ -2236,8 +2386,13 @@ def checkDataReference(
         }
     }
 
+    println "Проверки на соответствие справочникам / Выгрузка справочников: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочников: (" + (System.currentTimeMillis() - time) + " ms)");
+
     //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
 
+    long timeIsExistsAddress = 0
+    time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "");
@@ -2247,9 +2402,11 @@ def checkDataReference(
 
         // Спр1 ФИАС
         // todo oshelepeav Исправить на фатальную ошибку https://jira.aplana.com/browse/SBRFNDFL-448
+        long tIsExistsAddress = System.currentTimeMillis();
         if (!isExistsAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum, C_ADDRESS, fioAndInp, C_ADDRESS, R_FIAS);
         }
+        timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
 
         // Спр2 Гражданство (Обязательное поле)
         if (!citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
@@ -2294,7 +2451,7 @@ def checkDataReference(
             }
 
 
-            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)){
+            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                 // Спр12 ИНП первичная (Обязательное поле)
                 def inpList = inpMap.get(ndflPerson.personId)
                 if (!ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
@@ -2310,8 +2467,6 @@ def checkDataReference(
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum, C_INP, fioAndInp, C_INP, T_PERSON);
                 }
             }
-
-            // todo Спр12.1 ИНП консолидированная - Реализовать позже
 
             // Спр13 Дата рождения (Обязательное поле)
             if (!ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
@@ -2335,7 +2490,7 @@ def checkDataReference(
             }
 
 
-            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)){
+            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                 // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
                 def allDocList = dulMap.get(ndflPerson.personId)
                 // Вид документа
@@ -2376,7 +2531,6 @@ def checkDataReference(
                 }
             }
 
-
             // Спр18 Статус налогоплательщика (Обязательное поле)
             def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
             if (!ndflPerson.status.equals(taxpayerStatus)) {
@@ -2384,7 +2538,7 @@ def checkDataReference(
             }
 
             // Спр19 Адрес (Необязательное поле)
-            // Сравнение должны быть проведено даже с учетом пропусков
+            // Сравнение должно быть проведено даже с учетом пропусков
             def address = addressMap.get(personRecord.get(RF_ADDRESS).value)
             def regionCode
             def area
@@ -2446,7 +2600,13 @@ def checkDataReference(
             }
         }
     }
+    println "Проверки на соответствие справочникам / NdflPerson: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / NdflPerson: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    println "Проверки на соответствие справочникам / Проверка существования адреса: " + timeIsExistsAddress;
+    logger.info("Проверки на соответствие справочникам / Проверка существования адреса: (" + timeIsExistsAddress + " ms)");
+
+    time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
 
@@ -2471,7 +2631,10 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_RATE, fioAndInp, C_RATE, R_RATE);
         }
     }
+    println "Проверки на соответствие справочникам / NdflPersonIncome: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    time = System.currentTimeMillis();
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
@@ -2487,7 +2650,10 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
         }
     }
+    println "Проверки на соответствие справочникам / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    time = System.currentTimeMillis();
     for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
         def fioAndInp = ndflPersonFLMap.get(ndflPersonPrepayment.ndflPersonId)
         // Спр9 Код налоговой иснпекции (Обязательное поле)
@@ -2496,7 +2662,8 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum, C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
         }
     }
-
+    println "Проверки на соответствие справочникам / NdflPersonPrepayment: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / NdflPersonPrepayment: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -2525,13 +2692,14 @@ def checkDataCommon(
 //    def departmentParam = getDepartmentParam()
 //    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
 
+    long time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
 
-        println "ndflPerson.rowNum="+ndflPerson.rowNum
+        println "ndflPerson.rowNum=" + ndflPerson.rowNum
 
         rowNumPersonList.add(ndflPerson.rowNum)
 
@@ -2554,8 +2722,10 @@ def checkDataCommon(
             logger.warn(MESSAGE_ERROR_VALUE, T_PERSON, ndflPerson.rowNum, C_SNILS, fioAndInp, MESSAGE_ERROR_SNILS);
         }
     }
+    println "Общие проверки / NdflPerson: " + (System.currentTimeMillis() - time);
+    logger.info("Общие проверки / NdflPerson: (" + (System.currentTimeMillis() - time) + " ms)");
 
-
+    time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
@@ -2836,8 +3006,11 @@ def checkDataCommon(
 //            }
 //        }
     }
+    println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
+    logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
-    for (NdflPersonDeduction ndflPersonDeduction: ndflPersonDeductionList){
+    time = System.currentTimeMillis();
+    for (NdflPersonDeduction ndflPersonDeduction: ndflPersonDeductionList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
@@ -2865,8 +3038,10 @@ def checkDataCommon(
             logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_PERIOD_CURR_DATE, fioAndInp, MESSAGE_ERROR_DATE);
         }
     }
+    println "Общие проверки / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
+    logger.info("Общие проверки / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
 
-    for (NdflPersonPrepayment ndflPersonPrepayment: ndflPersonPrepaymentList){
+    for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
         rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
     }
 
@@ -2905,14 +3080,10 @@ def checkDataIncome(ndflPersonList, ndflPersonIncomeList) {
         // СведДох1 Дата начисления дохода
 
 
-
     }
 }
 
-
 //>------------------< CHECK DATA UTILS >----------------------<
-
-
 
 /**
  * Получить параметры для конкретного тербанка
@@ -3045,5 +3216,6 @@ def getErrorMsgAbsent(def inputList, def tableName) {
     }
     return resultMsg
 }
+
 
 
