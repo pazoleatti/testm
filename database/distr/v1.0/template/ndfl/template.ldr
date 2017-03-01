@@ -20,7 +20,7 @@ NAME
 )
 begindata
  100|100|01.01.2016|0|3|2|bf172465-20b7-4ce2-ac43-5482ad310c08|58adc3c2-66a0-4f11-98a2-defe682a092f|primary_rnu_ndfl/v2016/script.groovy|РНУ_НДФЛ (первичная)|
- 101|101|01.01.2016|0|2|2|b8406636-beb1-41d8-8f8a-cf4971309962|null|consolidated_rnu_ndfl/v2016/script.groovy|РНУ_НДФЛ (консолидированная)|
+ 101|101|01.01.2016|0|2|2|b8406636-beb1-41d8-8f8a-cf4971309962||consolidated_rnu_ndfl/v2016/script.groovy|РНУ_НДФЛ (консолидированная)|
  102|102|01.01.2016|0|7|3|f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71|790782e0-2282-41f4-8735-7b50904703ac|report_2ndfl_1/v2016/script.groovy|2-НДФЛ (1)|
  103|103|01.01.2016|0|7|5|41303bf7-9765-463f-a34b-f0a280bfa7bf|13765b29-f1b7-4ec0-a8a9-88196a6e45a1|report_6ndfl/v2016/script.groovy|6-НДФЛ|
  104|104|01.01.2016|0|7|4|d372df40-e448-48f5-9879-994753822122|77d802bf-e3b1-485b-ae52-41a21aac1034|report_2ndfl_1/v2016/script.groovy|2-НДФЛ (2)|

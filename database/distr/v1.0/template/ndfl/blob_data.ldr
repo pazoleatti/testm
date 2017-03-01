@@ -23,5 +23,5 @@ begindata
  77d802bf-e3b1-485b-ae52-41a21aac1034|NO_NDFL2_1_399_00_05_04_02.xsd|report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_04_02.xsd|01.01.2016|
  03f6d78d-bfd7-45bb-a16b-6c89131b76d1|report_person_primary.jrxml|primary_rnu_ndfl/v2016/report_person.jrxml|01.01.2016|
  042c50fc-a590-46b5-bb50-d04cc3a9424a|report_person_consolidated.jrxml|primary_rnu_ndfl/v2016/report_person.jrxml|01.01.2016|
- 047f207c-113e-488d-8390-9afc248a3bc8|report_ndfl_ref_1.jrxml|report_2ndfl_1/v2016/report_ndfl_ref.jrxml|01.01.2016|
- 04d9b114-1782-4d09-ad88-729e5605c6ff|report_ndfl_ref_2.jrxml|report_2ndfl_1/v2016/report_ndfl_ref.jrxml|01.01.2016|
+ 047f207c-113e-488d-8390-9afc248a3bc8|report_ndfl_ref_1.jrxml|report_2ndfl_1/v2016/report_2ndfl.jrxml|01.01.2016|
+ 04d9b114-1782-4d09-ad88-729e5605c6ff|report_ndfl_ref_2.jrxml|report_2ndfl_1/v2016/report_2ndfl.jrxml|01.01.2016|

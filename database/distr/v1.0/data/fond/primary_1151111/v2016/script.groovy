@@ -3393,6 +3393,7 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
+        Long addressId = null;
         PersonData person = personList.get(i)
         RefBookRecord refBookRecord = createPersonRecord(person, asnuId, null, new EmptyChangedListener());
         personRecords.add(refBookRecord);
