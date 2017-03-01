@@ -8,18 +8,22 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.*;
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author lhaziev
@@ -66,6 +70,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
      * Загрузка ТФ конкретной декларации. Только этот метод в сервисе транзакционный.
      */
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, String lock) {
         ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream, logger, lock);
         logger.info(LogData.L35.getText(), importCounter.getSuccessCounter(), importCounter.getFailCounter());
@@ -95,15 +100,36 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         int fail = 0;
         try {
             if (fileName.toLowerCase().endsWith(".zip")) {
-                // Архив — извлекаем все содержимое
-                ZipArchiveInputStream zais = new ZipArchiveInputStream(inputStream, ZIP_ENCODING);
-                ArchiveEntry entry;
+                File dataFile = null;
+                OutputStream dataFileOutputStream = null;
                 try {
-                    while ((entry = zais.getNextEntry()) != null) {
-                        if (loadFile(zais, entry.getName(), userInfo, logger, lock)) {
-                            success++;
-                        } else {
+                    dataFile = File.createTempFile("zipfile", ".original");
+                    dataFileOutputStream = new FileOutputStream(dataFile);
+                    IOUtils.copy(inputStream, dataFileOutputStream);
+                } catch (IOException e) {
+                    log(userInfo, LogData.L33, logger, lock, fileName, e.getMessage());
+                    fail++;
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    IOUtils.closeQuietly(dataFileOutputStream);
+                }
+                ZipFile zf = new ZipFile(dataFile);
+                Enumeration<ZipArchiveEntry> entries = zf.getEntries();
+                try {
+                    while (entries.hasMoreElements()) {
+                        try {
+                            ZipArchiveEntry entry = entries.nextElement();
+                            InputStream is = zf.getInputStream(entry);
+                            logger = new Logger();
+                            if (loadFile(is, entry.getName(), userInfo, logger, lock)) {
+                                success++;
+                            } else {
+                                fail++;
+                            }
+                        } catch (ServiceException se) {
+                            log(userInfo, LogData.L33, logger, lock, fileName, se.getMessage());
                             fail++;
+                            LOG.error(se.getMessage(), se);
                         }
                     }
                 } catch (IOException e) {
@@ -115,8 +141,6 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                     log(userInfo, LogData.L33, logger, lock, fileName, se.getMessage());
                     fail++;
                     LOG.error(se.getMessage(), se);
-                } finally {
-                    IOUtils.closeQuietly(zais);
                 }
             } else {
                 try {
@@ -136,6 +160,10 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                     LOG.error(se.getMessage(), se);
                 }
             }
+        } catch (IOException e) {
+            log(userInfo, LogData.L33, logger, lock, fileName, e.getMessage());
+            fail++;
+            LOG.error(e.getMessage(), e);
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
@@ -152,7 +180,6 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
             } finally {
                 IOUtils.closeQuietly(dataFileOutputStream);
             }
-
             try {
                 InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
                 try {
@@ -168,8 +195,6 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                     IOUtils.closeQuietly(dataFileInputStream);
                 }
             } catch (FileNotFoundException e) {
-                throw new ServiceException(e.getLocalizedMessage(), e);
-            } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             }
         } finally {

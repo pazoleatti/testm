@@ -1019,6 +1019,9 @@ def getSpecialReportTemplate() {
     new XSSFWorkbook(blobData.getInputStream())
 }
 
+
+
+
 /****************************************************************************
  *  Тестовые данные                                                         *
  *                                                                          *
@@ -1064,21 +1067,21 @@ class TestDataHolder {
         VYPL.setVyplOpsVs3(300)
         VYPL.setVyplOpsDogVs3(300)
         VYPL.setNachislSvVs3(400)
-        final VYPL_MT1 = new RaschsvSvVyplMt();
+        final VYPL_MT1 = new RaschsvSvVyplMk();
         VYPL_MT1.setMesyac("Январь")
         VYPL_MT1.setKodKatLic("1")
         VYPL_MT1.setSumVypl(300)
         VYPL_MT1.setVyplOps(100)
         VYPL_MT1.setVyplOpsDog(100)
         VYPL_MT1.setNachislSv(150)
-        final VYPL_MT2 = new RaschsvSvVyplMt();
+        final VYPL_MT2 = new RaschsvSvVyplMk();
         VYPL_MT2.setMesyac("Февраль")
         VYPL_MT2.setKodKatLic("1")
         VYPL_MT2.setSumVypl(300)
         VYPL_MT2.setVyplOps(100)
         VYPL_MT2.setVyplOpsDog(100)
         VYPL_MT2.setNachislSv(100)
-        final VYPL_MT3 = new RaschsvSvVyplMt();
+        final VYPL_MT3 = new RaschsvSvVyplMk();
         VYPL_MT3.setMesyac("Март")
         VYPL_MT3.setKodKatLic("1")
         VYPL_MT3.setSumVypl(400)
@@ -1697,12 +1700,18 @@ boolean isExistsKBK(String code) {
  *      Все проверки  раздела 1.6 Проверки по каждому физическому лицу - получателю доходов
  */
 void checkImportRaschsv(fileNode, fileName) {
+
+    long time = System.currentTimeMillis();
+
     checkRaschsvFileName(fileNode, fileName)
     checkPayment(fileNode, fileName)
     checkPodpisant(fileNode, fileName)
     checkPayer(fileNode, fileName)
     checkTariff_2_2_425(fileNode, fileName)
     checkFL(fileNode, fileName)
+
+    println "checkImportRaschsv " + (System.currentTimeMillis() - time);
+    logger.info("checkImportRaschsv: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -3103,7 +3112,6 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 /**
  * Получить "Физические лица" getRefPersons
- * @param personIds
  * @return
  */
 Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
@@ -3352,7 +3360,7 @@ def fillPersonAttr(Map<String, RefBookValue> values, PersonData person, Long asn
     putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
     putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
     putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, null, attributeChangeListener);
+    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, person.getSex() ?: null, attributeChangeListener);
     putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
     putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
     putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
@@ -3710,9 +3718,9 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
 
     personData.useAddress = false;
 
-    personData.pension = 2;
-    personData.medical = 2;
-    personData.social = 2;
+    personData.pension = person.prizOps ? Integer.parseInt(person.prizOps) : 2;
+    personData.medical = person.prizOms ? Integer.parseInt(person.prizOms) : 2;
+    personData.social = person.prizOss ? Integer.parseInt(person.prizOss) : 2;
     personData.employee = 2;
 
     return personData;
@@ -3820,7 +3828,10 @@ def checkDataDB() {
     checkDataDBPerson()
 
     // Суммовые проверки
+    long time = System.currentTimeMillis();
     checkDataDBSum()
+    println "Суммовые проверки " + (System.currentTimeMillis() - time);
+    logger.info("Суммовые проверки: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -3830,6 +3841,8 @@ def checkDataDB() {
 def checkDataDBPerson() {
 
     def raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
+
+    long time = System.currentTimeMillis();
 
     // Гражданство
     def citizenshipCodeMap = getRefCitizenship();
@@ -3855,8 +3868,13 @@ def checkDataDBPerson() {
     // Коды видов документов
     def documentTypeActualList = getActualRefDocument()
 
+    println "Загрузка справочников для проверок записей в БД / Проверки по плательщику страховых взносов " + (System.currentTimeMillis() - time);
+    logger.info("Загрузка справочников для проверок записей в БД / Проверки по плательщику страховых взносов: (" + (System.currentTimeMillis() - time) + " ms)");
+
     // Идентификаторы ссылок на справочник Физические лица
     def personIdList = []
+
+    time = System.currentTimeMillis();
 
     // Проверки по плательщику страховых взносов
     raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
@@ -3876,61 +3894,61 @@ def checkDataDBPerson() {
                     // 3.1.2 Соответствие фамилии ФЛ и справочника
                     if (raschsvPersSvStrahLic.familia != person.get(RF_LAST_NAME).value) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Фамилия"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.familia}\" не равен фамилии = \"${person.get(RF_LAST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.familia}\" не равен фамилии = \"${person.get(RF_LAST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.3 Соответствие имени ФЛ и справочника
                     if (raschsvPersSvStrahLic.imya != person.get(RF_FIRST_NAME).value) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Имя"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.imya}\" не равен имени = \"${person.get(RF_FIRST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.imya}\" не равен имени = \"${person.get(RF_FIRST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.4 Соответствие отчества ФЛ и справочника
                     if (raschsvPersSvStrahLic.otchestvo != null && raschsvPersSvStrahLic.otchestvo != person.get(RF_MIDDLE_NAME).value) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ФИО.Отчество"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.otchestvo}\" не равен отчеству = \"${person.get(RF_MIDDLE_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.otchestvo}\" не равен отчеству = \"${person.get(RF_MIDDLE_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.5 Соответствие даты рождения ФЛ и справочника
                     if (raschsvPersSvStrahLic.dataRozd != person.get(RF_BIRTH_DATE).value) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ДатаРожд"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.dataRozd}\" не равен дате рождения = \"${person.get(RF_BIRTH_DATE).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.dataRozd}\" не равен дате рождения = \"${person.get(RF_BIRTH_DATE).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.6 Соответствие пола ФЛ и справочника
                     if (raschsvPersSvStrahLic.pol != person.get(RF_SEX)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Пол"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.pol}\" не равен полу = \"${person.get(RF_SEX)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.pol}\" не равен полу = \"${person.get(RF_SEX)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.7 Соответствие признака ОПС ФЛ и справочника
                     if (raschsvPersSvStrahLic.prizOps != person.get(RF_PENSION)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОПС"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOps}\" не равен признаку ОПС = \"${person.get(RF_PENSION)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOps}\" не равен признаку ОПС = \"${person.get(RF_PENSION)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.8 Соответствие признака ОМС ФЛ и справочника
                     if (raschsvPersSvStrahLic.prizOms != person.get(RF_MEDICAL)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОМС"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOms}\" не равен признаку ОМС = \"${person.get(RF_MEDICAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOms}\" не равен признаку ОМС = \"${person.get(RF_MEDICAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.9 Соответствие признака ОСС
                     if (raschsvPersSvStrahLic.prizOss != person.get(RF_SOCIAL)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОСС"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOss}\" не равен признаку ОСС = \"${person.get(RF_SOCIAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOss}\" не равен признаку ОСС = \"${person.get(RF_SOCIAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.10 Соответсвие ИНН ФЛ - получателя дохода
                     if (raschsvPersSvStrahLic.innfl != null && raschsvPersSvStrahLic.innfl != person.get(RF_INN)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.innfl}\" не равен ИНН = \"${person.get(RF_INN)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.innfl}\" не равен ИНН = \"${person.get(RF_INN)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.11 Соответствие СНИЛС ФЛ - получателя дохода
                     if (raschsvPersSvStrahLic.snils != person.get(RF_SNILS)?.value?.toString()) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.snils}\" не равен СНИЛС = \"${person.get(RF_SNILS)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.snils}\" не равен СНИЛС = \"${person.get(RF_SNILS)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
@@ -3946,37 +3964,42 @@ def checkDataDBPerson() {
                     }
                     if (!personDocTypeList.contains(raschsvPersSvStrahLic.kodVidDoc)) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.kodVidDoc}\" не равен документу, удостоверяющему личность = \"${personDocTypeList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.kodVidDoc}\" не равен документу, удостоверяющему личность = \"${personDocTypeList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.13 Актуальность кода вида документа ФЛ - получателя дохода
                     personDocTypeList.each { personDocType ->
                         if (!documentTypeActualList.contains(personDocType)) {
-                            logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указаны неактуальные коды документов для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                            logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указаны неактуальные коды документов для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                         }
                     }
 
                     // 3.1.14 Соответствие серии и номера документа
                     if (!personDocNumberList.contains(raschsvPersSvStrahLic.serNomDoc)) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.serNomDoc}\" не равен серии и номеру ДУЛ = \"${personDocNumberList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.serNomDoc}\" не равен серии и номеру ДУЛ = \"${personDocNumberList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.15 Соответсвие кода гражданства ФЛ - получателя дохода в справочнике
                     if (raschsvPersSvStrahLic.grazd != citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)) {
                         def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд"
-                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.grazd}\" не равен гражданству = \"${citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("$pathValue = \"${raschsvPersSvStrahLic.grazd}\" не равен гражданству = \"${citizenshipCodeMap.get(person.get(RF_CITIZENSHIP)?.value)}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
 
                     // 3.1.16 Актуальность кода гражданства ФЛ
                     citizenship = getRefBookByRecordIds(REF_BOOK_COUNTRY_ID, person.get(RF_CITIZENSHIP)?.value)
                     if (!citizenshipCodeActualList.contains(citizenship?.CODE?.stringValue)) {
-                        logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указан неактуальный код гражданства для ФЛ с идентификатором ФЛ = \"${raschsvPersSvStrahLic.personId}\"")
+                        logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указан неактуальный код гражданства для ФЛ с идентификатором ФЛ = \"${person.get(RF_RECORD_ID).value}\"")
                     }
                 }
             }
         }
     }
+
+    println "Проверки по плательщику страховых взносов " + (System.currentTimeMillis() - time);
+    logger.info("Проверки по плательщику страховых взносов: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
 
     // 3.2.1 Дубли физического лица рамках формы
     def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonIdByDeclarationDataId(declarationData.id)
@@ -3998,6 +4021,11 @@ def checkDataDBPerson() {
             logger.warn(msgError + ids)
         }
     }
+
+    println "Дубли физического лица рамках формы " + (System.currentTimeMillis() - time);
+    logger.info("Дубли физического лица рамках формы: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    time = System.currentTimeMillis();
 
     // 3.2.2 Дубли физического лица в разных формах
     if (!personIdList.isEmpty()) {
@@ -4033,6 +4061,9 @@ def checkDataDBPerson() {
             }
         }
     }
+
+    println "Дубли физического лица в разных формах " + (System.currentTimeMillis() - time);
+    logger.info("Дубли физического лица в разных формах: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -4450,8 +4481,9 @@ def checkDataXml() {
         return
     }
 
-
     def msgErrNotEquals = "Не совпадает значение %s = \"%s\" плательщика страховых взносов %s."
+
+    long time = System.currentTimeMillis();
 
     // Параметры подразделения
     def departmentParam = getDepartmentParam(declarationData.departmentId)
@@ -4484,8 +4516,11 @@ def checkDataXml() {
     // Коды категорий застрахованных лиц
     def listPersonCategory = getActualPersonCategory()
 
-    // ------------Проверки по плательщику страховых взносов RASCHSV_SVNP_PODPISANT
+    println "Загрузка справочников для xml-проверок: " + (System.currentTimeMillis() - time);
+    logger.info("Загрузка справочников для xml-проверок: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    // ------------Проверки по плательщику страховых взносов RASCHSV_SVNP_PODPISANT
+    time = System.currentTimeMillis();
     fileNode.childNodes().each { documentNode ->
         // Документ
         if (documentNode.name == NODE_NAME_DOCUMENT) {
@@ -4738,6 +4773,8 @@ def checkDataXml() {
             }
         }
     }
+    println "Проверки xml: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки xml: (" + (System.currentTimeMillis() - time) + " ms)");
 
     // ------------Сводные данные об обязательствах плательщика
 }

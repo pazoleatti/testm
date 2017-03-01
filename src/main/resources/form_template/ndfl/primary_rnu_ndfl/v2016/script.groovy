@@ -2231,6 +2231,7 @@ RefBookDataProvider getProvider(def long providerId) {
  * @return
  */
 def checkData() {
+    long time = System.currentTimeMillis();
     // Реквизиты
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
     logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
@@ -2247,6 +2248,9 @@ def checkData() {
     List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
     logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
 
+    println "Получение записей из таблиц НФДЛ: " + (System.currentTimeMillis() - time);
+    logger.info("Получение записей из таблиц НФДЛ: (" + (System.currentTimeMillis() - time) + " ms)");
+
     // Проверки на соответствие справочникам
     checkDataReference(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
@@ -2262,7 +2266,9 @@ def checkData() {
  * @return
  */
 def checkDataReference(
-        def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
+    def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
+
+    long time = System.currentTimeMillis();
     // Страны
     def citizenshipCodeMap = getRefCountryCode()
     logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
@@ -2295,7 +2301,7 @@ def checkDataReference(
     def taxInspectionList = getRefNotifSource()
     logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
-    // Физические лица
+    // Массив идентификаторов Физических лиц
     def personIds = collectNdflPersonIds(ndflPersonList)
 
     //Map<Long, Map<String, RefBookValue>>
@@ -2336,8 +2342,13 @@ def checkDataReference(
         }
     }
 
+    println "Проверки на соответствие справочникам / Выгрузка справочников: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочников: (" + (System.currentTimeMillis() - time) + " ms)");
+
     //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
 
+    long timeIsExistsAddress = 0
+    time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "");
@@ -2347,9 +2358,11 @@ def checkDataReference(
 
         // Спр1 ФИАС
         // todo oshelepeav Исправить на фатальную ошибку https://jira.aplana.com/browse/SBRFNDFL-448
+        long tIsExistsAddress = System.currentTimeMillis();
         if (!isExistsAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum, C_ADDRESS, fioAndInp, C_ADDRESS, R_FIAS);
         }
+        timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
 
         // Спр2 Гражданство (Обязательное поле)
         if (!citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
@@ -2410,8 +2423,6 @@ def checkDataReference(
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum, C_INP, fioAndInp, C_INP, T_PERSON);
                 }
             }
-
-            // todo Спр12.1 ИНП консолидированная - Реализовать позже
 
             // Спр13 Дата рождения (Обязательное поле)
             if (!ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
@@ -2483,7 +2494,7 @@ def checkDataReference(
             }
 
             // Спр19 Адрес (Необязательное поле)
-            // Сравнение должны быть проведено даже с учетом пропусков
+            // Сравнение должно быть проведено даже с учетом пропусков
             def address = addressMap.get(personRecord.get(RF_ADDRESS).value)
             def regionCode
             def area
@@ -2545,7 +2556,13 @@ def checkDataReference(
             }
         }
     }
+    println "Проверки на соответствие справочникам / NdflPerson: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / NdflPerson: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    println "Проверки на соответствие справочникам / Проверка существования адреса: " + timeIsExistsAddress;
+    logger.info("Проверки на соответствие справочникам / Проверка существования адреса: (" + timeIsExistsAddress + " ms)");
+
+    time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
 
@@ -2570,7 +2587,10 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_RATE, fioAndInp, C_RATE, R_RATE);
         }
     }
+    println "Проверки на соответствие справочникам / NdflPersonIncome: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    time = System.currentTimeMillis();
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
@@ -2586,7 +2606,10 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
         }
     }
+    println "Проверки на соответствие справочникам / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    time = System.currentTimeMillis();
     for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
         def fioAndInp = ndflPersonFLMap.get(ndflPersonPrepayment.ndflPersonId)
         // Спр9 Код налоговой иснпекции (Обязательное поле)
@@ -2595,7 +2618,8 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum, C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
         }
     }
-
+    println "Проверки на соответствие справочникам / NdflPersonPrepayment: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / NdflPersonPrepayment: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -2624,6 +2648,7 @@ def checkDataCommon(
 //    def departmentParam = getDepartmentParam()
 //    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
 
+    long time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
@@ -2653,8 +2678,10 @@ def checkDataCommon(
             logger.warn(MESSAGE_ERROR_VALUE, T_PERSON, ndflPerson.rowNum, C_SNILS, fioAndInp, MESSAGE_ERROR_SNILS);
         }
     }
+    println "Общие проверки / NdflPerson: " + (System.currentTimeMillis() - time);
+    logger.info("Общие проверки / NdflPerson: (" + (System.currentTimeMillis() - time) + " ms)");
 
-
+    time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
@@ -2935,8 +2962,11 @@ def checkDataCommon(
 //            }
 //        }
     }
+    println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
+    logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
-    for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
+    time = System.currentTimeMillis();
+    for (NdflPersonDeduction ndflPersonDeduction: ndflPersonDeductionList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
@@ -2964,6 +2994,8 @@ def checkDataCommon(
             logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum, C_PERIOD_CURR_DATE, fioAndInp, MESSAGE_ERROR_DATE);
         }
     }
+    println "Общие проверки / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
+    logger.info("Общие проверки / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
 
     for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
         rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)

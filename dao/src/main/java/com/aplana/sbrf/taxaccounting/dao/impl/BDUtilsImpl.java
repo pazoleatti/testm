@@ -1,8 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,12 +30,22 @@ class BDUtilsImpl extends AbstractDao implements BDUtils {
     @Override
     public List<Long> getNextIds(Sequence sequence, Long count) {
         if (isSupportOver())
-            return getJdbcTemplate().queryForList("SELECT "+sequence.getName()+".NEXTVAL FROM DUAL CONNECT BY LEVEL<= ?", new Object[]{count}, java.lang.Long.class);
+            return getJdbcTemplate().queryForList("SELECT " + sequence.getName() + ".NEXTVAL FROM DUAL CONNECT BY LEVEL<= ?", new Object[]{count}, java.lang.Long.class);
         else {
             ArrayList<Long> listIds = new ArrayList<Long>(count.intValue());
-            for (Integer i = 0; i < count;i++)
-                listIds.add(getJdbcTemplate().queryForObject("SELECT "+sequence.getName()+".NEXTVAL FROM DUAL", Long.class));
+            for (Integer i = 0; i < count; i++)
+                listIds.add(getJdbcTemplate().queryForObject("SELECT " + sequence.getName() + ".NEXTVAL FROM DUAL", Long.class));
             return listIds;
         }
+    }
+
+    @Override
+    public Connection getConnection() {
+        return DataSourceUtils.getConnection(getJdbcTemplate().getDataSource());
+    }
+
+    @Override
+    public void checkConnection() {
+        getJdbcTemplate().queryForObject("SELECT 1 FROM DUAL", Integer.class);
     }
 }
