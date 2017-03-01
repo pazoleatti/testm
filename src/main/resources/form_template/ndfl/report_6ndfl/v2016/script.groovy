@@ -1224,8 +1224,19 @@ class PairKppOktmo {
         return result
     }
 }
+/************************************* СПЕЦОТЧЕТ **********************************************************************/
+
+@Field final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
+
+@Field final String TRANSPORT_FILE_TEMPLATE = "ТФ"
 
 def createSpecificReport() {
+    def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
+    if (alias == ALIAS_PRIMARY_RNU_W_ERRORS) {
+        createPrimaryRnuWithErrors()
+        return
+    }
+
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
 
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
@@ -1234,4 +1245,271 @@ def createSpecificReport() {
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+/**
+ * Создать Спецотчет Первичные РНУ с ошибками
+ * @return
+ */
+def createPrimaryRnuWithErrors() {
+    // Сведения о доходах из КНФ, которая является источником для входящей ОНФ и записи в реестре справок соответствующим доходам физлицам имеют ошибки
+    List<NdflPersonIncome> ndflPersonIncomeFromRNUConsolidatedList = ndflPersonService.findNdflPersonIncomeConsolidatedRNU6Ndfl(declarationData.id, declarationData.kpp, declarationData.oktmo)
+    // Сведения о вычетах имеющие такой же operationId как и сведения о доходах
+    List<NdflPersonDeduction> ndflPersonDeductionFromRNUConsolidatedList = []
+    // Сведения об авансах имеющие такой же operationId как и сведения о доходах
+    List<NdflPersonPrepayment> ndflPersonPrepaymentFromRNUConsolidatedList = []
+
+    ndflPersonIncomeFromRNUConsolidatedList.each {
+        ndflPersonDeductionFromRNUConsolidatedList.addAll(ndflPersonService.findDeductionsByNdflPersonAndOperation(it.ndflPersonId, it.operationId))
+        ndflPersonPrepaymentFromRNUConsolidatedList.addAll(ndflPersonService.findPrepaymentsByNdflPersonAndOperation(it.ndflPersonId, it.operationId))
+    }
+
+    ndflPersonIncomeFromRNUConsolidatedList.each {
+        NdflPersonIncome ndflPersonIncomePrimary = ndflPersonService.getIncome(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonIncomePrimary.ndflPersonId)
+        ndflPersonPrimary.incomes.add(ndflPersonIncomePrimary)
+    }
+
+    ndflPersonDeductionFromRNUConsolidatedList.each {
+        NdflPersonDeduction ndflPersonDeductionPrimary = ndflPersonService.getDeduction(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonDeductionPrimary.ndflPersonId)
+        ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)
+    }
+
+    ndflPersonDeductionFromRNUConsolidatedList.each {
+        NdflPersonPrepayment ndflPersonPrepaymentPrimary = ndflPersonService.getPrepayment(it.sourceId)
+        NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)
+        ndflPersonPrimary.prepayments.add(ndflPersonPrepaymentPrimary)
+    }
+    fillPrimaryRnuWithErrors()
+}
+
+/**
+ * Заполнение печатного представления спецотчета "Первичные РНУ с ошибками"
+ * @return
+ */
+def fillPrimaryRnuWithErrors() {
+    def writer = scriptSpecificReportHolder.getFileOutputStream()
+    def workbook = getSpecialReportTemplate()
+    fillGeneralData(workbook)
+    fillPrimaryRnuNDFLWithErrorsTable(workbook)
+    workbook.write(writer)
+    writer.close()
+    scriptSpecificReportHolder
+            .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+/**
+ * Заполнение шапки Спецотчета Первичные РНУ с ошибками
+ */
+def fillGeneralData(workbook) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    XSSFCellStyle style = makeStyleLeftAligned(workbook)
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    // Вид отчетности
+    String declarationTypeName = declarationTemplate.type.name
+    String note = declarationData.note
+    // Период
+    int year = departmentReportPeriod.reportPeriod.taxPeriod.year
+    String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).NAME.value
+    // Территориальный банк
+    String departmentName = department.name
+    // КПП
+    String kpp = declarationData.kpp
+    //	Дата сдачи корректировки
+    String dateDelivery = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).END_DATE.value?.format(DATE_FORMAT_DOTTED)
+    // ОКТМО
+    String oktmo = declarationData.oktmo
+    // Код НО (конечный)
+    String taxOrganCode = declarationData.taxOrganCode
+    // Дата формирования
+    String currentDate = new Date().format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
+
+    XSSFCell cell1 = sheet.getRow(2).createCell(1)
+    cell1.setCellValue(declarationTypeName + " " + note)
+    cell1.setCellStyle(style)
+    XSSFCell cell2 = sheet.getRow(3).createCell(1)
+    cell2.setCellValue(year + ":" + periodName)
+    cell2.setCellStyle(style)
+    XSSFCell cell3 = sheet.getRow(4).createCell(1)
+    cell3.setCellValue(dateDelivery)
+    cell3.setCellStyle(style)
+    XSSFCell cell4 = sheet.getRow(5).createCell(1)
+    cell4.setCellValue(departmentName)
+    cell4.setCellStyle(style)
+    XSSFCell cell5 = sheet.getRow(6).createCell(1)
+    cell5.setCellValue(kpp)
+    cell5.setCellStyle(style)
+    XSSFCell cell6 = sheet.getRow(7).createCell(1)
+    cell6.setCellValue(oktmo)
+    cell6.setCellStyle(style)
+    XSSFCell cell7 = sheet.getRow(8).createCell(1)
+    cell7.setCellValue(taxOrganCode)
+    cell7.setCellStyle(style)
+    XSSFCell cell8 = sheet.getRow(2).createCell(11)
+    cell8.setCellValue(currentDate)
+    cell8.setCellStyle(style)
+}
+
+def initNdflPersonPrimary(ndflPersonId) {
+    NdflPerson ndflPersonPrimary = ndflpersonFromRNUPrimary[ndflPersonId]
+    if (ndflPersonPrimary == null) {
+        ndflPersonPrimary = ndflPersonService.get(ndflPersonId)
+        ndflPersonPrimary.incomes.clear()
+        ndflPersonPrimary.deductions.clear()
+        ndflPersonPrimary.prepayments.clear()
+        ndflpersonFromRNUPrimary[ndflPersonId] = ndflPersonPrimary
+    }
+    return ndflPersonPrimary
+}
+
+/**
+ * Заполнить таблицу Спецотчета Первичные РНУ с ошибками
+ * @param workbook
+ * @return
+ */
+def fillPrimaryRnuNDFLWithErrorsTable(final XSSFWorkbook workbook) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    def startIndex = 12
+    ndflpersonFromRNUPrimary.values().each { ndflPerson ->
+        ndflPerson.incomes.each { income ->
+            fillPrimaryRnuNDFLWithErrorsRow(workbook, ndflPerson, income, "Свед о дох", startIndex)
+            startIndex++
+        }
+    }
+}
+
+/**
+ * Заполнение строки для таблицы Спецотчета Первичные РНУ с ошибками
+ * @param workbook
+ * @param ndflPerson
+ * @param operation операция отражающая доход, вычет или аванс
+ * @param sectionName Название раздела, в котором содержится операция
+ * @param index текущий индекс строки таблицы
+ * @return
+ */
+def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, ndflPerson, operation, sectionName, index) {
+    XSSFSheet sheet = workbook.getSheetAt(0)
+    XSSFRow row = sheet.createRow(index)
+    def styleLeftAligned = makeStyleLeftAligned(workbook)
+    styleLeftAligned = thinBorderStyle(styleLeftAligned)
+    def styleCenterAligned = makeStyleCenterAligned(workbook)
+    styleCenterAligned = thinBorderStyle(styleCenterAligned)
+    styleCenterAligned.setDataFormat(ScriptUtils.createXlsDateFormat(workbook))
+    // Первичная НФ
+    DeclarationData primaryRnuDeclarationData = declarationService.getDeclarationData(ndflPerson.declarationDataId)
+    DeclarationDataFile primaryRnuDeclarationDataFile = declarationService.findFilesWithSpecificType(ndflPerson.declarationDataId, TRANSPORT_FILE_TEMPLATE).get(0)
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(primaryRnuDeclarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    // Период
+    int year = departmentReportPeriod.reportPeriod.taxPeriod.year
+    String periodName = getProvider(REPORT_PERIOD_TYPE_ID)
+            .getRecords(getReportPeriodEndDate(primaryRnuDeclarationData.reportPeriodId), null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).NAME.value
+    // Подразделение
+    String departmentName = department.shortName
+    // АСНУ
+    String asnu = getProvider(REF_BOOK_ASNU_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
+    // Имя ТФ
+    String transportFileName = primaryRnuDeclarationDataFile.fileName
+    // Загрузил ТФ
+    String userName = primaryRnuDeclarationDataFile.userName
+    // Дата загрузки ТФ
+    Date uploadDate = primaryRnuDeclarationDataFile.date
+    // Строка с ошибкой.Строка
+    String rowNum = operation.rowNum.toString()
+    // Строка с ошибкой.ID операции
+    String operationId = operation.operationId.toString()
+    // 	Физическое лицо, к которому относится ошибочная строка. Документ
+    String idDocNumber = ndflPerson.idDocNumber
+    // Физическое лицо, к которому относится ошибочная строка. ФИО
+    String lastname = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
+    String firstname = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
+    String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
+    String fio = lastname + firstname + middlename
+    // Физическое лицо, к которому относится ошибочная строка. Дата рождения
+    Date birthDay = ndflPerson.birthDay
+
+    XSSFCell cell1 = row.createCell(0)
+    cell1.setCellValue(periodName + ":" + year)
+    cell1.setCellStyle(styleCenterAligned)
+    XSSFCell cell2 = row.createCell(1)
+    cell2.setCellValue(departmentName)
+    cell2.setCellStyle(styleLeftAligned)
+    XSSFCell cell3 = row.createCell(2)
+    cell3.setCellValue(asnu)
+    cell3.setCellStyle(styleCenterAligned)
+    XSSFCell cell4 = row.createCell(3)
+    cell4.setCellValue(transportFileName)
+    cell4.setCellStyle(styleLeftAligned)
+    XSSFCell cell5 = row.createCell(4)
+    cell5.setCellValue(userName)
+    cell5.setCellStyle(styleCenterAligned)
+    XSSFCell cell6 = row.createCell(5)
+    cell6.setCellValue(uploadDate)
+    cell6.setCellStyle(styleCenterAligned)
+    XSSFCell cell7 = row.createCell(6)
+    cell7.setCellValue(sectionName)
+    cell7.setCellStyle(styleCenterAligned)
+    XSSFCell cell8 = row.createCell(7)
+    cell8.setCellValue(rowNum)
+    cell8.setCellStyle(styleCenterAligned)
+    XSSFCell cell9 = row.createCell(8)
+    cell9.setCellValue(operationId)
+    cell9.setCellStyle(styleCenterAligned)
+    XSSFCell cell10 = row.createCell(9)
+    cell10.setCellValue(idDocNumber)
+    cell10.setCellStyle(styleCenterAligned)
+    XSSFCell cell11 = row.createCell(10)
+    cell11.setCellValue(fio)
+    cell11.setCellStyle(styleCenterAligned)
+    XSSFCell cell12 = row.createCell(11)
+    cell12.setCellValue(birthDay)
+    cell12.setCellStyle(styleCenterAligned)
+}
+
+// Находит в базе данных шаблон спецотчета по физическому лицу и возвращает его
+def getSpecialReportTemplate() {
+    def blobData = blobDataServiceDaoImpl.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
+    new XSSFWorkbook(blobData.getInputStream())
+}
+
+/**
+ * Создать стиль ячейки с выравниваем слева
+ * @param workbook
+ * @return
+ */
+
+def makeStyleLeftAligned(XSSFWorkbook workbook) {
+    def XSSFCellStyle style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_LEFT)
+    return style
+}
+
+/**
+ * Создать стиль ячейки с выравниваем по центру
+ * @param workbook
+ * @return
+ */
+
+def makeStyleCenterAligned(XSSFWorkbook workbook) {
+    def XSSFCellStyle style = workbook.createCellStyle()
+    style.setAlignment(CellStyle.ALIGN_CENTER)
+    return style
+}
+
+/**
+ * Добавляет к стилю ячейки тонкие границы
+ * @param style
+ * @return
+ */
+def thinBorderStyle(final style) {
+    style.setBorderTop(CellStyle.BORDER_THIN)
+    style.setBorderBottom(CellStyle.BORDER_THIN)
+    style.setBorderLeft(CellStyle.BORDER_THIN)
+    style.setBorderRight(CellStyle.BORDER_THIN)
+    return style
 }

@@ -186,13 +186,22 @@ public interface NdflPersonDao {
     List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo);
 
     /**
-     * Найти доходы из КНФ которая является источником для ОНФ
+     * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ
      * @param declarationDataId идентификатор ОНФ для которой необходимо найти строки из КНФ
      * @param kpp КПП ОНФ
      * @param oktmo ОКТМО ОНФ
      * @return
      */
-    List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU(long declarationDataId, String kpp, String oktmo);
+    List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU2Ndfl(long declarationDataId, String kpp, String oktmo);
+
+    /**
+     * Найти доходы из КНФ которая является источником для ОНФ 6-НДФЛ
+     * @param declarationDataId идентификатор ОНФ для которой необходимо найти строки из КНФ
+     * @param kpp КПП ОНФ
+     * @param oktmo ОКТМО ОНФ
+     * @return
+     */
+    List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU6Ndfl(long declarationDataId, String kpp, String oktmo);
 
     /**
      * Найти вычеты для определенной операции
