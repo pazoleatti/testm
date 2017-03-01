@@ -687,7 +687,7 @@ def createSpecificReport() {
 @Field Map<Long, Map<String, RefBookValue>> documentTypeCache = [:]
 @Field Map<Long, String> documentTypeCodeCache = [:]
 
-//Коды статуса налогоплатильщика
+//Коды статуса налогоплательщика
 @Field Map<Long, String> taxpayerStatusCodeCache = [:]
 
 //Адреса физлиц

@@ -565,7 +565,7 @@ RefBookRecord createIdentityTaxpayerRecord(PersonData person, Long asnuId, Attri
 }
 
 /**
- * Обновление записи в справочнике "Идентификаторы налогоплатильщика"
+ * Обновление записи в справочнике "Идентификаторы налогоплательщика"
  * @param taxpayerIdentityRefBook список записей справочника для текущего ФЛ
  * @param person ФЛ
  * @param asnuId id записи справочника АСНУ
@@ -799,7 +799,7 @@ PersonData createPersonData(NdflPerson person, Long asnuId) {
 }
 
 /**
- * По коду статуса налогоплатильщика найти id записи в кэше справочника
+ * По коду статуса налогоплательщика найти id записи в кэше справочника
  * @param String code
  * @return Long id
  */
@@ -810,7 +810,7 @@ def findTaxpayerStatusByCode(code) {
     }?.key
 
     if (code != null && !code.isEmpty() && result == null) {
-        logger.warn("В справочнике 'Статусы налогоплатильщика' не найдена запись, статус с кодом " + code);
+        logger.warn("В справочнике 'Статусы налогоплательщика' не найдена запись, статус с кодом " + code);
     }
     return result;
 
@@ -1560,7 +1560,7 @@ def getRefInpMap(def personIds) {
 @Field Map<Long, Map<String, RefBookValue>> documentTypeCache = [:]
 @Field Map<Long, String> documentTypeCodeCache = [:]
 
-//Коды статуса налогоплатильщика
+//Коды статуса налогоплательщика
 @Field Map<Long, String> taxpayerStatusCodeCache = [:]
 
 //Адреса физлиц

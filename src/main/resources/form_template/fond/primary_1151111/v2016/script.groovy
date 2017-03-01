@@ -3004,7 +3004,7 @@ def calculateData() {
 
     List<RaschsvPersSvStrahLic> declarationFormPersonList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
 
-    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size() +" "+ calcTimeMillis(time));
+    logger.info("В ПНФ номер "+ declarationData.id + " найдено записей о физ.лицах: " + declarationFormPersonList.size() +" "+ calcTimeMillis(time));
 
     time = System.currentTimeMillis();
 
@@ -3039,10 +3039,8 @@ def calculateData() {
         resultMap.put(declarationFormPerson.getId(), declarationFormPerson);
     }
 
-    logger.info("find: (" + (System.currentTimeMillis() - time) + " ms)");
+    logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPersonList.size() + ", подготовленно записей для обновления: " + updatedPersonList.size()+" "+ calcTimeMillis(time));
     time = System.currentTimeMillis();
-
-    logger.info("Идентификация завершена. Подготовленно записей для создания: " + createdPersonList.size() + ", подготовленно записей для обновления: " + updatedPersonList.size());
 
     //Создание справочников
     if (!createdPersonList.isEmpty()) {
@@ -3174,12 +3172,11 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
 
     //-----<INITIALIZE_CACHE_DATA_END>-----
 
+    int updCnt = 0;
     for (PersonData person : personList) {
         def personId = person.getRefBookPersonId();
 
         Map<String, RefBookValue> refBookPersonValues = refBookPerson.get(personId);
-
-        println "refBookPersonValues="+refBookPersonValues
 
         AttrCounter personAttrCnt = new AttrCounter();
 
@@ -3201,9 +3198,11 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
                     person.getLastName(),
                     person.getFirstName(),
                     person.getMiddleName()) + ". Изменения внесены в справочники: " + buildRefreshNotice(null, personAttrCnt, documentAttrCnt, null));
+            updCnt++;
         }
     }
 
+    logger.info("Обновлено записей: " + updCnt);
 
 }
 
@@ -3233,9 +3232,8 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
     //создание записей справочника физлиц
     List<RefBookRecord> personRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
-        Long addressId = addressIds.get(i);
         PersonData person = personList.get(i)
-        RefBookRecord refBookRecord = createPersonRecord(person, asnuId, addressId, new EmptyChangedListener());
+        RefBookRecord refBookRecord = createPersonRecord(person, asnuId, null, new EmptyChangedListener());
         personRecords.add(refBookRecord);
     }
 
@@ -3501,7 +3499,7 @@ RefBookRecord createIdentityTaxpayerRecord(PersonData person, Long asnuId, Attri
 }
 
 /**
- * Обновление записи в справочнике "Идентификаторы налогоплатильщика"
+ * Обновление записи в справочнике "Идентификаторы налогоплательщика"
  * @param taxpayerIdentityRefBook список записей справочника для текущего ФЛ
  * @param person ФЛ
  * @param asnuId id записи справочника АСНУ
