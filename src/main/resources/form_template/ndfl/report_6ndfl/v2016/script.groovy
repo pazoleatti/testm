@@ -17,7 +17,7 @@ switch (formDataEvent) {
         println "!CALCULATE!"
         buildXml(xml)
         // Формирование pdf-отчета формы
-        declarationService.createPdfReport(logger, declarationData, userInfo)
+//        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
