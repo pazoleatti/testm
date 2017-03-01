@@ -228,6 +228,9 @@ switch (formDataEvent) {
 
 @Field final String PERSONAL_DATA_TOTAL_ROW_LABEL = "Всего за последние три месяца расчетного (отчетного) периода"
 
+// TODO Серия/номер ДУЛ, ИНН, СНИЛС должны быть текстовыми ячейками. Иначе пропадают ведущие нули.
+// TODO варнинг ДА-НЕТ при открытие файла
+// TODO долго на 20к
 def createSpecificReport() {
     def workbook = getSpecialReportTemplate()
 
@@ -240,17 +243,30 @@ def createSpecificReport() {
         fillGeneralList(workbook)
         fillPersSvSheet(workbook)
     } else if (alias.equalsIgnoreCase(CONSOLIDATED_REPORT)) {
-        def raschsvObyazPlatSv = raschsvObyazPlatSvService.findObyazPlatSv(declarationData.id)
+        logger.info("Начало формирование")
 
+        logger.info("Извелечение данных из БД")
+        def raschsvObyazPlatSv = raschsvObyazPlatSvService.findObyazPlatSv(declarationData.id)
+        logger.info("Данные из БД получены")
+
+        logger.info("Заполнение листа \"Общие\"")
         fillGeneralList(workbook)
+
+        logger.info("Заполнение листа \"3.Персониф. Сведения\"")
         fillPersSvConsSheet(workbook)
+
+        logger.info("Заполнение листа \"Суммы страховых взносов\"")
         fillSumStrahVzn(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П1.Расчет ОПС ОМС\"")
         fillOpsOms(raschsvObyazPlatSv, workbook)
+
+        logger.info("Отчет сформирован")
     }
 
     workbook.write(writer)
     writer.close()
-    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + "_" + new Date().format("yyyyMMdd_HHmmss") + ".xlsx")
 }
 
 // Персонифицированные данные о ФЛ
@@ -935,21 +951,31 @@ def fillOpsOms(raschsvObyazPlatSv, XSSFWorkbook workbook) {
         def raschsvSvOpsOmsRaschKolNach = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_LIC_NACH_SV_VS == it.nodeName}?.raschsvKolLicTip
         def raschsvSvOpsOmsRaschKolBas = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_PREV_BAZ_OPS == it.nodeName}?.raschsvKolLicTip
 
-//        def raschsvSvOpsOmsRaschSumOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
-//        def raschsvSvOpsOmsRaschSumOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
-//        def raschsvSvOpsOmsRaschSumOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
-//        def raschsvSvOpsOmsRaschSumOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
-//        def raschsvSvOpsOmsRaschSumOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
-//        def raschsvSvOpsOmsRaschSumOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_NE_PREV == it.nodeName}?.raschsvSvSum1Tip
-//        def raschsvSvOpsOmsRaschSumOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_PREV == it.nodeName}?.raschsvSvSum1Tip
-
         fillOpsOmsKolRow(sheet, 14, raschsvSvOpsOmsRaschKolOverall)
         fillOpsOmsKolRow(sheet, 15, raschsvSvOpsOmsRaschKolNach)
         fillOpsOmsKolRow(sheet, 16, raschsvSvOpsOmsRaschKolBas)
+
+        def raschsvSvOpsOmsRaschSumNachislFl= raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumOblozen = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumBazNachisl = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumBazPrevysh = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumNachisl = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumNachislNePrev = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_NE_PREV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsOmsRaschSumNachislPrev = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_PREV == it.nodeName}?.raschsvSvSum1Tip
+
+        fillOpsOmsSumRow(sheet, 21, raschsvSvOpsOmsRaschSumNachislFl)
+        fillOpsOmsSumRow(sheet, 22, raschsvSvOpsOmsRaschSumOblozen)
+        fillOpsOmsSumRow(sheet, 23, raschsvSvOpsOmsRaschSumBazNachisl)
+        fillOpsOmsSumRow(sheet, 24, raschsvSvOpsOmsRaschSumBazPrevysh)
+        fillOpsOmsSumRow(sheet, 25, raschsvSvOpsOmsRaschSumNachisl)
+        fillOpsOmsSumRow(sheet, 26, raschsvSvOpsOmsRaschSumNachislNePrev)
+        fillOpsOmsSumRow(sheet, 27, raschsvSvOpsOmsRaschSumNachislPrev)
     }
 }
 
-
+/**
+ * Заполняет значениями строки для количеств
+ */
 def fillOpsOmsKolRow(sheet, pointer, kolLicTip) {
     def style = normalWithBorderStyle(sheet.getWorkbook())
     addFillingToStyle(style, ROWS_FILL_COLOR)
@@ -974,6 +1000,35 @@ def fillOpsOmsKolRow(sheet, pointer, kolLicTip) {
     cell5.setCellStyle(style)
     cell5.setCellValue(kolLicTip?.kol3mPosl3m ?: "")
 }
+
+/**
+ * Заполняет значениями строки для сумм
+ */
+def fillOpsOmsSumRow(sheet, pointer, sumLicTip) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = sheet.getRow(pointer).createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(sumLicTip?.sumVsegoPer ?: "")
+
+    def cell2 = sheet.getRow(pointer).createCell(2)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(sumLicTip?.sumVsegoPosl3m ?: "")
+
+    def cell3 = sheet.getRow(pointer).createCell(3)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(sumLicTip?.sum1mPosl3m ?: "")
+
+    def cell4 = sheet.getRow(pointer).createCell(4)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(sumLicTip?.sum2mPosl3m ?: "")
+
+    def cell5 = sheet.getRow(pointer).createCell(5)
+    cell5.setCellStyle(style)
+    cell5.setCellValue(sumLicTip?.sum3mPosl3m ?: "")
+}
+
 
 /****************************************************************************
  *  Блок стилизации                                                         *
