@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="832" leftMargin="10" rightMargin="0" topMargin="10" bottomMargin="10" isIgnorePagination="true" uuid="4de428c4-6f3c-42d2-abda-38ee0633bb0a">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="585" leftMargin="10" rightMargin="0" topMargin="10" bottomMargin="10" isIgnorePagination="true" uuid="4de428c4-6f3c-42d2-abda-38ee0633bb0a">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -9,8 +9,8 @@
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
 	<subDataset name="dsTab1" uuid="0d625995-fc75-4d01-aab2-cc1470fd1bc9">
-		<parameter name="declarationId" class="java.lang.Integer">
-			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
+		<parameter name="declarationId" class="java.lang.Long">
+			<defaultValueExpression><![CDATA[14889]]></defaultValueExpression>
 		</parameter>
 		<queryString>
 			<![CDATA[select m.declaration_data_id,
@@ -56,8 +56,8 @@
 		</group>
 	</subDataset>
 	<subDataset name="dsTab2" uuid="1b0332f1-b730-4544-b4d1-9e3742ff4169">
-		<parameter name="declarationId" class="java.lang.Integer">
-			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
+		<parameter name="declarationId" class="java.lang.Long">
+			<defaultValueExpression><![CDATA[14889]]></defaultValueExpression>
 		</parameter>
 		<queryString>
 			<![CDATA[select m.declaration_data_id,
@@ -94,8 +94,8 @@
 		</group>
 	</subDataset>
 	<subDataset name="dsTab3" uuid="47d7a52b-77d5-4d68-bf59-55570a0450ed">
-		<parameter name="declarationId" class="java.lang.Integer">
-			<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
+		<parameter name="declarationId" class="java.lang.Long">
+			<defaultValueExpression><![CDATA[14889]]></defaultValueExpression>
 		</parameter>
 		<queryString>
 			<![CDATA[select m.declaration_data_id,
@@ -144,8 +144,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 			<groupExpression><![CDATA[$F{DECLARATION_DATA_ID}]]></groupExpression>
 		</group>
 	</subDataset>
-	<parameter name="declarationId" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[14284]]></defaultValueExpression>
+	<parameter name="declarationId" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[14889]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[select t.name repname,per.name pername,m.otchet_god,
@@ -167,26 +167,26 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 	</background>
 	<title>
 		<band height="199" splitType="Stretch">
-			<textField>
-				<reportElement uuid="2f22b327-7058-483e-baf5-5921b07a4602" x="0" y="55" width="812" height="20"/>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2f22b327-7058-483e-baf5-5921b07a4602" x="0" y="55" width="585" height="20"/>
 				<box>
 					<bottomPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="Arial" size="10" isBold="true"/>
+					<font fontName="Arial" size="10" isBold="true" pdfEncoding="Identity-H"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REPNAME}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="ea445851-6fee-4dd4-9d12-bba91b2125f5" x="334" y="75" width="36" height="20"/>
+				<reportElement uuid="ea445851-6fee-4dd4-9d12-bba91b2125f5" x="182" y="75" width="36" height="20"/>
 				<textElement textAlignment="Center">
-					<font fontName="Arial" size="10" isBold="true"/>
+					<font fontName="Arial" size="10" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 				</textElement>
 				<text><![CDATA[за]]></text>
 			</staticText>
-			<textField>
-				<reportElement uuid="e713083b-bfec-408c-82ea-7f1834cb9c35" mode="Transparent" x="370" y="75" width="32" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e713083b-bfec-408c-82ea-7f1834cb9c35" mode="Transparent" x="218" y="75" width="184" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -196,7 +196,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PERNAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="4d0fe135-25bd-4270-ad49-618e0b0c1a3b" mode="Transparent" x="414" y="75" width="81" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
@@ -208,7 +208,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 				<textFieldExpression><![CDATA[$F{OTCHET_GOD}+" г."]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="8bbfd9d2-1f13-45b2-967c-87a8c568cf75" x="133" y="162" width="205" height="20"/>
+				<reportElement uuid="8bbfd9d2-1f13-45b2-967c-87a8c568cf75" x="55" y="166" width="205" height="20"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -216,12 +216,12 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement>
-					<font fontName="Arial" size="10" isBold="true" pdfFontName="arial.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="10" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 				</textElement>
 				<text><![CDATA[ Всего застрахованных лиц]]></text>
 			</staticText>
-			<textField>
-				<reportElement uuid="50a8822c-ddd5-4527-91ea-a753fb1023c7" mode="Transparent" x="338" y="162" width="142" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="50a8822c-ddd5-4527-91ea-a753fb1023c7" mode="Transparent" x="260" y="166" width="142" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>
@@ -239,22 +239,25 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 	<detail>
 		<band height="65" splitType="Stretch">
 			<componentElement>
-				<reportElement uuid="453fbfb4-d989-4fa5-9701-0f059863beab" key="table" x="0" y="10" width="812" height="51"/>
+				<reportElement uuid="453fbfb4-d989-4fa5-9701-0f059863beab" key="table" x="0" y="10" width="585" height="55"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
-					<datasetRun subDataset="dsTab1" uuid="79c6cc25-cd38-4435-abd9-37663bb769b3">
+					<datasetRun subDataset="dsTab1" uuid="40f7b3ae-865f-4696-915d-b6d226e01ba7">
+						<datasetParameter name="declarationId">
+							<datasetParameterExpression><![CDATA[$P{declarationId}]]></datasetParameterExpression>
+						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:columnGroup width="830" uuid="5aa1b701-65ff-40a6-8901-4ab7a819794f">
+					<jr:columnGroup width="578" uuid="5aa1b701-65ff-40a6-8901-4ab7a819794f">
 						<jr:tableHeader height="24" rowSpan="1">
 							<staticText>
-								<reportElement uuid="b57b5e46-0e93-4244-9419-9c239525dfe7" x="0" y="0" width="830" height="24"/>
+								<reportElement uuid="b57b5e46-0e93-4244-9419-9c239525dfe7" x="0" y="0" width="568" height="24"/>
 								<textElement verticalAlignment="Middle">
-									<font fontName="Arial" size="9" isBold="true" pdfFontName="arial.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+									<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								</textElement>
 								<text><![CDATA[Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физических лиц]]></text>
 							</staticText>
 						</jr:tableHeader>
-						<jr:columnGroup width="137" uuid="5b216062-3565-4adf-a404-b866611cc0f8">
+						<jr:columnGroup width="100" uuid="5b216062-3565-4adf-a404-b866611cc0f8">
 							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
@@ -263,15 +266,15 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="76ce494c-3301-49ae-97a8-55da7ea571fc" x="0" y="0" width="137" height="13"/>
+									<reportElement uuid="76ce494c-3301-49ae-97a8-55da7ea571fc" x="0" y="0" width="100" height="13"/>
 									<textElement textAlignment="Right">
-										<font fontName="Arial" size="8" isBold="true"/>
+										<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
 										<paragraph rightIndent="5"/>
 									</textElement>
 									<text><![CDATA[Всего:]]></text>
 								</staticText>
 							</jr:tableFooter>
-							<jr:column width="46" uuid="40a7bbbd-b682-40d3-bb7b-d8c0fbd5b058">
+							<jr:column width="36" uuid="40a7bbbd-b682-40d3-bb7b-d8c0fbd5b058">
 								<jr:columnHeader height="82" rowSpan="1">
 									<box>
 										<topPen lineWidth="0.5"/>
@@ -280,7 +283,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<rightPen lineWidth="0.5"/>
 									</box>
 									<staticText>
-										<reportElement uuid="4206e0b3-001d-4293-a3c6-14191e260f99" x="0" y="0" width="46" height="69"/>
+										<reportElement uuid="4206e0b3-001d-4293-a3c6-14191e260f99" x="0" y="0" width="36" height="82"/>
 										<textElement textAlignment="Center">
 											<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
 										</textElement>
@@ -294,8 +297,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="32bafbfc-a2b7-468b-8662-d4a600fbc80e" x="0" y="0" width="46" height="13"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="32bafbfc-a2b7-468b-8662-d4a600fbc80e" x="0" y="0" width="36" height="13"/>
 										<textElement textAlignment="Center">
 											<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
 										</textElement>
@@ -303,7 +306,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:detailCell>
 							</jr:column>
-							<jr:column width="91" uuid="79945da5-9e2c-48b6-bfc8-fa4f1135b65f">
+							<jr:column width="64" uuid="79945da5-9e2c-48b6-bfc8-fa4f1135b65f">
 								<jr:columnHeader height="82" rowSpan="1">
 									<box>
 										<topPen lineWidth="0.5"/>
@@ -312,12 +315,14 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<rightPen lineWidth="0.5"/>
 									</box>
 									<staticText>
-										<reportElement uuid="4416ea00-06b1-4ecc-913d-f1e39af75eaa" mode="Transparent" x="0" y="0" width="91" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+										<reportElement uuid="4416ea00-06b1-4ecc-913d-f1e39af75eaa" mode="Transparent" x="0" y="0" width="64" height="82" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
-										<text><![CDATA[Категория застрахованного лица]]></text>
+										<text><![CDATA[Категория
+застрахо-
+ванного лица]]></text>
 									</staticText>
 								</jr:columnHeader>
 								<jr:detailCell height="13" rowSpan="1">
@@ -327,8 +332,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField pattern="" isBlankWhenNull="false">
-										<reportElement uuid="b0a03f57-25df-41fa-940a-121a222a82e8" mode="Transparent" x="0" y="0" width="91" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField pattern="" isBlankWhenNull="true">
+										<reportElement uuid="b0a03f57-25df-41fa-940a-121a222a82e8" mode="Transparent" x="0" y="0" width="64" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
@@ -338,7 +343,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</jr:detailCell>
 							</jr:column>
 						</jr:columnGroup>
-						<jr:column width="86" uuid="702da718-4b3a-4a09-8d35-d170f895ba0b">
+						<jr:column width="62" uuid="702da718-4b3a-4a09-8d35-d170f895ba0b">
 							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
@@ -346,8 +351,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField evaluationTime="Group" evaluationGroup="grDecl" pattern="" isBlankWhenNull="false">
-									<reportElement uuid="c98c46be-3d27-47cf-9bc2-3b2e6c6f46a0" mode="Transparent" x="0" y="0" width="86" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField evaluationTime="Group" evaluationGroup="grDecl" pattern="" isBlankWhenNull="true">
+									<reportElement uuid="c98c46be-3d27-47cf-9bc2-3b2e6c6f46a0" mode="Transparent" x="0" y="0" width="62" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -363,12 +368,14 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="3192f923-23bc-4f6e-9ca1-d1e2901cfa9b" mode="Transparent" x="0" y="0" width="86" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="3192f923-23bc-4f6e-9ca1-d1e2901cfa9b" mode="Transparent" x="0" y="0" width="62" height="82" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Количество застрахованных]]></text>
+									<text><![CDATA[Количество
+застрахо-
+ванных]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:detailCell height="13" rowSpan="1">
@@ -378,8 +385,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="377d3c01-4753-4d6a-9e13-a8e88ace739e" mode="Transparent" x="0" y="0" width="86" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="377d3c01-4753-4d6a-9e13-a8e88ace739e" mode="Transparent" x="0" y="0" width="62" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -388,7 +395,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="116" uuid="52846206-d9fc-441f-9c40-e49372861619">
+						<jr:column width="88" uuid="52846206-d9fc-441f-9c40-e49372861619">
 							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
@@ -396,8 +403,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="b1f273f5-b8d7-48b1-b687-3fec908a1bba" mode="Transparent" x="0" y="0" width="116" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="b1f273f5-b8d7-48b1-b687-3fec908a1bba" mode="Transparent" x="0" y="0" width="88" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -413,13 +420,15 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="e3a0a30a-ff18-46bd-a67f-bd4a7fbda9c3" mode="Transparent" x="0" y="0" width="116" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="e3a0a30a-ff18-46bd-a67f-bd4a7fbda9c3" mode="Transparent" x="0" y="0" width="88" height="82" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Сумма выплат и иных
-вознаграждений, руб.]]></text>
+									<text><![CDATA[Сумма выплат
+и иных
+вознаграждений,
+руб.]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:detailCell height="13" rowSpan="1">
@@ -429,8 +438,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="7f9c034a-710f-4dfc-84eb-21982492a81c" mode="Transparent" x="0" y="0" width="116" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="7f9c034a-710f-4dfc-84eb-21982492a81c" mode="Transparent" x="0" y="0" width="88" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -439,7 +448,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="167" uuid="6e511c9a-f710-403d-9350-588d03e5f1a3">
+						<jr:column width="118" uuid="6e511c9a-f710-403d-9350-588d03e5f1a3">
 							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
@@ -447,8 +456,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="5132b6e9-4a81-4e6a-8282-cb738b9ea847" mode="Transparent" x="0" y="0" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="5132b6e9-4a81-4e6a-8282-cb738b9ea847" mode="Transparent" x="0" y="0" width="118" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -464,15 +473,16 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="39d99d8b-520d-4eb3-aba9-0ea8dad85c12" mode="Transparent" x="0" y="0" width="167" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="39d99d8b-520d-4eb3-aba9-0ea8dad85c12" mode="Transparent" x="0" y="0" width="118" height="82" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[База для исчисления страховых
-взносов на обязательное
-пенсионное страхование в
-пределах предельной величины,
+									<text><![CDATA[База для исчисления
+страховых взносов на
+обязательное пенсионное
+страхование в пределах
+предельной величины,
 руб.]]></text>
 								</staticText>
 							</jr:columnHeader>
@@ -483,8 +493,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="3c7ab2d9-e058-4d41-b81b-f8ba8fbd4ce5" mode="Transparent" x="0" y="0" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="3c7ab2d9-e058-4d41-b81b-f8ba8fbd4ce5" mode="Transparent" x="0" y="0" width="118" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -493,7 +503,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="177" uuid="d10777ce-ebb3-4266-b1ca-78b0ef94b0c4">
+						<jr:column width="117" uuid="d10777ce-ebb3-4266-b1ca-78b0ef94b0c4">
 							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
@@ -501,8 +511,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="9647da0d-72eb-42e3-bd3e-abceab50767e" mode="Transparent" x="0" y="0" width="177" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="9647da0d-72eb-42e3-bd3e-abceab50767e" mode="Transparent" x="0" y="0" width="117" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -518,16 +528,18 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="79a8a6a7-f21f-40a3-903b-79e4d74c5313" mode="Transparent" x="0" y="0" width="177" height="82" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="79a8a6a7-f21f-40a3-903b-79e4d74c5313" mode="Transparent" x="0" y="0" width="117" height="82" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[База для исчисления страховых
-взносов на обязательное
-пенсионное страхование в пределах
-предельной величины, в том числе
-по гражданско-правовым
+									<text><![CDATA[База для исчисления
+страховых взносов на
+обязательное пенсионное
+страхование в пределах
+предельной величины,
+в том числе по
+гражданско-правовым
 договорам, руб.
 ]]></text>
 								</staticText>
@@ -539,8 +551,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="f8145110-c172-4980-a493-07ea3b65a5ff" mode="Transparent" x="0" y="0" width="177" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="f8145110-c172-4980-a493-07ea3b65a5ff" mode="Transparent" x="0" y="0" width="117" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -549,7 +561,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="147" uuid="782a970a-ed37-4a73-9335-131c542f0be9">
+						<jr:column width="93" uuid="782a970a-ed37-4a73-9335-131c542f0be9">
 							<jr:tableFooter height="13" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
@@ -557,8 +569,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="0a4d6bbb-816c-462f-9997-d910e044babf" mode="Transparent" x="0" y="0" width="147" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="0a4d6bbb-816c-462f-9997-d910e044babf" mode="Transparent" x="0" y="0" width="93" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -574,15 +586,17 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="bd033082-8d67-4319-86ae-92650bc63582" mode="Transparent" x="0" y="0" width="147" height="69" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="bd033082-8d67-4319-86ae-92650bc63582" mode="Transparent" x="0" y="0" width="93" height="82" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Сумма исчисленных страховых
-взносов с базы исчисления
-страховых взносов, не
-превышающих предельную
+									<text><![CDATA[Сумма исчисленных
+страховых взносов
+с базы исчисления
+страховых взносов,
+не превышающих
+предельную
 величину, руб.
 ]]></text>
 								</staticText>
@@ -594,8 +608,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="7c4c9a07-e70d-42e0-aca9-26f4c2588b42" mode="Transparent" x="0" y="0" width="147" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="7c4c9a07-e70d-42e0-aca9-26f4c2588b42" mode="Transparent" x="0" y="0" width="93" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -610,22 +624,25 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 		</band>
 		<band height="64" splitType="Stretch">
 			<componentElement>
-				<reportElement uuid="c4051329-f034-4150-85f6-f62392f92d42" key="table" x="0" y="15" width="812" height="41"/>
+				<reportElement uuid="c4051329-f034-4150-85f6-f62392f92d42" key="table" x="0" y="12" width="585" height="52"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
-					<datasetRun subDataset="dsTab2" uuid="c4349e89-aab5-4a23-9e31-7ceb8178f92a">
+					<datasetRun subDataset="dsTab2" uuid="cc84cfff-1464-4abf-a645-f95bad0e8de4">
+						<datasetParameter name="declarationId">
+							<datasetParameterExpression><![CDATA[$P{declarationId}]]></datasetParameterExpression>
+						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:columnGroup width="510" uuid="d1c71f68-d0c7-40f1-b6c9-e36e167be076">
+					<jr:columnGroup width="368" uuid="d1c71f68-d0c7-40f1-b6c9-e36e167be076">
 						<jr:tableHeader height="30" rowSpan="1">
 							<staticText>
-								<reportElement uuid="35327bca-0fb0-4834-8c9a-2e3e079c85f1" x="0" y="0" width="510" height="30" isPrintInFirstWholeBand="true"/>
+								<reportElement uuid="35327bca-0fb0-4834-8c9a-2e3e079c85f1" x="0" y="0" width="368" height="30" isPrintInFirstWholeBand="true"/>
 								<textElement verticalAlignment="Middle">
-									<font fontName="Arial" size="9" isBold="true" pdfFontName="arial.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+									<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 								</textElement>
 								<text><![CDATA[Сведения о сумме выплат и иных вознаграждений, начисленных в пользу физических лиц, на которые исчислены страховые взносы по дополнительному тарифу]]></text>
 							</staticText>
 						</jr:tableHeader>
-						<jr:columnGroup width="119" uuid="90a90588-1303-4976-9f7b-67226675be4c">
+						<jr:columnGroup width="100" uuid="90a90588-1303-4976-9f7b-67226675be4c">
 							<jr:groupFooter groupName="DECLARATION_DATA_ID">
 								<jr:cell height="11" rowSpan="1">
 									<box>
@@ -635,17 +652,17 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<rightPen lineWidth="0.5"/>
 									</box>
 									<staticText>
-										<reportElement uuid="2e6ba2ce-4005-4b1f-aaf3-c1cd9add8ee0" x="0" y="0" width="119" height="11"/>
+										<reportElement uuid="2e6ba2ce-4005-4b1f-aaf3-c1cd9add8ee0" x="0" y="0" width="100" height="11"/>
 										<textElement textAlignment="Right">
-											<font fontName="Arial" size="8" isBold="true"/>
+											<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
 											<paragraph rightIndent="5"/>
 										</textElement>
 										<text><![CDATA[Всего:]]></text>
 									</staticText>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:column width="46" uuid="eda20d5f-ea63-45d4-8ec5-c596ff773043">
-								<jr:columnHeader height="31" rowSpan="1">
+							<jr:column width="36" uuid="eda20d5f-ea63-45d4-8ec5-c596ff773043">
+								<jr:columnHeader height="43" rowSpan="1">
 									<box>
 										<topPen lineWidth="0.5"/>
 										<leftPen lineWidth="0.5"/>
@@ -653,9 +670,9 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<rightPen lineWidth="0.5"/>
 									</box>
 									<staticText>
-										<reportElement uuid="758568f2-58a1-4097-b0e9-ee8615babe2b" x="0" y="0" width="46" height="31"/>
+										<reportElement uuid="758568f2-58a1-4097-b0e9-ee8615babe2b" x="0" y="0" width="36" height="43"/>
 										<textElement textAlignment="Center">
-											<font fontName="Arial" size="8" isBold="true"/>
+											<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
 										</textElement>
 										<text><![CDATA[Месяц]]></text>
 									</staticText>
@@ -667,8 +684,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="53db76c7-0e2c-4fdc-aeeb-fcfe00a7e1f9" mode="Transparent" x="0" y="0" width="46" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="53db76c7-0e2c-4fdc-aeeb-fcfe00a7e1f9" mode="Transparent" x="0" y="0" width="36" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
@@ -677,8 +694,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:detailCell>
 							</jr:column>
-							<jr:column width="73" uuid="9421f01b-5fcb-480d-9fad-8fb03e95b22a">
-								<jr:columnHeader height="31" rowSpan="1">
+							<jr:column width="64" uuid="9421f01b-5fcb-480d-9fad-8fb03e95b22a">
+								<jr:columnHeader height="43" rowSpan="1">
 									<box>
 										<topPen lineWidth="0.5"/>
 										<leftPen lineWidth="0.5"/>
@@ -686,7 +703,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<rightPen lineWidth="0.5"/>
 									</box>
 									<staticText>
-										<reportElement uuid="d305a314-c428-48c9-bf74-54ad97a0d1b0" mode="Transparent" x="0" y="0" width="73" height="31" forecolor="#000000" backcolor="#FFFFFF"/>
+										<reportElement uuid="d305a314-c428-48c9-bf74-54ad97a0d1b0" mode="Transparent" x="0" y="0" width="64" height="43" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
@@ -701,8 +718,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField pattern="" isBlankWhenNull="false">
-										<reportElement uuid="4e4ffda5-62b8-4e24-ac17-89375ad1f45d" mode="Transparent" x="0" y="0" width="73" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField pattern="" isBlankWhenNull="true">
+										<reportElement uuid="4e4ffda5-62b8-4e24-ac17-89375ad1f45d" mode="Transparent" x="0" y="0" width="64" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
@@ -712,7 +729,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</jr:detailCell>
 							</jr:column>
 						</jr:columnGroup>
-						<jr:column width="93" uuid="b06d020b-b6bb-4e75-8535-12787c52cfb0">
+						<jr:column width="62" uuid="b06d020b-b6bb-4e75-8535-12787c52cfb0">
 							<jr:tableHeader height="0" rowSpan="1"/>
 							<jr:groupFooter groupName="DECLARATION_DATA_ID">
 								<jr:cell height="11" rowSpan="1">
@@ -722,8 +739,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="405d57d3-b666-48dd-8ccf-1d1386c3ccb7" mode="Transparent" x="0" y="0" width="93" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="405d57d3-b666-48dd-8ccf-1d1386c3ccb7" mode="Transparent" x="0" y="0" width="62" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -732,7 +749,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:columnHeader height="31" rowSpan="1">
+							<jr:columnHeader height="43" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -740,12 +757,14 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="b1bf350b-f231-4f63-b425-7e05d424511a" mode="Transparent" x="0" y="0" width="93" height="31" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="b1bf350b-f231-4f63-b425-7e05d424511a" mode="Transparent" x="0" y="0" width="62" height="43" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Количество застрахованных]]></text>
+									<text><![CDATA[Количество
+застрахо-
+ванных]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:columnFooter height="0" rowSpan="1"/>
@@ -756,8 +775,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="cb2327c5-f085-4650-8f06-8dd6b9ff5d87" mode="Transparent" x="0" y="0" width="93" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="cb2327c5-f085-4650-8f06-8dd6b9ff5d87" mode="Transparent" x="0" y="0" width="62" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -766,7 +785,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="126" uuid="efb0ff27-87a8-4abc-b195-6ecfca85533b">
+						<jr:column width="88" uuid="efb0ff27-87a8-4abc-b195-6ecfca85533b">
 							<jr:tableHeader height="0" rowSpan="1"/>
 							<jr:groupFooter groupName="DECLARATION_DATA_ID">
 								<jr:cell height="11" rowSpan="1">
@@ -776,8 +795,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="9282f9cd-b996-4413-8e2d-2183acebf2fa" mode="Transparent" x="0" y="0" width="126" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="9282f9cd-b996-4413-8e2d-2183acebf2fa" mode="Transparent" x="0" y="0" width="88" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -786,7 +805,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:columnHeader height="31" rowSpan="1">
+							<jr:columnHeader height="43" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -794,13 +813,14 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="746024f2-d184-4eb2-8200-820841040a39" mode="Transparent" x="0" y="0" width="126" height="31" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="746024f2-d184-4eb2-8200-820841040a39" mode="Transparent" x="0" y="0" width="88" height="43" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Сумма выплат и иных
-вознаграждений, руб
+									<text><![CDATA[Сумма выплат и
+иных вознаграж-
+дений, руб
 ]]></text>
 								</staticText>
 							</jr:columnHeader>
@@ -812,8 +832,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="64a6a6e5-26da-4d85-981b-1fe30a5a4d10" mode="Transparent" x="0" y="0" width="126" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="64a6a6e5-26da-4d85-981b-1fe30a5a4d10" mode="Transparent" x="0" y="0" width="88" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -822,7 +842,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="172" uuid="06f5049e-a962-44ec-84a3-22ba0c47741b">
+						<jr:column width="118" uuid="06f5049e-a962-44ec-84a3-22ba0c47741b">
 							<jr:tableHeader height="0" rowSpan="1"/>
 							<jr:groupFooter groupName="DECLARATION_DATA_ID">
 								<jr:cell height="11" rowSpan="1">
@@ -832,8 +852,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="d16fb29e-4c59-4ba9-8cb6-7d59b5368d33" mode="Transparent" x="0" y="0" width="172" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="d16fb29e-4c59-4ba9-8cb6-7d59b5368d33" mode="Transparent" x="0" y="0" width="118" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -842,7 +862,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:columnHeader height="31" rowSpan="1">
+							<jr:columnHeader height="43" rowSpan="1">
 								<box>
 									<topPen lineWidth="0.5"/>
 									<leftPen lineWidth="0.5"/>
@@ -850,7 +870,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="ca641cc3-3fd1-4c38-967f-d131930634da" mode="Transparent" x="0" y="0" width="172" height="31" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="ca641cc3-3fd1-4c38-967f-d131930634da" mode="Transparent" x="0" y="0" width="118" height="43" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
@@ -868,8 +888,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="577e8624-14e5-47f8-85ba-26c0ebd6bb44" mode="Transparent" x="0" y="0" width="172" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="577e8624-14e5-47f8-85ba-26c0ebd6bb44" mode="Transparent" x="0" y="0" width="118" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -887,22 +907,25 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 		</band>
 		<band height="76" splitType="Stretch">
 			<componentElement>
-				<reportElement uuid="6cbce747-8c81-40c7-9b4e-9115af09c755" key="table" x="0" y="14" width="832" height="41"/>
-				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="dsTab3" uuid="7bd470ff-48fb-4e99-b7d3-5ce67e91176f">
+				<reportElement uuid="6cbce747-8c81-40c7-9b4e-9115af09c755" key="table" x="0" y="12" width="585" height="64"/>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
+					<datasetRun subDataset="dsTab3" uuid="04b66af1-be54-4b19-a4b5-c3641bcfa13b">
+						<datasetParameter name="declarationId">
+							<datasetParameterExpression><![CDATA[$P{declarationId}]]></datasetParameterExpression>
+						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:columnGroup width="998" uuid="ec52adfa-4cea-4578-92d1-4516cf035b0d">
-						<jr:tableHeader height="30" rowSpan="1">
+					<jr:columnGroup width="573" uuid="ec52adfa-4cea-4578-92d1-4516cf035b0d">
+						<jr:tableHeader height="21" rowSpan="1">
 							<staticText>
-								<reportElement uuid="c28a59cb-3c7a-4f8e-a471-7c64d9c5bb9a" x="0" y="0" width="998" height="30"/>
+								<reportElement uuid="c28a59cb-3c7a-4f8e-a471-7c64d9c5bb9a" x="0" y="0" width="573" height="21"/>
 								<textElement verticalAlignment="Middle">
-									<font fontName="Arial" size="9" isBold="true" pdfFontName="arial.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+									<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 								</textElement>
 								<text><![CDATA[Суммы страховых взносов подлежащие уплате за расчетный (отчетный) период]]></text>
 							</staticText>
 						</jr:tableHeader>
-						<jr:columnGroup width="364" uuid="26c9604b-e436-4f96-855e-5f28954ce5c4">
+						<jr:columnGroup width="219" uuid="26c9604b-e436-4f96-855e-5f28954ce5c4">
 							<jr:groupFooter groupName="grDeclId">
 								<jr:cell height="12" rowSpan="1">
 									<box>
@@ -913,16 +936,17 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<rightPen lineWidth="0.5"/>
 									</box>
 									<staticText>
-										<reportElement uuid="5b0873c1-e4da-4d2e-8415-6ae616a7f714" x="0" y="0" width="364" height="12"/>
+										<reportElement uuid="5b0873c1-e4da-4d2e-8415-6ae616a7f714" x="0" y="0" width="219" height="12"/>
 										<textElement textAlignment="Right">
-											<font fontName="Arial" size="8" isBold="true"/>
+											<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
+											<paragraph rightIndent="5"/>
 										</textElement>
 										<text><![CDATA[Всего:]]></text>
 									</staticText>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:column width="251" uuid="4238c166-b054-4786-9597-e0ec28dfbb19">
-								<jr:columnHeader height="57" rowSpan="1">
+							<jr:column width="125" uuid="4238c166-b054-4786-9597-e0ec28dfbb19">
+								<jr:columnHeader height="104" rowSpan="1">
 									<box>
 										<pen lineWidth="0.5"/>
 										<topPen lineWidth="0.5"/>
@@ -931,14 +955,14 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<rightPen lineWidth="0.5"/>
 									</box>
 									<staticText>
-										<reportElement uuid="60b7751f-bac5-4510-96b7-aa2f8137aa25" x="0" y="0" width="251" height="57"/>
+										<reportElement uuid="60b7751f-bac5-4510-96b7-aa2f8137aa25" x="0" y="0" width="125" height="104"/>
 										<textElement textAlignment="Center">
-											<font fontName="Arial" size="8" isBold="true"/>
+											<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H"/>
 										</textElement>
 										<text><![CDATA[Тип страховых взносов]]></text>
 									</staticText>
 								</jr:columnHeader>
-								<jr:detailCell height="23" rowSpan="1">
+								<jr:detailCell height="37" rowSpan="1">
 									<box>
 										<pen lineWidth="0.5"/>
 										<topPen lineWidth="0.5"/>
@@ -946,17 +970,18 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField isStretchWithOverflow="true">
-										<reportElement uuid="09ae5126-41b7-4b8f-85df-c629ce961a2d" stretchType="RelativeToTallestObject" x="0" y="0" width="251" height="23"/>
+									<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+										<reportElement uuid="09ae5126-41b7-4b8f-85df-c629ce961a2d" stretchType="RelativeToTallestObject" x="0" y="0" width="125" height="37"/>
 										<textElement>
-											<font fontName="Arial" size="8"/>
+											<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+											<paragraph leftIndent="5"/>
 										</textElement>
 										<textFieldExpression><![CDATA[$F{ROW_TEXT}]]></textFieldExpression>
 									</textField>
 								</jr:detailCell>
 							</jr:column>
-							<jr:column width="113" uuid="0f9243bb-86fd-4cab-b653-793308152568">
-								<jr:columnHeader height="57" rowSpan="1">
+							<jr:column width="94" uuid="0f9243bb-86fd-4cab-b653-793308152568">
+								<jr:columnHeader height="104" rowSpan="1">
 									<box>
 										<pen lineWidth="0.5"/>
 										<topPen lineWidth="0.5"/>
@@ -965,7 +990,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<rightPen lineWidth="0.5"/>
 									</box>
 									<staticText>
-										<reportElement uuid="c221c063-ca24-458c-9684-801b45606a5d" mode="Transparent" x="0" y="0" width="113" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+										<reportElement uuid="c221c063-ca24-458c-9684-801b45606a5d" mode="Transparent" x="0" y="0" width="94" height="104" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
@@ -973,7 +998,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<text><![CDATA[Код бюджетной классификации]]></text>
 									</staticText>
 								</jr:columnHeader>
-								<jr:detailCell height="23" rowSpan="1">
+								<jr:detailCell height="37" rowSpan="1">
 									<box>
 										<pen lineWidth="0.5"/>
 										<topPen lineWidth="0.5"/>
@@ -981,8 +1006,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField pattern="" isBlankWhenNull="false">
-										<reportElement uuid="f5182fc9-bddb-43d0-8e9c-bb4d31dcd498" mode="Transparent" x="0" y="0" width="113" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField pattern="" isBlankWhenNull="true">
+										<reportElement uuid="f5182fc9-bddb-43d0-8e9c-bb4d31dcd498" mode="Transparent" x="0" y="0" width="94" height="37" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
@@ -992,7 +1017,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</jr:detailCell>
 							</jr:column>
 						</jr:columnGroup>
-						<jr:column width="144" uuid="72dc7ccf-9de9-410e-875b-6ebbe3f05624">
+						<jr:column width="80" uuid="72dc7ccf-9de9-410e-875b-6ebbe3f05624">
 							<jr:tableHeader height="0" rowSpan="1"/>
 							<jr:groupFooter groupName="grDeclId">
 								<jr:cell height="12" rowSpan="1">
@@ -1003,8 +1028,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="6e7185ef-e6f7-4f05-8bb9-55766bc1683f" mode="Transparent" x="0" y="0" width="144" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="6e7185ef-e6f7-4f05-8bb9-55766bc1683f" mode="Transparent" x="0" y="0" width="80" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -1013,7 +1038,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:columnHeader height="57" rowSpan="1">
+							<jr:columnHeader height="104" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1022,18 +1047,21 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="887ae4a9-3485-47f6-9ea5-c7215bd227ec" mode="Transparent" x="0" y="0" width="144" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="887ae4a9-3485-47f6-9ea5-c7215bd227ec" mode="Transparent" x="0" y="0" width="80" height="104" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Сумма страховых взносов,
-подлежащая уплате за
-расчетный (отчетный)
+									<text><![CDATA[Сумма страховых
+взносов,
+подлежащая
+уплате за
+расчетный
+(отчетный)
 период, руб.]]></text>
 								</staticText>
 							</jr:columnHeader>
-							<jr:detailCell height="23" rowSpan="1">
+							<jr:detailCell height="37" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1041,8 +1069,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="d97d19b2-873d-4ba1-83c7-f5f927d674ee" mode="Transparent" x="0" y="0" width="144" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="d97d19b2-873d-4ba1-83c7-f5f927d674ee" mode="Transparent" x="0" y="0" width="80" height="37" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -1051,7 +1079,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="163" uuid="c3633e7a-89fa-41f7-a380-1cc072746fe2">
+						<jr:column width="95" uuid="c3633e7a-89fa-41f7-a380-1cc072746fe2">
 							<jr:tableHeader height="0" rowSpan="1"/>
 							<jr:groupFooter groupName="grDeclId">
 								<jr:cell height="12" rowSpan="1">
@@ -1062,8 +1090,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="57e1ff8b-d676-4a81-9e5d-8601cc8f2c42" mode="Transparent" x="0" y="0" width="163" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="57e1ff8b-d676-4a81-9e5d-8601cc8f2c42" mode="Transparent" x="0" y="0" width="95" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -1072,7 +1100,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:columnHeader height="57" rowSpan="1">
+							<jr:columnHeader height="104" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1081,19 +1109,23 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="dbd67f6e-a8a7-4b27-b0e7-3b1e1157fee9" mode="Transparent" x="0" y="0" width="163" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="dbd67f6e-a8a7-4b27-b0e7-3b1e1157fee9" mode="Transparent" x="0" y="0" width="95" height="104" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Сумма страховых взносов,
-подлежащая уплате за первый
-из последних трех месяцев
-расчетного (отчетного) периода,
-руб.]]></text>
+									<text><![CDATA[Сумма страховых
+взносов,
+подлежащая
+уплате за первый
+из последних
+трех месяцев
+расчетного
+(отчетного)
+периода, руб.]]></text>
 								</staticText>
 							</jr:columnHeader>
-							<jr:detailCell height="23" rowSpan="1">
+							<jr:detailCell height="37" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1101,8 +1133,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="db334642-562d-4eb8-bb22-dd96050605eb" mode="Transparent" x="0" y="0" width="163" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="db334642-562d-4eb8-bb22-dd96050605eb" mode="Transparent" x="0" y="0" width="95" height="37" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -1111,7 +1143,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="166" uuid="24d0ddf6-632e-4f39-a5f4-2038ad534002">
+						<jr:column width="89" uuid="24d0ddf6-632e-4f39-a5f4-2038ad534002">
 							<jr:tableHeader height="0" rowSpan="1"/>
 							<jr:groupFooter groupName="grDeclId">
 								<jr:cell height="12" rowSpan="1">
@@ -1122,8 +1154,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="0f4bdba2-c654-4402-8edb-797473a86b41" mode="Transparent" x="0" y="0" width="166" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="0f4bdba2-c654-4402-8edb-797473a86b41" mode="Transparent" x="0" y="0" width="89" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -1132,7 +1164,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:columnHeader height="57" rowSpan="1">
+							<jr:columnHeader height="104" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1141,19 +1173,23 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="67c803bc-8508-4969-bcd2-d38b0dfac84a" mode="Transparent" x="0" y="0" width="166" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="67c803bc-8508-4969-bcd2-d38b0dfac84a" mode="Transparent" x="0" y="0" width="89" height="104" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Сумма страховых взносов,
-подлежащая уплате за второй
-из последних трех месяцев
-расчетного (отчетного) периода,
-руб.]]></text>
+									<text><![CDATA[Сумма страховых
+взносов,
+подлежащая
+уплате за второй
+из последних
+трех месяцев
+расчетного
+(отчетного)
+периода, руб.]]></text>
 								</staticText>
 							</jr:columnHeader>
-							<jr:detailCell height="23" rowSpan="1">
+							<jr:detailCell height="37" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1161,8 +1197,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="49a916ea-34e2-4b46-8e1f-958a7530e6fa" mode="Transparent" x="0" y="0" width="166" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="49a916ea-34e2-4b46-8e1f-958a7530e6fa" mode="Transparent" x="0" y="0" width="89" height="37" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -1171,7 +1207,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="161" uuid="f2ab1e5e-1524-4645-afed-586e0a664cbb">
+						<jr:column width="90" uuid="f2ab1e5e-1524-4645-afed-586e0a664cbb">
 							<jr:tableHeader height="0" rowSpan="1"/>
 							<jr:groupFooter groupName="grDeclId">
 								<jr:cell height="12" rowSpan="1">
@@ -1182,8 +1218,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 										<bottomPen lineWidth="0.5"/>
 										<rightPen lineWidth="0.5"/>
 									</box>
-									<textField>
-										<reportElement uuid="2bff2e7f-6990-472d-a6a3-0fb7a9729b92" mode="Transparent" x="0" y="0" width="161" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<textField isBlankWhenNull="true">
+										<reportElement uuid="2bff2e7f-6990-472d-a6a3-0fb7a9729b92" mode="Transparent" x="0" y="0" width="90" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single" rightIndent="5"/>
@@ -1192,7 +1228,7 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									</textField>
 								</jr:cell>
 							</jr:groupFooter>
-							<jr:columnHeader height="57" rowSpan="1">
+							<jr:columnHeader height="104" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1201,20 +1237,24 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<rightPen lineWidth="0.5"/>
 								</box>
 								<staticText>
-									<reportElement uuid="853c031e-da82-4371-b129-f0d7b3921779" mode="Transparent" x="0" y="0" width="161" height="57" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="853c031e-da82-4371-b129-f0d7b3921779" mode="Transparent" x="0" y="0" width="90" height="104" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
-									<text><![CDATA[Сумма страховых взносов,
-подлежащая уплате за третий
-из последних трех месяцев
-расчетного (отчетного) периода,
-руб.
+									<text><![CDATA[Сумма страховых
+взносов,
+подлежащая
+уплате за третий
+из последних
+трех месяцев
+расчетного
+(отчетного)
+периода, руб.
 ]]></text>
 								</staticText>
 							</jr:columnHeader>
-							<jr:detailCell height="23" rowSpan="1">
+							<jr:detailCell height="37" rowSpan="1">
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5"/>
@@ -1222,8 +1262,8 @@ decode(d.node_name,'УплПерОПС','Обязательное пенсион
 									<bottomPen lineWidth="0.5"/>
 									<rightPen lineWidth="0.5"/>
 								</box>
-								<textField pattern="" isBlankWhenNull="false">
-									<reportElement uuid="20f09a61-ed6d-424d-8dac-20dd2b6d44b1" mode="Transparent" x="0" y="0" width="161" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textField pattern="" isBlankWhenNull="true">
+									<reportElement uuid="20f09a61-ed6d-424d-8dac-20dd2b6d44b1" mode="Transparent" x="0" y="0" width="90" height="37" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>

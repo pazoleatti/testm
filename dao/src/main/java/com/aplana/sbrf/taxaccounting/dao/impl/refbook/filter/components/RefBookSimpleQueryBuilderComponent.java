@@ -328,9 +328,10 @@ public class RefBookSimpleQueryBuilderComponent {
 
     public PreparedStatementData psGetMatchedRecordsByUniqueAttributes(@NotNull RefBook refBook, Long uniqueRecordId, @NotNull RefBookRecord record,
                                                                        @NotNull Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues) {
-        List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupsUniqueAttributesValues.get(1);
+        //TODO !!! неправильно, так как групп уникальности может быть несколько
+		List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupsUniqueAttributesValues.get(1);
 
-        PreparedStatementData sql = new PreparedStatementData("SELECT r.").append(RefBook.RECORD_ID_ALIAS).append(" as id, ");
+        PreparedStatementData sql = new PreparedStatementData("SELECT r.").append(RefBook.RECORD_ID_ALIAS).append(" AS id, ");
         appendNameColumn(sql, uniqueAttributesValues);
         sql.append("FROM ").append(refBook.getTableName()).append(" r\n");
         sql.append("WHERE r.status = 0\nAND (\n");
@@ -623,6 +624,70 @@ public class RefBookSimpleQueryBuilderComponent {
         }
         sql.append("\nFROM ").append(refBook.getTableName()).append("\nWHERE ").append(whereClause);
         return sql;
+    }
+
+    /**
+     * SELECT id <id_alias>, <attribute1>, <attributeN>
+     * FROM <ref_book_table_name>
+     * WHERE <whereClause> <version>
+     */
+
+    /* Пример сформированного sql-запроса:
+    with t as (select max(version) version, record_id from REF_BOOK_PERSON r where status = 0 and version <= '01.01.2016'  and
+    not exists (
+    select 1 from REF_BOOK_PERSON r2 where r2.record_id=r.record_id and r2.status != -1 and r2.version between r.version + interval '1' day and '01.01.2016')
+    group by record_id
+    )
+    SELECT * FROM (SELECT res.*, rownum row_number_over FROM (
+            SELECT frb.id AS id, frb.RECORD_ID, frb.LAST_NAME, frb.FIRST_NAME, frb.MIDDLE_NAME, frb.SEX, frb.INN, frb.INN_FOREIGN, frb.SNILS, frb.TAXPAYER_STATE, frb.BIRTH_DATE, frb.BIRTH_PLACE,
+            frb.CITIZENSHIP, frb.ADDRESS, frb.PENSION, frb.MEDICAL, frb.SOCIAL, frb.EMPLOYEE, frb.SOURCE_ID, frb.OLD_ID FROM t, REF_BOOK_PERSON frb
+            WHERE (frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0) ORDER BY frb.id) res
+    where
+    record_id IN (select p.record_id  FROM ref_book_person p INNER JOIN ndfl_person np ON p.id = np.person_id  WHERE np.declaration_data_id = 14873)
+    );
+     */
+    public PreparedStatementData psGetRecordsData(RefBook refBook, String whereClause, Date version) {
+
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery(String.format(WITH_STATEMENT, refBook.getTableName(), refBook.getTableName()));
+        ps.addParam(version);
+        ps.addParam(version);
+        ps.appendQuery("SELECT * FROM (");
+        ps.appendQuery("SELECT res.*, rownum row_number_over FROM ");
+        ps.appendQuery("(SELECT frb.id AS ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)) {
+                ps.appendQuery(", frb.");
+                ps.appendQuery(attribute.getAlias());
+            }
+        }
+        ps.appendQuery(" FROM t, ");
+        ps.appendQuery(refBook.getTableName());
+        ps.appendQuery(" frb ");
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        if (filterPS.getJoinPartsOfQuery() != null) {
+            ps.appendQuery(filterPS.getJoinPartsOfQuery());
+        }
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" WHERE (");
+            ps.appendQuery(filterPS.getQuery().toString());
+            if (!filterPS.getParams().isEmpty()) {
+                ps.addParam(filterPS.getParams());
+            }
+            ps.appendQuery(") ");
+        }
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" AND ");
+        } else {
+            ps.appendQuery(" WHERE ");
+        }
+
+        ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
+        ps.appendQuery(" ORDER BY frb.id");
+        ps.appendQuery(") res WHERE " + whereClause + ") ");
+        return ps;
     }
 
 

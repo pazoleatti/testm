@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +63,11 @@ public class RefBookConfigurationParam extends AbstractPermanentRefBook {
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(String where, Date version) {
         throw new UnsupportedOperationException();
     }
 

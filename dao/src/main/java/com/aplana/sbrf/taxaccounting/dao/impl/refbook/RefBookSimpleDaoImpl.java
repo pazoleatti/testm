@@ -126,6 +126,27 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         }
     }
 
+    /**
+     * Получение структуры Код строки → Строка справочника по списку кодов строк. Используется для возможности передачи курсора в in
+     * @param refBook справочник
+     * @param whereClause условие для подстановки в where
+     * @param version версия справочника
+     * @return
+     */
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(RefBook refBook, String whereClause, Date version) {
+        PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, whereClause, version);
+
+        String sql = ps.getQueryString();
+        System.out.println(sql);
+
+        try {
+            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), ps.getParams().toArray(), new RefBookValueMapper(refBook)));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
     private Map<Long, Map<String, RefBookValue>> mapListToData(List<Map<String, RefBookValue>> recordsList){
         Map<Long, Map<String, RefBookValue>> recordData = new HashMap<Long, Map<String, RefBookValue>>();
         for (Map<String, RefBookValue> record : recordsList) {
@@ -315,13 +336,13 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 
     /**
      *
-     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми
+     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми.
      * Обеспечение соблюдения уникальности атрибутов в пределах справочника
      *
      * @param refBook справочник
      * @param uniqueRecordId уникальный идентификатор записи справочника. Может быть null (при создании нового элемента). Используется для исключения из проверки указанного элемента справочника
      * @param record новые значения полей элемента справочника
-     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
+     * @return список пар "идентификатор записи"-"имя атрибута", у которых совпали значения уникальных атрибутов
      */
     @Override
     public List<Pair<Long, String>> getMatchedRecordsByUniqueAttributes(RefBook refBook, Long uniqueRecordId,

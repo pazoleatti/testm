@@ -218,14 +218,73 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 }
 
 /**
- * Получить "Физические лица" getRefPersons
+ * Получить "Физические лица"
+ * Полученные записи могут быть не актуальные на отчетный период
  * @param personIds
  * @return
  */
 Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
     Long declarationDataId = declarationData.id;
-    String whereClause = String.format("id in(select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
-    return getRefBookByRecordWhere(RefBook.Id.PERSON.id, whereClause)
+    String whereClause = String.format("id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
+    return getRefBookByRecordWhere(REF_BOOK_PERSON_ID, whereClause)
+}
+
+/**
+ * Получить мапу "Физические лица" <ID, RECORD_ID>
+ * Мапа нужна потому, что при получении актуальных записей ФЛ их идентифкаторы могут отличаться от NDFL_PERSON.PERSON_ID
+ * @param personIds
+ * @return
+ */
+Map<Long, Long> getMapPersonIdRecordIdByDeclarationDataId() {
+    Long declarationDataId = declarationData.id;
+    String whereClause = String.format("id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
+    def mapRefBookByRecordWhere = getRefBookByRecordWhere(REF_BOOK_PERSON_ID, whereClause)
+    def mapResult = [:]
+    mapRefBookByRecordWhere.each {id, refBook ->
+        mapResult.put(id, refBook.get(RF_RECORD_ID).value)
+    }
+    return mapResult
+}
+
+/**
+ * Получить актуальные на отчетную дату записи справочника "Физические лица"
+ * @param personIds
+ * @return
+ */
+Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataIds() {
+    Long declarationDataId = declarationData.id;
+    String whereClause = String.format("record_id IN (select p.record_id " +
+            " FROM ref_book_person p " +
+            " INNER JOIN ndfl_person np ON p.id = np.person_id " +
+            " WHERE np.declaration_data_id = %s)", declarationDataId)
+    def mapRefBookByRecordVersionWhere = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
+    def mapResult = [:]
+    mapRefBookByRecordVersionWhere.each { id, refBook ->
+        mapResult.put(refBook.get(RF_RECORD_ID).value, refBook)
+    }
+    return mapResult
+}
+
+/**
+ * Получить аутальные записи справочника "Физические лица"
+ * @param personIds
+ * @return
+ */
+//todo https://jira.aplana.com/browse/SBRFNDFL-543 Удалить после обновления стенда
+Map<Long, Map<String, RefBookValue>> getActualRefPersons(def personIds) {
+    if (personsActualCache.size() == 0) {
+        def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
+        refBookMap.each { personId, person ->
+            // Получим актуальную версию на основании RECORD_ID найденной записи
+            def actualPersonMap = getRefBookByFilter(REF_BOOK_PERSON_ID, "RECORD_ID = " + person.get(RF_RECORD_ID).value)
+            if (actualPersonMap) {
+                actualPersonMap.each { actualPerson ->
+                    personsActualCache.put(personId, actualPerson)
+                }
+            }
+        }
+    }
+    return personsActualCache;
 }
 
 //Приоритет документов удостоверяющих личность <Идентификатор, Приоритет(int)>
@@ -610,7 +669,7 @@ def fillPersonAttr(Map<String, RefBookValue> values, PersonData person, Long asn
     putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
     putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
     putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, null, attributeChangeListener);
+    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, person.getSex() ?: null, attributeChangeListener);
     putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
     putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
     putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
@@ -1854,7 +1913,7 @@ Date getReportPeriodEndDate() {
 }
 
 /**
- *
+ * Выгрузка из справочников по условию
  * @param refBookId
  * @param whereClause
  * @return
@@ -1869,24 +1928,18 @@ def getRefBookByRecordWhere(def long refBookId, def whereClause) {
 }
 
 /**
- * Получить аутальные записи справочника "Физические лица"
- * @param personIds
+ * Выгрузка из справочников по условию и версии
+ * @param refBookId
+ * @param whereClause
  * @return
  */
-Map<Long, Map<String, RefBookValue>> getActualRefPersons(def personIds) {
-    if (personsActualCache.size() == 0) {
-        def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
-        refBookMap.each { personId, person ->
-            // Получим актуальную версию на основании RECORD_ID найденной записи
-            def actualPersonMap = getRefBookByFilter(REF_BOOK_PERSON_ID, "RECORD_ID = " + person.get(RF_RECORD_ID).value)
-            if (actualPersonMap) {
-                actualPersonMap.each { actualPerson ->
-                    personsActualCache.put(personId, actualPerson)
-                }
-            }
-        }
+def getRefBookByRecordVersionWhere(def long refBookId, def whereClause, def version) {
+    Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataVersionWhere(whereClause, version)
+    if (refBookMap == null || refBookMap.size() == 0) {
+        //throw new ScriptException("Не найдены записи справочника " + refBookId)
+        return Collections.emptyMap();
     }
-    return personsActualCache;
+    return refBookMap
 }
 
 /**
@@ -1928,21 +1981,22 @@ def getRefDocumentTypeCode() {
 
 /**
  * Получить "ИНП"
- * todo Получение ИНП реализовано путем отдельных запросов для каждого personId, в будущем переделать на использование одного запроса
  * @return
  */
-def getRefINP(def personIds) {
-    if (inpCache.size() == 0) {
-        personIds.each { personId ->
-            def refBookMap = getRefBookByFilter(REF_BOOK_ID_TAX_PAYER_ID, "PERSON_ID = " + personId.toString())
-            def inpList = []
-            refBookMap.each { refBook ->
-                inpList.add(refBook?.INP?.stringValue)
-            }
-            inpCache.put(personId, inpList)
+Map<Long, Map<String, RefBookValue>> getRefINPByDeclarationDataId() {
+    Long declarationDataId = declarationData.id;
+    String whereClause = String.format("person_id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
+    def refBookResult = [:]
+    def refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause)
+    refBookMap.each { id, refBook ->
+        def inpList = refBookResult.get(refBook?.PERSON_ID?.referenceValue)
+        if (inpList == null) {
+            inpList = []
         }
+        inpList.add(refBook?.INP?.stringValue)
+        refBookResult.put(refBook?.PERSON_ID?.referenceValue, inpList)
     }
-    return inpCache;
+    return refBookResult
 }
 
 /**
@@ -2345,11 +2399,18 @@ def checkDataReference(
     def taxInspectionList = getRefNotifSource()
     logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
+    println "Проверки на соответствие справочникам / Выгрузка справочников: " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочников: (" + (System.currentTimeMillis() - time) + " ms)");
+
     // Массив идентификаторов Физических лиц
     def personIds = collectNdflPersonIds(ndflPersonList)
 
     //Map<Long, Map<String, RefBookValue>>
     def personMap = [:]
+
+    // Map<PERSON_ID, RECORD_ID>
+    // Мапа нужна потому, что при получении актуальных записей ФЛ их идентифкаторы могут отличаться от NDFL_PERSON.PERSON_ID
+    def personIdRecordIdMap = [:]
 
     // ИНП <person_id, массив_ИНП>
     def inpMap = [:]
@@ -2362,18 +2423,31 @@ def checkDataReference(
     def addressMap = [:]
 
     if (personIds.size() > 0) {
+        time = System.currentTimeMillis();
         personMap = getActualRefPersons(personIds)
+        // todo https://jira.aplana.com/browse/SBRFNDFL-543 Раскомментировать после обновления стенда
+//        personIdRecordIdMap = getMapPersonIdRecordIdByDeclarationDataId()
+//        personMap = getActualRefPersonsByDeclarationDataIds()
         logger.info(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
+        println "Проверки на соответствие справочникам / Выгрузка справочника Физические лица: " + (System.currentTimeMillis() - time);
+        logger.info("Проверки на соответствие справочникам / Выгрузка справочника Физические лица: (" + (System.currentTimeMillis() - time) + " ms)");
 
         // Получим мапу ИНП
-        inpMap = getRefINP(personIds)
+        time = System.currentTimeMillis();
+        inpMap = getRefINPByDeclarationDataId()
         logger.info(SUCCESS_GET_TABLE, R_INP, inpMap.size())
+        println "Проверки на соответствие справочникам / Выгрузка справочника ИНП: " + (System.currentTimeMillis() - time);
+        logger.info("Проверки на соответствие справочникам / Выгрузка справочника ИНП: (" + (System.currentTimeMillis() - time) + " ms)");
 
         // Получим мапу ДУЛ
+        time = System.currentTimeMillis();
         dulMap = getRefDulByDeclarationDataId()
         logger.info(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
+        println "Проверки на соответствие справочникам / Выгрузка справочника ДУЛ: " + (System.currentTimeMillis() - time);
+        logger.info("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ: (" + (System.currentTimeMillis() - time) + " ms)");
 
         // Получим Мапу адресов
+        time = System.currentTimeMillis();
         personMap.each { personId, person ->
             // Сохраним идентификаторы адресов в коллекцию
             if (person.get(RF_ADDRESS).value != null) {
@@ -2384,10 +2458,9 @@ def checkDataReference(
             addressMap = getRefAddress(addressIds)
             logger.info(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
         }
+        println "Проверки на соответствие справочникам / Выгрузка справочника Адреса: " + (System.currentTimeMillis() - time);
+        logger.info("Проверки на соответствие справочникам / Выгрузка справочника Адреса: (" + (System.currentTimeMillis() - time) + " ms)");
     }
-
-    println "Проверки на соответствие справочникам / Выгрузка справочников: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочников: (" + (System.currentTimeMillis() - time) + " ms)");
 
     //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
 
@@ -2434,6 +2507,8 @@ def checkDataReference(
         } else {
             //Справочник ФЛ
             def personRecord = personMap.get(ndflPerson.personId)
+            // todo https://jira.aplana.com/browse/SBRFNDFL-543 Раскомментировать после обновления стенда
+//            def personRecord = personMap.get(personIdRecordIdMap.get(ndflPerson.personId))
 
             // Спр11 Фамилия (Обязательное поле)
             if (!ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {

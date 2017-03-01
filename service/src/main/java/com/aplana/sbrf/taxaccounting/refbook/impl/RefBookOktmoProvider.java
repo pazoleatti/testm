@@ -138,6 +138,11 @@ public class RefBookOktmoProvider extends AbstractRefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(String where, Date version) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         RefBook refBook = refBookDao.get(refBookId);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);

@@ -2261,7 +2261,7 @@ create table ref_book_id_tax_payer
   version       date                not null,
   status        number(1) default 0 not null,
   person_id     number(18)          not null,
-  inp           varchar2(14 char)   not null,
+  inp           varchar2(25 char)   not null,
   as_nu         number(18)          not null
 );
 comment on table ref_book_id_tax_payer is 'Идентификатор налогоплательщика';
