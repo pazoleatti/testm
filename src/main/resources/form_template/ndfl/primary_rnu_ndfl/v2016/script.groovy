@@ -109,7 +109,7 @@ def calculate() {
 
     List<NdflPerson> declarationFormPersonList = ndflPersonService.findNdflPerson(declarationDataId)
 
-    logger.info("В ПНФ найдено записей о физ.лицах: " + declarationFormPersonList.size() + "(" + (System.currentTimeMillis() - time) + " ms)");
+    logger.info("В ПНФ номер: "+declarationDataId+" найдено записей о физ.лицах: " + declarationFormPersonList.size() + "(" + (System.currentTimeMillis() - time) + " ms)");
 
     time = System.currentTimeMillis();
 
@@ -131,7 +131,7 @@ def calculate() {
 
         List<PersonData> refBookPersonList = refbookPersonData.get(declarationFormPerson.id);
 
-        Long refBookPersonId = refBookPersonService.identificatePerson(personData, refBookPersonList, SIMILARITY_THRESHOLD, new Logger());
+        Long refBookPersonId = refBookPersonService.identificatePerson(personData, refBookPersonList, SIMILARITY_THRESHOLD, logger);
 
         //после идентификации выставим ссылку на запись справочника, если есть
         personData.setRefBookPersonId(refBookPersonId)
@@ -249,8 +249,10 @@ def getRefInpMapByDeclarationDataId() {
 
     if (inpPersonRefBookCache.isEmpty()) {
         Long declarationDataId = declarationData.id;
+
         String whereClause = String.format("person_id in(select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_TAX_PAYER.id, whereClause)
+
         refBookMap.each { personId, refBookValues ->
             Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
             def inpList = inpPersonRefBookCache.get(refBookPersonId);
@@ -297,6 +299,7 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
     time = System.currentTimeMillis();
     //-----<INITIALIZE_CACHE_DATA_END>-----
 
+    int updCnt = 0;
     for (PersonData person : personList) {
         def personId = person.getRefBookPersonId();
 
@@ -350,8 +353,11 @@ def updateRefbookPersonData(List<PersonData> personList, Long asnuId) {
                     person.getLastName(),
                     person.getFirstName(),
                     person.getMiddleName()) + ". Изменения внесены в справочники: " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
+            updCnt++;
         }
     }
+
+    logger.info("Обновлено записей: " + updCnt);
 
     println "updateRefbookPersonData " + (System.currentTimeMillis() - time);
 
@@ -893,7 +899,7 @@ PersonData createPersonData(NdflPerson person, Long asnuId) {
     personData.taxPayerStatusId = findTaxpayerStatusByCode(person.getStatus());
     personData.citizenshipId = findCountryId(person.getCitizenship());
     personData.citizenship = person.getCitizenship();
-    person.status = person.getStatus();
+    personData.status = person.getStatus();
 
     //Идентификаторы
     personData.inp = person.getInp();
