@@ -115,10 +115,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "join form_kind d_kind on d_kind.id = d_dft.kind\n" +
             "join form_type d_type on d_type.id = d_dft.form_type_id\n" +
             "where \n" +
-            "%s --список пар \n" +
-            "and (period_end >= :periodStart or period_end is null) --дата открытия периода \n" +
-            "and (:periodEnd is null or period_start <= :periodEnd) --дата окончания периода (может быть передана null)\n" +
-            "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) --исключить этот период";
+            "%s \n" + //--список пар
+            "and (period_end >= :periodStart or period_end is null)  \n" + //--дата открытия периода
+            "and (:periodEnd is null or period_start <= :periodEnd) \n" + //--дата окончания периода (может быть передана null)
+            "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) "; //--исключить этот период
 
     private final static String GET_DECLARATION_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, s_d.name as s_department, \n" +
             "a.department_declaration_type_id as destination, null as d_kind, d_type.name as d_type, d_d.name as d_department, \n" +
@@ -132,10 +132,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "join department d_d on d_d.id = d_ddt.department_id\n" +
             "join declaration_type d_type on d_type.id = d_ddt.declaration_type_id\n" +
             "where \n" +
-            "%s --список пар\n" +
-            "and (period_end >= :periodStart or period_end is null) --дата открытия периода\n" +
-            "and (:periodEnd is null or period_start <= :periodEnd) --дата окончания периода (может быть передана null)\n" +
-            "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) --исключить этот период";
+            "%s \n" + //--список пар
+            "and (period_end >= :periodStart or period_end is null) \n" + //--дата открытия периода
+            "and (:periodEnd is null or period_start <= :periodEnd) \n" + //--дата окончания периода (может быть передана null)
+            "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) "; //--исключить этот период
 
     @Override
     public Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd,
@@ -180,20 +180,20 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
     private final static String GET_LOOPS = "with subset(src, tgt, period_start, period_end, base) as\n" +
             "(\n" +
-            "--существующие записи из таблицы соответствия\n" +
+            //"--существующие записи из таблицы соответствия\n" +
             "select tds.src_department_form_type_id, tds.department_form_type_id, period_start, period_end, 1 as base from form_data_source tds\n" +
-            "union all --записи через cross join для возможности фильтрации попарно (можно заменить за запрос из временной таблицы), фиктивные даты = даты для фильтрации \n" +
-            "select a.id, b.id, :periodStart, cast(:periodEnd as date), 0 as base from department_form_type a, department_form_type b where %s --список пар \n" +
+            "union all \n" + //--записи через cross join для возможности фильтрации попарно (можно заменить за запрос из временной таблицы), фиктивные даты = даты для фильтрации
+            "select a.id, b.id, :periodStart, cast(:periodEnd as date), 0 as base from department_form_type a, department_form_type b where %s \n" + //--список пар
             ")\n" +
             "select \n" +
-            "       CONNECT_BY_ROOT src as IN_src_department_form_type_id, --исходный источник\n" +
-            "       CONNECT_BY_ROOT tgt as IN_department_form_type_id, --исходный приемник\n" +
+            "       CONNECT_BY_ROOT src as IN_src_department_form_type_id, \n" + //--исходный источник
+            "       CONNECT_BY_ROOT tgt as IN_department_form_type_id, \n" + //--исходный приемник
             "       src as src_department_form_type_id, \n" +
             "       tgt as department_form_type_id\n" +
             "from subset \n" +
-            "where connect_by_iscycle = 1 -- есть зацикливание\n" +
-            "connect by nocycle prior src = tgt and (period_end >= :periodStart or period_end is null) and (:periodEnd is null or period_start <= :periodEnd) -- предыдущий источник = текущему приемнику, т.е. поднимаемся наверх\n" +
-            "start with base  = 0 -- начать с тех записей, которые были добавлены в граф фиктивно";
+            "where connect_by_iscycle = 1 \n" + // -- есть зацикливание
+            "connect by nocycle prior src = tgt and (period_end >= :periodStart or period_end is null) and (:periodEnd is null or period_start <= :periodEnd) \n" + //-- предыдущий источник = текущему приемнику, т.е. поднимаемся наверх
+            "start with base  = 0 "; //-- начать с тех записей, которые были добавлены в граф фиктивно
 
     @Override
     public Map<SourcePair, SourcePair> getLoops(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd) {
@@ -368,9 +368,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "  (SELECT period_end + interval '1' DAY, lead(period_start) over (ORDER BY period_start) - interval '1' DAY FROM form_data_src\n" +
             "   UNION ALL \n" +
             "   SELECT :newPeriodStart AS period_start, min(period_start) - interval '1' DAY\n" +
-            "   FROM form_data_src -- дата начала нового периода\n" +
+            "   FROM form_data_src \n" + //-- дата начала нового периода
             "   UNION ALL \n" +
-            "   SELECT max(coalesce(period_end, to_date('30.12.9999', 'DD.MM.YYYY'))) + interval '1' DAY AS period_start, to_date(:newPeriodEnd, 'DD.MM.YYYY') period_end FROM form_data_src -- дата окончания нового периода\n" +
+            "   SELECT max(coalesce(period_end, to_date('30.12.9999', 'DD.MM.YYYY'))) + interval '1' DAY AS period_start, to_date(:newPeriodEnd, 'DD.MM.YYYY') period_end FROM form_data_src\n" + //-- дата окончания нового периода
             ")\n" +
             "SELECT *\n" +
             "FROM form_data_src_extended\n" +

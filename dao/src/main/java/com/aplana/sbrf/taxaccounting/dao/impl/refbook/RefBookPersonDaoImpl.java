@@ -9,14 +9,17 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrey Drunk
@@ -46,15 +49,15 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         SQL.append("  GROUP BY record_id \n");
         SQL.append("  ) \n");
         SQL.append("SELECT \n");
-        SQL.append("  --фл \n");
+        //SQL.append("  --фл \n");
         SQL.append("  dubl.last_name AS ndfl_person_ln, dubl.id AS ndfl_person_id, person.id AS person_id, person.record_id AS person_record_id, person.last_name AS last_name, person.first_name AS first_name, person.middle_name AS middle_name, person.sex AS sex, person.birth_date AS birth_date, person.inn AS inn, person.inn_foreign AS inn_foreign, person.snils AS snils, person.pension AS pension, person.medical AS midical, person.social AS social, person.employee AS employee, \n");
-        SQL.append("  --ссылки на записи \n");
+        //SQL.append("  --ссылки на записи \n");
         SQL.append("  person.citizenship AS citizenship_ref_id, person.taxpayer_state AS status_ref_id, person.version, \n");
-        SQL.append("  --документы \n");
+        //SQL.append("  --документы \n");
         SQL.append("  person_doc.doc_number AS document_number, person_doc.doc_id AS document_type_ref_id, \n");
-        SQL.append("  --идентификаторы \n");
+        //SQL.append("  --идентификаторы \n");
         SQL.append("  taxpayer_id.id AS inp_id, taxpayer_id.inp AS inp, taxpayer_id.as_nu AS asnu_ref_id, \n");
-        SQL.append("  -- адрес \n");
+        //SQL.append("  -- адрес \n");
         SQL.append("  addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id, addr.address \n");
         SQL.append("FROM t \n");
         SQL.append("JOIN \n");
@@ -123,15 +126,15 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         SQL.append("  GROUP BY record_id \n");
         SQL.append("  ) \n");
         SQL.append("SELECT \n");
-        SQL.append("  --фл \n");
+        //SQL.append("  --фл \n");
         SQL.append("  dubl.last_name AS ndfl_person_ln, dubl.id AS ndfl_person_id, person.id AS person_id, person.record_id AS person_record_id, person.last_name AS last_name, person.first_name AS first_name, person.middle_name AS middle_name, person.sex AS sex, person.birth_date AS birth_date, person.inn AS inn, person.inn_foreign AS inn_foreign, person.snils AS snils, person.pension AS pension, person.medical AS midical, person.social AS social, person.employee AS employee, \n");
-        SQL.append("  --ссылки на записи \n");
+        //SQL.append("  --ссылки на записи \n");
         SQL.append("  person.citizenship AS citizenship_ref_id, person.taxpayer_state AS status_ref_id, person.version, \n");
-        SQL.append("  --документы \n");
+        //SQL.append("  --документы \n");
         SQL.append("  person_doc.doc_number AS document_number, person_doc.doc_id AS document_type_ref_id, \n");
-        SQL.append("  --идентификаторы \n");
+        //SQL.append("  --идентификаторы \n");
         SQL.append("  NULL AS inp, NULL AS asnu_ref_id, \n");
-        SQL.append("  -- адрес \n");
+        //SQL.append("  -- адрес \n");
         SQL.append("  addr.id AS addr_id, addr.address_type, addr.country_id, addr.region_code, addr.postal_code, addr.district, addr.city, addr.locality, addr.street, addr.house, addr.build, addr.appartment, addr.status, addr.record_id, addr.address \n");
         SQL.append("FROM t \n");
         SQL.append("JOIN \n");
