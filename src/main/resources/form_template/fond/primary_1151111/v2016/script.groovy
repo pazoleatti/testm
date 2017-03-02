@@ -228,6 +228,8 @@ switch (formDataEvent) {
 
 @Field final String PERSONAL_DATA_TOTAL_ROW_LABEL = "Всего за последние три месяца расчетного (отчетного) периода"
 
+@Field final String TRANSPORT_FILE_TEMPLATE = "ТФ"
+
 // TODO Серия/номер ДУЛ, ИНН, СНИЛС должны быть текстовыми ячейками. Иначе пропадают ведущие нули.
 // TODO варнинг ДА-НЕТ при открытие файла
 // TODO долго на 20к
@@ -445,6 +447,9 @@ def createRowColumns() {
 def fillGeneralList(final XSSFWorkbook workbook) {
     // Получчить титульный лист из шаблона
     def sheet = workbook.getSheet(COMMON_SHEET)
+    // Дата формирования формы
+    println declarationData.id
+    def declarationDataFile = declarationService.findFilesWithSpecificType(declarationData.id, TRANSPORT_FILE_TEMPLATE).get(0)
     // Номер корректироки
     def nomCorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
     // получить отчетный год
@@ -461,10 +466,7 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     println departmentParamIncomeRow
     //def presentPlaceReference = departmentParamIncomeRow?.PRESENT_PLACE?.value
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
-    /*if (presentPlaceReference != null) {
-        poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
 
-    }*/
     // Место предоставления
     def poMestuCodeParam = poMestuParam?.get(RF_CODE)?.value
 
@@ -474,9 +476,8 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     sheet.getRow(5).getCell(1).setCellValue("5.01")
 
     // Сведения о документе
-    // TODO уточнить получение значения
     sheet.getRow(8).getCell(1).setCellValue("1151111")
-    sheet.getRow(9).getCell(1).setCellValue(new Date().format("dd.MM.yyyy"))
+    sheet.getRow(9).getCell(1).setCellValue(declarationDataFile.date.format("dd.MM.yyyy"))
     sheet.getRow(10).getCell(1).setCellValue(nomCorr?.toString())
     sheet.getRow(11).getCell(1).setCellValue(period)
     sheet.getRow(12).getCell(1).setCellValue(reportYear?.toString())
