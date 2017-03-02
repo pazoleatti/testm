@@ -943,33 +943,77 @@ def fillCellsOfRaschsvUplPrevOss(RaschsvUplPrevOss raschsvUplPrevOss, XSSFRow ro
  */
 def fillOpsOms(raschsvObyazPlatSv, XSSFWorkbook workbook) {
     raschsvObyazPlatSv.raschsvSvOpsOmsList.each { svOpsOms ->
-        //TODO clone sheet
-        def sheet = workbook.getSheet(OPS_OMS)
+        def defaultSheetIndex = workbook.getSheetIndex(OPS_OMS)
+        def sheet = workbook.cloneSheet(defaultSheetIndex)
+        workbook.setSheetOrder(sheet.sheetName, defaultSheetIndex)
+        workbook.setSheetName(defaultSheetIndex, OPS_OMS + " " + svOpsOms.tarifPlat)
 
-        def raschsvSvOpsOmsRasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_OPS == it.nodeName}
-        def raschsvSvOpsOmsRaschKolOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
-        def raschsvSvOpsOmsRaschKolNach = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_LIC_NACH_SV_VS == it.nodeName}?.raschsvKolLicTip
-        def raschsvSvOpsOmsRaschKolBas = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_PREV_BAZ_OPS == it.nodeName}?.raschsvKolLicTip
+        fillOpsOmsSingleValue(sheet, 7, svOpsOms.tarifPlat)
 
-        fillOpsOmsKolRow(sheet, 14, raschsvSvOpsOmsRaschKolOverall)
-        fillOpsOmsKolRow(sheet, 15, raschsvSvOpsOmsRaschKolNach)
-        fillOpsOmsKolRow(sheet, 16, raschsvSvOpsOmsRaschKolBas)
+        // Расчет сумм взносов на обязательное пенсионное страхование
+        def raschsvSvOpsRasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_OPS == it.nodeName}
 
-        def raschsvSvOpsOmsRaschSumNachislFl= raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumOblozen = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumBazNachisl = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumBazPrevysh = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumNachisl = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumNachislNePrev = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_NE_PREV == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumNachislPrev = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_PREV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschKolOverall = raschsvSvOpsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
+        def raschsvSvOpsRaschKolNach = raschsvSvOpsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_LIC_NACH_SV_VS == it.nodeName}?.raschsvKolLicTip
+        def raschsvSvOpsRaschKolBas = raschsvSvOpsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_PREV_BAZ_OPS == it.nodeName}?.raschsvKolLicTip
+        fillOpsOmsKolRow(sheet, 14, raschsvSvOpsRaschKolOverall)
+        fillOpsOmsKolRow(sheet, 15, raschsvSvOpsRaschKolNach)
+        fillOpsOmsKolRow(sheet, 16, raschsvSvOpsRaschKolBas)
 
-        fillOpsOmsSumRow(sheet, 21, raschsvSvOpsOmsRaschSumNachislFl)
-        fillOpsOmsSumRow(sheet, 22, raschsvSvOpsOmsRaschSumOblozen)
-        fillOpsOmsSumRow(sheet, 23, raschsvSvOpsOmsRaschSumBazNachisl)
-        fillOpsOmsSumRow(sheet, 24, raschsvSvOpsOmsRaschSumBazPrevysh)
-        fillOpsOmsSumRow(sheet, 25, raschsvSvOpsOmsRaschSumNachisl)
-        fillOpsOmsSumRow(sheet, 26, raschsvSvOpsOmsRaschSumNachislNePrev)
-        fillOpsOmsSumRow(sheet, 27, raschsvSvOpsOmsRaschSumNachislPrev)
+        def raschsvSvOpsRaschSumNachislFl= raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumOblozen = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumBazNachisl = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumBazPrevysh = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumNachisl = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumNachislNePrev = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_NE_PREV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumNachislPrev = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_PREV == it.nodeName}?.raschsvSvSum1Tip
+        fillOpsOmsSumRow(sheet, 21, raschsvSvOpsRaschSumNachislFl)
+        fillOpsOmsSumRow(sheet, 22, raschsvSvOpsRaschSumOblozen)
+        fillOpsOmsSumRow(sheet, 23, raschsvSvOpsRaschSumBazNachisl)
+        fillOpsOmsSumRow(sheet, 24, raschsvSvOpsRaschSumBazPrevysh)
+        fillOpsOmsSumRow(sheet, 25, raschsvSvOpsRaschSumNachisl)
+        fillOpsOmsSumRow(sheet, 26, raschsvSvOpsRaschSumNachislNePrev)
+        fillOpsOmsSumRow(sheet, 27, raschsvSvOpsRaschSumNachislPrev)
+
+        // Расчет сумм взносов на обязательное медицинское страхование
+        def raschsvSvOmsRasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_OMS == it.nodeName}
+
+        def raschsvSvOmsRaschKolOverall = raschsvSvOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
+        def raschsvSvOmsRaschKolNach = raschsvSvOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_LIC_NACH_SV_VS == it.nodeName}?.raschsvKolLicTip
+        fillOpsOmsKolRow(sheet, 34, raschsvSvOmsRaschKolOverall)
+        fillOpsOmsKolRow(sheet, 35, raschsvSvOmsRaschKolNach)
+
+        def raschsvSvOmsRaschSumNachislFl = raschsvSvOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOmsRaschSumOblozen = raschsvSvOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOmsRaschSumBazNachisl = raschsvSvOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOmsRaschSumBazPrevysh = raschsvSvOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
+        fillOpsOmsSumRow(sheet, 40, raschsvSvOmsRaschSumNachislFl)
+        fillOpsOmsSumRow(sheet, 41, raschsvSvOmsRaschSumOblozen)
+        fillOpsOmsSumRow(sheet, 42, raschsvSvOmsRaschSumBazNachisl)
+        fillOpsOmsSumRow(sheet, 43, raschsvSvOmsRaschSumBazPrevysh)
+
+        // Расчет сумм страховых взносов по дополнительному тарифу... указанных в пунктах 1 и 2 статьи 428 Налогового кодекса
+        def raschsvSvDop428Rasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_428_12 == it.nodeName}
+
+        fillOpsOmsSingleValue(sheet, 49, raschsvSvDop428Rasch?.prOsnSvDop)
+
+        def raschsvSvDop428RaschKolOverall = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
+        fillOpsOmsKolRow(sheet, 54, raschsvSvDop428RaschKolOverall)
+
+        def raschsvSvDop428RaschSumNachislFl = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvDop428RaschSumOblozen = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvDop428RaschSumBazNachisl = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvDop428RaschSumBazPrevysh = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
+        fillOpsOmsSumRow(sheet, 59, raschsvSvDop428RaschSumNachislFl)
+        fillOpsOmsSumRow(sheet, 60, raschsvSvDop428RaschSumOblozen)
+        fillOpsOmsSumRow(sheet, 61, raschsvSvDop428RaschSumBazNachisl)
+        fillOpsOmsSumRow(sheet, 62, raschsvSvDop428RaschSumBazPrevysh)
+    }
+
+    // Удаляем старый лист, из которого клонировали
+    if (raschsvObyazPlatSv.raschsvSvOpsOmsList.size() > 0) {
+        def defaultSheetIndex = workbook.getSheetIndex(OPS_OMS)
+        workbook.removeSheetAt(defaultSheetIndex)
     }
 }
 
@@ -1029,6 +1073,17 @@ def fillOpsOmsSumRow(sheet, pointer, sumLicTip) {
     cell5.setCellValue(sumLicTip?.sum3mPosl3m ?: "")
 }
 
+/**
+ * Заполнение одиночной ячейки
+ */
+def fillOpsOmsSingleValue(sheet, pointer, value) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = sheet.getRow(pointer).createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(value ?: "")
+}
 
 /****************************************************************************
  *  Блок стилизации                                                         *
