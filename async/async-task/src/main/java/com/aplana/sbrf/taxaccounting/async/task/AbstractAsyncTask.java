@@ -9,12 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.NotificationService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
@@ -22,7 +17,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionException;
 
-import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,7 +50,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
-    private RefBookFactory refBookFactory;
+    protected TAUserService userService;
 
     protected class TaskStatus {
         private final String reportId;
@@ -106,6 +100,12 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
+    private static final ThreadLocal<SimpleDateFormat> sdf_time = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm:ss.SSS");
         }
     };
 
@@ -200,6 +200,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
         final Logger logger = new Logger();
+        final Date startDate = new Date();
+        logger.info("Начало выполнения операции %s", sdf_time.get().format(startDate));
         LOG.info(String.format("Запущена асинхронная задача с ключом %s и датой начала %s (%s)", lock, sdf.get().format(lockDate), lockDate.getTime()));
         lockService.updateState(lock, lockDate, LockData.State.STARTED.getText());
         final TaskStatus taskStatus;
@@ -227,6 +229,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 threadRunner.interrupt();
                                 threadRunner.join();
                             }
+                            Date endDate = new Date();
+                            logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
                             if (!lockService.isLockExists(lock, lockDate)) {
                                 //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                                 //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
@@ -251,23 +255,17 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                         } else {
                                             lockService.updateState(lock, lockDate, LockData.State.SENDING_ERROR_MSGS.getText());
                                         }
-                                        if (e instanceof ServiceLoggerException && ((ServiceLoggerException) e).getUuid() != null) {
-                                            String msg = getErrorMsg(params, true);
-                                            Logger logger1 = new Logger();
-                                            logger1.error(msg);
-                                            if (e.getMessage() != null && !e.getMessage().isEmpty()) logger1.error(e);
-                                            sendNotifications(lock, msg, logEntryService.addFirst(logger1.getEntries(), ((ServiceLoggerException) e).getUuid()), NotificationType.DEFAULT, null);
-                                        } else if (e instanceof ScriptServiceException) {
-                                            String msg = getErrorMsg(params, false);
-                                            logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
-                                            if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
-                                            sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
+                                        Date endDate = new Date();
+                                        String msg;
+                                        if (e instanceof ScriptServiceException) {
+                                            msg = getErrorMsg(params, false);
                                         } else {
-                                            String msg = getErrorMsg(params, true);
-                                            logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
-                                            if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
-                                            sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
+                                            msg = getErrorMsg(params, true);
                                         }
+                                        logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
+                                        if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
+                                        logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
+                                        sendNotifications(lock, msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
                                         return null;
                                     }
                                 });
@@ -395,32 +393,11 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         LOG.info(String.format("Для задачи с ключом %s закончена рассылка уведомлений", lock));
     }
 
-    /**
-     * Формирует сообщение:
-     * Налоговый орган: "%s", КПП: "%s", ОКТМО: "%s", АСНУ: "%s"
-     */
-    public String formatDeclarationDataInfo(DeclarationData declarationData) {
-        List<String> messages = new ArrayList<String>();
-
-        if (declarationData.getTaxOrganCode() != null) {
-            messages.add(String.format("Налоговый орган: \"%s\"", declarationData.getTaxOrganCode()));
-        }
-
-        if (declarationData.getKpp() != null) {
-            messages.add(String.format("КПП: \"%s\"", declarationData.getKpp()));
-        }
-
-        if (declarationData.getOktmo() != null) {
-            messages.add(String.format("ОКТМО: \"%s\"", declarationData.getOktmo()));
-        }
-
-        if (declarationData.getAsnuId() != null) {
-            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
-            String asnuName = asnuProvider.getRecordData(declarationData.getAsnuId()).get("NAME").getStringValue();
-
-            messages.add(String.format("АСНУ: \"%s\"", asnuName));
-        }
-
-        return StringUtils.join(messages.toArray(), ", ", null);
+    protected TAUserInfo getUserInfo(Map<String, Object> params) {
+        int userId = (Integer)params.get(USER_ID.name());
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(userId));
+        return userInfo;
     }
+
 }
