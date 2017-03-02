@@ -65,8 +65,10 @@ public class RaschsvSvPrimTarif13422DaoImpl extends AbstractDao implements Rasch
     private static final String SQL_INSERT_SV_REEESTR_MDO = "INSERT INTO " + RaschsvSvReestrMdo.TABLE_NAME +
             " (" + SV_REESTR_MDO_COLS + ") VALUES (" + SV_REESTR_MDO_FIELDS + ")";
 
-    private static final String SQL_SELECT_TARIF = "SELECT " + TARIF_COLS + " FROM " + RaschsvSvPrimTarif13422.TABLE_NAME +
-            " WHERE " + RaschsvSvPrimTarif13422.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvPrimTarif13422.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvSvPrimTarif13422.COLUMNS, "pt.") +
+            " FROM raschsv_sv_prim_tarif1_3_422 pt " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON pt.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     private static final String SQL_SELECT_SVED_OBUCH = "SELECT " + SVED_OBUCH_COLS + " FROM " + RaschsvSvedObuch.TABLE_NAME +
             " WHERE " + RaschsvSvedObuch.COL_RASCHSV_SV_PRIM_TARIF1_422_ID + " = :" + RaschsvSvedObuch.COL_RASCHSV_SV_PRIM_TARIF1_422_ID;
@@ -205,12 +207,13 @@ public class RaschsvSvPrimTarif13422DaoImpl extends AbstractDao implements Rasch
         return raschsvVyplatIt422.getRaschsvSvSum1Tip().getId();
     }
 
-    public RaschsvSvPrimTarif13422 findRaschsvSvPrimTarif13422(Long obyazPlatSvId) {
+    @Override
+    public RaschsvSvPrimTarif13422 findRaschsvSvPrimTarif13422(Long declarationDataId) {
         try {
             SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue(RaschsvSvPrimTarif13422.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                    .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
             RaschsvSvPrimTarif13422 raschsvSvPrimTarif13422 =
-                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_TARIF, params, new RaschsvSvPrimTarif13422RowMapper());
+                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvSvPrimTarif13422RowMapper());
 
             // Выборка из СвСум1Тип
             List<RaschsvSvSum1Tip> raschsvSvSum1TipList = findRaschsvSvSum1Tip(raschsvSvPrimTarif13422.getId());

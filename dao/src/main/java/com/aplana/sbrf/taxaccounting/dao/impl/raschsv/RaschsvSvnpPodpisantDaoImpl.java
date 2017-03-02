@@ -53,6 +53,7 @@ public class RaschsvSvnpPodpisantDaoImpl extends AbstractDao implements RaschsvS
         return raschsvSvnpPodpisant.getId();
     }
 
+    @Override
     public RaschsvSvnpPodpisant findRaschsvSvnpPodpisant(Long declarationDataId) {
         try {
             SqlParameterSource params = new MapSqlParameterSource()

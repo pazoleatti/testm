@@ -91,11 +91,11 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
             raschsvObyazPlatSv.setRaschsvRashOssZak(raschsvRashOssZakDao.findRaschsvRashOssZak(declarationDataId));
             raschsvObyazPlatSv.setRaschsvVyplFinFb(raschsvVyplFinFbDao.findRaschsvVyplFinFb(declarationDataId));
             raschsvObyazPlatSv.setRaschsvPravTarif31427(raschsvPravTarif31427Dao.findRaschsvPravTarif31427(declarationDataId));
-            raschsvObyazPlatSv.setRaschsvPravTarif51427(raschsvPravTarif51427Dao.findRaschsvPravTarif51427(raschsvObyazPlatSv.getId()));
-            raschsvObyazPlatSv.setRaschsvPravTarif71427(raschsvPravTarif71427Dao.findRaschsvPravTarif71427(raschsvObyazPlatSv.getId()));
-            raschsvObyazPlatSv.setRaschsvSvPrimTarif91427(raschsvSvPrimTarif91427Dao.findRaschsvSvPrimTarif91427(raschsvObyazPlatSv.getId()));
-            raschsvObyazPlatSv.setRaschsvSvPrimTarif22425(raschsvSvPrimTarif22425Dao.findRaschsvSvPrimTarif22425(raschsvObyazPlatSv.getId()));
-            raschsvObyazPlatSv.setRaschsvSvPrimTarif13422(raschsvSvPrimTarif13422Dao.findRaschsvSvPrimTarif13422(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvPravTarif51427(raschsvPravTarif51427Dao.findRaschsvPravTarif51427(declarationDataId));
+            raschsvObyazPlatSv.setRaschsvPravTarif71427(raschsvPravTarif71427Dao.findRaschsvPravTarif71427(declarationDataId));
+            raschsvObyazPlatSv.setRaschsvSvPrimTarif91427(raschsvSvPrimTarif91427Dao.findRaschsvSvPrimTarif91427(declarationDataId));
+            raschsvObyazPlatSv.setRaschsvSvPrimTarif22425(raschsvSvPrimTarif22425Dao.findRaschsvSvPrimTarif22425(declarationDataId));
+            raschsvObyazPlatSv.setRaschsvSvPrimTarif13422(raschsvSvPrimTarif13422Dao.findRaschsvSvPrimTarif13422(declarationDataId));
 
             return raschsvObyazPlatSv;
         } catch (EmptyResultDataAccessException e) {

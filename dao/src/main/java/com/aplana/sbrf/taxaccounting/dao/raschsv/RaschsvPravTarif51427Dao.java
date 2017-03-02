@@ -16,8 +16,8 @@ public interface RaschsvPravTarif51427Dao {
 
     /**
      * Выборка из ПравТариф5.1.427
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    RaschsvPravTarif51427 findRaschsvPravTarif51427(Long obyazPlatSvId);
+    RaschsvPravTarif51427 findRaschsvPravTarif51427(Long declarationDataId);
 }

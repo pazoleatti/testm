@@ -27,7 +27,7 @@ public class RaschsvPravTarif31427DaoImpl extends AbstractDao implements Raschsv
             " (" + PRAV_TARIF_31427_COLS + ") VALUES (" + PRAV_TARIF_31427_FIELDS + ")";
 
     private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvPravTarif31427.COLUMNS, "pt.") +
-            "FROM raschsv_prav_tarif3_1_427 pt"  +
+            " FROM raschsv_prav_tarif3_1_427 pt"  +
             " INNER JOIN raschsv_obyaz_plat_sv ob ON pt.raschsv_obyaz_plat_sv_id = ob.id " +
             " WHERE ob.declaration_data_id = :declaration_data_id";
 
