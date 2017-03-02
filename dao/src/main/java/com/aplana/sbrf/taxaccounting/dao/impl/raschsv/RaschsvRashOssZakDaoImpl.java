@@ -37,7 +37,7 @@ public class RaschsvRashOssZakDaoImpl extends AbstractDao implements RaschsvRash
     private static final String SQL_INSERT_OSS_ZAK_RASH = "INSERT INTO " + RaschsvRashOssZakRash.TABLE_NAME +
             " (" + OSS_ZAK_RASH_COLS + ") VALUES (" + OSS_ZAK_RASH_FIELDS + ")";
 
-    private static final String SQL_SELECT_OSS_ZAK = "SELECT " + SqlUtils.getColumnsToString(RaschsvRashOssZak.COLUMNS, "oss.") +
+    private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvRashOssZak.COLUMNS, "oss.") +
             " FROM raschsv_rash_oss_zak oss " +
             " INNER JOIN raschsv_obyaz_plat_sv ob ON oss.raschsv_obyaz_plat_sv_id = ob.id " +
             " WHERE ob.declaration_data_id = :declaration_data_id";
@@ -102,7 +102,7 @@ public class RaschsvRashOssZakDaoImpl extends AbstractDao implements RaschsvRash
 
             // Выборка из РасхОССЗак
             RaschsvRashOssZak raschsvRashOssZak =
-                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_OSS_ZAK, params, new RaschsvRashOssZakRowMapper());
+                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvRashOssZakRowMapper());
 
             raschsvRashOssZak.setRaschsvRashOssZakRashList(findRaschsvRashOssZakRash(raschsvRashOssZak.getId()));
 

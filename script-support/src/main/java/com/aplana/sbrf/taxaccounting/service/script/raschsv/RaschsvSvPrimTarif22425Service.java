@@ -15,4 +15,11 @@ public interface RaschsvSvPrimTarif22425Service {
      * @return
      */
     Long insertRaschsvSvPrimTarif22425(RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425);
+
+    /**
+     * Выборка из СвПримТариф2.2.425
+     * @param declarationDataId
+     * @return
+     */
+    RaschsvSvPrimTarif22425 findRaschsvSvPrimTarif22425(Long declarationDataId);
 }

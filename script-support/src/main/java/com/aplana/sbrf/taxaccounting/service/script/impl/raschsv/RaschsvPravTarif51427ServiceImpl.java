@@ -12,7 +12,13 @@ public class RaschsvPravTarif51427ServiceImpl implements RaschsvPravTarif51427Se
     @Autowired
     RaschsvPravTarif51427Dao raschsvPravTarif51427Dao;
 
+    @Override
     public Long insertRaschsvPravTarif51427(RaschsvPravTarif51427 raschsvPravTarif51427) {
         return raschsvPravTarif51427Dao.insertRaschsvPravTarif51427(raschsvPravTarif51427);
+    }
+
+    @Override
+    public RaschsvPravTarif51427 findRaschsvPravTarif51427(Long declarationDataId) {
+        return raschsvPravTarif51427Dao.findRaschsvPravTarif51427(declarationDataId);
     }
 }

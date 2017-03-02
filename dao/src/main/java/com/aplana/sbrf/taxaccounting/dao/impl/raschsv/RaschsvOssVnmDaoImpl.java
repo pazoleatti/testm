@@ -77,7 +77,7 @@ public class RaschsvOssVnmDaoImpl extends AbstractDao implements RaschsvOssVnmDa
     private static final String SQL_INSERT_OSS_VNM_SUM = "INSERT INTO " + RaschsvOssVnmSum.TABLE_NAME +
             " (" + OSS_VNM_SUM_COLS + ") VALUES (" + OSS_VNM_SUM_FIELDS + ")";
 
-    private static final String SQL_SELECT_OSS_VNM = "SELECT " + SqlUtils.getColumnsToString(RaschsvOssVnm.COLUMNS, "oss.") +
+    private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvOssVnm.COLUMNS, "oss.") +
             " FROM raschsv_oss_vnm oss " +
             " INNER JOIN raschsv_obyaz_plat_sv ob ON oss.raschsv_obyaz_plat_sv_id = ob.id " +
             " WHERE ob.declaration_data_id = :declaration_data_id";
@@ -240,7 +240,7 @@ public class RaschsvOssVnmDaoImpl extends AbstractDao implements RaschsvOssVnmDa
                     .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
             // Выборка из РасчСВ_ОСС.ВНМ
             RaschsvOssVnm raschsvOssVnm =
-                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_OSS_VNM, params, new RaschsvOssVnmRowMapper());
+                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvOssVnmRowMapper());
 
             // Выборка из УплСВПрев
             raschsvOssVnm.setRaschsvUplSvPrevList(findRaschsvUplSvPrev(raschsvOssVnm.getRaschsvObyazPlatSvId()));

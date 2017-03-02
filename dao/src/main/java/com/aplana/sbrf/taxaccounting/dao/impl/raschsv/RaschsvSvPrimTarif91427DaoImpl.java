@@ -56,8 +56,10 @@ public class RaschsvSvPrimTarif91427DaoImpl extends AbstractDao implements Rasch
     private static final String SQL_INSERT_IT = "INSERT INTO " + RaschsvVyplatIt427.TABLE_NAME +
             " (" + VYPLAT_IT_COLS + ") VALUES (" + VYPLAT_IT_FIELDS + ")";
 
-    private static final String SQL_SELECT_TARIF = "SELECT " + TARIF_COLS + " FROM " + RaschsvSvPrimTarif91427.TABLE_NAME +
-            " WHERE " + RaschsvSvPrimTarif91427.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvPrimTarif91427.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvSvPrimTarif91427.COLUMNS, "pt.") +
+            " FROM raschsv_sv_prim_tarif9_1_427 pt " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON pt.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     private static final String SQL_SELECT_IT = "SELECT " + VYPLAT_IT_COLS + " FROM " + RaschsvVyplatIt427.TABLE_NAME +
             " WHERE " + RaschsvVyplatIt427.COL_RASCHSV_SV_PRIM_TARIF9_427_ID + " = :" + RaschsvVyplatIt427.COL_RASCHSV_SV_PRIM_TARIF9_427_ID;
@@ -149,12 +151,12 @@ public class RaschsvSvPrimTarif91427DaoImpl extends AbstractDao implements Rasch
         return raschsvVyplatIt427.getRaschsvSvSum1Tip().getId();
     }
 
-    public RaschsvSvPrimTarif91427 findRaschsvSvPrimTarif91427(Long obyazPlatSvId) {
+    public RaschsvSvPrimTarif91427 findRaschsvSvPrimTarif91427(Long declarationDataId) {
         try {
             SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue(RaschsvSvPrimTarif91427.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                    .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
             RaschsvSvPrimTarif91427 raschsvSvPrimTarif91427 =
-                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_TARIF, params, new RaschsvSvPrimTarif91427RowMapper());
+                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvSvPrimTarif91427RowMapper());
 
             // Выборка из СвСум1Тип
             List<RaschsvSvSum1Tip> raschsvSvSum1TipList = findRaschsvSvSum1Tip(raschsvSvPrimTarif91427.getId());

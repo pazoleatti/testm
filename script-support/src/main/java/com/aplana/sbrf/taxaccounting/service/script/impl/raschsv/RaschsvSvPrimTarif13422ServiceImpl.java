@@ -12,7 +12,12 @@ public class RaschsvSvPrimTarif13422ServiceImpl implements RaschsvSvPrimTarif134
     @Autowired
     private RaschsvSvPrimTarif13422Dao raschsvSvPrimTarif13422Dao;
 
+    @Override
     public Long insertRaschsvSvPrimTarif13422(RaschsvSvPrimTarif13422 raschsvSvPrimTarif13422) {
         return raschsvSvPrimTarif13422Dao.insertRaschsvSvPrimTarif13422(raschsvSvPrimTarif13422);
+    }
+
+    public RaschsvSvPrimTarif13422 findRaschsvSvPrimTarif13422(Long declarationDataId) {
+        return raschsvSvPrimTarif13422Dao.findRaschsvSvPrimTarif13422(declarationDataId);
     }
 }
