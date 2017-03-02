@@ -312,7 +312,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "dft.department_code, \n" +
                     "dft.department_garant_use,\n" +
                     "dft.department_sunr_use,\n" +
-                    "-- Для исполнителя\n" +
+                    //"-- Для исполнителя\n" +
                     "dp.ID        AS performer_id,\n" +
                     "dp.NAME      AS performer_name,\n" +
                     "dp.PARENT_ID AS performer_parent_id,\n" +
@@ -323,7 +323,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "dp.REGION_ID AS performer_region_id,\n" +
                     "dp.IS_ACTIVE AS performer_is_active,\n" +
                     "dp.CODE      AS performer_code,\n" +
-                    "-- Для сортировки\n" +
+                    //"-- Для сортировки\n" +
                     "dp.NAME  AS performer, \n" +
                     "p.FULL_NAME AS performer_full_name \n" +
                     "FROM (" +
@@ -334,7 +334,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "  dft.KIND,\n" +
                     "  ft.NAME,\n" +
                     "  ft.ID AS type_id,\n" +
-                    "  -- Для подразделения\n" +
+                    //"  -- Для подразделения\n" +
                     "  d.ID         AS department_id,\n" +
                     "  d.NAME       AS department_name,\n" +
                     "  d.PARENT_ID  AS department_parent_id,\n" +
@@ -347,7 +347,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "  d.CODE       AS department_code,\n" +
                     "  d.GARANT_USE AS department_garant_use,\n" +
                     "  d.SUNR_USE   AS department_sunr_use,\n" +
-                    "  -- Для сортировки\n" +
+                    //"  -- Для сортировки\n" +
                     "  ft.NAME  AS form_type,\n" +
                     "  dft.KIND AS form_kind,\n" +
                     "  d.NAME   AS department,\n" +

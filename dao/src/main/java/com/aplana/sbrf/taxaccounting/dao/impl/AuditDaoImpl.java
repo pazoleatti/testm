@@ -74,7 +74,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "                         JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
                     "                         JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
                     "                         left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = src.id \n" +
-                    "                       WHERE %s and %s) --10\n" +
+                    "                       WHERE %s and %s) \n" + //--10
                     "  ,\n" +
                     "    source_filter_4K AS (SELECT DISTINCT\n" +
                     "                           src.id            id,\n" +
@@ -87,7 +87,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "                           JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
                     "                           JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
                     "                           left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = src.id \n" +
-                    "                         WHERE %s and %s),--55 и 10\n" +
+                    "                         WHERE %s and %s),\n" + //--55 и 10
                     "    performer_filter_3K AS (SELECT\n" +
                     "                           src.id            id,\n" +
                     "                           src.FORM_TYPE_ID  form_type_id,\n" +
@@ -95,7 +95,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "                           src.DEPARTMENT_ID dep_id\n" +
                     "                         FROM department_form_type src\n" +
                     "                         left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = src.id \n" +
-                    "                         WHERE %s and %s) --55\n";
+                    "                         WHERE %s and %s) \n"; //--55
 
     private static final String SQL_CONTROL =
             SQL_FILTERS_FOR_CONTROL +
