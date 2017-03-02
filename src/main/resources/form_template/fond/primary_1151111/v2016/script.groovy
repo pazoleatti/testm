@@ -3227,6 +3227,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 /**
  * Получить "Физические лица" getRefPersons
+ * После проведения РАСЧЕТА raschsv_pers_sv_strah_lic.person_id ВСЕГДА будет ссылаться на актуальную записи справочника ФЛ
  * @return
  */
 Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
@@ -4008,28 +4009,17 @@ def checkDataDBPerson() {
     def citizenshipCodeMap = getRefCitizenship();
     def citizenshipCodeActualList = getActualRefCitizenship();
 
-    // Физические лица
-    def personIds = getPersonIds(raschsvPersSvStrahLicList)
-    def personMap = [:]
+    // ФЛ Map<person_id, RefBook>
+    def personMap = getRefPersonsByDeclarationDataId()
 
-    // ДУЛ <person_id, массив_ДУЛ>
-    def dulMap = [:]
-
-    if (!personIds.isEmpty()) {
-        personMap = getActualRefPersons(personIds)
-        if (personMap.isEmpty()) {
-            logger.error("Не найдены актуальные записи в справочнике \"Физические лица\".")
-        }
-
-        // Получим мапу ДУЛ
-        dulMap = getRefDul(personIds)
-    }
+    // ДУЛ Map<person_id, List<RefBook>>
+    def dulMap = getRefDulByDeclarationDataId()
 
     // Коды видов документов
     def documentTypeActualList = getActualRefDocument()
 
-    println "Загрузка справочников для проверок записей в БД / Проверки по плательщику страховых взносов " + (System.currentTimeMillis() - time);
-    logger.info("Загрузка справочников для проверок записей в БД / Проверки по плательщику страховых взносов: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Загрузка справочников для проверок записей в БД " + (System.currentTimeMillis() - time);
+    logger.info("Загрузка справочников для проверок записей в БД: (" + (System.currentTimeMillis() - time) + " ms)");
 
     // Идентификаторы ссылок на справочник Физические лица
     def personIdList = []
@@ -5102,46 +5092,6 @@ Map<Long, Map<String, RefBookValue>> getRefPersons(def personIds) {
         }
     }
     return personsCache;
-}
-
-/**
- * Получить аутальные записи справочника "Физические лица"
- * @param personIds
- * @return
- */
-Map<Long, Map<String, RefBookValue>> getActualRefPersons(def personIds) {
-    if (personsActualCache.size() == 0) {
-        def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
-        refBookMap.each { personId, person ->
-            // Получим актуальную версию на основании RECORD_ID найденной записи
-            def actualPersonMap = getRefBookByFilter(REF_BOOK_PERSON_ID, "RECORD_ID = " + person.get(RF_RECORD_ID).value)
-            if (actualPersonMap) {
-                actualPersonMap.each { actualPerson ->
-                    personsActualCache.put(personId, actualPerson)
-                }
-            }
-        }
-    }
-    return personsActualCache;
-}
-
-/**
- * Получить "Документ, удостоверяющий личность (ДУЛ)"
- * todo Получение ДУЛ реализовано путем отдельных запросов для каждого personId, в будущем переделать на использование одного запроса
- * @return
- */
-def getRefDul(def personIds) {
-    if (dulCache.size() == 0) {
-        personIds.each { personId ->
-            def refBookMap = getRefBookByFilter(REF_BOOK_ID_DOC_ID, "PERSON_ID = " + personId.toString())
-            def dulList = []
-            refBookMap.each { refBook ->
-                dulList.add(refBook)
-            }
-            dulCache.put(personId, dulList)
-        }
-    }
-    return dulCache;
 }
 
 /**
