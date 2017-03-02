@@ -15,4 +15,11 @@ public interface RaschsvPravTarif31427Service {
      * @return
      */
     Long insertRaschsvPravTarif31427(RaschsvPravTarif31427 raschsvPravTarif31427);
+
+    /**
+     * Выборка из ПравТариф3.1.427
+     * @param declarationDataId
+     * @return
+     */
+    RaschsvPravTarif31427 findRaschsvPravTarif31427(Long declarationDataId);
 }

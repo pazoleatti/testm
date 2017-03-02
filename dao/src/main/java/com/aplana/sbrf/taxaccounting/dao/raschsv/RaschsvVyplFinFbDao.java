@@ -16,8 +16,8 @@ public interface RaschsvVyplFinFbDao {
 
     /**
      * Выборка из ВыплФинФБ
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    RaschsvVyplFinFb findRaschsvVyplFinFb(Long obyazPlatSvId);
+    RaschsvVyplFinFb findRaschsvVyplFinFb(Long declarationDataId);
 }

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvRashOssZakDao;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZakRash;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -36,12 +37,15 @@ public class RaschsvRashOssZakDaoImpl extends AbstractDao implements RaschsvRash
     private static final String SQL_INSERT_OSS_ZAK_RASH = "INSERT INTO " + RaschsvRashOssZakRash.TABLE_NAME +
             " (" + OSS_ZAK_RASH_COLS + ") VALUES (" + OSS_ZAK_RASH_FIELDS + ")";
 
-    private static final String SQL_SELECT_OSS_ZAK = "SELECT " + OSS_ZAK_COLS + " FROM " + RaschsvRashOssZak.TABLE_NAME +
-            " WHERE " + RaschsvRashOssZak.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvRashOssZak.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT_OSS_ZAK = "SELECT " + SqlUtils.getColumnsToString(RaschsvRashOssZak.COLUMNS, "oss.") +
+            " FROM raschsv_rash_oss_zak oss " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON oss.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     private static final String SQL_SELECT_OSS_ZAK_RASH = "SELECT " + OSS_ZAK_RASH_COLS + " FROM " + RaschsvRashOssZakRash.TABLE_NAME +
             " WHERE " + RaschsvRashOssZakRash.COL_RASCHSV_RASH_OSS_ZAK_ID + " = :" + RaschsvRashOssZakRash.COL_RASCHSV_RASH_OSS_ZAK_ID;
 
+    @Override
     public Long insertRaschsvRashOssZak(RaschsvRashOssZak raschsvRashOssZak) {
         raschsvRashOssZak.setId(generateId(RaschsvRashOssZak.SEQ, Long.class));
 
@@ -90,10 +94,11 @@ public class RaschsvRashOssZakDaoImpl extends AbstractDao implements RaschsvRash
         return res.length;
     }
 
-    public RaschsvRashOssZak findRaschsvRashOssZak(Long obyazPlatSvId) {
+    @Override
+    public RaschsvRashOssZak findRaschsvRashOssZak(Long declarationDataId) {
         try {
             SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue(RaschsvRashOssZak.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                    .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
 
             // Выборка из РасхОССЗак
             RaschsvRashOssZak raschsvRashOssZak =

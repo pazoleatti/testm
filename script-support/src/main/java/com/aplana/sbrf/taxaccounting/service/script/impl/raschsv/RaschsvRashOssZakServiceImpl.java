@@ -12,7 +12,13 @@ public class RaschsvRashOssZakServiceImpl implements RaschsvRashOssZakService {
     @Autowired
     private RaschsvRashOssZakDao raschsvRashOssZakDao;
 
+    @Override
     public Long insertRaschsvRashOssZak(RaschsvRashOssZak raschsvRashOssZak) {
         return raschsvRashOssZakDao.insertRaschsvRashOssZak(raschsvRashOssZak);
+    }
+
+    @Override
+    public RaschsvRashOssZak findRaschsvRashOssZak(Long declarationDataId) {
+        return raschsvRashOssZakDao.findRaschsvRashOssZak(declarationDataId);
     }
 }

@@ -15,4 +15,11 @@ public interface RaschsvRashOssZakService {
      * @return
      */
     Long insertRaschsvRashOssZak(RaschsvRashOssZak raschsvRashOssZak);
+
+    /**
+     * Выборка из РасхОССЗак
+     * @param declarationDataId
+     * @return
+     */
+    RaschsvRashOssZak findRaschsvRashOssZak(Long declarationDataId);
 }

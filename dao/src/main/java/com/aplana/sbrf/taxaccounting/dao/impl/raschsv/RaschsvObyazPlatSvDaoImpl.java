@@ -87,10 +87,10 @@ public class RaschsvObyazPlatSvDaoImpl extends AbstractDao implements RaschsvOby
             raschsvObyazPlatSv.setRaschsvUplPerList(raschsvUplPerDao.findUplPer(declarationDataId));
             raschsvObyazPlatSv.setRaschsvUplPrevOss(raschsvUplPrevOssDao.findUplPrevOss(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvSvOpsOmsList(raschsvSvOpsOmsDao.findSvOpsOms(declarationDataId));
-            raschsvObyazPlatSv.setRaschsvOssVnm(raschsvOssVnmDao.findOssVnm(raschsvObyazPlatSv.getId()));
-            raschsvObyazPlatSv.setRaschsvRashOssZak(raschsvRashOssZakDao.findRaschsvRashOssZak(raschsvObyazPlatSv.getId()));
-            raschsvObyazPlatSv.setRaschsvVyplFinFb(raschsvVyplFinFbDao.findRaschsvVyplFinFb(raschsvObyazPlatSv.getId()));
-            raschsvObyazPlatSv.setRaschsvPravTarif31427(raschsvPravTarif31427Dao.findRaschsvPravTarif31427(raschsvObyazPlatSv.getId()));
+            raschsvObyazPlatSv.setRaschsvOssVnm(raschsvOssVnmDao.findOssVnm(declarationDataId));
+            raschsvObyazPlatSv.setRaschsvRashOssZak(raschsvRashOssZakDao.findRaschsvRashOssZak(declarationDataId));
+            raschsvObyazPlatSv.setRaschsvVyplFinFb(raschsvVyplFinFbDao.findRaschsvVyplFinFb(declarationDataId));
+            raschsvObyazPlatSv.setRaschsvPravTarif31427(raschsvPravTarif31427Dao.findRaschsvPravTarif31427(declarationDataId));
             raschsvObyazPlatSv.setRaschsvPravTarif51427(raschsvPravTarif51427Dao.findRaschsvPravTarif51427(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvPravTarif71427(raschsvPravTarif71427Dao.findRaschsvPravTarif71427(raschsvObyazPlatSv.getId()));
             raschsvObyazPlatSv.setRaschsvSvPrimTarif91427(raschsvSvPrimTarif91427Dao.findRaschsvSvPrimTarif91427(raschsvObyazPlatSv.getId()));

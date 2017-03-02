@@ -16,8 +16,8 @@ public interface RaschsvRashOssZakDao {
 
     /**
      * Выборка из РасхОССЗак
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    RaschsvRashOssZak findRaschsvRashOssZak(Long obyazPlatSvId);
+    RaschsvRashOssZak findRaschsvRashOssZak(Long declarationDataId);
 }
