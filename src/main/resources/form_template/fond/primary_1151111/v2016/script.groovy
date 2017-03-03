@@ -219,6 +219,7 @@ switch (formDataEvent) {
 @Field final String SUM_STRAH_VZN = "Суммы страховых взносов"
 @Field final String OPS_OMS = "П1.Расчет ОПС ОМС"
 @Field final String OSS_VNM = "П2.Расчет ОСС  ВНМ"
+@Field final String FED_BUD = "П4.Выплаты за счет Фед.Бюдж."
 
 // Имена псевдонима спецотчета
 @Field final String PERSON_REPORT = "person_rep_param"
@@ -255,7 +256,7 @@ def createSpecificReport() {
         logger.info("Заполнение листа \"Общие\"")
         fillGeneralList(workbook)
 
-        logger.info("Заполнение листа \"3.Персониф. Сведения\"")
+        logger.info("Заполнение листа \"Персониф. Сведения\"")
         fillPersSvConsSheet(workbook)
 
         logger.info("Заполнение листа \"Суммы страховых взносов\"")
@@ -264,8 +265,11 @@ def createSpecificReport() {
         logger.info("Заполнение листа \"П1.Расчет ОПС ОМС\"")
         fillOpsOms(raschsvObyazPlatSv, workbook)
 
-        logger.info("Заполнение листа \"П2.Расчет ОСС  ВНМ\"")
+        logger.info("Заполнение листа \"П2.Расчет ОСС ВНМ\"")
         fillOssVnm(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П4.Выплаты за счет Фед.Бюдж.\"")
+        fillFedBud(raschsvObyazPlatSv, workbook)
 
         logger.info("Отчет сформирован")
     }
@@ -1036,7 +1040,7 @@ def fillOssVnm(raschsvObyazPlatSv, XSSFWorkbook workbook) {
     def raschsvSvOssVnmKolOverall = raschsvOssVnm?.raschsvOssVnmKolList?.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
 
     fillKolRow(sheet, 14, raschsvSvOssVnmKolOverall)
-    
+
     // Суммы
     def raschsvSvOssVnmSumNachislFl = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
     def raschsvSvOssVnmSumOblozen = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
@@ -1065,15 +1069,71 @@ def fillOssVnm(raschsvObyazPlatSv, XSSFWorkbook workbook) {
     // Сумма страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами)
     def raschsvUplVsego =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL_VSEGO_PER == it.nodeName}
     def raschsvUplVsego3m =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL_VSEGO_POSL3M == it.nodeName}
-    def raschsvUpl1Vsego3m =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL1_VSEGO_POSL3M == it.nodeName}
-    def raschsvUpl2Vsego3m =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL2_VSEGO_POSL3M == it.nodeName}
-    def raschsvUpl3Vsego3m =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL3_VSEGO_POSL3M == it.nodeName}
+    def raschsvUpl1Vsego3m = raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL1_VSEGO_POSL3M == it.nodeName}
+    def raschsvUpl2Vsego3m = raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL2_VSEGO_POSL3M == it.nodeName}
+    def raschsvUpl3Vsego3m = raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL3_VSEGO_POSL3M == it.nodeName}
 
     fillPriznakRow(sheet, 36, raschsvUplVsego)
     fillPriznakRow(sheet, 37, raschsvUplVsego3m)
     fillPriznakRow(sheet, 38, raschsvUpl1Vsego3m)
     fillPriznakRow(sheet, 39, raschsvUpl2Vsego3m)
     fillPriznakRow(sheet, 40, raschsvUpl3Vsego3m)
+}
+
+/**
+ * Заполняет данными лист "Выплаты за счет Фед.Бюдж."
+ */
+def fillFedBud(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+    def sheet = workbook.getSheet(FED_BUD)
+
+    def raschsvVyplFinFb = raschsvObyazPlatSv?.raschsvVyplFinFb
+
+    // пострадавшим вследствие катастрофы на Чернобыльской АЭС
+    def raschsvVyplChernobyl = raschsvVyplFinFb?.raschsvVyplPrichinaList?.find {VYPL_FIN_FB_SV_VNF_CHERNOBYL == it.nodeName}
+    fillFedBudRow(sheet, 10, raschsvVyplChernobyl?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VR_NETR == it.nodeName})
+    fillFedBudRow(sheet, 11, raschsvVyplChernobyl?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_BEREM_ROD == it.nodeName})
+    fillFedBudRow(sheet, 12, raschsvVyplChernobyl?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB == it.nodeName})
+    fillFedBudRow(sheet, 13, raschsvVyplChernobyl?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB1 == it.nodeName})
+    fillFedBudRow(sheet, 14, raschsvVyplChernobyl?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB2 == it.nodeName})
+    fillFedBudRow(sheet, 15, raschsvVyplChernobyl?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VSEGO == it.nodeName})
+
+    // пострадавшим вследствие аварии на производственном объединении «Маяк»
+    def raschsvVyplMayk = raschsvVyplFinFb?.raschsvVyplPrichinaList?.find {VYPL_FIN_FB_SV_VNF_MAYK == it.nodeName}
+    fillFedBudRow(sheet, 20, raschsvVyplMayk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VR_NETR == it.nodeName})
+    fillFedBudRow(sheet, 21, raschsvVyplMayk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_BEREM_ROD == it.nodeName})
+    fillFedBudRow(sheet, 22, raschsvVyplMayk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB == it.nodeName})
+    fillFedBudRow(sheet, 23, raschsvVyplMayk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB1 == it.nodeName})
+    fillFedBudRow(sheet, 24, raschsvVyplMayk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB2 == it.nodeName})
+    fillFedBudRow(sheet, 25, raschsvVyplMayk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VSEGO == it.nodeName})
+
+    // пострадавшим вследствие ядерных испытаний на Семипалатинском полигоне
+    def raschsvVyplPolygon = raschsvVyplFinFb?.raschsvVyplPrichinaList?.find {VYPL_FIN_FB_SV_VNF_POLYGON == it.nodeName}
+    fillFedBudRow(sheet, 30, raschsvVyplPolygon?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VR_NETR == it.nodeName})
+    fillFedBudRow(sheet, 31, raschsvVyplPolygon?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VSEGO == it.nodeName})
+
+    // вследствие радиационных аварий, кроме Чернобыльской АЭС
+    def raschsvVyplPodrOsobRisk = raschsvVyplFinFb?.raschsvVyplPrichinaList?.find {VYPL_FIN_FB_SV_VNF_PODR_OSOB_RISK == it.nodeName}
+    fillFedBudRow(sheet, 36, raschsvVyplPodrOsobRisk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VR_NETR == it.nodeName})
+    fillFedBudRow(sheet, 37, raschsvVyplPodrOsobRisk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_BEREM_ROD == it.nodeName})
+    fillFedBudRow(sheet, 38, raschsvVyplPodrOsobRisk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB == it.nodeName})
+    fillFedBudRow(sheet, 39, raschsvVyplPodrOsobRisk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB1 == it.nodeName})
+    fillFedBudRow(sheet, 40, raschsvVyplPodrOsobRisk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB2 == it.nodeName})
+    fillFedBudRow(sheet, 41, raschsvVyplPodrOsobRisk?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VSEGO == it.nodeName})
+
+    // Дополнительные выплаты пособий
+    def raschsvVyplDop = raschsvVyplFinFb?.raschsvVyplPrichinaList?.find {VYPL_FIN_FB_SV_VNF_DOP == it.nodeName}
+    fillFedBudRow(sheet, 46, raschsvVyplDop?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VR_NETR == it.nodeName})
+    fillFedBudRow(sheet, 47, raschsvVyplDop?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_BEREM_ROD == it.nodeName})
+    fillFedBudRow(sheet, 48, raschsvVyplDop?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VSEGO == it.nodeName})
+
+    // Итого
+    def raschsvVyplVsego = raschsvVyplFinFb?.raschsvVyplPrichinaList?.find {VYPL_FIN_FB_SV_VNF_VSEGO == it.nodeName}
+    fillFedBudRow(sheet, 55, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VR_NETR == it.nodeName})
+    fillFedBudRow(sheet, 56, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_BEREM_ROD == it.nodeName})
+    fillFedBudRow(sheet, 57, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB == it.nodeName})
+    fillFedBudRow(sheet, 58, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB1 == it.nodeName})
+    fillFedBudRow(sheet, 59, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB2 == it.nodeName})
+    fillFedBudRow(sheet, 60, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VSEGO == it.nodeName})
 }
 
 /**
@@ -1145,7 +1205,7 @@ def fillSingleRow(sheet, pointer, value) {
 }
 
 /**
- * Заполнение двух ячееук: признак-сумма
+ * Заполнение двух ячеек: признак-сумма
  */
 def fillPriznakRow(sheet, pointer, raschsvUplSvPrev) {
     def style = normalWithBorderStyle(sheet.getWorkbook())
@@ -1160,6 +1220,27 @@ def fillPriznakRow(sheet, pointer, raschsvUplSvPrev) {
     cell2.setCellValue(raschsvUplSvPrev?.svSum ?: "")
 }
 
+/**
+ * Заполнение строк для:
+ * "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
+ */
+def fillFedBudRow(sheet, pointer, raschsvRashVypl) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = sheet.getRow(pointer).createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvRashVypl?.chislPoluch ?: "")
+
+    def cell2 = sheet.getRow(pointer).createCell(2)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvRashVypl?.kolVypl ?: "")
+
+    def cell3 = sheet.getRow(pointer).createCell(3)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvRashVypl?.rashod ?: "")
+}
+
 /****************************************************************************
  *  Блок стилизации                                                         *
  *                                                                          *
@@ -1167,7 +1248,7 @@ def fillPriznakRow(sheet, pointer, raschsvUplSvPrev) {
  *                                                                          *
  * **************************************************************************/
 
- /**
+/**
  * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем слева
  * @param workbook
  * @return
@@ -1618,6 +1699,20 @@ class TestDataHolder {
 
 // Атрибуты узла ВыплФинФБ
 @Field final VYPL_FIN_FB_SV_VNF_UHOD_INV = "СВВнФУходИнв"
+@Field final VYPL_FIN_FB_SV_VNF_CHERNOBYL = "ЧернобАЭС"
+@Field final VYPL_FIN_FB_SV_VNF_MAYK = "ПОМаяк"
+@Field final VYPL_FIN_FB_SV_VNF_POLYGON = "СемипалатПолигон"
+@Field final VYPL_FIN_FB_SV_VNF_PODR_OSOB_RISK = "ПодрОсобРиск"
+@Field final VYPL_FIN_FB_SV_VNF_DOP = "ДопФЗ255"
+@Field final VYPL_FIN_FB_SV_VNF_VSEGO = "Всего"
+
+@Field final VYPL_FIN_FB_SV_VNF_POS_VR_NETR = "ПосВрНетр"
+@Field final VYPL_FIN_FB_SV_VNF_POS_BEREM_ROD = "ПосБеремРод"
+@Field final VYPL_FIN_FB_SV_VNF_POS_YHOD_REB = "ЕжПосУходРеб"
+@Field final VYPL_FIN_FB_SV_VNF_POS_YHOD_REB1 = "ЕжПосУходРеб1"
+@Field final VYPL_FIN_FB_SV_VNF_POS_YHOD_REB2 = "ЕжПосУходРеб2"
+@Field final VYPL_FIN_FB_SV_VNF_POS_VSEGO = "Всего"
+
 
 // Атрибуты узла ПравТариф3.1.427
 @Field final PRAV_TARIF3_1_427_SR_CHISL_9MPR = "СрЧисл_9МПр"
