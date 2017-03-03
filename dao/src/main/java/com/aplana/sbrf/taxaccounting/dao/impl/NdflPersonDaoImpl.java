@@ -125,20 +125,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo) {
-        String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
-                " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
-                " WHERE np.declaration_data_id = :declaration_data_id" +
-                " AND ((npi.tax_date >= :startDate AND npi.tax_date <= :endDate) OR npi.tax_date IS NULL)" +
-                " AND ((npi.payment_date >= :startDate AND npi.payment_date <= :endDate) OR npi.payment_date IS NULL)" +
-                " AND (npi.tax_date IS NOT NULL OR npi.payment_date IS NOT NULL) " +
-                " AND (npi.kpp = :kpp or npi.kpp is null) AND (npi.oktmo = :oktmo or npi.oktmo is null)";
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdList(List<Long> ndflPersonIdList, Date startDate, Date endDate) {
+        String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi" +
+                " WHERE npi.ndfl_person_id in (:ndflPersonIdList)" +
+                " AND npi.tax_date between :startDate AND :endDate" +
+                " UNION SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi" +
+                " WHERE npi.ndfl_person_id in (:ndflPersonIdList)" +
+                " AND npi.payment_date between :startDate AND :endDate";
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("declaration_data_id", declarationDataId)
+                .addValue("ndflPersonIdList", ndflPersonIdList)
                 .addValue("startDate", startDate)
-                .addValue("endDate", endDate)
-                .addValue("kpp", kpp)
-                .addValue("oktmo", oktmo);
+                .addValue("endDate", endDate);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -147,13 +144,19 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+        String priznakFClause;
+        if (prFequals1) {
+            priznakFClause = " AND npi.INCOME_ACCRUED_SUMM <> 0";
+        } else {
+            priznakFClause = " AND npi.NOT_HOLDING_TAX > 0";
+        }
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " WHERE npi.ndfl_person_id = :ndflPersonId" +
-                " AND npi.tax_date between :startDate AND :endDate" +
+                " AND npi.tax_date between :startDate AND :endDate" + priznakFClause +
                 " UNION SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " WHERE npi.ndfl_person_id = :ndflPersonId" +
-                " AND npi.payment_date between :startDate AND :endDate";
+                " AND npi.payment_date between :startDate AND :endDate" + priznakFClause;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
                 .addValue("startDate", startDate)
@@ -166,9 +169,31 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonDeduction> findDeductionsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
-        String sql = "SELECT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " FROM ndfl_person_deduction npd " +
-                " WHERE npd.ndfl_person_id = :ndflPersonId" +
+    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkOstalnie(long ndflPersonId, Date startDate, Date endDate) {
+        String sql = "SELECT DISTINCT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " FROM ndfl_person_deduction npd, (SELECT operation_id, INCOME_ACCRUED_DATE, INCOME_CODE" +
+                " FROM NDFL_PERSON_INCOME WHERE ndfl_person_id = :ndflPersonId) i_data  WHERE npd.ndfl_person_id = :ndflPersonId" +
+                " AND npd.OPERATION_ID in i_data.operation_id AND npd.INCOME_ACCRUED in i_data.INCOME_ACCRUED_DATE" +
+                " AND npd.INCOME_CODE in i_data.INCOME_CODE AND npd.TYPE_CODE in " +
+                "(SELECT CODE FROM REF_BOOK_DEDUCTION_TYPE WHERE DEDUCTION_MARK in " +
+                "(SELECT ID FROM REF_BOOK_DEDUCTION_MARK WHERE NAME = 'Остальные')) AND npd.PERIOD_CURR_DATE between :startDate AND :endDate";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonDeduction>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate) {
+        String sql = "SELECT DISTINCT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " FROM ndfl_person_deduction npd, (SELECT operation_id" +
+                " FROM NDFL_PERSON_INCOME WHERE ndfl_person_id = :ndflPersonId) i_data  WHERE npd.ndfl_person_id = :ndflPersonId" +
+                " AND npd.OPERATION_ID in i_data.operation_id" +
+                " AND npd.TYPE_CODE in (SELECT CODE FROM REF_BOOK_DEDUCTION_TYPE WHERE DEDUCTION_MARK in " +
+                "(SELECT ID FROM REF_BOOK_DEDUCTION_MARK WHERE NAME in ('Стандартный', 'Социальный', 'Инвестиционный', 'Имущественный')))" +
                 " AND npd.PERIOD_CURR_DATE between :startDate AND :endDate";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
@@ -327,16 +352,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo) {
-        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npi") + " FROM ndfl_person_prepayment npi " +
-                " INNER JOIN ndfl_person np ON npi.ndfl_person_id = np.id " +
-                " INNER JOIN ndfl_person_income npi ON np.id = npi.ndfl_person_id " +
-                " WHERE np.declaration_data_id = :declarationDataId " +
-                " AND (npi.kpp = :kpp or npi.kpp is null) AND (npi.oktmo = :oktmo or npi.oktmo is null)";
+    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonIdList(List<Long> ndflPersonIdList) {
+        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " FROM ndfl_person_prepayment npp " +
+                " WHERE npp.ndfl_person_id in (:ndflPersonIdList) ";
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("declarationDataId", declarationDataId)
-                .addValue("kpp", kpp)
-                .addValue("oktmo", oktmo);
+                .addValue("ndflPersonIdList", ndflPersonIdList);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -535,6 +555,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "where npp.id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource("id", id);
         return getNamedParameterJdbcTemplate().queryForObject(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+    }
+
+    @Override
+    public List<NdflPerson> findByIdList(List<Long> ndflPersonIdList) {
+        String query = "SELECT " + createColumns(NdflPerson.COLUMNS, "np") + " FROM NDFL_PERSON NP" +
+                " WHERE NP.ID IN (:ndflPersonIdList)";
+        MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonIdList", ndflPersonIdList);
+        return getNamedParameterJdbcTemplate().query(query, params, new NdflPersonDaoImpl.NdflPersonRowMapper());
     }
 
     private <E> MapSqlParameterSource prepareParameters(E entity, String[] fields) {
