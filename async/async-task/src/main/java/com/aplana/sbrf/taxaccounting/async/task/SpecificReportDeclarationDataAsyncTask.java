@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -15,19 +13,16 @@ import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
-public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsyncTask {
+public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationAsyncTask {
+
+    private static final String SUCCESS = "Сформирован отчет \"%s\": %s";
+    private static final String FAIL = "Произошла %sошибка при формировании отчета \"%s\": %s. Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета";
 
     @Autowired
     private TAUserService userService;
 
     @Autowired
     private DeclarationDataService declarationDataService;
-
-    @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
-    private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -44,27 +39,6 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
     @Override
     protected ReportType getReportType() {
         return ReportType.SPECIFIC_REPORT_DEC;
-    }
-
-    @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
-        long declarationDataId = (Long)params.get("declarationDataId");
-        String alias = (String)params.get("alias");
-        int userId = (Integer)params.get(USER_ID.name());
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-
-        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
-        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
-
-        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, ddReportType);
-        if (value == null) {
-            throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
-        }
-        String msg = String.format("количество ячеек форм-источников(%s) превышает максимально допустимое(%s)!",  value, "%s");
-        return checkTask(getReportType(), value, declarationDataService.getTaskName(ddReportType, declarationTemplate.getType().getTaxType()), msg);
     }
 
     @Override
@@ -109,25 +83,23 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
     }
 
     @Override
+    protected DeclarationDataReportType getDeclarationDataReportType(Map<String, Object> params) {
+        String alias = (String)params.get("alias");
+        DeclarationData declarationData = getDeclaration(params);
+        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
+        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
+        return ddReportType;
+    }
+
+    @Override
     protected String getAsyncTaskName() {
         return "Формирование специфичного отчета налоговой формы";
     }
 
     @Override
-    protected String getNotificationMsg(Map<String, Object> params) {
-        int userId = (Integer)params.get(USER_ID.name());
+    protected String getAdditionalString(DeclarationData declaration, Map<String, Object> params) {
         String alias = (String)params.get("alias");
-
-        long declarationDataId = (Long)params.get("declarationDataId");
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-
-        DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
-        Department department = departmentService.getDepartment(declaration.getDepartmentId());
-        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
-        String str, strCorrPeriod = "";
         StringBuilder strSubreportParamValues = new StringBuilder(", ");
         if (!subreport.getDeclarationSubreportParams().isEmpty()) {
             Map<String, Object> subreportParamValues = (Map<String, Object>)params.get("subreportParamValues");
@@ -156,79 +128,42 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractAsy
                 strSubreportParamValues.append(", ");
             }
         }
-
         strSubreportParamValues = strSubreportParamValues.delete(strSubreportParamValues.length() - 2, strSubreportParamValues.length());
-
-        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", %s%s.", formatDeclarationDataInfo(declaration), strSubreportParamValues.toString());
+        String str = super.getAdditionalString(declaration, params);
+        if (str.isEmpty()) {
+            return strSubreportParamValues.toString();
+        } else if (strSubreportParamValues.length() > 0) {
+            return str + strSubreportParamValues.toString();
         } else {
-            str = strSubreportParamValues.toString() + ".";
+            return str;
         }
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
-        }
-        return String.format("Сформирован отчет \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
-                subreport.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
-                declarationTemplate.getType().getName(), str);
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        int userId = (Integer)params.get(USER_ID.name());
+        return getMessage(params, false, unexpected);
+    }
+
+    @Override
+    protected String getNotificationMsg(Map<String, Object> params) {
+        return getMessage(params, true, false);
+    }
+
+    private String getMessage(Map<String, Object> params, boolean isSuccess, boolean unexpected) {
         String alias = (String)params.get("alias");
-
-        long declarationDataId = (Long)params.get("declarationDataId");
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-
-        DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
-        Department department = departmentService.getDepartment(declaration.getDepartmentId());
-        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        DeclarationData declaration = getDeclaration(params);
         DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
-        String str, strCorrPeriod = "";
-        StringBuilder strSubreportParamValues = new StringBuilder(", ");
-        if (!subreport.getDeclarationSubreportParams().isEmpty()) {
-            Map<String, Object> subreportParamValues = (Map<String, Object>)params.get("subreportParamValues");
-            for(DeclarationSubreportParam declarationSubreportParam: subreport.getDeclarationSubreportParams()) {
-                strSubreportParamValues.append(declarationSubreportParam.getName()).append(": ");
-                Object value = subreportParamValues.get(declarationSubreportParam.getAlias());
-                strSubreportParamValues.append("\"");
-                if (value != null) {
-                    switch (declarationSubreportParam.getType()) {
-                        case STRING:
-                            strSubreportParamValues.append(value.toString());
-                            break;
-                        case NUMBER:
-                            strSubreportParamValues.append(value.toString());
-                            break;
-                        case DATE:
-                            strSubreportParamValues.append(SDF_DD_MM_YYYY.get().format((Date) value));
-                            break;
-                        case REFBOOK:
-                            String strVal = "";
-                            if (value != null) {
-                                strVal = refBookHelper.dereferenceValue((Long) value, declarationSubreportParam.getRefBookAttributeId());
-                            }
-                            strSubreportParamValues.append(strVal);
-                            break;
-                    }
-                }
-                strSubreportParamValues.append("\"");
-                strSubreportParamValues.append(", ");
-            }
-            strSubreportParamValues = strSubreportParamValues.delete(strSubreportParamValues.length() - 2, strSubreportParamValues.length());
-        }
-        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", %s%s.", formatDeclarationDataInfo(declaration), strSubreportParamValues.toString());
+
+        String template = isSuccess ? SUCCESS : FAIL;
+        if (isSuccess) {
+            return String.format(template,
+                    subreport.getName(),
+                    getDeclarationDescription(params));
         } else {
-            str = strSubreportParamValues.toString() + ".";
+            return String.format(template,
+                    unexpected ? "непредвиденная " : "",
+                    subreport.getName(),
+                    getDeclarationDescription(params));
         }
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(reportPeriod.getCorrectionDate());
-        }
-        return String.format("Произошла %sошибка при формировании отчета \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
-                unexpected?"непредвиденная ":"", subreport.getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
-                declarationTemplate.getType().getName(), str);
     }
 }

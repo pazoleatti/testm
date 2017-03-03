@@ -9,7 +9,6 @@
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
 	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
-	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.collapse.row.span" value="false"/>
 	<style name="table">
 		<box>
@@ -92,491 +91,269 @@
 		</box>
 	</style>
 	<subDataset name="dsPerson" uuid="60bb711a-3599-4714-ac34-65541030aa01">
-		<queryString language="xPath">
-			<![CDATA[/Файл/ИнфЧасть/ПолучДох]]>
+		<parameter name="NDFL_PERSON_ID" class="java.lang.Long">
+			<defaultValueExpression><![CDATA[12819]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[select row_number() over(partition by pers.id order by pers.id) rn,
+       pers.inp,
+       pers.last_name,
+       pers.first_name,
+       pers.middle_name,
+       pers.birth_day,
+       pers.snils,
+       pers.inn_np,
+       pers.inn_foreign,
+       pers.citizenship,
+       pers.id_doc_type,
+       pers.id_doc_number,
+       pers.status,
+       pers.post_index,
+       pers.region_code,
+       pers.area,
+       pers.city,
+       pers.locality,
+       pers.street,
+       pers.house,
+       pers.building,
+       pers.flat
+	from ndfl_person pers
+ where pers.id=$P{NDFL_PERSON_ID}]]>
 		</queryString>
-		<field name="ИНП" class="java.lang.String">
-			<fieldDescription><![CDATA[@ИНП]]></fieldDescription>
-		</field>
-		<field name="ФамФЛ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ФамФЛ]]></fieldDescription>
-		</field>
-		<field name="ИмяФЛ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ИмяФЛ]]></fieldDescription>
-		</field>
-		<field name="ОтчФЛ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ОтчФЛ]]></fieldDescription>
-		</field>
-		<field name="ДатаРожд" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДатаРожд]]></fieldDescription>
-		</field>
-		<field name="ИННФЛ" class="java.lang.String">
-			<fieldDescription><![CDATA[@ИННФЛ]]></fieldDescription>
-		</field>
-		<field name="Гражд" class="java.lang.String">
-			<fieldDescription><![CDATA[@Гражд]]></fieldDescription>
-		</field>
-		<field name="УдЛичнФЛКод" class="java.lang.String">
-			<fieldDescription><![CDATA[@УдЛичнФЛКод]]></fieldDescription>
-		</field>
-		<field name="УдЛичнФЛНом" class="java.lang.String">
-			<fieldDescription><![CDATA[@УдЛичнФЛНом]]></fieldDescription>
-		</field>
-		<field name="СтатусФЛ" class="java.lang.String">
-			<fieldDescription><![CDATA[@СтатусФЛ]]></fieldDescription>
-		</field>
-		<field name="Город" class="java.lang.String">
-			<fieldDescription><![CDATA[@Город]]></fieldDescription>
-		</field>
-		<field name="Дом" class="java.lang.String">
-			<fieldDescription><![CDATA[@Дом]]></fieldDescription>
-		</field>
-		<field name="Кварт" class="java.lang.String">
-			<fieldDescription><![CDATA[@Кварт]]></fieldDescription>
-		</field>
-		<field name="КодРегион" class="java.lang.String">
-			<fieldDescription><![CDATA[@КодРегион]]></fieldDescription>
-		</field>
-		<field name="Улица" class="java.lang.String">
-			<fieldDescription><![CDATA[@Улица]]></fieldDescription>
-		</field>
-		<field name="ИННИно" class="java.lang.String">
-			<fieldDescription><![CDATA[@ИННИно]]></fieldDescription>
-		</field>
-		<field name="НаселПункт" class="java.lang.String">
-			<fieldDescription><![CDATA[@НаселПункт]]></fieldDescription>
-		</field>
-		<field name="Район" class="java.lang.String">
-			<fieldDescription><![CDATA[@Район]]></fieldDescription>
-		</field>
-		<field name="Корпус" class="java.lang.String">
-			<fieldDescription><![CDATA[@Корпус]]></fieldDescription>
-		</field>
-		<field name="Индекс" class="java.lang.String">
-			<fieldDescription><![CDATA[@Индекс]]></fieldDescription>
-		</field>
-		<field name="СНИЛС" class="java.lang.String">
-			<fieldDescription><![CDATA[@СНИЛС]]></fieldDescription>
-		</field>
-		<variable name="v_inp" class="java.lang.String">
-			<variableExpression><![CDATA[($F{СНИЛС}==null || $F{СНИЛС}.equals( "0" )) ? $F{ИНП}: $F{СНИЛС}]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{СНИЛС}==null || $F{СНИЛС}.equals( "0" )) ?
-$F{ИНП}:
-$F{СНИЛС}]]></initialValueExpression>
-		</variable>
-		<variable name="v_nn" class="java.lang.Integer" incrementType="Report">
-			<variableExpression><![CDATA[$V{v_nn}+1]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
+		<field name="RN" class="java.math.BigDecimal"/>
+		<field name="INP" class="java.lang.String"/>
+		<field name="LAST_NAME" class="java.lang.String"/>
+		<field name="FIRST_NAME" class="java.lang.String"/>
+		<field name="MIDDLE_NAME" class="java.lang.String"/>
+		<field name="BIRTH_DAY" class="java.sql.Timestamp"/>
+		<field name="SNILS" class="java.lang.String"/>
+		<field name="INN_NP" class="java.lang.String"/>
+		<field name="INN_FOREIGN" class="java.lang.String"/>
+		<field name="CITIZENSHIP" class="java.lang.String"/>
+		<field name="ID_DOC_TYPE" class="java.lang.String"/>
+		<field name="ID_DOC_NUMBER" class="java.lang.String"/>
+		<field name="STATUS" class="java.lang.String"/>
+		<field name="POST_INDEX" class="java.lang.String"/>
+		<field name="REGION_CODE" class="java.lang.String"/>
+		<field name="AREA" class="java.lang.String"/>
+		<field name="CITY" class="java.lang.String"/>
+		<field name="LOCALITY" class="java.lang.String"/>
+		<field name="STREET" class="java.lang.String"/>
+		<field name="HOUSE" class="java.lang.String"/>
+		<field name="BUILDING" class="java.lang.String"/>
+		<field name="FLAT" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dsIncomes" uuid="b2479830-c91e-4d0c-abad-b21483eff568">
-		<queryString language="xPath">
-			<![CDATA[/Файл/ИнфЧасть/СведОпер/СведДохНал]]>
+		<parameter name="NDFL_PERSON_ID" class="java.lang.Long">
+			<defaultValueExpression><![CDATA[12819]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[select nvl(pers.snils,pers.inp) inp,
+       inc.row_num,
+       row_number() over(partition by inc.ndfl_person_id order by inc.id) rn,
+       inc.operation_id,
+       inc.income_code,
+       inc.income_type,
+       inc.income_accrued_date,
+       inc.income_payout_date,
+       inc.kpp,
+       inc.oktmo,
+       inc.income_accrued_summ,
+       inc.income_payout_summ,
+       inc.total_deductions_summ,
+       inc.tax_base,
+       inc.tax_rate,
+       inc.tax_date,
+       inc.calculated_tax,
+       inc.withholding_tax,
+       inc.not_holding_tax,
+       inc.overholding_tax,
+       inc.refound_tax,
+       inc.tax_transfer_date,
+       inc.payment_date,
+       inc.payment_number,
+       inc.tax_summ
+	from ndfl_person pers join ndfl_person_income inc on (inc.ndfl_person_id=pers.id)
+ where pers.id=$P{NDFL_PERSON_ID}]]>
 		</queryString>
-		<field name="НомСтр" class="java.lang.String">
-			<fieldDescription><![CDATA[@НомСтр]]></fieldDescription>
-		</field>
-		<field name="КПП" class="java.lang.String">
-			<fieldDescription><![CDATA[ancestor::СведОпер/@КПП]]></fieldDescription>
-		</field>
-		<field name="ИдОпер" class="java.lang.String">
-			<fieldDescription><![CDATA[ancestor::СведОпер/@ИдОпер]]></fieldDescription>
-		</field>
-		<field name="КодДох" class="java.lang.String">
-			<fieldDescription><![CDATA[@КодДох]]></fieldDescription>
-		</field>
-		<field name="ДатаДохВыпл" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДатаДохВыпл]]></fieldDescription>
-		</field>
-		<field name="ДатаДохНач" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДатаДохНач]]></fieldDescription>
-		</field>
-		<field name="ДатаНалог" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДатаНалог]]></fieldDescription>
-		</field>
-		<field name="НалБаза" class="java.lang.String">
-			<fieldDescription><![CDATA[@НалБаза]]></fieldDescription>
-		</field>
-		<field name="Ставка" class="java.lang.String">
-			<fieldDescription><![CDATA[@Ставка]]></fieldDescription>
-		</field>
-		<field name="СумВыч" class="java.lang.String">
-			<fieldDescription><![CDATA[@СумВыч]]></fieldDescription>
-		</field>
-		<field name="ОКТМО" class="java.lang.String">
-			<fieldDescription><![CDATA[ancestor::СведОпер/@ОКТМО]]></fieldDescription>
-		</field>
-		<field name="ИНП" class="java.lang.String">
-			<fieldDescription><![CDATA[/Файл/ИнфЧасть/ПолучДох/@ИНП]]></fieldDescription>
-		</field>
-		<field name="ТипДох" class="java.lang.String">
-			<fieldDescription><![CDATA[@ТипДох]]></fieldDescription>
-		</field>
-		<field name="ВозврНал" class="java.lang.String">
-			<fieldDescription><![CDATA[@ВозврНал]]></fieldDescription>
-		</field>
-		<field name="ДолгНА" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДолгНА]]></fieldDescription>
-		</field>
-		<field name="ДолгНП" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДолгНП]]></fieldDescription>
-		</field>
-		<field name="НИ" class="java.lang.String">
-			<fieldDescription><![CDATA[@НИ]]></fieldDescription>
-		</field>
-		<field name="НУ" class="java.lang.String">
-			<fieldDescription><![CDATA[@НУ]]></fieldDescription>
-		</field>
-		<field name="НалПерСумм" class="java.lang.String">
-			<fieldDescription><![CDATA[@НалПерСумм]]></fieldDescription>
-		</field>
-		<field name="СрокПрчслНал" class="java.lang.String">
-			<fieldDescription><![CDATA[@СрокПрчслНал]]></fieldDescription>
-		</field>
-		<field name="ПлатПоручНом" class="java.lang.String">
-			<fieldDescription><![CDATA[@ПлатПоручНом]]></fieldDescription>
-		</field>
-		<field name="ПлПоручДат" class="java.lang.String">
-			<fieldDescription><![CDATA[@ПлПоручДат]]></fieldDescription>
-		</field>
-		<field name="СНИЛС" class="java.lang.String">
-			<fieldDescription><![CDATA[/Файл/ИнфЧасть/ПолучДох/@СНИЛС]]></fieldDescription>
-		</field>
-		<field name="СуммДохНач" class="java.lang.String">
-			<fieldDescription><![CDATA[@СуммДохНач]]></fieldDescription>
-		</field>
-		<field name="СуммДохВыпл" class="java.lang.String">
-			<fieldDescription><![CDATA[@СуммДохВыпл]]></fieldDescription>
-		</field>
-		<variable name="v_inp" class="java.lang.String">
-			<variableExpression><![CDATA[($F{СНИЛС}==null || $F{СНИЛС}.equals( "0" )) ? $F{ИНП}: $F{СНИЛС}]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{СНИЛС}==null || $F{СНИЛС}.equals( "0" )) ?
-$F{ИНП}:
-$F{СНИЛС}]]></initialValueExpression>
-		</variable>
-		<variable name="СуммДохНач" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{СуммДохНач}==null || $F{СуммДохНач}=="" || $F{СуммДохНач}=="null" ? "0" : $F{СуммДохНач})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{СуммДохНач}==null || $F{СуммДохНач}=="" || $F{СуммДохНач}=="null" ? "0" : $F{СуммДохНач})))]]></initialValueExpression>
-		</variable>
-		<variable name="СуммДохВыпл" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{СуммДохВыпл}==null || $F{СуммДохВыпл}=="" ? "0" : $F{СуммДохВыпл})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{СуммДохВыпл}==null || $F{СуммДохВыпл}=="" ? "0" : $F{СуммДохВыпл})))]]></initialValueExpression>
-		</variable>
-		<variable name="СумВыч" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{СумВыч}==null || $F{СумВыч}=="" ? "0" : $F{СумВыч})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{СумВыч}==null || $F{СумВыч}==""  ? "0" : $F{СумВыч})))]]></initialValueExpression>
-		</variable>
-		<variable name="НалБаза" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{НалБаза}==null || $F{НалБаза}=="" ? "0" : $F{НалБаза})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{НалБаза}==null || $F{НалБаза}=="" ? "0" : $F{НалБаза})))]]></initialValueExpression>
-		</variable>
-		<variable name="Ставка" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{Ставка}==null || $F{Ставка}=="" ? "0" : $F{Ставка})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{Ставка}==null || $F{Ставка}=="" ? "0" : $F{Ставка})))]]></initialValueExpression>
-		</variable>
-		<variable name="НИ" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{НИ}==null || $F{НИ}=="" ? "0" : $F{НИ})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{НИ}==null || $F{НИ}=="" ? "0" : $F{НИ})))]]></initialValueExpression>
-		</variable>
-		<variable name="НУ" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{НУ}==null || $F{НУ}=="" ? "0" : $F{НУ})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{НУ}==null || $F{НУ}=="" ? "0" : $F{НУ})))]]></initialValueExpression>
-		</variable>
-		<variable name="ДолгНА" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{ДолгНА}==null || $F{ДолгНА}=="" ? "0" : $F{ДолгНА})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{ДолгНА}==null || $F{ДолгНА}=="" ? "0" : $F{ДолгНА})))]]></initialValueExpression>
-		</variable>
-		<variable name="ДолгНП" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{ДолгНП}==null || $F{ДолгНП}=="" ? "0" : $F{ДолгНП})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{ДолгНП}==null || $F{ДолгНП}=="" ? "0" : $F{ДолгНП})))]]></initialValueExpression>
-		</variable>
-		<variable name="ВозврНал" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{ВозврНал}==null || $F{ВозврНал}=="" ? "0" : $F{ВозврНал})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{ВозврНал}==null || $F{ВозврНал}=="" ? "0" : $F{ВозврНал})))]]></initialValueExpression>
-		</variable>
-		<variable name="НалПерСумм" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{НалПерСумм}==null || $F{НалПерСумм}=="" ? "0" : $F{НалПерСумм})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{НалПерСумм}==null || $F{НалПерСумм}=="" ? "0" : $F{НалПерСумм})))]]></initialValueExpression>
-		</variable>
+		<field name="INP" class="java.lang.String"/>
+		<field name="ROW_NUM" class="java.math.BigDecimal"/>
+		<field name="RN" class="java.math.BigDecimal"/>
+		<field name="OPERATION_ID" class="java.lang.String"/>
+		<field name="INCOME_CODE" class="java.lang.String"/>
+		<field name="INCOME_TYPE" class="java.lang.String"/>
+		<field name="INCOME_ACCRUED_DATE" class="java.sql.Timestamp"/>
+		<field name="INCOME_PAYOUT_DATE" class="java.sql.Timestamp"/>
+		<field name="KPP" class="java.lang.String"/>
+		<field name="OKTMO" class="java.lang.String"/>
+		<field name="INCOME_ACCRUED_SUMM" class="java.math.BigDecimal"/>
+		<field name="INCOME_PAYOUT_SUMM" class="java.math.BigDecimal"/>
+		<field name="TOTAL_DEDUCTIONS_SUMM" class="java.math.BigDecimal"/>
+		<field name="TAX_BASE" class="java.math.BigDecimal"/>
+		<field name="TAX_RATE" class="java.math.BigDecimal"/>
+		<field name="TAX_DATE" class="java.sql.Timestamp"/>
+		<field name="CALCULATED_TAX" class="java.math.BigDecimal"/>
+		<field name="WITHHOLDING_TAX" class="java.math.BigDecimal"/>
+		<field name="NOT_HOLDING_TAX" class="java.math.BigDecimal"/>
+		<field name="OVERHOLDING_TAX" class="java.math.BigDecimal"/>
+		<field name="REFOUND_TAX" class="java.math.BigDecimal"/>
+		<field name="TAX_TRANSFER_DATE" class="java.sql.Timestamp"/>
+		<field name="PAYMENT_DATE" class="java.sql.Timestamp"/>
+		<field name="PAYMENT_NUMBER" class="java.lang.String"/>
+		<field name="TAX_SUMM" class="java.math.BigDecimal"/>
 	</subDataset>
 	<subDataset name="dsMinuces" uuid="5da4eb6b-5d21-4d3f-b8e2-b50b75fdf867">
-		<queryString language="xPath">
-			<![CDATA[/Файл/ИнфЧасть/СведОпер/СведВыч]]>
+		<parameter name="NDFL_PERSON_ID" class="java.lang.Long">
+			<defaultValueExpression><![CDATA[12819]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[select nvl(pers.snils,pers.inp) inp,
+       ded.row_num,
+       row_number() over(partition by ded.ndfl_person_id order by ded.id) rn,
+       ded.operation_id,
+       ded.income_code,
+       ded.type_code,
+       ded.notif_type,
+       ded.notif_date,
+       ded.notif_num,
+       ded.notif_source,
+       ded.notif_summ,
+       ded.income_accrued,
+       ded.income_summ,
+       ded.period_prev_date,
+       ded.period_prev_summ,
+       ded.period_curr_date,
+       ded.period_curr_summ
+	from ndfl_person pers join ndfl_person_deduction ded on (ded.ndfl_person_id=pers.id)
+ where pers.id=$P{NDFL_PERSON_ID}]]>
 		</queryString>
-		<field name="НомСтр" class="java.lang.String">
-			<fieldDescription><![CDATA[@НомСтр]]></fieldDescription>
-		</field>
-		<field name="КодДох" class="java.lang.String">
-			<fieldDescription><![CDATA[@КодДох]]></fieldDescription>
-		</field>
-		<field name="ВычетКод" class="java.lang.String">
-			<fieldDescription><![CDATA[@ВычетКод]]></fieldDescription>
-		</field>
-		<field name="ДатаДохНач" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДатаДохНач]]></fieldDescription>
-		</field>
-		<field name="ДатаПредВыч" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДатаПредВыч]]></fieldDescription>
-		</field>
-		<field name="ДатаТекВыч" class="java.lang.String">
-			<fieldDescription><![CDATA[@ДатаТекВыч]]></fieldDescription>
-		</field>
-		<field name="СумПредВыч" class="java.lang.String">
-			<fieldDescription><![CDATA[@СумПредВыч]]></fieldDescription>
-		</field>
-		<field name="СумТекВыч" class="java.lang.String">
-			<fieldDescription><![CDATA[@СумТекВыч]]></fieldDescription>
-		</field>
-		<field name="СуммДохНач" class="java.lang.String">
-			<fieldDescription><![CDATA[@СуммДохНач]]></fieldDescription>
-		</field>
-		<field name="УведДата" class="java.lang.String">
-			<fieldDescription><![CDATA[@УведДата]]></fieldDescription>
-		</field>
-		<field name="УведИФНС" class="java.lang.String">
-			<fieldDescription><![CDATA[@УведИФНС]]></fieldDescription>
-		</field>
-		<field name="УведНом" class="java.lang.String">
-			<fieldDescription><![CDATA[@УведНом]]></fieldDescription>
-		</field>
-		<field name="УведСум" class="java.lang.String">
-			<fieldDescription><![CDATA[@УведСум]]></fieldDescription>
-		</field>
-		<field name="УведТип" class="java.lang.String">
-			<fieldDescription><![CDATA[@УведТип]]></fieldDescription>
-		</field>
-		<field name="ИНП" class="java.lang.String">
-			<fieldDescription><![CDATA[/Файл/ИнфЧасть/ПолучДох/@ИНП]]></fieldDescription>
-		</field>
-		<field name="ИдОпер" class="java.lang.String">
-			<fieldDescription><![CDATA[ancestor::СведОпер/@ИдОпер]]></fieldDescription>
-		</field>
-		<field name="СНИЛС" class="java.lang.String">
-			<fieldDescription><![CDATA[/Файл/ИнфЧасть/ПолучДох/@СНИЛС]]></fieldDescription>
-		</field>
-		<variable name="v_inp" class="java.lang.String">
-			<variableExpression><![CDATA[($F{СНИЛС}==null || $F{СНИЛС}.equals( "0" )) ? $F{ИНП}: $F{СНИЛС}]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{СНИЛС}==null || $F{СНИЛС}.equals( "0" )) ?
-$F{ИНП}:
-$F{СНИЛС}]]></initialValueExpression>
-		</variable>
-		<variable name="СуммДохНач" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{СуммДохНач}==null || $F{СуммДохНач}=="" ? "0" : $F{СуммДохНач})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{СуммДохНач}==null || $F{СуммДохНач}=="" ? "0" : $F{СуммДохНач})))]]></initialValueExpression>
-		</variable>
-		<variable name="СумПредВыч" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{СумПредВыч}==null || $F{СумПредВыч}=="" ? "0" : $F{СумПредВыч})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{СумПредВыч}==null || $F{СумПредВыч}=="" ? "0" : $F{СумПредВыч})))]]></initialValueExpression>
-		</variable>
-		<variable name="СумТекВыч" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{СумТекВыч}==null || $F{СумТекВыч}=="" ? "0" : $F{СумТекВыч})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{СумТекВыч}==null || $F{СумТекВыч}=="" ? "0" : $F{СумТекВыч})))]]></initialValueExpression>
-		</variable>
+		<field name="INP" class="java.lang.String"/>
+		<field name="ROW_NUM" class="java.math.BigDecimal"/>
+		<field name="RN" class="java.math.BigDecimal"/>
+		<field name="OPERATION_ID" class="java.lang.String"/>
+		<field name="INCOME_CODE" class="java.lang.String"/>
+		<field name="TYPE_CODE" class="java.lang.String"/>
+		<field name="NOTIF_TYPE" class="java.lang.String"/>
+		<field name="NOTIF_DATE" class="java.sql.Timestamp"/>
+		<field name="NOTIF_NUM" class="java.lang.String"/>
+		<field name="NOTIF_SOURCE" class="java.lang.String"/>
+		<field name="NOTIF_SUMM" class="java.math.BigDecimal"/>
+		<field name="INCOME_ACCRUED" class="java.sql.Timestamp"/>
+		<field name="INCOME_SUMM" class="java.math.BigDecimal"/>
+		<field name="PERIOD_PREV_DATE" class="java.sql.Timestamp"/>
+		<field name="PERIOD_PREV_SUMM" class="java.math.BigDecimal"/>
+		<field name="PERIOD_CURR_DATE" class="java.sql.Timestamp"/>
+		<field name="PERIOD_CURR_SUMM" class="java.math.BigDecimal"/>
 	</subDataset>
 	<subDataset name="dsPrepays" uuid="08b2ca2e-a4ee-41ee-8c5a-84f75d422fd7">
-		<queryString language="xPath">
-			<![CDATA[/Файл/ИнфЧасть/СведОпер/СведАванс]]>
+		<parameter name="NDFL_PERSON_ID" class="java.lang.Long">
+			<defaultValueExpression><![CDATA[12819]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[select nvl(pers.snils,pers.inp) inp,
+       prep.row_num,
+       row_number() over(partition by prep.ndfl_person_id order by prep.id) rn,
+       prep.operation_id,
+       prep.summ,
+       prep.notif_num,
+       prep.notif_date,
+       prep.notif_source
+	from ndfl_person pers join ndfl_person_prepayment prep on (prep.ndfl_person_id=pers.id)
+ where pers.id=$P{NDFL_PERSON_ID}]]>
 		</queryString>
-		<field name="Аванс" class="java.lang.String">
-			<fieldDescription><![CDATA[@Аванс]]></fieldDescription>
-		</field>
-		<field name="НомСтр" class="java.lang.String">
-			<fieldDescription><![CDATA[@НомСтр]]></fieldDescription>
-		</field>
-		<field name="УведДата" class="java.lang.String">
-			<fieldDescription><![CDATA[@УведДата]]></fieldDescription>
-		</field>
-		<field name="УведИФНС" class="java.lang.String">
-			<fieldDescription><![CDATA[@УведИФНС]]></fieldDescription>
-		</field>
-		<field name="УведНом" class="java.lang.String">
-			<fieldDescription><![CDATA[@УведНом]]></fieldDescription>
-		</field>
-		<field name="ИНП" class="java.lang.String">
-			<fieldDescription><![CDATA[/Файл/ИнфЧасть/ПолучДох/@ИНП]]></fieldDescription>
-		</field>
-		<field name="ИдОпер" class="java.lang.String">
-			<fieldDescription><![CDATA[ancestor::СведОпер/@ИдОпер]]></fieldDescription>
-		</field>
-		<field name="СНИЛС" class="java.lang.String">
-			<fieldDescription><![CDATA[/Файл/ИнфЧасть/ПолучДох/@СНИЛС]]></fieldDescription>
-		</field>
-		<variable name="v_inp" class="java.lang.String">
-			<variableExpression><![CDATA[($F{СНИЛС}==null || $F{СНИЛС}.equals( "0" )) ? $F{ИНП}: $F{СНИЛС}]]></variableExpression>
-			<initialValueExpression><![CDATA[($F{СНИЛС}==null || $F{СНИЛС}.equals( "0" )) ?
-$F{ИНП}:
-$F{СНИЛС}]]></initialValueExpression>
-		</variable>
-		<variable name="Аванс" class="java.math.BigDecimal">
-			<variableExpression><![CDATA[new Double(Double.parseDouble(($F{Аванс}==null || $F{Аванс}=="" ? "0" : $F{Аванс})))]]></variableExpression>
-			<initialValueExpression><![CDATA[new Double(Double.parseDouble(($F{Аванс}==null || $F{Аванс}=="" ? "0" : $F{Аванс})))]]></initialValueExpression>
-		</variable>
+		<field name="INP" class="java.lang.String"/>
+		<field name="ROW_NUM" class="java.math.BigDecimal"/>
+		<field name="RN" class="java.math.BigDecimal"/>
+		<field name="OPERATION_ID" class="java.lang.String"/>
+		<field name="SUMM" class="java.math.BigDecimal"/>
+		<field name="NOTIF_NUM" class="java.lang.String"/>
+		<field name="NOTIF_DATE" class="java.sql.Timestamp"/>
+		<field name="NOTIF_SOURCE" class="java.lang.String"/>
 	</subDataset>
-	<queryString language="xPath">
-		<![CDATA[/Файл]]>
+	<parameter name="NDFL_PERSON_ID" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[12819]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select dep.code depcode,
+       dep.name depname,
+       per.name pername,
+       to_char(per.end_date,'yyyy') repyear,
+       per.start_date,
+       per.end_date,
+       pers.status,
+       (select count(*) from ndfl_person_income c where c.ndfl_person_id=pers.id) cnt_inc,
+       (select count(*) from ndfl_person_deduction c where c.ndfl_person_id=pers.id) cnt_ded,
+       (select count(*) from ndfl_person_prepayment c where c.ndfl_person_id=pers.id) cnt_prep
+  from ndfl_person pers join declaration_data decl on (decl.id=pers.declaration_data_id)
+                        join department_report_period dper on (dper.id=decl.department_report_period_id)
+                        join department dep on (dep.id=dper.department_id)
+                        join report_period per on (per.id=dper.report_period_id)
+                        join report_period_type tper on (tper.id=per.dict_tax_period_id)
+ where pers.id=$P{NDFL_PERSON_ID}]]>
 	</queryString>
-	<field name="ВрВыгр" class="java.lang.String">
-		<fieldDescription><![CDATA[СлЧасть/@ВрВыгр]]></fieldDescription>
-	</field>
-	<field name="КодПодр" class="java.lang.String">
-		<fieldDescription><![CDATA[СлЧасть/@КодПодр]]></fieldDescription>
-	</field>
-	<field name="ДатаОтч" class="java.lang.String">
-		<fieldDescription><![CDATA[СлЧасть/@ДатаОтч]]></fieldDescription>
-	</field>
-	<field name="ОтчетГод" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/@ОтчетГод]]></fieldDescription>
-	</field>
-	<field name="ПериодОтч" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/@ПериодОтч]]></fieldDescription>
-	</field>
-	<field name="ИНП" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@ИНП]]></fieldDescription>
-	</field>
-	<field name="ИмяФЛ" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@ИмяФЛ]]></fieldDescription>
-	</field>
-	<field name="ФамФЛ" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@ФамФЛ]]></fieldDescription>
-	</field>
-	<field name="ОтчФЛ" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@ОтчФЛ]]></fieldDescription>
-	</field>
-	<field name="НомСтр" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведДохНал/@НомСтр]]></fieldDescription>
-	</field>
-	<field name="КодДох" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведДохНал/@КодДох]]></fieldDescription>
-	</field>
-	<field name="ИдОпер" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/@ИдОпер]]></fieldDescription>
-	</field>
-	<field name="КПП" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/@КПП]]></fieldDescription>
-	</field>
-	<field name="СведВыч" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведВыч]]></fieldDescription>
-	</field>
-	<field name="СведАванс" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведАванс]]></fieldDescription>
-	</field>
-	<field name="НомСтр2" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведВыч/@НомСтр]]></fieldDescription>
-	</field>
-	<field name="ВычетКод" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведВыч/@ВычетКод]]></fieldDescription>
-	</field>
-	<field name="КодДох2" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведВыч/@КодДох]]></fieldDescription>
-	</field>
-	<field name="ИННИно" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@ИННИно]]></fieldDescription>
-	</field>
-	<field name="Корпус" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@Корпус]]></fieldDescription>
-	</field>
-	<field name="НаселПункт" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@НаселПункт]]></fieldDescription>
-	</field>
-	<field name="Район" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@Район]]></fieldDescription>
-	</field>
-	<field name="Индекс" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@Индекс]]></fieldDescription>
-	</field>
-	<field name="Аванс" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведАванс/@Аванс]]></fieldDescription>
-	</field>
-	<field name="НомСтр3" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведАванс/@НомСтр]]></fieldDescription>
-	</field>
-	<field name="УведДата" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведАванс/@УведДата]]></fieldDescription>
-	</field>
-	<field name="УведИФНС" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведАванс/@УведИФНС]]></fieldDescription>
-	</field>
-	<field name="УведНом" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/СведОпер/СведАванс/@УведНом]]></fieldDescription>
-	</field>
-	<field name="СтатусФЛ" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@СтатусФЛ]]></fieldDescription>
-	</field>
-	<field name="СНИЛС" class="java.lang.String">
-		<fieldDescription><![CDATA[ИнфЧасть/ПолучДох/@СНИЛС]]></fieldDescription>
-	</field>
+	<field name="DEPCODE" class="java.math.BigDecimal"/>
+	<field name="DEPNAME" class="java.lang.String"/>
+	<field name="PERNAME" class="java.lang.String"/>
+	<field name="REPYEAR" class="java.lang.String"/>
+	<field name="START_DATE" class="java.sql.Timestamp"/>
+	<field name="END_DATE" class="java.sql.Timestamp"/>
+	<field name="STATUS" class="java.lang.String"/>
+	<field name="CNT_INC" class="java.math.BigDecimal"/>
+	<field name="CNT_DED" class="java.math.BigDecimal"/>
+	<field name="CNT_PREP" class="java.math.BigDecimal"/>
 	<variable name="vCurrDate" class="java.lang.String">
 		<variableExpression><![CDATA[new SimpleDateFormat("dd.MM.yyyy").format(new Date())]]></variableExpression>
 		<initialValueExpression><![CDATA[new SimpleDateFormat("dd.MM.yyyy").format(new Date())]]></initialValueExpression>
 	</variable>
-	<variable name="DateRepStr" class="java.lang.String">
-		<variableExpression><![CDATA[($F{ДатаОтч}==null ? $V{vCurrDate} : $F{ДатаОтч})]]></variableExpression>
-		<initialValueExpression><![CDATA[($F{ДатаОтч}==null ? $V{vCurrDate} : $F{ДатаОтч})]]></initialValueExpression>
-	</variable>
-	<variable name="v_pername" class="java.lang.String" calculation="System">
-		<variableExpression><![CDATA[($F{ПериодОтч}.substring( 0, 2 ) == "12" ? "декабрь" : $F{ПериодОтч})]]></variableExpression>
-		<initialValueExpression><![CDATA[(
-    $F{ПериодОтч} == "12" ?
-    "декабрь" :
-    $F{ПериодОтч} == "11" ?
-    "ноябрь" :
-    $F{ПериодОтч} == "10" ?
-    "октябрь" :
-    $F{ПериодОтч} == "09" ?
-    "сентябрь" :
-    $F{ПериодОтч} == "08" ?
-    "октябрь" :
-    $F{ПериодОтч}
-)]]></initialValueExpression>
-	</variable>
-	<variable name="vRepDate" class="java.util.Date">
-		<variableExpression><![CDATA[new  java.text.SimpleDateFormat("dd.MM.yyyy").parse($V{DateRepStr})]]></variableExpression>
-		<initialValueExpression><![CDATA[new  java.text.SimpleDateFormat("dd.MM.yyyy").parse($V{DateRepStr})]]></initialValueExpression>
+	<variable name="DateRepStr" class="java.util.Date">
+		<variableExpression><![CDATA[($F{END_DATE}==null ? $V{vCurrDate} : $F{END_DATE})]]></variableExpression>
+		<initialValueExpression><![CDATA[($F{END_DATE}==null ? $V{vCurrDate} : $F{END_DATE})]]></initialValueExpression>
 	</variable>
 	<variable name="v_repdate_str" class="java.lang.String">
-		<variableExpression><![CDATA[($V{vRepDate}==null ? $V{vCurrDate} : $V{vRepDate}.format("dd MMMMM yyyy")).toLowerCase() .replace("рь","ря") .replace("ль","ля") .replace("нь","ня") .replace("март","марта") .replace("май","мая") .replace("август","августа")]]></variableExpression>
-		<initialValueExpression><![CDATA[($V{vRepDate}==null ? $V{vCurrDate} : $V{vRepDate}.format("dd MMMMM yyyy")).toLowerCase()
+		<variableExpression><![CDATA[$V{DateRepStr}.format("dd MMMMM yyyy").toLowerCase()
 .replace("рь","ря")
 .replace("ль","ля")
 .replace("нь","ня")
 .replace("март","марта")
 .replace("май","мая")
-.replace("август","августа")]]></initialValueExpression>
+.replace("август","августа")]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{DateRepStr}.format("dd MMMMM yyyy").toLowerCase()   .replace("рь","ря")   .replace("ль","ля")   .replace("нь","ня")   .replace("март","марта")   .replace("май","мая")   .replace("август","августа")]]></initialValueExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="124">
+		<band height="185">
 			<staticText>
-				<reportElement uuid="71e7225d-110d-4ddb-bfd0-85557790e8d1" x="40" y="3" width="98" height="20"/>
+				<reportElement uuid="71e7225d-110d-4ddb-bfd0-85557790e8d1" x="0" y="0" width="98" height="18"/>
 				<textElement textAlignment="Right" markup="none">
 					<font fontName="Times New Roman" size="10" isBold="true" pdfEncoding="Identity-H"/>
+					<paragraph rightIndent="5"/>
 				</textElement>
 				<text><![CDATA[Подразделение]]></text>
 			</staticText>
-			<textField isBlankWhenNull="true">
-				<reportElement uuid="2c4439b0-2ca4-4b4c-91ad-9395def5104e" x="138" y="3" width="89" height="20"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="2c4439b0-2ca4-4b4c-91ad-9395def5104e" x="98" y="0" width="195" height="18"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement>
 					<font fontName="Times New Roman" size="10" pdfEncoding="Identity-H"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{КодПодр}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DEPNAME}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="e74d9e39-4d76-4b4f-bc6f-9c48abe6ea00" x="384" y="104" width="189" height="20"/>
+				<reportElement uuid="e74d9e39-4d76-4b4f-bc6f-9c48abe6ea00" x="98" y="54" width="140" height="18"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement>
 					<font fontName="Times New Roman" size="12" isBold="true" pdfEncoding="Identity-H"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{v_pername}+" "+$F{ОтчетГод}+" г."]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PERNAME}+" "+$F{REPYEAR}+" г."]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="49c78ad1-c2ef-4016-91a7-21ab82e89016" x="0" y="74" width="822" height="20">
+				<reportElement uuid="49c78ad1-c2ef-4016-91a7-21ab82e89016" x="0" y="36" width="293" height="18">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Заголовок"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -585,21 +362,22 @@ $F{СНИЛС}]]></initialValueExpression>
 				<text><![CDATA[Регистр налогового учета на доходы физических лиц]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="838bd7c2-2efe-499d-803d-cfc0be29373c" x="706" y="2" width="106" height="20"/>
+				<reportElement uuid="838bd7c2-2efe-499d-803d-cfc0be29373c" x="716" y="0" width="106" height="18"/>
 				<textElement textAlignment="Right">
 					<font fontName="Times New Roman" size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ф. РНУ НДФЛ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a313d2eb-17f0-4299-be18-d0449f3e3fd8" x="344" y="104" width="40" height="20"/>
+				<reportElement uuid="a313d2eb-17f0-4299-be18-d0449f3e3fd8" x="0" y="54" width="98" height="18"/>
 				<textElement textAlignment="Right">
 					<font fontName="Times New Roman" size="12" isBold="true" pdfEncoding="Identity-H"/>
+					<paragraph rightIndent="5"/>
 				</textElement>
 				<text><![CDATA[за ]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="false">
-				<reportElement uuid="c1a3f4ee-b146-4e99-9678-2df8157a951c" mode="Transparent" x="40" y="23" width="187" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="c1a3f4ee-b146-4e99-9678-2df8157a951c" mode="Transparent" x="0" y="18" width="129" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -610,7 +388,7 @@ $F{СНИЛС}]]></initialValueExpression>
 				<textFieldExpression><![CDATA[$V{v_repdate_str}]]></textFieldExpression>
 			</textField>
 			<break>
-				<reportElement uuid="d289244f-8b6e-4b61-bfa2-2c017bc393b7" x="0" y="123" width="100" height="1"/>
+				<reportElement uuid="d289244f-8b6e-4b61-bfa2-2c017bc393b7" x="0" y="184" width="100" height="1"/>
 			</break>
 		</band>
 	</title>
@@ -621,10 +399,24 @@ $F{СНИЛС}]]></initialValueExpression>
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Реквизиты"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
-					<datasetRun subDataset="dsPerson" uuid="e3b0a5e8-fe01-4755-97e1-b679df335ebf">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Файл/ИнфЧасть/ПолучДох")]]></dataSourceExpression>
+					<datasetRun subDataset="dsPerson" uuid="ebb18680-34ef-4938-9e7d-583ff3ddcd42">
+						<datasetParameter name="NDFL_PERSON_ID">
+							<datasetParameterExpression><![CDATA[$P{NDFL_PERSON_ID}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
 					<jr:column width="23" uuid="5cbeb33a-043a-42a0-bd64-2121ac6fb67c">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="ff1a0859-2263-413d-9fcc-278abdbbb48e" x="0" y="0" width="23" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[1]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="8650a1e8-e775-42dc-8446-99e8da8ee835" x="0" y="0" width="23" height="21">
@@ -643,11 +435,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{v_nn}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{RN}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="102" uuid="7c04e060-914c-42ff-9936-1dbb500bfccc">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="5bc1bf69-5d1c-4e56-b50a-64ad4e9ac0fd" x="0" y="0" width="102" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[2]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="106273db-cc7d-4e23-95a6-f16bff5c19d2" mode="Transparent" x="0" y="0" width="102" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -666,11 +469,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{v_inp}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INP}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="109" uuid="c22b817d-30a2-462b-850e-6d714b4d63d3">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="cbbd1232-314c-4355-a66d-e9e8f07a9e9e" x="0" y="0" width="109" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[3]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="df2359a2-19dd-4c6a-86da-339c27015655" mode="Transparent" x="0" y="0" width="109" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -689,11 +503,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ФамФЛ}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{LAST_NAME}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="107" uuid="4e400dda-cfb4-49c8-afde-a18730bf739c">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="a87c6383-2416-4f02-8ff8-4d76884282ce" x="0" y="0" width="107" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[4]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="e57aa7d6-df18-4dc5-8268-4798baf4cdfd" mode="Transparent" x="0" y="0" width="107" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -712,11 +537,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ИмяФЛ}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{FIRST_NAME}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="108" uuid="8346e484-7550-481c-8c57-ed14b807ba9c">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="b6ca248d-49a4-4771-822f-e34fa1879dbe" x="0" y="0" width="108" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[5]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="111f2714-0f20-41d6-ba54-d4add27626dd" mode="Transparent" x="0" y="0" width="108" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -735,11 +571,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ОтчФЛ}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{MIDDLE_NAME}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="102" uuid="81d37d78-c972-4754-8887-35181034cce0">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="4ab95f95-8888-42b5-afd3-b014138d0cdd" x="0" y="0" width="102" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[6]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="a9484eab-4e99-4e82-a88f-4d6a2dbfd0df" mode="Transparent" x="0" y="0" width="102" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -752,17 +599,28 @@ $F{СНИЛС}]]></initialValueExpression>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="1364efad-402f-455c-a99f-ef4cd37ab150" mode="Transparent" x="0" y="0" width="102" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ДатаРожд}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{BIRTH_DAY}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="71" uuid="75da6466-8e5b-457a-af35-4fd946fde712">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="96ff4aa3-d0be-42d2-b7cf-8f03bd89ad27" x="0" y="0" width="71" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[7]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="344f131c-47a5-4cbd-83d1-627f2d49066b" mode="Transparent" x="0" y="0" width="71" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -781,11 +639,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{Гражд}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{CITIZENSHIP}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="fb1aa555-8587-4e7b-a0ac-36200b9ebe95">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="6112f765-117c-41f4-bc23-76ce262531d3" x="0" y="0" width="90" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[8]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="9dd2e374-6c2d-45b8-82e5-b560443d896a" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -804,11 +673,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ИННФЛ}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INN_NP}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="c296c1c9-67bc-4d64-99a4-ea7f71f443ea">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c5daffd8-9feb-441c-a98c-753839be379e" x="0" y="0" width="90" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[9]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="c685f393-87d1-477a-94e2-b78aa645f294" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -827,11 +707,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ИННИно}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INN_FOREIGN}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="100" uuid="3c07b709-9bd7-4794-8faa-10c2c3e77c96">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c5684584-07f5-4314-af8c-5a71d85edfe7" x="0" y="0" width="100" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[10]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="10c270ae-f403-4d06-a14a-46c29d2afd27" mode="Transparent" x="0" y="0" width="100" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -850,11 +741,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{УдЛичнФЛКод}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{ID_DOC_TYPE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="101" uuid="f01cd35b-9b62-45ee-90e9-2d2c59eccd5c">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="dd9e96ec-b569-4233-81f2-a3343f9252f6" x="0" y="0" width="101" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[11]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="47d3dc9f-de78-4907-8ff5-224097d9b6d1" mode="Transparent" x="0" y="0" width="101" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -873,11 +775,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{УдЛичнФЛНом}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{ID_DOC_NUMBER}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="50" uuid="e5557df3-81f5-4269-9bca-78c0f1690b06">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="cf5ee842-fba4-4da5-829d-cb50b6f08a35" x="0" y="0" width="50" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[12]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="8cf8a330-5fbf-4184-8811-8c6538988e79" mode="Transparent" x="0" y="0" width="50" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -896,11 +809,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{СтатусФЛ}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{STATUS}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="324ed8cd-a9d3-4fc4-8d48-7a44c1250c7f">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="7583310e-e499-4da6-919a-b4e47852d742" x="0" y="0" width="90" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[13]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="20e1bdbc-caa8-4520-87a3-32fa93b0d805" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -918,11 +842,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{КодРегион}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{REGION_CODE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="acc85149-cf13-4a87-9a40-50fde185d7e6">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="0eedf9c9-1796-4955-9f48-4946c858098b" x="0" y="0" width="90" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[14]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="debd5830-3b3b-48dd-b7b2-9748f42eb080" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -940,11 +875,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{Индекс}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{POST_INDEX}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="57e166aa-1bfa-4cce-9228-3bd2ae88cdd1">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="73997dd2-0d3a-4185-a365-f3bc4c968165" x="0" y="0" width="90" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[15]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="00d96e5b-4cb5-4157-b9f3-0de0ef8c0831" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -962,11 +908,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{Район}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{AREA}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="3678aba0-6238-492c-850a-a9ae75c5bb98">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="60a4a774-87cd-4eab-95ad-c756c7e828d9" x="0" y="0" width="90" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[16]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="5acf0258-6363-49a1-b5e9-cb6c0d85afa7" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -984,11 +941,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{Город}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{CITY}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="3e223c27-a1cc-464d-9808-cdf94a1242c2">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c23b35bf-8d5d-4199-9da6-74b3dea003cd" x="0" y="0" width="90" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[17]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="18aa56a6-cd18-4356-b5d2-9c34f2cde8c1" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1006,11 +974,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{НаселПункт}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{LOCALITY}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="145" uuid="5e3e27bb-e38e-496a-bd96-8961203cf41d">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="1309c1a5-c36f-4a90-9fbc-49706ad6f457" x="0" y="0" width="145" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[18]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="48a36d06-29e9-4887-877f-2a0cd100bb1a" mode="Transparent" x="0" y="0" width="145" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1028,11 +1007,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{Улица}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{STREET}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="58" uuid="f55c9b8a-7841-4768-80d7-3d3a743a8a92">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="68dc1e76-a48c-4c83-b4bd-d9dc6726ecc4" x="0" y="0" width="58" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[19]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="e6f077b9-d873-474f-9847-1cfdd3bece45" mode="Transparent" x="0" y="0" width="58" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1050,11 +1040,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{Дом}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{HOUSE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="57" uuid="92137a1d-9cfb-4aa1-bd2b-71f35e628e2d">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="9c789a91-7868-45f9-96ec-7001447252f7" x="0" y="0" width="57" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[20]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="a0f2c75e-5b5b-4405-b9dd-93ec6abf5fb4" mode="Transparent" x="0" y="0" width="57" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1072,11 +1073,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{Корпус}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{BUILDING}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="63" uuid="5654ad45-16ad-4437-baa7-d5e3b076e359">
+						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
+							<staticText>
+								<reportElement uuid="e214c7d9-ddaa-4f74-af96-fb2f5035434e" x="0" y="0" width="63" height="12">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[21]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
 								<reportElement uuid="5871033f-3549-4926-a1ec-178eb9c17a0f" mode="Transparent" x="0" y="0" width="63" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1094,7 +1106,7 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{Кварт}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{FLAT}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -1102,16 +1114,31 @@ $F{СНИЛС}]]></initialValueExpression>
 			</componentElement>
 		</band>
 		<band height="41">
+			<printWhenExpression><![CDATA[$F{CNT_INC}>0]]></printWhenExpression>
 			<break>
 				<reportElement uuid="565267f0-d4e3-457f-8a4e-69e042447242" x="0" y="0" width="100" height="1"/>
 			</break>
 			<componentElement>
 				<reportElement uuid="768a5531-fc44-47d8-8856-c0acaec43105" key="table 4" x="0" y="13" width="822" height="28"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
-					<datasetRun subDataset="dsIncomes" uuid="9b42d3f7-20fc-4367-b5fe-ea52a6752cda">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Файл/ИнфЧасть/СведОпер/СведДохНал")]]></dataSourceExpression>
+					<datasetRun subDataset="dsIncomes" uuid="70d65f75-5f36-4ba1-9665-3108755f52dc">
+						<datasetParameter name="NDFL_PERSON_ID">
+							<datasetParameterExpression><![CDATA[$P{NDFL_PERSON_ID}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
 					<jr:column width="38" uuid="ba56f539-cd18-4b8c-bc27-3910070127ff">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="636e8e64-2e90-40bd-8928-31fc636abf7b" x="0" y="0" width="38" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[1]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="fa07aa53-0762-4e25-856f-fb4337ff9286" mode="Transparent" x="0" y="0" width="38" height="36" forecolor="#000000" backcolor="#FFFFFF">
@@ -1131,11 +1158,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{НомСтр}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{RN}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="110" uuid="8b17f8bb-cd96-421d-9a83-e8a3508822c9">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="f166714a-e92d-485d-9fd9-2bf93bb1cafb" x="0" y="0" width="110" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[2]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="f5d71bb8-8921-4519-87ff-757980ca212d" mode="Transparent" x="0" y="0" width="110" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1153,11 +1191,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{v_inp}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INP}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="60" uuid="19f30e93-4d2a-419b-a70e-5f14b7d38391">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="b064116c-1090-4b19-970b-1013cdbf1656" x="0" y="0" width="60" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[3]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="1cc348cb-fe32-4a66-bff1-83186600cc94" mode="Transparent" x="0" y="0" width="60" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1176,11 +1225,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ИдОпер}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{OPERATION_ID}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="56" uuid="ced3467e-6ca2-462f-aa0d-21b3889e9f5e">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="0596fcda-a8ab-4c23-a863-2fc0b26ed410" x="0" y="0" width="56" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[4]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="a298478c-8aba-4802-bc1f-13fc2e70921d" mode="Transparent" x="0" y="0" width="56" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1199,11 +1259,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{КодДох}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_CODE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="59" uuid="eb9b7e18-de0c-4a18-baf7-934239a3bde3">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="89bd4103-725c-44c9-86fb-2a2e902539b7" x="0" y="0" width="59" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[5]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="3e71e856-6343-4ab2-aa5b-2640c7c69b5c" mode="Transparent" x="0" y="0" width="59" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1222,11 +1293,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ТипДох}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_TYPE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="78" uuid="13198462-3d60-414f-a7ff-bff92082d84c">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="0c45d4b8-fa05-40f2-8211-3446c9b9157a" x="0" y="0" width="78" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[6]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="2ee17f17-a2cb-4bfe-8568-62da1b0aa8eb" mode="Transparent" x="0" y="0" width="78" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1239,17 +1321,28 @@ $F{СНИЛС}]]></initialValueExpression>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="10" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="44b27d6d-f620-4879-a852-6690a8f8936e" mode="Transparent" x="0" y="0" width="78" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
-								<textElement textAlignment="Justified" verticalAlignment="Top" rotation="None" markup="none">
+								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ДатаДохНач}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_ACCRUED_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="73" uuid="9bcafd54-4593-41e3-bcdd-002182210591">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="afd63147-2c62-4ee8-8caf-7336970a3af3" x="0" y="0" width="73" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[7]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="ad3dc034-33dc-4a54-af57-a4caa6c201a6" mode="Transparent" x="0" y="0" width="73" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1262,17 +1355,28 @@ $F{СНИЛС}]]></initialValueExpression>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="10" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="f7eedc03-94cf-4477-b339-7feae7032f20" mode="Transparent" x="0" y="0" width="73" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ДатаДохВыпл}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_PAYOUT_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="82" uuid="bdeaa621-30c1-4f2b-83f9-dcb85aca9a13">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="88a3fd94-fa17-4150-9b9a-2e10ef7d75fd" x="0" y="0" width="82" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[8]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="940ad76a-26ab-4f0c-9f60-b764ba958240" mode="Transparent" x="0" y="0" width="82" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1290,11 +1394,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{КПП}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{KPP}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="93" uuid="c7b74ac8-d5a7-4269-bdf5-ed66c70deefa">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="a8317155-5b2c-4565-a856-3397f3c462d1" x="0" y="0" width="93" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[9]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="0129cac8-2b94-4e59-933f-21157ca8b6e3" mode="Transparent" x="0" y="0" width="93" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1312,11 +1427,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ОКТМО}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{OKTMO}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="72" uuid="4333c1b0-dcc0-445e-87c2-efedf45757a9">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="5edc95bb-0998-4f2e-ab82-84fbdf3abdda" x="0" y="0" width="72" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[10]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="ade3e3aa-89bb-4c40-b133-c1496ab795f4" mode="Transparent" x="0" y="0" width="72" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1335,11 +1461,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{СуммДохНач}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_ACCRUED_SUMM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="75" uuid="c01aad74-43d6-4a1c-b73d-7e44adfa00df">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="272a2015-2763-4ffa-8411-77c7d162ed48" x="0" y="0" width="75" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[11]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="8027e10a-4a1c-4af2-9968-ec12e2083ef4" mode="Transparent" x="0" y="0" width="75" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1358,11 +1495,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{СуммДохВыпл}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_PAYOUT_SUMM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="86" uuid="b3d1ec3f-bd95-47be-b935-6e2c634c19ab">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="d386a9d0-bdc8-48f7-91e5-89dc931ed4fb" x="0" y="0" width="86" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[12]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="78971cc8-7059-41c9-8ca8-e6193a5a9b7f" mode="Transparent" x="0" y="0" width="86" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1380,11 +1528,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{СумВыч}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{TOTAL_DEDUCTIONS_SUMM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="85" uuid="683d469d-5c99-45c3-b1f5-dd03d873c3b4">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="a188d63a-ffa3-4544-95a0-ec05b3a6ad0e" x="0" y="0" width="85" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[13]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="11ebc4fe-7a46-405c-a27d-75fb3287d9b3" mode="Transparent" x="0" y="0" width="85" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1402,11 +1561,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{НалБаза}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{TAX_BASE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="92" uuid="d8dbac7f-a0a9-4393-8422-3c1e329b5c7a">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="3d267f4d-3ca3-40ef-99c3-9bf30174b246" x="0" y="0" width="92" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[14]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="75abe023-9549-4c04-ba87-2531800e7d8e" mode="Transparent" x="0" y="0" width="92" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1426,11 +1596,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{Ставка}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{TAX_RATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="b5ada93b-0812-4a7b-968f-2f5bb55242cf">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="7d1c3888-2a21-4c5c-9bde-f21613a94626" x="0" y="0" width="90" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[15]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="e4f908e6-d6c9-4d67-918a-66c735e7393e" mode="Transparent" x="0" y="0" width="90" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1443,17 +1624,28 @@ $F{СНИЛС}]]></initialValueExpression>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="10" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="d55c021f-5992-4cb3-b5ad-c2e4fc60e073" mode="Transparent" x="0" y="0" width="90" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ДатаНалог}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{TAX_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="97c0c6f7-184a-4d1a-89ae-47642e82ba20">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="e4b84d32-d084-474b-8386-2c78fc10b0ea" x="0" y="0" width="90" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[16]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="1df012b8-4766-4ef5-ba87-ccc4cb1ec28d" mode="Transparent" x="0" y="0" width="90" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1473,11 +1665,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{НИ}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{CALCULATED_TAX}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="c605ed52-a612-4276-9423-4f6353347abf">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="dbb49fa1-6d80-4308-91d1-8268dbf4e84c" x="0" y="0" width="90" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[17]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="ff9a771b-b5e6-4561-bd61-041b2cb38a6d" mode="Transparent" x="0" y="0" width="90" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1497,11 +1700,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{НУ}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{WITHHOLDING_TAX}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="fcb9b5ec-8cb0-448c-be5a-e4a7a8a5e60b">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="57a57700-652d-4016-9a11-f7a87ab3e1b4" x="0" y="0" width="90" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[18]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="f9e2be46-2030-4170-81d9-4a3e1cc4dfe9" mode="Transparent" x="0" y="0" width="90" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1521,11 +1735,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{ДолгНА}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{NOT_HOLDING_TAX}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="92" uuid="fc6b7f52-03a5-4597-a479-31f48e23f8fb">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="45587326-7210-49f1-b860-0144bb634a79" x="0" y="0" width="92" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[19]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="2b9a075e-898e-48aa-99f3-8b1b6b314cc5" mode="Transparent" x="0" y="0" width="92" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1544,11 +1769,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{ДолгНП}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{OVERHOLDING_TAX}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="105" uuid="4e302d7f-4bb2-4689-98f1-8e3c69843c9e">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="b1409f25-0eb6-43dd-af5f-6773dddfa082" x="0" y="0" width="105" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[20]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="35dd8c9b-2191-4848-a4af-3c107f52d71a" mode="Transparent" x="0" y="0" width="105" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1567,11 +1803,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{ВозврНал}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{REFOUND_TAX}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="117" uuid="c219aa25-0e0c-4b86-b954-95981bcbc6e6">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="4a000db0-f500-4e0c-a3b7-6252b9463aa7" x="0" y="0" width="117" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[21]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="e84c6be9-dfd4-4521-9f11-ca2fb42fb37d" mode="Transparent" x="0" y="0" width="117" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1590,11 +1837,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{СрокПрчслНал}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{TAX_TRANSFER_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="116" uuid="06c7d9de-3242-4604-ac63-18861d22c166">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="acaba5d3-25e4-4501-8a1a-e57e341b7097" x="0" y="0" width="116" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[22]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="0a848160-11e1-4de0-a5cb-a2be3730bdb6" mode="Transparent" x="0" y="0" width="116" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1614,11 +1872,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ПлПоручДат}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{PAYMENT_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="117" uuid="4484a1e7-4900-4aad-85a2-956ca1cd975a">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="3b95f829-8a5e-43f0-bca9-36ba6044337c" x="0" y="0" width="117" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[23]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="a2efc9f1-76ee-48c9-8912-bdf78f2802e4" mode="Transparent" x="0" y="0" width="117" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1638,11 +1907,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ПлатПоручНом}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{PAYMENT_NUMBER}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="117" uuid="aee70f02-7da0-47f5-84d0-fec8135a3668">
+						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
+							<staticText>
+								<reportElement uuid="f45f0344-38e3-43f8-9a32-673b3b47873f" x="0" y="0" width="117" height="11">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[24]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
 								<reportElement uuid="67d8fb13-00fc-45da-a17c-a486cf7a5b61" mode="Transparent" x="0" y="0" width="117" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1662,7 +1942,7 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{НалПерСумм}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{TAX_SUMM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -1670,16 +1950,31 @@ $F{СНИЛС}]]></initialValueExpression>
 			</componentElement>
 		</band>
 		<band height="47">
+			<printWhenExpression><![CDATA[$F{CNT_DED}>0]]></printWhenExpression>
 			<break>
 				<reportElement uuid="ba5af910-88c7-43ef-83fc-a960ef0cea1a" x="0" y="0" width="100" height="1"/>
 			</break>
 			<componentElement>
 				<reportElement uuid="1bcaa6a5-43cc-473c-9f5e-c29a7b6d91e9" key="table 4" x="0" y="18" width="822" height="28"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
-					<datasetRun subDataset="dsMinuces" uuid="951ce4bf-2c58-4e53-8e34-2e37201a7bc6">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Файл/ИнфЧасть/СведОпер/СведВыч")]]></dataSourceExpression>
+					<datasetRun subDataset="dsMinuces" uuid="dfa4de10-b62e-475f-8a65-7c793ed5a6fb">
+						<datasetParameter name="NDFL_PERSON_ID">
+							<datasetParameterExpression><![CDATA[$P{NDFL_PERSON_ID}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
 					<jr:column width="30" uuid="ec66d86e-f623-459e-849c-fe56f1802c94">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="a4a83b49-2014-426e-9ba1-0386e2a684c9" x="0" y="0" width="30" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[1]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="d2472f52-21c8-43c5-8df9-4c553e0411fd" mode="Transparent" x="0" y="0" width="30" height="38" forecolor="#000000" backcolor="#FFFFFF">
@@ -1699,11 +1994,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{НомСтр}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{RN}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="115" uuid="dcf95f6a-d91b-487a-9166-b5b2d6e3ce1b">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="0161a31e-90a8-4119-8a00-06a49b6f27eb" x="0" y="0" width="115" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[2]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="de773582-fb74-4ce7-b9d4-99dc6a4e9c7c" mode="Transparent" x="0" y="0" width="115" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1721,11 +2027,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{v_inp}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INP}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="90" uuid="8d1b6c82-9ecc-45a1-904a-fe5649a6fc2c">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="5e693a88-dda0-431f-8bb6-c0221959cc15" x="0" y="0" width="90" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[3]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="ac61aebe-b94c-4065-9a3f-9792751cebbc" mode="Transparent" x="0" y="0" width="90" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1743,11 +2060,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ВычетКод}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{TYPE_CODE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="101" uuid="2fedf428-ecd8-489b-bf62-e4aafa70cde4">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="75d14bfa-44de-4940-a395-6a329f252840" x="0" y="0" width="101" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[4]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="c8a750d0-0099-4663-b29f-f2091339d34a" mode="Transparent" x="0" y="0" width="101" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1767,11 +2095,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{УведТип}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{NOTIF_TYPE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="101" uuid="098d6474-c8dd-4bbb-9e9d-03001969af3b">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c8b63ab3-56b7-486f-a2ac-ff59566ce3a6" x="0" y="0" width="101" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[5]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="d2eb0a6b-31b1-4271-bd5d-52bd67f8cd48" mode="Transparent" x="0" y="0" width="101" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1791,11 +2130,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{УведДата}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{NOTIF_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="101" uuid="721ab6c2-6e85-4f40-abd9-355825b59514">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="9c6f84ea-fb75-4348-ba9c-c0457a67231b" x="0" y="0" width="101" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[6]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="2f937009-6a50-4e7a-b5e8-70df57db3895" mode="Transparent" x="0" y="0" width="101" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1815,11 +2165,22 @@ $F{СНИЛС}]]></initialValueExpression>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{УведНом}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{NOTIF_NUM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="98" uuid="92b3b863-8919-4f80-83bd-0c727613107b">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="5d8ee295-9065-4df8-8402-442d2205305f" x="0" y="0" width="98" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[7]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="c78b8d15-b199-42e6-9376-03d4ed8aa2d2" mode="Transparent" x="0" y="0" width="98" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1838,11 +2199,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ИдОпер}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{OPERATION_ID}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="98" uuid="c3cd2e4e-483f-41bf-9dca-a3c476d75b5f">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="d11a8142-30ea-42dc-9bb0-157ebdbf9033" x="0" y="0" width="98" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[8]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="914bfcea-2f34-4acf-aa45-39c1d2ad292b" mode="Transparent" x="0" y="0" width="98" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1861,11 +2233,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ДатаДохНач}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_ACCRUED}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="98" uuid="60c916cc-096a-42af-9e24-64902b931d1d">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="afc6e51d-63d9-473e-8e94-1d14d16a3cd5" x="0" y="0" width="98" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[9]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="2c495743-bad2-4f47-9354-2d36bcd4f42d" mode="Transparent" x="0" y="0" width="98" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1884,11 +2267,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{КодДох}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_CODE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="98" uuid="12ed27bd-50bb-4d4c-8424-f5b8b5ed334c">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="74b62cb6-93b0-489b-8b17-d2660a83c48c" x="0" y="0" width="98" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[10]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="b1429aa4-17b9-4d99-907a-d5b73628508c" mode="Transparent" x="0" y="0" width="98" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1907,11 +2301,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{СуммДохНач}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INCOME_SUMM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="102" uuid="79790d98-56dd-41d1-a910-b40252fa6149">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="90813c2c-b6ea-4bbe-9bc8-e6a7244e1eec" x="0" y="0" width="102" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[11]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="f6dca23e-bf30-4620-aa08-66a5ce7119f3" mode="Transparent" x="0" y="0" width="102" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1931,11 +2336,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ДатаПредВыч}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{PERIOD_PREV_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="102" uuid="6d910c0c-4f9b-4547-9db7-ee43cd29f848">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="d884937d-f356-4a16-800a-9ef412dffe92" x="0" y="0" width="102" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[12]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="4db0901f-0378-4330-a8e7-761240b5be29" mode="Transparent" x="0" y="0" width="102" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1955,11 +2371,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{СумПредВыч}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{PERIOD_PREV_SUMM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="102" uuid="55020b99-1b6a-4f35-b47b-4aeafed001cc">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="7c1f49a0-76bf-4583-95b6-ba026a32e130" x="0" y="0" width="102" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[13]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="1278aac6-6e7a-4ccd-9f1d-d76bdedd19aa" mode="Transparent" x="0" y="0" width="102" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -1979,11 +2406,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ДатаТекВыч}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{PERIOD_CURR_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="102" uuid="f32d1bac-0b36-46ff-8779-75d2531ef6f1">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="77abc93f-6eff-4bc3-b342-911659eeb804" x="0" y="0" width="102" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[14]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
 								<reportElement uuid="49e43b43-4687-42ed-90ba-55f4d3051941" mode="Transparent" x="0" y="0" width="102" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -2003,7 +2441,7 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{СумТекВыч}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{PERIOD_CURR_SUMM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -2011,17 +2449,31 @@ ID операции]]></text>
 			</componentElement>
 		</band>
 		<band height="48">
-			<printWhenExpression><![CDATA[$F{СтатусФЛ}=="6"]]></printWhenExpression>
+			<printWhenExpression><![CDATA[$F{STATUS}=="6" && $F{CNT_PREP}>0]]></printWhenExpression>
 			<break>
 				<reportElement uuid="3de974b3-17e5-4c85-9bb3-fc6bdc82762b" x="0" y="0" width="100" height="1"/>
 			</break>
 			<componentElement>
 				<reportElement uuid="e1c98384-fdee-400c-9087-8074de2c3fe0" key="table 4" x="0" y="20" width="822" height="28"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
-					<datasetRun subDataset="dsPrepays" uuid="897cb484-d46d-49c6-a61e-cb3635c7cec8">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Файл/ИнфЧасть/СведОпер/СведАванс")]]></dataSourceExpression>
+					<datasetRun subDataset="dsPrepays" uuid="2d4107b3-a3d3-435a-86a3-e35eb90d5585">
+						<datasetParameter name="NDFL_PERSON_ID">
+							<datasetParameterExpression><![CDATA[$P{NDFL_PERSON_ID}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
 					<jr:column width="33" uuid="5c4adc00-3962-4ce0-a758-90944e5e7f34">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="9938f532-6522-4066-b2e5-4f776fb98255" x="0" y="0" width="33" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[1]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="58" rowSpan="1">
 							<staticText>
 								<reportElement uuid="f8ac86eb-321e-4181-97f6-f0cd1bb6c113" mode="Transparent" x="0" y="0" width="33" height="58" forecolor="#000000" backcolor="#FFFFFF">
@@ -2041,11 +2493,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{НомСтр}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{RN}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="105" uuid="21a97023-ccd4-4be9-856a-c360dc19858a">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c491277e-f7b9-4dab-a7b8-21644e0a9d22" x="0" y="0" width="105" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[2]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="58" rowSpan="1">
 							<staticText>
 								<reportElement uuid="91a0e28e-1343-452d-8f41-25800b022c19" mode="Transparent" x="0" y="0" width="105" height="58" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -2063,11 +2526,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{v_inp}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{INP}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="72" uuid="86265c55-427a-4058-9345-6d08f3050062">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="21973cea-66bf-4071-b356-0237008af6d3" x="0" y="0" width="72" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[3]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="58" rowSpan="1">
 							<staticText>
 								<reportElement uuid="26026703-b5f4-4075-b342-73ba74c8930a" mode="Transparent" x="0" y="0" width="72" height="58" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -2085,11 +2559,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{ИдОпер}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{OPERATION_ID}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="101" uuid="18552607-399f-472a-b736-c2ecd5cebfab">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="e5e39616-79c6-4bd1-acf2-cf2981a678d5" x="0" y="0" width="101" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[4]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="58" rowSpan="1">
 							<staticText>
 								<reportElement uuid="a5d646c9-b7f1-4728-ace1-a850185c0b9e" mode="Transparent" x="0" y="0" width="101" height="58" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -2108,11 +2593,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{Аванс}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{SUMM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="168" uuid="a474b661-7997-4934-8b91-3c558e0c353b">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="f2aa9a65-6a5d-4f42-bba3-028fbfc4fc2c" x="0" y="0" width="168" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[5]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="58" rowSpan="1">
 							<staticText>
 								<reportElement uuid="89164234-f4e3-4f87-96a1-57788423b40e" mode="Transparent" x="0" y="0" width="168" height="58" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -2133,11 +2629,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{УведНом}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{NOTIF_NUM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="168" uuid="f14fd34d-4a49-4fa2-a966-2c51416adbd1">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c176aea3-7c22-4703-bb5d-18acf6a8b496" x="0" y="0" width="168" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[6]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="58" rowSpan="1">
 							<staticText>
 								<reportElement uuid="3663473a-ec7e-44da-b040-aa5f3638a834" mode="Transparent" x="0" y="0" width="168" height="58" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -2158,11 +2665,22 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{УведДата}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{NOTIF_DATE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="205" uuid="157507dd-5739-4a6c-ba81-06d8fa18c501">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="ae085f66-f9f1-4fe6-909e-6889ba4bafa0" x="0" y="0" width="205" height="10">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center">
+									<font fontName="Times New Roman" size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[7]]></text>
+							</staticText>
+						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="58" rowSpan="1">
 							<staticText>
 								<reportElement uuid="04fc5d92-f6f0-4ac9-bf3d-faa1e1a203f4" mode="Transparent" x="0" y="0" width="205" height="58" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -2183,7 +2701,7 @@ ID операции]]></text>
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{УведИФНС}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{NOTIF_SOURCE}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
