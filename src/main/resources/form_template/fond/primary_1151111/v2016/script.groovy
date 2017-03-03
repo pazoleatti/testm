@@ -219,6 +219,7 @@ switch (formDataEvent) {
 @Field final String SUM_STRAH_VZN = "Суммы страховых взносов"
 @Field final String OPS_OMS = "П1.Расчет ОПС ОМС"
 @Field final String OSS_VNM = "П2.Расчет ОСС  ВНМ"
+@Field final String OSS_ZAK = "П3.Расходы на ОСС Зак."
 @Field final String FED_BUD = "П4.Выплаты за счет Фед.Бюдж."
 
 // Имена псевдонима спецотчета
@@ -267,6 +268,9 @@ def createSpecificReport() {
 
         logger.info("Заполнение листа \"П2.Расчет ОСС ВНМ\"")
         fillOssVnm(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П3.Расходы на ОСС Зак.\"")
+        fillOssZak(raschsvObyazPlatSv, workbook)
 
         logger.info("Заполнение листа \"П4.Выплаты за счет Фед.Бюдж.\"")
         fillFedBud(raschsvObyazPlatSv, workbook)
@@ -1141,6 +1145,49 @@ def fillFedBud(raschsvObyazPlatSv, XSSFWorkbook workbook) {
 }
 
 /**
+ * Заполняет данными лист "Расходы на ОСС Зак."
+ */
+def fillOssZak(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+    def sheet = workbook.getSheet(OSS_ZAK)
+
+    def raschsvRashOssZak = raschsvObyazPlatSv?.raschsvRashOssZak
+
+    def vyplPosVrNetr = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ПосВрНетр" == it.nodeName}
+    def posVrNetrSov = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ПосВрНетрСов" == it.nodeName}
+    def posVrNetrIn = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ПосВрНетрИн" == it.nodeName}
+    def posVrNetrInSov = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ПосВрНетрИнСов" == it.nodeName}
+    def beremRod = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "БеремРод" == it.nodeName}
+    def beremRodSov = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "БеремРодСов" == it.nodeName}
+    def edPosRanBerem = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ЕдПосРанБерем" == it.nodeName}
+    def edPosRojd = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ЕдПосРожд" == it.nodeName}
+    def ejPosYhodReb = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ЕжПосУходРеб" == it.nodeName}
+    def ejPosYhodReb1 = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ЕжПосУходРеб1" == it.nodeName}
+    def ejPosYhodReb2 = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ЕжПосУходРеб2" == it.nodeName}
+    def oplDopVyhInv = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "ОплДопВыхИнв" == it.nodeName}
+    def cvdDopYhodInv = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "СВДопУходИнв" == it.nodeName}
+    def cocPsPogreb = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "СоцПосПогреб" == it.nodeName}
+    def itogo = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "Итого" == it.nodeName}
+    def nachNevyplPos = raschsvRashOssZak?.raschsvRashOssZakRashList?.find { "НачНевыплПос" == it.nodeName}
+
+    fillOssZak(sheet, 8, vyplPosVrNetr)
+    fillOssZak(sheet, 9, posVrNetrSov)
+    fillOssZak(sheet, 10, posVrNetrIn)
+    fillOssZak(sheet, 11, posVrNetrInSov)
+    fillOssZak(sheet, 12, beremRod)
+    fillOssZak(sheet, 13, beremRodSov)
+    fillOssZak(sheet, 14, edPosRanBerem)
+    fillOssZak(sheet, 15, edPosRojd)
+    fillOssZak(sheet, 16, ejPosYhodReb)
+    fillOssZak(sheet, 17, ejPosYhodReb1)
+    fillOssZak(sheet, 18, ejPosYhodReb2)
+    fillOssZak(sheet, 19, oplDopVyhInv)
+    fillOssZak(sheet, 20, cvdDopYhodInv)
+    fillOssZak(sheet, 21, cocPsPogreb)
+    fillOssZak(sheet, 22, itogo)
+    fillOssZak(sheet, 24, nachNevyplPos)
+}
+
+/**
  * Заполняет значениями строки для количеств
  */
 def fillKolRow(sheet, pointer, kolLicTip) {
@@ -1228,6 +1275,31 @@ def fillPriznakRow(sheet, pointer, raschsvUplSvPrev) {
  * Заполнение строк для:
  * "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
  */
+def fillOssZak(sheet, pointer, raschsvRashOssZakRash) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = sheet.getRow(pointer).createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvRashOssZakRash?.chislSluch ?: "")
+
+    def cell2 = sheet.getRow(pointer).createCell(2)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvRashOssZakRash?.kolVypl ?: "")
+
+    def cell3 = sheet.getRow(pointer).createCell(3)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvRashOssZakRash?.rashVsego ?: "")
+
+    def cell4 = sheet.getRow(pointer).createCell(4)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvRashOssZakRash?.rashFinFb ?: "")
+}
+
+/**
+ * Заполнение строк для:
+ * "Расходы по обязательному социальному страхованию на случай временной нетрудоспособности ..."
+ */
 def fillFedBudRow(sheet, pointer, raschsvRashVypl) {
     def style = normalWithBorderStyle(sheet.getWorkbook())
     addFillingToStyle(style, ROWS_FILL_COLOR)
@@ -1244,6 +1316,7 @@ def fillFedBudRow(sheet, pointer, raschsvRashVypl) {
     cell3.setCellStyle(style)
     cell3.setCellValue(raschsvRashVypl?.rashod ?: "")
 }
+
 
 /****************************************************************************
  *  Блок стилизации                                                         *
