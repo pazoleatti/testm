@@ -63,9 +63,9 @@ public interface RaschsvPersSvStrahLicDao {
 
     /**
      * Найти дубли RaschsvPersSvStrahLic, ссылающиеся на одну и ту же запись в таблице справочника Физические лица REF_BOOK_PERSON
-     * @param personIdList
+     * @param declarationDataId
      * @param reportPeriodId
      * @return
      */
-    List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(List<Long> personIdList, long reportPeriodId);
+    List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(long declarationDataId, long reportPeriodId);
 }
