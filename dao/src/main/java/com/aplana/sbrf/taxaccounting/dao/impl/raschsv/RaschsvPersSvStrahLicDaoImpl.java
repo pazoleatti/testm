@@ -503,17 +503,18 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     @Override
-    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(List<Long> personIdList, long reportPeriodId) {
+    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(long declarationDataId, long reportPeriodId) {
         String sql = "select * from (" +
                 " select " + PERS_SV_STRAH_LIC_COLS_WITH_ALIAS +
                 " ,count(*) over (partition by p.person_id) cnt " +
                 " from RASCHSV_PERS_SV_STRAH_LIC p " +
                 " inner join DECLARATION_DATA dd on p.declaration_data_id = dd.id " +
                 " inner join DEPARTMENT_REPORT_PERIOD drp on dd.department_report_period_id = drp.id " +
-                " where drp.report_period_id = :report_period_id and (" + SqlUtils.transformToSqlInStatement("p.person_id", personIdList) + ") " +
+                " where drp.report_period_id = :report_period_id and p.person_id in (select person_id from RASCHSV_PERS_SV_STRAH_LIC where declaration_data_id = :declaration_data_id) " +
                 " ) where cnt > 1";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("report_period_id", reportPeriodId);
+        params.addValue("declaration_data_id", declarationDataId);
         return getNamedParameterJdbcTemplate().query(sql, params, new RaschsvPersSvStrahLicDaoImpl.RaschsvPersSvStrahLicRowMapper());
     }
 

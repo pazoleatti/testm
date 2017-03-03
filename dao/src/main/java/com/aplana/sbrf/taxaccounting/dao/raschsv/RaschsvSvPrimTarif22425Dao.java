@@ -16,8 +16,8 @@ public interface RaschsvSvPrimTarif22425Dao {
 
     /**
      * Выборка из СвПримТариф2.2.425
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    RaschsvSvPrimTarif22425 findRaschsvSvPrimTarif22425(Long obyazPlatSvId);
+    RaschsvSvPrimTarif22425 findRaschsvSvPrimTarif22425(Long declarationDataId);
 }

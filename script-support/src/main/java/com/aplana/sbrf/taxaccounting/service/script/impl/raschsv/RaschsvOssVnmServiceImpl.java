@@ -16,4 +16,9 @@ public class RaschsvOssVnmServiceImpl implements RaschsvOssVnmService {
     public Long insertRaschsvOssVnm(RaschsvOssVnm raschsvOssVnm) {
         return raschsvOssVnmDao.insertRaschsvOssVnm(raschsvOssVnm);
     }
+
+    @Override
+    public RaschsvOssVnm findOssVnm(Long declarationDataId) {
+        return raschsvOssVnmDao.findOssVnm(declarationDataId);
+    }
 }

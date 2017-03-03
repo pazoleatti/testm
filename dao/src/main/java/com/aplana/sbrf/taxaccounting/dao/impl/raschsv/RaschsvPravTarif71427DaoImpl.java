@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPravTarif71427Dao;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif71427;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,8 +26,10 @@ public class RaschsvPravTarif71427DaoImpl extends AbstractDao implements Raschsv
     private static final String SQL_INSERT = "INSERT INTO " + RaschsvPravTarif71427.TABLE_NAME +
             " (" + PRAV_TARIF_71427_COLS + ") VALUES (" + PRAV_TARIF_71427_FIELDS + ")";
 
-    private static final String SQL_SELECT = "SELECT " + PRAV_TARIF_71427_COLS + " FROM " + RaschsvPravTarif71427.TABLE_NAME +
-            " WHERE " + RaschsvPravTarif71427.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvPravTarif71427.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvPravTarif71427.COLUMNS, "pt.") +
+            " FROM raschsv_prav_tarif7_1_427 pt"  +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON pt.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     public Long insertRaschsvPravTarif71427(RaschsvPravTarif71427 raschsvPravTarif71427) {
         raschsvPravTarif71427.setId(generateId(RaschsvPravTarif71427.SEQ, Long.class));
@@ -50,10 +53,10 @@ public class RaschsvPravTarif71427DaoImpl extends AbstractDao implements Raschsv
         return raschsvPravTarif71427.getId();
     }
 
-    public RaschsvPravTarif71427 findRaschsvPravTarif71427(Long obyazPlatSvId) {
+    public RaschsvPravTarif71427 findRaschsvPravTarif71427(Long declarationDataId) {
         try {
             SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue(RaschsvPravTarif71427.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                    .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
             return getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvPravTarif71427RowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;

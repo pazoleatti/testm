@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvVyplFinFbDao;
+import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplPrichina;
@@ -50,8 +51,10 @@ public class RaschsvVyplFinFbDaoImpl extends AbstractDao implements RaschsvVyplF
     private static final String SQL_INSERT_RASH_VYPL = "INSERT INTO " + RaschsvRashVypl.TABLE_NAME +
             " (" + RASH_VYPL_COLS + ") VALUES (" + RASH_VYPL_FIELDS + ")";
 
-    private static final String SQL_SELECT_VYPL_FIN_FB = "SELECT " + VYPL_FIN_FB_COLS + " FROM " + RaschsvVyplFinFb.TABLE_NAME +
-            " WHERE " + RaschsvVyplFinFb.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvVyplFinFb.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT_VYPL_FIN_FB = "SELECT " + SqlUtils.getColumnsToString(RaschsvVyplFinFb.COLUMNS, "vf.") +
+            " FROM raschsv_vypl_fin_fb vf " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON vf.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     private static final String SQL_SELECT_VYPL_PRICHINA = "SELECT " + VYPL_PRICHINA_COLS + " FROM " + RaschsvVyplPrichina.TABLE_NAME +
             " WHERE " + RaschsvVyplPrichina.COL_RASCHSV_VYPL_FIN_FB_ID + " = :" + RaschsvVyplPrichina.COL_RASCHSV_VYPL_FIN_FB_ID;
@@ -62,6 +65,7 @@ public class RaschsvVyplFinFbDaoImpl extends AbstractDao implements RaschsvVyplF
                     " ON " + RASH_VYPL_ALIAS + "." + RaschsvRashVypl.COL_RASCHSV_VYPL_PRICHINA_ID + " = " + VYPL_PRICHINA_ALIAS + "." + RaschsvVyplPrichina.COL_ID)
             .append(" WHERE " + VYPL_PRICHINA_ALIAS + "." + RaschsvVyplPrichina.COL_RASCHSV_VYPL_FIN_FB_ID + " = :" + RaschsvVyplPrichina.COL_RASCHSV_VYPL_FIN_FB_ID);
 
+    @Override
     public Long insertRaschsvVyplFinFb(RaschsvVyplFinFb raschsvVyplFinFb) {
         raschsvVyplFinFb.setId(generateId(RaschsvVyplFinFb.SEQ, Long.class));
 
@@ -140,10 +144,11 @@ public class RaschsvVyplFinFbDaoImpl extends AbstractDao implements RaschsvVyplF
         return res.length;
     }
 
-    public RaschsvVyplFinFb findRaschsvVyplFinFb(Long obyazPlatSvId) {
+    @Override
+    public RaschsvVyplFinFb findRaschsvVyplFinFb(Long declarationDataId) {
         try {
             SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue(RaschsvVyplFinFb.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                    .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
             // Выборка из РасчСВ_ОСС.ВНМ
             RaschsvVyplFinFb raschsvVyplFinFb =
                     getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_VYPL_FIN_FB, params, new RaschsvVyplFinFbRowMapper());

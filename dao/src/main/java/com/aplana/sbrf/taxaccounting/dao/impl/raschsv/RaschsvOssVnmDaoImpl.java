@@ -77,8 +77,10 @@ public class RaschsvOssVnmDaoImpl extends AbstractDao implements RaschsvOssVnmDa
     private static final String SQL_INSERT_OSS_VNM_SUM = "INSERT INTO " + RaschsvOssVnmSum.TABLE_NAME +
             " (" + OSS_VNM_SUM_COLS + ") VALUES (" + OSS_VNM_SUM_FIELDS + ")";
 
-    private static final String SQL_SELECT_OSS_VNM = "SELECT " + OSS_VNM_COLS + " FROM " + RaschsvOssVnm.TABLE_NAME +
-            " WHERE " + RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvOssVnm.COLUMNS, "oss.") +
+            " FROM raschsv_oss_vnm oss " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON oss.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     private static final StringBuilder SQL_SELECT_UPL_SV_PREV = new StringBuilder()
             .append("SELECT " + UPL_SV_PREV_COLS_WITH_ALIAS + " FROM " + RaschsvUplSvPrev.TABLE_NAME + " " + UPL_SV_PREV_ALIAS)
@@ -114,6 +116,7 @@ public class RaschsvOssVnmDaoImpl extends AbstractDao implements RaschsvOssVnmDa
                     " ON " + OSS_VNM_KOL_ALIAS + "." + RaschsvOssVnmKol.COL_RASCHSV_OSS_VNM_ID + " = " + OSS_VNM_ALIAS + "." + RaschsvOssVnm.COL_ID)
             .append(" WHERE " + OSS_VNM_ALIAS + "." + RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID);
 
+    @Override
     public Long insertRaschsvOssVnm(RaschsvOssVnm raschsvOssVnm) {
         raschsvOssVnm.setId(generateId(RaschsvOssVnm.SEQ, Long.class));
 
@@ -230,26 +233,27 @@ public class RaschsvOssVnmDaoImpl extends AbstractDao implements RaschsvOssVnmDa
         return res.length;
     }
 
-    public RaschsvOssVnm findOssVnm(Long obyazPlatSvId) {
+    @Override
+    public RaschsvOssVnm findOssVnm(Long declarationDataId) {
         try {
             SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue(RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                    .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
             // Выборка из РасчСВ_ОСС.ВНМ
             RaschsvOssVnm raschsvOssVnm =
-                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_OSS_VNM, params, new RaschsvOssVnmRowMapper());
+                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvOssVnmRowMapper());
 
             // Выборка из УплСВПрев
-            raschsvOssVnm.setRaschsvUplSvPrevList(findRaschsvUplSvPrev(raschsvOssVnm.getId()));
+            raschsvOssVnm.setRaschsvUplSvPrevList(findRaschsvUplSvPrev(raschsvOssVnm.getRaschsvObyazPlatSvId()));
 
             // Выборка из СвСум1Тип
-            List<RaschsvSvSum1Tip> raschsvSvSum1TipList = findRaschsvSvSum1Tip(raschsvOssVnm.getId());
+            List<RaschsvSvSum1Tip> raschsvSvSum1TipList = findRaschsvSvSum1Tip(raschsvOssVnm.getRaschsvObyazPlatSvId());
             Map<Long, RaschsvSvSum1Tip> mapRaschsvSvSum1Tip = new HashMap<Long, RaschsvSvSum1Tip>();
             for (RaschsvSvSum1Tip raschsvSvSum1Tip : raschsvSvSum1TipList) {
                 mapRaschsvSvSum1Tip.put(raschsvSvSum1Tip.getId(), raschsvSvSum1Tip);
             }
 
             // Выборка "Связь РасчСВ_ОСС.ВНМ и СвСум1Тип"
-            List<RaschsvOssVnmSum> raschsvOssVnmSumList = findRaschsvOssVnmSum(raschsvOssVnm.getId());
+            List<RaschsvOssVnmSum> raschsvOssVnmSumList = findRaschsvOssVnmSum(raschsvOssVnm.getRaschsvObyazPlatSvId());
             for (RaschsvOssVnmSum raschsvOssVnmSum : raschsvOssVnmSumList) {
                 RaschsvSvSum1Tip raschsvSvSum1Tip = mapRaschsvSvSum1Tip.get(raschsvOssVnmSum.getRaschsvSvSum1TipId());
                 raschsvOssVnmSum.setRaschsvSvSum1Tip(raschsvSvSum1Tip);
@@ -257,14 +261,14 @@ public class RaschsvOssVnmDaoImpl extends AbstractDao implements RaschsvOssVnmDa
             }
 
             // Выборка из КолЛицТип
-            List<RaschsvKolLicTip> raschsvKolLicTipList = findRaschsvKolLicTip(raschsvOssVnm.getId());
+            List<RaschsvKolLicTip> raschsvKolLicTipList = findRaschsvKolLicTip(raschsvOssVnm.getRaschsvObyazPlatSvId());
             Map<Long, RaschsvKolLicTip> mapRaschsvKolLicTip = new HashMap<Long, RaschsvKolLicTip>();
             for (RaschsvKolLicTip raschsvKolLicTip : raschsvKolLicTipList) {
                 mapRaschsvKolLicTip.put(raschsvKolLicTip.getId(), raschsvKolLicTip);
             }
 
             // Выборка "Связь РасчСВ_ОСС.ВНМ и КолЛицТип"
-            List<RaschsvOssVnmKol> raschsvOssVnmKolList = findRaschsvOssVnmKol(raschsvOssVnm.getId());
+            List<RaschsvOssVnmKol> raschsvOssVnmKolList = findRaschsvOssVnmKol(raschsvOssVnm.getRaschsvObyazPlatSvId());
             for (RaschsvOssVnmKol raschsvOssVnmKol : raschsvOssVnmKolList) {
                 RaschsvKolLicTip raschsvKolLicTip = mapRaschsvKolLicTip.get(raschsvOssVnmKol.getRaschsvKolLicTipId());
                 raschsvOssVnmKol.setRaschsvKolLicTip(raschsvKolLicTip);
@@ -279,34 +283,34 @@ public class RaschsvOssVnmDaoImpl extends AbstractDao implements RaschsvOssVnmDa
 
     /**
      * Выборка из УплСВПрев
-     * @param raschsvSvOpsOmsId
+     * @param raschsvObyazPlatSvId
      * @return
      */
-    private List<RaschsvUplSvPrev> findRaschsvUplSvPrev(Long raschsvSvOpsOmsId) {
+    private List<RaschsvUplSvPrev> findRaschsvUplSvPrev(Long raschsvObyazPlatSvId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID, raschsvSvOpsOmsId);
+                .addValue(RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID, raschsvObyazPlatSvId);
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_UPL_SV_PREV.toString(), params, new RaschsvUplSvPrevRowMapper());
     }
 
     /**
      * Выборка из СвСум1Тип
-     * @param raschsvSvOpsOmsId
+     * @param raschsvObyazPlatSvId
      * @return
      */
-    private List<RaschsvSvSum1Tip> findRaschsvSvSum1Tip(Long raschsvSvOpsOmsId) {
+    private List<RaschsvSvSum1Tip> findRaschsvSvSum1Tip(Long raschsvObyazPlatSvId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID, raschsvSvOpsOmsId);
+                .addValue(RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID, raschsvObyazPlatSvId);
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_SUM.toString(), params, new RaschsvSvSum1TipRowMapper());
     }
 
     /**
      * Выборка "Связь РасчСВ_ОСС.ВНМ и СвСум1Тип"
-     * @param raschsvSvOpsOmsId
+     * @param raschsvObyazPlatSvId
      * @return
      */
-    private List<RaschsvOssVnmSum> findRaschsvOssVnmSum(Long raschsvSvOpsOmsId) {
+    private List<RaschsvOssVnmSum> findRaschsvOssVnmSum(Long raschsvObyazPlatSvId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue(RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID, raschsvSvOpsOmsId);
+                .addValue(RaschsvOssVnm.COL_RASCHSV_OBYAZ_PLAT_SV_ID, raschsvObyazPlatSvId);
         return getNamedParameterJdbcTemplate().query(SQL_SELECT_OSS_VNM_SUM.toString(), params, new RaschsvOssVnmSumRowMapper());
     }
 
