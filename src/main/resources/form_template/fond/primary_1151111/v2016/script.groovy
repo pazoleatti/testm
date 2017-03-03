@@ -5174,11 +5174,11 @@ def checkDataDBSum() {
         // 3.3.6.3 Доля не менее 90%
         if (raschsvPravTarif31427.dohDoh54279mpr < 90) {
             def pathAttrVal = pathAttrPravTarif31427 + ".ДолДох5.427_9МПр = \"$raschsvPravTarif31427.dohDoh54279mpr\""
-            logger.info("$pathAttrVal менее 90%. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
+            logger.info("$pathAttrVal менее 90%%. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
         }
         if (raschsvPravTarif31427.dohDoh5427per < 90) {
             def pathAttrVal = pathAttrPravTarif31427 + ".ДолДох5.427_Пер = \"$raschsvPravTarif31427.dohDoh5427per\""
-            logger.info("$pathAttrVal менее 90%. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
+            logger.info("$pathAttrVal менее 90%%. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
         }
     }
 
@@ -5273,9 +5273,10 @@ def checkDataDBSum() {
 
     if (raschsvSvPrimTarif13422 != null) {
         RaschsvVyplatIt422 raschsvVyplatIt422 = raschsvSvPrimTarif13422.raschsvVyplatIt422
-        BigDecimal vyplatIt422Sum1 = vyplatIt425Sum ? vyplatIt425Sum.sum1mPosl3m ?: 0 : 0
-        BigDecimal vyplatIt422Sum2 = vyplatIt425Sum ? vyplatIt425Sum.sum2mPosl3m ?: 0 : 0
-        BigDecimal vyplatIt422Sum3 = vyplatIt425Sum ? vyplatIt425Sum.sum3mPosl3m ?: 0 : 0
+        RaschsvSvSum1Tip vyplatIt422Sum = raschsvVyplatIt422.raschsvSvSum1Tip
+        BigDecimal vyplatIt422Sum1 = vyplatIt422Sum ? vyplatIt422Sum.sum1mPosl3m ?: 0 : 0
+        BigDecimal vyplatIt422Sum2 = vyplatIt422Sum ? vyplatIt422Sum.sum2mPosl3m ?: 0 : 0
+        BigDecimal vyplatIt422Sum3 = vyplatIt422Sum ? vyplatIt422Sum.sum3mPosl3m ?: 0 : 0
         BigDecimal svedObuchSum1 = 0
         BigDecimal svedObuchSum2 = 0
         BigDecimal svedObuchSum3 = 0
