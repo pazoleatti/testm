@@ -1128,11 +1128,15 @@ def fillFedBud(raschsvObyazPlatSv, XSSFWorkbook workbook) {
 
     // Итого
     def raschsvVyplVsego = raschsvVyplFinFb?.raschsvVyplPrichinaList?.find {VYPL_FIN_FB_SV_VNF_VSEGO == it.nodeName}
-    fillFedBudRow(sheet, 55, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VR_NETR == it.nodeName})
-    fillFedBudRow(sheet, 56, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_BEREM_ROD == it.nodeName})
-    fillFedBudRow(sheet, 57, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB == it.nodeName})
-    fillFedBudRow(sheet, 58, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB1 == it.nodeName})
-    fillFedBudRow(sheet, 59, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB2 == it.nodeName})
+
+    fillSingleRow(sheet, 51, raschsvVyplVsego?.svVnfUhodInv)
+
+    fillFedBudRow(sheet, 54, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VR_NETR == it.nodeName})
+    fillFedBudRow(sheet, 55, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_BEREM_ROD == it.nodeName})
+    fillFedBudRow(sheet, 56, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB == it.nodeName})
+    fillFedBudRow(sheet, 57, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB1 == it.nodeName})
+    fillFedBudRow(sheet, 58, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_YHOD_REB2 == it.nodeName})
+    fillFedBudRow(sheet, 59, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_OPL_DOP_VYH_INV == it.nodeName})
     fillFedBudRow(sheet, 60, raschsvVyplVsego?.raschsvRashVyplList?.find {VYPL_FIN_FB_SV_VNF_POS_VSEGO == it.nodeName})
 }
 
@@ -1711,6 +1715,7 @@ class TestDataHolder {
 @Field final VYPL_FIN_FB_SV_VNF_POS_YHOD_REB = "ЕжПосУходРеб"
 @Field final VYPL_FIN_FB_SV_VNF_POS_YHOD_REB1 = "ЕжПосУходРеб1"
 @Field final VYPL_FIN_FB_SV_VNF_POS_YHOD_REB2 = "ЕжПосУходРеб2"
+@Field final VYPL_FIN_FB_SV_VNF_OPL_DOP_VYH_INV = "ОплДопВыхИнв"
 @Field final VYPL_FIN_FB_SV_VNF_POS_VSEGO = "Всего"
 
 
