@@ -55,17 +55,17 @@ public interface RaschsvPersSvStrahLicDao {
     List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
 
     /**
-     * Найти дубли RaschsvPersSvStrahLic, ссылающиеся на одну и ту же запись в таблице справочника Физические лица REF_BOOK_PERSON
+     * Найти дубли в одной форме
      * @param declarationDataId
      * @return
      */
-    List<RaschsvPersSvStrahLic> findDublicatePersonIdByDeclarationDataId(long declarationDataId);
+    List<RaschsvPersSvStrahLic> findDublicatePersonsByDeclarationDataId(long declarationDataId);
 
     /**
-     * Найти дубли RaschsvPersSvStrahLic, ссылающиеся на одну и ту же запись в таблице справочника Физические лица REF_BOOK_PERSON
+     * Найти дубли в разных формах
      * @param declarationDataId
      * @param reportPeriodId
      * @return
      */
-    List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(long declarationDataId, long reportPeriodId);
+    List<RaschsvPersSvStrahLic> findDublicatePersonsByReportPeriodId(long declarationDataId, long reportPeriodId);
 }
