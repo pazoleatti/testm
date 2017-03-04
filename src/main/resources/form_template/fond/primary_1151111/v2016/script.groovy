@@ -3563,7 +3563,13 @@ Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
             " FROM ref_book_person r " +
             " INNER JOIN raschsv_pers_sv_strah_lic p ON r.id = p.person_id " +
             " WHERE p.declaration_data_id = %s)", declarationDataId)
-    return getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
+    def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
+    def refBookMapResult = [:]
+    refBookMap.each { personId, refBookValue ->
+        Long refBookRecordId = refBookValue.get(RF_RECORD_ID).value
+        refBookMapResult.put(refBookRecordId, refBookValue)
+    }
+    return refBookMapResult
 }
 
 //Приоритет документов удостоверяющих личность <Идентификатор, Приоритет(int)>
@@ -4302,11 +4308,14 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
 @Field final String RF_DOC_NUMBER = "DOC_NUMBER"
 
 def checkData() {
+    long time = System.currentTimeMillis();
     // Проверки xml
     checkDataXml()
 
     // Проверки БД
     checkDataDB()
+    println "Все проверки " + (System.currentTimeMillis() - time);
+    logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -4363,9 +4372,7 @@ def checkDataDBPerson() {
         if (raschsvPersSvStrahLic.personId == null || raschsvPersSvStrahLic.personId == 0) {
             logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" для ФЛ " + fioBirthday)
         } else {
-            def personRecordItem = personMap.find{key, value -> raschsvPersSvStrahLic.recordId == value.get(RF_RECORD_ID).value}
-            def personRecord = personRecordItem?.value
-            def personId = personRecordItem?.key
+            def personRecord = personMap.get(raschsvPersSvStrahLic.recordId)
 
             if (!personRecord) {
                 logger.error("Не найдена актуальная запись в справочнике \"Физические лица\" для ФЛ " + fioBirthday)
@@ -4431,7 +4438,7 @@ def checkDataDBPerson() {
                 }
 
                 // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
-                def allDocList = dulMap.get(personId)
+                def allDocList = dulMap.get(personRecord.get("id")?.value)
                 // Вид документа
                 def personDocTypeList = []
                 // Серия и номер документа
