@@ -41,7 +41,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public NdflPerson get(long ndflPersonId) {
         try {
-            NdflPerson ndflPerson = getJdbcTemplate().queryForObject("select " + createColumns(NdflPerson.COLUMNS, "np") + " from ndfl_person np where np.id = ?", new Object[]{ndflPersonId}, new NdflPersonDaoImpl.NdflPersonRowMapper());
+            NdflPerson ndflPerson = getJdbcTemplate().queryForObject("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
+                    " from ndfl_person np " +
+                    " left join REF_BOOK_PERSON r on np.person_id = r.id " +
+                    " where np.id = ?",
+                    new Object[]{ndflPersonId},
+                    new NdflPersonDaoImpl.NdflPersonRowMapper());
 
             List<NdflPersonIncome> ndflPersonIncomes = findIncomes(ndflPersonId);
             List<NdflPersonDeduction> ndflPersonDeductions = findDeductions(ndflPersonId);
@@ -60,7 +65,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPerson> findPerson(long declarationDataId) {
         try {
-            return getJdbcTemplate().query("select " + createColumns(NdflPerson.COLUMNS, "np") + " from ndfl_person np where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonRowMapper());
+            return getJdbcTemplate().query("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
+                    " from ndfl_person np " +
+                    " left join REF_BOOK_PERSON r on np.person_id = r.id " +
+                    " where np.declaration_data_id = ?",
+                    new Object[]{declarationDataId},
+                    new NdflPersonDaoImpl.NdflPersonRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPerson>();
         }
@@ -244,8 +254,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public static String buildQuery(Map<String, Object> parameters) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT " + createColumns(NdflPerson.COLUMNS, "np") + " \n");
+        sb.append("SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " \n");
         sb.append("FROM ndfl_person np \n");
+        sb.append(" LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id \n");
         sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
 
         if (parameters != null && !parameters.isEmpty()) {
@@ -286,7 +297,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 sb.append("AND (np.id_doc_number is null OR np.id_doc_number = :idDocNumber) \n");
             }
         }
-        sb.append("ORDER BY row_num \n");
+        sb.append("ORDER BY np.row_num \n");
         return sb.toString();
 
     }
@@ -332,12 +343,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
-        String sql = "SELECT DISTINCT /*+rule */" + createColumns(NdflPerson.COLUMNS, "np") + " FROM ndfl_person np " +
-                "INNER JOIN ndfl_person_income npi " +
-                "ON np.id = npi.ndfl_person_id " +
-                "WHERE npi.kpp = :kpp " +
-                "AND npi.oktmo = :oktmo " +
-                "AND np.DECLARATION_DATA_ID in (select id from DECLARATION_DATA where id = :declarationDataId)";
+        String sql = "SELECT DISTINCT /*+rule */" + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
+                " FROM ndfl_person np " +
+                " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
+                " INNER JOIN ndfl_person_income npi " +
+                " ON np.id = npi.ndfl_person_id " +
+                " WHERE npi.kpp = :kpp " +
+                " AND npi.oktmo = :oktmo " +
+                " AND np.DECLARATION_DATA_ID in (select id from DECLARATION_DATA where id = :declarationDataId)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declarationDataId", declarationDataId)
                 .addValue("kpp", kpp)
@@ -645,6 +658,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             person.setDeclarationDataId(SqlUtils.getLong(rs, "declaration_data_id"));
             person.setRowNum(SqlUtils.getInteger(rs, "row_num"));
             person.setPersonId(SqlUtils.getLong(rs, "person_id"));
+            person.setRecordId(SqlUtils.getLong(rs, "record_id"));
 
             person.setInp(rs.getString("inp"));
             person.setSnils(rs.getString("snils"));

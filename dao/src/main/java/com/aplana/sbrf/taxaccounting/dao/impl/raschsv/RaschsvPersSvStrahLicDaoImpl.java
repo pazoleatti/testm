@@ -82,13 +82,16 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             " (" + VYPL_SV_DOP_MT_COLS + ") VALUES (" + VYPL_SV_DOP_MT_FIELDS + ")";
 
     // sql запрос для выборки из ПерсСвСтрахЛиц по ИНН ФЛ и идентификатору декларации
-    private static final String SQL_SELECT_PERSONS_BY_INNFL = "SELECT " + PERS_SV_STRAH_LIC_COLS + " FROM " + RaschsvPersSvStrahLic.TABLE_NAME +
-            " WHERE " + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " = :" + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " AND " +
-            RaschsvPersSvStrahLic.COL_INNFL + " = :" + RaschsvPersSvStrahLic.COL_INNFL;
+    private static final String SQL_SELECT_PERSONS_BY_INNFL = "SELECT " + SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, "p.") + ", r.record_id " +
+            " FROM RASCHSV_PERS_SV_STRAH_LIC p " +
+            " LEFT JOIN REF_BOOK_PERSON r on p.person_id = r.id " +
+            " WHERE p.declaration_data_id = :declaration_data_id AND p.innfl = :innfl";
 
     // sql запрос для выборки из ПерсСвСтрахЛиц по идентификатору декларации
-    private static final String SQL_SELECT_PERSONS = "SELECT " + PERS_SV_STRAH_LIC_COLS + " FROM " + RaschsvPersSvStrahLic.TABLE_NAME +
-            " WHERE " + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID + " = :" + RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID;
+    private static final String SQL_SELECT_PERSONS = "SELECT " + SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, "p.") + ", r.record_id " +
+            " FROM RASCHSV_PERS_SV_STRAH_LIC p " +
+            " LEFT JOIN REF_BOOK_PERSON r on p.person_id = r.id " +
+            " WHERE p.declaration_data_id = :declaration_data_id";
 
     // sql запрос для выборки из СвВыпл
     private static final String SQL_SELECT_SV_VYPL_BY_PERSON_IDS = "SELECT " + SV_VYPL_COLS + " FROM " + RaschsvSvVypl.TABLE_NAME +
@@ -114,10 +117,15 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
     @Override
     public RaschsvPersSvStrahLic get(long id) {
-        String query = "SELECT " + PERS_SV_STRAH_LIC_COLS + " FROM " + RaschsvPersSvStrahLic.TABLE_NAME + " WHERE ID = :id";
+        String query = "SELECT " + SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, "p.") + ", r.record_id " +
+                " FROM RASCHSV_PERS_SV_STRAH_LIC p " +
+                " LEFT JOIN REF_BOOK_PERSON r on p.person_id = r.id " +
+                " WHERE p.ID = :id";
         MapSqlParameterSource params = new MapSqlParameterSource("id", id);
         RaschsvPersSvStrahLic raschsvPersSvStrahLic = getNamedParameterJdbcTemplate().queryForObject(query, params, new RaschsvPersSvStrahLicRowMapper());
-        return findSvVyplAndVyplSvDopByPersons(Arrays.asList(raschsvPersSvStrahLic)).get(0);
+
+        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = findSvVyplAndVyplSvDopByPersons(Arrays.asList(raschsvPersSvStrahLic));
+        return raschsvPersSvStrahLicList.get(0);
     }
 
     @Override
@@ -127,7 +135,8 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
         List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList =
                 getNamedParameterJdbcTemplate().query(SQL_SELECT_PERSONS, params, new RaschsvPersSvStrahLicRowMapper());
 
-        return findSvVyplAndVyplSvDopByPersons(raschsvPersSvStrahLicList);
+        raschsvPersSvStrahLicList = findSvVyplAndVyplSvDopByPersons(raschsvPersSvStrahLicList);
+        return raschsvPersSvStrahLicList;
     }
 
     @Override
@@ -138,8 +147,8 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                     .addValue(RaschsvPersSvStrahLic.COL_INNFL, innfl);
             RaschsvPersSvStrahLic raschsvPersSvStrahLic =
                     getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_PERSONS_BY_INNFL, params, new RaschsvPersSvStrahLicRowMapper());
-            List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = findSvVyplAndVyplSvDopByPersons(Arrays.asList(raschsvPersSvStrahLic));
 
+            List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = findSvVyplAndVyplSvDopByPersons(Arrays.asList(raschsvPersSvStrahLic));
             return raschsvPersSvStrahLicList.get(0);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -148,47 +157,49 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
 
     @Override
     public List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> subreportParams) {
-            MapSqlParameterSource sqlParams = new MapSqlParameterSource();
-            String query = new String(SQL_SELECT_PERSONS);
-            sqlParams.addValue(RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID, declarationDataId);
-            for (String alias : subreportParams.keySet()) {
-                Object paramValue = subreportParams.get(alias);
-                if (paramValue != null) {
-                    if (alias.equalsIgnoreCase(SUBREPORT_PARAM_LASTNAME_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_FAMILIA + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_FAMILIA + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_FAMILIA, paramValue + "%");
-                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_NAME_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_IMYA + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_IMYA + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, paramValue + "%");
-                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_MIDDLENAME_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_OTCHESTVO + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_OTCHESTVO + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, paramValue + "%");
-                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_SNILS_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_SNILS + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_SNILS + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, paramValue + "%");
-                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_INN_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_INNFL + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_INNFL + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_INNFL, paramValue + "%");
-                    } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_DOC_ALIAS)) {
-                        query += " AND LOWER(" + RaschsvPersSvStrahLic.COL_SER_NOM_DOC + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_SER_NOM_DOC + ")";
-                        sqlParams.addValue(RaschsvPersSvStrahLic.COL_SER_NOM_DOC, paramValue + "%");
-                    }
+        MapSqlParameterSource sqlParams = new MapSqlParameterSource();
+        String query = new String(SQL_SELECT_PERSONS);
+        sqlParams.addValue(RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID, declarationDataId);
+        for (String alias : subreportParams.keySet()) {
+            Object paramValue = subreportParams.get(alias);
+            if (paramValue != null) {
+                if (alias.equalsIgnoreCase(SUBREPORT_PARAM_LASTNAME_ALIAS)) {
+                    query += " AND LOWER(p." + RaschsvPersSvStrahLic.COL_FAMILIA + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_FAMILIA + ")";
+                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_FAMILIA, paramValue + "%");
+                } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_NAME_ALIAS)) {
+                    query += " AND LOWER(p." + RaschsvPersSvStrahLic.COL_IMYA + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_IMYA + ")";
+                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_IMYA, paramValue + "%");
+                } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_MIDDLENAME_ALIAS)) {
+                    query += " AND LOWER(p." + RaschsvPersSvStrahLic.COL_OTCHESTVO + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_OTCHESTVO + ")";
+                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_OTCHESTVO, paramValue + "%");
+                } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_SNILS_ALIAS)) {
+                    query += " AND LOWER(p." + RaschsvPersSvStrahLic.COL_SNILS + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_SNILS + ")";
+                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_SNILS, paramValue + "%");
+                } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_INN_ALIAS)) {
+                    query += " AND LOWER(p." + RaschsvPersSvStrahLic.COL_INNFL + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_INNFL + ")";
+                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_INNFL, paramValue + "%");
+                } else if (alias.equalsIgnoreCase(SUBREPORT_PARAM_DOC_ALIAS)) {
+                    query += " AND LOWER(p." + RaschsvPersSvStrahLic.COL_SER_NOM_DOC + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_SER_NOM_DOC + ")";
+                    sqlParams.addValue(RaschsvPersSvStrahLic.COL_SER_NOM_DOC, paramValue + "%");
                 }
             }
-            if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS) != null && subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS) != null) {
-                query += " AND " + RaschsvPersSvStrahLic.COL_DATA_ROZD + " BETWEEN :birthdayFrom AND :birthdayBefore";
-                sqlParams.addValue("birthdayFrom", subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS));
-                sqlParams.addValue("birthdayBefore", subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS));
-            } else if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS) != null) {
-                query += " AND " + RaschsvPersSvStrahLic.COL_DATA_ROZD + " >= :" + RaschsvPersSvStrahLic.COL_DATA_ROZD;
-                sqlParams.addValue(RaschsvPersSvStrahLic.COL_DATA_ROZD, subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS));
-            } else if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS) != null) {
-                query += " AND " + RaschsvPersSvStrahLic.COL_DATA_ROZD + " <= :" + RaschsvPersSvStrahLic.COL_DATA_ROZD;
-                sqlParams.addValue(RaschsvPersSvStrahLic.COL_DATA_ROZD, subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS));
-            }
-            List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
-            raschsvPersSvStrahLicList.addAll(getNamedParameterJdbcTemplate().query(query, sqlParams, new RaschsvPersSvStrahLicRowMapper()));
-            return findSvVyplAndVyplSvDopByPersons(raschsvPersSvStrahLicList);
+        }
+        if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS) != null && subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS) != null) {
+            query += " AND p." + RaschsvPersSvStrahLic.COL_DATA_ROZD + " BETWEEN :birthdayFrom AND :birthdayBefore";
+            sqlParams.addValue("birthdayFrom", subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS));
+            sqlParams.addValue("birthdayBefore", subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS));
+        } else if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS) != null) {
+            query += " AND p." + RaschsvPersSvStrahLic.COL_DATA_ROZD + " >= :" + RaschsvPersSvStrahLic.COL_DATA_ROZD;
+            sqlParams.addValue(RaschsvPersSvStrahLic.COL_DATA_ROZD, subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS));
+        } else if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS) != null) {
+            query += " AND p." + RaschsvPersSvStrahLic.COL_DATA_ROZD + " <= :" + RaschsvPersSvStrahLic.COL_DATA_ROZD;
+            sqlParams.addValue(RaschsvPersSvStrahLic.COL_DATA_ROZD, subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS));
+        }
+        List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
+        raschsvPersSvStrahLicList.addAll(getNamedParameterJdbcTemplate().query(query, sqlParams, new RaschsvPersSvStrahLicRowMapper()));
+
+        raschsvPersSvStrahLicList = findSvVyplAndVyplSvDopByPersons(raschsvPersSvStrahLicList);
+        return raschsvPersSvStrahLicList;
     }
 
     /**
@@ -490,12 +501,17 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     @Override
-    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByDeclarationDataId(long declarationDataId) {
+    public List<RaschsvPersSvStrahLic> findDublicatePersonsByDeclarationDataId(long declarationDataId) {
+        /*
+        Поиск дублей в пределах одной формы.
+        Дубли ищутся по полю REF_BOOK_PERSON.RECORD_ID
+        */
         String sql = "select * from (" +
-                " select " + PERS_SV_STRAH_LIC_COLS +
-                " ,count(*) over (partition by person_id) cnt " +
-                " from RASCHSV_PERS_SV_STRAH_LIC " +
-                " where declaration_data_id = :declaration_data_id and person_id is not null " +
+                " select " + SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, "p.") + ", r.record_id " +
+                " ,count(*) over (partition by r.record_id) cnt " +
+                " from RASCHSV_PERS_SV_STRAH_LIC p " +
+                " inner join REF_BOOK_PERSON r on p.person_id = r.id " +
+                " where p.declaration_data_id = :declaration_data_id " +
                 " ) where cnt > 1";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declaration_data_id", declarationDataId);
@@ -503,14 +519,36 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     @Override
-    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(long declarationDataId, long reportPeriodId) {
+    public List<RaschsvPersSvStrahLic> findDublicatePersonsByReportPeriodId(long declarationDataId, long reportPeriodId) {
+        /*
+        Поиск дублей в разных формах, принадлежащих одному отчетному периоду.
+        Дубли ищутся по полю REF_BOOK_PERSON.RECORD_ID
+
+        Параметр declarationDataId нужен для того, чтоб выбрать REF_BOOK_PERSON.RECORD_ID, для которых нужно найти дубли
+
+        Такой подзапрос быстрее
+        exists
+        (select 1 from RASCHSV_PERS_SV_STRAH_LIC c2
+         inner join REF_BOOK_PERSON r2 on c2.person_id = r2.id
+         where c2.declaration_data_id = :declaration_data_id and r2.record_id = r.record_id)
+
+        , чем
+        r.record_id in
+        (select r2.record_id from RASCHSV_PERS_SV_STRAH_LIC c2
+         inner join REF_BOOK_PERSON r2 on c2.person_id = r2.id
+         where c2.declaration_data_id = :declaration_data_id)
+        */
         String sql = "select * from (" +
-                " select " + PERS_SV_STRAH_LIC_COLS_WITH_ALIAS +
-                " ,count(*) over (partition by p.person_id) cnt " +
+                " select " + SqlUtils.getColumnsToString(RaschsvPersSvStrahLic.COLUMNS, "p.") + ", r.record_id " +
+                " ,count(*) over (partition by r.record_id) cnt " +
                 " from RASCHSV_PERS_SV_STRAH_LIC p " +
+                " inner join REF_BOOK_PERSON r on p.person_id = r.id " +
                 " inner join DECLARATION_DATA dd on p.declaration_data_id = dd.id " +
                 " inner join DEPARTMENT_REPORT_PERIOD drp on dd.department_report_period_id = drp.id " +
-                " where drp.report_period_id = :report_period_id and p.person_id in (select person_id from RASCHSV_PERS_SV_STRAH_LIC where declaration_data_id = :declaration_data_id) " +
+                " where drp.report_period_id = :report_period_id and exists " +
+                    "(select 1 from RASCHSV_PERS_SV_STRAH_LIC c2 " +
+                    " inner join REF_BOOK_PERSON r2 on c2.person_id = r2.id " +
+                    " where c2.declaration_data_id = :declaration_data_id and r2.record_id = r.record_id) " +
                 " ) where cnt > 1";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("report_period_id", reportPeriodId);
@@ -548,6 +586,7 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             raschsvPersSvStrahLic.setImya(rs.getString(RaschsvPersSvStrahLic.COL_IMYA));
             raschsvPersSvStrahLic.setOtchestvo(rs.getString(RaschsvPersSvStrahLic.COL_OTCHESTVO));
             raschsvPersSvStrahLic.setPersonId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_PERSON_ID));
+            raschsvPersSvStrahLic.setRecordId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_RECORD_ID));
 
             return raschsvPersSvStrahLic;
         }
