@@ -5,10 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.RaschsvSvSum1TipRowMapper;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvSvPrimTarif22425Dao;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvSvSum1TipDao;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvInoGrazd;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif22425;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvSum1Tip;
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt425;
+import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -59,8 +56,10 @@ public class RaschsvSvPrimTarif22425DaoImpl extends AbstractDao implements Rasch
     private static final String SQL_INSERT_SV_INO_GRAZD = "INSERT INTO " + RaschsvSvInoGrazd.TABLE_NAME +
             " (" + SVED_INO_GRAZD_COLS + ") VALUES (" + SVED_INO_GRAZD_FIELDS + ")";
 
-    private static final String SQL_SELECT_TARIF = "SELECT " + TARIF_COLS + " FROM " + RaschsvSvPrimTarif22425.TABLE_NAME +
-            " WHERE " + RaschsvSvPrimTarif22425.COL_RASCHSV_OBYAZ_PLAT_SV_ID + " = :" + RaschsvSvPrimTarif22425.COL_RASCHSV_OBYAZ_PLAT_SV_ID;
+    private static final String SQL_SELECT = "SELECT " + SqlUtils.getColumnsToString(RaschsvSvPrimTarif22425.COLUMNS, "pt.") +
+            " FROM raschsv_sv_prim_tarif2_2_425 pt " +
+            " INNER JOIN raschsv_obyaz_plat_sv ob ON pt.raschsv_obyaz_plat_sv_id = ob.id " +
+            " WHERE ob.declaration_data_id = :declaration_data_id";
 
     private static final String SQL_SELECT_IT = "SELECT " + VYPLAT_IT_COLS + " FROM " + RaschsvVyplatIt425.TABLE_NAME +
             " WHERE " + RaschsvVyplatIt425.COL_RASCHSV_SV_PRIM_TARIF2_425_ID + " = :" + RaschsvVyplatIt425.COL_RASCHSV_SV_PRIM_TARIF2_425_ID;
@@ -154,12 +153,13 @@ public class RaschsvSvPrimTarif22425DaoImpl extends AbstractDao implements Rasch
         return raschsvVyplatIt425.getRaschsvSvSum1Tip().getId();
     }
 
-    public RaschsvSvPrimTarif22425 findRaschsvSvPrimTarif22425(Long obyazPlatSvId) {
+    @Override
+    public RaschsvSvPrimTarif22425 findRaschsvSvPrimTarif22425(Long declarationDataId) {
         try {
             SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue(RaschsvSvPrimTarif22425.COL_RASCHSV_OBYAZ_PLAT_SV_ID, obyazPlatSvId);
+                    .addValue(RaschsvObyazPlatSv.COL_DECLARATION_DATA_ID, declarationDataId);
             RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425 =
-                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT_TARIF, params, new RaschsvSvPrimTarif22425RowMapper());
+                    getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvSvPrimTarif22425RowMapper());
 
             // Выборка из СвСум1Тип
             List<RaschsvSvSum1Tip> raschsvSvSum1TipList = findRaschsvSvSum1Tip(raschsvSvPrimTarif22425.getId());

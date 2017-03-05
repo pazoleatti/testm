@@ -15,4 +15,11 @@ public interface RaschsvOssVnmService {
      * @return
      */
     Long insertRaschsvOssVnm(RaschsvOssVnm raschsvOssVnm);
+
+    /**
+     * Выборка из РасчСВ_ОСС.ВНМ
+     * @param declarationDataId
+     * @return
+     */
+    RaschsvOssVnm findOssVnm(Long declarationDataId);
 }

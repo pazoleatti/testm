@@ -392,8 +392,8 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         }
 
 
-        when(testHelper.getNdflPersonService().findIncomesByPeriodAndNdflPersonId(anyLong(), any(Date.class), any(Date.class))).thenReturn(ndflPerson.getIncomes());
-        when(testHelper.getNdflPersonService().findDeductionsByPeriodAndNdflPersonId(anyLong(), any(Date.class), any(Date.class))).thenReturn(ndflPerson.getDeductions());
+        //when(testHelper.getNdflPersonService().findIncomesByPeriodAndNdflPersonId(anyLong(), any(Date.class), any(Date.class))).thenReturn(ndflPerson.getIncomes());
+        //when(testHelper.getNdflPersonService().findDeductionsByPeriodAndNdflPersonId(anyLong(), any(Date.class), any(Date.class))).thenReturn(ndflPerson.getDeductions());
         when(testHelper.getNdflPersonService().findPrepaymentsByPeriodAndNdflPersonId(anyLong(), any(Date.class), any(Date.class))).thenReturn(ndflPerson.getPrepayments());
         return ndflPersonList;
     }

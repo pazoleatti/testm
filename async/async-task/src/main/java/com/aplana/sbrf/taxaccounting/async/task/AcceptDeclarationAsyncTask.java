@@ -1,22 +1,21 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
-public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
+public abstract class AcceptDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
+
+    private static final String SUCCESS = "Успешно выполнено принятие налоговой формы: %s";
+    private static final String FAIL = "Не удалось принять налоговую форму: %s. Найдены фатальные ошибки.";
 
     @Autowired
     private TAUserService userService;
@@ -25,43 +24,11 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
     private DeclarationDataService declarationDataService;
 
     @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
-    private DepartmentReportPeriodService departmentReportPeriodService;
-
-    @Autowired
-    private DeclarationTemplateService declarationTemplateService;
-
-    @Autowired
     private LockDataService lockService;
 
-    private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        }
-    };
     @Override
     protected ReportType getReportType() {
         return ReportType.ACCEPT_DEC;
-    }
-
-    @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
-        long declarationDataId = (Long)params.get("declarationDataId");
-        int userId = (Integer)params.get(USER_ID.name());
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-
-        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, DeclarationDataReportType.getDDReportTypeByReportType(getReportType()));
-        if (value == null) {
-            throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
-        }
-        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-        String msg = String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), value);
-        return checkTask(getReportType(), value, declarationDataService.getTaskName(DeclarationDataReportType.getDDReportTypeByReportType(getReportType()), declarationTemplate.getType().getTaxType()), msg);
     }
 
     @Override
@@ -87,53 +54,22 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Принять";
-    }
-
-    @Override
-    protected String getNotificationMsg(Map<String, Object> params) {
-        int userId = (Integer)params.get(USER_ID.name());
-        long declarationDataId = (Long)params.get("declarationDataId");
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-
-        DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
-        Department department = departmentService.getDepartment(declaration.getDepartmentId());
-        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        String str = ".";
-        return String.format("Успешно выполнено принятие %s: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
-                declarationTemplate.getType().getTaxType().getDeclarationShortName(),
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(),
-                reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                        formatter.get().format(reportPeriod.getCorrectionDate())) : "",
-                department.getName(),
-                declarationTemplate.getType().getName(), str);
+        return "Принятие налоговой формы";
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        int userId = (Integer)params.get(USER_ID.name());
-        long declarationDataId = (Long)params.get("declarationDataId");
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
+        return getMessage(params, false, unexpected);
+    }
 
-        DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
-        Department department = departmentService.getDepartment(declaration.getDepartmentId());
-        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        String str;
-        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
-            str = String.format(", %s", formatDeclarationDataInfo(declaration));
-        } else {
-            str = "";
-        }
-        return String.format("Не удалось принять %s: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s. Найдены фатальные ошибки.",
-                "налоговую форму",
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(),
-                reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                        formatter.get().format(reportPeriod.getCorrectionDate())) : "",
-                department.getName(),
-                declarationTemplate.getType().getName(), str);
+    @Override
+    protected String getNotificationMsg(Map<String, Object> params) {
+        return getMessage(params, true, false);
+    }
+
+    private String getMessage(Map<String, Object> params, boolean isSuccess, boolean unexpected) {
+        String template = isSuccess ? SUCCESS : FAIL;
+        return String.format(template,
+                getDeclarationDescription(params));
     }
 }

@@ -300,7 +300,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "ddt.department_code, \n" +
                     "ddt.department_garant_use,\n" +
                     "ddt.department_sunr_use,\n" +
-                    "-- Для исполнителя\n" +
+                    //"-- Для исполнителя\n" +
                     "dp.ID        AS performer_id,\n" +
                     "dp.NAME      AS performer_name,\n" +
                     "dp.PARENT_ID AS performer_parent_id,\n" +
@@ -311,7 +311,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "dp.REGION_ID AS performer_region_id,\n" +
                     "dp.IS_ACTIVE AS performer_is_active,\n" +
                     "dp.CODE      AS performer_code,\n" +
-                    "-- Для сортировки\n" +
+                    //"-- Для сортировки\n" +
                     "dp.NAME  AS performer, \n" +
                     "p.FULL_NAME AS performer_full_name \n" +
                     "FROM (" +
@@ -321,7 +321,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "SELECT ddt.ID as id,\n" +
                     "  ft.NAME,\n" +
                     "  ft.ID AS type_id,\n" +
-                    "  -- Для подразделения\n" +
+                    //"  -- Для подразделения\n" +
                     "  d.ID         AS department_id,\n" +
                     "  d.NAME       AS department_name,\n" +
                     "  d.PARENT_ID  AS department_parent_id,\n" +
@@ -334,7 +334,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "  d.CODE       AS department_code,\n" +
                     "  d.GARANT_USE AS department_garant_use,\n" +
                     "  d.SUNR_USE   AS department_sunr_use,\n" +
-                    "  -- Для сортировки\n" +
+                    //"  -- Для сортировки\n" +
                     "  ft.NAME  AS dec_type,\n" +
                     "  d.NAME   AS department,\n" +
                     "  d.FULL_NAME AS department_full_name \n" +
@@ -465,7 +465,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "SELECT ddt.ID,\n" +
                     "  dt.NAME,\n" +
                     "  dt.ID AS type_id,\n" +
-                    "  -- Для подразделения\n" +
+                    //"  -- Для подразделения\n" +
                     "  d.ID         AS department_id,\n" +
                     "  d.NAME       AS department_name,\n" +
                     "  d.PARENT_ID  AS department_parent_id,\n" +
@@ -478,7 +478,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "  d.CODE       AS department_code,\n" +
                     "  d.GARANT_USE AS department_garant_use,\n" +
                     "  d.SUNR_USE   AS department_sunr_use,\n" +
-                    "  -- Для сортировки\n" +
+                    //"  -- Для сортировки\n" +
                     "  dt.NAME AS dec_type,\n" +
                     "  d.NAME  AS department,\n" +
                     "  d.FULL_NAME AS department_full_name \n" +

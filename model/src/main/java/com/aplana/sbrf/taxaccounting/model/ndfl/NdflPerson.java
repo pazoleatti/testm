@@ -24,6 +24,11 @@ public class NdflPerson extends IdentityObject<Long> {
     private Long personId;
 
     /**
+     * Идентификатор ФЛ REF_BOOK_PERSON.RECORD_ID
+     */
+    private Long recordId;
+
+    /**
      * Ссылка на декларацию к которой относятся данные
      */
     private Long declarationDataId;
@@ -321,9 +326,15 @@ public class NdflPerson extends IdentityObject<Long> {
     public List<NdflPersonPrepayment> getPrepayments() {
         return prepayments != null ? prepayments : Collections.<NdflPersonPrepayment>emptyList();
     }
-
     public void setPrepayments(List<NdflPersonPrepayment> prepayments) {
         this.prepayments = prepayments;
+    }
+
+    public Long getRecordId() {
+        return recordId;
+    }
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
     }
 
     @Override

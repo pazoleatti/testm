@@ -15,4 +15,11 @@ public interface RaschsvVyplFinFbService {
      * @return
      */
     Long insertRaschsvVyplFinFb(RaschsvVyplFinFb raschsvVyplFinFb);
+
+    /**
+     * Выборка из ВыплФинФБ
+     * @param declarationDataId
+     * @return
+     */
+    RaschsvVyplFinFb findRaschsvVyplFinFb(Long declarationDataId);
 }

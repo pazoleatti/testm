@@ -18,8 +18,8 @@ public interface RaschsvOssVnmDao {
 
     /**
      * Выборка из РасчСВ_ОСС.ВНМ
-     * @param obyazPlatSvId
+     * @param declarationDataId
      * @return
      */
-    RaschsvOssVnm findOssVnm(Long obyazPlatSvId);
+    RaschsvOssVnm findOssVnm(Long declarationDataId);
 }

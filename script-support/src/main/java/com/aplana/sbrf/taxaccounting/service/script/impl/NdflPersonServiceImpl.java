@@ -20,13 +20,18 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     NdflPersonDao ndflPersonDao;
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
-        return ndflPersonDao.findIncomesByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate);
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+        return ndflPersonDao.findIncomesByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate, prFequals1);
     }
 
     @Override
-    public List<NdflPersonDeduction> findDeductionsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
-        return ndflPersonDao.findDeductionsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate);
+    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkOstalnie(long ndflPersonId, Date startDate, Date endDate) {
+        return ndflPersonDao.findDeductionsWithDeductionsMarkOstalnie(ndflPersonId, startDate, endDate);
+    }
+
+    @Override
+    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate) {
+        return ndflPersonDao.findDeductionsWithDeductionsMarkNotOstalnie(ndflPersonId, startDate, endDate);
     }
 
     @Override
@@ -111,13 +116,13 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo) {
-        return ndflPersonDao.findPrepaymentsByDeclarationDataId(declarationDataId, kpp, oktmo);
+    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonIdList(List<Long> ndflPersonIdList) {
+        return ndflPersonDao.findPrepaymentsByNdflPersonIdList(ndflPersonIdList);
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo) {
-        return ndflPersonDao.findIncomesByPeriodAndDeclarationDataId(declarationDataId, startDate, endDate, kpp, oktmo);
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdList(List<Long> ndflPersonIdList, Date startDate, Date endDate) {
+        return ndflPersonDao.findIncomesByPeriodAndNdflPersonIdList(ndflPersonIdList, startDate, endDate);
     }
 
     @Override
@@ -161,5 +166,10 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public NdflPersonPrepayment getPrepayment(long id) {
         return ndflPersonDao.getPrepayment(id);
+    }
+
+    @Override
+    public List<NdflPerson> findByIdList(List<Long> ndflPersonIdList) {
+        return ndflPersonDao.findByIdList(ndflPersonIdList);
     }
 }

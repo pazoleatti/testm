@@ -1595,19 +1595,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "case\n" +
             "  when (status=0 and (\n" +
             "  \t(:versionTo is null and (\n" +
-            "  \t\t(nextversion is not null and nextversion >= :versionFrom) or \t\t-- 1, 6\n" +
-            "\t\t(nextversion is null and version >= :versionFrom)\t\t\t\t\t-- 9, 10, 11, 12\n" +
+            "  \t\t(nextversion is not null and nextversion >= :versionFrom) or \t\t\n" + //-- 1, 6
+            "\t\t(nextversion is null and version >= :versionFrom)\t\t\t\t\t\n" + //-- 9, 10, 11, 12
             "  \t)) or (:versionTo is not null and (\n" +
-            "  \t\t(version <= :versionFrom and nextversion is not null and nextversion >= :versionFrom) or \t\t-- 2, 3\n" +
-            "  \t\t(version >= :versionFrom and version <= :versionTo)\t\t\t\t\t-- 4, 5\n" +
+            "  \t\t(version <= :versionFrom and nextversion is not null and nextversion >= :versionFrom) or \t\t\n" + //-- 2, 3
+            "  \t\t(version >= :versionFrom and version <= :versionTo)\t\t\t\t\t\n" + //-- 4, 5
             "  \t))\n" +
             "  )) then 1\n" +
-            "  when (status=0 and nextversion is null and version < :versionFrom) then 2\t\t\t\t\t\t\t--7, 8\n" +
-            "  when (status=2 and (:versionTo is not null and version >= :versionFrom and version < :versionTo and nextversion is not null and nextversion > :versionTo)) then 3 \t\t-- 17\n" +
+            "  when (status=0 and nextversion is null and version < :versionFrom) then 2\t\t\t\t\t\t\t\n" + //--7, 8
+            "  when (status=2 and (:versionTo is not null and version >= :versionFrom and version < :versionTo and nextversion is not null and nextversion > :versionTo)) then 3 \t\t\n" + //-- 17
             "  when (status=2 and (\n" +
-            "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or  \t-- 18\n" +
+            "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or  \t\n" + //-- 18
             "  \t(version = :versionFrom) or \n" +
-            "  \t(nextversion is null and version >= :versionFrom and (:versionTo is null or :versionTo >= version))\t\t\t\t\t\t\t\t\t-- 21, 22\n" +
+            "  \t(nextversion is null and version >= :versionFrom and (:versionTo is null or :versionTo >= version))\t\t\t\t\t\t\t\t\t\n" + //-- 21, 22
             "  )) then 4\n" +
             "  else 0\n" +
             "end as result\n" +
@@ -3167,8 +3167,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String GET_INACTIVE_RECORDS_IN_PERIOD = "select id, start_version as versionFrom, end_version as versionTo, \n" +
             "        case when status = -1 then 0\n" +
-            "             when ((:periodTo is not null and next_version is not null and next_version <= :periodTo) or (:periodTo is null and next_version is not null)) then 2 --дата окончания ограничивающего периода\n" +
-            "             when ((end_version is not null and end_version < :periodFrom) or (:periodTo is not null and start_version > :periodTo)) then 1 end state                    \n" +
+            "             when ((:periodTo is not null and next_version is not null and next_version <= :periodTo) or (:periodTo is null and next_version is not null)) then 2 \n" +
+            "             when ((end_version is not null and end_version < :periodFrom) or (:periodTo is not null and start_version > :periodTo)) then 1 end state \n" +
             "from   (\n" +
             "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) - interval '1' DAY end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
             "       from %s input\n" +

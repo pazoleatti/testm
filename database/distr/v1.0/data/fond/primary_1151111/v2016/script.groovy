@@ -218,6 +218,7 @@ switch (formDataEvent) {
 @Field final String CONS_PERSONAL_DATA = "3.Персониф. Сведения"
 @Field final String SUM_STRAH_VZN = "Суммы страховых взносов"
 @Field final String OPS_OMS = "П1.Расчет ОПС ОМС"
+@Field final String OSS_VNM = "П2.Расчет ОСС  ВНМ"
 
 // Имена псевдонима спецотчета
 @Field final String PERSON_REPORT = "person_rep_param"
@@ -227,6 +228,8 @@ switch (formDataEvent) {
 @Field final Color TOTAL_ROW_FILL_COLOR = new Color(186, 208, 80)
 
 @Field final String PERSONAL_DATA_TOTAL_ROW_LABEL = "Всего за последние три месяца расчетного (отчетного) периода"
+
+@Field final String TRANSPORT_FILE_TEMPLATE = "ТФ"
 
 // TODO Серия/номер ДУЛ, ИНН, СНИЛС должны быть текстовыми ячейками. Иначе пропадают ведущие нули.
 // TODO варнинг ДА-НЕТ при открытие файла
@@ -260,6 +263,9 @@ def createSpecificReport() {
 
         logger.info("Заполнение листа \"П1.Расчет ОПС ОМС\"")
         fillOpsOms(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П2.Расчет ОСС  ВНМ\"")
+        fillOssVnm(raschsvObyazPlatSv, workbook)
 
         logger.info("Отчет сформирован")
     }
@@ -445,6 +451,9 @@ def createRowColumns() {
 def fillGeneralList(final XSSFWorkbook workbook) {
     // Получчить титульный лист из шаблона
     def sheet = workbook.getSheet(COMMON_SHEET)
+    // Дата формирования формы
+    println declarationData.id
+    def declarationDataFile = declarationService.findFilesWithSpecificType(declarationData.id, TRANSPORT_FILE_TEMPLATE).get(0)
     // Номер корректироки
     def nomCorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
     // получить отчетный год
@@ -461,10 +470,7 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     println departmentParamIncomeRow
     //def presentPlaceReference = departmentParamIncomeRow?.PRESENT_PLACE?.value
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
-    /*if (presentPlaceReference != null) {
-        poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
 
-    }*/
     // Место предоставления
     def poMestuCodeParam = poMestuParam?.get(RF_CODE)?.value
 
@@ -474,9 +480,8 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     sheet.getRow(5).getCell(1).setCellValue("5.01")
 
     // Сведения о документе
-    // TODO уточнить получение значения
     sheet.getRow(8).getCell(1).setCellValue("1151111")
-    sheet.getRow(9).getCell(1).setCellValue(new Date().format("dd.MM.yyyy"))
+    sheet.getRow(9).getCell(1).setCellValue(declarationDataFile.date.format("dd.MM.yyyy"))
     sheet.getRow(10).getCell(1).setCellValue(nomCorr?.toString())
     sheet.getRow(11).getCell(1).setCellValue(period)
     sheet.getRow(12).getCell(1).setCellValue(reportYear?.toString())
@@ -943,40 +948,138 @@ def fillCellsOfRaschsvUplPrevOss(RaschsvUplPrevOss raschsvUplPrevOss, XSSFRow ro
  */
 def fillOpsOms(raschsvObyazPlatSv, XSSFWorkbook workbook) {
     raschsvObyazPlatSv.raschsvSvOpsOmsList.each { svOpsOms ->
-        //TODO clone sheet
-        def sheet = workbook.getSheet(OPS_OMS)
+        def defaultSheetIndex = workbook.getSheetIndex(OPS_OMS)
+        def sheet = workbook.cloneSheet(defaultSheetIndex)
+        workbook.setSheetOrder(sheet.sheetName, defaultSheetIndex)
+        workbook.setSheetName(defaultSheetIndex, OPS_OMS + " " + svOpsOms.tarifPlat)
 
-        def raschsvSvOpsOmsRasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_OPS == it.nodeName}
-        def raschsvSvOpsOmsRaschKolOverall = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
-        def raschsvSvOpsOmsRaschKolNach = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_LIC_NACH_SV_VS == it.nodeName}?.raschsvKolLicTip
-        def raschsvSvOpsOmsRaschKolBas = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_PREV_BAZ_OPS == it.nodeName}?.raschsvKolLicTip
+        fillSingleRow(sheet, 7, svOpsOms.tarifPlat)
 
-        fillOpsOmsKolRow(sheet, 14, raschsvSvOpsOmsRaschKolOverall)
-        fillOpsOmsKolRow(sheet, 15, raschsvSvOpsOmsRaschKolNach)
-        fillOpsOmsKolRow(sheet, 16, raschsvSvOpsOmsRaschKolBas)
+        // Расчет сумм взносов на обязательное пенсионное страхование
+        def raschsvSvOpsRasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_OPS == it.nodeName}
 
-        def raschsvSvOpsOmsRaschSumNachislFl= raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumOblozen = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumBazNachisl = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumBazPrevysh = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumNachisl = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumNachislNePrev = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_NE_PREV == it.nodeName}?.raschsvSvSum1Tip
-        def raschsvSvOpsOmsRaschSumNachislPrev = raschsvSvOpsOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_PREV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschKolOverall = raschsvSvOpsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
+        def raschsvSvOpsRaschKolNach = raschsvSvOpsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_LIC_NACH_SV_VS == it.nodeName}?.raschsvKolLicTip
+        def raschsvSvOpsRaschKolBas = raschsvSvOpsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_PREV_BAZ_OPS == it.nodeName}?.raschsvKolLicTip
+        fillKolRow(sheet, 14, raschsvSvOpsRaschKolOverall)
+        fillKolRow(sheet, 15, raschsvSvOpsRaschKolNach)
+        fillKolRow(sheet, 16, raschsvSvOpsRaschKolBas)
 
-        fillOpsOmsSumRow(sheet, 21, raschsvSvOpsOmsRaschSumNachislFl)
-        fillOpsOmsSumRow(sheet, 22, raschsvSvOpsOmsRaschSumOblozen)
-        fillOpsOmsSumRow(sheet, 23, raschsvSvOpsOmsRaschSumBazNachisl)
-        fillOpsOmsSumRow(sheet, 24, raschsvSvOpsOmsRaschSumBazPrevysh)
-        fillOpsOmsSumRow(sheet, 25, raschsvSvOpsOmsRaschSumNachisl)
-        fillOpsOmsSumRow(sheet, 26, raschsvSvOpsOmsRaschSumNachislNePrev)
-        fillOpsOmsSumRow(sheet, 27, raschsvSvOpsOmsRaschSumNachislPrev)
+        def raschsvSvOpsRaschSumNachislFl= raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumOblozen = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumBazNachisl = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumBazPrevysh = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumNachisl = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumNachislNePrev = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_NE_PREV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOpsRaschSumNachislPrev = raschsvSvOpsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NACHISL_SV_PREV == it.nodeName}?.raschsvSvSum1Tip
+        fillSumRow(sheet, 21, raschsvSvOpsRaschSumNachislFl)
+        fillSumRow(sheet, 22, raschsvSvOpsRaschSumOblozen)
+        fillSumRow(sheet, 23, raschsvSvOpsRaschSumBazNachisl)
+        fillSumRow(sheet, 24, raschsvSvOpsRaschSumBazPrevysh)
+        fillSumRow(sheet, 25, raschsvSvOpsRaschSumNachisl)
+        fillSumRow(sheet, 26, raschsvSvOpsRaschSumNachislNePrev)
+        fillSumRow(sheet, 27, raschsvSvOpsRaschSumNachislPrev)
+
+        // Расчет сумм взносов на обязательное медицинское страхование
+        def raschsvSvOmsRasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_OMS == it.nodeName}
+
+        def raschsvSvOmsRaschKolOverall = raschsvSvOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
+        def raschsvSvOmsRaschKolNach = raschsvSvOmsRasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_LIC_NACH_SV_VS == it.nodeName}?.raschsvKolLicTip
+        fillKolRow(sheet, 34, raschsvSvOmsRaschKolOverall)
+        fillKolRow(sheet, 35, raschsvSvOmsRaschKolNach)
+
+        def raschsvSvOmsRaschSumNachislFl = raschsvSvOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOmsRaschSumOblozen = raschsvSvOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOmsRaschSumBazNachisl = raschsvSvOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvOmsRaschSumBazPrevysh = raschsvSvOmsRasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
+        fillSumRow(sheet, 40, raschsvSvOmsRaschSumNachislFl)
+        fillSumRow(sheet, 41, raschsvSvOmsRaschSumOblozen)
+        fillSumRow(sheet, 42, raschsvSvOmsRaschSumBazNachisl)
+        fillSumRow(sheet, 43, raschsvSvOmsRaschSumBazPrevysh)
+
+        // Расчет сумм страховых взносов по дополнительному тарифу... указанных в пунктах 1 и 2 статьи 428 Налогового кодекса
+        def raschsvSvDop428Rasch = svOpsOms.raschsvSvOpsOmsRaschList.find {NODE_NAME_RASCH_SV_428_12 == it.nodeName}
+
+        fillSingleRow(sheet, 49, raschsvSvDop428Rasch?.prOsnSvDop)
+
+        def raschsvSvDop428RaschKolOverall = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschKolList.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
+        fillKolRow(sheet, 54, raschsvSvDop428RaschKolOverall)
+
+        def raschsvSvDop428RaschSumNachislFl = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvDop428RaschSumOblozen = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvDop428RaschSumBazNachisl = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+        def raschsvSvDop428RaschSumBazPrevysh = raschsvSvDop428Rasch.raschsvSvOpsOmsRaschSumList.find {NODE_NAME_BAZ_PREVYSH_OPS == it.nodeName}?.raschsvSvSum1Tip
+        fillSumRow(sheet, 59, raschsvSvDop428RaschSumNachislFl)
+        fillSumRow(sheet, 60, raschsvSvDop428RaschSumOblozen)
+        fillSumRow(sheet, 61, raschsvSvDop428RaschSumBazNachisl)
+        fillSumRow(sheet, 62, raschsvSvDop428RaschSumBazPrevysh)
     }
+
+    // Удаляем старый лист, из которого клонировали
+    if (raschsvObyazPlatSv.raschsvSvOpsOmsList.size() > 0) {
+        def defaultSheetIndex = workbook.getSheetIndex(OPS_OMS)
+        workbook.removeSheetAt(defaultSheetIndex)
+    }
+}
+
+
+/**
+ * Заполняет данными лист "Расчет ОПС ОМС"
+ */
+def fillOssVnm(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+    def sheet = workbook.getSheet(OSS_VNM)
+
+    def raschsvOssVnm = raschsvObyazPlatSv?.raschsvOssVnm
+    fillSingleRow(sheet, 7, raschsvOssVnm?.prizVypl)
+
+    // Количество лиц
+    def raschsvSvOssVnmKolOverall = raschsvOssVnm?.raschsvOssVnmKolList?.find {NODE_NAME_KOL_STRAH_LIC_VS == it.nodeName}?.raschsvKolLicTip
+
+    fillKolRow(sheet, 14, raschsvSvOssVnmKolOverall)
+    
+    // Суммы
+    def raschsvSvOssVnmSumNachislFl = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_VYPL_NACHISL_FL == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumOblozen = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_NE_OBLOZEN_SV == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumBazPrevysh = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_BAZ_PREVYSH_SV == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumBazNachisl = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_BAZ_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumBazNachislFarm = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_BAZ_NACHISL_SV_FARM == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumBazNachEs = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_BAZ_NACHISL_SV_NACH_ES == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumBazNachislPlat = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_BAZ_NACHISL_SV_PAT == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumBazInLic = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_BAZ_NACHISL_IN_LIC == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumNachisl = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_NACHISL_SV == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumProizv = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_PROIZV_RASCH_SO == it.nodeName}?.raschsvSvSum1Tip
+    def raschsvSvOssVnmSumVozm = raschsvOssVnm?.raschsvOssVnmSumList?.find {NODE_NAME_VOZM_RASCH_SO == it.nodeName}?.raschsvSvSum1Tip
+
+    fillSumRow(sheet, 19, raschsvSvOssVnmSumNachislFl)
+    fillSumRow(sheet, 20, raschsvSvOssVnmSumOblozen)
+    fillSumRow(sheet, 21, raschsvSvOssVnmSumBazPrevysh)
+    fillSumRow(sheet, 22, raschsvSvOssVnmSumBazNachisl)
+    fillSumRow(sheet, 23, raschsvSvOssVnmSumBazNachislFarm)
+    fillSumRow(sheet, 24, raschsvSvOssVnmSumBazNachEs)
+    fillSumRow(sheet, 25, raschsvSvOssVnmSumBazNachislPlat)
+    fillSumRow(sheet, 26, raschsvSvOssVnmSumBazInLic)
+    fillSumRow(sheet, 27, raschsvSvOssVnmSumNachisl)
+    fillSumRow(sheet, 28, raschsvSvOssVnmSumProizv)
+    fillSumRow(sheet, 29, raschsvSvOssVnmSumVozm)
+
+    // Сумма страховых взносов, подлежащая уплате (сумма превышения произведенных расходов над исчисленными страховыми взносами)
+    def raschsvUplVsego =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL_VSEGO_PER == it.nodeName}
+    def raschsvUplVsego3m =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL_VSEGO_POSL3M == it.nodeName}
+    def raschsvUpl1Vsego3m =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL1_VSEGO_POSL3M == it.nodeName}
+    def raschsvUpl2Vsego3m =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL2_VSEGO_POSL3M == it.nodeName}
+    def raschsvUpl3Vsego3m =  raschsvOssVnm?.raschsvUplSvPrevList?.find {NODE_NAME_UPL3_VSEGO_POSL3M == it.nodeName}
+
+    fillPriznakRow(sheet, 36, raschsvUplVsego)
+    fillPriznakRow(sheet, 37, raschsvUplVsego3m)
+    fillPriznakRow(sheet, 38, raschsvUpl1Vsego3m)
+    fillPriznakRow(sheet, 39, raschsvUpl2Vsego3m)
+    fillPriznakRow(sheet, 40, raschsvUpl3Vsego3m)
 }
 
 /**
  * Заполняет значениями строки для количеств
  */
-def fillOpsOmsKolRow(sheet, pointer, kolLicTip) {
+def fillKolRow(sheet, pointer, kolLicTip) {
     def style = normalWithBorderStyle(sheet.getWorkbook())
     addFillingToStyle(style, ROWS_FILL_COLOR)
 
@@ -1004,7 +1107,7 @@ def fillOpsOmsKolRow(sheet, pointer, kolLicTip) {
 /**
  * Заполняет значениями строки для сумм
  */
-def fillOpsOmsSumRow(sheet, pointer, sumLicTip) {
+def fillSumRow(sheet, pointer, sumLicTip) {
     def style = normalWithBorderStyle(sheet.getWorkbook())
     addFillingToStyle(style, ROWS_FILL_COLOR)
 
@@ -1029,6 +1132,33 @@ def fillOpsOmsSumRow(sheet, pointer, sumLicTip) {
     cell5.setCellValue(sumLicTip?.sum3mPosl3m ?: "")
 }
 
+/**
+ * Заполнение одиночной ячейки
+ */
+def fillSingleRow(sheet, pointer, value) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = sheet.getRow(pointer).createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(value ?: "")
+}
+
+/**
+ * Заполнение двух ячееук: признак-сумма
+ */
+def fillPriznakRow(sheet, pointer, raschsvUplSvPrev) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = sheet.getRow(pointer).createCell(1)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvUplSvPrev?.priznak ?: "")
+
+    def cell2 = sheet.getRow(pointer).createCell(2)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvUplSvPrev?.svSum ?: "")
+}
 
 /****************************************************************************
  *  Блок стилизации                                                         *
@@ -1336,11 +1466,18 @@ class TestDataHolder {
 @Field final NODE_NAME_VYPL_NACHISL_FL = "ВыплНачислФЛ"
 @Field final NODE_NAME_NE_OBLOZEN_SV = "НеОбложенСВ"
 @Field final NODE_NAME_BAZ_NACHISL_SV = "БазНачислСВ"
+@Field final NODE_NAME_BAZ_PREVYSH_SV = "БазПревышСВ"
 @Field final NODE_NAME_BAZ_PREVYSH_OPS = "БазПревышОПС"
 @Field final NODE_NAME_NACHISL_SV = "НачислСВ"
 @Field final NODE_NAME_NACHISL_SV_NE_PREV = "НачислСВНеПрев"
 @Field final NODE_NAME_NACHISL_SV_PREV = "НачислСВПрев"
 @Field final NODE_NAME_BAZ_NACHISL_SV_DOP = "БазНачислСВДоп"
+@Field final NODE_NAME_BAZ_NACHISL_SV_FARM = "БазНачСВФарм"
+@Field final NODE_NAME_BAZ_NACHISL_SV_NACH_ES = "БазНачСВЧлЭС"
+@Field final NODE_NAME_BAZ_NACHISL_SV_PAT = "БазНачСВПат"
+@Field final NODE_NAME_BAZ_NACHISL_IN_LIC = "БазНачСВИнЛиц"
+@Field final NODE_NAME_PROIZV_RASCH_SO = "ПроизвРасхСО"
+@Field final NODE_NAME_VOZM_RASCH_SO = "ВозмРасхСО"
 @Field final NODE_NAME_NACHISL_SV_DOP = "НачислСВДоп"
 @Field final NODE_NAME_KOL_LIC_NACH_SV = "КолЛицНачСВ"
 @Field final NODE_NAME_BAZ_NACHISL_SVDSO = "БазНачислСВДСО"
@@ -1348,6 +1485,11 @@ class TestDataHolder {
 
 @Field final NODE_NAME_RASCH_SV_OSS_VNM = "РасчСВ_ОСС.ВНМ"
 @Field final NODE_NAME_UPL_SV_PREV = "УплСВПрев"
+@Field final NODE_NAME_UPL_VSEGO_PER = "УплВсегоПер"
+@Field final NODE_NAME_UPL_VSEGO_POSL3M = "УплВсегоПосл3М"
+@Field final NODE_NAME_UPL1_VSEGO_POSL3M = "Упл1Посл3М"
+@Field final NODE_NAME_UPL2_VSEGO_POSL3M = "Упл2Посл3М"
+@Field final NODE_NAME_UPL3_VSEGO_POSL3M = "Упл3Посл3М"
 
 @Field final NODE_NAME_RASH_OSS_ZAK = "РасхОССЗак"
 
@@ -3227,6 +3369,7 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 
 /**
  * Получить "Физические лица" getRefPersons
+ * После проведения РАСЧЕТА raschsv_pers_sv_strah_lic.person_id ВСЕГДА будет ссылаться на актуальную записи справочника ФЛ
  * @return
  */
 Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
@@ -3520,7 +3663,7 @@ def fillPersonAttr(Map<String, RefBookValue> values, PersonData person, Long asn
     putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
     putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
     putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, person.getSex() ?: null, attributeChangeListener);
+    putOrUpdate(values, "SEX", RefBookAttributeType.NUMBER, person.getSex() ?: null, attributeChangeListener);
     putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
     putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
     putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
@@ -4008,28 +4151,17 @@ def checkDataDBPerson() {
     def citizenshipCodeMap = getRefCitizenship();
     def citizenshipCodeActualList = getActualRefCitizenship();
 
-    // Физические лица
-    def personIds = getPersonIds(raschsvPersSvStrahLicList)
-    def personMap = [:]
+    // ФЛ Map<person_id, RefBook>
+    def personMap = getRefPersonsByDeclarationDataId()
 
-    // ДУЛ <person_id, массив_ДУЛ>
-    def dulMap = [:]
-
-    if (!personIds.isEmpty()) {
-        personMap = getActualRefPersons(personIds)
-        if (personMap.isEmpty()) {
-            logger.error("Не найдены актуальные записи в справочнике \"Физические лица\".")
-        }
-
-        // Получим мапу ДУЛ
-        dulMap = getRefDul(personIds)
-    }
+    // ДУЛ Map<person_id, List<RefBook>>
+    def dulMap = getRefDulByDeclarationDataId()
 
     // Коды видов документов
     def documentTypeActualList = getActualRefDocument()
 
-    println "Загрузка справочников для проверок записей в БД / Проверки по плательщику страховых взносов " + (System.currentTimeMillis() - time);
-    logger.info("Загрузка справочников для проверок записей в БД / Проверки по плательщику страховых взносов: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Загрузка справочников для проверок записей в БД " + (System.currentTimeMillis() - time);
+    logger.info("Загрузка справочников для проверок записей в БД: (" + (System.currentTimeMillis() - time) + " ms)");
 
     // Идентификаторы ссылок на справочник Физические лица
     def personIdList = []
@@ -5102,46 +5234,6 @@ Map<Long, Map<String, RefBookValue>> getRefPersons(def personIds) {
         }
     }
     return personsCache;
-}
-
-/**
- * Получить аутальные записи справочника "Физические лица"
- * @param personIds
- * @return
- */
-Map<Long, Map<String, RefBookValue>> getActualRefPersons(def personIds) {
-    if (personsActualCache.size() == 0) {
-        def refBookMap = getRefBookByRecordIds(REF_BOOK_PERSON_ID, personIds)
-        refBookMap.each { personId, person ->
-            // Получим актуальную версию на основании RECORD_ID найденной записи
-            def actualPersonMap = getRefBookByFilter(REF_BOOK_PERSON_ID, "RECORD_ID = " + person.get(RF_RECORD_ID).value)
-            if (actualPersonMap) {
-                actualPersonMap.each { actualPerson ->
-                    personsActualCache.put(personId, actualPerson)
-                }
-            }
-        }
-    }
-    return personsActualCache;
-}
-
-/**
- * Получить "Документ, удостоверяющий личность (ДУЛ)"
- * todo Получение ДУЛ реализовано путем отдельных запросов для каждого personId, в будущем переделать на использование одного запроса
- * @return
- */
-def getRefDul(def personIds) {
-    if (dulCache.size() == 0) {
-        personIds.each { personId ->
-            def refBookMap = getRefBookByFilter(REF_BOOK_ID_DOC_ID, "PERSON_ID = " + personId.toString())
-            def dulList = []
-            refBookMap.each { refBook ->
-                dulList.add(refBook)
-            }
-            dulCache.put(personId, dulList)
-        }
-    }
-    return dulCache;
 }
 
 /**

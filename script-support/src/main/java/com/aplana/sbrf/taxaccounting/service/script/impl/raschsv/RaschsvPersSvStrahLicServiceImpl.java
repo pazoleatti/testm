@@ -46,12 +46,12 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     }
 
     @Override
-    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByDeclarationDataId(long declarationDataId) {
-        return raschsvPersSvStrahLicDao.findDublicatePersonIdByDeclarationDataId(declarationDataId);
+    public List<RaschsvPersSvStrahLic> findDublicatePersonsByDeclarationDataId(long declarationDataId) {
+        return raschsvPersSvStrahLicDao.findDublicatePersonsByDeclarationDataId(declarationDataId);
     }
 
     @Override
-    public List<RaschsvPersSvStrahLic> findDublicatePersonIdByReportPeriodId(List<Long> personIdList, long reportPeriodId) {
-        return raschsvPersSvStrahLicDao.findDublicatePersonIdByReportPeriodId(personIdList, reportPeriodId);
+    public List<RaschsvPersSvStrahLic> findDublicatePersonsByReportPeriodId(long declarationDataId, long reportPeriodId) {
+        return raschsvPersSvStrahLicDao.findDublicatePersonsByReportPeriodId(declarationDataId, reportPeriodId);
     }
 }

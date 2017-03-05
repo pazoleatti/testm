@@ -83,16 +83,14 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findIncomes(long ndflPersonId);
 
     /**
-     * Найти данные о доходах ФЛ по идентификатору декларации
+     * Найти данные о доходах Физлиц
      *
-     * @param declarationDataId
+     * @param ndflPersonIdList
      * @param startDate         - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate           - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param kpp
-     * @param oktmo
      * @return
      */
-    List<NdflPersonIncome> findIncomesByPeriodAndDeclarationDataId(long declarationDataId, Date startDate, Date endDate, String kpp, String oktmo);
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdList(List<Long> ndflPersonIdList, Date startDate, Date endDate);
 
     /**
      *  Найти данные о доходах по КПП и ОКТМО для Физлица
@@ -104,24 +102,35 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo);
 
     /**
-     * Найти данные о доходах ФЛ по идентификатору ФЛ
+     * Найти данные о доходах ФЛ по идентификатору и интервалу
      *
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param prFequals1 = true для НДФЛ(1) prFequals1 = false для НДФЛ(2)
      * @return
      */
-    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
 
     /**
-     * Найти данные о вычетах ФЛ по идентификатору ФЛ
+     * Найти данные о вычетах ФЛ с признаком вычета "Остальные"
      *
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
-    List<NdflPersonDeduction> findDeductionsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonDeduction> findDeductionsWithDeductionsMarkOstalnie(long ndflPersonId, Date startDate, Date endDate);
+
+    /**
+     * Найти данные о вычетах ФЛ с признаком вычета Социльный;Стандартный;Имущественный;Инвестиционный
+     *
+     * @param ndflPersonId
+     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @return
+     */
+    List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate);
 
     /**
      * Найти данные о авансах ФЛ по идентификатору ФЛ
@@ -151,14 +160,12 @@ public interface NdflPersonDao {
     int getCount(String sqlQuery, Map<String, Object> parameters);
 
     /**
-     * Данные об авансах ФЛ по идентификатору декларации
+     * Данные об авансах Физлиц
      *
-     * @param declarationDataId
-     * @param kpp
-     * @param oktmo
+     * @param ndflPersonIdList
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByDeclarationDataId(long declarationDataId, String kpp, String oktmo);
+    List<NdflPersonPrepayment> findPrepaymentsByNdflPersonIdList(List<Long> ndflPersonIdList);
 
     /**
      * Найти данный о вычетах
@@ -239,4 +246,12 @@ public interface NdflPersonDao {
      * @return
      */
     NdflPersonPrepayment getPrepayment(long id);
+
+    /**
+     * Найти Физлиц по списку id
+     * @param ndflPersonIdList
+     * @return
+     */
+    List<NdflPerson> findByIdList(List<Long> ndflPersonIdList);
+
 }

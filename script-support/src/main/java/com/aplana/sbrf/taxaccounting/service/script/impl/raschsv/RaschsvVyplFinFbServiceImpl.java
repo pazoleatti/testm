@@ -12,7 +12,13 @@ public class RaschsvVyplFinFbServiceImpl implements RaschsvVyplFinFbService {
     @Autowired
     private RaschsvVyplFinFbDao raschsvVyplFinFbDao;
 
+    @Override
     public Long insertRaschsvVyplFinFb(RaschsvVyplFinFb raschsvVyplFinFb) {
         return raschsvVyplFinFbDao.insertRaschsvVyplFinFb(raschsvVyplFinFb);
+    }
+
+    @Override
+    public RaschsvVyplFinFb findRaschsvVyplFinFb(Long declarationDataId) {
+        return raschsvVyplFinFbDao.findRaschsvVyplFinFb(declarationDataId);
     }
 }

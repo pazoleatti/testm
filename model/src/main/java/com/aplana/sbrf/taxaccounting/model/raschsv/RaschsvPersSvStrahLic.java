@@ -32,6 +32,9 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     // Ссылка на справочник физлиц
     private Long personId;
 
+    // Идентификатор ФЛ REF_BOOK_PERSON.RECORD_ID
+    private Long recordId;
+
     // СвВыпл
     private RaschsvSvVypl raschsvSvVypl;
 
@@ -61,6 +64,9 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     public static final String COL_IMYA = "imya";
     public static final String COL_OTCHESTVO = "otchestvo";
     public static final String COL_PERSON_ID = "person_id";
+
+    // Поле record_id принадлежит таблице REF_BOOK_PERSON
+    public static final String COL_RECORD_ID = "record_id";
 
     public static final String[] COLUMNS = {COL_ID, COL_DECLARATION_DATA_ID, COL_NOM_KORR, COL_PERIOD, COL_OTCHET_GOD,
             COL_NOMER, COL_SV_DATA, COL_INNFL, COL_SNILS, COL_DATA_ROZD, COL_GRAZD, COL_POL, COL_KOD_VID_DOC, COL_SER_NOM_DOC,
@@ -143,5 +149,12 @@ public class RaschsvPersSvStrahLic extends IdentityObject<Long> {
     }
     public void setPersonId(Long personId) {
         this.personId = personId;
+    }
+
+    public Long getRecordId() {
+        return recordId;
+    }
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
     }
 }
