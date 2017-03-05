@@ -72,7 +72,7 @@ alter table ref_book add constraint ref_book_fk_region foreign key (region_attri
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
 alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1, 1 , 2));
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
---create unique index i_ref_book_record_refbookid on ref_book_record (case when status <> -1 then ref_book_id else null end, case when status <> -1 then record_id else null end, case when status <> -1 then version else null end);
+create unique index i_ref_book_record_refbookid on ref_book_record (case when status <> -1 then ref_book_id else null end, case when status <> -1 then record_id else null end, case when status <> -1 then version else null end);
 
 alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
 alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record(id) on delete cascade;
@@ -98,9 +98,9 @@ alter table department_type add constraint department_type_pk primary key (id);
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
 alter table department add constraint department_fk_type foreign key(type) references department_type(id);
---alter table department add constraint department_chk_is_active check (is_active in (0, 1)) disable novalidate;
---alter table department add constraint department_chk_garant_use check (garant_use in (0, 1)) disable novalidate;
---alter table department add constraint department_chk_sunr_use check (sunr_use in (0, 1)) disable novalidate;
+alter table department add constraint department_chk_is_active check (is_active in (0, 1));
+alter table department add constraint department_chk_garant_use check (garant_use in (0, 1));
+alter table department add constraint department_chk_sunr_use check (sunr_use in (0, 1));
 
 alter table configuration add constraint configuration_pk primary key (code, department_id);
 alter table configuration add constraint configuration_fk foreign key (department_id) references department(id) on delete cascade;
@@ -197,15 +197,18 @@ alter table sec_user_role add constraint sec_user_role_pk primary key (user_id, 
 alter table sec_user_role add constraint sec_user_role_fk_user_id foreign key (user_id) references sec_user(id);
 alter table sec_user_role add constraint sec_user_role_fk_role_id foreign key (role_id) references sec_role(id);
 
+alter table log_business add constraint log_business_pk primary key (id);
 alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 
+alter table task_context add constraint task_context_pk primary key (id);
 alter table task_context add constraint task_context_uniq_task_id unique (task_id);
 alter table task_context add constraint task_context_uniq_task_name unique (task_name);
 alter table task_context add constraint task_context_fk_user_id foreign key (user_id) references sec_user(id);
 
+alter table notification add constraint notification_pk primary key (id);
 alter table notification add constraint notification_fk_report_period foreign key (report_period_id) references report_period (id) on delete cascade;
 alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department (id) on delete cascade;
 alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department (id) on delete cascade;
@@ -217,6 +220,8 @@ alter table notification add constraint notification_chk_type check (type in (0,
 alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data (id) on delete set null;
 
 alter table event add constraint event_pk primary key (id);
+
+alter table log_clob_query add constraint log_clob_query_pk primary key (id);
 
 alter table log_business add constraint log_business_fk_event_id foreign key (event_id) references event(id);
 
@@ -233,13 +238,14 @@ alter table template_changes add constraint template_changes_chk_template check 
 
 alter table audit_form_type add constraint audit_form_type_pk primary key (id);
 
+alter table log_system add constraint log_system_pk primary key (id);
 alter table log_system add constraint log_system_fk_event_id foreign key (event_id) references event(id);
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 504,  601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 504, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or report_period_name is not null);
 alter table log_system add constraint log_system_chk_aft check (audit_form_type_id = 1 and not event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is not null or audit_form_type_id = 2 and not event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is not null or audit_form_type_id = 3 and event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is null or audit_form_type_id = 4 and event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is null or audit_form_type_id in (5,6) and event_id in (7) and form_type_name is null and declaration_type_name is null or audit_form_type_id is null or event_id in (402));
 
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
---alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login) disable novalidate;
+alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
 --alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
 alter table log_system add constraint log_system_chk_is_error check (is_error in (0, 1));
 alter table log_system add constraint log_system_fk_audit_form_type foreign key (audit_form_type_id) references audit_form_type (id);
@@ -294,6 +300,7 @@ alter table log_system_report add constraint log_system_report_fk_sec_user forei
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
 alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
 
+alter table form_search_result add constraint form_search_result_pk primary key (id);
 alter table form_search_result add constraint form_search_result_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
 
 alter table department_change add constraint dep_change_pk primary key (department_id, log_date);
@@ -519,17 +526,17 @@ alter table ref_book_person add constraint fk_ref_book_person_taxpayer_st foreig
 alter table ref_book_id_doc add constraint fk_ref_book_id_doc_person foreign key (person_id) references ref_book_person(id);
 -- create unique index unq_ref_book_id_doc_pers_inc1 on ref_book_id_doc (decode(inc_rep,1,person_id,null));
 
---alter table ref_book_person add constraint chk_ref_book_person_pension check (pension in (1,2)) disable;
---alter table ref_book_person add constraint chk_ref_book_person_medical check (medical in(1,2)) disable;
---alter table ref_book_person add constraint chk_ref_book_person_social check (social in (1,2)) disable;
---alter table ref_book_person add constraint chk_ref_book_person_sex check (sex in (1,2)) disable;
---alter table ref_book_person add constraint chk_ref_book_person_employee check (employee in (1,2)) disable;
+alter table ref_book_person add constraint chk_ref_book_person_pension check (pension in (1,2));
+alter table ref_book_person add constraint chk_ref_book_person_medical check (medical in(1,2));
+alter table ref_book_person add constraint chk_ref_book_person_social check (social in (1,2));
+alter table ref_book_person add constraint chk_ref_book_person_sex check (sex in (1,2));
+alter table ref_book_person add constraint chk_ref_book_person_employee check (employee in (1,2));
 alter table ref_book_person add constraint chk_ref_book_person_status check (status between -1 and 2);
 alter table ref_book_person add constraint chk_ref_book_person_old_st check (old_status is null or old_status between -1 and 2);
---alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1)) disable;
+alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
 --alter table ref_book_address add constraint chk_ref_book_address_addr_n_rf check ((address_type=1 and region_code is null and country_id is not null) or (address_type=0)) disable;
 --alter table ref_book_address add constraint chk_ref_book_address_addr_rf check ((address_type=0 and region_code is not null and country_id is null) or (address_type=1)) disable;
---alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
+alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_doc add constraint chk_ref_book_id_doc_rep check(inc_rep in (0,1));
 alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 
