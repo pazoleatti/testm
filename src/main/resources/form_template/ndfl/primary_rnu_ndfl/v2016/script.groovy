@@ -1,5 +1,7 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
+
+
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.Column
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -9,12 +11,16 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult
+import com.aplana.sbrf.taxaccounting.model.StringColumn
+import com.aplana.sbrf.taxaccounting.model.identity.Address
+import com.aplana.sbrf.taxaccounting.model.identity.NaturalPerson
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -112,10 +118,8 @@ def calculate() {
     logger.info("В ПНФ номер "+declarationDataId+" найдено записей о физ.лицах: " + declarationFormPersonList.size() + "(" + (System.currentTimeMillis() - time) + " ms)");
 
     time = System.currentTimeMillis();
-
     Date actualVersion = new Date();
-    Map<Long, List<PersonData>> refbookPersonData = refBookPersonService.findRefBookPersonByPrimaryRnuNdfl(declarationDataId, asnuId, actualVersion)
-
+    Map<Long, Map<Long, NaturalPerson>> refbookPersonData = refBookPersonService.findRefBookPersonByPrimaryRnuNdfl(declarationDataId, asnuId, actualVersion)
     logger.info("Поиск сходных записей завершен, найдено записей: " + refbookPersonData.size() + " "+ calcTimeMillis(time));
 
     time = System.currentTimeMillis();
@@ -129,7 +133,9 @@ def calculate() {
 
         PersonData personData = createPersonData(declarationFormPerson, asnuId);
 
-        List<PersonData> refBookPersonList = refbookPersonData.get(declarationFormPerson.id);
+        Map<Long, NaturalPerson> refBookPersonMap = refbookPersonData.get(declarationFormPerson.id);
+
+        List<NaturalPerson> refBookPersonList = refBookPersonMap != null ? new ArrayList<NaturalPerson>(refBookPersonMap.values()) : null;
 
         Long refBookPersonId = refBookPersonService.identificatePerson(personData, refBookPersonList, SIMILARITY_THRESHOLD, logger);
 
@@ -173,7 +179,7 @@ def calculate() {
 
     //Обновление справочников
     if (!updatedPersonList.isEmpty()) {
-        updateRefbookPersonData(updatedPersonList, asnuId);
+        //updateRefbookPersonData(updatedPersonList, asnuId);
     }
 
     println "refresh " + (System.currentTimeMillis() - time);
@@ -434,8 +440,10 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
     List<RefBookRecord> addressRecords = new ArrayList<RefBookRecord>()
     for (int i = 0; i < personList.size(); i++) {
         PersonData person = personList.get(i)
-        RefBookRecord refBookRecord = creatAddressRecord(person, new EmptyChangedListener());
-        addressRecords.add(refBookRecord);
+        if (person.getAddress() != null){
+            RefBookRecord refBookRecord = creatAddressRecord(person.getAddress(), new EmptyChangedListener());
+            addressRecords.add(refBookRecord);
+        }
     }
 
     println "create address " + (System.currentTimeMillis() - time)
@@ -534,10 +542,10 @@ def createRefbookPersonData(List<PersonData> personList, Long asnuId) {
  * @param person
  * @return
  */
-RefBookRecord creatAddressRecord(PersonData person, AttributeChangeListener attributeChangeListener) {
+RefBookRecord creatAddressRecord(Address address, AttributeChangeListener attributeChangeListener) {
     RefBookRecord record = new RefBookRecord();
     Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
-    fillAddressAttr(values, person, attributeChangeListener);
+    fillAddressAttr(values, address, attributeChangeListener);
     record.setValues(values);
     return record;
 }
@@ -545,27 +553,27 @@ RefBookRecord creatAddressRecord(PersonData person, AttributeChangeListener attr
 /**
  * Заполнение записи справочника адреса физлиц
  * @param values
- * @param person
+ * @param address
  * @return
  */
-def fillAddressAttr(Map<String, RefBookValue> values, PersonData person, AttributeChangeListener attributeChangeListener) {
+def fillAddressAttr(Map<String, RefBookValue> values, Address address, AttributeChangeListener attributeChangeListener) {
 
-    int addressType = person.getAddressIno() != null && !person.getAddressIno().isEmpty() ? 1 : 0;
+    int addressType = address.getAddressIno() != null && !address.getAddressIno().isEmpty() ? 1 : 0;
     //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
-    Long countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
+    Long countryId = findCountryId(address.getCountryCode())  //код страны проживания не РФ
 
     putOrUpdate(values, "ADDRESS_TYPE", RefBookAttributeType.NUMBER, addressType, attributeChangeListener);
     putOrUpdate(values, "COUNTRY_ID", RefBookAttributeType.REFERENCE, countryId, attributeChangeListener);
-    putOrUpdate(values, "REGION_CODE", RefBookAttributeType.STRING, person.getRegionCode(), attributeChangeListener);
-    putOrUpdate(values, "DISTRICT", RefBookAttributeType.STRING, person.getDistrict(), attributeChangeListener);
-    putOrUpdate(values, "CITY", RefBookAttributeType.STRING, person.getCity(), attributeChangeListener);
-    putOrUpdate(values, "LOCALITY", RefBookAttributeType.STRING, person.getLocality(), attributeChangeListener);
-    putOrUpdate(values, "STREET", RefBookAttributeType.STRING, person.getStreet(), attributeChangeListener);
-    putOrUpdate(values, "HOUSE", RefBookAttributeType.STRING, person.getHouse(), attributeChangeListener);
-    putOrUpdate(values, "BUILD", RefBookAttributeType.STRING, person.getBuild(), attributeChangeListener);
-    putOrUpdate(values, "APPARTMENT", RefBookAttributeType.STRING, person.getAppartment(), attributeChangeListener);
-    putOrUpdate(values, "POSTAL_CODE", RefBookAttributeType.STRING, person.getPostalCode(), attributeChangeListener);
-    putOrUpdate(values, "ADDRESS", RefBookAttributeType.STRING, person.getAddressIno(), attributeChangeListener);
+    putOrUpdate(values, "REGION_CODE", RefBookAttributeType.STRING, address.getRegionCode(), attributeChangeListener);
+    putOrUpdate(values, "DISTRICT", RefBookAttributeType.STRING, address.getDistrict(), attributeChangeListener);
+    putOrUpdate(values, "CITY", RefBookAttributeType.STRING, address.getCity(), attributeChangeListener);
+    putOrUpdate(values, "LOCALITY", RefBookAttributeType.STRING, address.getLocality(), attributeChangeListener);
+    putOrUpdate(values, "STREET", RefBookAttributeType.STRING, address.getStreet(), attributeChangeListener);
+    putOrUpdate(values, "HOUSE", RefBookAttributeType.STRING, address.getHouse(), attributeChangeListener);
+    putOrUpdate(values, "BUILD", RefBookAttributeType.STRING, address.getBuild(), attributeChangeListener);
+    putOrUpdate(values, "APPARTMENT", RefBookAttributeType.STRING, address.getAppartment(), attributeChangeListener);
+    putOrUpdate(values, "POSTAL_CODE", RefBookAttributeType.STRING, address.getPostalCode(), attributeChangeListener);
+    putOrUpdate(values, "ADDRESS", RefBookAttributeType.STRING, address.getAddressIno(), attributeChangeListener);
 }
 
 /**
@@ -957,29 +965,11 @@ PersonData createPersonData(NdflPerson person, Long asnuId) {
     personData.documentTypeId = findDocumentTypeByCode(person.getIdDocType());
     personData.documentNumber = person.getIdDocNumber();
 
-    //Выставляем тип адреса getAddress
-    int addressType = person.getAddress() != null && !person.getAddress().isEmpty() ? 1 : 0;
-    //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
-
-    //Устанавливаем тип адреса, проверяется при сравнении
-    personData.addressType = addressType;
-
-    //Адрес в РФ
-    personData.regionCode = person.getRegionCode();
-    personData.postalCode = person.getPostIndex();
-    personData.district = person.getArea();
-    personData.city = person.getCity();
-    personData.locality = person.getLocality();
-    personData.street = person.getStreet();
-    personData.house = person.getHouse();
-    personData.build = person.getBuilding();
-    personData.appartment = person.getFlat();
-
-    //Адрес вре РФ, ставим код страны и сам адрес
-    personData.countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
-    personData.countryCode = person.getCountryCode();
-    personData.addressIno = person.getAddress();
     personData.useAddress = true;
+
+
+    personData.setAddress(createAddress(person));
+
 
     personData.pension = 2;
     personData.medical = 2;
@@ -988,6 +978,40 @@ PersonData createPersonData(NdflPerson person, Long asnuId) {
 
     return personData;
 }
+
+def createAddress(NdflPerson person){
+
+    Address address = new Address();
+
+    //Выставляем тип адреса getAddress
+    int addressType = person.getAddress() != null && !person.getAddress().isEmpty() ? 1 : 0;
+    //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
+
+    //Устанавливаем тип адреса, проверяется при сравнении
+    address.addressType = addressType;
+
+    //Адрес в РФ
+    address.regionCode = person.getRegionCode();
+    address.postalCode = person.getPostIndex();
+    address.district = person.getArea();
+    address.city = person.getCity();
+    address.locality = person.getLocality();
+    address.street = person.getStreet();
+    address.house = person.getHouse();
+    address.build = person.getBuilding();
+    address.appartment = person.getFlat();
+
+    //Адрес вре РФ, ставим код страны и сам адрес
+    address.countryId = findCountryId(person.getCountryCode())  //код страны проживания не РФ
+    address.countryCode = person.getCountryCode();
+    address.addressIno = person.getAddress();
+
+
+    return address
+
+
+}
+
 
 /**
  * По коду статуса налогоплательщика найти id записи в кэше справочника
