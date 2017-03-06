@@ -572,7 +572,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> findByIdList(List<Long> ndflPersonIdList) {
-        String query = "SELECT " + createColumns(NdflPerson.COLUMNS, "np") + " FROM NDFL_PERSON NP" +
+        String query = "SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " FROM NDFL_PERSON np" +
+                " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
                 " WHERE NP.ID IN (:ndflPersonIdList)";
         MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonIdList", ndflPersonIdList);
         return getNamedParameterJdbcTemplate().query(query, params, new NdflPersonDaoImpl.NdflPersonRowMapper());
