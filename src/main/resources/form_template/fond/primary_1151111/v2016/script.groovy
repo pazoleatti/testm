@@ -231,6 +231,8 @@ switch (formDataEvent) {
 @Field final String RAS_5T_427 = "П6.Расчет пп.5 п.1 ст.427"
 @Field final String RAS_7T_427 = "П7.Расчет пп.7 п.1 ст.427"
 @Field final String RAS_9T_427 = "П8.Сведения пп.9 п.1 ст.427"
+@Field final String SVE_222_425 = "П9.Сведения а.2 пп.2 п.2 ст.425"
+@Field final String SVE_13_422 = "П10.Сведния пп.1 п.3 ст.422"
 
 // Имена псевдонима спецотчета
 @Field final String PERSON_REPORT = "person_rep_param"
@@ -297,6 +299,12 @@ def createSpecificReport() {
 
         logger.info("Заполнение листа \"П8.Расчет пп.9 п.1 ст.427\"")
         fillRasch9st427(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П9.Сведения а.2 пп.2 п.2 ст.425\"")
+        fillRasch22425(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П10.Сведния пп.1 п.3 ст.422\"")
+        fillRasch13422(raschsvObyazPlatSv, workbook)
 
         logger.info("Отчет сформирован")
     }
@@ -1263,6 +1271,55 @@ def fillRasch9st427(raschsvObyazPlatSv, workbook) {
 }
 
 /**
+ * Заполняет данными лист:
+ * "Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта
+ * 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426)
+ * Налогового кодекса Российской Федерации"
+ */
+def fillRasch22425(raschsvObyazPlatSv, workbook) {
+    def startIndex = 10
+    def sheet = workbook.getSheet(SVE_222_425)
+    def raschsvSvPrimTarif22425 = raschsvObyazPlatSv?.raschsvSvPrimTarif22425
+    def raschsvSvInoGrazdList = raschsvSvPrimTarif22425?.raschsvSvInoGrazdList
+
+    if (raschsvSvInoGrazdList) {
+        sheet.shiftRows(startIndex, startIndex + 1, raschsvSvInoGrazdList.size() + 1)
+        for (int i = 0; i < raschsvSvInoGrazdList.size(); i++) {
+            fillRasch22425Row(sheet, sheet.createRow(startIndex + i), raschsvSvInoGrazdList.get(i))
+        }
+    }
+}
+
+/**
+ * Заполняет данными лист:
+ * "Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта
+ * 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426)
+ * Налогового кодекса Российской Федерации"
+ */
+def fillRasch13422(raschsvObyazPlatSv, workbook) {
+    def startIndex = 9
+    def blockShift = 5
+    def sheet = workbook.getSheet(SVE_13_422)
+    def raschsvSvPrimTarif13422 = raschsvObyazPlatSv?.raschsvSvPrimTarif13422
+    def raschsvSvedObuchList = raschsvSvPrimTarif13422?.raschsvSvedObuchList
+
+    if (raschsvSvedObuchList) {
+        sheet.shiftRows(startIndex, sheet.getLastRowNum(), raschsvSvedObuchList.size() + 1)
+        for (int i = 0; i < raschsvSvedObuchList.size(); i++) {
+            fillRasch13422Row(sheet, sheet.createRow(startIndex + i), raschsvSvedObuchList.get(i))
+        }
+
+        int n = startIndex + raschsvSvedObuchList.size() + blockShift
+        for (int i = 0; i < raschsvSvedObuchList.size(); i++) {
+            def raschsvSvReestrMdoList = raschsvSvedObuchList.get(i).raschsvSvReestrMdoList
+            for (int j = 0; j < raschsvSvReestrMdoList.size(); j++) {
+                fillRasch13422RowMdo(sheet, sheet.createRow(n++), raschsvSvedObuchList.get(i), raschsvSvReestrMdoList.get(j))
+            }
+        }
+    }
+}
+
+/**
  * Заполняет значениями строки для количеств
  */
 def fillKolRow(sheet, pointer, kolLicTip) {
@@ -1564,6 +1621,138 @@ def fillRasch9st427Row(sheet, row, raschsvSvedPatent) {
     def cell10 = row.createCell(9)
     cell10.setCellStyle(style)
     cell10.setCellValue(raschsvSvedPatent?.raschsvSvSum1Tip?.sum3mPosl3m ?: "")
+}
+
+/**
+ * Заполнение одиночной строки для:
+ * "Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта
+ * 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426) Налогового кодекса Российской Федерации"
+ */
+def fillRasch22425Row(sheet, row, raschsvSvInoGrazd) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = row.createCell(0)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvSvInoGrazd?.familia ?: "")
+
+    def cell2 = row.createCell(1)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvSvInoGrazd?.imya ?: "")
+
+    def cell3 = row.createCell(2)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvSvInoGrazd?.otchestvo ?: "")
+
+    def cell4 = row.createCell(3)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvSvInoGrazd?.innfl ?: "")
+
+    def cell5 = row.createCell(4)
+    cell5.setCellStyle(style)
+    cell5.setCellValue(raschsvSvInoGrazd?.snils ?: "")
+
+    def cell6 = row.createCell(5)
+    cell6.setCellStyle(style)
+    cell6.setCellValue(raschsvSvInoGrazd?.raschsvSvSum1Tip?.sumVsegoPer ?: "")
+
+    def cell7 = row.createCell(6)
+    cell7.setCellStyle(style)
+    cell7.setCellValue(raschsvSvInoGrazd?.raschsvSvSum1Tip?.sumVsegoPosl3m ?: "")
+
+    def cell8 = row.createCell(7)
+    cell8.setCellStyle(style)
+    cell8.setCellValue(raschsvSvInoGrazd?.raschsvSvSum1Tip?.sum1mPosl3m ?: "")
+
+    def cell9 = row.createCell(8)
+    cell9.setCellStyle(style)
+    cell9.setCellValue(raschsvSvInoGrazd?.raschsvSvSum1Tip?.sum2mPosl3m ?: "")
+
+    def cell10 = row.createCell(9)
+    cell10.setCellStyle(style)
+    cell10.setCellValue(raschsvSvInoGrazd?.raschsvSvSum1Tip?.sum3mPosl3m ?: "")
+}
+
+/**
+ * Заполнение одиночной строки для:
+ * Сведения, необходимые для применения положений подпункта 1 пункта 3 статьи 422
+ */
+def fillRasch13422Row(sheet, row, raschsvSvedObuch) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = row.createCell(0)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvSvedObuch?.unikNomer ?: "")
+
+    def cell2 = row.createCell(1)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvSvedObuch?.familia ?: "")
+
+    def cell3 = row.createCell(2)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvSvedObuch?.imya ?: "")
+
+    def cell4 = row.createCell(3)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvSvedObuch?.otchestvo ?: "")
+
+    def cell5 = row.createCell(4)
+    cell5.setCellStyle(style)
+    cell5.setCellValue("-")
+
+    def cell6 = row.createCell(5)
+    cell6.setCellStyle(style)
+    cell6.setCellValue(raschsvSvedObuch?.spravNomer ?: "")
+
+    def cell7 = row.createCell(6)
+    cell7.setCellStyle(style)
+    cell7.setCellValue(raschsvSvedObuch?.spravData?.format("dd.MM.yyyy") ?: "")
+
+    def cell8 = row.createCell(7)
+    cell8.setCellStyle(style)
+    cell8.setCellValue(raschsvSvedObuch?.raschsvSvSum1Tip?.sumVsegoPer ?: "")
+
+    def cell9 = row.createCell(8)
+    cell9.setCellStyle(style)
+    cell9.setCellValue(raschsvSvedObuch?.raschsvSvSum1Tip?.sumVsegoPosl3m ?: "")
+
+    def cell10 = row.createCell(9)
+    cell10.setCellStyle(style)
+    cell10.setCellValue(raschsvSvedObuch?.raschsvSvSum1Tip?.sum1mPosl3m ?: "")
+
+    def cell11 = row.createCell(10)
+    cell11.setCellStyle(style)
+    cell11.setCellValue(raschsvSvedObuch?.raschsvSvSum1Tip?.sum2mPosl3m ?: "")
+
+    def cell12 = row.createCell(11)
+    cell12.setCellStyle(style)
+    cell12.setCellValue(raschsvSvedObuch?.raschsvSvSum1Tip?.sum3mPosl3m ?: "")
+}
+
+/**
+ * Заполнение одиночной строки для:
+ * Сведения, необходимые для применения положений подпункта 1 пункта 3 статьи 422
+ */
+def fillRasch13422RowMdo(sheet, row, raschsvSvedObuch, raschsvSvedObuchMdo) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = row.createCell(0)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvSvedObuch?.unikNomer ?: "")
+
+    def cell2 = row.createCell(1)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvSvedObuchMdo?.naimMdo ?: "")
+
+    def cell3 = row.createCell(2)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvSvedObuchMdo?.dataZapis?.format("dd.MM.yyyy") ?: "")
+
+    def cell4 = row.createCell(3)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvSvedObuchMdo?.nomerZapis ?: "")
 }
 
 /****************************************************************************
