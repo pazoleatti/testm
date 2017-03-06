@@ -222,6 +222,9 @@ switch (formDataEvent) {
 @Field final String OSS_VNM = "П2.Расчет ОСС  ВНМ"
 @Field final String OSS_ZAK = "П3.Расходы на ОСС Зак."
 @Field final String FED_BUD = "П4.Выплаты за счет Фед.Бюдж."
+@Field final String RAS_3T_427 = "П5.Расчет пп.3 п.1 ст.427"
+@Field final String RAS_5T_427 = "П6.Расчет пп.5 п.1 ст.427"
+@Field final String RAS_7T_427 = "П7.Расчет пп.7 п.1 ст.427"
 
 // Имена псевдонима спецотчета
 @Field final String PERSON_REPORT = "person_rep_param"
@@ -275,6 +278,15 @@ def createSpecificReport() {
 
         logger.info("Заполнение листа \"П4.Выплаты за счет Фед.Бюдж.\"")
         fillFedBud(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П5.Расчет пп.3 п.1 ст.427\"")
+        fillRasch3st427(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П6.Расчет пп.5 п.1 ст.427\"")
+        fillRasch5st427(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П7.Расчет пп.7 п.1 ст.427\"")
+        fillRasch7st427(raschsvObyazPlatSv, workbook)
 
         logger.info("Отчет сформирован")
     }
@@ -955,7 +967,7 @@ def fillCellsOfRaschsvUplPrevOss(RaschsvUplPrevOss raschsvUplPrevOss, XSSFRow ro
 /**
  * Заполняет данными лист "Расчет ОПС ОМС"
  */
-def fillOpsOms(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+def fillOpsOms(raschsvObyazPlatSv, workbook) {
     raschsvObyazPlatSv.raschsvSvOpsOmsList.each { svOpsOms ->
         def defaultSheetIndex = workbook.getSheetIndex(OPS_OMS)
         def sheet = workbook.cloneSheet(defaultSheetIndex)
@@ -1035,7 +1047,7 @@ def fillOpsOms(raschsvObyazPlatSv, XSSFWorkbook workbook) {
 /**
  * Заполняет данными лист "Расчет ОПС ОМС"
  */
-def fillOssVnm(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+def fillOssVnm(raschsvObyazPlatSv, workbook) {
     def sheet = workbook.getSheet(OSS_VNM)
 
     def raschsvOssVnm = raschsvObyazPlatSv?.raschsvOssVnm
@@ -1088,7 +1100,7 @@ def fillOssVnm(raschsvObyazPlatSv, XSSFWorkbook workbook) {
 /**
  * Заполняет данными лист "Выплаты за счет Фед.Бюдж."
  */
-def fillFedBud(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+def fillFedBud(raschsvObyazPlatSv, workbook) {
     def sheet = workbook.getSheet(FED_BUD)
 
     def raschsvVyplFinFb = raschsvObyazPlatSv?.raschsvVyplFinFb
@@ -1148,7 +1160,7 @@ def fillFedBud(raschsvObyazPlatSv, XSSFWorkbook workbook) {
 /**
  * Заполняет данными лист "Расходы на ОСС Зак."
  */
-def fillOssZak(raschsvObyazPlatSv, XSSFWorkbook workbook) {
+def fillOssZak(raschsvObyazPlatSv, workbook) {
     def sheet = workbook.getSheet(OSS_ZAK)
 
     def raschsvRashOssZak = raschsvObyazPlatSv?.raschsvRashOssZak
@@ -1186,6 +1198,39 @@ def fillOssZak(raschsvObyazPlatSv, XSSFWorkbook workbook) {
     fillOssZak(sheet, 21, cocPsPogreb)
     fillOssZak(sheet, 22, itogo)
     fillOssZak(sheet, 24, nachNevyplPos)
+}
+
+/**
+ * Заполняет данными лист
+ *  "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками,
+ *  указанными в подпункте 3 пункта 1 статьи 427 Налогового кодекса Российской Федерации"
+ */
+def fillRasch3st427(raschsvObyazPlatSv, workbook) {
+    def sheet = workbook.getSheet(RAS_3T_427)
+    sheet.shiftRows(10, 12, 1)
+    fillRasch3st427Row(sheet, sheet.createRow(12), raschsvObyazPlatSv?.raschsvPravTarif31427)
+}
+
+/**
+ * Заполняет данными лист
+ *  "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками,
+ *  указанными в подпункте 5 пункта 1 статьи 427 Налогового кодекса Российской Федерации"
+ */
+def fillRasch5st427(raschsvObyazPlatSv, workbook) {
+    def sheet = workbook.getSheet(RAS_5T_427)
+    sheet.shiftRows(9, 10, 1)
+    fillRasch5st427Row(sheet, sheet.createRow(9), raschsvObyazPlatSv?.raschsvPravTarif51427)
+}
+
+/**
+ * Заполняет данными лист
+ *  "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками,
+ *  указанными в подпункте 7 пункта 1 статьи 427 Налогового кодекса Российской Федерации"
+ */
+def fillRasch7st427(raschsvObyazPlatSv, workbook) {
+    def sheet = workbook.getSheet(RAS_7T_427)
+    sheet.shiftRows(11, 12, 1)
+    fillRasch7st427Row(sheet, sheet.createRow(11), raschsvObyazPlatSv?.raschsvPravTarif71427)
 }
 
 /**
@@ -1318,6 +1363,128 @@ def fillFedBudRow(sheet, pointer, raschsvRashVypl) {
     cell3.setCellValue(raschsvRashVypl?.rashod ?: "")
 }
 
+
+/**
+ * Заполнение одиночной строки для:
+ * "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками,
+ * указанными в подпункте 3 пункта 1 статьи 427 Налогового кодекса Российской Федерации"
+ */
+def fillRasch3st427Row(sheet, row, raschsvPravTarif31427) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = row.createCell(0)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvPravTarif31427?.srChisl9mpr ?: "")
+
+    def cell2 = row.createCell(1)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvPravTarif31427?.srChislPer ?: "")
+
+    def cell3 = row.createCell(2)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvPravTarif31427?.doh2489mpr ?: "")
+
+    def cell4 = row.createCell(3)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvPravTarif31427?.doh248Per ?: "")
+
+    def cell5 = row.createCell(4)
+    cell5.setCellStyle(style)
+    cell5.setCellValue(raschsvPravTarif31427?.dohKr54279mpr ?: "")
+
+    def cell6 = row.createCell(5)
+    cell6.setCellStyle(style)
+    cell6.setCellValue(raschsvPravTarif31427?.dohKr5427Per ?: "")
+
+    def cell7 = row.createCell(6)
+    cell7.setCellStyle(style)
+    cell7.setCellValue(raschsvPravTarif31427?.dohDoh54279mpr ?: "")
+
+    def cell8 = row.createCell(7)
+    cell8.setCellStyle(style)
+    cell8.setCellValue(raschsvPravTarif31427?.dohDoh5427per ?: "")
+
+    def cell9 = row.createCell(8)
+    cell9.setCellStyle(style)
+    cell9.setCellValue(raschsvPravTarif31427?.dataZapAkOrg?.format("dd.MM.yyyy") ?: "")
+
+    def cell10 = row.createCell(9)
+    cell10.setCellStyle(style)
+    cell10.setCellValue(raschsvPravTarif31427?.nomZapAkOrg ?: "")
+}
+
+/**
+ * Заполнение одиночной строки для:
+ * "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками,
+ * указанными в подпункте 5 пункта 1 статьи 427 Налогового кодекса Российской Федерации"
+*/
+def fillRasch5st427Row(sheet, row, raschsvPravTarif51427) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = row.createCell(0)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvPravTarif51427?.doh346_15vs ?: "")
+
+    def cell2 = row.createCell(1)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvPravTarif51427?.doh6_427 ?: "")
+
+    def cell3 = row.createCell(2)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvPravTarif51427?.dolDoh6_427 ?: "")
+}
+
+/**
+ * Заполнение одиночной строки для:
+ * "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками,
+ * указанными в подпункте 7 пункта 1 статьи 427 Налогового кодекса Российской Федерации"
+ */
+def fillRasch7st427Row(sheet, row, raschsvPravTarif71427) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = row.createCell(0)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvPravTarif71427?.dohVsPred ?: "")
+
+    def cell2 = row.createCell(1)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvPravTarif71427?.dohVsPer ?: "")
+
+    def cell3 = row.createCell(2)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvPravTarif71427?.dohCelPostPred ?: "")
+
+    def cell4 = row.createCell(3)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvPravTarif71427?.dohCelPostPer ?: "")
+
+    def cell5 = row.createCell(4)
+    cell5.setCellStyle(style)
+    cell5.setCellValue(raschsvPravTarif71427?.dohGrantPred ?: "")
+
+    def cell6 = row.createCell(5)
+    cell6.setCellStyle(style)
+    cell6.setCellValue(raschsvPravTarif71427?.dohGrantPer ?: "")
+
+    def cell7 = row.createCell(6)
+    cell7.setCellStyle(style)
+    cell7.setCellValue(raschsvPravTarif71427?.dohEkDeyatPred ?: "")
+
+    def cell8 = row.createCell(7)
+    cell8.setCellStyle(style)
+    cell8.setCellValue(raschsvPravTarif71427?.dohEkDeyatPer ?: "")
+
+    def cell9 = row.createCell(8)
+    cell9.setCellStyle(style)
+    cell9.setCellValue(raschsvPravTarif71427?.dolDohPred ?: "")
+
+    def cell10 = row.createCell(9)
+    cell10.setCellStyle(style)
+    cell10.setCellValue(raschsvPravTarif71427?.dolDohPer ?: "")
+}
 
 /****************************************************************************
  *  Блок стилизации                                                         *
