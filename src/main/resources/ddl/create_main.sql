@@ -514,12 +514,14 @@ create sequence seq_sec_user start with 10000;
 create table sec_role (
   id    number(9)    not null,
   alias varchar2(20) not null,
-  name  varchar2(50) not null
+  name  varchar2(50) not null,
+  tax_type varchar2(1 char) not null
 );
 comment on table sec_role is 'Системные роли';
 comment on column sec_role.id is 'Первичный ключ';
 comment on column sec_role.alias is 'Код роли (мнемонический идентификатор)';
 comment on column sec_role.name is 'Наименование роли';
+comment on column sec_role.tax_type is 'Вид налога';
 ---------------------------------------------------------------------------------------------------
 create table sec_user_role (
   user_id number(9) not null,
