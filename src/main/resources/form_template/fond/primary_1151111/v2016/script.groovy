@@ -225,6 +225,7 @@ switch (formDataEvent) {
 @Field final String RAS_3T_427 = "П5.Расчет пп.3 п.1 ст.427"
 @Field final String RAS_5T_427 = "П6.Расчет пп.5 п.1 ст.427"
 @Field final String RAS_7T_427 = "П7.Расчет пп.7 п.1 ст.427"
+@Field final String RAS_9T_427 = "П8.Сведения пп.9 п.1 ст.427"
 
 // Имена псевдонима спецотчета
 @Field final String PERSON_REPORT = "person_rep_param"
@@ -240,6 +241,7 @@ switch (formDataEvent) {
 // TODO Серия/номер ДУЛ, ИНН, СНИЛС должны быть текстовыми ячейками. Иначе пропадают ведущие нули.
 // TODO варнинг ДА-НЕТ при открытие файла
 // TODO долго на 20к
+// TODO snisl в fillRasch9st427Row
 def createSpecificReport() {
     def workbook = getSpecialReportTemplate()
 
@@ -287,6 +289,9 @@ def createSpecificReport() {
 
         logger.info("Заполнение листа \"П7.Расчет пп.7 п.1 ст.427\"")
         fillRasch7st427(raschsvObyazPlatSv, workbook)
+
+        logger.info("Заполнение листа \"П8.Расчет пп.9 п.1 ст.427\"")
+        fillRasch9st427(raschsvObyazPlatSv, workbook)
 
         logger.info("Отчет сформирован")
     }
@@ -1234,6 +1239,25 @@ def fillRasch7st427(raschsvObyazPlatSv, workbook) {
 }
 
 /**
+ * Заполняет данными лист
+ *  "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками,
+ *  указанными в подпункте 9 пункта 1 статьи 427 Налогового кодекса Российской Федерации"
+ */
+def fillRasch9st427(raschsvObyazPlatSv, workbook) {
+    def startIndex = 10
+    def sheet = workbook.getSheet(RAS_9T_427)
+    def raschsvSvPrimTarif91427 = raschsvObyazPlatSv?.raschsvSvPrimTarif91427
+    def raschsvSvedPatentList = raschsvSvPrimTarif91427?.raschsvSvedPatentList
+
+    if (raschsvSvedPatentList) {
+        sheet.shiftRows(startIndex, startIndex + 1, raschsvSvedPatentList.size() + 1)
+        for (int i = 0; i < raschsvSvedPatentList.size(); i++) {
+            fillRasch9st427Row(sheet, sheet.createRow(startIndex + i), raschsvSvedPatentList.get(i))
+        }
+    }
+}
+
+/**
  * Заполняет значениями строки для количеств
  */
 def fillKolRow(sheet, pointer, kolLicTip) {
@@ -1484,6 +1508,57 @@ def fillRasch7st427Row(sheet, row, raschsvPravTarif71427) {
     def cell10 = row.createCell(9)
     cell10.setCellStyle(style)
     cell10.setCellValue(raschsvPravTarif71427?.dolDohPer ?: "")
+}
+
+/**
+ * Заполнение одиночной строки для:
+ * "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками,
+ * указанными в подпункте 9 пункта 1 статьи 427 Налогового кодекса Российской Федерации"
+ */
+def fillRasch9st427Row(sheet, row, raschsvSvedPatent) {
+    def style = normalWithBorderStyle(sheet.getWorkbook())
+    addFillingToStyle(style, ROWS_FILL_COLOR)
+
+    def cell1 = row.createCell(0)
+    cell1.setCellStyle(style)
+    cell1.setCellValue(raschsvSvedPatent?.nomPatent ?: "")
+
+    def cell2 = row.createCell(1)
+    cell2.setCellStyle(style)
+    cell2.setCellValue(raschsvSvedPatent?.vydDeyatPatent ?: "")
+
+    def cell3 = row.createCell(2)
+    cell3.setCellStyle(style)
+    cell3.setCellValue(raschsvSvedPatent?.dataNachDeyst?.format("dd.MM.yyyy") ?: "")
+
+    def cell4 = row.createCell(3)
+    cell4.setCellStyle(style)
+    cell4.setCellValue(raschsvSvedPatent?.dataKonDeyst?.format("dd.MM.yyyy") ?: "")
+
+    def cell5 = row.createCell(4)
+    cell5.setCellStyle(style)
+    //TODO
+    cell5.setCellValue("" ?: "")
+
+    def cell6 = row.createCell(5)
+    cell6.setCellStyle(style)
+    cell6.setCellValue(raschsvSvedPatent?.raschsvSvSum1Tip?.sumVsegoPer ?: "")
+
+    def cell7 = row.createCell(6)
+    cell7.setCellStyle(style)
+    cell7.setCellValue(raschsvSvedPatent?.raschsvSvSum1Tip?.sumVsegoPosl3m ?: "")
+
+    def cell8 = row.createCell(7)
+    cell8.setCellStyle(style)
+    cell8.setCellValue(raschsvSvedPatent?.raschsvSvSum1Tip?.sum1mPosl3m ?: "")
+
+    def cell9 = row.createCell(8)
+    cell9.setCellStyle(style)
+    cell9.setCellValue(raschsvSvedPatent?.raschsvSvSum1Tip?.sum2mPosl3m ?: "")
+
+    def cell10 = row.createCell(9)
+    cell10.setCellStyle(style)
+    cell10.setCellValue(raschsvSvedPatent?.raschsvSvSum1Tip?.sum3mPosl3m ?: "")
 }
 
 /****************************************************************************
