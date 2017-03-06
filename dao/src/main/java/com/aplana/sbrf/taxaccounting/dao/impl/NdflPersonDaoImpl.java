@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,9 +43,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public NdflPerson get(long ndflPersonId) {
         try {
             NdflPerson ndflPerson = getJdbcTemplate().queryForObject("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
-                    " from ndfl_person np " +
-                    " left join REF_BOOK_PERSON r on np.person_id = r.id " +
-                    " where np.id = ?",
+                            " from ndfl_person np " +
+                            " left join REF_BOOK_PERSON r on np.person_id = r.id " +
+                            " where np.id = ?",
                     new Object[]{ndflPersonId},
                     new NdflPersonDaoImpl.NdflPersonRowMapper());
 
@@ -66,9 +67,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public List<NdflPerson> findPerson(long declarationDataId) {
         try {
             return getJdbcTemplate().query("select " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
-                    " from ndfl_person np " +
-                    " left join REF_BOOK_PERSON r on np.person_id = r.id " +
-                    " where np.declaration_data_id = ?",
+                            " from ndfl_person np " +
+                            " left join REF_BOOK_PERSON r on np.person_id = r.id " +
+                            " where np.declaration_data_id = ?",
                     new Object[]{declarationDataId},
                     new NdflPersonDaoImpl.NdflPersonRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -363,7 +364,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
 
-
     @Override
     public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonIdList(List<Long> ndflPersonIdList) {
         String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " FROM ndfl_person_prepayment npp " +
@@ -390,7 +390,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     class UpdateNdflPersonBatch implements BatchPreparedStatementSetter {
-
         final List<NdflPerson> ndflPersonList;
 
         public UpdateNdflPersonBatch(List<NdflPerson> ndflPersonList) {
@@ -408,8 +407,40 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         public int getBatchSize() {
             return ndflPersonList.size();
         }
-
     }
+
+
+    @Override
+    public int[] updateRefBookPersonReferences(List<NaturalPerson> personList) {
+        String updateSql = "UPDATE ndfl_person SET person_id = ? WHERE id = ?";
+        try {
+            int[] result = getJdbcTemplate().batchUpdate(updateSql, new UpdatePersonReferenceBatch(personList));
+            return result;
+        } catch (DataAccessException e) {
+            throw new DaoException("Ошибка при обновлении идентификаторов физлиц", e);
+        }
+    }
+
+    class UpdatePersonReferenceBatch implements BatchPreparedStatementSetter {
+        final List<NaturalPerson> personList;
+
+        public UpdatePersonReferenceBatch(List<NaturalPerson> ndflPersonList) {
+            this.personList = ndflPersonList;
+        }
+
+        @Override
+        public void setValues(PreparedStatement ps, int i) throws SQLException {
+            NaturalPerson person = personList.get(i);
+            ps.setLong(1, person.getRefBookPersonId());
+            ps.setLong(2, person.getPersonId());
+        }
+
+        @Override
+        public int getBatchSize() {
+            return personList.size();
+        }
+    }
+
 
     @Override
     public Long save(final NdflPerson ndflPerson) {
@@ -526,7 +557,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .addValue("operationId", operationId);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
-        } catch(EmptyResultDataAccessException ex) {
+        } catch (EmptyResultDataAccessException ex) {
             return new ArrayList<NdflPersonDeduction>();
         }
     }
@@ -541,7 +572,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .addValue("operationId", operationId);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
-        } catch(EmptyResultDataAccessException ex) {
+        } catch (EmptyResultDataAccessException ex) {
             return new ArrayList<NdflPersonPrepayment>();
         }
     }

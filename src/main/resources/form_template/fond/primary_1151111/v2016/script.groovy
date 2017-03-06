@@ -4823,12 +4823,12 @@ def checkDataDBPerson() {
         // 3.1.1 Назначение ФЛ записи справочника "Физические лица"
         // Если personId, то он принимает значение 0
         if (raschsvPersSvStrahLic.personId == null || raschsvPersSvStrahLic.personId == 0) {
-            logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" для ФЛ " + fioBirthday)
+            logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" или запись неактуальна для ФЛ " + fioBirthday)
         } else {
             def personRecord = personMap.get(raschsvPersSvStrahLic.recordId)
 
             if (!personRecord) {
-                logger.error("Не найдена актуальная запись в справочнике \"Физические лица\" для ФЛ " + fioBirthday)
+                logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" или запись неактуальна для ФЛ " + fioBirthday)
             } else {
                 // 3.1.2 Соответствие фамилии ФЛ и справочника
                 if (raschsvPersSvStrahLic.familia != personRecord.get(RF_LAST_NAME).value) {
@@ -4962,7 +4962,6 @@ def checkDataDBPerson() {
     logger.info("Дубли физического лица рамках формы: (" + (System.currentTimeMillis() - time) + " ms)");
 
     // 3.2.2 Дубли физического лица в разных формах
-    // todo https://jira.aplana.com/browse/SBRFNDFL-544 Раскомментировать после обновления стенда
     time = System.currentTimeMillis();
     raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonsByReportPeriodId(declarationData.id, declarationData.reportPeriodId)
     if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
