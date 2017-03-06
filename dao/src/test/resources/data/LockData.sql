@@ -10,9 +10,9 @@ INSERT INTO sec_user (id, name, login, department_id, is_active, email) VALUES
 INSERT INTO sec_user (id, name, login, department_id, is_active, email) VALUES
 (2, 'Петя2', 'controlTB2', 1, 1, 'controlTB2@bank.ru');
 
-INSERT INTO sec_role (id, alias, name) VALUES (1, 'ROLE_CONTROL', 'Контролёр');
-INSERT INTO sec_role (id, alias, name) VALUES (2, 'ROLE_OPER', 'Оператор');
-INSERT INTO sec_role (id, alias, name) VALUES (3, 'ROLE_CONTROL_UNP', 'Контролёр УНП');
+INSERT INTO sec_role (id, alias, name, tax_type) VALUES (1, 'ROLE_CONTROL', 'Контролёр', 'N');
+INSERT INTO sec_role (id, alias, name, tax_type) VALUES (2, 'ROLE_OPER', 'Оператор', 'N');
+INSERT INTO sec_role (id, alias, name, tax_type) VALUES (3, 'ROLE_CONTROL_UNP', 'Контролёр УНП', 'N');
 
 INSERT INTO lock_data (key, user_id, date_lock) VALUES ('a', 0, TIMESTAMP '2013-01-01 00:05:00.000000');
 INSERT INTO lock_data (key, user_id) VALUES ('b', 1);
