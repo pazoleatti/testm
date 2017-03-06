@@ -85,6 +85,8 @@ switch (formDataEvent) {
         break
 }
 
+@Field def PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
+
 //------------------ Calculate ----------------------
 /**
  * Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
@@ -240,10 +242,10 @@ Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
     Long declarationDataId = declarationData.id;
-    String whereClause = String.format("record_id IN (select r.record_id " +
+    String whereClause = String.format("select r.record_id " +
             " FROM ref_book_person r " +
             " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-            " WHERE p.declaration_data_id = %s)", declarationDataId)
+            " WHERE p.declaration_data_id = %s AND frb.record_id = r.record_id", declarationDataId)
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
     def refBookMapResult = [:]
     refBookMap.each { personId, refBookValue ->
@@ -293,10 +295,10 @@ def getRefInpMapByDeclarationDataId() {
 Map<Long, Map<String, RefBookValue>> getActualRefInpMapByDeclarationDataId() {
     if (inpActualCache.isEmpty()) {
         Long declarationDataId = declarationData.id;
-        String whereClause = String.format("person_id in (select r.id " +
+        String whereClause = String.format("select r.id " +
                 " FROM ref_book_person r " +
                 " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s)", declarationDataId)
+                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { id, refBook ->
@@ -1410,6 +1412,23 @@ def findReportPeriodCode(reportPeriod) {
 
 void importData() {
 
+    // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
+    def declarationDataList = declarationService.find(PRIMARY_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+    if (declarationDataList != null && !declarationDataList.isEmpty()) {
+
+        // Период
+        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+        def calendarStartDate = reportPeriod?.calendarStartDate
+
+        // Подразделение
+        Department department = departmentService.get(declarationData.departmentId)
+
+        logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
+                    в периоде \"$periodCode\" ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
+        return
+    }
+
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
@@ -1855,6 +1874,9 @@ def prepaymentAttr(personPrepayment) {
 // Дата окончания отчетного периода
 @Field def reportPeriodEndDate = null
 
+// Кэш для справочников
+@Field def refBookCache = [:]
+
 /**
  * Получить "АСНУ"
  * @return
@@ -1942,6 +1964,7 @@ def getRefBookByRecordWhere(def long refBookId, def whereClause) {
  * @param refBookId
  * @param whereClause
  * @return
+ * Поскольку поиск осуществляется с использованием оператора EXISTS необходимодимо всегда связывать поле подзапроса через ALIAS frb
  */
 def getRefBookByRecordVersionWhere(def long refBookId, def whereClause, def version) {
     Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataVersionWhere(whereClause, version)
@@ -2117,10 +2140,10 @@ def getRefDulByDeclarationDataId() {
 Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
     if (dulActualCache.isEmpty()) {
         Long declarationDataId = declarationData.id;
-        String whereClause = String.format("person_id in (select r.id " +
+        String whereClause = String.format("select r.id " +
                 " FROM ref_book_person r " +
                 " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s)", declarationDataId)
+                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { personId, refBookValues ->
@@ -2199,6 +2222,13 @@ RefBookDataProvider getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
+}
+
+/**
+ * Разыменование записи справочника
+ */
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 //>------------------< UTILS >----------------------<

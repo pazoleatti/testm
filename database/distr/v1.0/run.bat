@@ -37,9 +37,9 @@ CD deppar
 call fill.bat
 CD ../..
 
-ECHO ## dml: template
-CD template
-CALL template.bat
+ECHO ## dml: templates
+CD templates/script
+CALL templates.bat
 CD ..
 
 ECHO ## ddl: create all constraint

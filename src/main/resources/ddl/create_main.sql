@@ -514,12 +514,14 @@ create sequence seq_sec_user start with 10000;
 create table sec_role (
   id    number(9)    not null,
   alias varchar2(20) not null,
-  name  varchar2(50) not null
+  name  varchar2(50) not null,
+  tax_type varchar2(1 char) not null
 );
 comment on table sec_role is 'Системные роли';
 comment on column sec_role.id is 'Первичный ключ';
 comment on column sec_role.alias is 'Код роли (мнемонический идентификатор)';
 comment on column sec_role.name is 'Наименование роли';
+comment on column sec_role.tax_type is 'Вид налога';
 ---------------------------------------------------------------------------------------------------
 create table sec_user_role (
   user_id number(9) not null,
@@ -530,7 +532,7 @@ comment on column sec_user_role.user_id is 'Идентификатор поль�
 comment on column sec_user_role.role_id is 'Идентификатор роли';
 ----------------------------------------------------------------------------------------------------
 create table log_business (
-  id                   number(18, 0) primary key,
+  id                   number(18, 0),
   log_date             date           not null,
   event_id             number(3, 0)   not null,
   user_login           varchar2(255)  not null,
@@ -564,7 +566,7 @@ comment on column audit_form_type.id is 'Код записи';
 comment on column audit_form_type.name is 'Наименование типа';
 ------------------------------------------------------------------------------------------------------
 create table log_system (
-  id                    number(18, 0) primary key,
+  id                    number(18, 0),
   log_date              date                not null,
   ip                    varchar2(39),
   event_id              number(3, 0)        not null,
@@ -626,7 +628,7 @@ comment on column department_report_period.correction_date is 'Период сд
 create sequence seq_department_report_period start with 1000;
 ------------------------------------------------------------------------------------------------------
 create table task_context (
-  id                  number(18, 0) primary key,
+  id                  number(18, 0),
   task_id             number(18, 0) not null,
   task_name           varchar2(100) not null,
   modification_date   date          not null,
@@ -648,7 +650,7 @@ comment on column task_context.user_id is 'Идентификатор польз
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
 create table notification (
-  id                     number(9) primary key,
+  id                     number(9),
   report_period_id       number(9)              null,
   sender_department_id   number(9)              null,
   receiver_department_id number(9)              null,
@@ -932,7 +934,7 @@ create sequence seq_form_data_nnn start with 10000;
 --------------------------------------------------------------------------------------------------------
 create table log_clob_query
 (
-  id               number(9)                              not null primary key,
+  id               number(9)                              not null,
   form_template_id number(9),
   sql_mode         varchar2(10),
   text_query       clob,
@@ -1001,7 +1003,7 @@ comment on column department_form_type_performer.performer_dep_id is 'Испол
 --------------------------------------------------------------------------------------------------------
 create table form_search_result
 (
-  "ID"           number(9, 0) primary key,
+  "ID"           number(9, 0),
   "SESSION_ID"   number(10, 0),
   "FORM_DATA_ID" number(18, 0),
   "DATE"         date,

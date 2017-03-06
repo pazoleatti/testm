@@ -250,6 +250,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 				newDeclaration.setOktmo(oktmo);
                 newDeclaration.setAsnuId(asunId);
                 newDeclaration.setFileName(fileName);
+                newDeclaration.setNote(note);
 
                 // Вызываем событие скрипта CREATE
                 declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
