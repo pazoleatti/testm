@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
+import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Andrey Drunk
@@ -35,37 +33,29 @@ public class RefBookPersonServiceTest {
     @Autowired
     RefBookPersonService personService;
 
-    private List<PersonData> getList(){
-        List<PersonData> personDataList = new ArrayList<PersonData>();
-
-        personDataList.add(createPersonData(1L, "999", "1", "", "23", "", "1111", "Иванов", "Иван", "Иванович", null));
-        personDataList.add(createPersonData(2L, "888", "2", "", "33", null, "2222", "Сидорова", "Наталья", "Викторовна", "12.10.1954"));
-        personDataList.add(createPersonData(3L, "777", "", "5", "45", "", "1111", "Кулькина", "Василина", null, ""));
-        personDataList.add(createPersonData(4L, "888", "2", "", "23", null, "1111", "Иванов", "Иван", "Иванович", "12.10.1954"));
-        personDataList.add(createPersonData(5L, "888", "2", "", "23", "", "1111", "Иванов", "Ивон", "Ивановиеч", "12.10.1954"));
-        personDataList.add(createPersonData(6L, "888", "2", "", "23", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954"));
+    private List<IdentityPerson> getList() {
+        List<IdentityPerson> personDataList = new ArrayList<IdentityPerson>();
+        personDataList.add(createNaturalPerson(1L, "999", "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null));
+        personDataList.add(createNaturalPerson(2L, "888", "2", "", "33", null, "2222", "Сидорова", "Наталья", "Викторовна", "12.10.1954"));
+        personDataList.add(createNaturalPerson(3L, "777", "", "5", "45", "", "1111", "Кулькина", "Василина", null, ""));
+        personDataList.add(createNaturalPerson(4L, "888", "2", "", "23", null, "1111", "Иванов", "Иван", "Иванович", "12.10.1954"));
+        personDataList.add(createNaturalPerson(5L, "888", "2", "", "23", "", "1111", "Иванов", "Ивон", "Ивановиеч", "12.10.1954"));
+        personDataList.add(createNaturalPerson(6L, "888", "2", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", "12.10.1954"));
         return personDataList;
     }
 
     @Before
     public void init() {
-
         RefBookPersonDao refBookPersonDao = mock(RefBookPersonDao.class);
-
         //when(refBookPersonDao.findPersonByPersonData(any(PersonData.class), any(Date.class))).thenReturn(getList());
-
         ReflectionTestUtils.setField(personService, "refBookPersonDao", refBookPersonDao);
     }
 
     @Test
     public void identificatePersonTest() {
-
-
-
-        PersonData person = createPersonData("888", "2", "", "23", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Long result = personService.identificatePerson(person, getList(), 900, new Logger());
-        assertEquals(Long.valueOf(6L), result);
-
+        PersonData person = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
+        NaturalPerson result = personService.identificatePerson(person, getList(), 900, new Logger());
+        assertEquals(Long.valueOf(6L), result.getRefBookPersonId());
     }
 
 
@@ -74,8 +64,9 @@ public class RefBookPersonServiceTest {
                                        String lastName,
                                        String firstName, String middleName, String birthDate) {
         PersonData result = new PersonData();
-        result.setId(id);
+        result.setRefBookPersonId(id);
         result.setRecordId(id);
+        result.setAsnuId(5L);
         result.setInp(inp);
         result.setInn(inn);
         result.setInnForeign(innForeign);
@@ -89,6 +80,7 @@ public class RefBookPersonServiceTest {
         return result;
     }
 
+
     public PersonData createPersonData(String inp, String inn, String innForeign, String snils, String docType,
                                        String docNumber,
                                        String lastName,
@@ -96,128 +88,40 @@ public class RefBookPersonServiceTest {
         return createPersonData(null, inp, inn, innForeign, snils, docType, docNumber, lastName, firstName, middleName, birthDate);
     }
 
-    public List<BaseWeigthCalculator> getComporatorList() {
+    public NaturalPerson createNaturalPerson(Long id, String inp, String inn, String innForeign, String snils, String docType,
+                                             String docNumber,
+                                             String lastName,
+                                             String firstName, String middleName, String birthDate) {
+        NaturalPerson result = new NaturalPerson();
+        result.setRefBookPersonId(id);
+        result.setRecordId(id);
 
-        List<BaseWeigthCalculator> result = new ArrayList<BaseWeigthCalculator>();
+        PersonIdentifier personIdentifier = new PersonIdentifier();
+        personIdentifier.setId(1L);
+        personIdentifier.setInp(inp);
+        personIdentifier.setAsnuId(5L);
 
-        //Фамилия
-        result.add(new BaseWeigthCalculator<PersonData>(5) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareString(a.getLastName(), b.getLastName());
-            }
-        });
+        result.getPersonIdentityList().add(personIdentifier);
 
-        //Имя
-        result.add(new BaseWeigthCalculator<PersonData>(5) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareString(a.getFirstName(), b.getFirstName());
-            }
-        });
 
-        //Отчество
-        result.add(new BaseWeigthCalculator<PersonData>(0.5) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareString(a.getMiddleName(), b.getMiddleName());
-            }
-        });
+        DocType docTypeObject = new DocType();
+        docTypeObject.setId(5L);
 
-        //Пол
-        /*result.add(new BaseWeigthComporator<PersonData>(1) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareNumber(a.getSex(), b.getSex());
-            }
-        });*/
+        PersonDocument personDocument = new PersonDocument();
+        personDocument.setDocType(docTypeObject);
+        personDocument.setIncRep(1);
+        personDocument.setDocumentNumber(docNumber);
 
-        //Дата рождения
-        result.add(new BaseWeigthCalculator<PersonData>(5) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareDate(a.getBirthDate(), b.getBirthDate());
-            }
-        });
+        result.getPersonDocumentList().add(personDocument);
 
-        //Гражданство
-        /*result.add(new BaseWeigthComporator<PersonData>(1) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareString(a.getCitizenship(), b.getCitizenship());
-            }
-        });*/
+        result.setInn(inn);
+        result.setInnForeign(innForeign);
+        result.setSnils(snils);
 
-        //Идентификатор физлица номер и код АСНУ
-       /* result.add(new BaseWeigthComporator<PersonData>(10) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                boolean result = equalsNullSafe(prepareStr(a.getInp()), prepareStr(b.getInp()));
-                if (!result) {
-                    return 0D;
-                }
-                return compareString(a.getAsnu(), b.getAsnu());
-            }
-        });*/
-
-        //ИНН в РФ
-        result.add(new BaseWeigthCalculator<PersonData>(10) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareString(a.getInn(), b.getInn());
-            }
-        });
-
-        //ИНН в стране гражданства
-        result.add(new BaseWeigthCalculator<PersonData>(10) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareString(a.getInnForeign(), b.getInnForeign());
-            }
-        });
-
-        //СНИЛС
-        result.add(new BaseWeigthCalculator<PersonData>(15) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                return compareString(a.getInnForeign(), b.getInnForeign());
-            }
-
-            @Override
-            protected String prepareStr(String string) {
-                if (string != null) {
-                    return super.prepareStr(string).replaceAll("[-]", "");
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        //Статус налогоплатильщика
-//        result.add(new BaseWeigthComporator<PersonData>(1) {
-//            @Override
-//            public double calc(PersonData a, PersonData b) {
-//                return compareString(a.getStatus(), b.getStatus());
-//            }
-//        });
-
-        //Документ вид документа и код
-        result.add(new BaseWeigthCalculator<PersonData>(10) {
-            @Override
-            public double calc(PersonData a, PersonData b) {
-                boolean result = equalsNullSafe(a.getDocumentTypeId(), b.getDocumentTypeId());
-                if (!result) {
-                    return 0D;
-                }
-                return compareString(a.getDocumentNumber(), b.getDocumentNumber());
-            }
-        });
-
-        //weithMap.add("address", 1); //Адрес в РФ Одновременно поля <Адрес РФ> равны соответствующим полям  ЗСФЛ."Адрес места жительства в Российской Федерации"
-        //weithMap.add("address_foreign", 1); //Адрес в стране регистрации, Одновременно поля <Адрес Ино> равны соответствующим полям  ЗСФЛ."Адрес за пределами Российской Федерации "
-        //weithMap.add("ДУЛ", 1); //<Признак ОПС> = ЗСФЛ."ИНН в Российской Федерации"
-        //weithMap.add("ДУЛ", 1); //<Признак ОПС> = ЗСФЛ."ИНН в Российской Федерации"
-        //weithMap.add("ДУЛ", 1); //<Признак ОПС> = ЗСФЛ."ИНН в Российской Федерации"
+        result.setLastName(lastName);
+        result.setFirstName(firstName);
+        result.setMiddleName(middleName);
+        result.setBirthDate(toDate(birthDate));
         return result;
     }
 
