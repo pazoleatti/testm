@@ -244,4 +244,19 @@ public final class SqlUtils {
 		}
 		return sb.toString();
 	}
+
+	/**
+	 * Проверяет существует ли столбец
+	 * @param rs
+	 * @param columnName - имя столбца
+	 * @return
+	 * @throws SQLException
+     */
+	public static boolean isExistColumn(ResultSet rs, String columnName) {
+		try {
+			rs.findColumn(columnName);
+			return true;
+		} catch (SQLException sqlex) {}
+		return false;
+	}
 }

@@ -9,8 +9,8 @@
     <jdbc:initialize-database>
         <jdbc:script location="file:../src/main/resources/dml/event.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/TAUser.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/TaxType.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/TAUser.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/FormType.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/TemplateChanges.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>

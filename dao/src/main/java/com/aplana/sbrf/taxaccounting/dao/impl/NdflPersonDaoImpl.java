@@ -572,7 +572,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public List<NdflPerson> findByIdList(List<Long> ndflPersonIdList) {
-        String query = "SELECT " + createColumns(NdflPerson.COLUMNS, "np") + " FROM NDFL_PERSON NP" +
+        String query = "SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " FROM NDFL_PERSON np" +
+                " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
                 " WHERE NP.ID IN (:ndflPersonIdList)";
         MapSqlParameterSource params = new MapSqlParameterSource("ndflPersonIdList", ndflPersonIdList);
         return getNamedParameterJdbcTemplate().query(query, params, new NdflPersonDaoImpl.NdflPersonRowMapper());
@@ -658,7 +659,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             person.setDeclarationDataId(SqlUtils.getLong(rs, "declaration_data_id"));
             person.setRowNum(SqlUtils.getInteger(rs, "row_num"));
             person.setPersonId(SqlUtils.getLong(rs, "person_id"));
-            person.setRecordId(SqlUtils.getLong(rs, "record_id"));
+
+            // Идентификатор ФЛ REF_BOOK_PERSON.RECORD_ID
+            if (SqlUtils.isExistColumn(rs, "record_id")) {
+                person.setRecordId(SqlUtils.getLong(rs, "record_id"));
+            }
 
             person.setInp(rs.getString("inp"));
             person.setSnils(rs.getString("snils"));

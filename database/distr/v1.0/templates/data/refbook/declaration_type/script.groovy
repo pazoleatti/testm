@@ -104,7 +104,7 @@ String ATTR_YEAR = "ОтчетГод";
 
 @Field String ERROR_NAME_FORMAT = "Имя транспортного файла «%s» не соответствует формату!";
 @Field String ERROR_NOT_FOUND_FILE_NAME = "Не найдено имя отчетного файла в файле ответа «%s»!";
-@Field String ERROR_NOT_FOUND_FORM = "Файл ответа «%s», для которого сформирован ответ, не найден в формах!";
+@Field String ERROR_NOT_FOUND_FORM = "Не найдена форма, содержащая «%s», для файла ответа «%s»";
 
 // Шаблоны имен файлов
 @Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)_(.*)\\.(xml|XML)";
@@ -398,7 +398,7 @@ def importAnswer1151111() {
         def declarationDataList = declarationService.find(declarationDataFileNameReport)
         if (declarationDataList == null || declarationDataList.size() == 0) {
             // Ошибка: Не найдена форма, соответсвующая имени отчетного файла
-            throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FORM, declarationDataFileNameReport));
+            throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FORM, declarationDataFileNameReport, UploadFileName));
         } else if (declarationDataList.size() != 1) {
             // Ошибка: Найдено несколько форм, соответствующих имени отчетного файла
 
@@ -913,7 +913,7 @@ def importNdflResponse() {
 
     def declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
     if (declarationDataList.isEmpty()) {
-        logger.error("Файл ответа \"%s\", для которого сформирован ответ, не найден в отчетных формах", reportFileName)
+        logger.error(ERROR_NOT_FOUND_FORM, reportFileName, UploadFileName);
         return
     }
     if (declarationDataList.size() > 1) {
@@ -921,8 +921,7 @@ def importNdflResponse() {
         declarationDataList.each { declData ->
             result += "\"${AttachFileType.TYPE_2.title}\", \"${declData.kpp}\", \"${declData.oktmo}\"; "
         }
-
-        logger.error("Файл ответа \"%s\", для которого сформирован ответ, найден в отчетных формах: %s", reportFileName, result)
+        logger.error(ERROR_NOT_FOUND_FORM + ": " + result, reportFileName, UploadFileName);
         return
     }
     def declarationData = declarationDataList.get(0)
