@@ -234,10 +234,10 @@ Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
     Long declarationDataId = declarationData.id;
-    String whereClause = String.format("record_id IN (select r.record_id " +
+    String whereClause = String.format("select r.record_id " +
             " FROM ref_book_person r " +
             " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-            " WHERE p.declaration_data_id = %s)", declarationDataId)
+            " WHERE p.declaration_data_id = %s AND frb.record_id = r.record_id", declarationDataId)
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
     def refBookMapResult = [:]
     refBookMap.each { personId, refBookValue ->
@@ -287,10 +287,10 @@ def getRefInpMapByDeclarationDataId() {
 Map<Long, Map<String, RefBookValue>> getActualRefInpMapByDeclarationDataId() {
     if (inpActualCache.isEmpty()) {
         Long declarationDataId = declarationData.id;
-        String whereClause = String.format("person_id in (select r.id " +
+        String whereClause = String.format("select r.id " +
                 " FROM ref_book_person r " +
                 " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s)", declarationDataId)
+                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { id, refBook ->
@@ -1918,6 +1918,7 @@ def getRefBookByRecordWhere(def long refBookId, def whereClause) {
  * @param refBookId
  * @param whereClause
  * @return
+ * Поскольку поиск осуществляется с использованием оператора EXISTS необходимодимо всегда связывать поле подзапроса через ALIAS frb
  */
 def getRefBookByRecordVersionWhere(def long refBookId, def whereClause, def version) {
     Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataVersionWhere(whereClause, version)
@@ -2093,10 +2094,10 @@ def getRefDulByDeclarationDataId() {
 Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
     if (dulActualCache.isEmpty()) {
         Long declarationDataId = declarationData.id;
-        String whereClause = String.format("person_id in (select r.id " +
+        String whereClause = String.format("select r.id " +
                 " FROM ref_book_person r " +
                 " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s)", declarationDataId)
+                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { personId, refBookValues ->
