@@ -31,6 +31,10 @@ public final class StringUtils {
 			return null;
 		}
 
+        if (array.length == 0) {
+            return "";
+        }
+
 		int startIndex = 0;
 		int endIndex = array.length;
 
