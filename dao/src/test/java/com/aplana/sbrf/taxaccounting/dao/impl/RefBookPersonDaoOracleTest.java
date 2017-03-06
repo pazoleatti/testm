@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import java.util.Map;
 /**
  * @author Andrey Drunk
  */
-//@Ignore("Включать только локально, со включенным тестом не коммитить!")
+@Ignore("Включать только локально, со включенным тестом не коммитить!")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ForOracleTest.xml"})
 @Transactional

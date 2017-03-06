@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper;
+import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
@@ -7,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.util.Date;
 import java.util.List;
@@ -20,7 +23,6 @@ import java.util.Map;
 @ScriptExposed
 public interface RefBookPersonService {
 
-    Map<Long, Map<Long, NaturalPerson>> findRefBookPersonByPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version);
 
     Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version);
 
@@ -29,5 +31,50 @@ public interface RefBookPersonService {
     NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
 
     List<BaseWeigthCalculator> getBaseCalculateList();
+
+
+    /**
+     * @param version
+     */
+    void fillRecordVersions(Date version);
+
+    /**
+     * Найти всех новых ФЛ из РНУ-НДФЛ по которым будет создаваться запись в справочнике
+     *
+     * @param declarationDataId идентификатор НФ
+     * @param version           версия записи
+     * @return
+     */
+    Map<Long, NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper);
+
+    /**
+     * Найти всех ФЛ по определяющим параметрам
+     *
+     * @param declarationDataId идентификатор НФ
+     * @param asnuId            идентификатор АСНУ загрузившей данные
+     * @param version           версия записи
+     * @return
+     */
+    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+
+    /**
+     * Найти всех ФЛ по полному списку параметров
+     *
+     * @param declarationDataId
+     * @param asnuId            идентификатор АСНУ загрузившей данные
+     * @param version           версия записи
+     * @return
+     */
+    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+
+    /**
+     * Найти данные о ФЛ в ПНФ
+     *
+     * @param declarationDataId
+     * @param naturalPersonRowMapper
+     * @return
+     */
+    List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper);
+
 
 }

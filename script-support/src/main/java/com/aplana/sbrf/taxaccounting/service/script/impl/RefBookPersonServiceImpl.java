@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper;
+import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,22 +25,38 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     @Autowired
     private RefBookPersonDao refBookPersonDao;
 
-    @Autowired
-    private RefBookFactory refBookFactory;
+    // ----------------------------- РНУ-НДФЛ  -----------------------------
 
     @Override
-    public Map<Long, Map<Long, NaturalPerson>> findRefBookPersonByPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version) {
-        return refBookPersonDao.findRefBookPersonByPrimaryRnuNdflFunction(declarationDataId, asnuId, version);
+    public void fillRecordVersions(Date version) {
+        refBookPersonDao.fillRecordVersions(version);
     }
+
+    @Override
+    public Map<Long, NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper) {
+        return refBookPersonDao.findPersonForInsertFromPrimaryRnuNdfl(declarationDataId, asnuId, version, naturalPersonPrimaryRnuRowMapper);
+    }
+
+    @Override
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(declarationDataId, asnuId, version, naturalPersonHandler);
+    }
+
+    @Override
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(declarationDataId, asnuId, version, naturalPersonHandler);
+    }
+
+    public List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper) {
+        return refBookPersonDao.findNaturalPersonPrimaryDataFromNdfl(declarationDataId, naturalPersonRowMapper);
+    }
+
+
+    // ----------------------------- 1151111 -----------------------------
 
     @Override
     public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version) {
         return refBookPersonDao.findRefBookPersonByPrimary1151111(declarationDataId, asnuId, version);
-    }
-
-
-    public List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper) {
-        return refBookPersonDao.findNaturalPersonPrimaryDataFromNdfl(declarationDataId, naturalPersonRowMapper);
     }
 
 
@@ -452,6 +469,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
         return result;
     }
+
 
     private class PersonDataComparator implements Comparator<IdentityPerson> {
         @Override
