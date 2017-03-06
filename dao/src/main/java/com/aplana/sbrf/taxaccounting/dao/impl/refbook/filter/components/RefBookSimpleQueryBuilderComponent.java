@@ -641,10 +641,12 @@ public class RefBookSimpleQueryBuilderComponent {
     SELECT * FROM (SELECT res.*, rownum row_number_over FROM (
             SELECT frb.id AS id, frb.RECORD_ID, frb.LAST_NAME, frb.FIRST_NAME, frb.MIDDLE_NAME, frb.SEX, frb.INN, frb.INN_FOREIGN, frb.SNILS, frb.TAXPAYER_STATE, frb.BIRTH_DATE, frb.BIRTH_PLACE,
             frb.CITIZENSHIP, frb.ADDRESS, frb.PENSION, frb.MEDICAL, frb.SOCIAL, frb.EMPLOYEE, frb.SOURCE_ID, frb.OLD_ID FROM t, REF_BOOK_PERSON frb
-            WHERE (frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0) ORDER BY frb.id) res
-    where
-    record_id IN (select p.record_id  FROM ref_book_person p INNER JOIN ndfl_person np ON p.id = np.person_id  WHERE np.declaration_data_id = 14873)
-    );
+            WHERE (frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)
+            AND EXISTS (select p.record_id  FROM ref_book_person p INNER JOIN ndfl_person np ON p.id = np.person_id  WHERE np.declaration_data_id = 14873 AND frb.record_id = p.record_id)
+            ORDER BY frb.id) res));
+
+    Поскольку поиск осуществляется с использованием оператора EXISTS необходимодимо всегда связывать поле подзапроса через ALIAS frb, например:
+    AND frb.record_id = p.record_id
      */
     public PreparedStatementData psGetRecordsData(RefBook refBook, String whereClause, Date version) {
 
@@ -685,8 +687,9 @@ public class RefBookSimpleQueryBuilderComponent {
         }
 
         ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
+        ps.appendQuery(" AND EXISTS (" + whereClause + ")");
         ps.appendQuery(" ORDER BY frb.id");
-        ps.appendQuery(") res WHERE " + whereClause + ") ");
+        ps.appendQuery(") res)");
         return ps;
     }
 
