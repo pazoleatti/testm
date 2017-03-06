@@ -92,6 +92,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (838,95,'Наименование','NAME',1,1,null,null,1,null,30,1,0,0,null,0,2000);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (839,95,'Код роли','ALIAS',1,2,null,null,1,null,30,1,1,null,null,0,2000);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (843,95,'Вид налога','TAX_TYPE',1,3,null,null,1,null,6,1,0,null,null,0,1);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (840,96,'Код','CODE',1,1,null,null,1,null,5,1,1,0,null,0,11);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (841,96,'Наименование','NAME',1,2,null,null,1,null,20,1,0,null,null,0,500);

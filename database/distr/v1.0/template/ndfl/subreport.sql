@@ -1,7 +1,7 @@
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1001,100,'Сведения о ФЛ c параметрами',1,'rnu_ndfl_person','03f6d78d-bfd7-45bb-a16b-6c89131b76d1',1);
+	(1001,100,'РНУ НДФЛ по физическому лицу',1,'rnu_ndfl_person','03f6d78d-bfd7-45bb-a16b-6c89131b76d1',1);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1011,101,'Сведения о ФЛ c параметрами',1,'rnu_ndfl_person','042c50fc-a590-46b5-bb50-d04cc3a9424a',1);
+	(1011,101,'РНУ НДФЛ по физическому лицу',1,'rnu_ndfl_person','042c50fc-a590-46b5-bb50-d04cc3a9424a',1);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1021,102,'2-НДФЛ 1',1,'report_2ndfl','047f207c-113e-488d-8390-9afc248a3bc8',0);	
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 

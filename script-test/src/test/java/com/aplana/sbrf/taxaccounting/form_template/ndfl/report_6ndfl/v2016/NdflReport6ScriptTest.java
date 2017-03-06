@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.form_template.ndfl.report_6ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -16,8 +15,8 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.*;
 import org.custommonkey.xmlunit.Diff;
+import org.custommonkey.xmlunit.*;
 import org.junit.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -30,12 +29,9 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.awt.*;
 import java.io.*;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -93,7 +89,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
     @Before
     public void mockService() {
         // Данные об авансах ФЛ по идентификатору декларации
-        when(testHelper.getNdflPersonService().findPrepaymentsByDeclarationDataId(any(Long.class), any(String.class), any(String.class)))
+        /*when(testHelper.getNdflPersonService().findPrepaymentsByDeclarationDataId(any(Long.class), any(String.class), any(String.class)))
                 .thenAnswer(new Answer<List<NdflPersonPrepayment>>() {
                     @Override
                     public List<NdflPersonPrepayment> answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -110,10 +106,10 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                         ndflPersonPrepaymentList.add(ndflPersonPrepayment2);
                         return ndflPersonPrepaymentList;
                     }
-                });
+                });*/
 
         // Данные о доходах ФЛ по идентификатору декларации
-        when(testHelper.getNdflPersonService().findIncomesByPeriodAndDeclarationDataId(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
+        /*when(testHelper.getNdflPersonService().findIncomesByPeriodAndDeclarationDataId(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
                 .thenAnswer(new Answer<List<NdflPersonIncome>>() {
                     @Override
                     public List<NdflPersonIncome> answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -176,7 +172,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                         ndflPersonIncomeList.add(ndflPersonIncome3);
                         return ndflPersonIncomeList;
                     }
-                });
+                });*/
 
         // Период
         when(testHelper.getFormDataService().getRefBookValue(eq(8L), anyLong(), anyMap())).thenAnswer(
