@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model.identity;
+package com.aplana.sbrf.taxaccounting.model.identification;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Идентификатор ФЛ
+ *
  * @author Andrey Drunk
  */
 public class PersonIdentifier extends IdentityObject<Long> {

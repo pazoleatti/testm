@@ -1,20 +1,31 @@
-package com.aplana.sbrf.taxaccounting.model.identity;
+package com.aplana.sbrf.taxaccounting.model.identification;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Andrey Drunk
  */
-public class NaturalPerson extends IdentityObject<Long> implements IdentityPerson {
+public class NaturalPerson implements IdentityPerson {
+
+    /**
+     * Идентификатор ФЛ
+     */
+    private Long personId;
 
     /**
      * Уникальный идентификатор записи в справочнике ФЛ
      */
     private Long refBookPersonId;
+
+    /**
+     * Идентификатор записи (buisiness key) в справочнике физлиц, заполняется при получении записи из БД
+     */
+    private Long recordId;
 
     /**
      * Фамилия
@@ -52,16 +63,14 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
     private String snils;
 
     /**
-     * Статус физлица, сравнивается по идентификатору записи в справочнике, так как ссылается на не версионный справочник
-     * Ссылка на справочник {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id#TAXPAYER_STATUS}
+     * Статус физлица
      */
-    private Long taxPayerStatusId;
+    private TaxpayerStatus taxPayerStatus;
 
     /**
-     * Гражданство, сравнивается по идентификатору записи в справочнике, так как ссылается на не версионный справочник
-     * Ссылка на справочник {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id#COUNTRY}
+     * Гражданство
      */
-    private Long citizenshipId;
+    private Country citizenship;
 
     /**
      * Дата рождения
@@ -71,12 +80,12 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
     /**
      * Список идентификаторов ФЛ
      */
-    private Map<Long, PersonIdentifier> personIdentityMap;
+    private List<PersonIdentifier> personIdentityList;
 
     /**
      * Список документов ФЛ
      */
-    private Map<Long, PersonDocument> personDocumentMap;
+    private List<PersonDocument> personDocumentList;
 
     /**
      * Адрес фл
@@ -89,14 +98,10 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
     private Integer employee;
 
     /**
-     * Идентификатор записи (buisiness key) в справочнике физлиц, заполняется при получении записи из БД
-     */
-    private Long recordId;
-
-    /**
-     * Идентификатор объекта, на основании которого создана запись
+     * Система источник
      */
     private Long sourceId;
+
 
     /**
      * Поле для хранения веса записи при идентификации
@@ -104,8 +109,16 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
     private Double weigth;
 
     public NaturalPerson() {
-        this.personIdentityMap = new HashMap<Long, PersonIdentifier>();
-        this.personDocumentMap = new HashMap<Long, PersonDocument>();
+        this.personIdentityList = new ArrayList<PersonIdentifier>();
+        this.personDocumentList = new ArrayList<PersonDocument>();
+    }
+
+    public Long getPersonId() {
+        return personId;
+    }
+
+    public void setPersonId(Long personId) {
+        this.personId = personId;
     }
 
     public Long getRefBookPersonId() {
@@ -172,20 +185,20 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
         this.snils = snils;
     }
 
-    public Long getTaxPayerStatusId() {
-        return taxPayerStatusId;
+    public TaxpayerStatus getTaxPayerStatus() {
+        return taxPayerStatus;
     }
 
-    public void setTaxPayerStatusId(Long taxPayerStatusId) {
-        this.taxPayerStatusId = taxPayerStatusId;
+    public void setTaxPayerStatus(TaxpayerStatus taxPayerStatusId) {
+        this.taxPayerStatus = taxPayerStatusId;
     }
 
-    public Long getCitizenshipId() {
-        return citizenshipId;
+    public Country getCitizenship() {
+        return citizenship;
     }
 
-    public void setCitizenshipId(Long citizenshipId) {
-        this.citizenshipId = citizenshipId;
+    public void setCitizenship(Country citizenship) {
+        this.citizenship = citizenship;
     }
 
     public Date getBirthDate() {
@@ -238,48 +251,20 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
         this.employee = employee;
     }
 
-
-    public Map<Long, PersonIdentifier> getPersonIdentityMap() {
-        return personIdentityMap;
+    public List<PersonIdentifier> getPersonIdentityList() {
+        return personIdentityList;
     }
 
-    public void setPersonIdentityMap(Map<Long, PersonIdentifier> personIdentityMap) {
-        this.personIdentityMap = personIdentityMap;
+    public void setPersonIdentityList(List<PersonIdentifier> personIdentityList) {
+        this.personIdentityList = personIdentityList;
     }
 
-    public Map<Long, PersonDocument> getPersonDocumentMap() {
-        return personDocumentMap;
+    public List<PersonDocument> getPersonDocumentList() {
+        return personDocumentList;
     }
 
-    public PersonDocument getIncludeReportDocument() {
-        for (PersonDocument document: personDocumentMap.values()){
-            if (document.isIncludeReport()){
-                return document;
-            }
-        }
-        return null;
-    }
-
-    public void setPersonDocumentMap(Map<Long, PersonDocument> personDocumentMap) {
-        this.personDocumentMap = personDocumentMap;
-    }
-
-    public Collection<PersonIdentifier> getPersonIdentifiers() {
-        return personIdentityMap.values();
-    }
-
-    public Collection<PersonDocument> getPersonDocuments() {
-        return personDocumentMap.values();
-    }
-
-    @Override
-    public Double getWeigth() {
-        return weigth;
-    }
-
-    @Override
-    public void setWeigth(Double weigth) {
-        this.weigth = weigth;
+    public void setPersonDocumentList(List<PersonDocument> personDocumentList) {
+        this.personDocumentList = personDocumentList;
     }
 
     public Long getRecordId() {
@@ -298,6 +283,41 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
         this.sourceId = sourceId;
     }
 
+    public PersonDocument getIncludeReportDocument() {
+        for (PersonDocument document : personDocumentList) {
+            if (document.isIncludeReport()) {
+                return document;
+            }
+        }
+        return null;
+    }
+
+    public PersonDocument getPersonDocument() {
+        if (personDocumentList != null && !personDocumentList.isEmpty()) {
+            personDocumentList.get(0);
+        }
+        return null;
+    }
+
+    public PersonIdentifier getPersonIdentifier() {
+        if (personIdentityList != null && !personIdentityList.isEmpty()) {
+            personIdentityList.get(0);
+        }
+        return null;
+    }
+
+
+    @Override
+    public Double getWeigth() {
+        return weigth;
+    }
+
+    @Override
+    public void setWeigth(Double weigth) {
+        this.weigth = weigth;
+    }
+
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -309,11 +329,11 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
                 .append("inn", inn)
                 .append("innForeign", innForeign)
                 .append("snils", snils)
-                .append("taxPayerStatusId", taxPayerStatusId)
-                .append("citizenshipId", citizenshipId)
+                .append("taxPayerStatus", taxPayerStatus)
+                .append("citizenship", citizenship)
                 .append("birthDate", birthDate)
-                .append("personIdentityList", personIdentityMap)
-                .append("personDocumentList", personDocumentMap)
+                .append("personIdentityList", personIdentityList)
+                .append("personDocumentList", personDocumentList)
                 .append("address", address)
                 .append("pension", pension)
                 .append("medical", medical)

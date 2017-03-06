@@ -1,10 +1,10 @@
-package com.aplana.sbrf.taxaccounting.model.identity;
+package com.aplana.sbrf.taxaccounting.model.identification;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Тип документа
+ *
  * @author Andrey Drunk
  */
 public class DocType extends IdentityObject<Long> {
@@ -14,6 +14,14 @@ public class DocType extends IdentityObject<Long> {
     private String code;
 
     private Integer priority;
+
+    public DocType() {
+    }
+
+    public DocType(Long id, String code) {
+        this.id = id;
+        this.code = code;
+    }
 
     public String getName() {
         return name;

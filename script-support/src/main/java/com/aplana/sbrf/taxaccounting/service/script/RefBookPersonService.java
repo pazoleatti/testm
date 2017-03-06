@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.PersonData;
-import com.aplana.sbrf.taxaccounting.model.identity.IdentityPerson;
-import com.aplana.sbrf.taxaccounting.model.identity.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
@@ -24,9 +24,9 @@ public interface RefBookPersonService {
 
     Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version);
 
-    Long identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger);
+    NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger);
 
-    Long identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
+    NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
 
     List<BaseWeigthCalculator> getBaseCalculateList();
 

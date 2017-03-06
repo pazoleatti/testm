@@ -2,9 +2,8 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
-import com.aplana.sbrf.taxaccounting.model.identity.*;
+import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,9 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Andrey Drunk
@@ -36,7 +33,7 @@ public class RefBookPersonServiceTest {
     @Autowired
     RefBookPersonService personService;
 
-    private List<IdentityPerson> getList(){
+    private List<IdentityPerson> getList() {
         List<IdentityPerson> personDataList = new ArrayList<IdentityPerson>();
         personDataList.add(createNaturalPerson(1L, "999", "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null));
         personDataList.add(createNaturalPerson(2L, "888", "2", "", "33", null, "2222", "Сидорова", "Наталья", "Викторовна", "12.10.1954"));
@@ -57,8 +54,8 @@ public class RefBookPersonServiceTest {
     @Test
     public void identificatePersonTest() {
         PersonData person = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        Long result = personService.identificatePerson(person, getList(), 900, new Logger());
-        assertEquals(Long.valueOf(6L), result);
+        NaturalPerson result = personService.identificatePerson(person, getList(), 900, new Logger());
+        assertEquals(Long.valueOf(6L), result.getRefBookPersonId());
     }
 
 
@@ -67,7 +64,7 @@ public class RefBookPersonServiceTest {
                                        String lastName,
                                        String firstName, String middleName, String birthDate) {
         PersonData result = new PersonData();
-        result.setId(id);
+        result.setRefBookPersonId(id);
         result.setRecordId(id);
         result.setAsnuId(5L);
         result.setInp(inp);
@@ -84,8 +81,6 @@ public class RefBookPersonServiceTest {
     }
 
 
-
-
     public PersonData createPersonData(String inp, String inn, String innForeign, String snils, String docType,
                                        String docNumber,
                                        String lastName,
@@ -94,17 +89,19 @@ public class RefBookPersonServiceTest {
     }
 
     public NaturalPerson createNaturalPerson(Long id, String inp, String inn, String innForeign, String snils, String docType,
-                                       String docNumber,
-                                       String lastName,
-                                       String firstName, String middleName, String birthDate) {
+                                             String docNumber,
+                                             String lastName,
+                                             String firstName, String middleName, String birthDate) {
         NaturalPerson result = new NaturalPerson();
-        result.setId(id);
+        result.setRefBookPersonId(id);
         result.setRecordId(id);
 
         PersonIdentifier personIdentifier = new PersonIdentifier();
+        personIdentifier.setId(1L);
         personIdentifier.setInp(inp);
         personIdentifier.setAsnuId(5L);
-        result.getPersonIdentityMap().put(1L, personIdentifier);
+
+        result.getPersonIdentityList().add(personIdentifier);
 
 
         DocType docTypeObject = new DocType();
@@ -115,7 +112,7 @@ public class RefBookPersonServiceTest {
         personDocument.setIncRep(1);
         personDocument.setDocumentNumber(docNumber);
 
-        result.getPersonDocumentMap().put(1L, personDocument);
+        result.getPersonDocumentList().add(personDocument);
 
         result.setInn(inn);
         result.setInnForeign(innForeign);

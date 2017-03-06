@@ -1,13 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import com.aplana.sbrf.taxaccounting.model.identity.Address;
-import com.aplana.sbrf.taxaccounting.model.identity.IdentityPerson;
-import com.aplana.sbrf.taxaccounting.model.identity.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import java.util.Date;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 
 /**
  * Класс для передачи данных из ДАО в сервис
@@ -27,7 +20,6 @@ public class PersonData extends NaturalPerson {
     private String inp;
 
     /**
-     *
      * Идентификаторы налогоплательщика. Ссылка на справочник {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id#ASNU}
      */
     private Long asnuId;
@@ -70,14 +62,6 @@ public class PersonData extends NaturalPerson {
         this.useAddress = useAddress;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getInp() {
         return inp;
     }
@@ -110,9 +94,6 @@ public class PersonData extends NaturalPerson {
         this.documentNumber = documentNumber;
     }
 
-    public String getCitizenship() {
-        return citizenship;
-    }
 
     public void setCitizenship(String citizenship) {
         this.citizenship = citizenship;

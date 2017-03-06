@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model.identity;
+package com.aplana.sbrf.taxaccounting.model.identification;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -62,7 +62,7 @@ public class PersonDocument extends IdentityObject<Long> {
         this.incRep = incRep;
     }
 
-    public boolean isIncludeReport(){
+    public boolean isIncludeReport() {
         return incRep != null && incRep.equals(1);
     }
 

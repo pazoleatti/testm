@@ -2,12 +2,14 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
-import com.aplana.sbrf.taxaccounting.model.identity.*;
+import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
@@ -22,6 +24,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     @Autowired
     private RefBookPersonDao refBookPersonDao;
 
+    @Autowired
+    private RefBookFactory refBookFactory;
+
     @Override
     public Map<Long, Map<Long, NaturalPerson>> findRefBookPersonByPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version) {
         return refBookPersonDao.findRefBookPersonByPrimaryRnuNdflFunction(declarationDataId, asnuId, version);
@@ -32,13 +37,43 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         return refBookPersonDao.findRefBookPersonByPrimary1151111(declarationDataId, asnuId, version);
     }
 
+
+    public List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper) {
+        return refBookPersonDao.findNaturalPersonPrimaryDataFromNdfl(declarationDataId, naturalPersonRowMapper);
+    }
+
+
+    /**
+     * Получить "Страны"
+     *
+     * @return
+     */
+   /* def getRefCountryCode() {
+        if (countryCodeCache.size() == 0) {
+            def refBookMap = getRefBook(RefBook.Id.COUNTRY.getId())
+            refBookMap.each { refBook ->
+                    countryCodeCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+            }
+        }
+        return countryCodeCache;
+    }
+
+    def getRefDocumentType() {
+        if (documentTypeCache.size() == 0) {
+            def refBookList = getRefBook(RefBook.Id.DOCUMENT_CODES.getId())
+            refBookList.each { refBook ->
+                    documentTypeCache.put(refBook?.id?.numberValue, refBook)
+            }
+        }
+        return documentTypeCache;
+    }*/
     @Override
-    public Long identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger) {
+    public NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger) {
         return identificatePerson(personData, refBookPersonList, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()), logger);
     }
 
     @Override
-    public Long identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
+    public NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
 
         double treshold = tresholdValue / 1000D;
         List<IdentityPerson> personDataList = refBookPersonList;
@@ -47,7 +82,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             calculateWeigth(personData, personDataList, weigthComporators);
 
             StringBuffer msg = new StringBuffer();
-
 
 
             msg.append("Для ФЛ " + buildNotice(personData) + " сходных записей найдено: " + personDataList.size()).append(" ");
@@ -66,7 +100,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 logger.info(msg.toString());
                 //}
 
-                return identificatedPerson.getId();
+                return (NaturalPerson) identificatedPerson;
             } else {
                 msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
                 logger.info(msg.toString());
@@ -162,19 +196,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         }
     }
 
-    public PersonDocument findDocument(NaturalPerson person, Long docTypeId, String docNumber) {
-        for (PersonDocument personDocument : person.getPersonDocuments()) {
-            DocType docType = personDocument.getDocType();
-            if (docType != null) {
-                if (BaseWeigthCalculator.isValueEquals(docTypeId, docType.getId())
-                        && BaseWeigthCalculator.isEqualsNullSafeStr(docNumber, personDocument.getDocumentNumber())) {
-                    return personDocument;
-                }
-            }
-        }
-        return null;
-    }
-
 
     /**
      * Метод формирует список по которому будет рассчитывается схожесть записи
@@ -229,8 +250,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         result.add(new BaseWeigthCalculator<IdentityPerson>("Гражданство", 1) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
-                return compareNumber(a.getCitizenshipId(), b.getCitizenshipId());
+                return compareNumber(getIdOrNull(a.getCitizenship()), getIdOrNull(b.getCitizenship()));
             }
+
         });
 
         //Идентификатор физлица номер и код АСНУ
@@ -239,25 +261,30 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             public double calc(IdentityPerson a, IdentityPerson b) {
 
                 //Запись первичной НФ
-                PersonData primaryPerson = (PersonData) a;
+                NaturalPerson primaryPerson = (NaturalPerson) a;
                 //Запись справочника физлиц
-                NaturalPerson naturalPerson = (NaturalPerson) b;
+                NaturalPerson refBookPerson = (NaturalPerson) b;
 
-                //ищем идентификатор физлица
-                PersonIdentifier personIdentifier = findIdentifier(naturalPerson, primaryPerson.getInp(), primaryPerson.getAsnuId());
+                PersonIdentifier primaryPersonId = primaryPerson.getPersonIdentifier();
 
-                return (personIdentifier != null) ? weigth : 0D;
+                if (primaryPersonId != null) {
+                    //Ищем совпадение в списке идентификаторов
+                    PersonIdentifier refBookPersonId = findIdentifier(refBookPerson, primaryPersonId.getInp(), primaryPersonId.getAsnuId());
+                    return (refBookPersonId != null) ? weigth : 0D;
+                } else {
+                    //если  значени параметра не задано то оно не должно учитыватся при сравнении со списком
+                    return weigth;
+                }
             }
 
             private PersonIdentifier findIdentifier(NaturalPerson person, String inp, Long asnuId) {
-                for (PersonIdentifier personIdentifier : person.getPersonIdentifiers()) {
+                for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
                     if (equalsNullSafe(prepareStr(inp), prepareStr(personIdentifier.getInp())) && equalsNullSafe(asnuId, personIdentifier.getAsnuId())) {
                         return personIdentifier;
                     }
                 }
                 return null;
             }
-
         });
 
         //ИНН в РФ
@@ -306,14 +333,32 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 //Запись первичной НФ
-                PersonData primaryPerson = (PersonData) a;
+                NaturalPerson primaryPerson = (NaturalPerson) a;
                 //Запись справочника физлиц
-                NaturalPerson naturalPerson = (NaturalPerson) b;
+                NaturalPerson refBookPerson = (NaturalPerson) b;
 
+                PersonDocument primaryPersonDocument = primaryPerson.getPersonDocument();
 
+                if (primaryPersonDocument != null) {
+                    Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
+                    PersonDocument personDocument = findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
+                    return (personDocument != null) ? weigth : 0D;
+                } else {
+                    return weigth;
+                }
+            }
 
-                PersonDocument personDocument = findDocument(naturalPerson, primaryPerson.getDocumentTypeId(), primaryPerson.getDocumentNumber());
-                return (personDocument != null) ? weigth : 0D;
+            public PersonDocument findDocument(NaturalPerson person, Long docTypeId, String docNumber) {
+                for (PersonDocument personDocument : person.getPersonDocumentList()) {
+                    DocType docType = personDocument.getDocType();
+                    if (docType != null) {
+                        if (BaseWeigthCalculator.isValueEquals(docTypeId, docType.getId())
+                                && BaseWeigthCalculator.isEqualsNullSafeStr(docNumber, personDocument.getDocumentNumber())) {
+                            return personDocument;
+                        }
+                    }
+                }
+                return null;
             }
         });
 
@@ -392,7 +437,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 Address b = personB.getAddress();
 
                 if (a != null && b != null) {
-                    boolean result = equalsNullSafe(a.getCountryId(), b.getCountryId());
+                    boolean result = equalsNullSafe(getIdOrNull(a.getCountry()), getIdOrNull(b.getCountry()));
                     if (!result) {
                         return 0D;
                     }
@@ -402,11 +447,8 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 } else {
                     return 0D;
                 }
-
-
             }
         });
-
 
         return result;
     }

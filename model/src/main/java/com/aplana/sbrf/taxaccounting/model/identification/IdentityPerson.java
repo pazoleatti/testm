@@ -1,6 +1,5 @@
-package com.aplana.sbrf.taxaccounting.model.identity;
+package com.aplana.sbrf.taxaccounting.model.identification;
 
-import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -10,24 +9,38 @@ import java.util.Date;
  */
 public interface IdentityPerson {
 
-    Long getId();
     String getLastName();
+
     String getFirstName();
+
     String getMiddleName();
+
     Integer getSex();
+
     String getInn();
+
     String getInnForeign();
+
     String getSnils();
-    Long getTaxPayerStatusId();
-    Long getCitizenshipId();
+
+    TaxpayerStatus getTaxPayerStatus();
+
+    Country getCitizenship();
+
     Date getBirthDate();
+
     Address getAddress();
+
     Integer getPension();
+
     Integer getMedical();
+
     Integer getSocial();
+
     Integer getEmployee();
 
     //поле для хранения веса записи
     Double getWeigth();
+
     void setWeigth(Double weigth);
 }

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.util;
 
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -46,6 +48,15 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
     public String getName() {
         return name;
     }
+
+    public <T extends Number> T getIdOrNull(IdentityObject<T> identityObject) {
+        if (identityObject != null) {
+            return identityObject.getId();
+        } else {
+            return null;
+        }
+    }
+
 
     //        protected double compareString(String a, String b, double weight) {
 //            System.out.println(a+"="+b);
@@ -105,7 +116,7 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
     }
 
 
-    protected  boolean equalsNullSafeStr(String a, String b) {
+    protected boolean equalsNullSafeStr(String a, String b) {
         return isEqualsNullSafeStr(a, b);
     }
 

@@ -1,6 +1,8 @@
-package com.aplana.sbrf.taxaccounting.model.identity;
+package com.aplana.sbrf.taxaccounting.model.identification;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author Andrey Drunk
@@ -25,7 +27,7 @@ public class Address extends IdentityObject<Long> {
     /**
      * Адрес вне РФ
      */
-    private Long countryId;
+    private Country country;
     private String countryCode;
     private String addressIno;
 
@@ -110,12 +112,12 @@ public class Address extends IdentityObject<Long> {
         this.appartment = appartment;
     }
 
-    public Long getCountryId() {
-        return countryId;
+    public Country getCountry() {
+        return country;
     }
 
-    public void setCountryId(Long countryId) {
-        this.countryId = countryId;
+    public void setCountry(Country country) {
+        this.country = country;
     }
 
     public String getCountryCode() {
@@ -132,5 +134,24 @@ public class Address extends IdentityObject<Long> {
 
     public void setAddressIno(String addressIno) {
         this.addressIno = addressIno;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .append("addressType", addressType)
+                .append("regionCode", regionCode)
+                .append("postalCode", postalCode)
+                .append("district", district)
+                .append("city", city)
+                .append("locality", locality)
+                .append("street", street)
+                .append("house", house)
+                .append("build", build)
+                .append("appartment", appartment)
+                .append("country", country)
+                .append("countryCode", countryCode)
+                .append("addressIno", addressIno)
+                .toString();
     }
 }
