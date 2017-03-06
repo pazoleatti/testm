@@ -2377,6 +2377,9 @@ def checkData() {
 
     // Проверки сведений о доходах
     checkDataIncome(ndflPersonList, ndflPersonIncomeList)
+
+    println "Все проверки " + (System.currentTimeMillis() - time);
+    logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
