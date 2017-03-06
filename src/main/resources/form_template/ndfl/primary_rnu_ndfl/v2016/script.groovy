@@ -79,6 +79,8 @@ switch (formDataEvent) {
         break
 }
 
+@Field def PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
+
 //------------------ Calculate ----------------------
 /**
  * Порог схожести при идентификации физлиц 0..1000, 1000 - совпадение по всем параметрам
@@ -1386,6 +1388,23 @@ def findReportPeriodCode(reportPeriod) {
 
 void importData() {
 
+    // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
+    def declarationDataList = declarationService.find(PRIMARY_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+    if (declarationDataList != null && !declarationDataList.isEmpty()) {
+
+        // Период
+        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+        def calendarStartDate = reportPeriod?.calendarStartDate
+
+        // Подразделение
+        Department department = departmentService.get(declarationData.departmentId)
+
+        logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
+                    в периоде \"$periodCode\" ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
+        return
+    }
+
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
@@ -1831,6 +1850,9 @@ def prepaymentAttr(personPrepayment) {
 // Дата окончания отчетного периода
 @Field def reportPeriodEndDate = null
 
+// Кэш для справочников
+@Field def refBookCache = [:]
+
 /**
  * Получить "АСНУ"
  * @return
@@ -2176,6 +2198,13 @@ RefBookDataProvider getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
+}
+
+/**
+ * Разыменование записи справочника
+ */
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 //>------------------< UTILS >----------------------<
