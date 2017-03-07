@@ -255,5 +255,21 @@ public interface NdflPersonService {
      * @return
      */
     List<NdflPerson> findByIdList(List<Long> ndflPersonIdList);
+
+    /**
+     * Поиск дублей по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    List<Integer> findDublRowNum(String tableName, Long declarationDataId);
+
+    /**
+     * Поиск пропусков по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    List<Integer> findMissingRowNum(String tableName, Long declarationDataId);
 }
 
