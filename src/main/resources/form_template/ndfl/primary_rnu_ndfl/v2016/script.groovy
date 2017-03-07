@@ -35,7 +35,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.model.PersonData
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
-import form_template.fond.primary_1151111.v2016.EmptyChangedListener;
+import form_template.ndfl.primary_rnu_ndfl.v2016.EmptyChangedListener;
 
 // com.aplana.sbrf.taxaccounting.refbook.* - используется для получения id-справочников
 import groovy.transform.Field
@@ -1351,21 +1351,21 @@ def findReportPeriodCode(reportPeriod) {
 void importData() {
 
     // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
-    def declarationDataList = declarationService.find(PRIMARY_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
-    if (declarationDataList != null && !declarationDataList.isEmpty()) {
-
-        // Период
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
-        def calendarStartDate = reportPeriod?.calendarStartDate
-
-        // Подразделение
-        Department department = departmentService.get(declarationData.departmentId)
-
-        logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
-                    в периоде \"$periodCode\" ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
-        return
-    }
+//    def declarationDataList = declarationService.find(PRIMARY_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+//    if (declarationDataList != null && !declarationDataList.isEmpty()) {
+//
+//        // Период
+//        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+//        def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+//        def calendarStartDate = reportPeriod?.calendarStartDate
+//
+//        // Подразделение
+//        Department department = departmentService.get(declarationData.departmentId)
+//
+//        logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
+//                    в периоде \"$periodCode\" ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
+//        return
+//    }
 
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
@@ -2337,6 +2337,9 @@ def checkData() {
 
     // Проверки сведений о доходах
     checkDataIncome(ndflPersonList, ndflPersonIncomeList)
+
+    println "Все проверки " + (System.currentTimeMillis() - time);
+    logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -2707,18 +2710,6 @@ def checkDataReference(
 def checkDataCommon(
         def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
 
-    // Порядковые номера строк в "Реквизиты"
-    def rowNumPersonList = []
-
-    // Порядковые номера строк в "Сведения о доходах и НДФЛ"
-    def rowNumPersonIncomeList = []
-
-    // Порядковые номера строк в "Сведения о вычетах"
-    def rowNumPersonDeductionList = []
-
-    // Порядковые номера строк в "Сведения о доходах в виде авансовых платежей"
-    def rowNumPersonPrepaymentList = []
-
     // Тербанки
     //def mapTerBank = getTerBank()
 
@@ -2735,8 +2726,6 @@ def checkDataCommon(
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
 
         println "ndflPerson.rowNum=" + ndflPerson.rowNum
-
-        rowNumPersonList.add(ndflPerson.rowNum)
 
         // Общ1 Корректность ИНН (Необязательное поле)
         if (ndflPerson.innNp != null && !ScriptUtils.checkControlSumInn(ndflPerson.innNp)) {
@@ -2764,8 +2753,6 @@ def checkDataCommon(
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
-
-        rowNumPersonIncomeList.add(ndflPersonIncome.rowNum)
 
         // Общ5 Принадлежность дат операций к отчетному периоду
         // Дата начисления дохода (Необязательное поле)
@@ -3049,8 +3036,6 @@ def checkDataCommon(
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
-        rowNumPersonDeductionList.add(ndflPersonDeduction.rowNum)
-
         // Общ6 Принадлежность дат налоговых вычетов к отчетному периоду
         // Дата выдачи уведомления (Обязательное поле)
         if (ndflPersonDeduction.notifDate < getReportPeriodStartDate() || ndflPersonDeduction.notifDate > getReportPeriodEndDate()) {
@@ -3076,25 +3061,36 @@ def checkDataCommon(
     println "Общие проверки / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
 
-    for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
-        rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
-    }
-
     // Общ8 Отсутствие пропусков и повторений в нумерации строк
+    time = System.currentTimeMillis();
+
+    List<Integer> rowNumPersonList = ndflPersonService.findDublRowNum("NDFL_PERSON", declarationData.id)
+    logger.info("rowNumPersonList.size() = " + rowNumPersonList.size())
     def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
+    List<Integer> rowNumPersonIncomeList = ndflPersonService.findDublRowNum("NDFL_PERSON_INCOME", declarationData.id)
     msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeList, T_PERSON_INCOME)
+    List<Integer> rowNumPersonDeductionList = ndflPersonService.findDublRowNum("NDFL_PERSON_DEDUCTION", declarationData.id)
     msgErrDubl += getErrorMsgDubl(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
+    List<Integer> rowNumPersonPrepaymentList = ndflPersonService.findDublRowNum("NDFL_PERSON_PREPAYMENT", declarationData.id)
     msgErrDubl += getErrorMsgDubl(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
     msgErrDubl = msgErrDubl == "" ? "" : MESSAGE_ERROR_DUBL + msgErrDubl
+
+    rowNumPersonList = ndflPersonService.findMissingRowNum("NDFL_PERSON", declarationData.id)
     def msgErrAbsent = getErrorMsgAbsent(rowNumPersonList, T_PERSON)
+    rowNumPersonIncomeList = ndflPersonService.findMissingRowNum("NDFL_PERSON_INCOME", declarationData.id)
     msgErrAbsent += getErrorMsgAbsent(rowNumPersonIncomeList, T_PERSON_INCOME)
+    rowNumPersonDeductionList = ndflPersonService.findMissingRowNum("NDFL_PERSON_DEDUCTION", declarationData.id)
     msgErrAbsent += getErrorMsgAbsent(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
+    rowNumPersonPrepaymentList = ndflPersonService.findMissingRowNum("NDFL_PERSON_PREPAYMENT", declarationData.id)
     msgErrAbsent += getErrorMsgAbsent(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
     msgErrAbsent = msgErrAbsent == "" ? "" : MESSAGE_ERROR_ABSENT + msgErrAbsent
     if (msgErrDubl != "" || msgErrAbsent != "") {
         //В ТФ имеются пропуски или повторы в нумерации строк.
         logger.warn(MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent);
     }
+
+    println "Общие проверки / Проверки на отсутсвие повторений: " + (System.currentTimeMillis() - time);
+    logger.info("Общие проверки / Проверки на отсутсвие повторений: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -3203,9 +3199,8 @@ def getQuotedFields(def fieldNameList) {
  */
 def getErrorMsgDubl(def inputList, def tableName) {
     def resultMsg = ""
-    def dublList = inputList.findAll { inputList.count(it) > 1 }.unique()
-    if (dublList.size() > 0) {
-        resultMsg = " Раздел \"" + tableName + "\" № " + dublList.sort().join(", ") + "."
+    if (inputList.size() > 0) {
+        resultMsg = " Раздел \"" + tableName + "\" № " + inputList.join(", ") + "."
     }
     return resultMsg
 }
@@ -3217,25 +3212,46 @@ def getErrorMsgDubl(def inputList, def tableName) {
  * @return
  */
 def getErrorMsgAbsent(def inputList, def tableName) {
-    def absentList = []
-    def sortList = inputList.unique().sort()
-    if (sortList != null && sortList.size() > 0) {
-        def i = sortList.get(0) == null ? 0 : sortList.get(0)
-        sortList.each { item ->
-            if (item != null) {
-                if (item != i) {
-                    absentList.add(i)
-                }
-                i++
-            }
-        }
-    }
     def resultMsg = ""
-    if (absentList.size() > 0) {
-        resultMsg = " Раздел \"" + tableName + "\" № " + absentList.sort().join(", ") + "."
+    if (inputList.size() > 0) {
+        resultMsg = " Раздел \"" + tableName + "\" № " + inputList.join(", ") + "."
     }
     return resultMsg
 }
 
+class EmptyChangedListener implements AttributeChangeListener {
+    public void processAttr(AttributeChangeEvent event) {
+        //do nothing...
+    }
+}
 
+class AttrCounter implements AttributeChangeListener {
 
+    private int refreshed = 0;
+    private int created = 0;
+    private int ignored = 0;
+
+    Map<String, String> msg = new HashMap<String, String>();
+
+    @Override
+    void processAttr(AttributeChangeEvent event) {
+        if (EventType.CREATED.equals(event.type)) {
+            created++;
+            //if (event.getValue() != null) {sb.append("[").append(event.getAttrName()).append(": ").append(event.getValue()).append("]")}
+        } else if (EventType.REFRESHED.equals(event.type)) {
+            refreshed++;
+            msg.put(event.getAttrName(), new StringBuilder().append(event.getCurrentValue()).append("->").append(event.getValue()))
+        } else if (EventType.IGNORED.equals(event.type)) {
+            ignored++;
+        }
+    }
+
+    public Map<String, String> getMessages() {
+        return msg;
+    }
+
+    public boolean isUpdate() {
+        return (created != 0 || refreshed != 0)
+    }
+
+}
