@@ -71,7 +71,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		return getView().getFilterData();
 	}
 
-	public void initFilter(final TaxType taxType, final DeclarationDataFilter dataFilter) {
+	public void initFilter(final TaxType taxType, final Boolean isReports, final DeclarationDataFilter dataFilter) {
 
 		GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(taxType);
@@ -88,7 +88,12 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 						public void onSuccess(GetDeclarationFilterDataResult result) {
                             DeclarationDataFilterAvailableValues filterValues = result.getFilterValues();
 
-							getView().setKindFilter(result.getDataKinds());
+                            List<DeclarationFormKind> filterList = new ArrayList<DeclarationFormKind>(result.getDataKinds());
+                            if (!isReports && TaxType.NDFL.equals(taxType)) {
+                                filterList.remove(DeclarationFormKind.REPORTS);
+                            }
+                            getView().setKindFilter(filterList);
+
                             getView().setDepartmentsList(result.getDepartments(), filterValues.getDepartmentIds());
 							getView().setReportPeriods(result.getPeriods());
 							getView().setDeclarationTypeMap(fillDeclarationTypesMap(filterValues));

@@ -128,7 +128,7 @@ public class DeclarationListPresenter extends
                 filterStates.clear();
                 selectedItemIds = null;
             }
-			filterPresenter.initFilter(taxType, filterStates.get(taxType));
+			filterPresenter.initFilter(taxType, isReports, filterStates.get(taxType));
             filterPresenter.getView().updateFilter(taxType, isReports);
             getView().updatePageSize(taxType);
             getView().updateButton();
@@ -171,10 +171,12 @@ public class DeclarationListPresenter extends
         if (isReports) {
             filter.setFormKindIds(Arrays.asList(DeclarationFormKind.REPORTS.getId()));
         } else {
-            if (filter.getFormKindIds() == null || filter.getFormKindIds().isEmpty()) {
-                filter.setFormKindIds(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
-            } else {
-                filter.getFormKindIds().remove(DeclarationFormKind.REPORTS.getId());
+            if (TaxType.NDFL.equals(taxType)) {
+                if (filter.getFormKindIds() == null || filter.getFormKindIds().isEmpty()) {
+                    filter.setFormKindIds(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
+                } else {
+                    filter.getFormKindIds().remove(DeclarationFormKind.REPORTS.getId());
+                }
             }
         }
 
