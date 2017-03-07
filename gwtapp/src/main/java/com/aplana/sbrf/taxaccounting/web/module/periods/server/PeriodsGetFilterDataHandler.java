@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
 public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGetFilterData, PeriodsGetFilterDataResult> {
 
 	@Autowired
@@ -45,7 +45,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
         TaxType taxType = action.getTaxType();
 	    List<Department> departments = new ArrayList<Department>();
         Set<Integer> ad = new HashSet<Integer>();
-        if (userInfo.getUser().hasRole("ROLE_CONTROL_UNP")) {
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
 	        res.setCanEdit(true);
             switch (taxType) {
                 case NDFL:
@@ -63,7 +63,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
             }
         } else { // Контролер НС
 	        res.setCanChangeDepartment(false);
-	        res.setDepartments(departmentService.getTBDepartments(userInfo.getUser()));
+	        res.setDepartments(departmentService.getTBDepartments(userInfo.getUser(), taxType));
 	        res.setSelectedDepartment(
 			        new DepartmentPair(res.getDepartments().get(0).getId(),
 					        res.getDepartments().get(0).getParentId(),

@@ -78,42 +78,6 @@ public class DeclarationDataServiceImplTest {
 	//
 	////////////////
 	
-	//@Test
-	public void testRefreshDeclaration() {
-		Logger logger = new Logger();		
-		// TODO: sgoryachkin: Нужно сделать нормальный тест. Пока как временное решение - игнорить ошибку при генерации
-		try{
-			TAUserInfo userInfo = new TAUserInfo();
-			userInfo.setIp("192.168.72.16");
-			userInfo.setUser(mockUser(10,  0, TARole.ROLE_CONTROL));
-			declarationDataService.calculate(logger, 1l, userInfo, new Date(), null, new LockStateLogger() {
-                @Override
-                public void updateState(String state) {
-
-                }
-            });
-		} catch (ServiceException e) {
-			//Nothing
-		}
-		
-		// Verify
-		verify(declarationDataDao).get(1l);
-	}
-	
-	//@Test(expected=AccessDeniedException.class)
-	public void testRefreshDeclarationNoAccess() {
-		Logger logger = new Logger();
-		TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setIp("192.168.72.16");
-		userInfo.setUser(mockUser(10,  2, TARole.ROLE_CONTROL));
-		declarationDataService.calculate(logger, 2l, userInfo, new Date(), null, new LockStateLogger() {
-            @Override
-            public void updateState(String state) {
-
-            }
-        });
-	}
-
     @Test
     public void testme() {
         // TODO фиктивный тест, добил чтоб не падала сборка

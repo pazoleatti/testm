@@ -29,6 +29,7 @@ public class PrintingServiceImplTest {
 
         TARole role = new TARole();
         role.setAlias(USER_ROLE);
+        role.setTaxType(TaxType.NDFL);
         List<TARole> listUserRoles = new ArrayList<TARole>();
         listUserRoles.add(role);
 

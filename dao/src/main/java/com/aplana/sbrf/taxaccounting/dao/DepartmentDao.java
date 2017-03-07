@@ -199,4 +199,8 @@ public interface DepartmentDao {
     void setUsedByGarant(int depId, boolean used);
 
     int getHierarchyLevel(int departmentId);
+
+    List<Integer> getAllPerformers(int departmentId, int declarationTypeId);
+
+    List<Integer> getAllPerformers(int userDepId, List<TaxType> taxTypes);
 }

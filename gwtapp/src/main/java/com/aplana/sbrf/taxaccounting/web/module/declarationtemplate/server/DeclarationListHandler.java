@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class DeclarationListHandler	extends AbstractActionHandler<DeclarationListAction, DeclarationListResult> {
 	@Autowired
 	private DeclarationTemplateService declarationTemplateService;

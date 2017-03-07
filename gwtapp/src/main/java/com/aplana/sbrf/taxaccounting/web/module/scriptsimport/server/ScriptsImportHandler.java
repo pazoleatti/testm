@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
  * User: Denis Loshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class ScriptsImportHandler extends AbstractActionHandler<ScriptsImportAction, ScriptsImportResult> {
     @Autowired
     BlobDataService blobDataService;

@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationAction, GetDeclarationResult> {
     @Autowired
 	private DeclarationTemplateService declarationTemplateService;

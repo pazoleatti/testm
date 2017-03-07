@@ -83,7 +83,7 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                 action.setFieldId(result.getDefaultReportPeriod().getId());
             case SECOND:
                 List<Integer> departments =
-                        departmentService.getOpenPeriodDepartments(userInfo.getUser(), asList(action.getTaxType()), action.getFieldId());
+                        departmentService.getOpenPeriodDepartments(userInfo.getUser(), action.getTaxType(), action.getFieldId());
                 if (departments.isEmpty()){
                     result.setDepartments(new ArrayList<Department>());
                     result.setDepartmentIds(new HashSet<Integer>());

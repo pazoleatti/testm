@@ -100,14 +100,19 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> getBADepartments(TAUser tAUser) {
+    public List<Department> getBADepartments(TAUser tAUser, TaxType taxType) {
         List<Department> retList = new ArrayList<Department>();
 
-        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) ||
+                tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS) ||
+                tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentTBChildren(tAUser.getDepartmentId()));
+        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_OPER) ||
+                tAUser.hasRole(taxType, TARole.F_ROLE_OPER)){
+            retList.addAll(departmentDao.getAllChildren(tAUser.getDepartmentId()));
         }
 
         return retList;
@@ -117,12 +122,12 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Integer> getBADepartmentIds(TAUser tAUser) {
         List<Integer> retList = new ArrayList<Integer>();
 
-        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartmentIds());
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+        } else if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL) || tAUser.hasRole(TARole.ROLE_OPER)){
+        } else if (tAUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)){
             retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
         }
 
@@ -130,18 +135,17 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> getTBDepartments(TAUser tAUser) {
+    public List<Department> getTBDepartments(TAUser tAUser, TaxType taxType) {
         List<Department> retList = new ArrayList<Department>();
 
-        if (tAUser.hasRole(TARole.ROLE_ADMIN)
-         || tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(TARole.N_ROLE_ADMIN)
+         || tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделение с типом 2
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)
-                || tAUser.hasRole(TARole.ROLE_CONTROL)
-                || tAUser.hasRole(TARole.ROLE_OPER)) {
+        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)
+                || tAUser.hasRole(taxType, TARole.N_ROLE_OPER) || tAUser.hasRole(taxType, TARole.F_ROLE_OPER)) {
             if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.CSKO_PCP) {
                 List<Integer> departmentIds = departmentDao.getDepartmentIdsByExecutors(Arrays.asList(tAUser.getDepartmentId()));
                 for (Integer depId : departmentIds) {
@@ -188,15 +192,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getTBDepartmentIds(TAUser tAUser) {
+    public List<Integer> getTBDepartmentIds(TAUser tAUser, TaxType taxType) {
         List<Integer> retList = new ArrayList<Integer>();
 
-        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделения с типом 2
             retList.addAll(departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode()));
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)) {
             if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERR_BANK) {
                 // поразделение пользователя
                 retList.add(tAUser.getDepartmentId());
@@ -219,30 +223,19 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
+    public List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, Date periodStart, Date periodEnd) {
         List<Integer> retList = new ArrayList<Integer>();
-        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
-            for (Department dep : departmentDao.listDepartments()) {
-                retList.add(dep.getId());
-            }
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            // 1, 2
-            retList.addAll(departmentDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxTypes, periodStart, periodEnd));
-            // 3
-            retList.addAll(getDepartmentIdsByExecutors(retList, taxTypes));
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL)) {
-            // 1, 2
-            retList.addAll(departmentDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxTypes, periodStart, periodEnd));
-            // 3
-            retList.addAll(getDepartmentIdsByExecutors(retList, taxTypes));
-        } else if (tAUser.hasRole(TARole.ROLE_OPER)) {
+            retList.addAll(departmentDao.listDepartmentIds());
+        } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
             // 1
-            for (Department dep : departmentDao.getAllChildren(tAUser.getDepartmentId())) {
-                retList.add(dep.getId());
-            }
+            retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
+        } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+            // 1
+            retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
             // 2
-            retList.addAll(getDepartmentIdsByExecutors(retList, taxTypes));
+            retList.addAll(departmentDao.getAllPerformers(tAUser.getDepartmentId(), Arrays.asList(taxType)));
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -255,6 +248,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> getSourcesDepartments(TAUser tAUser, Date periodStart, Date periodEnd) {
         List<Department> retList = new ArrayList<Department>();
+        /*
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
@@ -264,7 +258,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             if (!baDepartmentIds.isEmpty()) {
                 retList.addAll(departmentDao.getDepartmentsByDestinationSource(baDepartmentIds, periodStart, periodEnd));
             }
-        }
+        }*/
 
         // Результат выборки должен содержать только уникальные подразделения
         Set<Department> setItems = new HashSet<Department>(retList);
@@ -278,6 +272,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Collection<Integer> getSourcesDepartmentIds(TAUser tAUser, Date periodStart, Date periodEnd) {
         // Результат выборки должен содержать только уникальные подразделения
         HashSet<Integer> retList = new HashSet<Integer>();
+        /*
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartmentIds());
@@ -287,15 +282,16 @@ public class DepartmentServiceImpl implements DepartmentService {
             if (!baDepartmentIds.isEmpty()) {
                 retList.addAll(departmentDao.getDepartmentIdsByDestinationSource(baDepartmentIds, periodStart, periodEnd));
             }
-        }
+        }*/
 
         return retList;
     }
 
     @Override
-    public List<Department> getDestinationDepartments(TAUser tAUser) {
+    public List<Department> getDestinationDepartments(TaxType taxType, TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
-        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP) || tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+        if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS) ||
+                tAUser.hasRoles(taxType, TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
         }
@@ -312,17 +308,19 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Collection<Integer> getAppointmentDepartments(TAUser tAUser) {
         // Результат выборки должен содержать только уникальные подразделения
         HashSet<Integer> retList = new HashSet<Integer>();
-        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // все подразделения из справочника подразделений
-            for (Department dep : departmentDao.listDepartments()) {
-                retList.add(dep.getId());
-            }
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL) || tAUser.hasRole(TARole.ROLE_OPER)) {
-            // 1. подразделения, для форм которых подразделения из выборки 10 - Выборка для бизнес-администрирования назначены исполнителями.
-            retList.addAll(departmentDao.getDepartmentIdsByExecutors(getBADepartmentIds(tAUser)));
-            // 2. подразделения, для форм которых подразделения из выборки 45 - Подразделения, доступные через назначение источников-приёмников назначены исполнителями.
-            for (Department dep : getSourcesDepartments(tAUser, null, null)) {
-                retList.add(dep.getId());
+        for(TaxType taxType: Arrays.asList(TaxType.NDFL, TaxType.PFR)) {
+            if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+                // все подразделения из справочника подразделений
+                for (Department dep : departmentDao.listDepartments()) {
+                    retList.add(dep.getId());
+                }
+            } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+                // 1. подразделения, для форм которых подразделения из выборки 10 - Выборка для бизнес-администрирования назначены исполнителями.
+                retList.addAll(departmentDao.getDepartmentIdsByExecutors(getBADepartmentIds(tAUser)));
+                // 2. подразделения, для форм которых подразделения из выборки 45 - Подразделения, доступные через назначение источников-приёмников назначены исполнителями.
+                for (Department dep : getSourcesDepartments(tAUser, null, null)) {
+                    retList.add(dep.getId());
+                }
             }
         }
 
@@ -340,11 +338,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, int reportPeriodId) {
+    public List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, int reportPeriodId) {
         ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
         List<Integer> retList = new ArrayList<Integer>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
-        List<Integer> list = getTaxFormDepartments(tAUser, taxTypes, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+        List<Integer> list = getTaxFormDepartments(tAUser, taxType, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
         departmentReportPeriodFilter.setIsActive(true);
         departmentReportPeriodFilter.setDepartmentIdList(list);
@@ -449,5 +447,28 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public int getHierarchyLevel(int departmentId) {
         return departmentDao.getHierarchyLevel(departmentId);
+    }
+
+    @Override
+    public List<Integer> getTaxDeclarationDepartments(TAUser tAUser, DeclarationType declarationType) {
+        TaxType taxType = declarationType.getTaxType();
+        if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)
+                || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
+            // Все подразделения из справочника подразделений
+            return departmentDao.listDepartmentIds();
+        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS)
+                || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)) {
+            // Все подразделения в рамках ТБ
+            return departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId());
+        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_OPER)
+                || tAUser.hasRole(taxType, TARole.F_ROLE_OPER)) {
+            List<Integer> departmentIds = new ArrayList<Integer>();
+            // Подразделение + дочерниее
+            departmentIds.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
+            // Подразделения для которых назначен источником
+            departmentIds.addAll(departmentDao.getAllPerformers(tAUser.getDepartmentId(), declarationType.getId()));
+            return departmentIds;
+        }
+        return new ArrayList<Integer>();
     }
 }

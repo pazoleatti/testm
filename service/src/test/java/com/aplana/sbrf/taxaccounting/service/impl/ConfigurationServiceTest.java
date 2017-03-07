@@ -135,7 +135,8 @@ public class ConfigurationServiceTest {
         TAUser user = new TAUser();
         userInfo.setUser(user);
         TARole role = new TARole();
-        role.setAlias(TARole.ROLE_CONF);
+        role.setAlias(TARole.N_ROLE_CONF);
+        role.setTaxType(TaxType.NDFL);
         user.setRoles(asList(role));
         Logger logger = new Logger();
         service.saveAllConfig(userInfo, new ConfigurationParamModel(), new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
@@ -563,7 +564,8 @@ public class ConfigurationServiceTest {
         user.setDepartmentId(1);
         userInfo.setUser(user);
         TARole role = new TARole();
-        role.setAlias(TARole.ROLE_ADMIN);
+        role.setAlias(TARole.N_ROLE_ADMIN);
+        role.setTaxType(TaxType.NDFL);
         user.setRoles(asList(role));
         return userInfo;
     }

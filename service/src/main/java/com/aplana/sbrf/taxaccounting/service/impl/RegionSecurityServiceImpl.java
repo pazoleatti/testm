@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -43,7 +40,7 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
     private boolean check(TAUser user, Long refBookId, Long uniqueRecordId, Long recordCommonId,
                          Map<String, RefBookValue> values, Date start, Date end, Boolean isDeleteVersion) {
         // если роль пользователя "контролер УНП", то завершить разрешив изменения
-        if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             return true;
         }
 
@@ -51,7 +48,7 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
         RefBook refBook = refBookFactory.get(refBookId);
 
         // если справочник не региональный или пользователь не "контролел НС", то завершить запретив изменения
-        if (refBook.getRegionAttribute() == null || !user.hasRole(TARole.ROLE_CONTROL_NS)) {
+        if (refBook.getRegionAttribute() == null || !user.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
             return false;
         }
 
@@ -59,7 +56,7 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
         RefBookDataProvider departmentProvider = refBookFactory.getDataProvider(DEPARTMENT_REF_BOOK_ID);
         Map<String, RefBookValue> department = departmentProvider.getRecordData((long) user.getDepartmentId());
         Set<Long> availableRegions = new HashSet<Long>();
-        for (Department dep : departmentService.getBADepartments(user)) {
+        for (Department dep : departmentService.getBADepartments(user, TaxType.NDFL)) {
             availableRegions.add(dep.getRegionId());
         }
 

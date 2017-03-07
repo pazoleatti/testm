@@ -31,7 +31,7 @@ import java.util.Map;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_ADMIN')")
 public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveAction, AuditArchiveResult> {
     private static final ThreadLocal<SimpleDateFormat> SDF = new ThreadLocal<SimpleDateFormat>() {
         @Override

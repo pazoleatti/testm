@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -42,7 +39,7 @@ public class RegionSecurityServiceImplTest {
 
     private final Date START = new Date();
 
-    private TAUser nsUser = getUser(TARole.ROLE_CONTROL_NS);
+    private TAUser nsUser = getUser(TARole.N_ROLE_CONTROL_NS);
 
     @Before
     public void init() {
@@ -115,7 +112,7 @@ public class RegionSecurityServiceImplTest {
         Department nsDepartment = new Department();
         nsDepartment.setRegionId(USER_REGION);
         departments.add(nsDepartment);
-        when(departmentService.getBADepartments(nsUser)).thenReturn(departments);
+        when(departmentService.getBADepartments(nsUser, TaxType.NDFL)).thenReturn(departments);
 
         when(refBookFactory.get(NOT_REGION_REF_BOOK_ID)).thenReturn(notRegionRefBook);
         when(refBookFactory.get(REGION_REF_BOOK_ID)).thenReturn(refBook);
@@ -139,7 +136,7 @@ public class RegionSecurityServiceImplTest {
     @Test
     public void deleteRecordSuccessForUnp() {
         // для роли UNP всегда можно изменять
-        TAUser user = getUser(TARole.ROLE_CONTROL_UNP);
+        TAUser user = getUser(TARole.N_ROLE_CONTROL_UNP);
         Long regionRefBook = REGION_REF_BOOK_ID;
         Long uniqueRecord = UNIQUE_RECORD_ID;
         boolean result = regionSecurityService.checkDelete(user, regionRefBook, uniqueRecord, true);
@@ -148,20 +145,6 @@ public class RegionSecurityServiceImplTest {
         Long notRegionRefBook = NOT_REGION_REF_BOOK_ID;
         result = regionSecurityService.checkDelete(user, notRegionRefBook, uniqueRecord, true);
         Assert.assertTrue(result);
-    }
-
-    @Test
-    public void deleteRecordFailForNotUnpOrNs() {
-        // для ролей не UNP и на NS нельзя изменять ни региональные и ни нерегиональные спавочники
-        TAUser user = getUser(TARole.ROLE_CONTROL);
-        Long regionRefBookId = REGION_REF_BOOK_ID;
-        Long uniqueRecordId = UNIQUE_RECORD_ID;
-        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, true);
-        Assert.assertFalse(result);
-
-        Long notRegionRefBookId = NOT_REGION_REF_BOOK_ID;
-        result = regionSecurityService.checkDelete(user, notRegionRefBookId, uniqueRecordId, true);
-        Assert.assertFalse(result);
     }
 
     @Test
@@ -180,7 +163,7 @@ public class RegionSecurityServiceImplTest {
     @Test
     public void deleteRecordFailForNsBadUserDepartment() {
         // для ролей NS можно править только региональные записи относящиеся к его региону
-        TAUser user = getUser(TARole.ROLE_CONTROL_NS, false);
+        TAUser user = getUser(TARole.N_ROLE_CONTROL_NS, false);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID;
         boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, true);
@@ -224,7 +207,7 @@ public class RegionSecurityServiceImplTest {
     @Test
     public void saveRecordFailForNs() {
         // для ролей NS можно править только региональные записи относящиеся к его региону
-        TAUser user = getUser(TARole.ROLE_CONTROL_NS);
+        TAUser user = getUser(TARole.N_ROLE_CONTROL_NS);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID;
         Long recordCommonId = COMMON_RECORD_ID;
@@ -277,6 +260,7 @@ public class RegionSecurityServiceImplTest {
         TARole role = new TARole();
         role.setId(1);
         role.setAlias(roleAlias);
+        role.setTaxType(TaxType.NDFL);
         roles.add(role);
 
         user.setRoles(roles);

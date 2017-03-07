@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicatePersonAction, GetDuplicatePersonResult> {
 
     @Autowired

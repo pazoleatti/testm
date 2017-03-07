@@ -21,7 +21,7 @@ import java.util.Calendar;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class CreateNewDeclarationTypeHandler extends AbstractActionHandler<CreateNewDeclarationTypeAction, CreateNewDeclarationTypeResult> {
 
     @Autowired

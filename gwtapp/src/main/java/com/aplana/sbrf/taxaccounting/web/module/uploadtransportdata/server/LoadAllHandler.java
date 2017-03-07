@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER','ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAllResult> {
 
     @Autowired

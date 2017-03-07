@@ -418,7 +418,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
-        return configurationService.getAllConfig(userInfo);
+        return configurationService.getCommonConfig(userInfo);
     }
 
     @Override

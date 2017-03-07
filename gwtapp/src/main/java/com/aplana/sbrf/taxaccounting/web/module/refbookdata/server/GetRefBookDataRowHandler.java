@@ -68,18 +68,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             return result;
         }
 
-        TAUser currentUser = securityService.currentUserInfo().getUser();
         String filter = null;
-        if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
-            List<Department> deps = departmentService.getBADepartments(currentUser);
-            filter = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
-            if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
-                //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи
-                // справочника - ни одна не должна быть ему доступна
-                return result;
-            }
-        }
-
         if (filter != null && !filter.isEmpty()) {
             filter = filter + " and " + action.getFilter();
         } else {

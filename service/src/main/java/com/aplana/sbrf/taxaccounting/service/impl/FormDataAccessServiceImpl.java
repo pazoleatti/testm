@@ -86,9 +86,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный тип %s не назначен подразделению!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE2 = "Нет прав доступа к созданию формы с заданными параметрами!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный тип %s не назначен подразделению";
-    private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create form in balance period!";
+    private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only N_ROLE_CONTROL can create form in balance period!";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать %s";
-    private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create manual version of form!";
+    private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only N_ROLE_CONTROL can create manual version of form!";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL = "Только контролер может создавать версию ручного ввода";
     private static final String FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав на %s формы с типом \"%s\" в статусе \"%s\"!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
@@ -126,7 +126,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Override
     public void canRead(TAUserInfo userInfo, long formDataId) {
         // УНП может просматривать все формы всех типов
-        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             return;
         }
         // НФ
@@ -135,28 +135,26 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Подразделения, доступные пользователю
         List<Integer> availableDepartmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                asList(formData.getFormType().getTaxType()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                formData.getFormType().getTaxType(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 
         // Создаваемые вручную формы (читают все, имеющие доступ к подразделению в любом статусе)
         if (asList(FormDataKind.ADDITIONAL, FormDataKind.PRIMARY, FormDataKind.UNP).contains(formData.getKind())
-                && (userInfo.getUser().hasRole(TARole.ROLE_OPER)
-                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))
+                && (userInfo.getUser().hasRole(TARole.N_ROLE_OPER)
+                || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS))
                 && availableDepartmentList.contains(formData.getDepartmentId())) {
             return;
         }
 
         // Создаваемые автоматически формы (читают все контролеры, имеющие доступ к подразделению в любом статусе)
         if (asList(FormDataKind.CONSOLIDATED, FormDataKind.SUMMARY, FormDataKind.CALCULATED).contains(formData.getKind())
-                && (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))
+                && ( userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS))
                 && availableDepartmentList.contains(formData.getDepartmentId())) {
             // Передаваемые на вышестоящий уровень (читают все контролеры, имеющие доступ к подразделению в любом статусе)
             return;
         }
 
         // Оператору доступны расчетные формы
-        if (userInfo.getUser().hasRole(TARole.ROLE_OPER) && formData.getKind() == FormDataKind.CALCULATED) {
+        if (userInfo.getUser().hasRole(TARole.N_ROLE_OPER) && formData.getKind() == FormDataKind.CALCULATED) {
             return;
         }
 
@@ -209,9 +207,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             }
         }
         // Проверка периода ввода остатков
-        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)
                 && departmentReportPeriod.isBalance()) {
             LOG.warn(CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG);
             throw new ServiceException(
@@ -220,7 +217,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Проверка доступности подразделения
         if (!departmentService.getOpenPeriodDepartments(userInfo.getUser(),
-                asList(formTemplate.getType().getTaxType()),
+                formTemplate.getType().getTaxType(),
                 departmentReportPeriod.getReportPeriod().getId()).contains(departmentReportPeriod.getDepartmentId())) {
             LOG.warn(String.format(FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG, departmentReportPeriod.getDepartmentId(),
 					departmentReportPeriod.getReportPeriod().getId()));
@@ -288,9 +285,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         FormData formData = formDataDao.get(formDataId, false);
 
         //Проверка роли пользователя
-        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             logger.warn(String.format(CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG));
             throw new ServiceException(CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL);
         }
@@ -345,9 +341,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             switch (formData.getState()) {
                 case CREATED:
                     // Созданные редактируют только контролеры, которые могут открыть форму для чтения
-                    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         throw new AccessDeniedException(
                                 String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
                                         formData.getKind().getTitle(), formData.getState().getTitle()));
@@ -370,9 +365,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     return;
                 case PREPARED:
                     // Подготовленные редактируют только контролеры, которые могут открыть форму для чтения
-                    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
                                 formData.getKind().getTitle(), formData.getState().getTitle()));
                     }
@@ -380,15 +374,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 case APPROVED:
                     // Подготовленные редактируют только контролеры вышестоящего уровня, которые могут открыть форму для чтения
                     // Не контролеры
-                    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
                                 formData.getKind().getTitle(), formData.getState().getTitle()));
                     }
                     // Контролеры текущего уровня
-                    if ((userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))
+                    if ((userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS))
                             && userInfo.getUser().getDepartmentId() == formData.getDepartmentId()) {
                         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
                                 formData.getKind().getTitle(), formData.getState().getTitle()));
@@ -408,13 +400,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             switch (formData.getState()) {
                 case CREATED:
                     // Оператору доступны расчетные формы
-                    if (userInfo.getUser().hasRole(TARole.ROLE_OPER) && formData.getKind() == FormDataKind.CALCULATED) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_OPER) && formData.getKind() == FormDataKind.CALCULATED) {
                         return;
                     }
                     // Созданные редактируют только контролеры, которые могут открыть форму для чтения
-                    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
                                 formData.getKind().getTitle(), formData.getState().getTitle()));
                     }
@@ -452,9 +443,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         FormData formData = formDataDao.getWithoutRows(formDataId);
 
         //Проверка роли пользователя
-        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             logger.warn(String.format(CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG));
             throw new ServiceException(CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL);
         }
@@ -516,8 +506,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
 
         // Признак контролера вышестоящего уровня
-        boolean isUpControl = userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                && formData.getDepartmentId() != userInfo.getUser().getDepartmentId();
+        boolean isUpControl = formData.getDepartmentId() != userInfo.getUser().getDepartmentId();
 
         if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL).contains(formData.getKind()) &&
                 sendToNextLevel) {
@@ -527,26 +516,24 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             switch (formData.getState()) {
                 case CREATED:
                     // Повысить статус могут все, кто имеет доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_OPER)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_OPER)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         result.add(WorkflowMove.CREATED_TO_PREPARED);
                     }
                     break;
                 case PREPARED:
                     // Повысить и понизить статус могут все контролеры, которые имеют доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         result.add(WorkflowMove.PREPARED_TO_CREATED);
                         result.add(WorkflowMove.PREPARED_TO_APPROVED);
                     }
                     break;
                 case APPROVED:
                     // Повысить и понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                    if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+                    if (isUpControl || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)) {
                         result.add(WorkflowMove.APPROVED_TO_PREPARED);
                         result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
                     }
@@ -554,8 +541,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 case ACCEPTED:
                     // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
                     // Форма "Согласование организации" не распринимается
-                    if ((isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))) {
+                    if ((isUpControl || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS))) {
                         result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
                     }
                     break;
@@ -570,18 +557,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             switch (formData.getState()) {
                 case CREATED:
                     // Повысить статус могут все, кто имеет доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_OPER)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_OPER)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         result.add(WorkflowMove.CREATED_TO_PREPARED);
                     }
                     break;
                 case PREPARED:
                     // Повысить и понизить статус могут все контролеры, которые имеют доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if ( userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         result.add(WorkflowMove.PREPARED_TO_CREATED);
                         result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
                     }
@@ -593,9 +578,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     break;
                 case ACCEPTED:
                     // Понизить статус могут все контролеры, которые имеют доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)) {
                         result.add(WorkflowMove.ACCEPTED_TO_PREPARED);
                     }
                     break;
@@ -609,9 +593,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             switch (formData.getState()) {
                 case CREATED:
                     // Повысить статус могут все контролеры, которые имеют доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         result.add(WorkflowMove.CREATED_TO_ACCEPTED);
                     }
                     break;
@@ -622,9 +605,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     break;
                 case ACCEPTED:
                     // Понизить статус могут все контролеры, которые имеют доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         result.add(WorkflowMove.ACCEPTED_TO_CREATED);
                     }
                     break;
@@ -639,29 +621,27 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             switch (formData.getState()) {
                 case CREATED:
                     // Повысить статус могут все контролеры, которые имеют доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         result.add(WorkflowMove.CREATED_TO_APPROVED);
                     }
                     break;
                 case APPROVED:
                     // Пониизить статус могут все контролеры, которые имеют доступ для чтения
-                    if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
                         result.add(WorkflowMove.APPROVED_TO_CREATED);
                     }
                     // Повысить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                    if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+                    if (isUpControl || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)) {
                         result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
                     }
                     break;
                 case ACCEPTED:
                     // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                    if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+                    if (isUpControl || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)
+                            || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)) {
                         result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
                     }
                     break;
@@ -716,9 +696,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         List<FormDataKind> formDataKindList = new ArrayList<FormDataKind>(FormDataKind.values().length);
         // http://conf.aplana.com/pages/viewpage.action?pageId=11386069
         formDataKindList.add(FormDataKind.PRIMARY);
-        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                || userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             formDataKindList.add(FormDataKind.CONSOLIDATED);
             formDataKindList.add(FormDataKind.SUMMARY);
         }

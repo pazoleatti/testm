@@ -22,7 +22,7 @@ import java.util.Date;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class DeleteDTVersionHandler extends AbstractActionHandler<DeleteDTVersionAction, DeleteDTVersionResult> {
 
     @Autowired

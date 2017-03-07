@@ -42,7 +42,7 @@ import java.util.Map;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 @Transactional
 public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction, UnitEditingResult> {
 
@@ -66,7 +66,6 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
     private DepartmentService departmentService;
 
 	private static final String LOCK_MESSAGE = "Справочник \"%s\" заблокирован, попробуйте выполнить операцию позже!";
-
 
     public UnitEditingHandler() {
         super(UnitEditingAction.class);

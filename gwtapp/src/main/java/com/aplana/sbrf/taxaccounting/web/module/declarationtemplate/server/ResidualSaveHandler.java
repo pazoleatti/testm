@@ -12,6 +12,7 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,6 +21,7 @@ import java.util.Date;
  * User: avanteev
  */
 @Service
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class ResidualSaveHandler extends AbstractActionHandler<ResidualSaveAction, ResidualSaveResult> {
 
     @Autowired

@@ -230,7 +230,7 @@ public class DeclarationDataPresenter
 														+ DeclarationListNameTokens.DECLARATION_LIST
 														+ ";nType="
 														+ result.getTaxType()
-                                                        + (DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind())?(";"+ DeclarationListPresenter.REPORTS + "=" + true):""), result.getTaxType()
+                                                        + (TaxType.NDFL.equals(taxType) && DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind())?(";"+ DeclarationListPresenter.REPORTS + "=" + true):""), result.getTaxType()
                                         .getName());
 								getView().setTitle(result.getDeclarationType(), result.getTaxType().equals(TaxType.DEAL));
 								updateTitle(result.getDeclarationType());
@@ -439,7 +439,7 @@ public class DeclarationDataPresenter
 										}
 									}, DeclarationDataPresenter.this));
 		} else {
-            Dialog.confirmMessageYesClose("Отмена принятия", "Вы действительно хотите отменить принятие формы?", new DialogHandler() {
+            Dialog.confirmMessageYesClose("Возврат в Создана", "Вы действительно хотите вернуть в статус \"Создана\" форму?\"", new DialogHandler() {
                 @Override
                 public void yes() {
                     LogCleanEvent.fire(DeclarationDataPresenter.this);

@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -19,14 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarationList, GetDeclarationListResult> {
 
 	public GetDeclarationListHandler() {
@@ -52,21 +48,32 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 		}
 
         boolean wasEmpty = false;
+        TaxType taxType = action.getDeclarationFilter().getTaxType();
 
         TAUser currentUser = securityService.currentUserInfo().getUser();
 
         if (action.getDeclarationFilter().getDepartmentIds() == null || action.getDeclarationFilter().getDepartmentIds().isEmpty()) {
             action.getDeclarationFilter().setDepartmentIds(departmentService.getTaxFormDepartments(
-                    currentUser, asList(action.getDeclarationFilter().getTaxType()), null, null));
+                    currentUser, action.getDeclarationFilter().getTaxType(), null, null));
             wasEmpty = true;
         }
 
+        List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
+        for(DeclarationFormKind declarationFormKind: GetDeclarationFilterDataHandler.getAvailableDeclarationFormKind(taxType, action.isReports(), currentUser)) {
+            availableDeclarationFormKindIds.add(declarationFormKind.getId());
+        }
+        if (action.getDeclarationFilter().getFormKindIds() != null && !action.getDeclarationFilter().getFormKindIds().isEmpty()) {
+            availableDeclarationFormKindIds.retainAll(action.getDeclarationFilter().getFormKindIds());
+        }
+        action.getDeclarationFilter().setFormKindIds(availableDeclarationFormKindIds);
+
         // Для всех пользователей, кроме пользователей с ролью "Контролер УНП" происходит принудительная фильтрация
         // деклараций по подразделениям
-        if (!currentUser.hasRole(TARole.ROLE_CONTROL_UNP) && !wasEmpty) {
+        if (!currentUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)
+                && !wasEmpty) {
             // Список доступных подразделений
             List<Integer> availableList = departmentService.getTaxFormDepartments(
-                    currentUser, asList(action.getDeclarationFilter().getTaxType()), null, null);
+                    currentUser, action.getDeclarationFilter().getTaxType(), null, null);
 
             // Если пользовательская фильтрация не задана, то выбираем по всем доступным подразделениям
             // Если пользовательская фильтрация задана, то выбираем по всем доступным подразделениям,
@@ -89,13 +96,18 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
                 int countOfRecords = action.getDeclarationFilter().getCountOfRecords();
                 int startIndex = action.getDeclarationFilter().getStartIndex();
                 result.setPage((int)(rowNum/countOfRecords));
-                if (((int)startIndex/countOfRecords) != result.getPage()) {
+                if ((startIndex/countOfRecords) != result.getPage()) {
                     return result;
                 }
             }
         }
 
         action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
+
+        if (taxType.equals(TaxType.NDFL) && !currentUser.hasRole(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER) ||
+                taxType.equals(TaxType.PFR) && !currentUser.hasRole(TARole.F_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.F_ROLE_OPER)) {
+            action.getDeclarationFilter().setUserDepartmentId(currentUser.getDepartmentId());
+        }
 
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();

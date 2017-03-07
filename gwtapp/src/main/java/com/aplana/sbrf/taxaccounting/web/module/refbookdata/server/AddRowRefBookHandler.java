@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class AddRowRefBookHandler extends AbstractActionHandler<AddRowRefBookAction, AddRowRefBookResult> {
     @Autowired
     private RefBookFactory refBookFactory;

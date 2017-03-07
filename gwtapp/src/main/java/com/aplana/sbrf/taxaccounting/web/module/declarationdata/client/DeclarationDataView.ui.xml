@@ -218,7 +218,7 @@
                             <g:Button text="Рассчитать" ui:field="recalculateButton" />
                             <g:Button text="Удалить" ui:field="deleteButton" />
                             <g:Button text="Принять" ui:field="acceptButton" />
-                            <g:Button text="Отменить принятие" ui:field="cancelButton" />
+                            <g:Button text="Возврат в Создана" ui:field="cancelButton" />
                             <g:Button text="Показать" ui:field="viewPdf" visible="false"/>
                         </style:LeftBar>
                         <g:HorizontalPanel>
