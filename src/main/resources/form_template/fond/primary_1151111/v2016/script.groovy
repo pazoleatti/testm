@@ -2316,21 +2316,21 @@ class TestDataHolder {
 void importData() {
 
     // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
-    def declarationDataList = declarationService.find(PRIMARY_1151111_TEMPLATE_ID, declarationData.departmentReportPeriodId)
-    if (declarationDataList != null && !declarationDataList.isEmpty()) {
-
-        // Период
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
-        def calendarStartDate = reportPeriod?.calendarStartDate
-
-        // Подразделение
-        Department department = departmentService.get(declarationData.departmentId)
-
-        logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
-                    в периоде \"$periodCode\" ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
-        return
-    }
+//    def declarationDataList = declarationService.find(PRIMARY_1151111_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+//    if (declarationDataList != null && !declarationDataList.isEmpty()) {
+//
+//        // Период
+//        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+//        def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+//        def calendarStartDate = reportPeriod?.calendarStartDate
+//
+//        // Подразделение
+//        Department department = departmentService.get(declarationData.departmentId)
+//
+//        logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
+//                    в периоде \"$periodCode\" ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
+//        return
+//    }
 
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
