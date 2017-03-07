@@ -169,13 +169,12 @@ public interface NdflPersonService {
 
     /**
      * Найти NdflPerson строки данных о доходах которых соответствуют паре кпп и октмо
-     *
      * @param declarationDataId
      * @param kpp
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo);
 
     /**
      * Данные об авансах Физлиц
@@ -256,5 +255,21 @@ public interface NdflPersonService {
      * @return
      */
     List<NdflPerson> findByIdList(List<Long> ndflPersonIdList);
+
+    /**
+     * Поиск дублей по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    List<Integer> findDublRowNum(String tableName, Long declarationDataId);
+
+    /**
+     * Поиск пропусков по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    List<Integer> findMissingRowNum(String tableName, Long declarationDataId);
 }
 

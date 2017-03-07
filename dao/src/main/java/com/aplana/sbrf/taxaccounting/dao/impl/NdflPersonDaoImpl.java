@@ -164,10 +164,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " WHERE npi.ndfl_person_id = :ndflPersonId" +
-                " AND npi.tax_date between :startDate AND :endDate" + priznakFClause +
-                " UNION SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
-                " WHERE npi.ndfl_person_id = :ndflPersonId" +
-                " AND npi.payment_date between :startDate AND :endDate" + priznakFClause;
+                " AND npi.INCOME_ACCRUED_DATE between :startDate AND :endDate" + priznakFClause;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
                 .addValue("startDate", startDate)
@@ -343,7 +340,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo) {
         String sql = "SELECT DISTINCT /*+rule */" + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
                 " FROM ndfl_person np " +
                 " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
@@ -351,7 +348,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 " ON np.id = npi.ndfl_person_id " +
                 " WHERE npi.kpp = :kpp " +
                 " AND npi.oktmo = :oktmo " +
-                " AND np.DECLARATION_DATA_ID in (select id from DECLARATION_DATA where id = :declarationDataId)";
+                " AND np.DECLARATION_DATA_ID in (:declarationDataId)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declarationDataId", declarationDataId)
                 .addValue("kpp", kpp)
@@ -621,6 +618,59 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<Integer> findDublRowNum(String tableName, Long declarationDataId) {
+        String sql = null;
+        if (tableName.equals("NDFL_PERSON")) {
+            sql = "SELECT t.row_num FROM " + tableName + " t " +
+                    " WHERE t.declaration_data_id =:declaration_data_id AND t.row_num IN " +
+                    "(SELECT i.row_num FROM " + tableName + " i WHERE i.row_num IS NOT NULL GROUP BY i.row_num HAVING COUNT(i.row_num) > 1) " +
+                    " GROUP BY t.row_num " +
+                    " ORDER BY t.row_num";
+        } else {
+            sql = "SELECT t.row_num FROM " + tableName + " t " +
+                    " WHERE t.row_num IN " +
+                    "(SELECT i.row_num FROM " + tableName + " i " +
+                    " INNER JOIN NDFL_PERSON p ON i.ndfl_person_id = p.id" +
+                    " WHERE p.declaration_data_id =:declaration_data_id AND i.row_num IS NOT NULL GROUP BY i.row_num HAVING COUNT(i.row_num) > 1) " +
+                    " GROUP BY t.row_num " +
+                    " ORDER BY t.row_num";
+        }
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declaration_data_id", declarationDataId);
+        return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Integer>() {
+            @Override
+            public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getInt("row_num");
+            }
+        });
+    }
+
+    @Override
+    public List<Integer> findMissingRowNum(String tableName, Long declarationDataId) {
+        String sql = null;
+        if (tableName.equals("NDFL_PERSON")) {
+            sql = "WITH t AS (SELECT t.row_num FROM " + tableName + " t " +
+                    " WHERE t.row_num IS NOT NULL AND t.declaration_data_id =:declaration_data_id ORDER BY t.row_num) " +
+                    " SELECT LEVEL AS row_num FROM (SELECT MAX(row_num) AS max_x FROM t) " +
+                    " CONNECT BY LEVEL <= max_x MINUS SELECT row_num FROM t";
+        } else {
+            sql = "WITH t AS (SELECT t.row_num FROM " + tableName + " t " +
+                    " INNER JOIN NDFL_PERSON p ON t.ndfl_person_id = p.id " +
+                    " WHERE t.row_num IS NOT NULL AND p.declaration_data_id =:declaration_data_id ORDER BY t.row_num) " +
+                    " SELECT LEVEL AS row_num FROM (SELECT MAX(row_num) AS max_x FROM t) " +
+                    " CONNECT BY LEVEL <= max_x MINUS SELECT row_num FROM t";
+        }
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declaration_data_id", declarationDataId);
+        return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Integer>() {
+            @Override
+            public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getInt("row_num");
+            }
+        });
     }
 
     private static String createColumns(String[] columns, String alias) {
