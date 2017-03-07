@@ -254,11 +254,10 @@ Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
  * @return Map < person_id , Map < имя_поля , значение_поля > >
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
-    Long declarationDataId = declarationData.id;
-    String whereClause = String.format("select r.record_id " +
-            " FROM ref_book_person r " +
-            " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-            " WHERE p.declaration_data_id = %s AND frb.record_id = r.record_id", declarationDataId)
+    String whereClause = """
+            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+        """
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
     def refBookMapResult = [:]
     refBookMap.each { personId, refBookValue ->
@@ -307,11 +306,10 @@ def getRefInpMapByDeclarationDataId() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefInpMapByDeclarationDataId() {
     if (inpActualCache.isEmpty()) {
-        Long declarationDataId = declarationData.id;
-        String whereClause = String.format("select r.id " +
-                " FROM ref_book_person r " +
-                " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
+        String whereClause = """
+            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN raschsv_pers_sv_strah_lic np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+        """
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { id, refBook ->
@@ -2078,11 +2076,10 @@ def getRefDulByDeclarationDataId() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
     if (dulActualCache.isEmpty()) {
-        Long declarationDataId = declarationData.id;
-        String whereClause = String.format("select r.id " +
-                " FROM ref_book_person r " +
-                " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
+        String whereClause = """
+            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN raschsv_pers_sv_strah_lic np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+        """
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { personId, refBookValues ->

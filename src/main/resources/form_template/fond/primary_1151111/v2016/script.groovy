@@ -1,76 +1,26 @@
 package form_template.fond.primary_1151111.v2016
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.PersonData
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.log.Logger
+import com.aplana.sbrf.taxaccounting.model.raschsv.*
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-
-import javax.script.ScriptException
-import java.awt.Color
-import java.text.SimpleDateFormat
-
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.ss.usermodel.Font
-import org.apache.poi.xssf.usermodel.XSSFColor
-import org.apache.poi.xssf.usermodel.XSSFCellStyle
-import org.apache.poi.xssf.usermodel.XSSFFont
-import org.apache.poi.xssf.usermodel.XSSFRow
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.apache.commons.io.IOUtils
-
-import com.aplana.sbrf.taxaccounting.model.formdata.*
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.PersonData
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMk
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPer
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOms
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRasch
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschSum
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschKol
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvSum1Tip
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvKolLicTip
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmSum
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmKol
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplSvPrev
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZakRash
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplPrichina
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif31427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif51427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif71427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif91427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedPatent
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif22425
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt425
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvInoGrazd
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif13422
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt422
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedObuch
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvReestrMdo
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvnpPodpisant
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVypl
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogStrahLic
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVyplDop;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.transform.Memoized
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.util.CellRangeAddress
+import org.apache.poi.xssf.usermodel.*
 
-import java.util.regex.Pattern
+import javax.script.ScriptException
+import java.awt.*
+import java.util.List
 
 //----------------------------------------------------------------------------------------------------------------------
 // Счетчик для проверки соответствия числа узлов
@@ -3822,11 +3772,10 @@ Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
  * @return Map<person_id, Map<имя_поля, значение_поля>>
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
-    Long declarationDataId = declarationData.id;
-    String whereClause = String.format("select r.record_id " +
-            " FROM ref_book_person r " +
-            " INNER JOIN raschsv_pers_sv_strah_lic p ON r.id = p.person_id " +
-            " WHERE p.declaration_data_id = %s AND frb.record_id = r.record_id", declarationDataId)
+    String whereClause = """
+        JOIN ref_book_person p ON (frb.record_id = p.record_id)
+        JOIN raschsv_pers_sv_strah_lic np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+    """
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
     def refBookMapResult = [:]
     refBookMap.each { personId, refBookValue ->
@@ -6299,11 +6248,10 @@ def getRefDulByDeclarationDataId() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
     if (dulActualCache.isEmpty()) {
-        Long declarationDataId = declarationData.id;
-        String whereClause = String.format("select r.id " +
-                " FROM ref_book_person r " +
-                " INNER JOIN raschsv_pers_sv_strah_lic p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
+        String whereClause = """
+            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN raschsv_pers_sv_strah_lic np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+        """
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { personId, refBookValues ->
