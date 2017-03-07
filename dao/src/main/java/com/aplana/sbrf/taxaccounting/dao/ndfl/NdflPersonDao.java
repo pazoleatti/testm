@@ -184,13 +184,13 @@ public interface NdflPersonDao {
     List<NdflPersonPrepayment> findPrepayments(long ndflPersonId);
 
     /**
-     * Найти NdflPerson строки данных о доходах которых соответствуют паре кпп и октмо
+     * Найти NdflPerson строки данных о доходах которых соответствуют парам кпп и октмо
      * @param declarationDataId
      * @param kpp
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo);
 
     /**
      * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ

@@ -163,10 +163,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " WHERE npi.ndfl_person_id = :ndflPersonId" +
-                " AND npi.tax_date between :startDate AND :endDate" + priznakFClause +
-                " UNION SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
-                " WHERE npi.ndfl_person_id = :ndflPersonId" +
-                " AND npi.payment_date between :startDate AND :endDate" + priznakFClause;
+                " AND npi.INCOME_ACCRUED_DATE between :startDate AND :endDate" + priznakFClause;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
                 .addValue("startDate", startDate)
@@ -342,7 +339,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo) {
         String sql = "SELECT DISTINCT /*+rule */" + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
                 " FROM ndfl_person np " +
                 " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
@@ -350,7 +347,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 " ON np.id = npi.ndfl_person_id " +
                 " WHERE npi.kpp = :kpp " +
                 " AND npi.oktmo = :oktmo " +
-                " AND np.DECLARATION_DATA_ID in (select id from DECLARATION_DATA where id = :declarationDataId)";
+                " AND np.DECLARATION_DATA_ID in (:declarationDataId)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declarationDataId", declarationDataId)
                 .addValue("kpp", kpp)

@@ -51,7 +51,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo) {
         return ndflPersonDao.findNdflPersonByPairKppOktmo(declarationDataId, kpp, oktmo);
     }
 

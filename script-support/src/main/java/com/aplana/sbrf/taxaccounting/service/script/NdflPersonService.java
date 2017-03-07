@@ -169,13 +169,12 @@ public interface NdflPersonService {
 
     /**
      * Найти NdflPerson строки данных о доходах которых соответствуют паре кпп и октмо
-     *
      * @param declarationDataId
      * @param kpp
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo);
 
     /**
      * Данные об авансах Физлиц
