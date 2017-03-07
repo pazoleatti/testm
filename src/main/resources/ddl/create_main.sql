@@ -381,7 +381,7 @@ comment on column declaration_data.oktmo is 'ОКТМО';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
 comment on column declaration_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
-comment on column declaration_data.state is 'Состояние формы';
+comment on column declaration_data.state is 'Состояние формы (1 - Создана, 2 - Подготовлена, 3 - Принята)';
 comment on column declaration_data.file_name is 'Имя файла';
 comment on column declaration_data.doc_state_id is 'Состояние ЭД';
 
