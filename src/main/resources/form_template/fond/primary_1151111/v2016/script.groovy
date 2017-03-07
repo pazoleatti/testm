@@ -245,8 +245,6 @@ switch (formDataEvent) {
 
 @Field final String TRANSPORT_FILE_TEMPLATE = "ТФ"
 
-// TODO Серия/номер ДУЛ, ИНН, СНИЛС должны быть текстовыми ячейками. Иначе пропадают ведущие нули.
-// TODO варнинг ДА-НЕТ при открытие файла
 // TODO долго на 20к
 // TODO snisl в fillRasch9st427Row
 def createSpecificReport() {
