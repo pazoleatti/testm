@@ -241,5 +241,312 @@ where
   ((person_doc.doc_id = dubl.id_doc_type and (replace(lower(person_doc.doc_number), ' ', '') = dubl.id_doc_number)));
 
 
+--///////////////////////////////////// РНУ - НДФЛ (чере union) //////////////////////////////////////////////////////
+
+/*По ФИО*/
+select /*+ordered use_nl(person) use_nl(person_doc) use_nl(taxpayer_id) use_nl(addr)*/
+  --фл
+  t.id    as ndfl_person_id,
+  person.id as person_id,
+  person.record_id as person_record_id,
+  person.last_name as last_name,
+  person.first_name as first_name,
+  person.middle_name as middle_name,
+  person.sex as sex,
+  person.birth_date as birth_date,
+  person.inn as inn,
+  person.inn_foreign as inn_foreign,
+  person.snils as snils,
+  person.pension as pension,
+  person.medical as midical,
+  person.social as social,
+  person.employee as employee,
+  --ссылки на записи
+  person.citizenship as citizenship_ref_id,
+  person.taxpayer_state as status_ref_id,
+  person.version,
+  --документы
+  person_doc.doc_number as document_number,
+  person_doc.doc_id as document_type_ref_id,
+  --идентификаторы
+  taxpayer_id.inp as inp,
+  taxpayer_id.as_nu as asnu_ref_id,
+  -- адрес
+  addr.id as addr_id,
+  addr.address_type,
+  addr.country_id,
+  addr.region_code,
+  addr.postal_code,
+  addr.district,
+  addr.city,
+  addr.locality,
+  addr.street,
+  addr.house,
+  addr.build,
+  addr.appartment,
+  addr.status,
+  addr.record_id,
+  addr.address
+from ndfl_person t join ref_book_person person on (replace(lower(person.last_name),' ','') = replace(lower(t.last_name),' ','') and
+                                                   replace(lower(person.first_name),' ','') = replace(lower(t.first_name),' ','') and
+                                                   replace(lower(person.middle_name),' ','') = replace(lower(t.middle_name),' ','') and
+                                                   person.birth_date=t.birth_day
+  )
+  left join ref_book_id_doc person_doc on (person_doc.person_id=person.id)
+  left join ref_book_id_tax_payer taxpayer_id on (taxpayer_id.person_id = person.id)
+  left join ref_book_address addr on (addr.id=person.address)
+where t.declaration_data_id=:decl_data_id
+union
+/*по СНИЛСУ*/
+select /*+ordered use_nl(person) use_nl(person_doc) use_nl(taxpayer_id) use_nl(addr)*/
+  --фл
+  t.id    as ndfl_person_id,
+  person.id as person_id,
+  person.record_id as person_record_id,
+  person.last_name as last_name,
+  person.first_name as first_name,
+  person.middle_name as middle_name,
+  person.sex as sex,
+  person.birth_date as birth_date,
+  person.inn as inn,
+  person.inn_foreign as inn_foreign,
+  person.snils as snils,
+  person.pension as pension,
+  person.medical as midical,
+  person.social as social,
+  person.employee as employee,
+  --ссылки на записи
+  person.citizenship as citizenship_ref_id,
+  person.taxpayer_state as status_ref_id,
+  person.version,
+  --документы
+  person_doc.doc_number as document_number,
+  person_doc.doc_id as document_type_ref_id,
+  --идентификаторы
+  taxpayer_id.inp as inp,
+  taxpayer_id.as_nu as asnu_ref_id,
+  -- адрес
+  addr.id as addr_id,
+  addr.address_type,
+  addr.country_id,
+  addr.region_code,
+  addr.postal_code,
+  addr.district,
+  addr.city,
+  addr.locality,
+  addr.street,
+  addr.house,
+  addr.build,
+  addr.appartment,
+  addr.status,
+  addr.record_id,
+  addr.address
+from ndfl_person t join ref_book_person person on (replace(replace(person.snils,' ',''),'-','') = replace(replace(t.snils, ' ', ''), '-', ''))
+  left join ref_book_id_doc person_doc on (person_doc.person_id=person.id)
+  left join ref_book_id_tax_payer taxpayer_id on (taxpayer_id.person_id = person.id)
+  left join ref_book_address addr on (addr.id=person.address)
+where t.declaration_data_id=:decl_data_id
+union
+/*По ИННу*/
+select /*ordered use_nl(person) use_nl(person_doc) use_nl(taxpayer_id) use_nl(addr)*/
+  --фл
+  t.id    as ndfl_person_id,
+  person.id as person_id,
+  person.record_id as person_record_id,
+  person.last_name as last_name,
+  person.first_name as first_name,
+  person.middle_name as middle_name,
+  person.sex as sex,
+  person.birth_date as birth_date,
+  person.inn as inn,
+  person.inn_foreign as inn_foreign,
+  person.snils as snils,
+  person.pension as pension,
+  person.medical as midical,
+  person.social as social,
+  person.employee as employee,
+  --ссылки на записи
+  person.citizenship as citizenship_ref_id,
+  person.taxpayer_state as status_ref_id,
+  person.version,
+  --документы
+  person_doc.doc_number as document_number,
+  person_doc.doc_id as document_type_ref_id,
+  --идентификаторы
+  taxpayer_id.inp as inp,
+  taxpayer_id.as_nu as asnu_ref_id,
+  -- адрес
+  addr.id as addr_id,
+  addr.address_type,
+  addr.country_id,
+  addr.region_code,
+  addr.postal_code,
+  addr.district,
+  addr.city,
+  addr.locality,
+  addr.street,
+  addr.house,
+  addr.build,
+  addr.appartment,
+  addr.status,
+  addr.record_id,
+  addr.address
+from ndfl_person t join ref_book_person person on (replace(person.inn,' ','') = replace(t.inn_np,' ',''))
+  left join ref_book_id_doc person_doc on (person_doc.person_id=person.id)
+  left join ref_book_id_tax_payer taxpayer_id on (taxpayer_id.person_id = person.id)
+  left join ref_book_address addr on (addr.id=person.address)
+where t.declaration_data_id=:decl_data_id
+union
+/*По ИННу иностранного государства*/
+select /*ordered use_nl(person) use_nl(person_doc) use_nl(taxpayer_id) use_nl(addr)*/
+  --фл
+  t.id    as ndfl_person_id,
+  person.id as person_id,
+  person.record_id as person_record_id,
+  person.last_name as last_name,
+  person.first_name as first_name,
+  person.middle_name as middle_name,
+  person.sex as sex,
+  person.birth_date as birth_date,
+  person.inn as inn,
+  person.inn_foreign as inn_foreign,
+  person.snils as snils,
+  person.pension as pension,
+  person.medical as midical,
+  person.social as social,
+  person.employee as employee,
+  --ссылки на записи
+  person.citizenship as citizenship_ref_id,
+  person.taxpayer_state as status_ref_id,
+  person.version,
+  --документы
+  person_doc.doc_number as document_number,
+  person_doc.doc_id as document_type_ref_id,
+  --идентификаторы
+  taxpayer_id.inp as inp,
+  taxpayer_id.as_nu as asnu_ref_id,
+  -- адрес
+  addr.id as addr_id,
+  addr.address_type,
+  addr.country_id,
+  addr.region_code,
+  addr.postal_code,
+  addr.district,
+  addr.city,
+  addr.locality,
+  addr.street,
+  addr.house,
+  addr.build,
+  addr.appartment,
+  addr.status,
+  addr.record_id,
+  addr.address
+from ndfl_person t join ref_book_person person on (replace(person.inn_foreign,' ','') = replace(t.inn_foreign,' ',''))
+  left join ref_book_id_doc person_doc on (person_doc.person_id=person.id)
+  left join ref_book_id_tax_payer taxpayer_id on (taxpayer_id.person_id = person.id)
+  left join ref_book_address addr on (addr.id=person.address)
+where t.declaration_data_id=:decl_data_id
+union
+/*По ДУЛ*/
+select /*ordered use_nl(person_doc) use_nl(person) use_nl(taxpayer_id) use_nl(addr)*/
+  --фл
+  t.id    as ndfl_person_id,
+  person.id as person_id,
+  person.record_id as person_record_id,
+  person.last_name as last_name,
+  person.first_name as first_name,
+  person.middle_name as middle_name,
+  person.sex as sex,
+  person.birth_date as birth_date,
+  person.inn as inn,
+  person.inn_foreign as inn_foreign,
+  person.snils as snils,
+  person.pension as pension,
+  person.medical as midical,
+  person.social as social,
+  person.employee as employee,
+  --ссылки на записи
+  person.citizenship as citizenship_ref_id,
+  person.taxpayer_state as status_ref_id,
+  person.version,
+  --документы
+  person_doc.doc_number as document_number,
+  person_doc.doc_id as document_type_ref_id,
+  --идентификаторы
+  taxpayer_id.inp as inp,
+  taxpayer_id.as_nu as asnu_ref_id,
+  -- адрес
+  addr.id as addr_id,
+  addr.address_type,
+  addr.country_id,
+  addr.region_code,
+  addr.postal_code,
+  addr.district,
+  addr.city,
+  addr.locality,
+  addr.street,
+  addr.house,
+  addr.build,
+  addr.appartment,
+  addr.status,
+  addr.record_id,
+  addr.address
+from ndfl_person t left join ref_book_doc_type dt on (dt.code=t.id_doc_type)
+  left join ref_book_id_doc person_doc on (person_doc.doc_id=dt.id and replace(lower(person_doc.doc_number),' ','') = replace(lower(t.id_doc_number),' ',''))
+  left join ref_book_person person on (person.id = person_doc.person_id)
+  left join ref_book_id_tax_payer taxpayer_id on (taxpayer_id.person_id = person.id)
+  left join ref_book_address addr on (addr.id=person.address)
+where t.declaration_data_id=:decl_data_id
+union
+/*По ИНП*/
+select /*ordered use_nl(taxpayer_id) use_nl(person)  use_nl(addr) use_nl(person_doc)*/
+  --фл
+  t.id    as ndfl_person_id,
+  person.id as person_id,
+  person.record_id as person_record_id,
+  person.last_name as last_name,
+  person.first_name as first_name,
+  person.middle_name as middle_name,
+  person.sex as sex,
+  person.birth_date as birth_date,
+  person.inn as inn,
+  person.inn_foreign as inn_foreign,
+  person.snils as snils,
+  person.pension as pension,
+  person.medical as midical,
+  person.social as social,
+  person.employee as employee,
+  --ссылки на записи
+  person.citizenship as citizenship_ref_id,
+  person.taxpayer_state as status_ref_id,
+  person.version,
+  --документы
+  person_doc.doc_number as document_number,
+  person_doc.doc_id as document_type_ref_id,
+  --идентификаторы
+  taxpayer_id.inp as inp,
+  taxpayer_id.as_nu as asnu_ref_id,
+  -- адрес
+  addr.id as addr_id,
+  addr.address_type,
+  addr.country_id,
+  addr.region_code,
+  addr.postal_code,
+  addr.district,
+  addr.city,
+  addr.locality,
+  addr.street,
+  addr.house,
+  addr.build,
+  addr.appartment,
+  addr.status,
+  addr.record_id,
+  addr.address
+from ndfl_person t left join ref_book_id_tax_payer taxpayer_id on (taxpayer_id.as_nu = :asnuID and lower(taxpayer_id.inp)=lower(t.inp))
+  left join ref_book_person person on (person.id = taxpayer_id.person_id)
+  left join ref_book_address addr on (addr.id=person.address)
+  left join ref_book_id_doc person_doc on (person_doc.person_id=person.id)
+where t.declaration_data_id=:decl_data_id
+
 
 
