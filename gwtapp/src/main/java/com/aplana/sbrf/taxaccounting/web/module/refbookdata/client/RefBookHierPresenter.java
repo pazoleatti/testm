@@ -425,28 +425,6 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         };
     }
 
-    /*private void checkRecord() {
-        CheckRecordExistenceAction action = new CheckRecordExistenceAction();
-        action.setRefBookId(refBookId);
-        action.setRecordId(uniqueRecordId);
-        dispatcher.execute(action, CallbackUtils.defaultCallback(
-                new AbstractCallback<CheckRecordExistenceResult>() {
-                    @Override
-                    public void onSuccess(CheckRecordExistenceResult result) {
-                        if (result.isRecordExistence()) {
-                            uniqueRecordId = null;
-                            refBookHierDataPresenter.reload();
-                            getView().loadAndSelect();
-                        } else {
-                            refBookHierDataPresenter.reload();
-                            refBookHierDataPresenter.setSelected(uniqueRecordId);
-                            hierEditFormPresenter.show(uniqueRecordId);
-                        }
-                    }
-                }, this));
-    }*/
-
-
     @Override
     public void onPrintClicked(String reportName) {
         CreateReportAction action = new CreateReportAction();

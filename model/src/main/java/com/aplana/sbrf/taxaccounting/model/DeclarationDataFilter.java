@@ -52,6 +52,11 @@ public class DeclarationDataFilter implements Serializable {
 
     private List<Long> asnuIds;
 
+    /**
+     * Подразделение пользователя, должно задаваться только пользователю с ролью Оператор
+     */
+    private Integer userDepartmentId;
+
     /*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
 
@@ -233,5 +238,13 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setAsnuIds(List<Long> asnuIds) {
         this.asnuIds = asnuIds;
+    }
+
+    public Integer getUserDepartmentId() {
+        return userDepartmentId;
+    }
+
+    public void setUserDepartmentId(Integer userDepartmentId) {
+        this.userDepartmentId = userDepartmentId;
     }
 }

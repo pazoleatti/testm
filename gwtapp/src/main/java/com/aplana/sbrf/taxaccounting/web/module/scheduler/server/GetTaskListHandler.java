@@ -26,7 +26,7 @@ import java.util.List;
  * @author dloshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('N_ROLE_ADMIN')")
 public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction, GetTaskListResult> {
 
     private static final String DATE_FORMAT = "dd-MM-yyyy, HH:mm";

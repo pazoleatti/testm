@@ -47,6 +47,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     private DeclarationDataService declarationDataService;
     @Autowired
     private AuditService auditService;
+    @Autowired
+    private TAUserService userService;
 
     @Override
     public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
@@ -105,7 +107,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(declarationTemplate.getId(), declarationTemplate.getVersion());
         for (long declarationId : ddIds) {
             // Отменяем задачи формирования спец отчетов/удаляем спец отчеты
-            declarationDataService.interruptTask(declarationId, user, ReportType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
+            declarationDataService.interruptTask(declarationId, userService.getSystemUserInfo(), ReportType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
         }
 
         declarationTemplateService.save(declarationTemplate);
@@ -216,7 +218,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         }
         auditService.add(FormDataEvent.TEMPLATE_DELETED, user, template.getVersion(),
                 endDate, template.getName(), null, null, null);
-        logging(templateId, FormDataEvent.TEMPLATE_DELETED, user.getUser());
         return isDeleteAll;
     }
 

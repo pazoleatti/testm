@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
+import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -30,7 +31,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     public static final String DATE_BOX_TITLE = "Дата формирования налоговой формы";
     public static final String DATE_BOX_TITLE_D = "Дата формирования уведомления";
     private static final int TABLE_TOP2 = 103;
-    private static final int TABLE_TOP3 = 108;
+    private static final int TABLE_TOP3 = 110;
     private static final int TABLE_TOP4 = 125;
     private static final int TABLE_TOP5 = 142;
 
@@ -79,7 +80,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     Label kppLabel, oktmoLabel, taxOrganCodeLabel, stateEDLabel, asnuLabel, importTfLabel;
 
 	@UiField
-	PdfViewerView pdfViewer;
+    PdfViewerWidget pdfViewer;
     @UiField
     DockLayoutPanel noPdfPanel;
     @UiField
@@ -345,6 +346,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         int top = (num == 5) ? TABLE_TOP5 :  (num == 4) ? TABLE_TOP4 :
                   ((num == 3) ? TABLE_TOP3 : TABLE_TOP2);
         noPdfPanel.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
+        pdfViewer.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
     }
 
     @Override

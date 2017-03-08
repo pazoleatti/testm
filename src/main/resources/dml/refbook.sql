@@ -124,9 +124,9 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 -- АСНУ
 insert into ref_book (id,name,visible,type,read_only,region_attribute_id,table_name,is_versioned) values (900,'АСНУ',1,0,1,null,'REF_BOOK_ASNU',0);
 
-insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9002,900,'Код АСНУ','CODE',1,1,null,null,1,null,5,1,0,null,null,0,4);
-insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9003,900,'Наименование АСНУ','NAME',1,2,null,null,1,null,25,0,0,null,null,0,100);
-insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9004,900,'Тип дохода','TYPE',1,3,null,null,1,null,50,0,0,null,null,0,255);
+insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9002,900,'Код АСНУ','CODE',1,0,null,null,1,null,5,1,0,null,null,0,4);
+insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9003,900,'Наименование АСНУ','NAME',1,1,null,null,1,null,25,0,0,null,null,0,100);
+insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9004,900,'Тип дохода','TYPE',1,2,null,null,1,null,50,0,0,null,null,0,255);
 
 -- Физические лица и статусы налогоплательщиков
 -- с учетом изменений по задаче SBRFNDFL-132
@@ -156,7 +156,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9025, 902, 'Включается в отчетность', 'INC_REP', 2, 5, null, null, 1, 0, 6, 0, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name ,alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9026, 902, 'Физ. лицо', 'PERSON_ID', 4, 6, 904, 9041, 1, null, 15, 0, 0, null, null, 0, null);
 
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9031, 903, 'Код', 'CODE', 1, 1, null, null, 1, null, 1, 1, 0, null, null, 0, 1);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9031, 903, 'Код', 'CODE', 1, 1, null, null, 1, null, 15, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9032, 903, 'Наименование', 'NAME', 1, 2, null, null, 1, null, 15, 1, 0, null, null, 0, 1000);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9059, 904, 'Идентификатор ФЛ', 'RECORD_ID', 2, 0, null, null, 1, 0, 18, 0, 1, null, null, 1, 18);
@@ -167,7 +167,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9045, 904, 'ИНН в Российской Федерации', 'INN', 1, 5, null, null, 1, null, 12, 0, 0, null, null, 0, 12);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9046, 904, 'ИНН в стране гражданства', 'INN_FOREIGN', 1, 6, null, null, 1, null, 15, 0, 0, null, null, 0, 50);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9047, 904, 'СНИЛС', 'SNILS', 1, 7, null, null, 1, null, 14, 0, 0, null, null, 0, 14);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9048, 904, 'Статус налогоплательщика ', 'TAXPAYER_STATE', 4, 8, 903, 9031, 0, null, 15, 0, 0, null, null, 0, null);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9048, 904, 'Статус налогоплательщика ', 'TAXPAYER_STATE', 4, 8, 903, 9031, 1, null, 15, 0, 0, null, null, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9050, 904, 'Дата рождения', 'BIRTH_DATE', 3, 10, null, null, 1, null, 15, 1, 0, null, 1, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9051, 904, 'Место рождения', 'BIRTH_PLACE', 1, 11, null, null, 1, null, 15, 0, 0, null, null, 0, 255);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9052, 904, 'Гражданство', 'CITIZENSHIP', 4, 12, 10, 50, 1, null, 3, 1, 0, null, null, 0, null);
@@ -181,7 +181,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9061, 905, 'ИНП', 'INP', 1, 1, null, null, 1, null, 15, 1, 0, null, null, 0, 25);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9062, 905, 'АС НУ', 'AS_NU', 4, 2, 900, 9002, 1, null, 15, 1, 0, null, null, 0, null);
-insert into ref_book_attribute (id, ref_book_id, name ,alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9053, 905, 'Физ. лицо', 'PERSON_ID', 4, 6, 904, 9041, 1, null, 15, 0, 0, null, null, 0, null);
+insert into ref_book_attribute (id, ref_book_id, name ,alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9053, 905, 'Физ. лицо', 'PERSON_ID', 4, 3, 904, 9041, 1, null, 15, 1, 0, null, null, 0, null);
 
 -- Новые табличные справочники
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (921,'Коды видов вычетов',1,0,0,null,'REF_BOOK_DEDUCTION_TYPE');

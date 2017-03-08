@@ -312,7 +312,7 @@ public class DeclarationTemplateController {
     }
 
     private boolean checkRole(HttpServletResponse response, TAUserInfo userInfo) throws IOException {
-        if (!userInfo.getUser().hasRole(TARole.ROLE_CONF)) {
+        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
             response.setContentType("text/plain");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().printf("Ошибка доступа (недостаточно прав)");

@@ -128,12 +128,22 @@ public class DeclarationListPresenter extends
                 filterStates.clear();
                 selectedItemIds = null;
             }
-			filterPresenter.initFilter(taxType, filterStates.get(taxType));
+			filterPresenter.initFilter(taxType, isReports, filterStates.get(taxType));
             filterPresenter.getView().updateFilter(taxType, isReports);
             getView().updatePageSize(taxType);
-            getView().updateButton();
 
+            getView().updateButton();
             ready = false;
+
+            DetectUserRoleAction action = new DetectUserRoleAction();
+            action.setTaxType(taxType);
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<DetectUserRoleResult>() {
+                        @Override
+                        public void onSuccess(DetectUserRoleResult result) {
+                            getView().setVisibleCancelButton(result.isControl());
+                        }
+                    }, this));
 		} catch (Exception e) {
 			ErrorEvent.fire(this, "Не удалось открыть список налоговых форм", e);
 		}
@@ -180,6 +190,7 @@ public class DeclarationListPresenter extends
 
         GetDeclarationList requestData = new GetDeclarationList();
         requestData.setDeclarationFilter(filter);
+        requestData.setReports(isReports);
 
         dispatcher.execute(requestData, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDeclarationListResult>() {
@@ -291,7 +302,7 @@ public class DeclarationListPresenter extends
                         }
                     }, DeclarationListPresenter.this));
         } else {
-            Dialog.confirmMessageYesClose("Отмена принятия", "Вы действительно хотите отменить принятие форм?", new DialogHandler() {
+            Dialog.confirmMessageYesClose("Возврат в Создана", "Вы действительно хотите вернуть в статус \"Создана\" формы?", new DialogHandler() {
                 @Override
                 public void yes() {
                     AcceptDeclarationListAction action = new AcceptDeclarationListAction();

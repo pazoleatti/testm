@@ -172,4 +172,14 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     public List<NdflPerson> findByIdList(List<Long> ndflPersonIdList) {
         return ndflPersonDao.findByIdList(ndflPersonIdList);
     }
+
+    @Override
+    public List<Integer> findDublRowNum(String tableName, Long declarationDataId) {
+        return ndflPersonDao.findDublRowNum(tableName, declarationDataId);
+    }
+
+    @Override
+    public List<Integer> findMissingRowNum(String tableName, Long declarationDataId) {
+        return ndflPersonDao.findMissingRowNum(tableName, declarationDataId);
+    }
 }

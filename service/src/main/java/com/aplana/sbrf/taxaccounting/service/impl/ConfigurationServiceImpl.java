@@ -64,10 +64,20 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_ADMIN, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
         return configurationDao.getAll();
+    }
+
+    @Override
+    public ConfigurationParamModel getCommonConfig(TAUserInfo userInfo) {
+        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
+                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
+                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+            throw new AccessDeniedException(ACCESS_READ_ERROR);
+        }
+        return configurationDao.getCommonConfig();
     }
 
     @Override
@@ -110,7 +120,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_ADMIN) && !userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
         return configurationDao.getByDepartment(departmentId);
@@ -123,7 +133,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         // Права
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_ADMIN)) {
             throw new AccessDeniedException(ACCESS_WRITE_ERROR);
         }
 
@@ -249,7 +259,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         // Права
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_ADMIN)) {
             throw new AccessDeniedException(ACCESS_WRITE_ERROR);
         }
 
@@ -354,7 +364,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap) {
+    public void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo) {
+        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
+                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
+                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+            throw new AccessDeniedException(ACCESS_WRITE_ERROR);
+        }
         configurationDao.update(configurationParamMap, COMMON_PARAM_DEPARTMENT_ID);
     }
 

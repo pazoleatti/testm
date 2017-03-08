@@ -20,7 +20,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetNotificationsHandler extends AbstractActionHandler<GetNotificationsAction, GetNotificationsResult> {
 
 	public GetNotificationsHandler() {
@@ -43,7 +43,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         }
         NotificationsFilterData filter = action.getFilter();
         filter.setUserId(user.getId());
-        filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
+        //filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
         filter.setUserRoleIds(userRoles);
 
 
@@ -78,8 +78,8 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         // если заполнен ID пользователя-получателя (для любой роли) или ID роли получателя (для любой роли)
         // или ID подразделения-получателя (для роли Контролёр УНП или Контролёр НС)
         return notification.getUserId() > 0 || notification.getRoleId() > 0 ||
-                (notification.getReceiverDepartmentId() != null && (user.hasRole(TARole.ROLE_CONTROL_UNP) ||
-                                (user.hasRole(TARole.ROLE_CONTROL_NS) && user.getDepartmentId() == notification.getReceiverDepartmentId())));
+                (notification.getReceiverDepartmentId() != null && (user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP) ||
+                                (user.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS) && user.getDepartmentId() == notification.getReceiverDepartmentId())));
 
     }
 

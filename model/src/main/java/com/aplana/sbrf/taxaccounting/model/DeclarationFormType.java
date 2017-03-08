@@ -8,7 +8,9 @@ import java.io.Serializable;
  */
 public class DeclarationFormType implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
+    public static final int DECLARATION_TYPE_1151111 = 1;
+
 	private long id;
 	private String name;
 

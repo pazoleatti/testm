@@ -194,10 +194,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             return new ImportCounter(0, 1);
         }
 
-        if (!userInfo.getUser().hasRole(TARole.ROLE_OPER)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_OPER)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             logger.error(ACCESS_DENIED_ERROR);
             return new ImportCounter(0, 1);
         }
@@ -475,7 +474,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             // 40 - Выборка для доступа к экземплярам НФ/деклараций
             List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    Arrays.asList(declarationType.getTaxType()), null, null);
+                    declarationType.getTaxType(), null, null);
             if (!departmentList.contains(formDepartment.getId())) {
                 logger.warn(U3 + U3_1, fileName, formDepartment.getName());
                 return null;

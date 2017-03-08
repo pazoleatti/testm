@@ -374,29 +374,6 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         getView().searchButtonClicked(relevanceDate);
     }
 
-    /*private void checkRecord() {
-        CheckRecordExistenceAction action = new CheckRecordExistenceAction();
-        action.setRefBookId(refBookId);
-        action.setRecordId(recordId);
-        dispatcher.execute(action, CallbackUtils.defaultCallback(
-                new AbstractCallback<CheckRecordExistenceResult>() {
-                    @Override
-                    public void onSuccess(CheckRecordExistenceResult result) {
-                        if (result.isRecordExistence()) {
-                            recordId = null;
-                            getView().reload();
-                            getView().loadAndSelect();
-                        } else {
-                            getView().reload();
-                            getView().setSelected(recordId);
-                            ShowItemEvent.fire(RefBookHierDataPresenter.this, null, recordId);
-                            //editPresenter.show(recordId);
-                        }
-                    }
-                }, this));
-    }*/
-
-
     public Date getRelevanceDate() {
         return getView().getPickerState().getVersionDate();
     }

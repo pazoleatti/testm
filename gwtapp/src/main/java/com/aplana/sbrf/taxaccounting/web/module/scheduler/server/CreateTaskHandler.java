@@ -27,7 +27,7 @@ import java.util.Map;
  * @author dloshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('N_ROLE_ADMIN')")
 public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, CreateTaskResult> {
 
     @Autowired

@@ -16,6 +16,12 @@ public interface ConfigurationService {
      */
     ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
 
+
+    /**
+     * Получение конфигурационных параметров (табл. CONFIGURATION)
+     */
+    ConfigurationParamModel getCommonConfig(TAUserInfo userInfo);
+
     /**
      * Получает настройки почты
      * @return настройки почты - список <Столбец, Значение>
@@ -55,5 +61,5 @@ public interface ConfigurationService {
     /**
      * Сохранение общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
      */
-    void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap);
+    void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo);
 }

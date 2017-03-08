@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDeclarationFilterData, GetDeclarationFilterDataResult> {
 
 	public GetDeclarationFilterDataHandler() {
@@ -34,7 +34,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 
 	@Autowired
 	private DepartmentService departmentService;
-	
+
 	@Autowired
 	private DeclarationDataSearchService declarationDataSearchService;
 
@@ -45,10 +45,11 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
 
 		TAUserInfo currentUser = securityService.currentUserInfo();
+
         DeclarationDataFilterAvailableValues declarationFilterValues =
                 declarationDataSearchService.getFilterAvailableValues(currentUser, action.getTaxType());
 
-        res.setDataKinds(Arrays.asList(DeclarationFormKind.PRIMARY, DeclarationFormKind.CONSOLIDATED, DeclarationFormKind.REPORTS));
+        res.setDataKinds(getAvailableDeclarationFormKind(action.getTaxType(), action.isReports(), currentUser.getUser()));
 
         // Доступные подразделения
 		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(
@@ -71,7 +72,36 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		return res;
 	}
 
-	@Override
+    public static List<DeclarationFormKind> getAvailableDeclarationFormKind(TaxType taxType, boolean isReports, TAUser taUser) {
+        if (taxType.equals(TaxType.PFR)) {
+            if (taUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+                return Arrays.asList(DeclarationFormKind.PRIMARY, DeclarationFormKind.CONSOLIDATED, DeclarationFormKind.REPORTS);
+            } else if (taUser.hasRole(taxType, TARole.F_ROLE_OPER)) {
+                return Arrays.asList(DeclarationFormKind.PRIMARY);
+            } else {
+                return new ArrayList<DeclarationFormKind>();
+            }
+        } else if (taxType.equals(TaxType.NDFL)) {
+            if (isReports) {
+                if (taUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+                    return Arrays.asList(DeclarationFormKind.REPORTS);
+                } else {
+                    return new ArrayList<DeclarationFormKind>();
+                }
+            } else {
+                if (taUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+                    return Arrays.asList(DeclarationFormKind.PRIMARY, DeclarationFormKind.CONSOLIDATED);
+                } else if (taUser.hasRole(taxType, TARole.N_ROLE_OPER)) {
+                    return Arrays.asList(DeclarationFormKind.PRIMARY);
+                } else {
+                    return new ArrayList<DeclarationFormKind>();
+                }
+            }
+        }
+        return new ArrayList<DeclarationFormKind>();
+    }
+
+    @Override
 	public void undo(GetDeclarationFilterData getDeclarationFilterData,
                      GetDeclarationFilterDataResult getDeclarationFilterDataResult,
                      ExecutionContext executionContext) throws ActionException {

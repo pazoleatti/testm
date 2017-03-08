@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -633,17 +634,25 @@ public class RefBookSimpleQueryBuilderComponent {
      */
 
     /* Пример сформированного sql-запроса:
-    with t as (select max(version) version, record_id from REF_BOOK_PERSON r where status = 0 and version <= '01.01.2016'  and
-    not exists (
-    select 1 from REF_BOOK_PERSON r2 where r2.record_id=r.record_id and r2.status != -1 and r2.version between r.version + interval '1' day and '01.01.2016')
-    group by record_id
-    )
-    SELECT * FROM (SELECT res.*, rownum row_number_over FROM (
-            SELECT frb.id AS id, frb.RECORD_ID, frb.LAST_NAME, frb.FIRST_NAME, frb.MIDDLE_NAME, frb.SEX, frb.INN, frb.INN_FOREIGN, frb.SNILS, frb.TAXPAYER_STATE, frb.BIRTH_DATE, frb.BIRTH_PLACE,
-            frb.CITIZENSHIP, frb.ADDRESS, frb.PENSION, frb.MEDICAL, frb.SOCIAL, frb.EMPLOYEE, frb.SOURCE_ID, frb.OLD_ID FROM t, REF_BOOK_PERSON frb
-            WHERE (frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)
-            AND EXISTS (select p.record_id  FROM ref_book_person p INNER JOIN ndfl_person np ON p.id = np.person_id  WHERE np.declaration_data_id = 14873 AND frb.record_id = p.record_id)
-            ORDER BY frb.id) res);
+	   WITH t AS
+	  (SELECT max(VERSION) VERSION, record_id
+	   FROM REF_BOOK_PERSON r
+	   WHERE status = 0 AND VERSION <= '29.06.2017' AND NOT EXISTS ( SELECT 1 FROM REF_BOOK_PERSON r2
+			WHERE r2.record_id=r.record_id AND r2.status != -1 AND r2.version BETWEEN r.version + interval '1' DAY AND '29.06.2017')
+	   GROUP BY record_id)
+	  SELECT *
+	  FROM
+	  (SELECT res.*, rownum row_number_over
+	   FROM
+		 (SELECT frb.id AS id, frb.RECORD_ID, frb.LAST_NAME, frb.FIRST_NAME, frb.MIDDLE_NAME, frb.SEX, frb.INN,
+				  frb.INN_FOREIGN, frb.SNILS, frb.TAXPAYER_STATE, frb.BIRTH_DATE, frb.BIRTH_PLACE, frb.CITIZENSHIP, frb.ADDRESS,
+				  frb.PENSION, frb.MEDICAL, frb.SOCIAL, frb.EMPLOYEE,frb.SOURCE_ID, frb.OLD_ID
+		  FROM t
+			 JOIN REF_BOOK_PERSON frb ON (frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)
+			 JOIN ref_book_person p ON (frb.record_id = p.record_id)
+			 JOIN RASCHSV_PERS_SV_STRAH_LIC np ON (np.declaration_data_id = 10094 AND p.id = np.person_id)
+			) res)
+			ORDER BY id
 
     Поскольку поиск осуществляется с использованием оператора EXISTS необходимодимо всегда связывать поле подзапроса через ALIAS frb, например:
     AND frb.record_id = p.record_id
@@ -664,32 +673,14 @@ public class RefBookSimpleQueryBuilderComponent {
                 ps.appendQuery(attribute.getAlias());
             }
         }
-        ps.appendQuery(" FROM t, ");
+        ps.appendQuery(" FROM t JOIN ");
         ps.appendQuery(refBook.getTableName());
-        ps.appendQuery(" frb ");
+        ps.appendQuery(" frb ON (frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
 
-        PreparedStatementData filterPS = new PreparedStatementData();
-        if (filterPS.getJoinPartsOfQuery() != null) {
-            ps.appendQuery(filterPS.getJoinPartsOfQuery());
-        }
-        if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" WHERE (");
-            ps.appendQuery(filterPS.getQuery().toString());
-            if (!filterPS.getParams().isEmpty()) {
-                ps.addParam(filterPS.getParams());
-            }
-            ps.appendQuery(") ");
-        }
-        if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" AND ");
-        } else {
-            ps.appendQuery(" WHERE ");
-        }
-
-        ps.appendQuery("(frb.version = t.version AND frb.record_id = t.record_id AND frb.status = 0)");
-        ps.appendQuery(" AND EXISTS (" + whereClause + ")");
-        ps.appendQuery(" ORDER BY frb.id");
-        ps.appendQuery(") res)");
+		if (StringUtils.isNotBlank(whereClause)) {
+			ps.appendQuery(whereClause);
+		}
+        ps.appendQuery(") res) ORDER BY id");
         return ps;
     }
 

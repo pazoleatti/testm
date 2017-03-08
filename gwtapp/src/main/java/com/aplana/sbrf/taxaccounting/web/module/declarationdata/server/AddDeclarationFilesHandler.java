@@ -30,7 +30,7 @@ import java.util.Map;
  * @author Lhaziev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class AddDeclarationFilesHandler extends AbstractActionHandler<AddDeclarationFileAction, AddDeclarationFileResult> {
 
     private final static int DEFAULT_FILE_TYPE_CODE = 6;

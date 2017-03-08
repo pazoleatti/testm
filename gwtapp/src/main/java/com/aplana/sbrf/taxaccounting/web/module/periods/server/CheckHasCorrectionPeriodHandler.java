@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Service
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
 public class CheckHasCorrectionPeriodHandler extends AbstractActionHandler<CheckHasCorrectionPeriodAction, CheckHasCorrectionPeriodResult> {
 
     @Autowired

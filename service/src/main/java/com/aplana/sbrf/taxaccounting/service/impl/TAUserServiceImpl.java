@@ -38,6 +38,7 @@ public class TAUserServiceImpl implements TAUserService {
 		systemUserInfo = new TAUserInfo();
 		systemUserInfo.setIp("127.0.0.1");
 		systemUserInfo.setUser(getUser(TAUser.SYSTEM_USER_ID));
+
 	}
 
 	/**

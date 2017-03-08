@@ -1,76 +1,26 @@
 package form_template.fond.primary_1151111.v2016
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.PersonData
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.log.Logger
+import com.aplana.sbrf.taxaccounting.model.raschsv.*
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
-
-import javax.script.ScriptException
-import java.awt.Color
-import java.text.SimpleDateFormat
-
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.ss.usermodel.Font
-import org.apache.poi.xssf.usermodel.XSSFColor
-import org.apache.poi.xssf.usermodel.XSSFCellStyle
-import org.apache.poi.xssf.usermodel.XSSFFont
-import org.apache.poi.xssf.usermodel.XSSFRow
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.apache.commons.io.IOUtils
-
-import com.aplana.sbrf.taxaccounting.model.formdata.*
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.PersonData
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVypl
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvVyplMk
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDop
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplSvDopMt
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvObyazPlatSv
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPer
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplPrevOss
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOms
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRasch
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschSum
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvOpsOmsRaschKol
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvSum1Tip
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvKolLicTip
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnm
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmSum
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvOssVnmKol
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvUplSvPrev
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZak
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashOssZakRash
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplFinFb
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplPrichina
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvRashVypl
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif31427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif51427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPravTarif71427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif91427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt427
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedPatent
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif22425
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt425
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvInoGrazd
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvPrimTarif13422
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvVyplatIt422
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvedObuch
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvReestrMdo
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvSvnpPodpisant
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVypl
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogStrahLic
-import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvItogVyplDop;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
-
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.transform.Memoized
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.util.CellRangeAddress
+import org.apache.poi.xssf.usermodel.*
 
-import java.util.regex.Pattern
+import javax.script.ScriptException
+import java.awt.*
+import java.util.List
 
 //----------------------------------------------------------------------------------------------------------------------
 // Счетчик для проверки соответствия числа узлов
@@ -2316,19 +2266,23 @@ class TestDataHolder {
 void importData() {
 
     // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
+    // Данный код отрабатывает, когда файл формы уже фактически сохранен в базу, поэтому при проверке сущестования формы для данного периода и подразделения не нужно учитывать данный файл в выборке
     def declarationDataList = declarationService.find(PRIMARY_1151111_TEMPLATE_ID, declarationData.departmentReportPeriodId)
-    if (declarationDataList != null && !declarationDataList.isEmpty()) {
+    DeclarationData declarationDataClone = declarationDataList?.find{ it.fileName != UploadFileName }
+    if (declarationDataClone != null) {
 
         // Период
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        def periodCode = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
+        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+        def periodCode = period?.CODE?.stringValue
+        def periodName = period?.NAME?.stringValue
         def calendarStartDate = reportPeriod?.calendarStartDate
 
         // Подразделение
         Department department = departmentService.get(declarationData.departmentId)
 
         logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
-                    в периоде \"$periodCode\" ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
+                    в периоде $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
         return
     }
 
@@ -4009,11 +3963,10 @@ Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
  * @return Map<person_id, Map<имя_поля, значение_поля>>
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
-    Long declarationDataId = declarationData.id;
-    String whereClause = String.format("select r.record_id " +
-            " FROM ref_book_person r " +
-            " INNER JOIN raschsv_pers_sv_strah_lic p ON r.id = p.person_id " +
-            " WHERE p.declaration_data_id = %s AND frb.record_id = r.record_id", declarationDataId)
+    String whereClause = """
+        JOIN ref_book_person p ON (frb.record_id = p.record_id)
+        JOIN raschsv_pers_sv_strah_lic np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+    """
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
     def refBookMapResult = [:]
     refBookMap.each { personId, refBookValue ->
@@ -5467,17 +5420,17 @@ def checkDataDBSum() {
     if (uplSvPrevCurr1 != ossNachislSvCurr1 + ossVosmRashSoCurr1) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл1Посл3М.Сумма = \"$uplSvPrevCurr1\""
         def pathAttrComp = pathAttrOss + ".НачислСВ.Сум1Посл3М = \"$ossNachislSvCurr1\", " + pathAttrOss + ".ВозмРасхСО.Сум1Посл3М = \"$ossVosmRashSoCurr1\"."
-        logger.info("$pathAttrVal не равен $pathAttrComp")
+        logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (uplSvPrevCurr2 != ossNachislSvCurr2 + ossVosmRashSoCurr2) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл2Посл3М.Сумма = \"$uplSvPrevCurr2\""
         def pathAttrComp = pathAttrOss + ".НачислСВ.Сум2Посл3М = \"$ossNachislSvCurr2\", " + pathAttrOss + ".ВозмРасхСО.Сум2Посл3М = \"$ossVosmRashSoCurr2\"."
-        logger.info("$pathAttrVal не равен $pathAttrComp")
+        logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (uplSvPrevCurr3 != ossNachislSvCurr3 + ossVosmRashSoCurr3) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл3Посл3М.Сумма = \"$uplSvPrevCurr3\""
         def pathAttrComp = pathAttrOss + ".НачислСВ.Сум3Посл3М = \"$ossNachislSvCurr3\", " + pathAttrOss + ".ВозмРасхСО.Сум3Посл3М = \"$ossVosmRashSoCurr3\"."
-        logger.info("$pathAttrVal не равен $pathAttrComp")
+        logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
 
     // *********************************** РасхОССЗак ***********************************
@@ -5534,34 +5487,34 @@ def checkDataDBSum() {
     // 3.3.4.2 Сумма ежемесячных пособий по уходу за ребенком равна сумме пособий за первого ребенка и второго и последующих детей
     if (ezPosChislSluch != ezPos1ChislSluch + ezPos2ChislSluch) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.ЧислСлуч = \"$ezPosChislSluch\""
-        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.ЧислСлуч = \"$ezPos1ChislSluch\", " + pathAttrOssZak + ".ЕжПосУходРеб2.ЧислСлуч = \"$ezPos2ChislSluch\"."
-        logger.info("$pathAttrVal не равен $pathAttrComp")
+        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.ЧислСлуч = \"$ezPos1ChislSluch\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.ЧислСлуч = \"$ezPos2ChislSluch\"."
+        logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (ezPosKolVypl != ezPos1KolVypl + ezPos2KolVypl) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.КолВыпл = \"$ezPosKolVypl\""
-        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.КолВыпл = \"$ezPos1KolVypl\", " + pathAttrOssZak + ".ЕжПосУходРеб2.КолВыпл = \"$ezPos2KolVypl\"."
-        logger.info("$pathAttrVal не равен $pathAttrComp")
+        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.КолВыпл = \"$ezPos1KolVypl\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.КолВыпл = \"$ezPos2KolVypl\"."
+        logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (ezPosRashVsego != ezPos1RashVsego + ezPos2RashVsego) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.РасхВсего = \"$ezPosRashVsego\""
-        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.РасхВсего = \"$ezPos1RashVsego\", " + pathAttrOssZak + ".ЕжПосУходРеб2.РасхВсего = \"$ezPos2RashVsego\"."
-        logger.info("$pathAttrVal не равен $pathAttrComp")
+        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.РасхВсего = \"$ezPos1RashVsego\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.РасхВсего = \"$ezPos2RashVsego\"."
+        logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (ezPosRashFinFb != ezPos1RashFinFb + ezPos2RashFinFb) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.РасхФинФБ = \"$ezPosRashVsego\""
-        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.РасхФинФБ = \"$ezPos1RashVsego\", " + pathAttrOssZak + ".ЕжПосУходРеб2.РасхФинФБ = \"$ezPos2RashVsego\"."
-        logger.info("$pathAttrVal не равен $pathAttrComp")
+        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.РасхФинФБ = \"$ezPos1RashVsego\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.РасхФинФБ = \"$ezPos2RashVsego\"."
+        logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     // 3.3.4.3 Итого равно сумме по всем видам пособий
     if (ossZakRashVsegoItogo != ossZakRashVsegoSum) {
         def pathAttrVal = pathAttrOssZak + ".Итого.РасхВсего = \"$ossZakRashVsegoItogo\""
         def pathAttrComp = kindAids.join(", ") + " = \"$ossZakRashVsegoSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (ossZakRashFinFBItogo != ossZakRashFinFBSum) {
         def pathAttrVal = pathAttrOssZak + ".Итого.РасхФинФБ = \"$ossZakRashFinFBItogo\""
         def pathAttrComp = kindAids.join(", ") + " = \"$ossZakRashFinFBSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
 
     // *********************************** ВыплФинФБ ***********************************
@@ -5633,7 +5586,7 @@ def checkDataDBSum() {
             if (chernobVsegoRashod != chernobVsegoRashodSum) {
                 def pathAttrVal = pathAttrVyplFinFB + nodeName + "Всего = \"$chernobVsegoRashod\""
                 def pathAttrComp = ["ПосВрНетр.Расход", "ПосБеремРод.Расход", "ЕжПосУходРеб.Расход"].join(", ") + " = \"$chernobVsegoRashodSum\""
-                logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+                logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
             }
             // 3.3.5.2 Сумма ежемесячных пособий по уходу за ребенком равна сумме пособий за первого ребенка и второго и последующих детей
             // 3.3.5.4 Сумма ежемесячных пособий по уходу за ребенком равна сумме пособий за первого ребенка и второго и последующих детей
@@ -5641,13 +5594,13 @@ def checkDataDBSum() {
             if (chernobUhodRebRashod != chernobUhodRebRashodSum) {
                 def pathAttrVal = pathAttrVyplFinFB + nodeName + "ЕжПосУходРеб.Расход = \"$chernobUhodRebRashod\""
                 def pathAttrComp = ["ЕжПосУходРеб1.Расход", "ЕжПосУходРеб2.Расход"].join(", ") + " = \"$chernobUhodRebRashodSum\""
-                logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+                logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
             }
             Integer chernobUhodRebKolVyplSum = chernobUhodReb1KolVypl + chernobUhodReb2KolVypl
             if (chernobUhodRebKolVypl != chernobUhodRebKolVyplSum) {
                 def pathAttrVal = pathAttrVyplFinFB + nodeName + "ЕжПосУходРеб.КолВыпл = \"$chernobUhodRebKolVypl\""
                 def pathAttrComp = ["ЕжПосУходРеб1.КолВыпл", "ЕжПосУходРеб2.КолВыпл"].join(", ") + " = \"$chernobUhodRebKolVyplSum\""
-                logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+                logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
             }
         } else if (raschsvVyplPrichina.nodeName == "СемипалатПолигон") {
             BigDecimal semipalatVsegoRashod = 0       // Всего.Расход
@@ -5663,7 +5616,7 @@ def checkDataDBSum() {
             if (semipalatVsegoRashod != semipalatPosVrNetrRashod) {
                 def pathAttrVal = pathAttrVyplFinFB + ".СемипалатПолигон.Всего.Расход = \"$semipalatVsegoRashod\""
                 def pathAttrComp = pathAttrVyplFinFB + ".СемипалатПолигон.ПосВрНетр.Расход = \"$semipalatPosVrNetrRashod\""
-                logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+                logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
             }
         }
 
@@ -5677,7 +5630,6 @@ def checkDataDBSum() {
                     vsegoPosBeremRodChislPoluch = raschsvRashVypl.chislPoluch ?: 0
                     vsegoPosBeremRodKolVypl = raschsvRashVypl.kolVypl ?: 0
                     vsegoPosBeremRodRashod = raschsvRashVypl.rashod ?: 0
-                } else if (raschsvRashVypl.nodeName == "ЕжПосУходРеб1") {
                 }
             }
         } else if (["ЧернобАЭС", "ПОМаяк", "СемипалатПолигон", "ПодрОсобРиск", "ДопФЗ255"].contains(raschsvVyplPrichina.nodeName)) {
@@ -5690,17 +5642,22 @@ def checkDataDBSum() {
                     vsegoPosBeremRodChislPoluchSum += raschsvRashVypl.chislPoluch ?: 0
                     vsegoPosBeremRodKolVyplSum += raschsvRashVypl.kolVypl ?: 0
                     vsegoPosBeremRodRashodSum += raschsvRashVypl.rashod ?: 0
-                } else if (raschsvRashVypl.nodeName == "ЕжПосУходРеб1") {
                 }
             }
         }
 
+        // 3.3.5.8 Всего пособий по уходу за первым ребенком равно сумме этих пособий по различным категориям
+        // 3.3.5.9 Всего пособий по уходу за вторым ребенком и последующими равно сумме этих пособий по различным категориям
         if (raschsvVyplPrichina.nodeName == "Всего") {
             for (RaschsvRashVypl raschsvRashVypl : raschsvVyplPrichina.raschsvRashVyplList) {
-                if (raschsvRashVypl.nodeName == "ЕжПосУходРеб1") {
+                if (raschsvRashVypl.nodeName == "ЕжПосУходРеб1" || raschsvRashVypl.nodeName == "ЕжПосУходРеб2") {
                     vsegoEzPosUhodReb1ChislPoluch = raschsvRashVypl.chislPoluch ?: 0
                     vsegoEzPosUhodReb1KolVypl = raschsvRashVypl.kolVypl ?: 0
                     vsegoEzPosUhodReb1Rashod = raschsvRashVypl.rashod ?: 0
+                } else if (raschsvRashVypl.nodeName == "ЕжПосУходРеб2") {
+                    vsegoEzPosUhodReb2ChislPoluch = raschsvRashVypl.chislPoluch ?: 0
+                    vsegoEzPosUhodReb2KolVypl = raschsvRashVypl.kolVypl ?: 0
+                    vsegoEzPosUhodReb2Rashod = raschsvRashVypl.rashod ?: 0
                 }
             }
         } else if (["ЧернобАЭС", "ПОМаяк", "ПодрОсобРиск"].contains(raschsvVyplPrichina.nodeName)) {
@@ -5709,6 +5666,10 @@ def checkDataDBSum() {
                     vsegoEzPosUhodReb1ChislPoluchSum += raschsvRashVypl.chislPoluch ?: 0
                     vsegoEzPosUhodReb1KolVyplSum += raschsvRashVypl.kolVypl ?: 0
                     vsegoEzPosUhodReb1RashodSum += raschsvRashVypl.rashod ?: 0
+                } else if (raschsvRashVypl.nodeName == "ЕжПосУходРеб2") {
+                    vsegoEzPosUhodReb2ChislPoluchSum += raschsvRashVypl.chislPoluch ?: 0
+                    vsegoEzPosUhodReb2KolVyplSum += raschsvRashVypl.kolVypl ?: 0
+                    vsegoEzPosUhodReb2RashodSum += raschsvRashVypl.rashod ?: 0
                 }
             }
         }
@@ -5719,19 +5680,19 @@ def checkDataDBSum() {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосВрНетр.ЧислПолуч = \"$vsegoPosVrNetrChislPoluch\""
         def pathAttrComp = ["ЧернобАЭС.ПосВрНетр.ЧислПолуч", "ПОМаяк.ПосВрНетр.ЧислПолуч", "СемипалатПолигон.ПосВрНетр.ЧислПолуч",
                             "ПодрОсобРиск.ПосВрНетр.ЧислПолуч", "ДопФЗ255.ПосВрНетр.ЧислПолуч"].join(", ") + " = \"$vsegoPosVrNetrChislPoluchSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (vsegoPosVrNetrKolVypl != vsegoPosVrNetrKolVyplSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосВрНетр.КолВыпл = \"$vsegoPosVrNetrKolVypl\""
         def pathAttrComp = ["ЧернобАЭС.ПосВрНетр.КолВыпл", "ПОМаяк.ПосВрНетр.КолВыпл", "СемипалатПолигон.ПосВрНетр.КолВыпл",
                             "ПодрОсобРиск.ПосВрНетр.КолВыпл", "ДопФЗ255.ПосВрНетр.КолВыпл"].join(", ") + " = \"$vsegoPosVrNetrKolVyplSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (vsegoPosVrNetrRashod != vsegoPosVrNetrRashodSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосВрНетр.Расход = \"$vsegoPosVrNetrRashod\""
         def pathAttrComp = ["ЧернобАЭС.ПосВрНетр.Расход", "ПОМаяк.ПосВрНетр.Расход", "СемипалатПолигон.ПосВрНетр.Расход",
                             "ПодрОсобРиск.ПосВрНетр.Расход", "ДопФЗ255.ПосВрНетр.Расход"].join(", ") + " = \"$vsegoPosVrNetrRashodSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
 
     // 3.3.5.7 Всего пособий беременности и родам равно сумме этих пособий по различным категориям
@@ -5739,53 +5700,53 @@ def checkDataDBSum() {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосБеремРод.ЧислПолуч = \"$vsegoPosBeremRodChislPoluch\""
         def pathAttrComp = ["ЧернобАЭС.ПосБеремРод.ЧислПолуч", "ПОМаяк.ПосБеремРод.ЧислПолуч", "ПодрОсобРиск.ПосБеремРод.ЧислПолуч",
                             "ДопФЗ255.ПосБеремРод.ЧислПолуч"].join(", ") + " = \"$vsegoPosBeremRodChislPoluchSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (vsegoPosBeremRodKolVypl != vsegoPosBeremRodKolVyplSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосБеремРод.КолВыпл = \"$vsegoPosBeremRodKolVypl\""
-        def pathAttrComp = ["ЧернобАЭС.ПосБеремРод.КолВыпл", "ПОМаяк.ПосВрНетр.КолВыпл", "ПодрОсобРиск.ПосБеремРод.КолВыпл",
+        def pathAttrComp = ["ЧернобАЭС.ПосБеремРод.КолВыпл", "ПОМаяк.ПосБеремРод.КолВыпл", "ПодрОсобРиск.ПосБеремРод.КолВыпл",
                             "ДопФЗ255.ПосБеремРод.КолВыпл"].join(", ") + " = \"$vsegoPosBeremRodKolVyplSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (vsegoPosBeremRodRashod != vsegoPosBeremRodRashodSum) {
-        def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосВрНетр.Расход = \"$vsegoPosBeremRodRashod\""
+        def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосБеремРод.Расход = \"$vsegoPosBeremRodRashod\""
         def pathAttrComp = ["ЧернобАЭС.ПосБеремРод.Расход", "ПОМаяк.ПосБеремРод.Расход", "ПодрОсобРиск.ПосБеремРод.Расход",
                             "ДопФЗ255.ПосБеремРод.Расход"].join(", ") + " = \"$vsegoPosBeremRodRashodSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
 
     // 3.3.5.8 Всего пособий по уходу за первым ребенком равно сумме этих пособий по различным категориям
     if (vsegoEzPosUhodReb1ChislPoluch != vsegoEzPosUhodReb1ChislPoluchSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.ЧислПолуч = \"$vsegoEzPosUhodReb1ChislPoluch\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.ЧислПолуч", "ПОМаяк.ЕжПосУходРеб1.ЧислПолуч", "ПодрОсобРиск.ЕжПосУходРеб1.ЧислПолуч"].join(", ") + " = \"$vsegoEzPosUhodReb1ChislPoluchSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (vsegoEzPosUhodReb1KolVypl != vsegoEzPosUhodReb1KolVyplSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.КолВыпл = \"$vsegoEzPosUhodReb1KolVypl\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.КолВыпл", "ПОМаяк.ЕжПосУходРеб1.КолВыпл", "ПодрОсобРиск.ЕжПосУходРеб1.КолВыпл"].join(", ") + " = \"$vsegoEzPosUhodReb1KolVyplSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (vsegoEzPosUhodReb1Rashod != vsegoEzPosUhodReb1RashodSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.Расход = \"$vsegoEzPosUhodReb1Rashod\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.Расход", "ПОМаяк.ЕжПосУходРеб1.Расход", "ПодрОсобРиск.ЕжПосУходРеб1.Расход"].join(", ") + " = \"$vsegoEzPosUhodReb1RashodSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
 
     // 3.3.5.9 Всего пособий по уходу за вторым ребенком и последующими равно сумме этих пособий по различным категориям
     if (vsegoEzPosUhodReb2ChislPoluch != vsegoEzPosUhodReb2ChislPoluchSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.ЧислПолуч = \"$vsegoEzPosUhodReb2ChislPoluch\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.ЧислПолуч", "ПОМаяк.ЕжПосУходРеб1.ЧислПолуч", "ПодрОсобРиск.ЕжПосУходРеб1.ЧислПолуч"].join(", ") + " = \"$vsegoEzPosUhodReb2ChislPoluchSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (vsegoEzPosUhodReb2KolVypl != vsegoEzPosUhodReb2KolVyplSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.КолВыпл = \"$vsegoEzPosUhodReb2KolVypl\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.КолВыпл", "ПОМаяк.ЕжПосУходРеб1.КолВыпл", "ПодрОсобРиск.ЕжПосУходРеб1.КолВыпл"].join(", ") + " = \"$vsegoEzPosUhodReb2KolVyplSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
     if (vsegoEzPosUhodReb2Rashod != vsegoEzPosUhodReb2RashodSum) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.Расход = \"$vsegoEzPosUhodReb2Rashod\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.Расход", "ПОМаяк.ЕжПосУходРеб1.Расход", "ПодрОсобРиск.ЕжПосУходРеб1.Расход"].join(", ") + " = \"$vsegoEzPosUhodReb2RashodSum\""
-        logger.info("$pathAttrVal не равен сумме: $pathAttrComp")
+        logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
 
     // *********************************** ПравТариф3.1.427 ***********************************
@@ -5794,28 +5755,28 @@ def checkDataDBSum() {
 
     // 3.3.6.1 ПравТариф3.1.427 заполняется только, если код тарифа плательщика 06
     if (opsOmsIsExistTarifPlat_06 == true && raschsvPravTarif31427 == null) {
-        logger.info("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф3.1.427 должны быть заполнены при коде тарифа плательщика 06.")
+        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф3.1.427 должны быть заполнены при коде тарифа плательщика 06.")
     }
 
     if (raschsvPravTarif31427 != null) {
         // 3.3.6.2 Численность не менее 7
         if (raschsvPravTarif31427.srChisl9mpr < 7) {
             def pathAttrVal = pathAttrPravTarif31427 + ".СрЧисл_9МПр = \"$raschsvPravTarif31427.srChisl9mpr\""
-            logger.info("$pathAttrVal менее 7 чел. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
+            logger.warn("$pathAttrVal менее 7 чел. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
         }
         if (raschsvPravTarif31427.srChislPer < 7) {
             def pathAttrVal = pathAttrPravTarif31427 + ".СрЧисл_Пер = \"$raschsvPravTarif31427.srChislPer\""
-            logger.info("$pathAttrVal менее 7 чел. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
+            logger.warn("$pathAttrVal менее 7 чел. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
         }
 
         // 3.3.6.3 Доля не менее 90%
         if (raschsvPravTarif31427.dohDoh54279mpr < 90) {
             def pathAttrVal = pathAttrPravTarif31427 + ".ДолДох5.427_9МПр = \"$raschsvPravTarif31427.dohDoh54279mpr\""
-            logger.info("$pathAttrVal менее 90%%. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
+            logger.warn("$pathAttrVal менее 90%%. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
         }
         if (raschsvPravTarif31427.dohDoh5427per < 90) {
             def pathAttrVal = pathAttrPravTarif31427 + ".ДолДох5.427_Пер = \"$raschsvPravTarif31427.dohDoh5427per\""
-            logger.info("$pathAttrVal менее 90%%. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
+            logger.warn("$pathAttrVal менее 90%%. В соответствии с п.5 ст.427 НК РФ необходимо уточнить правомерность применения пониженного тарифа.")
         }
     }
 
@@ -5825,7 +5786,7 @@ def checkDataDBSum() {
 
     // 3.3.7.1 ПравТариф5.1.427 заполняется только, если код тарифа плательщика 08
     if (opsOmsIsExistTarifPlat_08 == true && raschsvPravTarif51427 == null) {
-        logger.info("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф5.1.427 должны быть заполнены при коде тарифа плательщика 08.")
+        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф5.1.427 должны быть заполнены при коде тарифа плательщика 08.")
     }
 
     if (raschsvPravTarif51427 != null) {
@@ -5833,7 +5794,7 @@ def checkDataDBSum() {
         if (raschsvPravTarif51427.doh346_15vs < raschsvPravTarif51427.doh6_427) {
             def pathAttrVal = pathAttrPravTarif51427 + ".Дох346.15Вс = \"$raschsvPravTarif51427.doh346_15vs\""
             def pathAttrComp = pathAttrPravTarif51427 + ".Дох6.427 = \"$raschsvPravTarif51427.doh6_427\"."
-            logger.info("$pathAttrVal не может быть меньше $pathAttrComp")
+            logger.warn("$pathAttrVal не может быть меньше $pathAttrComp")
         }
     }
 
@@ -5843,7 +5804,7 @@ def checkDataDBSum() {
 
     // 3.3.8.1 ПравТариф7.1.427 заполняется только, если код тарифа плательщика 10
     if (opsOmsIsExistTarifPlat_10 == true && raschsvPravTarif71427 == null) {
-        logger.info("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф7.1.427 должны быть заполнены при коде тарифа плательщика 10.")
+        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф7.1.427 должны быть заполнены при коде тарифа плательщика 10.")
     }
 
     if (raschsvPravTarif71427 != null) {
@@ -5857,7 +5818,7 @@ def checkDataDBSum() {
             def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПред = \"$dohCelPostPred\", "
             pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПред = \"$dohGrantPred\", "
             pathAttrComp += pathAttrPravTarif71427 + ".ДохЭкДеятПред = \"$dohEkDeyatPred\"."
-            logger.info("$pathAttrVal не может быть меньше суммы: $pathAttrComp")
+            logger.warn("$pathAttrVal не может быть меньше суммы: $pathAttrComp")
         }
     }
 
@@ -5867,7 +5828,7 @@ def checkDataDBSum() {
 
     // 3.3.9.1 Элементы не заполнены
     if (raschsvSvPrimTarif91427 != null) {
-        logger.info("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.СвПримТариф9.1.427 заполняются только для ИП.")
+        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.СвПримТариф9.1.427 заполняются только для ИП.")
     }
 
     // *********************************** СвПримТариф2.2.425 ***********************************
@@ -5892,15 +5853,15 @@ def checkDataDBSum() {
         // 3.3.10.1 Итого выплат равно сумме по всем иностранным гражданам
         if (vyplatIt425Sum1 != svInoGrazdSum1) {
             def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt425Sum1\""
-            logger.info("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
+            logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
         }
         if (vyplatIt425Sum2 != svInoGrazdSum2) {
             def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум2Посл3М = \"$vyplatIt425Sum2\""
-            logger.info("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
+            logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
         }
         if (vyplatIt425Sum3 != svInoGrazdSum3) {
             def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt425Sum3\""
-            logger.info("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
+            logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
         }
     }
 
@@ -5927,15 +5888,15 @@ def checkDataDBSum() {
         // 3.3.11.1 Итого выплат равно сумме по всем обучающимся
         if (vyplatIt422Sum1 != svedObuchSum1) {
             def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt422Sum1\""
-            logger.info("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
+            logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
         }
         if (vyplatIt422Sum2 != svedObuchSum2) {
             def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум2Посл3М = \"$vyplatIt422Sum2\""
-            logger.info("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
+            logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
         }
         if (vyplatIt422Sum3 != svedObuchSum3) {
             def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt422Sum3\""
-            logger.info("$pathAttrVal не равен сумме выплат по всем обучающимся.")
+            logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
         }
     }
 }
@@ -6157,6 +6118,7 @@ def checkDataXml() {
                         if (raschetSvChildNode.name == NODE_NAME_OBYAZ_PLAT_SV) {
 
                             // 2.2.1 Соответствие кода ОКТМО (справочник ОКТМО очень большой, поэтому обращаться к нему будем по записи)
+                            // xml-файл содержит только один узел ОбязПлатСВ, поэтому обращение к БД от сюда допустимо
                             def oktmoXml = raschetSvChildNode.attributes()[OBYAZ_PLAT_SV_OKTMO]
                             def oktmoParam = getRefBookValue(REF_BOOK_OKTMO_ID, departmentParamIncomeRow?.OKTMO?.referenceValue)
                             if (oktmoXml != oktmoParam?.CODE?.stringValue) {
@@ -6485,11 +6447,10 @@ def getRefDulByDeclarationDataId() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
     if (dulActualCache.isEmpty()) {
-        Long declarationDataId = declarationData.id;
-        String whereClause = String.format("select r.id " +
-                " FROM ref_book_person r " +
-                " INNER JOIN raschsv_pers_sv_strah_lic p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
+        String whereClause = """
+            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN raschsv_pers_sv_strah_lic np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+        """
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { personId, refBookValues ->

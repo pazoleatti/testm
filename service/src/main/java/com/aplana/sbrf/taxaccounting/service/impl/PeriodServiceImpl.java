@@ -464,13 +464,12 @@ public class PeriodServiceImpl implements PeriodService {
 
 	@Override
 	public Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType) {
-		List<Integer> departments = departmentService.getTaxFormDepartments(user, Collections.singletonList(taxType), null, null);
-		if (user.hasRole(TARole.ROLE_CONTROL_UNP)
-				|| user.hasRole(TARole.ROLE_CONTROL_NS)
-				|| user.hasRole(TARole.ROLE_CONTROL)
+		List<Integer> departments = departmentService.getTaxFormDepartments(user, taxType, null, null);
+		if (user.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) || user.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)
+				|| user.hasRole(taxType, TARole.N_ROLE_CONTROL_NS) || user.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)
 				) {
 			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false, false));
-		} else if (user.hasRole(TARole.ROLE_OPER)) {
+		} else if (user.hasRole(taxType, TARole.N_ROLE_OPER) || user.hasRole(taxType, TARole.F_ROLE_OPER)) {
 			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true, false));
 		} else {
 			return Collections.EMPTY_SET;
@@ -648,7 +647,7 @@ public class PeriodServiceImpl implements PeriodService {
                 case PFR:
                     switch (operation) {
 						case FIND:
-							return departmentService.getTBDepartmentIds(user);
+							return departmentService.getTBDepartmentIds(user, taxType);
 						case EDIT_DEADLINE:
 							return departmentService.getBADepartmentIds(user);
 					}

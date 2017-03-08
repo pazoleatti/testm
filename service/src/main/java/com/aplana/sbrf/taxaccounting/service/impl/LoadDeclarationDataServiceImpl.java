@@ -77,10 +77,8 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     }
 
     private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger, String lock) {
-        if (!userInfo.getUser().hasRole(TARole.ROLE_OPER)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP,
+                TARole.F_ROLE_OPER, TARole.F_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_UNP)) {
             logger.error(ACCESS_DENIED_ERROR);
             return new ImportCounter(0, 1);
         }

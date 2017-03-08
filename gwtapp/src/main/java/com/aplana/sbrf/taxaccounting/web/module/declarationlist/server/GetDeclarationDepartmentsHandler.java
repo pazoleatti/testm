@@ -20,7 +20,7 @@ import java.util.*;
 import static java.util.Arrays.asList;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetDeclarationDepartmentsAction, GetDeclarationDepartmentsResult> {
 
     public GetDeclarationDepartmentsHandler() {
@@ -49,13 +49,13 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
 
         // Доступные подразделения
         List<Integer> departments =
-                departmentService.getOpenPeriodDepartments(userInfo.getUser(), asList(action.getTaxType()), action.getReportPeriodId());
+                departmentService.getOpenPeriodDepartments(userInfo.getUser(), action.getTaxType(), action.getReportPeriodId());
         if (departments.isEmpty()){
             result.setDepartments(new ArrayList<Department>());
             result.setDepartmentIds(new HashSet<Integer>());
         } else {
             if (action.isReports()) {
-                Set<Integer> departmentIds = new HashSet<Integer>(departmentService.getTBDepartmentIds(userInfo.getUser()));
+                Set<Integer> departmentIds = new HashSet<Integer>(departmentService.getTBDepartmentIds(userInfo.getUser(), action.getTaxType()));
                 result.setDepartments(new ArrayList<Department>(
                         departmentService.getRequiredForTreeDepartments(departmentIds).values()));
                 result.setDepartmentIds(departmentIds);
