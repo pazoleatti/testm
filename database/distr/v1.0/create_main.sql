@@ -571,7 +571,7 @@ create table log_system (
   ip                    varchar2(39),
   event_id              number(3, 0)        not null,
   user_login            varchar2(255)       not null,
-  roles                 varchar2(200),
+  roles                 varchar2(2000 char),
   department_name       varchar2(4000 byte),
   report_period_name    varchar2(100),
   form_kind_id          number(9, 0),
