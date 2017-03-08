@@ -326,13 +326,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
             if (departmentReportPeriodService.get(dd.getDepartmentReportPeriodId()).isActive()) {
-                declarationDataDao.setStatus(id, State.CREATED);
+                if (State.PREPARED.equals(dd.getState())) {
+                    declarationDataDao.setStatus(id, State.CREATED);
+                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_PREPARED_TO_CREATED, null);
+                }
             }
         } else {
             if (departmentReportPeriodService.get(dd.getDepartmentReportPeriodId()).isActive()) {
                 if (State.CREATED.equals(dd.getState())) {
                     // Переводим в состояние подготовлено
                     declarationDataDao.setStatus(id, State.PREPARED);
+                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_PREPARED, null);
                 }
             }
             logger.info("Проверка завершена, ошибок не обнаружено");
@@ -395,7 +399,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void accept(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
-        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED);
 
         DeclarationData declarationData = declarationDataDao.get(id);
 
@@ -414,8 +418,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         declarationData.setState(State.ACCEPTED);
 
-        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-        auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null);
+        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED, null);
+        auditService.add(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED, userInfo, declarationData, null, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED.getTitle(), null);
 
         lockStateLogger.updateState("Изменение состояния налоговой формы");
 
@@ -832,6 +836,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
                     }
                 }
+            }
+
+            exchangeParams.put(DeclarationDataScriptParams.XML, null);
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.AFTER_CALCULATE, logger, exchangeParams);
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceException();
             }
         } catch (IOException e) {
             LOG.error("", e);

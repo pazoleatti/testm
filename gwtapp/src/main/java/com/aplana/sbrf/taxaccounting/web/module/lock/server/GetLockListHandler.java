@@ -73,7 +73,7 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
         result.setLocks(locks);
         result.setTotalCountOfRecords(records.getTotalCount());
         result.setCurrentUserId(currentUser.getId());
-        result.setHasRoleAdmin(currentUser.hasRole(TARole.ROLE_ADMIN));
+        result.setHasRoleAdmin(currentUser.hasRole(TARole.N_ROLE_ADMIN));
         return result;
     }
 

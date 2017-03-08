@@ -24,7 +24,7 @@ import java.util.List;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionListAction, GetDTVersionListResult> {
 
     @Autowired

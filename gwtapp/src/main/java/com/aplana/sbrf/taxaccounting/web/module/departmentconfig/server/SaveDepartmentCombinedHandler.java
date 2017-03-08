@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  * @author Dmitriy Levykin
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDepartmentCombinedAction,
         SaveDepartmentCombinedResult> {
 
@@ -54,8 +54,6 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     private SecurityService securityService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-    @Autowired
-    private RefBookHelper refBookHelper;
 
     public SaveDepartmentCombinedHandler() {
         super(SaveDepartmentCombinedAction.class);

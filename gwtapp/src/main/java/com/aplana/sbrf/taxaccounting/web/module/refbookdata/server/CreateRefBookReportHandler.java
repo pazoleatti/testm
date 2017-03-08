@@ -96,18 +96,6 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
         if (lockType == null &&
                 (lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId(), ReportType.EDIT_REF_BOOK))) == null) {
             String filter = null;
-            if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
-                List<Department> deps = departmentService.getBADepartments(currentUser);
-                filter = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
-                if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
-                    //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи
-                    // справочника - ни одна не должна быть ему доступна
-                    logger.error("Нет доступных записей для выгрузки");
-                    result.setUuid(logEntryService.save(logger.getEntries()));
-                    return result;
-                }
-            }
-
             String searchPattern = action.getSearchPattern();
             if (searchPattern != null && !searchPattern.isEmpty()) {
                 if (filter != null && !filter.isEmpty()) {

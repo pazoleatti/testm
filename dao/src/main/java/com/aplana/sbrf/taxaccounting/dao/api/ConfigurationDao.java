@@ -18,6 +18,11 @@ public interface ConfigurationDao {
      */
     ConfigurationParamModel getAll();
 
+    /**
+     * Читает из БД значения всех параметров.
+     */
+    ConfigurationParamModel getCommonConfig();
+
     ConfigurationParamModel getByDepartment(Integer departmentId);
 
     /**

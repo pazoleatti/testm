@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class TAUserDaoTest {
 		Assert.assertEquals(1, user.getId());
 		Assert.assertEquals("controlBank", user.getLogin());
 		Assert.assertEquals(1, user.getDepartmentId());
-		Assert.assertTrue(user.hasRole(TARole.ROLE_CONTROL));
+		Assert.assertTrue(user.hasRole("N_ROLE_CONTROL_NS"));
 		Assert.assertEquals("controlBank@bank.ru", user.getEmail());
 		Assert.assertTrue(user.isActive());
 	}
@@ -61,8 +62,9 @@ public class TAUserDaoTest {
 	public void testCreateUser() {
 		TARole role = new TARole();
 		role.setId(1);
-		role.setAlias("ROLE_OPER");
+		role.setAlias("N_ROLE_OPER");
 		role.setName("Контролёр");
+        role.setTaxType(TaxType.NDFL);
 		List<TARole> roles = new ArrayList<TARole>();
 		roles.add(role);
 		TAUser user = new TAUser();
@@ -108,13 +110,15 @@ public class TAUserDaoTest {
 		user.setLogin(LOGIN_CONTROL_BANK);
 		
 		TARole role = new TARole();
-		role.setAlias("ROLE_OPER");
+		role.setAlias("N_ROLE_OPER");
 		role.setName("Оператор");
-		List<TARole> roles = new ArrayList<TARole>();
+        role.setTaxType(TaxType.NDFL);
+        List<TARole> roles = new ArrayList<TARole>();
 		roles.add(role);
 		TARole role1 = new TARole();
-		role1.setAlias("ROLE_CONTROL_UNP");
+		role1.setAlias("N_ROLE_CONTROL_UNP");
 		role1.setName("Контролёр УНП");
+        role1.setTaxType(TaxType.NDFL);
 		roles.add(role1);
 		
 		user.setRoles(roles);
@@ -122,13 +126,13 @@ public class TAUserDaoTest {
 		Assert.assertEquals(1,userDao.getUser(user.getId()).getDepartmentId());
 		Assert.assertEquals("controlBank@bank.ru",userDao.getUser(user.getId()).getEmail());
 		Assert.assertEquals("Контролёр Банка",userDao.getUser(user.getId()).getName());
-		Assert.assertEquals("ROLE_CONTROL",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(0).getAlias());
+		Assert.assertEquals("N_ROLE_CONTROL_NS",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(0).getAlias());
 		userDao.updateUser(user);
 		Assert.assertEquals(3,userDao.getUser(user.getId()).getDepartmentId());
 		Assert.assertEquals("@sard",userDao.getUser(user.getId()).getEmail());
 		Assert.assertEquals("Контролёр Банка",userDao.getUser(user.getId()).getName());
-        Assert.assertEquals("ROLE_OPER",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(0).getAlias());
-        Assert.assertEquals("ROLE_CONTROL_UNP",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(1).getAlias());
+        Assert.assertEquals("N_ROLE_OPER",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(0).getAlias());
+        Assert.assertEquals("N_ROLE_CONTROL_UNP",userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().get(1).getAlias());
 		Assert.assertEquals(2,userDao.getUser(userDao.getUserIdByLogin(user.getLogin())).getRoles().size());
 	}
 	
@@ -139,7 +143,7 @@ public class TAUserDaoTest {
 	
 	@Test
 	public void testCheckUserRole(){
-		Assert.assertEquals(1, userDao.checkUserRole("ROLE_OPER"));
+		Assert.assertEquals(1, userDao.checkUserRole("N_ROLE_OPER"));
 	}
 
 	@Test

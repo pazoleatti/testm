@@ -47,7 +47,7 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
         SourceClientData sourceClientData = new SourceClientData();
         Logger logger = new Logger();
 
-        if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!securityService.currentUserInfo().getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             for (DepartmentAssign right : action.getRightSelectedObjects()) {
                 FormType rightFormType = sourceService.getFormType(right.getTypeId());
                 if (rightFormType.getTaxType() != action.getTaxType()) {

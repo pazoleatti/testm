@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
 @Component
 public class GetDeadlineDepartmentsHandler extends AbstractActionHandler<GetDeadlineDepartmentsAction, GetDeadlineDepartmentsResult> {
 
@@ -35,19 +35,19 @@ public class GetDeadlineDepartmentsHandler extends AbstractActionHandler<GetDead
 		List<Department> departments = new ArrayList<Department>();
 		GetDeadlineDepartmentsResult result = new GetDeadlineDepartmentsResult();
 		Department d = null;
-		if (userInfo.getUser().hasRole("ROLE_CONTROL_UNP")) {
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
 			switch (taxType) {
                 case NDFL:
                 case PFR:
-					departments.addAll(departmentService.getBADepartments(userInfo.getUser()));
+					departments.addAll(departmentService.getBADepartments(userInfo.getUser(), action.getTaxType()));
 					d = departmentService.getBankDepartment();
 					break;
 				default:
 					break;
 			}
 		} else { // Контролер НС
-			departments.addAll(departmentService.getBADepartments(userInfo.getUser()));
-			d = departmentService.getTBDepartments(userInfo.getUser()).get(0);
+			departments.addAll(departmentService.getBADepartments(userInfo.getUser(), action.getTaxType()));
+			d = departmentService.getTBDepartments(userInfo.getUser(), taxType).get(0);
 		}
 
 		DepartmentPair dep = new DepartmentPair();

@@ -87,7 +87,7 @@ public class DeclarationServiceTest {
 
         ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
+        userInfo.setUser(mockUser(1, 1, TARole.N_ROLE_CONTROL_UNP));
         assertTrue(service.getAcceptedFormDataSources(declarationData, userInfo, new Logger()) != null);
     }
 

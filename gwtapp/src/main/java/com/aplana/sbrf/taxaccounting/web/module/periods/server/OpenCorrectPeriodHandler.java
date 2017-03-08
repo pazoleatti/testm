@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Component
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
 public class OpenCorrectPeriodHandler extends AbstractActionHandler<OpenCorrectPeriodAction, OpenCorrectPeriodResult> {
 
     public OpenCorrectPeriodHandler() {

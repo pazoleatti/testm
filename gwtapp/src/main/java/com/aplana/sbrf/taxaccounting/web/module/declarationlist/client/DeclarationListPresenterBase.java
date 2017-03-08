@@ -47,6 +47,8 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         int getPage();
 
         void updateButton();
+
+        void setVisibleCancelButton(boolean isVisible);
     }
 
 	protected final DispatchAsync dispatcher;

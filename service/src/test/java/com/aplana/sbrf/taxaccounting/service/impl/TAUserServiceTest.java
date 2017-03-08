@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -52,6 +53,7 @@ public class TAUserServiceTest {
 		
 		TARole role = new TARole();
 		role.setAlias(USER_ROLE);
+        role.setTaxType(TaxType.NDFL);
 		List<TARole> listUserRoles = new ArrayList<TARole>();
 		listUserRoles.add(role);
 		
@@ -116,6 +118,7 @@ public class TAUserServiceTest {
         user.setDepartmentId(USER_DEPARTMENT_ID);
         TARole role = new TARole();
         role.setAlias(USER_ROLE);
+        role.setTaxType(TaxType.NDFL);
         List<TARole> listUserRoles = new ArrayList<TARole>();
         listUserRoles.add(role);
         user.setRoles(listUserRoles);

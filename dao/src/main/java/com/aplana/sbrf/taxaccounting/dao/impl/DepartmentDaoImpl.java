@@ -538,4 +538,53 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             return 0;
         }
     }
+
+    @Override
+    public List<Integer> getAllPerformers(int userDepId, int declarationTypeId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("userDepId", userDepId);
+        params.put("declarationTypeId", declarationTypeId);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList("SELECT ddt.department_id\n" +
+                    "FROM department_declaration_type ddt\n" +
+                    "WHERE ddt.declaration_type_id = :declarationTypeId AND ddt.department_id IN (\n" +
+                    "  SELECT dep.ID FROM department dep CONNECT BY PRIOR dep.ID = dep.parent_id START WITH dep.ID in (\n" +
+                    "    SELECT DISTINCT ddt.department_id\n" +
+                    "    FROM department_declaration_type ddt\n" +
+                    "    INNER JOIN department_decl_type_performer ddtp ON ddt.ID = ddtp.department_decl_type_id \n" +
+                    "    WHERE ddt.declaration_type_id = :declarationTypeId AND ddtp.performer_dep_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id START WITH dep_ddtp.ID = :userDepId)\n" +
+                    "  )\n" +
+                    ")", params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
+    }
+
+
+    @Override
+    public List<Integer> getAllPerformers(int userDepId, List<TaxType> taxTypes) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("userDepId", userDepId);
+        List<String> types = new ArrayList<String>();
+        for (TaxType type : taxTypes) {
+            types.add(String.valueOf(type.getCode()));
+        }
+        params.put("taxTypes", types);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList("SELECT DISTINCT ddt2.department_id\n" +
+                    "FROM department_declaration_type ddt2\n" +
+                    "INNER JOIN declaration_type dt ON dt.id = ddt2.declaration_type_id\n" +
+                    "WHERE dt.tax_type in (:taxTypes) AND ddt2.department_id IN (\n" +
+                    "  SELECT dep.ID FROM department dep CONNECT BY PRIOR dep.ID = dep.parent_id START WITH dep.ID in (\n" +
+                    "    SELECT DISTINCT ddt.department_id\n" +
+                    "    FROM department_declaration_type ddt\n" +
+                    "    INNER JOIN department_decl_type_performer ddtp ON ddt.ID = ddtp.department_decl_type_id \n" +
+                    "    WHERE ddt.declaration_type_id = ddt2.declaration_type_id AND ddtp.performer_dep_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id START WITH dep_ddtp.ID = :userDepId)\n" +
+                    "  )\n" +
+                    ")", params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
+    }
+
 }

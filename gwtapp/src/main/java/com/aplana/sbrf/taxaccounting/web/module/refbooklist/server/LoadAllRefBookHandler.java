@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 @Component
 public class LoadAllRefBookHandler extends AbstractActionHandler<LoadRefBookAction, LoadRefBookResult> {
 

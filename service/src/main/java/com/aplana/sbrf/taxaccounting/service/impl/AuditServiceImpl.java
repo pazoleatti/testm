@@ -189,20 +189,20 @@ public class AuditServiceImpl implements AuditService {
             TAUser user = userInfo.getUser();
             HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
                     new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
-            if (user.hasRole(TARole.ROLE_ADMIN)) {
+            if (user.hasRole(TARole.N_ROLE_ADMIN)) {
                 return auditDao.getLogsForAdmin(filter);
-            } else if (user.hasRole(TARole.ROLE_CONTROL_NS) || user.hasRole(TARole.ROLE_CONTROL)) {
+            } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
 
                 sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
                 sampleVal.put(SAMPLE_NUMBER.S_45, departmentService.getSourcesDepartmentIds(userInfo.getUser(), null, null));
                 sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
 
                 return auditDao.getLogsBusinessForControl(filter, sampleVal);
-            } else if (user.hasRole(TARole.ROLE_OPER)) {
+            } else if (user.hasRole(TARole.N_ROLE_OPER)) {
                 sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
                 sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
                 return auditDao.getLogsBusinessForOper(filter, sampleVal);
-            } else if (user.hasRole(TARole.ROLE_CONTROL_UNP)){
+            } else if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)){
                 return auditDao.getLogsBusinessForControlUnp(filter);
             }
         } catch (DaoException e) {
@@ -214,11 +214,11 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public long getCountRecords(LogSystemFilter filter,  TAUserInfo userInfo) {
+    public long getCountRecords(LogSystemFilter filter, TAUserInfo userInfo) {
         TAUser user = userInfo.getUser();
-        if (user.hasRole(TARole.ROLE_ADMIN)) {
+        if (user.hasRole(TARole.N_ROLE_ADMIN)) {
             return auditDao.getCount(filter);
-        } else if (user.hasRole(TARole.ROLE_CONTROL_NS) || user.hasRole(TARole.ROLE_CONTROL)) {
+        } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
             HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
                     new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
             sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
@@ -226,13 +226,13 @@ public class AuditServiceImpl implements AuditService {
             sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
 
             return auditDao.getCountForControl(filter, sampleVal);
-        } else if (user.hasRole(TARole.ROLE_OPER)) {
+        } else if (user.hasRole(TARole.N_ROLE_OPER)) {
             HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
                     new HashMap<SAMPLE_NUMBER, Collection<Integer>>(2);
             sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
             sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
             return auditDao.getCountForOper(filter, sampleVal);
-        } else if (user.hasRole(TARole.ROLE_CONTROL_UNP)){
+        } else if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)){
             return auditDao.getCountForControlUnp(filter);
         }
         return auditDao.getCount(filter);

@@ -169,17 +169,17 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
                 SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%", "90%")),
                 !s_45_55.isEmpty() ? SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_55) : "1=3",
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "90%"))
         );
 
         PreparedStatementData ps = new PreparedStatementData();
@@ -242,17 +242,17 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
                 SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%", "90%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_55),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))
+                        eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "90%"))
         );
 
         PreparedStatementData ps = new PreparedStatementData();
@@ -323,13 +323,13 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
                 SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_OPER, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%", "90%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_OPER, null, "_", "10%", "40%", "90%")),
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_55) : "1=3",
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "90%"))
+                        eventDao.getEventCodes(TARole.N_ROLE_OPER, null, "90%"))
                 );
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery(sql);
@@ -371,13 +371,13 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
                 SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_OPER, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%", "90%")),
+                        eventDao.getEventCodes(TARole.N_ROLE_OPER, null, "_", "10%", "40%", "90%")),
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_55) : "1=3",
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "90%"))
+                        eventDao.getEventCodes(TARole.N_ROLE_OPER, null, "90%"))
         );
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery(sql);
@@ -399,7 +399,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
         ps.appendQuery("WHERE (");
         ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                eventDao.getEventCodes(TARole.ROLE_CONTROL, Arrays.asList(
+                eventDao.getEventCodes(TARole.N_ROLE_CONTROL_UNP, Arrays.asList(
 								LOGIN.getCode(),
 								LOGOUT.getCode(),
 								LOG_SYSTEM_BACKUP.getCode(),
@@ -429,7 +429,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
         ps.appendQuery("WHERE (");
         ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                eventDao.getEventCodes(TARole.ROLE_CONTROL, Arrays.asList(
+                eventDao.getEventCodes(TARole.N_ROLE_CONTROL_UNP, Arrays.asList(
 						LOGIN.getCode(),
 						LOGOUT.getCode(),
 						LOG_SYSTEM_BACKUP.getCode(),

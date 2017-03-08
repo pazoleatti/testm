@@ -48,16 +48,18 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	@Override
 	public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType) {
 		DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
-		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
-            if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP) && userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
-                List<Department> departmentList = departmentService.getTBDepartments(userInfo.getUser());
+		if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER,
+                TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS, TARole.F_ROLE_OPER)) {
+            if (taxType.equals(TaxType.NDFL) && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP) && userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS) ||
+                    taxType.equals(TaxType.PFR) && !userInfo.getUser().hasRole(TARole.F_ROLE_CONTROL_UNP) && userInfo.getUser().hasRole(TARole.F_ROLE_CONTROL_NS)) {
+                List<Department> departmentList = departmentService.getTBDepartments(userInfo.getUser(), taxType);
                 if (departmentList.size() != 1) {
                     throw new AccessDeniedException("Ошибка назначения подразделения для роли «Контролёр НС»");
                 }
             }
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    asList(taxType), null, null)));
+                    taxType, null, null)));
         } else {
 			throw new AccessDeniedException("Недостаточно прав для поиска налоговых форм");
 		}

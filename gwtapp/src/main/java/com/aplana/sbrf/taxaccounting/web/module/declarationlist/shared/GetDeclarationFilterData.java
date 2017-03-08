@@ -6,11 +6,8 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetDeclarationFilterData extends UnsecuredActionImpl<GetDeclarationFilterDataResult> {
 
-	public GetDeclarationFilterData(){
-
-	}
-
 	private TaxType taxType;
+    private boolean isReports;
 
 	public TaxType getTaxType() {
 		return taxType;
@@ -19,4 +16,12 @@ public class GetDeclarationFilterData extends UnsecuredActionImpl<GetDeclaration
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
 	}
+
+    public boolean isReports() {
+        return isReports;
+    }
+
+    public void setReports(boolean isReports) {
+        this.isReports = isReports;
+    }
 }

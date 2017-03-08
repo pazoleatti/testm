@@ -21,7 +21,7 @@ import java.util.List;
  * @author dloshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('N_ROLE_ADMIN')")
 public class GetAvailableTasksHandler extends AbstractActionHandler<GetAvailableTasksAction, GetAvailableTasksResult> {
 
     @Autowired

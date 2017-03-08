@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.commonparameter.server;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.SaveCommonParameterAction;
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.SaveCommonParameterResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -16,9 +17,10 @@ public class SaveCommonParameterHandler extends AbstractActionHandler<SaveCommon
 
     @Autowired
     private ConfigurationService configurationService;
-
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private SecurityService securityService;
 
     public SaveCommonParameterHandler() {
         super(SaveCommonParameterAction.class);
@@ -34,7 +36,7 @@ public class SaveCommonParameterHandler extends AbstractActionHandler<SaveCommon
         if (!logger.getEntries().isEmpty()) {
             result.setUuid(logEntryService.save(logger.getEntries()));
         } else {
-            configurationService.saveCommonConfigurationParams(action.getConfigurationParamMap());
+            configurationService.saveCommonConfigurationParams(action.getConfigurationParamMap(), securityService.currentUserInfo());
         }
 
         return result;

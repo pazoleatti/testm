@@ -13,7 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class CheckRoleHandler extends AbstractActionHandler<CheckRoleAction, CheckRoleResult> {
 
     @Autowired
@@ -27,7 +27,7 @@ public class CheckRoleHandler extends AbstractActionHandler<CheckRoleAction, Che
     public CheckRoleResult execute(CheckRoleAction checkRoleAction, ExecutionContext executionContext) throws ActionException {
         TAUser user = securityService.currentUserInfo().getUser();
         CheckRoleResult result = new CheckRoleResult();
-        result.setResult(user.hasRole(TARole.ROLE_CONF));
+        result.setResult(user.hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF));
         return result;
     }
 

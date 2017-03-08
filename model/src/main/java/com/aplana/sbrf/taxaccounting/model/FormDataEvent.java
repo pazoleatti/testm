@@ -33,11 +33,13 @@ public enum FormDataEvent implements Serializable {
     GET_SPECIFIC_REPORT_TYPES(20, "Получить список специфичных отчетов"),
     CALCULATE_TASK_COMPLEXITY(21, "Рассчитать сложность задачи формирования специфичных отчетов"),
     CHECK_VISIBILITY_PDF(22, "Проверка видимости формы предварительного просмотра для налоговой формы"),
+    AFTER_CALCULATE(25, "После рассчитать"),
 
     CREATE_FORMS(23, "Создание экземпляров форм"), // Вызывается не для экземпляра формы
     CREATE_REPORTS(24, "Сформировать отчетность"), // Вызывается не для экземпляра формы
 
-	MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
+
+    MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),
 	MOVE_APPROVED_TO_ACCEPTED(103, "Принять из \"Утверждена\""),
 	MOVE_ACCEPTED_TO_APPROVED(104, "Вернуть из \"Принята\" в \"Утверждена\""),
@@ -61,7 +63,7 @@ public enum FormDataEvent implements Serializable {
 
 	ADD_ROW(301, "Добавить строку"),
 	DELETE_ROW(303, "Удалить строку"),
-	AFTER_LOAD(302, "Загрузка"),	/* Вызывается после того как форма была получена из БД.
+    AFTER_LOAD(302, "Загрузка"),	/* Вызывается после того как форма была получена из БД.
 									Если изменяются данные формы в справочных ячейках,
 									то нужно вызвать scriptFormDataHolder.setDataChanged(true) */
 
@@ -82,25 +84,6 @@ public enum FormDataEvent implements Serializable {
     TEMPLATE_ACTIVATED(703, "Версия макета введена в действие"),
     TEMPLATE_DEACTIVATED(704, "Версия макета выведена из действия"),
     TEMPLATE_DELETED(705, "Версия макета удалена"),
-
-    GAR_UPLOAD_CONTRACTS(810, "Гарантии: Загрузка данных о договорах обеспечения"),
-    GAR_UPLOAD_CUSTOMER_DATA(811, "Гарантии: Загрузка данных о клиентах"),
-    GAR_UPLOAD_PAYMENTS_DATA(812, "Гарантии: Загрузка данных о платежах"),
-    GAR_UPLOAD_REFBOOK(813, "Гарантии: Загрузка справочника"),
-
-    GAR_CREATE_CLIENT_PROFILES(820, "Гарантии: Создание анкеты клиента"),
-    GAR_EDIT_CLIENT_PROFILES(821, "Гарантии: Редактирование анкеты клиента"),
-
-    GAR_CREATE_GUARANTEE(830, "Гарантии: Создание договора гарантии"),
-    GAR_EDIT_GUARANTEE(831, "Гарантии: Редактирование договора гарантии"),
-    GAR_CLOSE_GUARANTEE(832, "Гарантии: Закрытие договора гарантии"),
-
-    GAR_CREATE_OBSP(840, "Гарантии: Создание договора обеспечения"),
-    GAR_EDIT_OBSP(841, "Гарантии: Редактирование договора обеспечения"),
-    GAR_CLOSE_OBSP(842, "Гарантии: Закрытие договора обеспечения"),
-
-    GAR_CREATE_TASK_FORMATION_RNU23(850, "Гарантии: Создание задачи формирования РНУ-23"),
-    GAR_CREATE_TASK_FORMATION_REPORT(860, "Гарантии: Создание задачи формирования отчета"),
 
     ADD_DEPARTMENT(901, "Создание подразделения"),
     UPDATE_DEPARTMENT(902, "Модификация подразделения"),

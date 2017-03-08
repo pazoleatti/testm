@@ -7,14 +7,14 @@ import java.util.List;
 
 public class DetectUserRoleResult implements Result {
 	private static final long serialVersionUID = -6037420163541321038L;
-	
-	List<TARole> userRole;
 
-	public List<TARole> getUserRole() {
-		return userRole;
-	}
+    private boolean isControl;
 
-	public void setUserRole(List<TARole> userRole) {
-		this.userRole = userRole;
-	}
+    public boolean isControl() {
+        return isControl;
+    }
+
+    public void setControl(boolean isControl) {
+        this.isControl = isControl;
+    }
 }

@@ -82,7 +82,7 @@ public interface DepartmentService {
      * @param tAUser пользователь
      * @return
      */
-    List<Department> getBADepartments(TAUser tAUser);
+    List<Department> getBADepartments(TAUser tAUser, TaxType taxType);
 
     /**
      * 10 - Выборка идентификаторов подразделений для бизнес-администрирования
@@ -101,7 +101,7 @@ public interface DepartmentService {
      * @param tAUser пользователь
      * @return список подразделений
      */
-    List<Department> getTBDepartments(TAUser tAUser);
+    List<Department> getTBDepartments(TAUser tAUser, TaxType taxType);
 
     /**
      * Получение родительского узла заданного типа (указанное подразделение м.б. результатом, если его тип соответствует искомому)
@@ -127,7 +127,7 @@ public interface DepartmentService {
      * @param tAUser пользователь
      * @return список идентификаторов подразделений
      */
-    List<Integer> getTBDepartmentIds(TAUser tAUser);
+    List<Integer> getTBDepartmentIds(TAUser tAUser, TaxType taxType);
 
     /**
      * 30 - Получение Банка
@@ -140,12 +140,20 @@ public interface DepartmentService {
      * 40 - Выборка id подразделений для доступа к экземплярам НФ/деклараций
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380670">Аналитика</a>
      * @param tAUser пользователь
-     * @param taxTypes Типы
+     * @param taxType Тип налога
      * @param periodStart  начало периода, в котором действуют назначения
      * @param periodEnd    окончание периода, в котором действуют назначения
      * @return
      */
-    List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes, Date periodStart, Date periodEnd);
+    List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, Date periodStart, Date periodEnd);
+
+    /**
+     * Выборка id подразделений для доступа к экземплярам деклараций
+     * @param tAUser пользователь
+     * @param declarationType Тип декларации(макета)
+     * @return
+     */
+    List<Integer> getTaxDeclarationDepartments(TAUser tAUser, DeclarationType declarationType);
 
     /**
      * 45 - Подразделения, доступные через назначение источников-приёмников
@@ -173,7 +181,7 @@ public interface DepartmentService {
      * @param tAUser пользователь
      * @return
      */
-    List<Department> getDestinationDepartments(TAUser tAUser);
+    List<Department> getDestinationDepartments(TaxType taxType, TAUser tAUser);
 
     /**
      * 55 - Подразделения, доступные через назначение исполнителя
@@ -195,11 +203,11 @@ public interface DepartmentService {
      * 80 - Выборка id подразделений по открытым периодам
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11383234">Аналитика</a>
      * @param tAUser пользователь
-     * @param taxTypes Типы налога
+     * @param taxType Типы налога
      * @param reportPeriodId id периода
      * @return
      */
-    List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, int reportPeriodId);
+    List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, int reportPeriodId);
 
 	/**
 	 * Получить подразделения по списку идентификаторов

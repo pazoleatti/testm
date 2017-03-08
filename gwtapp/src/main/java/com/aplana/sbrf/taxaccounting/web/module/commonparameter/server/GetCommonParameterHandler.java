@@ -16,7 +16,6 @@ public class GetCommonParameterHandler extends AbstractActionHandler<GetCommonPa
 
 	@Autowired
 	private SecurityService securityService;
-
 	@Autowired
 	private ConfigurationService configurationService;
 
@@ -27,7 +26,7 @@ public class GetCommonParameterHandler extends AbstractActionHandler<GetCommonPa
 	@Override
 	public GetCommonParameterResult execute(GetCommonParameterAction action, ExecutionContext context) throws ActionException {
         GetCommonParameterResult result = new GetCommonParameterResult();
-		result.setModel(configurationService.getAllConfig(securityService.currentUserInfo()));
+		result.setModel(configurationService.getCommonConfig(securityService.currentUserInfo()));
         return result;
     }
 

@@ -2,11 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +38,8 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			result.setId(SqlUtils.getInteger(rs,"id"));
 			result.setName(rs.getString("name"));
 			result.setAlias(rs.getString("alias"));
-			return result;
+            result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            return result;
 		}
 	}; 
 	
@@ -114,7 +111,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			}
 
 			List<TARole> userRoles = getJdbcTemplate().query(
-				"select id, alias, name from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?)",
+				"select id, alias, name, tax_type from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?)",
 				new Object[] { user.getId() },
 				new int[] { Types.NUMERIC },
 				TA_ROLE_MAPPER

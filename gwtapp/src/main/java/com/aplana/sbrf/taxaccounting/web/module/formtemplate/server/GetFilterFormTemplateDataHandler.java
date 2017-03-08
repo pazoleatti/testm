@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class GetFilterFormTemplateDataHandler extends AbstractActionHandler<GetFilterFormTemplateData, GetFilterFormTemplateDataResult> {
 	
     public GetFilterFormTemplateDataHandler() {

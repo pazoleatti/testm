@@ -46,7 +46,7 @@ public class GetIfrsReportPeriodsHandler extends AbstractActionHandler<GetReport
         List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
         periodList.addAll(periodService.getPeriodsByTaxTypeAndDepartments(TaxType.INCOME,
                 new ArrayList<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                        asList(TaxType.INCOME), null, null))));
+                        TaxType.INCOME, null, null))));
         result.setReportPeriods(periodList);
         return result;
     }

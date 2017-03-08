@@ -61,7 +61,7 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
         PeriodsInterval period = action.getNewPeriodsInterval();
         Logger logger = new Logger();
 
-        if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!securityService.currentUserInfo().getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             for (CurrentAssign assign : action.getCurrentAssigns()) {
                 if (action.getTaxType() != assign.getTaxType()) {
                     throw new ActionException("Недостаточно прав на редактирование назначений: назначенные формы должны относится к текущему налогу!");
