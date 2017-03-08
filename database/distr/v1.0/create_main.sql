@@ -536,7 +536,7 @@ create table log_business (
   log_date             date           not null,
   event_id             number(3, 0)   not null,
   user_login           varchar2(255)  not null,
-  roles                varchar2(200)  not null,
+  roles                varchar2(2000)  not null,
   declaration_data_id  number(9, 0),
   form_data_id         number(9, 0),
   note                 varchar2(510),
