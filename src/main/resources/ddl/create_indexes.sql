@@ -1,6 +1,7 @@
 create index idx_ref_book_id_tax_payer_pers on ref_book_id_tax_payer(person_id);
 create index idx_ref_book_id_doc_pers on ref_book_id_doc(person_id);
 create index idx_ref_person_status on ref_book_person(status);
+create index idx_ref_book_person_rec_id on ref_book_person (record_id);
 
 create index srch_ref_person_name_brthd on ref_book_person(replace(lower(last_name), ' ', ''),replace(lower(first_name), ' ', ''),replace(lower(middle_name), ' ', ''),birth_date);
 create index srch_ref_book_id_doc_tp_num on ref_book_id_doc(doc_id,replace(lower(doc_number), ' ', ''));
@@ -29,8 +30,6 @@ create index ndfl_pers_inc_kpp_oktmo on ndfl_person_income(kpp,oktmo);
 create index idx_ndfl_person_ded_ppcurrdt on ndfl_person_deduction(ndfl_person_id,period_curr_date);
 
 create index idx_ndfl_person_prep_pnotdt on ndfl_person_prepayment(ndfl_person_id,notif_date);
-
-create index idx_ras_psv_strlic_decl_person on raschsv_pers_sv_strah_lic(declaration_data_id,person_id);
 
 create index idx_ref_deduct_mark_name on ref_book_deduction_mark(name);
 create index idx_ref_deduct_type_dmark on ref_book_deduction_type(deduction_mark);
