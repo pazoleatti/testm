@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import org.junit.Before;
@@ -53,26 +52,28 @@ public class RefBookPersonServiceTest {
 
     @Test
     public void identificatePersonTest() {
-        PersonData person = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        NaturalPerson result = personService.identificatePerson(person, getList(), 900, new Logger());
-        assertEquals(Long.valueOf(6L), result.getRefBookPersonId());
+        NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
+        NaturalPerson result = personService.identificatePerson(primaryPerson, getList(), 900, new Logger());
+
+        assertEquals(Long.valueOf(6L), result.getId());
     }
 
 
-    public PersonData createPersonData(Long id, String inp, String inn, String innForeign, String snils, String docType,
-                                       String docNumber,
-                                       String lastName,
-                                       String firstName, String middleName, String birthDate) {
-        PersonData result = new PersonData();
-        result.setRefBookPersonId(id);
+    public NaturalPerson createPersonData(Long id, String inp, String inn, String innForeign, String snils, String docType,
+                                          String docNumber,
+                                          String lastName,
+                                          String firstName, String middleName, String birthDate) {
+        NaturalPerson result = new NaturalPerson();
+        result.setId(id);
         result.setRecordId(id);
-        result.setAsnuId(5L);
-        result.setInp(inp);
+
         result.setInn(inn);
         result.setInnForeign(innForeign);
         result.setSnils(snils);
-        result.setDocumentTypeId(5L);
-        result.setDocumentNumber(docNumber);
+
+        result.getPersonIdentityList().add(createPersonIdentifier(1L, inp, 5L));
+        result.getPersonDocumentList().add(createPersonDocument(5L, 1, docNumber));
+
         result.setLastName(lastName);
         result.setFirstName(firstName);
         result.setMiddleName(middleName);
@@ -81,10 +82,10 @@ public class RefBookPersonServiceTest {
     }
 
 
-    public PersonData createPersonData(String inp, String inn, String innForeign, String snils, String docType,
-                                       String docNumber,
-                                       String lastName,
-                                       String firstName, String middleName, String birthDate) {
+    public NaturalPerson createPersonData(String inp, String inn, String innForeign, String snils, String docType,
+                                          String docNumber,
+                                          String lastName,
+                                          String firstName, String middleName, String birthDate) {
         return createPersonData(null, inp, inn, innForeign, snils, docType, docNumber, lastName, firstName, middleName, birthDate);
     }
 
@@ -93,26 +94,11 @@ public class RefBookPersonServiceTest {
                                              String lastName,
                                              String firstName, String middleName, String birthDate) {
         NaturalPerson result = new NaturalPerson();
-        result.setRefBookPersonId(id);
+        result.setId(id);
         result.setRecordId(id);
 
-        PersonIdentifier personIdentifier = new PersonIdentifier();
-        personIdentifier.setId(1L);
-        personIdentifier.setInp(inp);
-        personIdentifier.setAsnuId(5L);
-
-        result.getPersonIdentityList().add(personIdentifier);
-
-
-        DocType docTypeObject = new DocType();
-        docTypeObject.setId(5L);
-
-        PersonDocument personDocument = new PersonDocument();
-        personDocument.setDocType(docTypeObject);
-        personDocument.setIncRep(1);
-        personDocument.setDocumentNumber(docNumber);
-
-        result.getPersonDocumentList().add(personDocument);
+        result.getPersonIdentityList().add(createPersonIdentifier(1L, inp, 5L));
+        result.getPersonDocumentList().add(createPersonDocument(5L, 1, docNumber));
 
         result.setInn(inn);
         result.setInnForeign(innForeign);
@@ -123,6 +109,24 @@ public class RefBookPersonServiceTest {
         result.setMiddleName(middleName);
         result.setBirthDate(toDate(birthDate));
         return result;
+    }
+
+    private PersonIdentifier createPersonIdentifier(Long id, String inp, Long asnuId) {
+        PersonIdentifier personIdentifier = new PersonIdentifier();
+        personIdentifier.setId(id);
+        personIdentifier.setInp(inp);
+        personIdentifier.setAsnuId(asnuId);
+        return personIdentifier;
+    }
+
+    private PersonDocument createPersonDocument(Long docTypeId, Integer incRep, String documentNumber) {
+        DocType docTypeObject = new DocType();
+        docTypeObject.setId(5L);
+        PersonDocument personDocument = new PersonDocument();
+        personDocument.setDocType(docTypeObject);
+        personDocument.setIncRep(1);
+        personDocument.setDocumentNumber(documentNumber);
+        return personDocument;
     }
 
 

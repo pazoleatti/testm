@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 import java.util.Date;
@@ -17,7 +21,7 @@ public interface NdflPersonService {
     /**
      * Пакетное обновление ссылок NdflPerson.personId на справочник физлиц
      */
-    int[] updatePersonRefBookReferences(List<NdflPerson> ndflPersonList);
+    int[] updateRefBookPersonReferences(List<NaturalPerson> ndflPersonList);
 
     /**
      * Создает новую запись о доходах ФЛ привязанную к ПНФ
@@ -111,7 +115,7 @@ public interface NdflPersonService {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1 = true для НДФЛ(1) prFequals1 = false для НДФЛ(2)
+     * @param prFequals1   = true для НДФЛ(1) prFequals1 = false для НДФЛ(2)
      * @return
      */
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
@@ -189,32 +193,35 @@ public interface NdflPersonService {
      * Найти данные о доходах Физлиц
      *
      * @param ndflPersonIdList
-     * @param startDate         - начало периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param endDate           - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param startDate        - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate          - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdList(List<Long> ndflPersonIdList, Date startDate, Date endDate);
 
     /**
      * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ
+     *
      * @param declarationDataId идентификатор ОНФ для которой необходимо найти строки из КНФ
-     * @param kpp КПП ОНФ
-     * @param oktmo ОКТМО ОНФ
+     * @param kpp               КПП ОНФ
+     * @param oktmo             ОКТМО ОНФ
      * @return
      */
     List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU2Ndfl(long declarationDataId, String kpp, String oktmo);
 
     /**
      * Найти доходы из КНФ которая является источником для ОНФ 6-НДФЛ
+     *
      * @param declarationDataId идентификатор ОНФ для которой необходимо найти строки из КНФ
-     * @param kpp КПП ОНФ
-     * @param oktmo ОКТМО ОНФ
+     * @param kpp               КПП ОНФ
+     * @param oktmo             ОКТМО ОНФ
      * @return
      */
     List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU6Ndfl(long declarationDataId, String kpp, String oktmo);
 
     /**
      * Найти вычеты для определенной операции
+     *
      * @param ndflPersonId
      * @param operationId
      * @return
@@ -223,6 +230,7 @@ public interface NdflPersonService {
 
     /**
      * Найти авансы для определенной операции
+     *
      * @param ndflPersonId
      * @param operationId
      * @return
@@ -231,6 +239,7 @@ public interface NdflPersonService {
 
     /**
      * Найти доход по идентификатору
+     *
      * @param id
      * @return
      */
@@ -238,6 +247,7 @@ public interface NdflPersonService {
 
     /**
      * Найти вычет по идентификатору
+     *
      * @param id
      * @return
      */
@@ -245,6 +255,7 @@ public interface NdflPersonService {
 
     /**
      * Найти аванс по идентификатору
+     *
      * @param id
      * @return
      */
@@ -252,6 +263,7 @@ public interface NdflPersonService {
 
     /**
      * Найти Физлиц по списку id
+     *
      * @param ndflPersonIdList
      * @return
      */

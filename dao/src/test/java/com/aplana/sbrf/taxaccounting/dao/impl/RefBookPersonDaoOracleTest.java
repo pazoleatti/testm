@@ -7,9 +7,12 @@ import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,11 +84,15 @@ public class RefBookPersonDaoOracleTest {
 
         int size = 0;
 
-        Map<Long, NaturalPerson> insertRecords = refBookPersonDao.findPersonForInsertFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonPrimaryRnuRowMapper());
+        List<NaturalPerson> insertRecords = refBookPersonDao.findPersonForInsertFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonPrimaryRnuRowMapper());
 
         size += insertRecords.size();
 
         System.out.println("   insertRecords=" + insertRecords);
+
+        PersonDocument doc = insertRecords.get(0).getPersonDocument();
+
+        System.out.println("   insertRecords=" + doc);
 
         Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
 
@@ -93,9 +100,6 @@ public class RefBookPersonDaoOracleTest {
 
         System.out.println("   updateRecords=" + updateRecords);
 
-        List<NaturalPerson> list = getPersonList(updateRecords);
-
-        ndflPersonDao.updateRefBookPersonReferences(list);
 
         Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
 
@@ -111,18 +115,12 @@ public class RefBookPersonDaoOracleTest {
 
     }
 
-    private List<NaturalPerson> getPersonList(Map<Long, Map<Long, NaturalPerson>> records) {
-        List<NaturalPerson> res = new ArrayList<NaturalPerson>();
-        for (Long personId : records.keySet()) {
-            Map<Long, NaturalPerson> rows = records.get(personId);
-            List<NaturalPerson> nplist = new ArrayList<NaturalPerson>(rows.values());
-            NaturalPerson np = (NaturalPerson) nplist.get(0);
-            np.setPersonId(personId);
-            res.add(np);
+
+    public void insertPersonRecords(List<? extends IdentityObject> identityObjectList) {
+        List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
+        for (IdentityObject identityObject : identityObjectList) {
+            System.out.println("identityObject=" + identityObject);
         }
-        return res;
-
-
     }
 
 

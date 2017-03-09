@@ -27,11 +27,6 @@ public interface NdflPersonDao {
     /**
      * Пакетное обновление ссылок NdflPerson.personId на справочник физлиц
      *
-     * @param ndflPersonList список объектов для обновления
-     */
-    int[] updatePersonRefBookReferences(List<NdflPerson> ndflPersonList);
-
-    /**
      * @param ndflPersonList
      * @return
      */

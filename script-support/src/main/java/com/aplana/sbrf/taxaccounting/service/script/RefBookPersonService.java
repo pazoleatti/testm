@@ -26,9 +26,9 @@ public interface RefBookPersonService {
 
     Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version);
 
-    NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger);
+    NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger);
 
-    NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
+    NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
 
     List<BaseWeigthCalculator> getBaseCalculateList();
 
@@ -45,7 +45,7 @@ public interface RefBookPersonService {
      * @param version           версия записи
      * @return
      */
-    Map<Long, NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper);
+    List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper);
 
     /**
      * Найти всех ФЛ по определяющим параметрам

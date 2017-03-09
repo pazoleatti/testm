@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -21,11 +23,9 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
 
 import java.awt.*;
 import java.io.*;
@@ -33,7 +33,6 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.text.ParseException;
-
 import java.util.*;
 import java.util.List;
 
@@ -48,8 +47,6 @@ import static org.mockito.Mockito.*;
 /**
  * @author Andrey Drunk
  */
-//TODO 06.03.2017 отклчил на время
-@Ignore
 public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(PrimaryRnuNdflScriptTest.class.getName());
@@ -127,9 +124,21 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     private Map<String, RefBookValue> createRefBookMock(long id) {
         Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
         result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
-        result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "foo"));
+        result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "foo" + id));
+        result.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "bar" + id));
         result.put("ADDRESS", new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(new Random().nextInt(1000))));
         return result;
+    }
+
+    private PagingResult<Map<String, RefBookValue>> getCountryRefBook() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        for (int i = 0; i < 8; i++) {
+            Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+            values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.REFERENCE, Long.valueOf(i)));
+            values.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "000" + i));
+            pagingResult.add(values);
+        }
+        return pagingResult;
     }
 
     /**
@@ -137,7 +146,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
      *
      * @throws IOException
      */
-    @Ignore
+
     @Test
     public void calculateTest() throws IOException {
         final int ndflPersonSize = 5;
@@ -145,10 +154,14 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         final Map<Long, NdflPerson> ndflPersonMap = mockFindNdflPerson(ndflPersonSize);
         when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenReturn(new ArrayList<NdflPerson>(ndflPersonMap.values()));
 
+        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), any(String.class), any(RefBookAttribute.class))).thenReturn(getCountryRefBook());
+
+        when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
+
         when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
 
         when(testHelper.getRefBookPersonService().identificatePerson(any(PersonData.class), anyList(), anyInt(), any(Logger.class))).thenReturn(null).thenReturn(null);
-                //.thenReturn(1L).thenReturn(2L).thenReturn(3L);
+        //.thenReturn(1L).thenReturn(2L).thenReturn(3L);
 
         doAnswer(new Answer<Void>() {
             public Void answer(InvocationOnMock invocation) {
@@ -167,13 +180,14 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             }
         });
 
-        when(testHelper.getNdflPersonService().updatePersonRefBookReferences(anyList())).thenAnswer(new Answer<int[]>() {
+        when(testHelper.getNdflPersonService().updateRefBookPersonReferences(anyList())).thenAnswer(new Answer<int[]>() {
             @Override
             public int[] answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                List<NdflPerson> personData = (List<NdflPerson>) args[0];
-                for (NdflPerson person : personData) {
-                    Assert.assertNotNull(person.getPersonId());
+                List<NaturalPerson> personData = (List<NaturalPerson>) args[0];
+                for (NaturalPerson person : personData) {
+                    Assert.assertNotNull(person.getId());
+                    Assert.assertNotNull(person.getPrimaryPersonId());
                 }
                 return new int[]{};
             }

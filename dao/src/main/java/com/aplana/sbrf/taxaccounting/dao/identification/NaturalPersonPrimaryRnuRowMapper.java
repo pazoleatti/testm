@@ -30,8 +30,8 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
         NaturalPerson person = new NaturalPerson();
 
-        person.setPersonId(SqlUtils.getLong(rs, "id"));
-        person.setRefBookPersonId(SqlUtils.getLong(rs, "person_id"));
+        person.setPrimaryPersonId(SqlUtils.getLong(rs, "id"));
+        person.setId(SqlUtils.getLong(rs, "person_id"));
 
         person.setSnils(rs.getString("snils"));
         person.setLastName(rs.getString("last_name"));
@@ -46,6 +46,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         String inp = rs.getString("inp");
         if (inp != null && asnuId != null) {
             PersonIdentifier personIdentifier = new PersonIdentifier();
+            personIdentifier.setNaturalPerson(person);
             personIdentifier.setInp(inp);
             personIdentifier.setAsnuId(asnuId);
             person.getPersonIdentityList().add(personIdentifier);
@@ -56,6 +57,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
         if (documentNumber != null && documentTypeCode != null) {
             PersonDocument personDocument = new PersonDocument();
+            personDocument.setNaturalPerson(person);
             personDocument.setDocumentNumber(documentNumber);
             personDocument.setDocType(getDocTypeByCode(documentTypeCode));
             person.getPersonDocumentList().add(personDocument);
@@ -72,6 +74,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
         if (getFiasAddres() != null) {
             Address address = new Address();
+
             address.setCountry(getCountryByCode(rs.getString("country_code")));
             address.setRegionCode(rs.getString("region_code"));
             address.setPostalCode(rs.getString("post_index"));
@@ -83,6 +86,9 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
             address.setBuild(rs.getString("building"));
             address.setAppartment(rs.getString("flat"));
             address.setAddressIno(rs.getString("address"));
+            //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
+            int addressType = (address.getAddressIno() != null && !address.getAddressIno().isEmpty()) ? 1 : 0;
+            address.setAddressType(addressType);
 
             return address;
         } else {

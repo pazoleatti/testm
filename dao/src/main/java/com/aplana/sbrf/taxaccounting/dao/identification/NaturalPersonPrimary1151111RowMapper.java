@@ -18,8 +18,9 @@ public class NaturalPersonPrimary1151111RowMapper extends NaturalPersonPrimaryRo
 
         NaturalPerson person = new NaturalPerson();
 
-        person.setPersonId(SqlUtils.getLong(rs, "id"));
-        person.setRefBookPersonId(SqlUtils.getLong(rs, "person_id"));
+        person.setPrimaryPersonId(SqlUtils.getLong(rs, "id"));
+        person.setId(SqlUtils.getLong(rs, "person_id"));
+
         person.setRecordId(SqlUtils.getLong(rs, "record_id"));
 
         person.setSnils(rs.getString("snils"));

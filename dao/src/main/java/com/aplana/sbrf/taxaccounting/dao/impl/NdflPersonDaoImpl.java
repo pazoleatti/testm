@@ -377,39 +377,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
     }
 
-
-    @Override
-    public int[] updatePersonRefBookReferences(List<NdflPerson> ndflPersonList) {
-        String updateSql = "UPDATE ndfl_person SET person_id = ? WHERE id = ?";
-        try {
-            int[] result = getJdbcTemplate().batchUpdate(updateSql, new UpdateNdflPersonBatch(ndflPersonList));
-            return result;
-        } catch (DataAccessException e) {
-            throw new DaoException("Ошибка при обновлении идентификаторов физлиц", e);
-        }
-    }
-
-    class UpdateNdflPersonBatch implements BatchPreparedStatementSetter {
-        final List<NdflPerson> ndflPersonList;
-
-        public UpdateNdflPersonBatch(List<NdflPerson> ndflPersonList) {
-            this.ndflPersonList = ndflPersonList;
-        }
-
-        @Override
-        public void setValues(PreparedStatement ps, int i) throws SQLException {
-            NdflPerson ndflPerson = ndflPersonList.get(i);
-            ps.setLong(1, ndflPerson.getPersonId());
-            ps.setLong(2, ndflPerson.getId());
-        }
-
-        @Override
-        public int getBatchSize() {
-            return ndflPersonList.size();
-        }
-    }
-
-
     @Override
     public int[] updateRefBookPersonReferences(List<NaturalPerson> personList) {
         String updateSql = "UPDATE ndfl_person SET person_id = ? WHERE id = ?";
@@ -431,8 +398,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         @Override
         public void setValues(PreparedStatement ps, int i) throws SQLException {
             NaturalPerson person = personList.get(i);
-            ps.setLong(1, person.getRefBookPersonId());
-            ps.setLong(2, person.getPersonId());
+            ps.setLong(1, person.getId()); //идентификатор записи в справочнике ФЛ
+            ps.setLong(2, person.getPrimaryPersonId()); //идентификатор записи в ПНФ
         }
 
         @Override

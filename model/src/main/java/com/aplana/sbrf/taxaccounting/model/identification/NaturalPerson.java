@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.identification;
 
+import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -10,17 +11,12 @@ import java.util.List;
 /**
  * @author Andrey Drunk
  */
-public class NaturalPerson implements IdentityPerson {
+public class NaturalPerson extends IdentityObject<Long> implements IdentityPerson {
 
     /**
-     * Идентификатор ФЛ
+     * Идентификатор ФЛ в первичной форме
      */
-    private Long personId;
-
-    /**
-     * Уникальный идентификатор записи в справочнике ФЛ
-     */
-    private Long refBookPersonId;
+    private Long primaryPersonId;
 
     /**
      * Идентификатор записи (buisiness key) в справочнике физлиц, заполняется при получении записи из БД
@@ -113,20 +109,12 @@ public class NaturalPerson implements IdentityPerson {
         this.personDocumentList = new ArrayList<PersonDocument>();
     }
 
-    public Long getPersonId() {
-        return personId;
+    public Long getPrimaryPersonId() {
+        return primaryPersonId;
     }
 
-    public void setPersonId(Long personId) {
-        this.personId = personId;
-    }
-
-    public Long getRefBookPersonId() {
-        return refBookPersonId;
-    }
-
-    public void setRefBookPersonId(Long refBookPersonId) {
-        this.refBookPersonId = refBookPersonId;
+    public void setPrimaryPersonId(Long primaryPersonId) {
+        this.primaryPersonId = primaryPersonId;
     }
 
     public String getLastName() {
@@ -292,16 +280,26 @@ public class NaturalPerson implements IdentityPerson {
         return null;
     }
 
+    /**
+     * Получить документ ФЛ, данный метод используется при работе с ФЛ из первичных форм, так как там может быть не более одного документа
+     *
+     * @return докумен ФЛ
+     */
     public PersonDocument getPersonDocument() {
         if (personDocumentList != null && !personDocumentList.isEmpty()) {
-            personDocumentList.get(0);
+            return personDocumentList.get(0);
         }
         return null;
     }
 
+    /**
+     * Получить идентификатор ФЛ, данный метод используется при работе с ФЛ из первичных форм, так как там может быть не более одного идентификатора
+     *
+     * @return идентификатор ФЛ
+     */
     public PersonIdentifier getPersonIdentifier() {
         if (personIdentityList != null && !personIdentityList.isEmpty()) {
-            personIdentityList.get(0);
+            return personIdentityList.get(0);
         }
         return null;
     }
@@ -321,7 +319,8 @@ public class NaturalPerson implements IdentityPerson {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("refBookPersonId", refBookPersonId)
+                .append("id(refBook)", id)
+                .append("id(primary)", primaryPersonId)
                 .append("lastName", lastName)
                 .append("firstName", firstName)
                 .append("middleName", middleName)
@@ -341,4 +340,6 @@ public class NaturalPerson implements IdentityPerson {
                 .append("employee", employee)
                 .toString();
     }
+
+
 }

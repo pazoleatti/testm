@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import org.springframework.jdbc.core.RowCallbackHandler;
 
 import java.sql.ResultSet;
@@ -13,9 +14,19 @@ import java.util.Map;
  */
 public abstract class NaturalPersonHandler implements RowCallbackHandler {
 
-    public static final String PERSON_ID = "PERSON_ID";
+    /**
+     * Идентификатор записи в ПНФ
+     */
+    public static final String PRIMARY_PERSON_ID = "person_id";
+
+    /**
+     * Идентификатор записи в справочнике ФЛ
+     */
+    public static final String REFBOOK_PERSON_ID = "ref_book_person_id";
 
     private int rowCount;
+
+    protected Logger logger;
 
     private Map<Long, Map<Long, NaturalPerson>> result;
 
@@ -36,5 +47,9 @@ public abstract class NaturalPersonHandler implements RowCallbackHandler {
 
     public Map<Long, Map<Long, NaturalPerson>> getResult() {
         return result;
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
     }
 }

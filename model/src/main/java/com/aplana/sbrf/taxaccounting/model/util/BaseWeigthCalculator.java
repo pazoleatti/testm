@@ -12,6 +12,9 @@ import java.util.Date;
  */
 public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
 
+    /**
+     * Наименование сравнения
+     */
     protected String name;
 
     /**
@@ -49,25 +52,11 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
         return name;
     }
 
-    public <T extends Number> T getIdOrNull(IdentityObject<T> identityObject) {
-        if (identityObject != null) {
-            return identityObject.getId();
-        } else {
-            return null;
-        }
-    }
-
-
-    //        protected double compareString(String a, String b, double weight) {
-//            System.out.println(a+"="+b);
-//            return equalsNullSafe(prepareStr(a), prepareStr(b)) ? weigth : 0D;
-//        }
-
     /**
      * Сравнить строки исключая пробелы, без учета регистра
      */
     protected double compareString(String a, String b) {
-        return equalsNullSafe(prepareStr(a), prepareStr(b)) ? weigth : 0D;
+        return isStringEquals(a, b) ? weigth : 0D;
     }
 
     /**
@@ -94,6 +83,12 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
         return prepareString(string);
     }
 
+    /**
+     * Удалить все пробельные символы из строки
+     *
+     * @param string
+     * @return
+     */
     public static String prepareString(String string) {
         if (string != null) {
             return string.replaceAll("\\s", "").toLowerCase();
@@ -102,12 +97,24 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
         }
     }
 
+    public static <T extends Number> T getIdOrNull(IdentityObject<T> identityObject) {
+        if (identityObject != null) {
+            return identityObject.getId();
+        } else {
+            return null;
+        }
+    }
+
+    public static boolean isStringEquals(String a, String b) {
+        return equalsNullSafe(prepareString(a), prepareString(b));
+    }
+
 
     /**
      * @param date
      * @return
      */
-    private String formatDate(Date date) {
+    private static String formatDate(Date date) {
         if (date != null) {
             return new SimpleDateFormat("dd.MM.yyyy").format(date);
         } else {
@@ -116,7 +123,7 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
     }
 
 
-    protected boolean equalsNullSafeStr(String a, String b) {
+    protected static boolean equalsNullSafeStr(String a, String b) {
         return isEqualsNullSafeStr(a, b);
     }
 
@@ -128,9 +135,10 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
      * Основное условие сравнения параметров, если оба параметра не заданы то считается что они равны, если
      * только один из параметров не задан то нет
      */
-    protected <T> boolean equalsNullSafe(T a, T b) {
+    protected static <T> boolean equalsNullSafe(T a, T b) {
         return isValueEquals(a, b);
     }
+
 
     public static <T> boolean isValueEquals(T a, T b) {
         boolean result = false;

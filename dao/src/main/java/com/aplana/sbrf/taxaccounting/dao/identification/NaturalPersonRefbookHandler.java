@@ -14,8 +14,14 @@ import java.util.Map;
  */
 public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
+    /**
+     * Карта для создания идкнтификаторов ФЛ
+     */
     private Map<Long, Map<Long, PersonIdentifier>> identitiesMap;
 
+    /**
+     * Карта для создания документов ФЛ
+     */
     private Map<Long, Map<Long, PersonDocument>> documentsMap;
 
     /**
@@ -33,7 +39,9 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
      */
     private Map<Long, DocType> docTypeMap;
 
-
+    /**
+     *
+     */
     public NaturalPersonRefbookHandler() {
         super();
         identitiesMap = new HashMap<Long, Map<Long, PersonIdentifier>>();
@@ -44,9 +52,9 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
     public void processRow(ResultSet rs, int rowNum, Map<Long, Map<Long, NaturalPerson>> map) throws SQLException {
 
         //Идентификатор записи первичной формы
-        Long primaryPersonId = SqlUtils.getLong(rs, PERSON_ID);
+        Long primaryPersonId = SqlUtils.getLong(rs, PRIMARY_PERSON_ID);
 
-        //if (primaryPersonId == null) {throw new ServiceException("Не задано значение PERSON_ID");}
+        //if (primaryPersonId == null) {throw new ServiceException("Не задано значение PRIMARY_PERSON_ID");}
 
         //Список сходных записей
         Map<Long, NaturalPerson> similarityPersonMap = map.get(primaryPersonId);
@@ -57,12 +65,12 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         }
 
         //Идентификатор справочника
-        Long refBookPersonId = SqlUtils.getLong(rs, "ref_book_person_id");
+        Long refBookPersonId = SqlUtils.getLong(rs, REFBOOK_PERSON_ID);
 
         NaturalPerson naturalPerson = similarityPersonMap.get(refBookPersonId);
 
         if (naturalPerson == null) {
-            naturalPerson = buildNaturalPerson(rs, refBookPersonId);
+            naturalPerson = buildNaturalPerson(rs, refBookPersonId, primaryPersonId);
             similarityPersonMap.put(refBookPersonId, naturalPerson);
         }
 
@@ -83,16 +91,15 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     }
 
-
     private void addPersonIdentifier(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
 
-        Long personId = naturalPerson.getRefBookPersonId();
+        Long refBookPersonId = naturalPerson.getId();
         Long personIdentifierId = SqlUtils.getLong(rs, "book_id_tax_payer_id");
-        Map<Long, PersonIdentifier> personIdentityMap = identitiesMap.get(personId);
+        Map<Long, PersonIdentifier> personIdentityMap = identitiesMap.get(refBookPersonId);
 
         if (personIdentityMap == null) {
             personIdentityMap = new HashMap<Long, PersonIdentifier>();
-            identitiesMap.put(personId, personIdentityMap);
+            identitiesMap.put(refBookPersonId, personIdentityMap);
         }
 
         if (personIdentifierId != null && !personIdentityMap.containsKey(personIdentifierId)) {
@@ -108,13 +115,13 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     private void addPersonDocument(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
 
-        Long personId = naturalPerson.getRefBookPersonId();
+        Long refBookPersonId = naturalPerson.getId();
         Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
-        Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(personId);
+        Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(refBookPersonId);
 
         if (pesonDocumentMap == null) {
             pesonDocumentMap = new HashMap<Long, PersonDocument>();
-            documentsMap.put(personId, pesonDocumentMap);
+            documentsMap.put(refBookPersonId, pesonDocumentMap);
         }
 
         if (docId != null && !pesonDocumentMap.containsKey(docId)) {
@@ -131,11 +138,13 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         }
     }
 
-    private NaturalPerson buildNaturalPerson(ResultSet rs, Long personId) throws SQLException {
+    private NaturalPerson buildNaturalPerson(ResultSet rs, Long refBookPersonId, Long primaryPersonId) throws SQLException {
         NaturalPerson person = new NaturalPerson();
 
         //person
-        person.setRefBookPersonId(personId);
+        person.setId(refBookPersonId);
+        person.setPrimaryPersonId(primaryPersonId);
+
         person.setLastName(rs.getString("last_name"));
         person.setFirstName(rs.getString("first_name"));
         person.setMiddleName(rs.getString("middle_name"));

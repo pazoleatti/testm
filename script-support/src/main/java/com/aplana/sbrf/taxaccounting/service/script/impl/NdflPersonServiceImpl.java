@@ -3,12 +3,19 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrey Drunk
@@ -61,8 +68,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public int[] updatePersonRefBookReferences(List<NdflPerson> ndflPersonList) {
-        return ndflPersonDao.updatePersonRefBookReferences(ndflPersonList);
+    public int[] updateRefBookPersonReferences(List<NaturalPerson> ndflPersonList) {
+        return ndflPersonDao.updateRefBookPersonReferences(ndflPersonList);
     }
 
     @Override

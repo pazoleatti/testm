@@ -48,19 +48,17 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public Map<Long, NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper) {
+    public List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper primaryRnuRowMapper) {
 
         long time = System.currentTimeMillis();
 
-        //TODO заменить на внешний RowMapper для заполнения сразу всех полей из справочников
-        NaturalPersonInsertHandler naturalPersonHandler = new NaturalPersonInsertHandler();
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForIns");
-        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC));
+        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, primaryRnuRowMapper), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
-        call.execute(params);
+        Map<String, Object> returnedResults = call.execute(params);
 
-        Map<Long, NaturalPerson> result = naturalPersonHandler.getResult();
+        List<NaturalPerson> result = (List<NaturalPerson>) returnedResults.get("ref_cursor");
 
         System.out.println("addPersonForInsert " + result.size() + " rows fetched (" + (System.currentTimeMillis() - time) + " ms)");
 
@@ -146,7 +144,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         }
 
         public void processRow(ResultSet rs, Map<Long, NaturalPerson> map) throws SQLException {
-            Long primaryPersonId = SqlUtils.getLong(rs, NaturalPersonHandler.PERSON_ID);
+            Long primaryPersonId = SqlUtils.getLong(rs, NaturalPersonHandler.PRIMARY_PERSON_ID);
             map.put(primaryPersonId, null);
             //System.out.println(rowNum+", "+primaryPersonId);
         }
@@ -345,7 +343,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
             PersonData person = new PersonData();
 
             //person
-            person.setRefBookPersonId(SqlUtils.getLong(rs, "person_id"));
+            person.setId(SqlUtils.getLong(rs, "person_id"));
 
             person.setRecordId(SqlUtils.getLong(rs, "person_record_id"));
             person.setLastName(rs.getString("last_name"));

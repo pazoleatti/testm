@@ -33,7 +33,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
     @Override
-    public Map<Long, NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper) {
+    public List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper) {
         return refBookPersonDao.findPersonForInsertFromPrimaryRnuNdfl(declarationDataId, asnuId, version, naturalPersonPrimaryRnuRowMapper);
     }
 
@@ -85,12 +85,12 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         return documentTypeCache;
     }*/
     @Override
-    public NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger) {
+    public NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger) {
         return identificatePerson(personData, refBookPersonList, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()), logger);
     }
 
     @Override
-    public NaturalPerson identificatePerson(PersonData personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
+    public NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
 
         double treshold = tresholdValue / 1000D;
         List<IdentityPerson> personDataList = refBookPersonList;
@@ -99,7 +99,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             calculateWeigth(personData, personDataList, weigthComporators);
 
             StringBuffer msg = new StringBuffer();
-
 
             msg.append("Для ФЛ " + buildNotice(personData) + " сходных записей найдено: " + personDataList.size()).append(" ");
             DecimalFormat df = new DecimalFormat("0.00");
@@ -111,21 +110,19 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             IdentityPerson identificatedPerson = Collections.max(personDataList, new PersonDataComparator());
             if (identificatedPerson.getWeigth() > treshold) {
                 //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
-                //TODO убрать вывод в лог
-                //if (personDataList.size() > 1){
-                msg.append(". Выбрана запись: [" + buildRefBookNotice(identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
-                logger.info(msg.toString());
-                //}
+                if (personDataList.size() > 1) {
+                    msg.append(". Выбрана запись: [" + buildRefBookNotice(identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
+                    logger.info(msg.toString());
+                }
 
                 return (NaturalPerson) identificatedPerson;
             } else {
-                msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
+                //msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
                 logger.info(msg.toString());
                 return null;
             }
         } else {
-            //TODO убрать вывод в лог
-            logger.info("Для ФЛ " + buildNotice(personData) + " сходных записей не найдено");
+            //logger.info("Для ФЛ " + buildNotice(personData) + " сходных записей не найдено");
             return null;
         }
 
@@ -160,28 +157,33 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
      * Формирует строку в виде
      * <Номер в форме(ИНП)>: <Фамилия> <Имя> <Отчество>, <Название ДУЛ> № <Серия и номер ДУЛ>
      *
-     * @param personData
      * @return
      */
-    public static String buildNotice(PersonData personData) {
+    public static String buildNotice(IdentityPerson identityPerson) {
+
+        NaturalPerson naturalPerson = (NaturalPerson) identityPerson;
 
         StringBuffer sb = new StringBuffer();
 
-        if (personData.getPersonNumber() != null) {
-            sb.append("Номер: " + personData.getPersonNumber()).append(": ");
-        } else if (personData.getInp() != null) {
-            sb.append("ИНП: " + personData.getInp()).append(": ");
+
+        //TODO для 115
+        /*if (naturalPerson.getPersonNumber() != null) {
+            sb.append("Номер: " + naturalPerson.getPersonNumber()).append(": ");
+        } else if (naturalPerson.getInp() != null) {
+            sb.append("ИНП: " + naturalPerson.getInp()).append(": ");
         } else if (personData.getSnils() != null) {
             sb.append("СНИЛС: " + personData.getSnils()).append(": ");
-        }
+        }*/
 
-        sb.append(emptyIfNull(personData.getLastName())).append(" ");
-        sb.append(emptyIfNull(personData.getFirstName())).append(" ");
-        sb.append(emptyIfNull(personData.getMiddleName())).append(" ");
-        if (personData.getDocumentTypeCode() != null) {
-            sb.append(personData.getDocumentTypeCode() != null ? ("код: " + personData.getDocumentTypeCode()) : "").append(", ");
-        }
-        sb.append(emptyIfNull(personData.getDocumentNumber()));
+        sb.append(emptyIfNull(naturalPerson.getPrimaryPersonId() + " - " + naturalPerson.getId())).append(" ");
+        sb.append(emptyIfNull(naturalPerson.getLastName())).append(" ");
+        sb.append(emptyIfNull(naturalPerson.getFirstName())).append(" ");
+        sb.append(emptyIfNull(naturalPerson.getMiddleName())).append(" ");
+
+        //if (naturalPerson.getDocumentTypeCode() != null) {
+        //    sb.append(naturalPerson.getDocumentTypeCode() != null ? ("код: " + personData.getDocumentTypeCode()) : "").append(", ");
+        //}
+        sb.append(Arrays.toString(naturalPerson.getPersonDocumentList().toArray()));
         return sb.toString();
     }
 
@@ -269,7 +271,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareNumber(getIdOrNull(a.getCitizenship()), getIdOrNull(b.getCitizenship()));
             }
-
         });
 
         //Идентификатор физлица номер и код АСНУ
@@ -324,17 +325,18 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         result.add(new BaseWeigthCalculator<IdentityPerson>("СНИЛС", 15) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
-                return compareString(a.getSnils(), b.getSnils());
+                return compareString(prepareSnils(a.getSnils()), prepareSnils(b.getSnils()));
             }
 
-            @Override
-            protected String prepareStr(String string) {
+            public String prepareSnils(String string) {
                 if (string != null) {
-                    return super.prepareStr(string).replaceAll("[-]", "");
+                    return string.replaceAll("[-]", "");
                 } else {
                     return null;
                 }
             }
+
+
         });
 
         //Статус налогоплательщика
@@ -480,6 +482,8 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
     public class PersonDataWeigthCalculator implements WeigthCalculator<IdentityPerson> {
 
+        private Map<String, Double> result = new HashMap<String, Double>();
+
         private List<BaseWeigthCalculator> compareList;
 
         public PersonDataWeigthCalculator(List<BaseWeigthCalculator> compareList) {
@@ -492,11 +496,17 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             double summParameterWeigt = 0D;
             for (BaseWeigthCalculator calculator : compareList) {
                 double weigth = calculator.calc(a, b);
+                result.put(calculator.getName(), weigth);
                 summWeigth += weigth;
                 summParameterWeigt += calculator.getWeigth();
             }
             return summWeigth / summParameterWeigt;
         }
+
+        public Map<String, Double> getResult() {
+            return result;
+        }
+
     }
 
 }

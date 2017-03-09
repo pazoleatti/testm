@@ -35,7 +35,7 @@ public interface RefBookPersonDao {
      * @param version           версия записи
      * @return
      */
-    Map<Long, NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper);
+    List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper primaryRnuRowMapper);
 
     /**
      * Найти всех ФЛ по определяющим параметрам
