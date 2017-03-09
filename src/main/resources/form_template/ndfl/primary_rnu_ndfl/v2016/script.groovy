@@ -1230,27 +1230,6 @@ def findReportPeriodCode(reportPeriod) {
 
 void importData() {
 
-    // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
-    // Данный код отрабатывает, когда файл формы уже фактически сохранен в базу, поэтому при проверке сущестования формы для данного периода и подразделения не нужно учитывать данный файл в выборке
-    def declarationDataList = declarationService.find(PRIMARY_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
-    DeclarationData declarationDataClone = declarationDataList?.find{ it.fileName != UploadFileName }
-    if (declarationDataClone != null) {
-
-        // Период
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-        def periodCode = period?.CODE?.stringValue
-        def periodName = period?.NAME?.stringValue
-        def calendarStartDate = reportPeriod?.calendarStartDate
-
-        // Подразделение
-        Department department = departmentService.get(declarationData.departmentId)
-
-        logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
-                    в периоде $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
-        return
-    }
-
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
