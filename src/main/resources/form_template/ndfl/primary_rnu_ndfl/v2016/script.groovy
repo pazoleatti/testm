@@ -340,10 +340,15 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
         mapPersonIdentifierAttr(personIdentifier)
     });
 
-
     println "insert updateRefBookPersonReferences"
     //update reference to ref book
     ndflPersonService.updateRefBookPersonReferences(insertRecords);
+
+    //Выводим информацию о созданных записях
+    for (NaturalPerson person : insertRecords) {
+        String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
+        logger.info(noticeMsg);
+    }
 
     println "end create"
 
