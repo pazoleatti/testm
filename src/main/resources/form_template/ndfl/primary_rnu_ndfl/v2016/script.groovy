@@ -768,7 +768,7 @@ Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
     String whereClause = """
-            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN ref_book_person p ON (frb.record_id = p.record_id)
             JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
         """
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
@@ -2190,7 +2190,7 @@ def checkData() {
     checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
     // Проверки сведений о доходах
-    checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
+//    checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
 
     println "Все проверки " + (System.currentTimeMillis() - time);
     logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
