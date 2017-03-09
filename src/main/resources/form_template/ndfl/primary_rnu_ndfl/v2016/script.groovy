@@ -2376,7 +2376,7 @@ def checkDataReference(
                 if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
                     // Спр12 ИНП первичная (Обязательное поле)
                     def inpList = inpMap.get(personRecord.get("id")?.value)
-                    if (!ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
+                    if (inpList == null || !ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
                         logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
                                 T_PERSON, ndflPerson.rowNum, C_INP, fioAndInp, C_INP, R_INP);
                     }
@@ -2946,14 +2946,15 @@ def checkDataCommon(
                 listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
             }
         }
-        if (!mapDepartmentNotExistRnu.isEmpty()) {
-            // Период
-            def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-            def periodCode = period?.CODE?.stringValue
-            def periodName = period?.NAME?.stringValue
-            def calendarStartDate = reportPeriod?.calendarStartDate
 
+        // Период
+        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+        def periodCode = period?.CODE?.stringValue
+        def periodName = period?.NAME?.stringValue
+        def calendarStartDate = reportPeriod?.calendarStartDate
+
+        if (!mapDepartmentNotExistRnu.isEmpty()) {
             def listDepartmentNotExistRnu = []
             mapDepartmentNotExistRnu.each {
                 listDepartmentNotExistRnu.add(it.value)
