@@ -34,7 +34,8 @@ switch (formDataEvent) {
         consolidation()
         generateXml()
         // Формирование pdf-отчета формы
-        declarationService.createPdfReport(logger, declarationData, userInfo)
+        //TODO отключил из-за ошибки
+        //declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesList()
@@ -81,12 +82,11 @@ void consolidation() {
     //список нф-источников
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
 
-    logger.info(String.format("НФ-источников найдено: %d", sourcesInfo.size()))
-
-    List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
-    logger.info(String.format("ФЛ в ПНФ найдено: %d", ndflPersonList.size()));
+    logger.info("Номера первичных НФ включенных в консолидацию: " + declarationDataIdList + ", общее количество : " + declarationDataIdList.size());
+
+    List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         throw new ServiceException("При получении источников возникли ошибки. Консолидация НФ не возможна.");
@@ -95,7 +95,8 @@ void consolidation() {
     //Карта в которой хранится record_id и NdflPerson в котором объединяются данные о даходах
     SortedMap<Long, NdflPerson> ndflPersonMap = consolidateNdflPerson(ndflPersonList, declarationDataIdList);
 
-    logger.info(String.format("ФЛ в КНФ найдено: %d", ndflPersonMap.size()))
+    logger.info(String.format("Количество физических лиц, загруженных в формы-источники: %d", ndflPersonList.size()));
+    logger.info(String.format("Количество уникальных физических лиц в формах-источниках по справочнику ФЛ: %d", ndflPersonMap.size()));
 
     //Актуализация первичного ключа запись, все одинаковые записи должны указывать на последнюю актуальную на данный момент версию
     println "consolidation start actualize"
@@ -108,6 +109,7 @@ void consolidation() {
         personIds.add(personId);
         ndflPerson.personId = personId;
     }
+
     println "consolidation end actualize(" + (System.currentTimeMillis() - time) + ")"
 
     //-----<INITIALIZE_CACHE_DATA>-----
@@ -380,6 +382,9 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
             continue
         }
         List<NdflPerson> ndflPersonList = findNdflPersonWithData(declarationDataId);
+
+        //logger.info("Физических лиц в НФ "+declarationDataId+ ": " + ndflPersonList.size());
+
         result.addAll(ndflPersonList);
         i++;
     }
@@ -394,7 +399,7 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
  * @param sourcesInfo
  * @return
  */
-List<Long> collectDeclarationDataIdList (List<Relation> sourcesInfo) {
+List<Long> collectDeclarationDataIdList(List<Relation> sourcesInfo) {
     def result = []
     for (Relation relation : sourcesInfo) {
         if (!result.contains(relation.declarationDataId)) {
