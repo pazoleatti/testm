@@ -381,7 +381,7 @@ comment on column declaration_data.oktmo is 'ОКТМО';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 comment on column declaration_data.asnu_id is 'Идентификатор АСНУ';
 comment on column declaration_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
-comment on column declaration_data.state is 'Состояние формы';
+comment on column declaration_data.state is 'Состояние формы (1 - Создана, 2 - Подготовлена, 3 - Принята)';
 comment on column declaration_data.file_name is 'Имя файла';
 comment on column declaration_data.doc_state_id is 'Состояние ЭД';
 
@@ -536,7 +536,7 @@ create table log_business (
   log_date             date           not null,
   event_id             number(3, 0)   not null,
   user_login           varchar2(255)  not null,
-  roles                varchar2(200)  not null,
+  roles                varchar2(2000)  not null,
   declaration_data_id  number(9, 0),
   form_data_id         number(9, 0),
   note                 varchar2(510),
@@ -571,7 +571,7 @@ create table log_system (
   ip                    varchar2(39),
   event_id              number(3, 0)        not null,
   user_login            varchar2(255)       not null,
-  roles                 varchar2(200),
+  roles                 varchar2(2000 char),
   department_name       varchar2(4000 byte),
   report_period_name    varchar2(100),
   form_kind_id          number(9, 0),
@@ -1322,7 +1322,8 @@ create table raschsv_svnp_podpisant
    otchestvo        VARCHAR2(60 CHAR),
    podpisant_pr_podp  VARCHAR2(1 CHAR),
    podpisant_naim_doc VARCHAR2(120 CHAR),
-   podpisant_naim_org VARCHAR2(1000 CHAR)
+   podpisant_naim_org VARCHAR2(1000 CHAR),
+   nom_korr NUMBER(7)
 );
 create sequence seq_raschsv_svnp_podpisant start with 1;
 comment on table raschsv_svnp_podpisant is 'Сведения о плательщике страховых взносов и лице, подписавшем документ';
@@ -1342,6 +1343,7 @@ comment on column raschsv_svnp_podpisant.otchestvo is 'Отчество (Отч�
 comment on column raschsv_svnp_podpisant.podpisant_pr_podp is 'Признак лица, подписавшего документ (ПрПодп)';
 comment on column raschsv_svnp_podpisant.podpisant_naim_doc is 'Наименование документа, подтверждающего полномочия представителя (НаимДок)';
 comment on column raschsv_svnp_podpisant.podpisant_naim_org is 'Наименование организации - представителя плательщика (НаимОрг)';
+comment on column raschsv_svnp_podpisant.nom_korr is 'Номер корректировки (НомКорр)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_kol_lic_tip
 (

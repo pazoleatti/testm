@@ -252,7 +252,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
                 upload.setVisible(false);
-                duplicate.setVisible(getUiHandlers().getRefBookId().equals(RefBook.Id.PERSON.getId()));
+                duplicate.setVisible(false);
                 break;
             case VIEW:
                 edit.setVisible(true);

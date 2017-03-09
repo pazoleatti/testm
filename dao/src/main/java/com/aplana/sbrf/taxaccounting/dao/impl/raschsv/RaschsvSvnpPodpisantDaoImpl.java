@@ -47,7 +47,8 @@ public class RaschsvSvnpPodpisantDaoImpl extends AbstractDao implements RaschsvS
                 .addValue(RaschsvSvnpPodpisant.COL_OTCHESTVO, raschsvSvnpPodpisant.getOtchestvo())
                 .addValue(RaschsvSvnpPodpisant.COL_PODPISANT_PR_PODP, raschsvSvnpPodpisant.getPodpisantPrPodp())
                 .addValue(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_DOC, raschsvSvnpPodpisant.getPodpisantNaimDoc())
-                .addValue(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_ORG, raschsvSvnpPodpisant.getPodpisantNaimOrg());
+                .addValue(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_ORG, raschsvSvnpPodpisant.getPodpisantNaimOrg())
+                .addValue(RaschsvSvnpPodpisant.COL_NOM_KORR, raschsvSvnpPodpisant.getNomKorr());
         getNamedParameterJdbcTemplate().update(SQL_INSERT.toString(), params);
 
         return raschsvSvnpPodpisant.getId();
@@ -73,20 +74,21 @@ public class RaschsvSvnpPodpisantDaoImpl extends AbstractDao implements RaschsvS
             RaschsvSvnpPodpisant raschsvSvnpPodpisant = new RaschsvSvnpPodpisant();
             raschsvSvnpPodpisant.setId(SqlUtils.getLong(rs, RaschsvSvnpPodpisant.COL_ID));
             raschsvSvnpPodpisant.setDeclarationDataId(SqlUtils.getLong(rs, RaschsvSvnpPodpisant.COL_DECLARATION_DATA_ID));
-            raschsvSvnpPodpisant.setSvnpOkved(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_OKVED));
-            raschsvSvnpPodpisant.setSvnpTlph(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_TLPH));
-            raschsvSvnpPodpisant.setSvnpNaimOrg(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_NAIM_ORG));
-            raschsvSvnpPodpisant.setSvnpInnyl(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_INNYL));
-            raschsvSvnpPodpisant.setSvnpKpp(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_KPP));
-            raschsvSvnpPodpisant.setSvnpSvReorgForm(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_SV_REORG_FORM));
-            raschsvSvnpPodpisant.setSvnpSvReorgInnyl(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_SV_REORG_INNYL));
-            raschsvSvnpPodpisant.setSvnpSvReorgKpp(rs.getNString(RaschsvSvnpPodpisant.COL_SVNP_SV_REORG_KPP));
-            raschsvSvnpPodpisant.setFamilia(rs.getNString(RaschsvSvnpPodpisant.COL_FAMILIA));
-            raschsvSvnpPodpisant.setImya(rs.getNString(RaschsvSvnpPodpisant.COL_IMYA));
-            raschsvSvnpPodpisant.setOtchestvo(rs.getNString(RaschsvSvnpPodpisant.COL_OTCHESTVO));
-            raschsvSvnpPodpisant.setPodpisantPrPodp(rs.getNString(RaschsvSvnpPodpisant.COL_PODPISANT_PR_PODP));
-            raschsvSvnpPodpisant.setPodpisantNaimDoc(rs.getNString(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_DOC));
-            raschsvSvnpPodpisant.setPodpisantNaimOrg(rs.getNString(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_ORG));
+            raschsvSvnpPodpisant.setSvnpOkved(rs.getString(RaschsvSvnpPodpisant.COL_SVNP_OKVED));
+            raschsvSvnpPodpisant.setSvnpTlph(rs.getString(RaschsvSvnpPodpisant.COL_SVNP_TLPH));
+            raschsvSvnpPodpisant.setSvnpNaimOrg(rs.getString(RaschsvSvnpPodpisant.COL_SVNP_NAIM_ORG));
+            raschsvSvnpPodpisant.setSvnpInnyl(rs.getString(RaschsvSvnpPodpisant.COL_SVNP_INNYL));
+            raschsvSvnpPodpisant.setSvnpKpp(rs.getString(RaschsvSvnpPodpisant.COL_SVNP_KPP));
+            raschsvSvnpPodpisant.setSvnpSvReorgForm(rs.getString(RaschsvSvnpPodpisant.COL_SVNP_SV_REORG_FORM));
+            raschsvSvnpPodpisant.setSvnpSvReorgInnyl(rs.getString(RaschsvSvnpPodpisant.COL_SVNP_SV_REORG_INNYL));
+            raschsvSvnpPodpisant.setSvnpSvReorgKpp(rs.getString(RaschsvSvnpPodpisant.COL_SVNP_SV_REORG_KPP));
+            raschsvSvnpPodpisant.setFamilia(rs.getString(RaschsvSvnpPodpisant.COL_FAMILIA));
+            raschsvSvnpPodpisant.setImya(rs.getString(RaschsvSvnpPodpisant.COL_IMYA));
+            raschsvSvnpPodpisant.setOtchestvo(rs.getString(RaschsvSvnpPodpisant.COL_OTCHESTVO));
+            raschsvSvnpPodpisant.setPodpisantPrPodp(rs.getString(RaschsvSvnpPodpisant.COL_PODPISANT_PR_PODP));
+            raschsvSvnpPodpisant.setPodpisantNaimDoc(rs.getString(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_DOC));
+            raschsvSvnpPodpisant.setPodpisantNaimOrg(rs.getString(RaschsvSvnpPodpisant.COL_PODPISANT_NAIM_ORG));
+            raschsvSvnpPodpisant.setNomKorr(rs.getInt(RaschsvSvnpPodpisant.COL_NOM_KORR));
             return raschsvSvnpPodpisant;
         }
     }

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValues, FilterValues> {
 
 	@Autowired
@@ -41,26 +41,14 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 
         List<TARole> allRoles = taRoleService.getAll();
 
-        // исключаем роль гарантий из списка если пользователи бизнес контролеры, для админа можно
-        // http://conf.aplana.com/pages/diffpagesbyversion.action?pageId=10486850&selectedPageVersions=41&selectedPageVersions=42
-        if (!currentUser.hasRole(TARole.ROLE_ADMIN) && (currentUser.hasRole(TARole.ROLE_CONTROL_UNP) || currentUser.hasRole(TARole.ROLE_CONTROL_NS))) {
-            for (int i = allRoles.size() - 1; i >= 0; i--) {
-                TARole role = allRoles.get(i);
-                if (TARole.ROLE_GARANT.equals(role.getAlias())) {
-                    allRoles.remove(role);
-                    break;
-                }
-            }
-            result.setRoleFilter("ALIAS != '" + TARole.ROLE_GARANT + "'");
-        }
-
         result.setRoles(allRoles);
 
 		Set<Integer> depIds = new HashSet<Integer>();
+        depIds.addAll(departmentService.getBADepartmentIds(currentUser));
 
-		if (currentUser.hasRole(TARole.ROLE_ADMIN) ) {
+		if (currentUser.hasRole(TARole.N_ROLE_ADMIN)) {
             depIds.addAll(departmentService.listIdAll());
-        } else if (currentUser.hasRole(TARole.ROLE_CONTROL_NS) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        } else {
             depIds.addAll(departmentService.getBADepartmentIds(currentUser));
         }
         result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));

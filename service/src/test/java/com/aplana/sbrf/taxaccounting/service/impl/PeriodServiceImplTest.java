@@ -54,7 +54,7 @@ public class PeriodServiceImplTest {
     @Before
     public void init(){
         userInfo.setIp(LOCAL_IP);
-        userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
+        userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.N_ROLE_CONTROL_NS));
 
         /**
          * Налоговые периоды 1,2 - транспорт.

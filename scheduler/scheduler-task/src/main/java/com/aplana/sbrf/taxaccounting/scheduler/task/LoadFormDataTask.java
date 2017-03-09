@@ -71,7 +71,7 @@ public class LoadFormDataTask extends AbstractUserTask {
          */
         if (departmentId.equals(ALL_DEPARTMENTS_ID)){
             TAUser user = userService.getUser(userId);
-            List<Department> departments = departmentService.getTBDepartments(user);
+            List<Department> departments = departmentService.getTBDepartments(user, TaxType.NDFL);
             for (Department department : departments) {
                 departmentsIds.add(department.getId());
             }
@@ -107,7 +107,7 @@ public class LoadFormDataTask extends AbstractUserTask {
 
         // элементы выпадающего списка
         List<SelectBoxItem> selectBoxItems = new ArrayList<SelectBoxItem>();
-        List<Department> departments = departmentService.getTBDepartments(userInfo.getUser());
+        List<Department> departments = departmentService.getTBDepartments(userInfo.getUser(), TaxType.NDFL);
         // отсортировать по алфавиту
         Collections.sort(departments, new Comparator<Department>() {
             @Override

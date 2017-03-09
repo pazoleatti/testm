@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetDeclarationPopUpFilterHandler extends AbstractActionHandler<GetDeclarationPopUpFilterAction, GetDeclarationPopUpFilterResult> {
 
 	public GetDeclarationPopUpFilterHandler() {
@@ -38,7 +38,7 @@ public class GetDeclarationPopUpFilterHandler extends AbstractActionHandler<GetD
 		GetDeclarationPopUpFilterResult result = new GetDeclarationPopUpFilterResult();
 
 		Set<Integer> availableDepartmentSet = new HashSet<Integer>();
-		List<Department> availableDepartmentList = departmentService.getBADepartments(currUser);
+		List<Department> availableDepartmentList = departmentService.getBADepartments(currUser, action.getTaxType());
 		for (Department d: availableDepartmentList){
 			availableDepartmentSet.add(d.getId());
 		}
@@ -47,7 +47,7 @@ public class GetDeclarationPopUpFilterHandler extends AbstractActionHandler<GetD
 		result.setDepartments(availableDepartmentList);
 
 		Set<Integer> availablePerformersSet = new HashSet<Integer>();
-		List<Department> availablePerformersList = departmentService.getDestinationDepartments(currUser);
+		List<Department> availablePerformersList = departmentService.getDestinationDepartments(action.getTaxType(), currUser);
 		for (Department d: availablePerformersList){
 			availablePerformersSet.add(d.getId());
 		}

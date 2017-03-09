@@ -21,7 +21,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetNotificationCountHandler extends AbstractActionHandler<GetNotificationCountAction, GetNotificationCountResult> {
 
 	public GetNotificationCountHandler() {
@@ -45,7 +45,7 @@ public class GetNotificationCountHandler extends AbstractActionHandler<GetNotifi
         }
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setUserId(user.getId());
-        filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
+        //filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
         filter.setUserRoleIds(userRoles);
         filter.setRead(false);
 		result.setNotificationCount(notificationService.getCountByFilter(filter));

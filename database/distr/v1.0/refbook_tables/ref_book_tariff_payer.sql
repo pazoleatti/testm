@@ -26,3 +26,6 @@ insert into ref_book_tariff_payer(id,code,name) values(seq_ref_book_record.nextv
 
 update ref_book_tariff_payer set for_ops_oms=1 where code between '01' and '16';
 update ref_book_tariff_payer set for_ops_oms=0 where for_ops_oms is null;
+
+update ref_book_tariff_payer set for_ops_dop=1 where code between '21' and '27';
+update ref_book_tariff_payer set for_ops_dop=0 where for_ops_dop is null;

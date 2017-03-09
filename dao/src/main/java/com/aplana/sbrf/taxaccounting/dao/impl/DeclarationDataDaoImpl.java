@@ -343,6 +343,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
                 .append(" AND drp.id = dec.department_report_period_id AND dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id and dec.declaration_template_id = dectemplate.id");
 
+        if (filter.getUserDepartmentId() != null) {
+            sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
+                .append(" OR :userDepId IN (\n" +
+                    "SELECT DISTINCT ddtp.performer_dep_id \n" +
+                    "FROM department_decl_type_performer ddtp \n" +
+                    "INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
+                    "WHERE ddt.declaration_type_id = dectemplate.declaration_type_id AND ddt.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.parent_id = dep_ddtp.ID START WITH dep_ddtp.ID = drp.department_id)\n" +
+                    "))");
+            values.put("userDepId", filter.getUserDepartmentId());
+        }
+
         if (filter.getTaxType() != null) {
             sql.append(" AND dectype.tax_type = ").append("\'").append(filter.getTaxType().getCode()).append("\'");
         }
@@ -395,34 +406,32 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             values.put("fileName", "%" + filter.getFileName() + "%");
         }
 
-        if (filter.getTaxType() == TaxType.NDFL || filter.getTaxType() == TaxType.PFR) {
-            if (!StringUtils.isBlank(filter.getTaxOrganCode())) {
-                sql.append(" AND lower(dec.tax_organ_code) like lower(:tax_organ_code)");
-                values.put("tax_organ_code", "%" + filter.getTaxOrganCode() + "%");
-            }
+        if (!StringUtils.isBlank(filter.getTaxOrganCode())) {
+            sql.append(" AND lower(dec.tax_organ_code) like lower(:tax_organ_code)");
+            values.put("tax_organ_code", "%" + filter.getTaxOrganCode() + "%");
+        }
 
-            if (!StringUtils.isBlank(filter.getTaxOrganKpp())) {
-                sql.append(" AND lower(dec.kpp) like lower(:kpp)");
-                values.put("kpp", "%" + filter.getTaxOrganKpp() + "%");
-            }
+        if (!StringUtils.isBlank(filter.getTaxOrganKpp())) {
+            sql.append(" AND lower(dec.kpp) like lower(:kpp)");
+            values.put("kpp", "%" + filter.getTaxOrganKpp() + "%");
+        }
 
-            if (!StringUtils.isBlank(filter.getOktmo())) {
-                sql.append(" AND lower(dec.oktmo) like lower(:oktmo)");
-                values.put("oktmo", "%" + filter.getOktmo() + "%");
-            }
-            if (!StringUtils.isBlank(filter.getNote())) {
-                sql.append(" AND lower(dec.note) like lower(:note)");
-                values.put("note", "%" + filter.getNote() + "%");
-            }
+        if (!StringUtils.isBlank(filter.getOktmo())) {
+            sql.append(" AND lower(dec.oktmo) like lower(:oktmo)");
+            values.put("oktmo", "%" + filter.getOktmo() + "%");
+        }
+        if (!StringUtils.isBlank(filter.getNote())) {
+            sql.append(" AND lower(dec.note) like lower(:note)");
+            values.put("note", "%" + filter.getNote() + "%");
+        }
 
-            if (filter.getDocStateId() != null) {
-                sql.append(" AND dec.doc_state_id = ").append(filter.getDocStateId());
-            }
+        if (filter.getDocStateId() != null) {
+            sql.append(" AND dec.doc_state_id = ").append(filter.getDocStateId());
+        }
 
-            if (!StringUtils.isBlank(filter.getDeclarationDataIdStr())) {
-                sql.append(" AND TO_CHAR(dec.id) like lower(:declarationDataIdStr)");
-                values.put("declarationDataIdStr", "%" + filter.getDeclarationDataIdStr() + "%");
-            }
+        if (!StringUtils.isBlank(filter.getDeclarationDataIdStr())) {
+            sql.append(" AND TO_CHAR(dec.id) like lower(:declarationDataIdStr)");
+            values.put("declarationDataIdStr", "%" + filter.getDeclarationDataIdStr() + "%");
         }
     }
 
@@ -716,5 +725,42 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
 
+    }
+
+    @Override
+    public List<Integer> findDeclarationDataIdByTypeStatusReportPeriod(Integer reportPeriodId, Long ndflId,
+                                                                       Integer declarationTypeId, Integer departmentType,
+                                                                       Boolean reportPeriodStatus, Integer declarationState) {
+        Integer isActive = reportPeriodStatus ? 1 : 0;
+        String sql = "SELECT distinct dd.id " +
+                " FROM \n" +
+                "  ref_book_ndfl n \n" +
+                "  JOIN ref_book_ndfl_detail nd ON nd.ref_book_ndfl_id = n.id\n" +
+                "  JOIN ref_book_oktmo ro ON ro.id = nd.oktmo\n" +
+                "  JOIN ndfl_person_income npi ON (npi.oktmo = ro.code AND npi.kpp = nd.kpp)\n" +
+                "  JOIN ndfl_person np ON np.id = npi.ndfl_person_id\n" +
+                "  JOIN declaration_data dd ON dd.id = np.declaration_data_id\n" +
+                "  JOIN declaration_template dt ON dt.id = dd.declaration_template_id\n" +
+                "  JOIN department_report_period drp ON drp.id = dd.department_report_period_id\n" +
+                "  JOIN department d ON d.id = drp.department_id\n" +
+                " WHERE \n" +
+                "  n.id = :ndflId\n" +
+                "  AND dt.declaration_type_id = :declarationTypeId\n" +
+                "  AND drp.report_period_id = :reportPeriodId\n" +
+                "  AND d.type = :departmentType\n" +
+                "  AND drp.is_active = :isActive\n" +
+                "  AND dd.state = :declarationState";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("reportPeriodId", reportPeriodId)
+                .addValue("ndflId", ndflId)
+                .addValue("declarationTypeId", declarationTypeId)
+                .addValue("departmentType", departmentType)
+                .addValue("isActive", isActive)
+                .addValue("declarationState", declarationState);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
     }
 }

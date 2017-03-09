@@ -296,7 +296,8 @@ create table ref_book_tariff_payer
   status      number(1) default 0 not null,
   code        varchar2(2 char)    not null,
   name        varchar2(2000 char) not null,
-  for_ops_oms number(1)
+  for_ops_oms number(1) default 0 not null,
+  for_ops_dop number(1) default 0 not null
 );
 
 comment on table ref_book_tariff_payer is 'Коды тарифа плательщика';
@@ -307,6 +308,7 @@ comment on column ref_book_tariff_payer.status is 'Статус записи (0 
 comment on column ref_book_tariff_payer.code is 'Код тарифа плательщика';
 comment on column ref_book_tariff_payer.name is 'Название тарифа плательщика';
 comment on column ref_book_tariff_payer.for_ops_oms is 'Используется в ОПС и ОМС';
+comment on column ref_book_tariff_payer.for_ops_dop is 'Используется для доп. тарифов ОПС';
 
 --Коды классов условий труда
 create table ref_book_hard_work

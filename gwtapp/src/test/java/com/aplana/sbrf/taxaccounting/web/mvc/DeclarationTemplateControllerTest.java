@@ -63,7 +63,7 @@ public class DeclarationTemplateControllerTest {
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
         TARole role = new TARole(){{
-            setAlias(TARole.ROLE_CONF);
+            setAlias(TARole.N_ROLE_CONF);
         }};
         user.setRoles(Arrays.asList(role));
         userInfo.setUser(user);

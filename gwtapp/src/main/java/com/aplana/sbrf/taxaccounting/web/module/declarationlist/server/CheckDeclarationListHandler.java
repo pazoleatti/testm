@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDeclarationListAction, CheckDeclarationListResult> {
 	@Autowired
 	private DeclarationDataService declarationDataService;

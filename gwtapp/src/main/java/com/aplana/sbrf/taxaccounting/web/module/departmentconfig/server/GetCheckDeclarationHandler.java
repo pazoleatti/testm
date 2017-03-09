@@ -31,7 +31,7 @@ import static java.util.Arrays.asList;
  * @author Lenar Haziev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDeclarationAction, GetCheckDeclarationResult> {
 
     private static final String WARN_MSG = "\"%s\" %s, \"%s\"%s, состояние - \"%s\"";
@@ -81,12 +81,11 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
     @Override
     public GetCheckDeclarationResult execute(GetCheckDeclarationAction action, ExecutionContext executionContext) throws ActionException {
         GetCheckDeclarationResult result = new GetCheckDeclarationResult();
-        result.setControlUnp(securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP));
+        result.setControlUnp(securityService.currentUserInfo().getUser().hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP));
 
         Logger logger = new Logger();
         ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
         List<Integer> reportPeriodIds = new ArrayList<Integer>();
-        ArrayList<Long> formTypeIds = new ArrayList<Long>();
         Long refBookId = null;
         switch (action.getTaxType()) {
             case NDFL:

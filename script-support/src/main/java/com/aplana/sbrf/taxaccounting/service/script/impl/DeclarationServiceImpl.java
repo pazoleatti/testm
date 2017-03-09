@@ -418,7 +418,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
-        return configurationService.getAllConfig(userInfo);
+        return configurationService.getCommonConfig(userInfo);
     }
 
     @Override
@@ -435,5 +435,13 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
         return declarationDataFileDao.findFilesWithSpecificType(declarationDataId, fileTypeName);
+    }
+
+    @Override
+    public List<Integer> findDeclarationDataIdByTypeStatusReportPeriod(Integer reportPeriodId, Long ndflId,
+                                                                       Integer declarationTypeId, Integer departmentType,
+                                                                       Boolean departmentReportPeriodStatus, Integer declarationState) {
+        return declarationDataDao.findDeclarationDataIdByTypeStatusReportPeriod(reportPeriodId, ndflId, declarationTypeId,
+                departmentType, departmentReportPeriodStatus, declarationState);
     }
 }

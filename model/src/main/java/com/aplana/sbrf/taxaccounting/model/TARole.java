@@ -3,43 +3,52 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 
 public class TARole implements Serializable {
-	/**
-	 * Алиас роли "Контролёр"
-	 */
-	public static final String ROLE_CONTROL = "ROLE_CONTROL";
-	/**
-	 * Алиас роли "Оператор"
-	 */
-	public static final String ROLE_OPER = "ROLE_OPER";
-	/**
-	 * Алиас роли "Контролёр УНП"
-	 */
-	public static final String ROLE_CONTROL_UNP = "ROLE_CONTROL_UNP";
     /**
-     * Алиас роли "Контролёр НС"
+     * Алиас роли "Оператор (НДФЛ)"
      */
-    public static final String ROLE_CONTROL_NS = "ROLE_CONTROL_NS";
-	/**
-	 * Алиас роли "Настройщик"
-	 */
-	public static final String ROLE_CONF = "ROLE_CONF";
-	/**
-	 * Алиас роли "Администратор"
-	 */
-	public static final String ROLE_ADMIN = "ROLE_ADMIN";
+    public static final String N_ROLE_OPER = "N_ROLE_OPER";
+    /**
+     * Алиас роли "Контролёр УНП (НДФЛ)"
+     */
+    public static final String N_ROLE_CONTROL_UNP = "N_ROLE_CONTROL_UNP";
+    /**
+     * Алиас роли "Контролёр НС (НДФЛ)"
+     */
+    public static final String N_ROLE_CONTROL_NS = "N_ROLE_CONTROL_NS";
+    /**
+     * Алиас роли "Настройщик (НДФЛ)"
+     */
+    public static final String N_ROLE_CONF = "N_ROLE_CONF";
+    /**
+     * Алиас роли "Администратор (НДФЛ)"
+     */
+    public static final String N_ROLE_ADMIN = "N_ROLE_ADMIN";
 
     /**
-     * Алиас роли "Пользователь модуля Гарантий"
+     * Алиас роли "Оператор (Сборы)"
      */
-    public static final String ROLE_GARANT = "ROLE_GARANT";
+    public static final String F_ROLE_OPER = "F_ROLE_OPER";
+    /**
+     * Алиас роли "Контролёр УНП (Сборы)"
+     */
+    public static final String F_ROLE_CONTROL_UNP = "F_ROLE_CONTROL_UNP";
+    /**
+     * Алиас роли "Контролёр НС (Сборы)"
+     */
+    public static final String F_ROLE_CONTROL_NS = "F_ROLE_CONTROL_NS";
+    /**
+     * Алиас роли "Настройщик (Сборы)"
+     */
+    public static final String F_ROLE_CONF = "F_ROLE_CONF";
 
 	private static final long serialVersionUID = 1L;
 	
 	private int id;
 	private String alias;
 	private String name;
-	
-	public int getId() {
+    private TaxType taxType;
+
+    public int getId() {
 		return id;
 	}
 	public void setId(int id) {
@@ -58,7 +67,15 @@ public class TARole implements Serializable {
 		this.alias = alias;
 	}
 
-	@Override
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
+
+    @Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
@@ -68,6 +85,7 @@ public class TARole implements Serializable {
 		if (id != taRole.id) return false;
 		if (!alias.equals(taRole.alias)) return false;
 		if (!name.equals(taRole.name)) return false;
+        if (!taxType.equals(taRole.taxType)) return false;
 
 		return true;
 	}
@@ -81,8 +99,9 @@ public class TARole implements Serializable {
     public String toString() {
         return "TARole{" +
                 "id: " + id +
-                ",alias: " + alias +
-                ",name: " + name +
+                ", alias: " + alias +
+                ", name: " + name +
+                (taxType != null ? (", taxType: " + taxType.getCode()) : "") +
                 '}';
     }
 }

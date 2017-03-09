@@ -58,7 +58,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(long declarationDataId, String kpp, String oktmo) {
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo) {
         return ndflPersonDao.findNdflPersonByPairKppOktmo(declarationDataId, kpp, oktmo);
     }
 
@@ -178,5 +178,15 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public List<NdflPerson> findByIdList(List<Long> ndflPersonIdList) {
         return ndflPersonDao.findByIdList(ndflPersonIdList);
+    }
+
+    @Override
+    public List<Integer> findDublRowNum(String tableName, Long declarationDataId) {
+        return ndflPersonDao.findDublRowNum(tableName, declarationDataId);
+    }
+
+    @Override
+    public List<Integer> findMissingRowNum(String tableName, Long declarationDataId) {
+        return ndflPersonDao.findMissingRowNum(tableName, declarationDataId);
     }
 }

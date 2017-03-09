@@ -83,10 +83,10 @@ public class AuditServiceImplTest {
         user.setLogin("user1");
         user.setRoles(new ArrayList<TARole>(){{
             add(new TARole(){{
-                setName(TARole.ROLE_ADMIN);
+                setName(TARole.N_ROLE_ADMIN);
             }});
             add(new TARole(){{
-                setName(TARole.ROLE_CONTROL);
+                setName(TARole.N_ROLE_CONTROL_NS);
             }});
         }});
         userInfo.setIp("127.0.0.1");
@@ -115,7 +115,7 @@ public class AuditServiceImplTest {
         verify(auditDao, times(2)).add(argument.capture());
 
         assertEquals(argument.getAllValues().get(0).getFormDepartmentName(), "Открытое акционерное общество \"Сбербанк России\"");
-        assertEquals(argument.getAllValues().get(0).getRoles(), TARole.ROLE_ADMIN + ", " + TARole.ROLE_CONTROL);
+        assertEquals(argument.getAllValues().get(0).getRoles(), TARole.N_ROLE_ADMIN + ", " + TARole.N_ROLE_CONTROL_NS);
 
         assertEquals(argument.getAllValues().get(1).getFormDepartmentName(), "Центральный аппарат/Управление налогового планирования");
         assertEquals(argument.getAllValues().get(1).getUserDepartmentName(), "Центральный аппарат/Управление налогового планирования");
@@ -164,7 +164,7 @@ public class AuditServiceImplTest {
 
         assertEquals(argument.getValue().getFormDepartmentName(), "Центральный аппарат/Управление налогового планирования");
         assertEquals(argument.getValue().getReportPeriodName(), "2015 первый квартал в корр.периоде 01.01.2015");
-        assertEquals(argument.getValue().getRoles(), TARole.ROLE_ADMIN + ", " + TARole.ROLE_CONTROL);
+        assertEquals(argument.getValue().getRoles(), TARole.N_ROLE_ADMIN + ", " + TARole.N_ROLE_CONTROL_NS);
     }
 
     @Test

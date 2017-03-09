@@ -129,10 +129,18 @@ public class TaxFormNominationPresenter
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
+        String value = request.getParameter("nType", "");
+        TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
+        TaxFormNominationPresenter.this.taxType = nType;
+        boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
+        getView().init(nType, isForm);
+        declarationDestinationsPresenter.initForm(nType);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         getView().clearFormFilter();
-        dispatcher.execute(new GetOpenDataAction(),
+        GetOpenDataAction action = new GetOpenDataAction();
+        action.setTaxType(taxType);
+        dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetOpenDataResult>() {
                             @Override
@@ -142,12 +150,6 @@ public class TaxFormNominationPresenter
                                     return;
                                 }
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                                String value = request.getParameter("nType", "");
-                                TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
-                                TaxFormNominationPresenter.this.taxType = nType;
-                                boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
-                                getView().init(nType, isForm);
-                                declarationDestinationsPresenter.initForm(nType);
 
                             }
                         }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));

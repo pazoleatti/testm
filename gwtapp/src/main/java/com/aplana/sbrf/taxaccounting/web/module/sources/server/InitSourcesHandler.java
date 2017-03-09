@@ -47,7 +47,7 @@ public class InitSourcesHandler extends AbstractActionHandler<InitSourcesAction,
 		InitSourcesResult result = new InitSourcesResult();
 		TAUserInfo userInfo = securityService.currentUserInfo();
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
-		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+		if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) { // ToDo
             result.setControlUNP(true);
 			result.setDepartments(departmentService.listDepartments());
             Set<Integer> availableDepartments = new HashSet<Integer>();
@@ -55,10 +55,10 @@ public class InitSourcesHandler extends AbstractActionHandler<InitSourcesAction,
                 availableDepartments.add(dep.getId());
             }
             result.setAvailableDepartments(availableDepartments);
-        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+        } else if (userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)) { // ToDo
             result.setControlUNP(false);
 			Set<Integer> availableDepartments = new HashSet<Integer>();
-            for (Department dep : departmentService.getBADepartments(userInfo.getUser())) {
+            for (Department dep : departmentService.getBADepartments(userInfo.getUser(), action.getTaxType())) {
                 availableDepartments.add(dep.getId());
             }
 			result.setDepartments(new ArrayList<Department>(departmentService

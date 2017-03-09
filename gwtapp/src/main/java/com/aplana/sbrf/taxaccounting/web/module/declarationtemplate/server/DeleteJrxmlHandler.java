@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction, DeleteJrxmlResult> {
 
     @Autowired

@@ -64,17 +64,17 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		super(eventBus, view);
 		this.dispatchAsync = dispatchAsync;
 		getView().setUiHandlers(this);
-		detectUserRoles();
 	}
 
 	public DeclarationDataFilter getFilterData() {
 		return getView().getFilterData();
 	}
 
-	public void initFilter(final TaxType taxType, final DeclarationDataFilter dataFilter) {
+	public void initFilter(final TaxType taxType, final boolean isReports, final DeclarationDataFilter dataFilter) {
 
 		GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(taxType);
+        action.setReports(isReports);
 
         // выставляем фильтр по умолчанию, иначе при задании размера пейджинга после получения nType
         // происходит обращение к driver.flush(), а driver.edit еще не выполнился т.к не отработал асинхронный вызов
@@ -118,15 +118,5 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 			declarationTypeMap.put(declarationType.getId(), declarationType.getName());
 		}
 		return declarationTypeMap;
-	}
-
-	private void detectUserRoles(){
-		DetectUserRoleAction action = new DetectUserRoleAction();
-		dispatchAsync.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<DetectUserRoleResult>() {
-					@Override
-					public void onSuccess(DetectUserRoleResult result) {
-                    }
-				}, this));
 	}
 }

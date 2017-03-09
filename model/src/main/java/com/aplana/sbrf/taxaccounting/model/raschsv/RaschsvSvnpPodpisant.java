@@ -22,6 +22,7 @@ public class RaschsvSvnpPodpisant extends IdentityObject<Long> {
     private String podpisantPrPodp;
     private String podpisantNaimDoc;
     private String podpisantNaimOrg;
+    private Integer nomKorr;
 
     public static final String SEQ = "seq_raschsv_svnp_podpisant";
     public static final String TABLE_NAME = "raschsv_svnp_podpisant";
@@ -41,10 +42,11 @@ public class RaschsvSvnpPodpisant extends IdentityObject<Long> {
     public static final String COL_PODPISANT_PR_PODP = "podpisant_pr_podp";
     public static final String COL_PODPISANT_NAIM_DOC = "podpisant_naim_doc";
     public static final String COL_PODPISANT_NAIM_ORG = "podpisant_naim_org";
+    public static final String COL_NOM_KORR = "nom_korr";
 
     public static final String[] COLUMNS = {COL_ID, COL_DECLARATION_DATA_ID, COL_SVNP_OKVED, COL_SVNP_TLPH, COL_SVNP_NAIM_ORG,
             COL_SVNP_INNYL, COL_SVNP_KPP, COL_SVNP_SV_REORG_FORM, COL_SVNP_SV_REORG_INNYL, COL_SVNP_SV_REORG_KPP,
-            COL_FAMILIA, COL_IMYA, COL_OTCHESTVO, COL_PODPISANT_PR_PODP, COL_PODPISANT_NAIM_DOC, COL_PODPISANT_NAIM_ORG};
+            COL_FAMILIA, COL_IMYA, COL_OTCHESTVO, COL_PODPISANT_PR_PODP, COL_PODPISANT_NAIM_DOC, COL_PODPISANT_NAIM_ORG, COL_NOM_KORR};
 
     public Long getDeclarationDataId() {
         return declarationDataId;
@@ -149,5 +151,12 @@ public class RaschsvSvnpPodpisant extends IdentityObject<Long> {
     }
     public void setPodpisantNaimOrg(String podpisantNaimOrg) {
         this.podpisantNaimOrg = podpisantNaimOrg;
+    }
+
+    public Integer getNomKorr() {
+        return nomKorr;
+    }
+    public void setNomKorr(Integer nomKorr) {
+        this.nomKorr = nomKorr;
     }
 }

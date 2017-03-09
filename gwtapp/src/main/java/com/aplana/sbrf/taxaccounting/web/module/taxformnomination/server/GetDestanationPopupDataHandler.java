@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetDestanationPopupDataAction;
@@ -21,7 +22,7 @@ import java.util.Set;
  * @author auldanov
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanationPopupDataAction, GetDestanationPopupDataResult> {
 
     @Autowired
@@ -44,7 +45,7 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
 
         // Подразделения доступные пользователю
         Set<Integer> availableDepartmentSet = new HashSet<Integer>();
-        List<Department> availableDepartmentList = departmentService.getBADepartments(currUser);
+        List<Department> availableDepartmentList = departmentService.getBADepartments(currUser, action.getTaxType());
         for (Department d: availableDepartmentList){
             availableDepartmentSet.add(d.getId());
         }
@@ -55,7 +56,7 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
 
         // Исполнители доступные пользователю
         Set<Integer> availablePerformersSet = new HashSet<Integer>();
-        List<Department> availablePerformersList = departmentService.getDestinationDepartments(currUser);
+        List<Department> availablePerformersList = departmentService.getDestinationDepartments(action.getTaxType(), currUser);
         for (Department d: availablePerformersList){
             availablePerformersSet.add(d.getId());
         }

@@ -42,7 +42,7 @@ public class GetCurrentAssignsHandler extends
         QueryParams queryParams = new QueryParams();
         queryParams.setSearchOrdering(action.getOrdering());
         queryParams.setAscending(action.isAscSorting());
-        boolean isControlUNP = securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP);
+        boolean isControlUNP = securityService.currentUserInfo().getUser().hasRole(TARole.N_ROLE_CONTROL_UNP);
         if(!action.isDeclaration()){
             List<DepartmentFormType> departmentFormTypes;
             FormType formType = sourceService.getFormType(action.getTypeId());

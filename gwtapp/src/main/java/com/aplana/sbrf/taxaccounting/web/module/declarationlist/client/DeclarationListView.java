@@ -625,11 +625,9 @@ public class DeclarationListView extends
                 cancel = false;
             }
             if (State.PREPARED.equals(row.getState())) {
-                cancel = false;
             }
             if (State.ACCEPTED.equals(row.getState())) {
                 calculate = false;
-                //delete = false;
                 accept = false;
             }
         }
@@ -638,5 +636,10 @@ public class DeclarationListView extends
         deleteButton.setEnabled(delete);
         acceptButton.setEnabled(accept);
         cancelButton.setEnabled(cancel);
+    }
+
+    @Override
+    public void setVisibleCancelButton(boolean isVisible) {
+        cancelButton.setVisible(isVisible);
     }
 }

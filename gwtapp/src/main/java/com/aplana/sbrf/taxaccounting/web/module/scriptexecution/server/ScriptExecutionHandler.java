@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
  * @author Stanislav Yasinskiy
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class ScriptExecutionHandler extends AbstractActionHandler<ScriptExecutionAction, ScriptExecutionResult> {
 
     @Autowired

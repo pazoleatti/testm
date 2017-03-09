@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class SetActiveHandler extends AbstractActionHandler<SetActiveAction, SetActiveResult> {
 
     @Autowired

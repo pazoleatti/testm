@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  * @author dloshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('N_ROLE_ADMIN')")
 public class StopTaskHandler extends AbstractActionHandler<StopTaskAction, StopTaskResult> {
 
     @Autowired

@@ -108,10 +108,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	
 	@Override
 	public FormDataFilterAvailableValues getAvailableFilterValues(TAUserInfo userInfo, TaxType taxType) {
-        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                && !userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_OPER)) {
             throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
         }
 
@@ -133,7 +132,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         // Подразделения
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
         result.setDepartmentIds(new HashSet<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                asList(taxType), null, null)));
+                taxType, null, null)));
 
         // Подразделение по-умолчанию
         result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
@@ -157,10 +156,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
      * Фильтр для Dao-слоя при выборке НФ. Пользовательская фильтрация и принудительная фильтрация.
      */
     private FormDataDaoFilter createFormDataDaoFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
-        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                && !userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+        if (!userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.N_ROLE_OPER)) {
             throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
         }
         FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
@@ -169,14 +167,21 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         // Подразделения (могут быть не заданы - тогда все доступные по выборке 40 - http://conf.aplana.com/pages/viewpage.action?pageId=11380670)
         Set<Integer> departments = new HashSet<Integer>();
         if (formDataFilter.getDepartmentIds() == null || formDataFilter.getDepartmentIds().isEmpty()) {
-            departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()), null, null));
+            if (formDataFilter.getTaxType() != null) {
+                departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                        formDataFilter.getTaxType(), null, null));
+            } else {
+                // ToDo Налоговые формы выключены
+                /*departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                        formDataFilter.getTaxType() != null ? formDataFilter.getTaxType() : asList(TaxType.values()), null, null));*/
+            }
+
             // ПРИНУДИТЕЛЬНАЯ ФИЛЬТРАЦИЯ
-            if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+            if (userInfo.getUser().hasRole(TARole.N_ROLE_OPER)) {
                 // Операторы дополнительно фильтруются по подразделениям и типам форм
                 // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
                 departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                        asList(formDataFilter.getTaxType()), null, null));
+                        formDataFilter.getTaxType(), null, null));
             }
         } else {
             departments.addAll(formDataFilter.getDepartmentIds());
@@ -189,7 +194,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         if (formDataFilter.getFormDataKind() == null || formDataFilter.getFormDataKind().isEmpty()) {
             kinds.addAll(formDataAccessService.getAvailableFormDataKind(userInfo, asList(formDataFilter.getTaxType())));
             // ПРИНУДИТЕЛЬНАЯ ФИЛЬТРАЦИЯ
-            if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+            if (userInfo.getUser().hasRole(TARole.N_ROLE_OPER)) {
                 // Доступные типы
                 List<FormDataKind> formDataKindList = new LinkedList<FormDataKind>();
                 formDataKindList.add(FormDataKind.PRIMARY);
@@ -212,15 +217,15 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         TAUser tAUser = userInfo.getUser();
         List<Long> formTypes = formDataFilter.getFormTypeId();
         if (formTypes == null || formTypes.isEmpty()) {
-            if (!tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
+            if (!tAUser.hasRole(TARole.N_ROLE_CONTROL_UNP)) {
+                if (tAUser.hasRole(TARole.N_ROLE_CONTROL_NS)) {
                     formTypes = sourceService.getDFTFormTypeBySource(tAUser.getDepartmentId(), formDataFilter.getTaxType(), formDataDaoFilter.getFormDataKinds());
                 } else {
                     formTypes = sourceService.getDFTByPerformerDep(tAUser.getDepartmentId(), formDataFilter.getTaxType(), formDataDaoFilter.getFormDataKinds());
                 }
                 List<Department> departments10 = new ArrayList<Department>();
-                if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-                    departments10 = departmentService.getBADepartments(tAUser);
+                if (tAUser.hasRole(TARole.N_ROLE_CONTROL_NS)) {
+                    departments10 = departmentService.getBADepartments(tAUser, TaxType.NDFL);
                 } else {
                     departments10.addAll(departmentService.getAllChildren(tAUser.getDepartmentId()));
                 }

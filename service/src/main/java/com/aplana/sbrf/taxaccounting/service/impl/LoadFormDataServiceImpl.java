@@ -138,7 +138,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         List<Department> departmentTBList = new LinkedList<Department>();
         for (TaxType taxType : TaxType.values()) {
             // Выборка подразделений http://conf.aplana.com/pages/viewpage.action?pageId=13111363
-            List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(), Collections.singletonList(taxType), null, null);
+            List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(), taxType, null, null);
 
             List<Integer> departmentTBIdList = new LinkedList<Integer>();
             if (departmentList != null) {

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  * @author Fail Mukhametdinov
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONF', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class GetRefBookScriptHandler extends AbstractActionHandler<GetRefBookScriptAction, GetRefBookScriptResult> {
 
     @Autowired

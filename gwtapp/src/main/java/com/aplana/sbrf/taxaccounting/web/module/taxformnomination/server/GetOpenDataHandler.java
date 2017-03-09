@@ -24,7 +24,7 @@ import java.util.Set;
  * @author Stanislav Yasinskiy
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 @Component("getNominationOpenDataHandler")
 public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction, GetOpenDataResult> {
 
@@ -46,9 +46,11 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         TAUser currUser = securityService.currentUserInfo().getUser();
 
         // Признак контролера
-        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP) ||
+                currUser.hasRole(action.getTaxType(), TARole.F_ROLE_CONTROL_UNP)) {
             result.setControlUNP(true);
-        } else if (currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+        } else if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_NS) ||
+                currUser.hasRole(action.getTaxType(), TARole.F_ROLE_CONTROL_NS)) {
             result.setControlUNP(false);
         }
 
@@ -62,15 +64,17 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         List<Department> departmentList = new ArrayList<Department>();
 
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
-        if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP) ||
+                currUser.hasRole(action.getTaxType(), TARole.F_ROLE_CONTROL_UNP)) {
             // Все подразделения
             result.setDepartments(departmentService.listAll());
 
             for (Department dep : result.getDepartments()) {
                 avSet.add(dep.getId());
             }
-        } else if (currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            for (Department dep : departmentService.getBADepartments(currUser)) {
+        } else if (currUser.hasRole(action.getTaxType(), TARole.N_ROLE_CONTROL_NS) ||
+                currUser.hasRole(action.getTaxType(), TARole.F_ROLE_CONTROL_NS)) {
+            for (Department dep : departmentService.getBADepartments(currUser, action.getTaxType())) {
                 avSet.add(dep.getId());
                 departmentList.add(dep);
             }
