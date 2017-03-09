@@ -62,7 +62,7 @@ switch (formDataEvent) {
         checkData()
         break
     case FormDataEvent.CALCULATE:
-        calculate();
+        calculate()
         // Формирование pdf-отчета формы
         declarationService.createPdfReport(logger, declarationData, userInfo)
         break
@@ -82,6 +82,12 @@ def calcTimeMillis(long time) {
     return " (" + (currTime - time) + " ms)";
 }
 
+def testQueries(){
+
+
+
+}
+
 
 @Field List<Country> countryRefBookCache = [];
 
@@ -92,11 +98,6 @@ List<Country> getCountryRefBookList() {
 
         refBookRecords.each { refBookValueMap ->
             Country country = new Country();
-
-
-
-            logger.info("refBookValueMap=" + refBookValueMap + ", ID=" + refBookValueMap?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue());
-
             country.setId(refBookValueMap?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue());
             country.setCode(refBookValueMap?.get("CODE")?.getStringValue());
 
@@ -167,8 +168,7 @@ NaturalPersonRefbookHandler createRefbookHandler() {
 
     NaturalPersonRefbookHandler refbookHandler = new NaturalPersonRefbookHandler();
 
-    //TODO добавить logger в handler
-    //refbookHandler.setLogger(logger);
+    refbookHandler.setLogger(logger);
 
     List<Country> countryList = getCountryRefBookList();
     refbookHandler.setCountryMap(countryList.collectEntries {
@@ -305,26 +305,36 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
         }
     }
 
+    println "insert address"
+
     //insert addresses batch
     insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), addressList, { address ->
         mapAddressAttr(address)
     });
 
+    println "insert person"
     //insert persons batch
     insertBatchRecords(RefBook.Id.PERSON.getId(), insertRecords, { person ->
         mapPersonAttr(person)
     });
+
+    println "insert personDocument"
 
     //insert documents batch
     insertBatchRecords(RefBook.Id.ID_DOC.getId(), documentList, { personDocument ->
         mapPersonDocumentAttr(personDocument)
     });
 
+
+    println "insert personIdentifier"
+
     //insert identifiers batch
     insertBatchRecords(RefBook.Id.ID_TAX_PAYER.getId(), documentList, { personIdentifier ->
         mapPersonIdentifierAttr(personIdentifier)
     });
 
+
+    println "insert updateRefBookPersonReferences"
     //update reference to ref book
     ndflPersonService.updateRefBookPersonReferences(insertRecords);
 
@@ -341,6 +351,8 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
 def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap, Map<Long, Map<Long, NaturalPerson>> similarityPersonMap) {
 
     println "start update"
+    //println "primaryPersonMap="+primaryPersonMap
+    //println "similarityPersonMap="+similarityPersonMap
 
     //Проходим по списку и определяем наиболее подходящюю запись, если подходящей записи не найдено то содадим ее
 
@@ -358,22 +370,32 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
     for (Map.Entry<Long, Map<Long, NaturalPerson>> entry : similarityPersonMap.entrySet()) {
         Long primaryPersonId = entry.getKey();
-        List<NaturalPerson> similarityPersonList = entry.getValue();
+
+        Map<Long, NaturalPerson> similarityPersonValues= entry.getValue();
+
+        List<NaturalPerson> similarityPersonList = new ArrayList<NaturalPerson>(similarityPersonValues.values());
 
         NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
 
+        //отладочный вывод
+        /*println primaryPersonId +": "
+        int i = 0;
+        for (NaturalPerson np: similarityPersonList){
+            println "   "+np.getId()+" weigth="+np.getWeigth() +"  "+np.toString();
+            if (i > 15){
+                break;
+            }
+            i++;
+        }*/
+
         if (refBookPerson != null) {
+            primaryPerson.setId(refBookPerson.getId());
+            updatePersonList.add(primaryPerson);
+        } else {
             //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
             insertPersonList.add(primaryPerson);
-        } else {
 
-            //Address
-            if (primaryPerson.getAddress() != null) {
-
-            }
-
-            updatePersonList.add(primaryPerson);
         }
     }
 
@@ -417,10 +439,10 @@ def mapPersonAttr(NaturalPerson person) {
     putValue(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate());
     putValue(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null);
     putValue(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId());
-    putValue(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension());
-    putValue(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical());
-    putValue(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial());
-    putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee());
+    putValue(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension() ?: 2);
+    putValue(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical() ?: 2);
+    putValue(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial() ?: 2);
+    putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2);
     putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
     putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
     putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId);
@@ -449,20 +471,29 @@ def mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
 
 def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
     //подготовка записей
-    List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
-    for (IdentityObject identityObject : identityObjectList) {
-        def values = refBookMapper(identityObject);
-        recordList.add(createRefBookRecord(values));
-    }
-    //создание записей справочника
-    List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
 
-    //установка id
-    for (int i = 0; i < identityObjectList.size(); i++) {
-        Long id = generatedIds.get(i);
-        IdentityObject identityObject = identityObjectList.get(i);
-        identityObject.setId(id);
+    println "insertBatchRecords refBookId="+refBookId+", identityObjectList="+identityObjectList.size+", refBookMapper="+refBookMapper
+
+    if (identityObjectList != null && !identityObjectList.isEmpty()){
+        List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
+        for (IdentityObject identityObject : identityObjectList) {
+            def values = refBookMapper(identityObject);
+            recordList.add(createRefBookRecord(values));
+        }
+
+        //println "identityObjectList="+identityObjectList
+
+        //создание записей справочника
+        List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
+
+        //установка id
+        for (int i = 0; i < identityObjectList.size(); i++) {
+            Long id = generatedIds.get(i);
+            IdentityObject identityObject = identityObjectList.get(i);
+            identityObject.setId(id);
+        }
     }
+
 }
 
 def putValue(Map<String, RefBookValue> values, String attrName, RefBookAttributeType type, Object value) {
