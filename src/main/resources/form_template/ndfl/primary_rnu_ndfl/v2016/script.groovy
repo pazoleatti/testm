@@ -29,12 +29,8 @@ import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.*
 import java.text.SimpleDateFormat
-
-/**
- * Справочник "Коды, определяющие налоговый (отчётный) период"
- */
-@Field
-def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 /**
  * Вид формы "Консолидированная", используется при определении проверок в частях
@@ -43,8 +39,6 @@ def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataIncome(java.lang.Object, java.lang.Object)}
  *
  */
-@Field final FormDataKind FORM_DATA_KIND = FormDataKind.PRIMARY;
-
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -68,7 +62,20 @@ switch (formDataEvent) {
         break
 }
 
-@Field def PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
+@Field final FormDataKind FORM_DATA_KIND_PRIMARY = FormDataKind.PRIMARY;
+@Field final FormDataKind FORM_DATA_KIND_CONSOLIDATED = FormDataKind.CONSOLIDATED;
+
+/**
+ * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
+ */
+@Field final int CONSOLIDATED_RNU_NDFL_TEMPLATE_ID = 101
+@Field final int PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
+
+/**
+ * Справочник "Коды, определяющие налоговый (отчётный) период"
+ */
+@Field
+def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 
 //------------------ Calculate ----------------------
 /**
@@ -792,7 +799,7 @@ Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
     String whereClause = """
-            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN ref_book_person p ON (frb.record_id = p.record_id)
             JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
         """
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
@@ -1592,7 +1599,7 @@ def prepaymentAttr(personPrepayment) {
 }
 
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
-//если проверки различаются то используется параметр {@link #FORM_DATA_KIND}
+//если проверки различаются то используется параметр {@link #FORM_DATA_KIND_CONSOLIDATED}
 //При внесении изменений учитывается что эта чать скрипта используется(копируется) и в первичной и в консолидированной
 
 //>------------------< REF BOOK >----------------------<
@@ -2214,7 +2221,7 @@ def checkData() {
     checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
     // Проверки сведений о доходах
-    checkDataIncome(ndflPersonList, ndflPersonIncomeList)
+//    checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
 
     println "Все проверки " + (System.currentTimeMillis() - time);
     logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
@@ -2366,7 +2373,7 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
                     // Спр12 ИНП первичная (Обязательное поле)
                     def inpList = inpMap.get(personRecord.get("id")?.value)
                     if (!ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
@@ -2405,7 +2412,7 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
                     // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
                     def allDocList = dulMap.get(personRecord.get("id")?.value)
                     // Вид документа
@@ -2906,6 +2913,62 @@ def checkDataCommon(
 //            }
 //        }
     }
+
+    // Общ12
+    if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.CONSOLIDATED)) {
+        // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
+        def mapDepartmentNotExistRnu = [
+                4:'Байкальский банк',
+                8:'Волго-Вятский банк',
+                20:'Дальневосточный банк',
+                27:'Западно-Сибирский банк',
+                32:'Западно-Уральский банк',
+                37:'Московский банк',
+                44:'Поволжский банк',
+                52:'Северный банк',
+                64:'Северо-Западный банк',
+                82:'Сибирский банк',
+                88:'Среднерусский банк',
+                97:'Уральский банк',
+                113:'Центральный аппарат ПАО Сбербанк',
+                102:'Центрально-Чернозёмный банк',
+                109:'Юго-Западный банк'
+        ]
+        def listDepartmentNotAcceptedRnu = []
+        List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+        for (DeclarationData dd : declarationDataList) {
+            // Подразделение
+            Long departmentCode = departmentService.get(dd.departmentId)?.code
+            mapDepartmentNotExistRnu.remove(departmentCode)
+
+            // Если налоговая форма не принята
+            if (!dd.state.equals(State.ACCEPTED)) {
+                listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
+            }
+        }
+        if (!mapDepartmentNotExistRnu.isEmpty()) {
+            // Период
+            def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+            def periodCode = period?.CODE?.stringValue
+            def periodName = period?.NAME?.stringValue
+            def calendarStartDate = reportPeriod?.calendarStartDate
+
+            def listDepartmentNotExistRnu = []
+            mapDepartmentNotExistRnu.each {
+                listDepartmentNotExistRnu.add(it.value)
+            }
+            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
+                        не созданы экземпляры консолидированных налоговых форм для следующих ТБ: "${listDepartmentNotExistRnu.join("\", \"")}".
+                        Данные этих форм не включены в отчетность!""")
+        }
+        if (!listDepartmentNotAcceptedRnu.isEmpty()) {
+            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
+                        имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: "${listDepartmentNotAcceptedRnu.join("\", \"")}".
+                        , для которых в системе существуют КНФ в текущем периоде, состояние которых <> "Принята">. Данные этих форм не включены в отчетность!""")
+        }
+    }
+
     println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
@@ -2976,19 +3039,266 @@ def checkDataCommon(
  * @param ndflPersonList
  * @param ndflPersonIncomeList
  */
-def checkDataIncome(ndflPersonList, ndflPersonIncomeList) {
+def checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList) {
 
     ndflPersonList.each { ndflPerson ->
-        def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "");
+        def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+        ndflPersonRowNumMap.put(ndflPerson.id, ndflPerson.rowNum)
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
+        personsCache.put(ndflPerson.id, ndflPerson)
     }
+    def incomeAccruedDateConditionDataList = []
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["1010", "3020", "1110", "1400", "2001", "2010", "2012",
+                                                                              "2300", "2710", "2760", "2762", "2770", "2900", "4800"], ["00"], new Column6EqualsColumn7())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
+                                                                              "1541", "1542", "1543", "1544", "1545", "1546", "1547",
+                                                                              "1548", "1549", "1551", "1552", "1554"], ["01", "02"], new Column6EqualsColumn7())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
+                                                                              "1541", "1542", "1543"], ["04"], new MatchMask("31.12.20\\d{2}"))
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000"], ["05"], new LastMonthCalendarDay())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000", "2002"], ["07"], new Column6EqualsColumn7())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000", "2002"], ["08", "09", "10"], new Column7LastDayOfYear())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000", "2002"], ["11"], new LastMonthCalendarDay())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000", "2002"], ["12"], new Column7LastDayOfYear())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2520", "2720", "2740", "2750", "2790"], ["00"], new Column6EqualsColumn7())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2610"], ["00"], new Column6EqualsColumn7())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2640", "2641"], ["00"], new Column6EqualsColumn7())
+
+    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2800"], ["00"], new LastMonthCalendarDayButNotFree())
 
     ndflPersonIncomeList.each { ndflPersonIncome ->
+
+        def ndflPerson = personsCache.get(ndflPersonIncome.ndflPersonId)
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
+
         // СведДох1 Дата начисления дохода
+        incomeAccruedDateConditionDataList.each { incomeData ->
+            if (incomeData.incomeCodes.contains(ndflPersonIncome.incomeCode) && incomeData.incomeTypes.contains(ndflPersonIncome.incomeCode)) {
+                if (incomeData.checker.check(ndflPersonIncome)) {
+                    def messageErrorIncomeAccruedDate = MESSAGE_ERROR_NOT_MATCH_RULE + " \"Если Графа 4 = %s и Графа 5 = %s, то Графа 6 = %s\""
+                    def textError = sprintf(messageErrorIncomeAccruedDate, ndflPersonIncome.incomeCode, ndflPersonIncome.incomeType, ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy"))
+                    logger.error(MESSAGE_ERROR_VALUE,
+                            T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_ACCRUED_DATE, fioAndInp, textError);
+                }
+            }
+        }
+
+        // Сумма вычета
+        BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
+        if (!ndflPersonIncome.totalDeductionsSumm.equals(sumNdflDeduction)) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + "\"Графа 12 Раздел 2 = сумма значений граф 16 Раздел 3\"");
+        }
+        if (sumNdflDeduction.compareTo(ndflPersonIncome.incomeAccruedSumm) <= 0) {
+            logger.error(MESSAGE_ERROR_VALUE,
+                    T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + "\"сумма значений граф 16 Раздела 3 ≤ графа 10 Раздел 2\"");
+        }
+
+        // Налоговая база
+        if (ndflPersonIncome.incomeAccruedSumm.compareTo(new BigDecimal(0)) !=0 && ndflPersonIncome.taxBase.compareTo(new BigDecimal(0)) !=0) {
+            if (ndflPersonIncome.taxBase.compareTo(ndflPersonIncome.incomeAccruedSumm.subtract(ndflPersonIncome.totalDeductionsSumm) !=0)) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + "\"Если \"Графа 10\" ≠ 0 и \"Графа 13\" ≠ 0, то «Графа 13» = «Графа 10» - «Графа 12»\"");
+            }
+        }
+        if (ndflPersonIncome.incomePayoutSumm.compareTo(new BigDecimal(0)) !=0 && ndflPersonIncome.taxBase.compareTo(new BigDecimal(0)) !=0) {
+            if (ndflPersonIncome.taxBase.compareTo(ndflPersonIncome.incomePayoutSumm.subtract(ndflPersonIncome.totalDeductionsSumm) !=0)) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE +
+                        "\"Если \"Графа 11\" ≠ 0 и \"Графа 13\" ≠ 0, то \"Графа 13\" = \"Графа 11\" - \"Графа 12\"\"");
+            }
+        }
+
+        // Процентная ставка
+        if (ndflPersonIncome.taxRate == 13) {
+            def conditionA = ndflPerson.citizenship == "643" && ndflPerson.incomeCode != "1010" && ndflPerson.status != "2"
+            def conditionB = ndflPerson.citizenship == "643" && ndflPerson.incomeCode == "1010" && ndflPerson.status == "1"
+            def conditionC = ndflPerson.citizenship != "643" && (ndflPerson.incomeCode == "2000" ||
+                    ndflPerson.incomeCode == "2001" || ndflPerson.incomeCode == "2010" ||
+                    ndflPerson.incomeCode == "2002" || ndflPerson.incomeCode == "2003") && (ndflPerson.status == "3" ||
+                    ndflPerson.status == "4" || ndflPerson.status == "5" || ndflPerson.status == "6")
+            if (!(conditionA || conditionB || conditionC)) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE +
+                        "\"Если Графа 14 = 13, то выполняется одно из следующих условий:\n" +
+                        "«графа 7 Раздел 1» = 643 и «графа 4» ≠ 1010 и «графа 12 Раздел 1» ≠ 2\n" +
+                        "«графа 7 Раздел 1» = 643 и «графа 4» = 1010 и «графа 12 Раздел 1» = 1\n" +
+                        "«графа 7 Раздел 1» ≠ 643 и («графа 4» = 2000 или 2001 или 2010 или 2002 или 2003) и («графа 12 Раздел 1» ≥ 3)\"")
+            }
+        } else if (ndflPersonIncome.taxRate == 15) {
+            if(!(ndflPerson.incomeCode == "1010" && ndflPerson.status != "1")) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE +
+                        "\"Если Графа 14 = 15, то\n" +
+                        "«графа 4» = 1010 и «графа 12 Раздел 1» ≠ 1\"")
+            }
+        } else if (ndflPersonIncome.taxRate == 35) {
+            if (!((ndflPerson.incomeCode == "2740" || ndflPerson.incomeCode == "3020" || ndflPerson.incomeCode == "2610") &&
+                    ndflPerson.status != "2")) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE +
+                        "\"Если Графа 14 = 35, то\n" +
+                        "«графа 4» = (2740 или 3020 или 2610) и «графа 12 Раздел 1» ≠ 2\"")
+            }
+        } else if (ndflPersonIncome.taxRate == 30) {
+            def conditionA = (ndflPerson.status == "2" || ndflPerson.status == "3" || ndflPerson.status == "4" ||
+                    ndflPerson.status == "5" || ndflPerson.status == "6") && ndflPerson.incomeCode != "1010"
+            def conditionB = (ndflPerson.incomeCode != "2000" || ndflPerson.incomeCode != "2001" || ndflPerson.incomeCode != "2010") &&
+                    (ndflPerson.status == "3" || ndflPerson.status == "4" ||
+                            ndflPerson.status == "5" || ndflPerson.status == "6")
+            if (!(conditionA || conditionB)) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE +
+                        "\"Если Графа 14 = 30, то выполняется одно из следующих условий:\n" +
+                        "«графа 12 Раздел 1» ≥ 2 и «графа 4» ≠ 1010\n" +
+                        "(«графа 4» ≠ 2000 или 2001 или 2010) и «графа 12 Раздел 1» > 2\"")
+            }
+        } else if (ndflPersonIncome.taxRate == 9) {
+            if (!(ndflPerson.citizenship == "643" && ndflPerson.incomeCode != "1110" && ndflPerson.status == "1")) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE +
+                        "\"Если Графа 14 = 9, то\n" +
+                        "«графа 7 Раздел 1» = 643 и «графа 4» = 1110 и «графа 12 Раздел 1» = 1\"")
+            }
+        } else {
+            // TODO Уточнить что такое специальная ставка
+            if (!(ndflPerson.citizenship != "643" && ndflPerson.incomeCode != "1010" && ndflPerson.status != "1")) {
+                logger.error(MESSAGE_ERROR_VALUE,
+                        T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE +
+                        "\"Специальная ставка, то\n" +
+                        "«графа 7 Раздел 1» ≠ 643 и «графа 4» = 1010 и «графа 12 Раздел 1» ≠ 1\"")
+            }
+        }
 
 
+    }
+}
+
+// получить сумму вычетов для ndflPersonIncome
+def getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList) {
+    BigDecimal sumNdflDeduction = new BigDecimal(0)
+    for (ndflPersonDeduction in ndflPersonDeductionList) {
+        if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId && ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy") == ndflPersonDeduction.incomeAccrued.format("dd.MM.yyyy")) {
+            sumNdflDeduction = sumNdflDeduction.add(ndflPersonDeduction)
+        }
+    }
+    return sumNdflDeduction
+}
+
+/**
+ * Получить коллекцию идентификаторов записей справочника "Физические лица"
+ * @param ndflPersonList
+ * @return
+ */
+def getPersonIds(def ndflPersonList) {
+    def personIds = []
+    ndflPersonList.each { ndflPerson ->
+        // todo Почему ndflPerson.personId != 0
+        if (ndflPerson.personId != null && ndflPerson.personId != 0) {
+            personIds.add(ndflPerson.personId)
+        }
+    }
+    return personIds;
+}
+
+class IncomeAccruedDateConditionData {
+
+    List<String> incomeCodes
+    List<String> incomeTypes
+    IncomeAccruedDateConditionChecker checker
+
+    IncomeAccruedDateConditionData(List<String> incomeCodes, List<String> incomeTypes, IncomeAccruedDateConditionChecker checker) {
+        this.incomeCodes = incomeCodes
+        this.incomeTypes = incomeTypes
+        this.checker = checker
+    }
+}
+
+interface IncomeAccruedDateConditionChecker {
+    boolean check(NdflPersonIncome income)
+}
+
+class Column6EqualsColumn7 implements IncomeAccruedDateConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome income) {
+        String accrued = income.incomeAccruedDate.format("dd.MM.yyyy")
+        String payout = income.incomePayoutDate.format("dd.MM.yyyy")
+        return accrued == payout
+    }
+}
+
+class MatchMask implements IncomeAccruedDateConditionChecker {
+    String maskRegex
+
+    MatchMask(String maskRegex) {
+        this.maskRegex = maskRegex
+    }
+
+    @Override
+    boolean check(NdflPersonIncome income) {
+        String accrued = income.incomeAccruedDate.format("dd.MM.yyyy")
+        Pattern pattern = Pattern.compile(maskRegex)
+        Matcher matcher = pattern.matcher(accrued)
+        if (matcher.matches()) {
+            return true
+        }
+        return false
+    }
+}
+
+class LastMonthCalendarDay implements IncomeAccruedDateConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome income) {
+        Calendar calendar = Calendar.getInstance()
+        calendar.setTime(income.incomeAccruedDate)
+        int currentMonth = calendar.get(Calendar.MONTH)
+        calendar.add(calendar.DATE, 1)
+        int comparedMonth = calendar.get(Calendar.MONTH)
+        return currentMonth != comparedMonth
+    }
+}
+
+class Column7LastDayOfYear implements IncomeAccruedDateConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome income) {
+        Calendar calendarPayout = Calendar.getInstance()
+        calendarPayout.setTime(income.incomePayoutDate)
+        int currentYearPayout = calendarPayout.get(Calendar.YEAR)
+        calendarPayout.add(Calendar.DATE, 1)
+        int comparedYearPayout = calendarPayout.get(Calendar.YEAR)
+        if (currentYearPayout != comparedYearPayout) {
+            return new Column6EqualsColumn7().check(income)
+        } else {
+            return new MatchMask("31.12.20\\d{2}").check(income)
+        }
+    }
+}
+
+class LastMonthCalendarDayButNotFree implements IncomeAccruedDateConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome income) {
+        boolean lastMonthDay = new LastMonthCalendarDay().check(income)
+        Calendar calendar = Calendar.getInstance()
+        calendar.setTime(income.incomeAccruedDate)
+        int dayOfWeek = Calendar.get(Calendar.DAY_OF_WEEK)
+        if (lastMonthDay && dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY) {
+            return true
+        } else if (!lastMonthDay && dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
+            return true
+        }
+        return false
     }
 }
 
