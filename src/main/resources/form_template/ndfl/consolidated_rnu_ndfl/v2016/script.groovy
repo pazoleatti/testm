@@ -34,7 +34,7 @@ switch (formDataEvent) {
         consolidation()
         generateXml()
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesList()
