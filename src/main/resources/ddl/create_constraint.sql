@@ -505,11 +505,6 @@ alter table fias_houseint add constraint chk_fias_houseint_intstatus check (ints
 
 alter table fias_room add constraint chk_fias_room_livestatus check (livestatus in (0,1));
 
---индексы
---выключен для тестов
---create index idx_f_fias_addrobj_formalname on fias_addrobj (replace(lower(formalname),' ',''));
-create index idx_fias_addrobj_parentguid on fias_addrobj (parentguid);
-create index idx_fias_addrobj_region_status on fias_addrobj (regioncode, currstatus);
 
 --------------------------------------------------------------------------------------------------------------------------
 -- Справочники физических лиц и статусов налогоплательщиков

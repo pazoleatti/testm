@@ -296,7 +296,8 @@ create table ref_book_tariff_payer
   status      number(1) default 0 not null,
   code        varchar2(2 char)    not null,
   name        varchar2(2000 char) not null,
-  for_ops_oms number(1)
+  for_ops_oms number(1) default 0 not null,
+  for_ops_dop number(1) default 0 not null
 );
 
 comment on table ref_book_tariff_payer is 'Коды тарифа плательщика';
