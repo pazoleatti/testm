@@ -308,6 +308,7 @@ comment on column ref_book_tariff_payer.status is 'Статус записи (0 
 comment on column ref_book_tariff_payer.code is 'Код тарифа плательщика';
 comment on column ref_book_tariff_payer.name is 'Название тарифа плательщика';
 comment on column ref_book_tariff_payer.for_ops_oms is 'Используется в ОПС и ОМС';
+comment on column ref_book_tariff_payer.for_ops_dop is 'Используется для доп. тарифов ОПС';
 
 --Коды классов условий труда
 create table ref_book_hard_work
