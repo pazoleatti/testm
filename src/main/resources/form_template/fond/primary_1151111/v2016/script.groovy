@@ -2317,6 +2317,8 @@ void importData() {
     fileNode.childNodes().each { documentNode ->
         raschsvSvnpPodpisant.svnpTlph = documentNode.name
         if (documentNode.name == NODE_NAME_DOCUMENT) {
+            // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
+//            raschsvSvnpPodpisant.nomKorr = documentNode.attributes()["НомКорр"]
             documentNode.childNodes().each { raschetSvNode ->
                 if (raschetSvNode.name == NODE_NAME_RASCHET_SV) {
                     // Разбор узла РасчетСВ
@@ -4694,6 +4696,7 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
 @Field final String RF_CODE = "CODE"
 @Field final String RF_FOR_FOND = "FOR_FOND"
 @Field final String RF_FOR_OPS_OMS = "FOR_OPS_OMS"
+@Field final String RF_FOR_OPS_DOP = "FOR_OPS_DOP"
 
 // Поля справочника Физические лица
 @Field final String RF_RECORD_ID = "RECORD_ID"
@@ -4954,6 +4957,8 @@ def checkDataDBPerson() {
  * @return
  */
 def checkDataDBSum() {
+
+    RaschsvSvnpPodpisant raschsvSvnpPodpisant = raschsvSvnpPodpisantService.findRaschsvSvnpPodpisant(declarationData.id)
 
     BigDecimal svVyplMkSum1 = 0
     BigDecimal svVyplMkSum2 = 0
@@ -5248,18 +5253,21 @@ def checkDataDBSum() {
     }
 
     // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину) (Проверки выполняются по всем РасчСВ_ОПС)
+    // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
+//    if (raschsvSvnpPodpisant.nomKorr == 0) {
     if (nachislSvNePrevSum1 != svVyplMkSum1) {
         def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
-        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+        logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
     }
     if (nachislSvNePrevSum2 != svVyplMkSum2) {
         def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
-        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+        logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
     }
     if (nachislSvNePrevSum3 != svVyplMkSum3) {
         def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
-        logger.warn("Сумма исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ не равна $pathAttrVal")
+        logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
     }
+//    }
 
     // 3.3.1.3 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОПС)
     if (nachislSvOpsSum1 != uplPerOpsSum1) {
@@ -5279,82 +5287,88 @@ def checkDataDBSum() {
     }
 
     // 3.3.2.1 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу в целом (Проверки выполняются по всем РасчСВ_ОПС428)
-    def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
-    def pathAttr428_3 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.3.НачислСВДоп"
-    if (nachislSvDop428_12Sum1 + nachislSvDop428_3Sum1 != svVyplMkDopSum1) {
-        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум1Посл3М = \"$nachislSvDop428_12Sum1\", " + pathAttr428_3 + ".Сум1Посл3М = \"$nachislSvDop428_3Sum1\"")
-    }
-    if (nachislSvDop428_12Sum2 + nachislSvDop428_3Sum2 != svVyplMkDopSum2) {
-        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум2Посл3М = \"$nachislSvDop428_12Sum2\", " + pathAttr428_3 + ".Сум2Посл3М = \"$nachislSvDop428_3Sum2\"")
-    }
-    if (nachislSvDop428_12Sum3 + nachislSvDop428_3Sum3 != svVyplMkDopSum3) {
-        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум3Посл3М = \"$nachislSvDop428_12Sum3\", " + pathAttr428_3 + ".Сум3Посл3М = \"$nachislSvDop428_3Sum3\"")
-    }
+    // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
+//    if (raschsvSvnpPodpisant.nomKorr == 0) {
+        def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
+        def pathAttr428_3 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.3.НачислСВДоп"
+        if (nachislSvDop428_12Sum1 + nachislSvDop428_3Sum1 != svVyplMkDopSum1) {
+            logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум1Посл3М = \"$nachislSvDop428_12Sum1\", " + pathAttr428_3 + ".Сум1Посл3М = \"$nachislSvDop428_3Sum1\"")
+        }
+        if (nachislSvDop428_12Sum2 + nachislSvDop428_3Sum2 != svVyplMkDopSum2) {
+            logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум2Посл3М = \"$nachislSvDop428_12Sum2\", " + pathAttr428_3 + ".Сум2Посл3М = \"$nachislSvDop428_3Sum2\"")
+        }
+        if (nachislSvDop428_12Sum3 + nachislSvDop428_3Sum3 != svVyplMkDopSum3) {
+            logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум3Посл3М = \"$nachislSvDop428_12Sum3\", " + pathAttr428_3 + ".Сум3Посл3М = \"$nachislSvDop428_3Sum3\"")
+        }
+//    }
 
-    vyplSvDopMtMap.each { tarif, vyplSvDopMtSum ->
-        // 3.3.2.2 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу (п 1 и 2 статьи 428)
-        ["22", "21"].each {
-            def prOsnSvDop = null
-            switch (it) {
-                case "22":
-                    prOsnSvDop = "1"
-                    break
-                case "21":
-                    prOsnSvDop = "2"
-                    break
+    // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
+//    if (raschsvSvnpPodpisant.nomKorr == 0) {
+        vyplSvDopMtMap.each { tarif, vyplSvDopMtSum ->
+            // 3.3.2.2 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу (п 1 и 2 статьи 428)
+            ["22", "21"].each {
+                def prOsnSvDop = null
+                switch (it) {
+                    case "22":
+                        prOsnSvDop = "1"
+                        break
+                    case "21":
+                        prOsnSvDop = "2"
+                        break
+                }
+                if (tarif == it) {
+                    BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(prOsnSvDop)
+                    if (nachisl428_12Sum_1 != vyplSvDopMtSum) {
+                        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум1Посл3М = \"$nachisl428_12Sum_1\"")
+                    }
+                    BigDecimal nachisl428_12Sum_2 = nachisl428_12Sum2Map.get(prOsnSvDop)
+                    if (nachisl428_12Sum_2 != vyplSvDopMtSum) {
+                        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум2Посл3М = \"$nachisl428_12Sum_2\"")
+                    }
+                    BigDecimal nachisl428_12Sum_3 = nachisl428_12Sum3Map.get(prOsnSvDop)
+                    if (nachisl428_12Sum_3 != vyplSvDopMtSum) {
+                        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум3Посл3М = \"$nachisl428_12Sum_3\"")
+                    }
+                }
             }
-            if (tarif == it) {
-                BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(prOsnSvDop)
-                if (nachisl428_12Sum_1 != vyplSvDopMtSum) {
-                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум1Посл3М = \"$nachisl428_12Sum_1\"")
+
+            // 3.3.2.3 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛравна значению исчисленных страховых взносов по доп. тарифу (п 3 428)
+            ["23", "24", "25", "26", "27"].each {
+                def klasUslTrud = null
+                switch (it) {
+                    case "23":
+                        klasUslTrud = "1"
+                        break
+                    case "24":
+                        klasUslTrud = "2"
+                        break
+                    case "25":
+                        klasUslTrud = "3"
+                        break
+                    case "26":
+                        klasUslTrud = "4"
+                        break
+                    case "27":
+                        klasUslTrud = "5"
+                        break
                 }
-                BigDecimal nachisl428_12Sum_2 = nachisl428_12Sum2Map.get(prOsnSvDop)
-                if (nachisl428_12Sum_2 != vyplSvDopMtSum) {
-                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум2Посл3М = \"$nachisl428_12Sum_2\"")
-                }
-                BigDecimal nachisl428_12Sum_3 = nachisl428_12Sum3Map.get(prOsnSvDop)
-                if (nachisl428_12Sum_3 != vyplSvDopMtSum) {
-                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум3Посл3М = \"$nachisl428_12Sum_3\"")
+                if (tarif == it) {
+                    BigDecimal nachisl428_3Sum_1 = nachisl428_3Sum1Map.get(klasUslTrud)
+                    if (nachisl428_3Sum_1 != vyplSvDopMtSum) {
+                        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум1Посл3М = \"$nachisl428_3Sum_1\"")
+                    }
+                    BigDecimal nachisl428_3Sum_2 = nachisl428_3Sum2Map.get(klasUslTrud)
+                    if (nachisl428_3Sum_2 != vyplSvDopMtSum) {
+                        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум2Посл3М = \"$nachisl428_3Sum_2\"")
+                    }
+                    BigDecimal nachisl428_3Sum_3 = nachisl428_3Sum3Map.get(klasUslTrud)
+                    if (nachisl428_3Sum_3 != vyplSvDopMtSum) {
+                        logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум3Посл3М = \"$nachisl428_3Sum_3\"")
+                    }
                 }
             }
         }
-
-        // 3.3.2.3 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛравна значению исчисленных страховых взносов по доп. тарифу (п 3 428)
-        ["23", "24", "25", "26", "27"].each {
-            def klasUslTrud = null
-            switch (it) {
-                case "23":
-                    klasUslTrud = "1"
-                    break
-                case "24":
-                    klasUslTrud = "2"
-                    break
-                case "25":
-                    klasUslTrud = "3"
-                    break
-                case "26":
-                    klasUslTrud = "4"
-                    break
-                case "27":
-                    klasUslTrud = "5"
-                    break
-            }
-            if (tarif == it) {
-                BigDecimal nachisl428_3Sum_1 = nachisl428_3Sum1Map.get(klasUslTrud)
-                if (nachisl428_3Sum_1 != vyplSvDopMtSum) {
-                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум1Посл3М = \"$nachisl428_3Sum_1\"")
-                }
-                BigDecimal nachisl428_3Sum_2 = nachisl428_3Sum2Map.get(klasUslTrud)
-                if (nachisl428_3Sum_2 != vyplSvDopMtSum) {
-                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум2Посл3М = \"$nachisl428_3Sum_2\"")
-                }
-                BigDecimal nachisl428_3Sum_3 = nachisl428_3Sum3Map.get(klasUslTrud)
-                if (nachisl428_3Sum_3 != vyplSvDopMtSum) {
-                    logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум3Посл3М = \"$nachisl428_3Sum_3\"")
-                }
-            }
-        }
-    }
+//    }
 
     // 3.3.3.1 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОМС428)
     if (uplPerOmsSum1 != nachislSvOmsSum1) {
@@ -5754,11 +5768,12 @@ def checkDataDBSum() {
     def pathAttrPravTarif31427 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф3.1.427"
 
     // 3.3.6.1 ПравТариф3.1.427 заполняется только, если код тарифа плательщика 06
-    if (opsOmsIsExistTarifPlat_06 == true && raschsvPravTarif31427 == null) {
-        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф3.1.427 должны быть заполнены при коде тарифа плательщика 06.")
+    if (opsOmsIsExistTarifPlat_06 == true && raschsvPravTarif31427 == null ||
+            opsOmsIsExistTarifPlat_06 == false && raschsvPravTarif31427 != null) {
+        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф3.1.427 заполняются при коде тарифа плательщика \"06\".")
     }
 
-    if (raschsvPravTarif31427 != null) {
+    if (raschsvPravTarif31427 != null && opsOmsIsExistTarifPlat_06 == true) {
         // 3.3.6.2 Численность не менее 7
         if (raschsvPravTarif31427.srChisl9mpr < 7) {
             def pathAttrVal = pathAttrPravTarif31427 + ".СрЧисл_9МПр = \"$raschsvPravTarif31427.srChisl9mpr\""
@@ -5785,11 +5800,12 @@ def checkDataDBSum() {
     def pathAttrPravTarif51427 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф5.1.427"
 
     // 3.3.7.1 ПравТариф5.1.427 заполняется только, если код тарифа плательщика 08
-    if (opsOmsIsExistTarifPlat_08 == true && raschsvPravTarif51427 == null) {
-        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф5.1.427 должны быть заполнены при коде тарифа плательщика 08.")
+    if (opsOmsIsExistTarifPlat_08 == true && raschsvPravTarif51427 == null ||
+            opsOmsIsExistTarifPlat_08 == false && raschsvPravTarif51427 != null) {
+        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф5.1.427 заполняются при коде тарифа плательщика \"08\".")
     }
 
-    if (raschsvPravTarif51427 != null) {
+    if (raschsvPravTarif51427 != null && opsOmsIsExistTarifPlat_08 == true) {
         // 3.3.7.2 Сумма доходов всего не менее суммы доходов по п.6 ст. 427
         if (raschsvPravTarif51427.doh346_15vs < raschsvPravTarif51427.doh6_427) {
             def pathAttrVal = pathAttrPravTarif51427 + ".Дох346.15Вс = \"$raschsvPravTarif51427.doh346_15vs\""
@@ -5803,11 +5819,12 @@ def checkDataDBSum() {
     def pathAttrPravTarif71427 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф7.1.427"
 
     // 3.3.8.1 ПравТариф7.1.427 заполняется только, если код тарифа плательщика 10
-    if (opsOmsIsExistTarifPlat_10 == true && raschsvPravTarif71427 == null) {
-        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф7.1.427 должны быть заполнены при коде тарифа плательщика 10.")
+    if (opsOmsIsExistTarifPlat_10 == true && raschsvPravTarif71427 == null ||
+            opsOmsIsExistTarifPlat_10 == false && raschsvPravTarif71427 != null) {
+        logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф7.1.427 заполняются при коде тарифа плательщика \"10\".")
     }
 
-    if (raschsvPravTarif71427 != null) {
+    if (raschsvPravTarif71427 != null && opsOmsIsExistTarifPlat_10 == true) {
         // 3.3.8.2 	Сумма доходов всего не менее суммы доходов по отдельным разделам
         def dohVsPred = raschsvPravTarif71427.dohVsPred ?: 0
         def dohCelPostPred = raschsvPravTarif71427.dohCelPostPred ?: 0
@@ -5851,18 +5868,21 @@ def checkDataDBSum() {
             svInoGrazdSum3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
         }
         // 3.3.10.1 Итого выплат равно сумме по всем иностранным гражданам
-        if (vyplatIt425Sum1 != svInoGrazdSum1) {
-            def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt425Sum1\""
-            logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
-        }
-        if (vyplatIt425Sum2 != svInoGrazdSum2) {
-            def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум2Посл3М = \"$vyplatIt425Sum2\""
-            logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
-        }
-        if (vyplatIt425Sum3 != svInoGrazdSum3) {
-            def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt425Sum3\""
-            logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
-        }
+        // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
+//        if (raschsvSvnpPodpisant.nomKorr == 0) {
+            if (vyplatIt425Sum1 != svInoGrazdSum1) {
+                def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt425Sum1\""
+                logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
+            }
+            if (vyplatIt425Sum2 != svInoGrazdSum2) {
+                def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум2Посл3М = \"$vyplatIt425Sum2\""
+                logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
+            }
+            if (vyplatIt425Sum3 != svInoGrazdSum3) {
+                def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt425Sum3\""
+                logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
+            }
+//        }
     }
 
     // *********************************** СвПримТариф1.3.422 ***********************************
@@ -5886,18 +5906,21 @@ def checkDataDBSum() {
         }
 
         // 3.3.11.1 Итого выплат равно сумме по всем обучающимся
-        if (vyplatIt422Sum1 != svedObuchSum1) {
-            def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt422Sum1\""
-            logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
-        }
-        if (vyplatIt422Sum2 != svedObuchSum2) {
-            def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум2Посл3М = \"$vyplatIt422Sum2\""
-            logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
-        }
-        if (vyplatIt422Sum3 != svedObuchSum3) {
-            def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt422Sum3\""
-            logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
-        }
+        // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
+//        if (raschsvSvnpPodpisant.nomKorr == 0) {
+            if (vyplatIt422Sum1 != svedObuchSum1) {
+                def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt422Sum1\""
+                logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
+            }
+            if (vyplatIt422Sum2 != svedObuchSum2) {
+                def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум2Посл3М = \"$vyplatIt422Sum2\""
+                logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
+            }
+            if (vyplatIt422Sum3 != svedObuchSum3) {
+                def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt422Sum3\""
+                logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
+            }
+//        }
     }
 }
 
@@ -6217,10 +6240,12 @@ def checkDataXml() {
                                                 if (vyplSvDopMtNode.name == NODE_NAME_VYPL_SV_DOP_MT) {
                                                     // 2.3.4 Значение кода тарифа
                                                     def tariffPayerCodeXml = vyplSvDopMtNode.attributes()[VYPL_SV_DOP_MT_TARIF]
-                                                    if (!mapActualTariffPayerCode.find { key, value -> key == tariffPayerCodeXml }) {
-                                                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_PERS_SV_STRAH_LIC, NODE_NAME_SV_VYPL_SVOPS,
-                                                                        NODE_NAME_VYPL_SV_DOP, NODE_NAME_VYPL_SV_DOP_MT, VYPL_SV_DOP_MT_TARIF].join(".")
-                                                        logger.warn(pathAttr + " = \"" + tariffPayerCodeXml + "\" ФЛ с СНИЛС = \"" + snils + "\"  не найден (не действует) в справочнике \"Коды тарифа плательщика\".")
+                                                    actualTariffPayerCode = mapActualTariffPayerCode.get(tariffPayerCodeXml)
+                                                    // todo https://jira.aplana.com/browse/SBRFNDFL-595 Раскомментировать после обновления стенда
+//                                                    if (!actualTariffPayerCode && actualTariffPayerCode?.get(RF_FOR_OPS_DOP)?.value) {
+                                                    if (!actualTariffPayerCode) {
+                                                        def pathAttr = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.СвВыплСВОПС.ВыплСВДоп.ВыплСВДопМТ.Тариф"
+                                                        logger.warn("$pathAttr = \"$tariffPayerCodeXml\" ФЛ с СНИЛС = \"$snils\"  не найден (не действует) в справочнике \"Коды тарифа плательщика\".")
                                                     }
                                                 }
                                             }
@@ -6232,9 +6257,8 @@ def checkDataXml() {
                                                     // 2.3.5 Значение кода категории застрахованного лица
                                                     def kodKatLisCodeXml = svVyplMkNode.attributes()[SV_VYPL_MT_KOD_KAT_LIC]
                                                     if (!listPersonCategory.contains(kodKatLisCodeXml)) {
-                                                        def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_PERS_SV_STRAH_LIC, NODE_NAME_SV_VYPL_SVOPS,
-                                                                        NODE_NAME_SV_VYPL, NODE_NAME_SV_VYPL_MK, SV_VYPL_MT_KOD_KAT_LIC].join(".")
-                                                        logger.warn(pathAttr + " = \"" + kodKatLisCodeXml + "\" ФЛ с СНИЛС = \"" + snils + "\"  не найден (не действует) в справочнике \"Коды категорий застрахованных лиц\".")
+                                                        def pathAttr = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.СвВыплСВОПС.СвВыпл.СвВыплМК.КодКатЛиц"
+                                                        logger.warn("$pathAttr = \"$kodKatLisCodeXml\" ФЛ с СНИЛС = \"$snils\"  не найден (не действует) в справочнике \"Коды категорий застрахованных лиц\".")
                                                     }
                                                 }
                                             }
