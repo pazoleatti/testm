@@ -1322,7 +1322,8 @@ create table raschsv_svnp_podpisant
    otchestvo        VARCHAR2(60 CHAR),
    podpisant_pr_podp  VARCHAR2(1 CHAR),
    podpisant_naim_doc VARCHAR2(120 CHAR),
-   podpisant_naim_org VARCHAR2(1000 CHAR)
+   podpisant_naim_org VARCHAR2(1000 CHAR),
+   nom_korr NUMBER(7)
 );
 create sequence seq_raschsv_svnp_podpisant start with 1;
 comment on table raschsv_svnp_podpisant is 'Сведения о плательщике страховых взносов и лице, подписавшем документ';
@@ -1342,6 +1343,7 @@ comment on column raschsv_svnp_podpisant.otchestvo is 'Отчество (Отч�
 comment on column raschsv_svnp_podpisant.podpisant_pr_podp is 'Признак лица, подписавшего документ (ПрПодп)';
 comment on column raschsv_svnp_podpisant.podpisant_naim_doc is 'Наименование документа, подтверждающего полномочия представителя (НаимДок)';
 comment on column raschsv_svnp_podpisant.podpisant_naim_org is 'Наименование организации - представителя плательщика (НаимОрг)';
+comment on column raschsv_svnp_podpisant.nom_korr is 'Номер корректировки (НомКорр)';
 ------------------------------------------------------------------------------------------------------
 create table raschsv_kol_lic_tip
 (
