@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -27,6 +28,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     private static final String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
     private static final String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению \"%s\"!";
+    private static final String CHECK_ROLE_MESSAGE = "Нет прав доступа к данному виду налогу \"%s\"!";
 
     @Autowired
     private LogEntryService logEntryService;
@@ -125,6 +127,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
+        checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
         DeclarationType type = declarationTemplate.getType();
@@ -146,6 +149,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
+        checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
@@ -162,6 +166,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
     @Override
     public void deleteTemplate(int typeId, Logger logger, TAUserInfo user) {
+        checkRole(declarationTypeService.get(typeId).getTaxType(), user.getUser());
         List<DeclarationTemplate> templates = declarationTemplateService.getDecTemplateVersionsByStatus(typeId,
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         if (templates != null && !templates.isEmpty()){
@@ -187,6 +192,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     public boolean deleteVersionTemplate(int templateId, Logger logger, TAUserInfo user) {
         boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
         DeclarationTemplate template = declarationTemplateService.get(templateId);
+        checkRole(template.getType().getTaxType(), user.getUser());
         Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
         versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
@@ -224,6 +230,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public boolean setStatusTemplate(int templateId, Logger logger, TAUserInfo user, boolean force) {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(templateId);
+        checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
 
         if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
@@ -258,5 +265,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         changes.setDeclarationTemplateId(id);
         changes.setAuthor(user);
         templateChangesService.save(changes);
+    }
+
+    private void checkRole(TaxType taxType, TAUser user) {
+        if (user.hasRoles(taxType, TARole.N_ROLE_CONF, TARole.N_ROLE_CONF)) {
+            throw new ServiceException(CHECK_ROLE_MESSAGE, taxType.getName());
+        }
     }
 }

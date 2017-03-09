@@ -79,7 +79,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         // Проверка возможности работать с видом налога
         if (!userInfo.getUser().hasTax(taxType)) {
-            error("Нет прав на доступ к данному налогу", logger);
+            error("Нет прав доступа к данному налогу", logger);
         }
 
         // Выборка для доступа к экземплярам деклараций
