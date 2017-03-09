@@ -31,20 +31,12 @@ import javax.xml.stream.events.*
 import java.text.SimpleDateFormat
 
 /**
- * Справочник "Коды, определяющие налоговый (отчётный) период"
- */
-@Field
-def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
-
-/**
  * Вид формы "Консолидированная", используется при определении проверок в частях
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataReference(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataCommon(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataIncome(java.lang.Object, java.lang.Object)}
  *
  */
-@Field final FormDataKind FORM_DATA_KIND = FormDataKind.PRIMARY;
-
 
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -68,7 +60,20 @@ switch (formDataEvent) {
         break
 }
 
-@Field def PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
+@Field final FormDataKind FORM_DATA_KIND_PRIMARY = FormDataKind.PRIMARY;
+@Field final FormDataKind FORM_DATA_KIND_CONSOLIDATED = FormDataKind.CONSOLIDATED;
+
+/**
+ * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
+ */
+@Field final int CONSOLIDATED_RNU_NDFL_TEMPLATE_ID = 101
+@Field final int PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
+
+/**
+ * Справочник "Коды, определяющие налоговый (отчётный) период"
+ */
+@Field
+def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 
 //------------------ Calculate ----------------------
 /**
@@ -1561,7 +1566,7 @@ def prepaymentAttr(personPrepayment) {
 }
 
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
-//если проверки различаются то используется параметр {@link #FORM_DATA_KIND}
+//если проверки различаются то используется параметр {@link #FORM_DATA_KIND_CONSOLIDATED}
 //При внесении изменений учитывается что эта чать скрипта используется(копируется) и в первичной и в консолидированной
 
 //>------------------< REF BOOK >----------------------<
@@ -2335,7 +2340,7 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
                     // Спр12 ИНП первичная (Обязательное поле)
                     def inpList = inpMap.get(personRecord.get("id")?.value)
                     if (!ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
@@ -2374,7 +2379,7 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
                     // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
                     def allDocList = dulMap.get(personRecord.get("id")?.value)
                     // Вид документа
@@ -2875,6 +2880,62 @@ def checkDataCommon(
 //            }
 //        }
     }
+
+    // Общ12
+    if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.CONSOLIDATED)) {
+        // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
+        def mapDepartmentNotExistRnu = [
+                4:'Байкальский банк',
+                8:'Волго-Вятский банк',
+                20:'Дальневосточный банк',
+                27:'Западно-Сибирский банк',
+                32:'Западно-Уральский банк',
+                37:'Московский банк',
+                44:'Поволжский банк',
+                52:'Северный банк',
+                64:'Северо-Западный банк',
+                82:'Сибирский банк',
+                88:'Среднерусский банк',
+                97:'Уральский банк',
+                113:'Центральный аппарат ПАО Сбербанк',
+                102:'Центрально-Чернозёмный банк',
+                109:'Юго-Западный банк'
+        ]
+        def listDepartmentNotAcceptedRnu = []
+        List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+        for (DeclarationData dd : declarationDataList) {
+            // Подразделение
+            Long departmentCode = departmentService.get(dd.departmentId)?.code
+            mapDepartmentNotExistRnu.remove(departmentCode)
+
+            // Если налоговая форма не принята
+            if (!dd.state.equals(State.ACCEPTED)) {
+                listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
+            }
+        }
+        if (!mapDepartmentNotExistRnu.isEmpty()) {
+            // Период
+            def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+            def periodCode = period?.CODE?.stringValue
+            def periodName = period?.NAME?.stringValue
+            def calendarStartDate = reportPeriod?.calendarStartDate
+
+            def listDepartmentNotExistRnu = []
+            mapDepartmentNotExistRnu.each {
+                listDepartmentNotExistRnu.add(it.value)
+            }
+            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
+                        не созданы экземпляры консолидированных налоговых форм для следующих ТБ: "${listDepartmentNotExistRnu.join("\", \"")}".
+                        Данные этих форм не включены в отчетность!""")
+        }
+        if (!listDepartmentNotAcceptedRnu.isEmpty()) {
+            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
+                        имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: "${listDepartmentNotAcceptedRnu.join("\", \"")}".
+                        , для которых в системе существуют КНФ в текущем периоде, состояние которых <> "Принята">. Данные этих форм не включены в отчетность!""")
+        }
+    }
+
     println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
