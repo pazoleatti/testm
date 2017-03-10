@@ -273,16 +273,22 @@ public class DeclarationListPresenter extends
     @Override
     public void delete() {
         LogCleanEvent.fire(this);
-        DeleteDeclarationListAction action = new DeleteDeclarationListAction();
-        action.setDeclarationIds(getView().getSelectedIds());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<DeleteDeclarationListResult>() {
-                    @Override
-                    public void onSuccess(DeleteDeclarationListResult result) {
-                        LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
-                        onFind();
-                    }
-                }, DeclarationListPresenter.this));
+        Dialog.confirmMessageYesClose(Dialog.CONFIRM_MESSAGE, "Вы уверены, что хотите удалить налоговую форму?", new DialogHandler() {
+            @Override
+            public void yes() {
+
+                DeleteDeclarationListAction action = new DeleteDeclarationListAction();
+                action.setDeclarationIds(getView().getSelectedIds());
+                dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<DeleteDeclarationListResult>() {
+                            @Override
+                            public void onSuccess(DeleteDeclarationListResult result) {
+                                LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                                onFind();
+                            }
+                        }, DeclarationListPresenter.this));
+            }
+        });
     }
 
     @Override
@@ -302,7 +308,7 @@ public class DeclarationListPresenter extends
                         }
                     }, DeclarationListPresenter.this));
         } else {
-            Dialog.confirmMessageYesClose("Вернуть в Создана", "Вы действительно хотите вернуть в статус \"Создана\" формы?", new DialogHandler() {
+            Dialog.confirmMessageYesClose(Dialog.CONFIRM_MESSAGE, "Вы действительно хотите вернуть в статус \"Создана\" формы?", new DialogHandler() {
                 @Override
                 public void yes() {
                     AcceptDeclarationListAction action = new AcceptDeclarationListAction();
