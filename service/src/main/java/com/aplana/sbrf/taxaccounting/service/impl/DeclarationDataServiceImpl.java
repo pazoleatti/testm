@@ -777,6 +777,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException("Ошибка при формировании временного файла для XML", e);
                 }
                 exchangeParams.put(DeclarationDataScriptParams.XML, fileWriter);
+                exchangeParams.put(DeclarationDataScriptParams.XML_FILE, xmlFile);
                 LOG.info(String.format("Формирование XML-файла налоговой формы %s", declarationData.getId()));
                 stateLogger.updateState("Формирование XML-файла");
                 declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
