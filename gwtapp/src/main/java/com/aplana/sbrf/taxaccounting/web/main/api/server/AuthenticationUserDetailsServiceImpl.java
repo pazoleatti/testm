@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +21,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserDetailsService<Authentication> {
+public class AuthenticationUserDetailsServiceImpl implements  AuthenticationUserDetailsService<Authentication> {
 
 	private static final Log LOG = LogFactory.getLog(AuthenticationUserDetailsServiceImpl.class);
 
 	@Autowired
-	TAUserService userService;
+    private TAUserService userService;
 	@Autowired
 	private AuditService auditService;
 
@@ -55,11 +58,15 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 
 		TAUserInfo info = new TAUserInfo();
 		info.setUser(user);
-		info.setIp(
-				((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr()
-		);
+		info.setIp(getRemoteAddress(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest()));
 		auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null, null);
 
 		return new User(userName, "notused", grantedAuthorities);
 	}
+
+    private String getRemoteAddress(HttpServletRequest request) {
+        Validate.notNull(request);
+        String xff = request.getHeader("X-Forwarded-For");
+        return StringUtils.isEmpty(xff) ? request.getRemoteAddr() : StringUtils.substringBefore(xff, ",");
+    }
 }
