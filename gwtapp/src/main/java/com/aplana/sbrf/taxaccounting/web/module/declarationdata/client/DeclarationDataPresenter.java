@@ -439,7 +439,7 @@ public class DeclarationDataPresenter
 										}
 									}, DeclarationDataPresenter.this));
 		} else {
-            Dialog.confirmMessageYesClose("Возврат в Создана", "Вы действительно хотите вернуть в статус \"Создана\" форму?\"", new DialogHandler() {
+            Dialog.confirmMessageYesClose("Вернуть в Создана", "Вы действительно хотите вернуть в статус \"Создана\" форму?\"", new DialogHandler() {
                 @Override
                 public void yes() {
                     LogCleanEvent.fire(DeclarationDataPresenter.this);
