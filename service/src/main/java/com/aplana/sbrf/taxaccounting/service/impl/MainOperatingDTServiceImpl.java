@@ -268,7 +268,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     private void checkRole(TaxType taxType, TAUser user) {
-        if (user.hasRoles(taxType, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
+        if (!user.hasRoles(taxType, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
             throw new ServiceException(CHECK_ROLE_MESSAGE, taxType.getName());
         }
     }
