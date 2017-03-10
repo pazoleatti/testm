@@ -25,6 +25,7 @@ create index idx_ndfl_person_inc_paymdt on ndfl_person_income(ndfl_person_id,pay
 create index idx_ndfl_person_inc_oktmo on ndfl_person_income(ndfl_person_id,oktmo);
 create index idx_ndfl_person_inc_kpp on ndfl_person_income(ndfl_person_id,kpp);
 create index srch_ndfl_pers_inc_income on ndfl_person_income(ndfl_person_id,operation_id,income_accrued_date,income_code);
+create index idx_ndfl_person_inc_src on ndfl_person_income(source_id);
 create index ndfl_pers_inc_kpp_oktmo on ndfl_person_income(kpp,oktmo);
 
 create index idx_ndfl_person_ded_ppcurrdt on ndfl_person_deduction(ndfl_person_id,period_curr_date);
@@ -37,6 +38,10 @@ create index idx_ref_deduct_type_dmark on ref_book_deduction_type(deduction_mark
 create index idx_decl_data_oktmo_kpp on declaration_data(oktmo, kpp);
 
 create index idx_ras_psv_strlic_decl_person on raschsv_pers_sv_strah_lic(declaration_data_id,person_id);
+create index idx_ra_sv_vypl_parent on raschsv_sv_vypl(raschsv_pers_sv_strah_lic_id);
+create index idx_ra_sv_vypl_mk_parent on raschsv_sv_vypl_mk(raschsv_sv_vypl_id);
+create index idx_ra_vypl_sv_dop_parent on raschsv_vypl_sv_dop(raschsv_pers_sv_strah_lic_id);
+create index idx_ra_vypl_sv_dop_mt_parent on raschsv_vypl_sv_dop_mt(raschsv_vypl_sv_dop_id);
 
 create index idx_f_fias_addrobj_formalname on fias_addrobj (replace(lower(formalname),' ',''));
 create index idx_fias_addrobj_parentguid on fias_addrobj (parentguid);

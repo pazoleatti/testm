@@ -301,8 +301,8 @@ def buildXml(def writer, boolean isForSpecificReport) {
  * Найти обобщенные данные о доходах физ лиц и данные в разрезе ставок
  *
  * @param declarationDataId - идентификатор декларации
- * @param startDate         - "Дата удержания налога" и "Дата платежного поручения" должны быть >= даты начала отчетного периода
- * @param endDate           - "Дата удержания налога" и "Дата платежного поручения" должны быть <= даты окончания отчетного периода
+ * @param startDate - "Дата удержания налога" и "Дата платежного поручения" должны быть >= даты начала отчетного периода
+ * @param endDate - "Дата удержания налога" и "Дата платежного поручения" должны быть <= даты окончания отчетного периода
  * @param kpp
  * @param oktmo
  * @return
@@ -325,7 +325,7 @@ NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(def startDate, def e
     // Код дохода, для которого вычисляются дивиденты
     def final String INCOME_CODE_DIV = "1010";
 
-        // Обобщенные показатели о доходах
+    // Обобщенные показатели о доходах
     NdflPersonIncomeCommonValue ndflPersonIncomeCommonValue = new NdflPersonIncomeCommonValue()
 
     // Перечень уникальных идентификаторов ФЛ
@@ -436,7 +436,7 @@ NdflPersonIncomeCommonValue findNdflPersonIncomeCommonValue(def startDate, def e
  *
  * @param declarationDataId - идентификатор декларации
  * @param calendarStartDate - "Дата удержания налога" и "Дата платежного поручения" должны быть >= даты начала последнего квартала отчетного периода
- * @param endDate           - "Дата удержания налога" и "Дата платежного поручения" <= даты окончания последнего квартала отчетного периода
+ * @param endDate - "Дата удержания налога" и "Дата платежного поручения" <= даты окончания последнего квартала отчетного периода
  * @param kpp
  * @param oktmo
  * @return
@@ -830,9 +830,13 @@ def createForm() {
     } else {
         def departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         def departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
+        def referencesOktmoList = departmentParamTableList.OKTMO?.value
+        referencesOktmoList.removeAll([null])
+        def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
+
         departmentParamTableList.each { dep ->
             if (dep.OKTMO?.value != null) {
-                def oktmo = getOktmoById(dep.OKTMO?.value)
+                def oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
                 if (oktmo != null) {
                     pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, oktmo.CODE.value, dep?.TAX_ORGAN_CODE?.value)
                 }
@@ -845,12 +849,11 @@ def createForm() {
 
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
-    allDeclarationData.each { declaration ->
-        pairKppOktmoList.each { pair ->
-            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(declaration.id, pair.kpp.toString(), pair.oktmo.toString())
-            if (ndflPersons != null && ndflPersons.size() != 0) {
-                addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
-            }
+
+    pairKppOktmoList.each { pair ->
+        def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString())
+        if (ndflPersons != null && ndflPersons.size() != 0) {
+            addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
         }
     }
     //logger.info(ndflPersonsGroupedByKppOktmo.toString())
@@ -877,6 +880,11 @@ def createForm() {
 
 }
 
+def getOktmoByIdList(idList) {
+    def provider = getProvider(REF_BOOK_OKTMO_ID)
+    return provider.getRecordData(idList)
+}
+
 /**
  * получить id всех ТБ для данного отчетного периода
  * @param departmentReportPeriod
@@ -900,7 +908,23 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
 }
 
 def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndflPersonList) {
-    boolean createNewGroup = true
+
+    def kppOktmoNdflPersons = ndflPersonsGroupedByKppOktmo.get(pairKppOktmoBeingComparing)
+    if (kppOktmoNdflPersons == null) {
+        ndflPersonsGroupedByKppOktmo.put(pairKppOktmoBeingComparing, ndflPersonList)
+    } else {
+        def kppOktmoNdflPersonsEntrySet = ndflPersonsGroupedByKppOktmo.entrySet()
+        kppOktmoNdflPersonsEntrySet.each {
+            if (it.getKey().equals().pairKppOktmoBeingComparing) {
+                if (it.getKey().taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
+                    logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
+                }
+                //Если Коды НО совпадают, для всех дублей пар КПП+ОКТМО создается одна ОНФ, в которой указывается совпадающий Код НО.
+                it.getValue().addAll(ndflPersonList)
+            }
+        }
+    }
+    /*boolean createNewGroup = true
     ndflPersonsGroupedByKppOktmo.keySet().each { pairKppOktmo ->
         if (pairKppOktmo.kpp == pairKppOktmoBeingComparing.kpp && pairKppOktmo.oktmo == pairKppOktmoBeingComparing.oktmo) {
             if (pairKppOktmo.taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
@@ -912,7 +936,7 @@ def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndf
     }
     if (createNewGroup) {
         ndflPersonsGroupedByKppOktmo[pairKppOktmoBeingComparing] = ndflPersonList
-    }
+    }*/
 }
 
 def getPrevDepartmentReportPeriod(departmentReportPeriod) {
@@ -942,7 +966,7 @@ def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
     }
 }
 
-def appendNdflPersonsToForm (def declarationDataId, def ndflPersons){
+def appendNdflPersonsToForm(def declarationDataId, def ndflPersons) {
     ndflPersons.each {
         it.setId(null)
         it.setDeclarationDataId(declarationDataId)
@@ -963,7 +987,7 @@ def createReports() {
     scriptParams.put("fileName", "reports.zip")
     try {
         Department department = departmentService.get(declarationData.departmentId);
-        DeclarationTemplate declarationTemplate =  declarationService.getTemplate(declarationData.declarationTemplateId);
+        DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
@@ -1101,7 +1125,7 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
 
     return relation
 }
- // Найти подразделения в РНУ которых имеются операции из декларации
+// Найти подразделения в РНУ которых имеются операции из декларации
 def getDeclarationDataList(def sourceTypeId, def allDepartmentReportPeriodIds) {
     // Найти все доходы по декларации
     def toReturn = []
@@ -1122,6 +1146,7 @@ def getDeclarationDataList(def sourceTypeId, def allDepartmentReportPeriodIds) {
     }
     return toReturn
 }
+
 def getDepartmentReportPeriodById(def id) {
     if (id != null && departmentReportPeriodMap[id] == null) {
         departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)

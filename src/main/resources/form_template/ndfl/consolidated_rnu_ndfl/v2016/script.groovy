@@ -89,7 +89,7 @@ void consolidation() {
     List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
 
     if (logger.containsLevel(LogLevel.ERROR)) {
-        throw new ServiceException("При получении источников возникли ошибки. Консолидация НФ не возможна.");
+        throw new ServiceException("При получении источников возникли ошибки. Консолидация НФ невозможна.");
     }
 
     //Карта в которой хранится record_id и NdflPerson в котором объединяются данные о даходах
