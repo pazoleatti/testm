@@ -1539,7 +1539,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String T_PERSON_PREPAYMENT = "Сведения о доходах в виде авансовых платежей"
 
 // Справочники
-@Field final String R_FIAS = "ФИАС"
+@Field final String R_FIAS = "КЛАДР"
 @Field final String R_PERSON = "Физические лица"
 @Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
 @Field final String R_ID_DOC_TYPE = "Коды документов"

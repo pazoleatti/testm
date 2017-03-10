@@ -370,13 +370,10 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 }
 
                 // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
-                def ndflPersonIncomesFiltered = findAllIncomes(np.id, startDate, endDate, priznakF)
-
-                // Сведения о вычетах
-                // def ndflPersonDeductions = findDeductions(np.id, startDate, endDate, ndflPersonIncomesFiltered)
+                def ndflPersonIncomesAll = findAllIncomes([np.id], startDate, endDate, priznakF)
 
                 // Сведения о доходах сгруппированные по ставке
-                def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomesFiltered)
+                def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomesAll)
 
                 // Сведения о вычетах с признаком "Остальные"
                 def deductionsSelectedForDeductionsInfo = ndflPersonService.findDeductionsWithDeductionsMarkOstalnie(np.id, startDate, endDate)
@@ -487,14 +484,14 @@ def buildXml(def writer, boolean isForSpecificReport) {
                             }
                         }
 
-                        СумИтНалПер(СумДохОбщ: ScriptUtils.round(getSumDohod(ndflPersonIncomesFiltered), 2),
-                                НалБаза: ScriptUtils.round(getNalBaza(ndflPersonIncomesFiltered), 2),
-                                НалИсчисл: getNalIschisl(ndflPersonIncomesFiltered),
+                        СумИтНалПер(СумДохОбщ: ScriptUtils.round(getSumDohod(ndflPersonIncomesAll), 2),
+                                НалБаза: ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2),
+                                НалИсчисл: getNalIschisl(ndflPersonIncomesAll),
                                 АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
-                                НалУдерж: getNalUderzh(priznakF, ndflPersonIncomesFiltered),
-                                НалПеречисл: getNalPerechisl(priznakF, ndflPersonIncomesFiltered),
-                                НалУдержЛиш: getNalUderzhLish(priznakF, ndflPersonIncomesFiltered),
-                                НалНеУдерж: getNalNeUderzh(ndflPersonIncomesFiltered)) {
+                                НалУдерж: getNalUderzh(priznakF, ndflPersonIncomesAll),
+                                НалПеречисл: getNalPerechisl(priznakF, ndflPersonIncomesAll),
+                                НалУдержЛиш: getNalUderzhLish(priznakF, ndflPersonIncomesAll),
+                                НалНеУдерж: getNalNeUderzh(ndflPersonIncomesAll)) {
 
                             if (np.status == "6") {
                                 ndflPersonPrepayments.each { prepayment ->
@@ -1179,13 +1176,9 @@ def createForm() {
     //initNdflPersons(ndflPersonsIdGroupedByKppOktmo)
 
     // Удаление ранее созданных отчетных форм
-    println 1
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
-        println 2
-        println it.id
         declarationService.delete(it.id, userInfo)
     }
-    println 3
     // Создание ОНФ для каждой пары КПП и ОКТМО
     ndflPersonsIdGroupedByKppOktmo.each { npGroup ->
         def oktmo = npGroup.key.oktmo

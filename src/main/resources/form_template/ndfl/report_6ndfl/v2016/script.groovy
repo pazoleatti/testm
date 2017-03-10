@@ -308,14 +308,12 @@ def buildXml(def writer, boolean isForSpecificReport) {
                         }
                     }
                 }
-                /* Операции сгруппированные по дате начисления дохода. Мапа где ключ: дата начисления дохода - значение:
-                 * Мапа где ключ ид операции, значение список операция для ключа
-                */
-                def dateDatas = [:]
-
+                /* Мапа используется для заполнения раздела ДохНал. Ключом выступает объект Пара физлицо-ИдОперации,
+                а значением спиок доходов которые соответствуют этой паре*/
                 def pairPersonOperationIdMap = [:]
+                // Находим все возможные значения
                 ndflPersonIncomeList.each {
-                    def PairPersonOperationId pair = new PairPersonOperationId(it.ndflPersonId, it.operationId)
+                    PairPersonOperationId pair = new PairPersonOperationId(it.ndflPersonId, it.operationId)
                     def incomesGroup = pairPersonOperationIdMap.get(pair)
                     if (incomesGroup == null) {
                         pairPersonOperationIdMap.put(pair, [it])
@@ -323,48 +321,37 @@ def buildXml(def writer, boolean isForSpecificReport) {
                         incomesGroup << it
                     }
                 }
-
+                // В этом временном списке находятся пары NdflPersonId-OperationId, которые не следует включать в отчет
                 def pairOperationsForRemove = []
 
+                // заполняем pairOperationsForRemove
                 pairPersonOperationIdMap.each { k, v ->
 
                     def absentAccruedDate = true
                     def absentTaxDate = true
                     def absentTransferDate = true
-                    println "*******************"
                     for (def income : v) {
-                        println income
                         if (income.incomeAccruedDate != null && income.incomeAccruedSumm != null && !income.incomeAccruedSumm.equals(new BigDecimal(0))) {
-                            println "1"
                             absentAccruedDate = false
                             break
                         }
                     }
-                    println "-------------------"
                     for (def income : v) {
-                        println income
                         if (income.taxDate != null) {
-                            println "2"
                             if (income.taxDate >= reportPeriod.calendarStartDate && income.taxDate <= reportPeriod.endDate) {
-                                println "2/1"
                                 absentTaxDate = false
                                 break
                             }
                         }
                     }
-                    println "-------------------"
                     for (def income : v) {
-                        println income
                         if (income.taxTransferDate != null) {
-                            println "3"
                             if (income.taxTransferDate >= reportPeriod.calendarStartDate && income.taxTransferDate <= reportPeriod.endDate) {
-                                println "3/1"
                                 absentTransferDate = false
                                 break
                             }
                         }
                     }
-                    println "-------------------"
                     if (absentAccruedDate || absentTaxDate || absentTransferDate) {
                         pairOperationsForRemove << k
                     }
@@ -372,7 +359,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 pairOperationsForRemove.each {
                     pairPersonOperationIdMap.remove(it)
                 }
-                println pairPersonOperationIdMap
                 if (pairPersonOperationIdMap.size() != 0) {
 
                     ДохНал() {
@@ -416,7 +402,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
                             ) {}
                         }
                     }
-
                 }
             }
         }
@@ -952,7 +937,6 @@ def createForm() {
         def kpp = npGroup.key.kpp
         def taxOrganCode = npGroup.key.taxOrganCode
         def npGropSourcesIdList = npGroup.value.id
-        println npGropSourcesIdList
         Long ddId
         params = new HashMap<String, Object>()
         ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
@@ -1008,19 +992,6 @@ def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndf
             }
         }
     }
-    /*boolean createNewGroup = true
-    ndflPersonsGroupedByKppOktmo.keySet().each { pairKppOktmo ->
-        if (pairKppOktmo.kpp == pairKppOktmoBeingComparing.kpp && pairKppOktmo.oktmo == pairKppOktmoBeingComparing.oktmo) {
-            if (pairKppOktmo.taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
-                logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
-            }
-            ndflPersonsGroupedByKppOktmo.get(pairKppOktmo).addAll(ndflPersonList)
-            createNewGroup = false
-        }
-    }
-    if (createNewGroup) {
-        ndflPersonsGroupedByKppOktmo[pairKppOktmoBeingComparing] = ndflPersonList
-    }*/
 }
 
 def getPrevDepartmentReportPeriod(departmentReportPeriod) {

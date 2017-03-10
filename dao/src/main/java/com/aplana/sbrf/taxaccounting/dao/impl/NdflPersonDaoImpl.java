@@ -120,14 +120,60 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo) {
+    public List<NdflPersonIncome> findIncomesForPersonByKppOktmo(List<Long> ndflPersonId, String kpp, String oktmo) {
         String sql = "select /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
                 " from NDFL_PERSON_INCOME npi where " +
-                "npi.NDFL_PERSON_ID = :ndflPersonId and npi.OKTMO = :oktmo and npi.KPP = :kpp";
+                "npi.NDFL_PERSON_ID in (:ndflPersonId) and npi.OKTMO = :oktmo and npi.KPP = :kpp";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
                 .addValue("oktmo", oktmo)
                 .addValue("kpp", kpp);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriod(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate) {
+        String sql = "select /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
+                " from NDFL_PERSON_INCOME npi where " +
+                "npi.NDFL_PERSON_ID in (:ndflPersonId) and npi.OKTMO = :oktmo and npi.KPP = :kpp " +
+                "AND npi.INCOME_ACCRUED_DATE between :startDate AND :endDate " +
+                "UNION SELECT /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi" +
+                " WHERE npi.ndfl_person_id in (:ndflPersonId)" +
+                " AND npi.tax_date between :startDate AND :endDate" +
+                " and npi.OKTMO = :oktmo and npi.KPP = :kpp " +
+                " UNION SELECT /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi" +
+                " WHERE npi.ndfl_person_id in (:ndflPersonId)" +
+                " AND npi.payment_date between :startDate AND :endDate" +
+                " and npi.OKTMO = :oktmo and npi.KPP = :kpp ";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("oktmo", oktmo)
+                .addValue("kpp", kpp)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriodByAccruedDate(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate) {
+        String sql = "select /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
+                " from NDFL_PERSON_INCOME npi where " +
+                "npi.NDFL_PERSON_ID in (:ndflPersonId) and npi.OKTMO = :oktmo and npi.KPP = :kpp " +
+                "AND npi.INCOME_ACCRUED_DATE between :startDate AND :endDate";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("oktmo", oktmo)
+                .addValue("kpp", kpp)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -534,6 +580,19 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("ndflPersonId", ndflPersonId)
                 .addValue("operationId", operationId);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+        } catch (EmptyResultDataAccessException ex) {
+            return new ArrayList<NdflPersonPrepayment>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<Long> operationId) {
+        String sql = "select distinct " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " " +
+                " from NDFL_PERSON_PREPAYMENT npp join NDFL_PERSON_INCOME npi ON npi.ndfl_person_id = npp.ndfl_person_id where npi.id in (:operationId)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("operationId", operationId);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException ex) {
