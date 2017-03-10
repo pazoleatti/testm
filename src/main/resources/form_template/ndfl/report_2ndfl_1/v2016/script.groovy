@@ -1179,13 +1179,9 @@ def createForm() {
     //initNdflPersons(ndflPersonsIdGroupedByKppOktmo)
 
     // Удаление ранее созданных отчетных форм
-    println 1
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
-        println 2
-        println it.id
         declarationService.delete(it.id, userInfo)
     }
-    println 3
     // Создание ОНФ для каждой пары КПП и ОКТМО
     ndflPersonsIdGroupedByKppOktmo.each { npGroup ->
         def oktmo = npGroup.key.oktmo
