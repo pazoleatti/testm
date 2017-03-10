@@ -61,7 +61,18 @@ public interface NdflPersonService {
      * @param oktmo
      * @return
      */
-    List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo);
+    List<NdflPersonIncome> findIncomesForPersonByKppOktmo(List<Long> ndflPersonId, String kpp, String oktmo);
+
+    /**
+     * Найти данные о доходах по КПП и ОКТМО для Физлица
+     * @param ndflPersonId
+     * @param kpp
+     * @param oktmo
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriod(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate);
 
     /**
      * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
@@ -76,6 +87,14 @@ public interface NdflPersonService {
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
+
+    /**
+     * Найти авансы для определенной операции
+     *
+     * @param operationId ключ операции в БД, а не поле ид операции
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<Long> operationId);
 
     /**
      * Найти данный о вычетах
