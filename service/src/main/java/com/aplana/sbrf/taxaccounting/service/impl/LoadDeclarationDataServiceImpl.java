@@ -118,11 +118,15 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                         try {
                             ZipArchiveEntry entry = entries.nextElement();
                             InputStream is = zf.getInputStream(entry);
-                            logger = new Logger();
-                            if (loadFile(is, entry.getName(), userInfo, logger, lock)) {
-                                success++;
-                            } else {
-                                fail++;
+                            Logger localLogger = new Logger();
+                            try {
+                                if (loadFile(is, entry.getName(), userInfo, localLogger, lock)) {
+                                    success++;
+                                } else {
+                                    fail++;
+                                }
+                            } finally {
+                                logger.getEntries().addAll(localLogger.getEntries());
                             }
                         } catch (ServiceException se) {
                             log(userInfo, LogData.L33, logger, lock, fileName, se.getMessage());
