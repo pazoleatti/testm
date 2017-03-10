@@ -2493,6 +2493,16 @@ def checkDataCommon(
     logger.info("Общие проверки / Проверки на отсутсвие повторений: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
+// Кэш для справочников
+@Field def refBookCache = [:]
+
+/**
+ * Разыменование записи справочника
+ */
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 /**
  * Проверки сведений о доходах
  * @param ndflPersonList
