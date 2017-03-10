@@ -73,6 +73,8 @@ public class GetDeclarationDataHandler
         result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED));
         result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
         result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
+        result.setCanRecalculate(permittedEvents.contains(FormDataEvent.CALCULATE));
+
         result.setUserLoginImportTf(logBusinessService.getUserLoginImportTf(declaration.getId()));
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());

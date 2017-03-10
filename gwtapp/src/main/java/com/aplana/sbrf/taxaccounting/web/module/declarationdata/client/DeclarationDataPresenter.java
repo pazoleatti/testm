@@ -240,7 +240,7 @@ public class DeclarationDataPresenter
 								getView().showAccept(result.isCanAccept());
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
-								getView().showRecalculateButton(result.isCanDelete());
+								getView().showRecalculateButton(result.isCanRecalculate());
 
                                 onTimerReport(DeclarationDataReportType.XML_DEC, false);
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);
