@@ -2335,8 +2335,7 @@ void importData() {
     fileNode.childNodes().each { documentNode ->
         raschsvSvnpPodpisant.svnpTlph = documentNode.name
         if (documentNode.name == NODE_NAME_DOCUMENT) {
-            // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
-//            raschsvSvnpPodpisant.nomKorr = documentNode.attributes()["НомКорр"]
+            raschsvSvnpPodpisant.nomKorr = documentNode.attributes()["НомКорр"]
             documentNode.childNodes().each { raschetSvNode ->
                 if (raschetSvNode.name == NODE_NAME_RASCHET_SV) {
                     // Разбор узла РасчетСВ
@@ -5305,21 +5304,20 @@ def checkDataDBSum() {
     }
 
     // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину) (Проверки выполняются по всем РасчСВ_ОПС)
-    // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
-//    if (raschsvSvnpPodpisant.nomKorr == 0) {
-    if (nachislSvNePrevSum1 != svVyplMkSum1) {
-        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
-        logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
+    if (raschsvSvnpPodpisant.nomKorr == 0) {
+        if (nachislSvNePrevSum1 != svVyplMkSum1) {
+            def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
+            logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
+        }
+        if (nachislSvNePrevSum2 != svVyplMkSum2) {
+            def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
+            logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
+        }
+        if (nachislSvNePrevSum3 != svVyplMkSum3) {
+            def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
+            logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
+        }
     }
-    if (nachislSvNePrevSum2 != svVyplMkSum2) {
-        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
-        logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
-    }
-    if (nachislSvNePrevSum3 != svVyplMkSum3) {
-        def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
-        logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
-    }
-//    }
 
     // 3.3.1.3 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОПС)
     if (nachislSvOpsSum1 != uplPerOpsSum1) {
@@ -5339,8 +5337,7 @@ def checkDataDBSum() {
     }
 
     // 3.3.2.1 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу в целом (Проверки выполняются по всем РасчСВ_ОПС428)
-    // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
-//    if (raschsvSvnpPodpisant.nomKorr == 0) {
+    if (raschsvSvnpPodpisant.nomKorr == 0) {
         def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
         def pathAttr428_3 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.3.НачислСВДоп"
         if (nachislSvDop428_12Sum1 + nachislSvDop428_3Sum1 != svVyplMkDopSum1) {
@@ -5352,10 +5349,9 @@ def checkDataDBSum() {
         if (nachislSvDop428_12Sum3 + nachislSvDop428_3Sum3 != svVyplMkDopSum3) {
             logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум3Посл3М = \"$nachislSvDop428_12Sum3\", " + pathAttr428_3 + ".Сум3Посл3М = \"$nachislSvDop428_3Sum3\"")
         }
-//    }
+    }
 
-    // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
-//    if (raschsvSvnpPodpisant.nomKorr == 0) {
+    if (raschsvSvnpPodpisant.nomKorr == 0) {
         vyplSvDopMtMap.each { tarif, vyplSvDopMtSum ->
             // 3.3.2.2 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу (п 1 и 2 статьи 428)
             ["22", "21"].each {
@@ -5420,7 +5416,7 @@ def checkDataDBSum() {
                 }
             }
         }
-//    }
+    }
 
     // 3.3.3.1 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОМС428)
     if (uplPerOmsSum1 != nachislSvOmsSum1) {
@@ -5920,8 +5916,7 @@ def checkDataDBSum() {
             svInoGrazdSum3 += raschsvSvSum1Tip.sum3mPosl3m ?: 0
         }
         // 3.3.10.1 Итого выплат равно сумме по всем иностранным гражданам
-        // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
-//        if (raschsvSvnpPodpisant.nomKorr == 0) {
+        if (raschsvSvnpPodpisant.nomKorr == 0) {
             if (vyplatIt425Sum1 != svInoGrazdSum1) {
                 def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt425Sum1\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
@@ -5934,7 +5929,7 @@ def checkDataDBSum() {
                 def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt425Sum3\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
             }
-//        }
+        }
     }
 
     // *********************************** СвПримТариф1.3.422 ***********************************
@@ -5958,8 +5953,7 @@ def checkDataDBSum() {
         }
 
         // 3.3.11.1 Итого выплат равно сумме по всем обучающимся
-        // todo https://jira.aplana.com/browse/SBRFNDFL-575 Раскомментировать после обновления стенда
-//        if (raschsvSvnpPodpisant.nomKorr == 0) {
+        if (raschsvSvnpPodpisant.nomKorr == 0) {
             if (vyplatIt422Sum1 != svedObuchSum1) {
                 def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt422Sum1\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
@@ -5972,7 +5966,7 @@ def checkDataDBSum() {
                 def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt422Sum3\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
             }
-//        }
+        }
     }
 }
 

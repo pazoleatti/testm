@@ -1225,14 +1225,13 @@ def getRefPersons() {
 
 /**
  * Получить актуальные на отчетную дату записи справочника "Физические лица"
- * @return Map<person_id, Map<имя_поля, значение_поля>>
+ * @return Map < person_id , Map < имя_поля , значение_поля > >
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
-    Long declarationDataId = declarationData.id;
-    String whereClause = String.format("select r.record_id " +
-            " FROM ref_book_person r " +
-            " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-            " WHERE p.declaration_data_id = %s AND frb.record_id = r.record_id", declarationDataId)
+    String whereClause = """
+            JOIN ref_book_person p ON (frb.record_id = p.record_id)
+            JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+        """
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
     def refBookMapResult = [:]
     refBookMap.each { personId, refBookValue ->
@@ -1284,11 +1283,10 @@ def getRefDocumentTypeCode() {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefInpMapByDeclarationDataId() {
     if (inpActualCache.isEmpty()) {
-        Long declarationDataId = declarationData.id;
-        String whereClause = String.format("select r.id " +
-                " FROM ref_book_person r " +
-                " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
+        String whereClause = """
+            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+        """
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { id, refBook ->
@@ -1407,11 +1405,10 @@ def getRefAddress(def addressIds) {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
     if (dulActualCache.isEmpty()) {
-        Long declarationDataId = declarationData.id;
-        String whereClause = String.format("select r.id " +
-                " FROM ref_book_person r " +
-                " INNER JOIN ndfl_person p ON r.id = p.person_id " +
-                " where p.declaration_data_id = %s AND frb.person_id = r.id", declarationDataId)
+        String whereClause = """
+            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+        """
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { personId, refBookValues ->
@@ -1542,7 +1539,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String T_PERSON_PREPAYMENT = "Сведения о доходах в виде авансовых платежей"
 
 // Справочники
-@Field final String R_FIAS = "ФИАС"
+@Field final String R_FIAS = "КЛАДР"
 @Field final String R_PERSON = "Физические лица"
 @Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
 @Field final String R_ID_DOC_TYPE = "Коды документов"
@@ -1678,7 +1675,10 @@ def checkData() {
     checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
     // Проверки сведений о доходах
-    checkDataIncome(ndflPersonList, ndflPersonIncomeList)
+//    checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
+
+    println "Все проверки " + (System.currentTimeMillis() - time);
+    logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
 }
 
 /**
@@ -1827,10 +1827,10 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
                     // Спр12 ИНП первичная (Обязательное поле)
                     def inpList = inpMap.get(personRecord.get("id")?.value)
-                    if (!ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
+                    if (inpList == null || !ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
                         logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
                                 T_PERSON, ndflPerson.rowNum, C_INP, fioAndInp, C_INP, R_INP);
                     }
@@ -1866,7 +1866,7 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
                     // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
                     def allDocList = dulMap.get(personRecord.get("id")?.value)
                     // Вид документа
@@ -2049,18 +2049,6 @@ def checkDataReference(
 def checkDataCommon(
         def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
 
-    // Порядковые номера строк в "Реквизиты"
-    def rowNumPersonList = []
-
-    // Порядковые номера строк в "Сведения о доходах и НДФЛ"
-    def rowNumPersonIncomeList = []
-
-    // Порядковые номера строк в "Сведения о вычетах"
-    def rowNumPersonDeductionList = []
-
-    // Порядковые номера строк в "Сведения о доходах в виде авансовых платежей"
-    def rowNumPersonPrepaymentList = []
-
     // Тербанки
     //def mapTerBank = getTerBank()
 
@@ -2077,8 +2065,6 @@ def checkDataCommon(
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
 
         println "ndflPerson.rowNum=" + ndflPerson.rowNum
-
-        rowNumPersonList.add(ndflPerson.rowNum)
 
         // Общ1 Корректность ИНН (Необязательное поле)
         if (ndflPerson.innNp != null && !ScriptUtils.checkControlSumInn(ndflPerson.innNp)) {
@@ -2106,8 +2092,6 @@ def checkDataCommon(
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
-
-        rowNumPersonIncomeList.add(ndflPersonIncome.rowNum)
 
         // Общ5 Принадлежность дат операций к отчетному периоду
         // Дата начисления дохода (Необязательное поле)
@@ -2388,21 +2372,21 @@ def checkDataCommon(
     if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.CONSOLIDATED)) {
         // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
         def mapDepartmentNotExistRnu = [
-                4:'Байкальский банк',
-                8:'Волго-Вятский банк',
-                20:'Дальневосточный банк',
-                27:'Западно-Сибирский банк',
-                32:'Западно-Уральский банк',
-                37:'Московский банк',
-                44:'Поволжский банк',
-                52:'Северный банк',
-                64:'Северо-Западный банк',
-                82:'Сибирский банк',
-                88:'Среднерусский банк',
-                97:'Уральский банк',
-                113:'Центральный аппарат ПАО Сбербанк',
-                102:'Центрально-Чернозёмный банк',
-                109:'Юго-Западный банк'
+                4  : 'Байкальский банк',
+                8  : 'Волго-Вятский банк',
+                20 : 'Дальневосточный банк',
+                27 : 'Западно-Сибирский банк',
+                32 : 'Западно-Уральский банк',
+                37 : 'Московский банк',
+                44 : 'Поволжский банк',
+                52 : 'Северный банк',
+                64 : 'Северо-Западный банк',
+                82 : 'Сибирский банк',
+                88 : 'Среднерусский банк',
+                97 : 'Уральский банк',
+                113: 'Центральный аппарат ПАО Сбербанк',
+                102: 'Центрально-Чернозёмный банк',
+                109: 'Юго-Западный банк'
         ]
         def listDepartmentNotAcceptedRnu = []
         List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
@@ -2416,25 +2400,30 @@ def checkDataCommon(
                 listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
             }
         }
-        if (!mapDepartmentNotExistRnu.isEmpty()) {
-            // Период
-            def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-            def periodCode = period?.CODE?.stringValue
-            def periodName = period?.NAME?.stringValue
-            def calendarStartDate = reportPeriod?.calendarStartDate
 
+        // Период
+        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+        def periodCode = period?.CODE?.stringValue
+        def periodName = period?.NAME?.stringValue
+        def calendarStartDate = reportPeriod?.calendarStartDate
+
+        if (!mapDepartmentNotExistRnu.isEmpty()) {
             def listDepartmentNotExistRnu = []
             mapDepartmentNotExistRnu.each {
                 listDepartmentNotExistRnu.add(it.value)
             }
             logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
-                        не созданы экземпляры консолидированных налоговых форм для следующих ТБ: "${listDepartmentNotExistRnu.join("\", \"")}".
+                        не созданы экземпляры консолидированных налоговых форм для следующих ТБ: "${
+                listDepartmentNotExistRnu.join("\", \"")
+            }".
                         Данные этих форм не включены в отчетность!""")
         }
         if (!listDepartmentNotAcceptedRnu.isEmpty()) {
             logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
-                        имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: "${listDepartmentNotAcceptedRnu.join("\", \"")}".
+                        имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: "${
+                listDepartmentNotAcceptedRnu.join("\", \"")
+            }".
                         , для которых в системе существуют КНФ в текущем периоде, состояние которых <> "Принята">. Данные этих форм не включены в отчетность!""")
         }
     }
@@ -2443,11 +2432,9 @@ def checkDataCommon(
     logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
     time = System.currentTimeMillis();
-    for (NdflPersonDeduction ndflPersonDeduction: ndflPersonDeductionList) {
+    for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
-
-        rowNumPersonDeductionList.add(ndflPersonDeduction.rowNum)
 
         // Общ6 Принадлежность дат налоговых вычетов к отчетному периоду
         // Дата выдачи уведомления (Обязательное поле)
@@ -2474,25 +2461,46 @@ def checkDataCommon(
     println "Общие проверки / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
 
-    for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
-        rowNumPersonPrepaymentList.add(ndflPersonPrepayment.rowNum)
-    }
-
     // Общ8 Отсутствие пропусков и повторений в нумерации строк
+    time = System.currentTimeMillis();
+
+    List<Integer> rowNumPersonList = ndflPersonService.findDublRowNum("NDFL_PERSON", declarationData.id)
+    logger.info("rowNumPersonList.size() = " + rowNumPersonList.size())
     def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
+    List<Integer> rowNumPersonIncomeList = ndflPersonService.findDublRowNum("NDFL_PERSON_INCOME", declarationData.id)
     msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeList, T_PERSON_INCOME)
+    List<Integer> rowNumPersonDeductionList = ndflPersonService.findDublRowNum("NDFL_PERSON_DEDUCTION", declarationData.id)
     msgErrDubl += getErrorMsgDubl(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
+    List<Integer> rowNumPersonPrepaymentList = ndflPersonService.findDublRowNum("NDFL_PERSON_PREPAYMENT", declarationData.id)
     msgErrDubl += getErrorMsgDubl(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
     msgErrDubl = msgErrDubl == "" ? "" : MESSAGE_ERROR_DUBL + msgErrDubl
+
+    rowNumPersonList = ndflPersonService.findMissingRowNum("NDFL_PERSON", declarationData.id)
     def msgErrAbsent = getErrorMsgAbsent(rowNumPersonList, T_PERSON)
+    rowNumPersonIncomeList = ndflPersonService.findMissingRowNum("NDFL_PERSON_INCOME", declarationData.id)
     msgErrAbsent += getErrorMsgAbsent(rowNumPersonIncomeList, T_PERSON_INCOME)
+    rowNumPersonDeductionList = ndflPersonService.findMissingRowNum("NDFL_PERSON_DEDUCTION", declarationData.id)
     msgErrAbsent += getErrorMsgAbsent(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
+    rowNumPersonPrepaymentList = ndflPersonService.findMissingRowNum("NDFL_PERSON_PREPAYMENT", declarationData.id)
     msgErrAbsent += getErrorMsgAbsent(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
     msgErrAbsent = msgErrAbsent == "" ? "" : MESSAGE_ERROR_ABSENT + msgErrAbsent
     if (msgErrDubl != "" || msgErrAbsent != "") {
         //В ТФ имеются пропуски или повторы в нумерации строк.
         logger.warn(MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent);
     }
+
+    println "Общие проверки / Проверки на отсутсвие повторений: " + (System.currentTimeMillis() - time);
+    logger.info("Общие проверки / Проверки на отсутсвие повторений: (" + (System.currentTimeMillis() - time) + " ms)");
+}
+
+// Кэш для справочников
+@Field def refBookCache = [:]
+
+/**
+ * Разыменование записи справочника
+ */
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /**

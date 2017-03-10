@@ -625,10 +625,12 @@ public class DeclarationListView extends
                 cancel = false;
             }
             if (State.PREPARED.equals(row.getState())) {
+                delete = false;
             }
             if (State.ACCEPTED.equals(row.getState())) {
                 calculate = false;
                 accept = false;
+                delete = false;
             }
         }
         checkButton.setEnabled(check);

@@ -166,4 +166,23 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     public void setPeriodCurrSumm(BigDecimal periodCurrSumm) {
         this.periodCurrSumm = periodCurrSumm;
     }
+
+    @Override
+    public String toString() {
+        return "NdflPersonDeduction{" +
+                "typeCode='" + typeCode + '\'' +
+                ", notifType='" + notifType + '\'' +
+                ", notifDate=" + notifDate +
+                ", notifNum='" + notifNum + '\'' +
+                ", notifSource='" + notifSource + '\'' +
+                ", notifSumm=" + notifSumm +
+                ", incomeAccrued=" + incomeAccrued +
+                ", incomeCode='" + incomeCode + '\'' +
+                ", incomeSumm=" + incomeSumm +
+                ", periodPrevDate=" + periodPrevDate +
+                ", periodPrevSumm=" + periodPrevSumm +
+                ", periodCurrDate=" + periodCurrDate +
+                ", periodCurrSumm=" + periodCurrSumm +
+                '}';
+    }
 }
