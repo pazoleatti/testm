@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
-import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -24,8 +22,6 @@ import java.util.Map;
 public interface RefBookPersonService {
 
 
-    Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version);
-
     NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger);
 
     NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
@@ -45,7 +41,7 @@ public interface RefBookPersonService {
      * @param version           версия записи
      * @return
      */
-    List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper);
+    List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, RowMapper<NaturalPerson> naturalPersonPrimaryRnuRowMapper);
 
     /**
      * Найти всех ФЛ по определяющим параметрам
@@ -75,6 +71,17 @@ public interface RefBookPersonService {
      * @return
      */
     List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper);
+
+
+    void fillRecordVersions1151111(Date version);
+
+    List<NaturalPerson> findPersonForInsertFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, RowMapper<NaturalPerson> naturalPersonPrimaryRnuRowMapper);
+
+    Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+
+    Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler);
+
+    List<NaturalPerson> findNaturalPersonPrimaryDataFrom1151111(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper);
 
 
 }

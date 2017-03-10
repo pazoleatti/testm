@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
@@ -33,7 +32,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
     @Override
-    public List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonPrimaryRnuRowMapper naturalPersonPrimaryRnuRowMapper) {
+    public List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, RowMapper<NaturalPerson> naturalPersonPrimaryRnuRowMapper) {
         return refBookPersonDao.findPersonForInsertFromPrimaryRnuNdfl(declarationDataId, asnuId, version, naturalPersonPrimaryRnuRowMapper);
     }
 
@@ -47,6 +46,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         return refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(declarationDataId, asnuId, version, naturalPersonHandler);
     }
 
+    @Override
     public List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper) {
         return refBookPersonDao.findNaturalPersonPrimaryDataFromNdfl(declarationDataId, naturalPersonRowMapper);
     }
@@ -55,35 +55,33 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     // ----------------------------- 1151111 -----------------------------
 
     @Override
-    public Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version) {
-        return refBookPersonDao.findRefBookPersonByPrimary1151111(declarationDataId, asnuId, version);
+    public void fillRecordVersions1151111(Date version) {
+        refBookPersonDao.fillRecordVersions1151111(version);
+    }
+
+    @Override
+    public List<NaturalPerson> findPersonForInsertFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, RowMapper<NaturalPerson> naturalPersonPrimaryRnuRowMapper) {
+        return refBookPersonDao.findPersonForInsertFromPrimary1151111(declarationDataId, asnuId, version, naturalPersonPrimaryRnuRowMapper);
+    }
+
+    @Override
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForUpdateFromPrimary1151111(declarationDataId, asnuId, version, naturalPersonHandler);
+    }
+
+    @Override
+    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
+        return refBookPersonDao.findPersonForCheckFromPrimary1151111(declarationDataId, asnuId, version, naturalPersonHandler);
+    }
+
+    @Override
+    public List<NaturalPerson> findNaturalPersonPrimaryDataFrom1151111(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper) {
+        return refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(declarationDataId, naturalPersonRowMapper);
     }
 
 
-    /**
-     * Получить "Страны"
-     *
-     * @return
-     */
-   /* def getRefCountryCode() {
-        if (countryCodeCache.size() == 0) {
-            def refBookMap = getRefBook(RefBook.Id.COUNTRY.getId())
-            refBookMap.each { refBook ->
-                    countryCodeCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
-            }
-        }
-        return countryCodeCache;
-    }
+    // ----------------------------- identification -----------------------------
 
-    def getRefDocumentType() {
-        if (documentTypeCache.size() == 0) {
-            def refBookList = getRefBook(RefBook.Id.DOCUMENT_CODES.getId())
-            refBookList.each { refBook ->
-                    documentTypeCache.put(refBook?.id?.numberValue, refBook)
-            }
-        }
-        return documentTypeCache;
-    }*/
     @Override
     public NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger) {
         return identificatePerson(personData, refBookPersonList, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()), logger);
@@ -215,7 +213,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         }
     }
 
-
     /**
      * Метод формирует список по которому будет рассчитывается схожесть записи
      *
@@ -295,14 +292,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 }
             }
 
-            private PersonIdentifier findIdentifier(NaturalPerson person, String inp, Long asnuId) {
-                for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
-                    if (equalsNullSafe(prepareStr(inp), prepareStr(personIdentifier.getInp())) && equalsNullSafe(asnuId, personIdentifier.getAsnuId())) {
-                        return personIdentifier;
-                    }
-                }
-                return null;
-            }
         });
 
         //ИНН в РФ
@@ -327,16 +316,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(prepareSnils(a.getSnils()), prepareSnils(b.getSnils()));
             }
-
-            public String prepareSnils(String string) {
-                if (string != null) {
-                    return string.replaceAll("[-]", "");
-                } else {
-                    return null;
-                }
-            }
-
-
         });
 
         //Статус налогоплательщика
@@ -358,6 +337,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
                 PersonDocument primaryPersonDocument = primaryPerson.getPersonDocument();
 
+
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
                     PersonDocument personDocument = findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
@@ -367,18 +347,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 }
             }
 
-            public PersonDocument findDocument(NaturalPerson person, Long docTypeId, String docNumber) {
-                for (PersonDocument personDocument : person.getPersonDocumentList()) {
-                    DocType docType = personDocument.getDocType();
-                    if (docType != null) {
-                        if (BaseWeigthCalculator.isValueEquals(docTypeId, docType.getId())
-                                && BaseWeigthCalculator.isEqualsNullSafeStr(docNumber, personDocument.getDocumentNumber())) {
-                            return personDocument;
-                        }
-                    }
-                }
-                return null;
-            }
         });
 
         /**

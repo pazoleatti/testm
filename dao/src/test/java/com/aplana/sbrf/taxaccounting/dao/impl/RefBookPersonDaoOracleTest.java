@@ -146,4 +146,65 @@ public class RefBookPersonDaoOracleTest {
     }
 
 
+    //1151111
+    private static final Long decl_data115_id = 15143L; //вставка
+
+    @Test
+    public void testFindNaturalPersonPrimaryData1151111() {
+        long time = System.currentTimeMillis();
+
+        NaturalPersonPrimaryRnuRowMapper rowMapper = new NaturalPersonPrimaryRnuRowMapper();
+
+
+        Long declarationDataId = 15297L;
+        //Long declarationDataId = 14730L;
+
+        List<NaturalPerson> result = refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(declarationDataId, rowMapper);
+        printResult(time, result.size());
+    }
+
+    @Test
+    public void testFind115PersonFunc() {
+
+        List<NaturalPerson> result = refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(decl_data115_id, new NaturalPersonPrimaryRnuRowMapper());
+
+        System.out.println("Всего записей в ПНФ: decl_data_id=" + decl_data115_id + ", size=" + result.size());
+
+        long time = System.currentTimeMillis();
+
+        Date version = new Date();
+
+        refBookPersonDao.fillRecordVersions(version);
+
+        int size = 0;
+
+        List<NaturalPerson> insertRecords = refBookPersonDao.findPersonForInsertFromPrimary1151111(decl_data115_id, 1L, version, new NaturalPersonPrimaryRnuRowMapper());
+
+        size += insertRecords.size();
+
+        System.out.println("   insertRecords=" + insertRecords);
+
+
+        Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimary1151111(decl_data115_id, 1L, version, new NaturalPersonRefbookHandler());
+
+        size += updateRecords.size();
+
+        System.out.println("   updateRecords=" + updateRecords);
+
+
+        Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimary1151111(decl_data115_id, 1L, version, new NaturalPersonRefbookHandler());
+
+        size += checkRecords.size();
+
+        System.out.println("   checkRecords=" + checkRecords);
+
+        List<NaturalPerson> result2 = refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(decl_data115_id, new NaturalPersonPrimaryRnuRowMapper());
+
+        //System.out.println("Всего записей в ПНФ: decl_data_id=" + decl_data_id + ", size=" + result2.size());
+
+        printResult(time, size);
+
+    }
+
+
 }
