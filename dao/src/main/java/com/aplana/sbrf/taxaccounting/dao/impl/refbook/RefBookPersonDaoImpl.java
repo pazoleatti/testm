@@ -107,7 +107,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     public List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper) {
 
         StringBuilder SQL = new StringBuilder();
-        SQL.append("SELECT id, declaration_data_id, person_id, row_num, inp, snils, last_name, first_name, middle_name, birth_day, citizenship, inn_np, inn_foreign, id_doc_type, id_doc_number, status, post_index, region_code, area, city, locality, street, house, building, flat, country_code, address, additional_data \n");
+        SQL.append("SELECT id, declaration_data_id, person_id, row_num, inp, snils, last_name, first_name, middle_name, birth_day, citizenship, inn_np, inn_foreign, id_doc_type, id_doc_number, status, post_index, region_code, area, city, locality, street, house, building, flat, country_code, address, additional_data, NULL sex, NULL pension, NULL medical, NULL social, NULL correct_num, NULL period, NULL rep_period, NULL num, NULL sv_date  \n");
         SQL.append("FROM ndfl_person \n");
         SQL.append("WHERE declaration_data_id = :declarationDataId");
 
