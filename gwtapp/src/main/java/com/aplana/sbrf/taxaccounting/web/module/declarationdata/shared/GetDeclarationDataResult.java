@@ -34,8 +34,17 @@ public class GetDeclarationDataResult implements Result {
 	private boolean canAccept;
 	private boolean canReject;
     private boolean canDelete;
+    private boolean canRecalculate;
 
-	public boolean isCanAccept() {
+    public boolean isCanRecalculate() {
+        return canRecalculate;
+    }
+
+    public void setCanRecalculate(boolean canRecalculate) {
+        this.canRecalculate = canRecalculate;
+    }
+
+    public boolean isCanAccept() {
 		return canAccept;
 	}
 

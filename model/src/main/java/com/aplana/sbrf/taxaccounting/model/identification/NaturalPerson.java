@@ -59,6 +59,11 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
     private String snils;
 
     /**
+     * Номер ФЛ
+     */
+    private Integer num;
+
+    /**
      * Статус физлица
      */
     private TaxpayerStatus taxPayerStatus;
@@ -107,6 +112,14 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
     public NaturalPerson() {
         this.personIdentityList = new ArrayList<PersonIdentifier>();
         this.personDocumentList = new ArrayList<PersonDocument>();
+    }
+
+    public Integer getNum() {
+        return num;
+    }
+
+    public void setNum(Integer num) {
+        this.num = num;
     }
 
     public Long getPrimaryPersonId() {
@@ -338,6 +351,7 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
                 .append("medical", medical)
                 .append("social", social)
                 .append("employee", employee)
+                .append("weigth", weigth)
                 .toString();
     }
 

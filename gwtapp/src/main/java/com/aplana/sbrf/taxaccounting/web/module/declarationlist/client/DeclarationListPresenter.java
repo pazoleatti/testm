@@ -302,7 +302,7 @@ public class DeclarationListPresenter extends
                         }
                     }, DeclarationListPresenter.this));
         } else {
-            Dialog.confirmMessageYesClose("Возврат в Создана", "Вы действительно хотите вернуть в статус \"Создана\" формы?", new DialogHandler() {
+            Dialog.confirmMessageYesClose("Вернуть в Создана", "Вы действительно хотите вернуть в статус \"Создана\" формы?", new DialogHandler() {
                 @Override
                 public void yes() {
                     AcceptDeclarationListAction action = new AcceptDeclarationListAction();

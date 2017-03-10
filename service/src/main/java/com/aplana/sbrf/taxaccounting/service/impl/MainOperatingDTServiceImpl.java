@@ -60,6 +60,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user, Boolean force) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
+        checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
         Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
@@ -231,7 +232,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     public boolean setStatusTemplate(int templateId, Logger logger, TAUserInfo user, boolean force) {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(templateId);
         checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
-
         if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                     declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
@@ -268,7 +268,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     private void checkRole(TaxType taxType, TAUser user) {
-        if (user.hasRoles(taxType, TARole.N_ROLE_CONF, TARole.N_ROLE_CONF)) {
+        if (!user.hasRoles(taxType, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
             throw new ServiceException(CHECK_ROLE_MESSAGE, taxType.getName());
         }
     }

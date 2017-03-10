@@ -25,7 +25,16 @@ create or replace package person_pkg as
             n.flat,
             n.country_code,
             n.address,
-            n.additional_data
+            n.additional_data,
+            to_number(null) sex, 
+            to_number(null) pension, 
+            to_number(null) medical, 
+            to_number(null) social, 
+            to_char(null) correct_num, 
+            to_char(null) period, 
+            to_char(null) rep_period, 
+            to_char(null) num, 
+            null sv_date
        from ndfl_person n
       where n.declaration_data_id=c_declaration
         and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.last_name),' ','')
@@ -37,73 +46,73 @@ create or replace package person_pkg as
         and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ',''));
 
   cursor persons_for_update(c_declaration number) is
-select fv.person_id,
-       person.id as ref_book_person_id,
-       person.last_name,
-       person.first_name,
-       person.middle_name,
-       person.sex,
-       person.inn,
-       person.inn_foreign,
-       person.snils,
-       person.taxpayer_state,
-       person.birth_date,
-       person.birth_place,
-       person.citizenship,
-       person.pension,
-       person.medical,
-       person.social,
-       person.employee,
-       person.record_id,
-       person.source_id,
-       person.old_id,
-       tax.id as book_id_tax_payer_id,
-       tax.inp,
-       tax.as_nu,
-       doc.id as ref_book_id_doc_id,
-       doc.doc_id,
-       doc.doc_number,
-       doc.issued_by,
-       doc.issued_date,
-       doc.inc_rep,
-       addr.id as ref_book_address_id,
-       addr.country_id,
-       addr.region_code,
-       addr.postal_code,
-       addr.district,
-       addr.city,
-       addr.locality,
-       addr.street,
-       addr.house,
-       addr.build,
-       addr.appartment,
-       addr.address_type,
-       addr.address
-  from (
-     select distinct n.id as person_id,first_value(fv.id) over(partition by n.id) ref_person_id
-       from  ndfl_person n join ref_book_person fv on (replace(lower(nvl(fv.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
-                                                       and replace(lower(nvl(fv.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
-                                                       and replace(lower(nvl(fv.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
-                                                       and fv.birth_date=n.birth_day
-                                                       and replace(replace(nvl(fv.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
-                                                       and replace(nvl(fv.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
-                                                       and replace(nvl(fv.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
-                                                       )
-      where n.declaration_data_id=c_declaration
-                and exists (select 1 from ref_book_person c
-                             where replace(lower(nvl(c.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
-                               and replace(lower(nvl(c.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
-                               and replace(lower(nvl(c.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
-                               and c.birth_date=n.birth_day
-                               and replace(replace(nvl(c.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
-                               and replace(nvl(c.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
-                               and replace(nvl(c.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
-                               )
-        and exists(select 1 from tmp_version t where t.version = fv.version and t.record_id = fv.record_id)
-        ) fv join ref_book_person person on (person.id=fv.ref_person_id)
-             left join ref_book_id_tax_payer tax on (tax.person_id=person.id)
-             left join ref_book_id_doc doc on (doc.person_id=person.id)
-             left join ref_book_address addr on (addr.id=person.address);
+    select fv.person_id,
+           person.id as ref_book_person_id,
+           person.last_name,
+           person.first_name,
+           person.middle_name,
+           person.sex,
+           person.inn,
+           person.inn_foreign,
+           person.snils,
+           person.taxpayer_state,
+           person.birth_date,
+           person.birth_place,
+           person.citizenship,
+           person.pension,
+           person.medical,
+           person.social,
+           person.employee,
+           person.record_id,
+           person.source_id,
+           person.old_id,
+           tax.id as book_id_tax_payer_id,
+           tax.inp,
+           tax.as_nu,
+           doc.id as ref_book_id_doc_id,
+           doc.doc_id,
+           doc.doc_number,
+           doc.issued_by,
+           doc.issued_date,
+           doc.inc_rep,
+           addr.id as ref_book_address_id,
+           addr.country_id,
+           addr.region_code,
+           addr.postal_code,
+           addr.district,
+           addr.city,
+           addr.locality,
+           addr.street,
+           addr.house,
+           addr.build,
+           addr.appartment,
+           addr.address_type,
+           addr.address
+      from (
+             select distinct n.id as person_id,first_value(fv.id) over(partition by n.id) ref_person_id
+               from  ndfl_person n join ref_book_person fv on (replace(lower(nvl(fv.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
+                                                               and replace(lower(nvl(fv.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
+                                                               and replace(lower(nvl(fv.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
+                                                               and fv.birth_date=n.birth_day
+                                                               and replace(replace(nvl(fv.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
+                                                               and replace(nvl(fv.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
+                                                               and replace(nvl(fv.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
+                                                               )
+              where n.declaration_data_id=c_declaration
+                        and exists (select 1 from ref_book_person c
+                                     where replace(lower(nvl(c.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
+                                       and replace(lower(nvl(c.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
+                                       and replace(lower(nvl(c.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
+                                       and c.birth_date=n.birth_day
+                                       and replace(replace(nvl(c.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
+                                       and replace(nvl(c.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
+                                       and replace(nvl(c.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
+                                       )
+                and exists(select 1 from tmp_version t where t.version = fv.version and t.record_id = fv.record_id)
+            ) fv join ref_book_person person on (person.id=fv.ref_person_id)
+                 left join ref_book_id_tax_payer tax on (tax.person_id=person.id)
+                 left join ref_book_id_doc doc on (doc.person_id=person.id)
+                 left join ref_book_address addr on (addr.id=person.address);
 
   cursor persons_for_check(c_declaration number,c_asnu number) is
        /*По ФИО*/
@@ -424,7 +433,7 @@ select fv.person_id,
   type TPersonsForUpdTab is table of persons_for_update%rowtype;
   type TPersonsForCheckTab is table of persons_for_check%rowtype;
   
-  procedure FillRecordVersions(p_date date);
+  procedure FillRecordVersions(p_date date default trunc(sysdate));
   
   -- Получение курсоров для идентификации НДФЛ
   function GetPersonForIns(p_declaration number) return ref_cursor;
@@ -440,10 +449,14 @@ end;
 show errors;
 
 create or replace package body person_pkg as
-
-  procedure FillRecordVersions(p_date date)
+  
+  v_date date:=trunc(sysdate);
+  
+  procedure FillRecordVersions(p_date date default trunc(sysdate))
   is
   begin
+    v_date:=p_date;
+    
     delete from tmp_version;
     insert into tmp_version
     select max(version) version,
@@ -489,7 +502,16 @@ create or replace package body person_pkg as
               n.flat,
               n.country_code,
               n.address,
-              n.additional_data
+              n.additional_data,
+              null sex, 
+              null pension, 
+              null medical, 
+              null social, 
+              null correct_num, 
+              null period, 
+              null rep_period, 
+              null num, 
+              null sv_date
          from ndfl_person n
         where n.declaration_data_id=p_declaration
           and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.last_name),' ','')
@@ -570,7 +592,7 @@ create or replace package body person_pkg as
                                and replace(nvl(c.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
                                and replace(nvl(c.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
                                )
-                and exists(select 1 from tmp_version t where t.version = fv.version and t.record_id = fv.record_id)
+                and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = fv.version and t.record_id = fv.record_id)
                 ) fv join ref_book_person person on (person.id=fv.ref_person_id)
                      left join ref_book_id_tax_payer tax on (tax.person_id=person.id)
                      left join ref_book_id_doc doc on (doc.person_id=person.id)
@@ -637,7 +659,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
       union
        /*по СНИЛСУ*/
       select t.id as person_id,
@@ -688,7 +710,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
       union 
       /*По ИННу*/
       select t.id as person_id,
@@ -739,7 +761,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
       union
       /*По ИННу иностранного государства*/
       select t.id as person_id,
@@ -790,7 +812,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
       union
       /*По ДУЛ*/
       select t.id as person_id,
@@ -842,7 +864,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
       union
       /*По ИНП*/
       select t.id as person_id,
@@ -893,7 +915,7 @@ create or replace package body person_pkg as
                            left join ref_book_id_doc doc on (doc.person_id=person.id)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id);
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id);
   
     return v_ref;
   end;
@@ -929,7 +951,16 @@ create or replace package body person_pkg as
               null flat,
               null country_code,
               null address,
-              null additional_data
+              null additional_data,
+              n.pol sex, 
+              n.priz_ops pension, 
+              n.priz_oms medical, 
+              n.priz_oss social, 
+              n.nom_korr correct_num, 
+              n.period period, 
+              n.otchet_god rep_period, 
+              n.nomer num, 
+              n.sv_data sv_date
          from raschsv_pers_sv_strah_lic n
         where n.declaration_data_id=p_declaration
           and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.familia),' ','')
@@ -1007,7 +1038,7 @@ create or replace package body person_pkg as
                                and replace(replace(nvl(c.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
                                and replace(nvl(c.inn,'empty'),' ','') = replace(nvl(n.innfl,'empty'),' ','')
                                )
-                and exists(select 1 from tmp_version t where t.version = fv.version and t.record_id = fv.record_id)
+                and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = fv.version and t.record_id = fv.record_id)
                 ) fv join ref_book_person person on (person.id=fv.ref_person_id)
                      left join ref_book_id_tax_payer tax on (tax.person_id=person.id)
                      left join ref_book_id_doc doc on (doc.person_id=person.id)
@@ -1074,7 +1105,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
       union
        /*по СНИЛСУ*/
       select t.id as person_id,
@@ -1125,7 +1156,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
       union 
       /*По ИННу*/
       select t.id as person_id,
@@ -1176,7 +1207,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id)
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
       union
       /*По ДУЛ*/
       select t.id as person_id,
@@ -1228,7 +1259,7 @@ create or replace package body person_pkg as
                            left join ref_book_address addr on (addr.id=person.address)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.version = person.version and t.record_id = person.record_id);
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id);
   
     return v_ref;
   end;
@@ -1413,7 +1444,7 @@ create or replace package body fias_pkg as
               select tab.*,
                      nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||
                      nvl2(tab.loc_fname,tab.loc_fname||',','')||nvl2(tab.street_fname,tab.street_fname||',','') ndfl_full_addr,
-                     (select min(id)
+                     (select id
                         from table(fias_pkg.GetFiasAddrs(tab.region_code,trim(lower(tab.area_fname)),trim(lower(tab.city_fname)),trim(lower(tab.loc_fname)),trim(lower(tab.street_fname)),
                                                          trim(lower(tab.area_type)),trim(lower(tab.city_type)),trim(lower(tab.loc_type)),trim(lower(tab.street_type)),tab.post_index)) f
                        where lower(f.full_addr||',')=lower(nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||

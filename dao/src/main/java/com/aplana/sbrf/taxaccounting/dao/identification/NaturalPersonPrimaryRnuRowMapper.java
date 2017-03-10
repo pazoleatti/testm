@@ -63,12 +63,20 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
             person.getPersonDocumentList().add(personDocument);
         }
 
+        //добавлено для 115 макета
+        person.setPension(SqlUtils.getInteger(rs, "pension"));
+        person.setMedical(SqlUtils.getInteger(rs, "medical"));
+        person.setSocial(SqlUtils.getInteger(rs, "social"));
+        person.setNum(SqlUtils.getInteger(rs, "num"));
+        person.setSex(SqlUtils.getInteger(rs, "sex"));
+
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
         person.setAddress(buildAddress(rs));
 
         //rs.getString("additional_data")
         return person;
     }
+
 
     private Address buildAddress(ResultSet rs) throws SQLException {
 
