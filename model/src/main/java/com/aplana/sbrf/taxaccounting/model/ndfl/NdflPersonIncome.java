@@ -255,4 +255,31 @@ public class NdflPersonIncome extends NdflPersonOperation {
     public void setTaxSumm(Integer taxSumm) {
         this.taxSumm = taxSumm;
     }
+
+    @Override
+    public String toString() {
+        return "NdflPersonIncome{" +
+                "incomeCode='" + incomeCode + '\'' +
+                ", incomeType='" + incomeType + '\'' +
+                ", oktmo='" + oktmo + '\'' +
+                ", kpp='" + kpp + '\'' +
+                ", incomeAccruedDate=" + incomeAccruedDate +
+                ", incomePayoutDate=" + incomePayoutDate +
+                ", incomeAccruedSumm=" + incomeAccruedSumm +
+                ", incomePayoutSumm=" + incomePayoutSumm +
+                ", totalDeductionsSumm=" + totalDeductionsSumm +
+                ", taxBase=" + taxBase +
+                ", taxRate=" + taxRate +
+                ", taxDate=" + taxDate +
+                ", calculatedTax=" + calculatedTax +
+                ", withholdingTax=" + withholdingTax +
+                ", notHoldingTax=" + notHoldingTax +
+                ", overholdingTax=" + overholdingTax +
+                ", refoundTax=" + refoundTax +
+                ", taxTransferDate=" + taxTransferDate +
+                ", paymentDate=" + paymentDate +
+                ", paymentNumber='" + paymentNumber + '\'' +
+                ", taxSumm=" + taxSumm +
+                '}';
+    }
 }

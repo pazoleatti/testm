@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.ndfl;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 
 import java.util.Date;
 import java.util.List;
@@ -102,7 +99,29 @@ public interface NdflPersonDao {
      * @param oktmo
      * @return
      */
-    List<NdflPersonIncome> findIncomesForPersonByKppOktmo(long ndflPersonId, String kpp, String oktmo);
+    List<NdflPersonIncome> findIncomesForPersonByKppOktmo(List<Long> ndflPersonId, String kpp, String oktmo);
+
+    /**
+     * Найти данные о доходах по КПП и ОКТМО для Физлица
+     * @param ndflPersonId
+     * @param kpp
+     * @param oktmo
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriod(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate);
+
+    /**
+     * Найти данные о доходах по КПП и ОКТМО для Физлица с учетом только даты начисления дохода
+     * @param ndflPersonId
+     * @param kpp
+     * @param oktmo
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriodByAccruedDate(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate);
 
     /**
      * Найти данные о доходах ФЛ по идентификатору и интервалу
@@ -232,6 +251,14 @@ public interface NdflPersonDao {
      * @return
      */
     List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, long operationId);
+
+    /**
+     * Найти авансы для определенной операции
+     *
+     * @param operationId ключ операции в БД, а не поле ид операции
+     * @return
+     */
+    List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<Long> operationId);
 
     /**
      * Найти доход по идентификатору

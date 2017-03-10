@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimary1151111RowMapper;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -9,8 +11,10 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.PersonData;
+import com.aplana.sbrf.taxaccounting.model.identification.Address;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import org.junit.Ignore;
@@ -22,6 +26,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -59,8 +65,8 @@ public class RefBookPersonDaoOracleTest {
 
     //14873
     //Для ФЛ Номер: 0765540960: Петров Матвей Юрьевич код: 21, 80 04 505050 сходных записей найдено: 2 [ИНП: 0765540960: Борисова Марфа Юрьевна 88 08 010203 (0,42)][ИНП: 0765540960: Петров Матвей Юрьевич 80 04 505050 (1,00)]. Выбрана запись: [ИНП: 0765540960: Петров Матвей Юрьевич 80 04 505050 (1,00)]
-    private static final Long decl_data_id = 15161L; //вставка
-    //private  static final Long decl_data_id = 14873L; //обновление
+    //private static final Long decl_data_id = 148731L; //вставка
+    private  static final Long decl_data_id = 14873L; //обновление
 
     @Test
     public void testFindNdflPerson() {
@@ -68,6 +74,14 @@ public class RefBookPersonDaoOracleTest {
         Map<Long, List<PersonData>> result = refBookPersonDao.findRefBookPersonByPrimaryRnuNdfl(decl_data_id, 1L, new Date());
         printResult(time, result.size());
     }
+
+    @Test
+    public void testFindNaturalPersonPrimaryDataFromNdfl() {
+        long time = System.currentTimeMillis();
+        List<NaturalPerson> result = refBookPersonDao.findNaturalPersonPrimaryDataFromNdfl(decl_data_id, new NaturalPersonPrimaryRnuRowMapper());
+        printResult(time, result.size());
+    }
+
 
     @Test
     public void testFindNdflPersonFunc() {
@@ -153,10 +167,9 @@ public class RefBookPersonDaoOracleTest {
     public void testFindNaturalPersonPrimaryData1151111() {
         long time = System.currentTimeMillis();
 
-        NaturalPersonPrimaryRnuRowMapper rowMapper = new NaturalPersonPrimaryRnuRowMapper();
+        NaturalPersonPrimary1151111RowMapper rowMapper = new NaturalPersonPrimary1151111RowMapper();
 
-
-        Long declarationDataId = 15297L;
+        Long declarationDataId = 15182L;
         //Long declarationDataId = 14730L;
 
         List<NaturalPerson> result = refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(declarationDataId, rowMapper);

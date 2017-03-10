@@ -319,6 +319,8 @@ public class DeclarationTestScriptHelper {
         bindings.put("userInfo", new TAUserInfo());
         bindings.put("user", user);
         bindings.put("applicationVersion", "test-version");
+        bindings.put("partNumber", 1);
+        bindings.put("ndflPersonKnfId", Arrays.asList(new Long[]{1L, 2L}));
 
         bindings.put("calculateParams", calculateParams);
 

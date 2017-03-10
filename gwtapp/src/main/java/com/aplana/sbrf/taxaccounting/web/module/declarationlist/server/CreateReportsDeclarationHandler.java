@@ -30,7 +30,6 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
 		super(CreateReportsDeclarationAction.class);
 	}
 
-
     @Autowired
     private SecurityService securityService;
 
