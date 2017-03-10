@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model.util;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
+import com.aplana.sbrf.taxaccounting.model.identification.DocType;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -131,11 +135,19 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
         return isValueEquals(prepareString(a), prepareString(b));
     }
 
+    public static String prepareSnils(String string) {
+        if (string != null) {
+            return string.replaceAll("[-]", "");
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Основное условие сравнения параметров, если оба параметра не заданы то считается что они равны, если
      * только один из параметров не задан то нет
      */
-    protected static <T> boolean equalsNullSafe(T a, T b) {
+    public static <T> boolean equalsNullSafe(T a, T b) {
         return isValueEquals(a, b);
     }
 
@@ -150,6 +162,37 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
             result = false;
         }
         return result;
+    }
+
+    public static PersonDocument findDocument(NaturalPerson person, Long docTypeId, String docNumber) {
+        for (PersonDocument personDocument : person.getPersonDocumentList()) {
+            DocType docType = personDocument.getDocType();
+            if (docType != null) {
+                if (isValueEquals(docTypeId, docType.getId())
+                        && isEqualsNullSafeStr(docNumber, personDocument.getDocumentNumber())) {
+                    return personDocument;
+                }
+            }
+        }
+        return null;
+    }
+
+    public PersonIdentifier findIdentifier(NaturalPerson person, String inp, Long asnuId) {
+        for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
+            if (equalsNullSafe(BaseWeigthCalculator.prepareString(inp), BaseWeigthCalculator.prepareString(personIdentifier.getInp())) && equalsNullSafe(asnuId, personIdentifier.getAsnuId())) {
+                return personIdentifier;
+            }
+        }
+        return null;
+    }
+
+    public PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
+        for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
+            if (personIdentifier.getAsnuId() != null && personIdentifier.getAsnuId().equals(asnuId)) {
+                return personIdentifier;
+            }
+        }
+        return null;
     }
 
 
