@@ -34,7 +34,8 @@ switch (formDataEvent) {
         consolidation()
         generateXml()
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        //TODO отключил из-за ошибки
+        //declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesList()
@@ -48,19 +49,21 @@ switch (formDataEvent) {
 }
 
 /**
- * Идентификатор шаблона РНУ-НДФЛ (первичная)
- */
-@Field
-def PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
-
-/**
  * Вид формы "Консолидированная", используется при определении проверок в частях
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataReference(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataCommon(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataIncome(java.lang.Object, java.lang.Object)}
  *
  */
-@Field final FormDataKind FORM_DATA_KIND = FormDataKind.CONSOLIDATED;
+
+@Field final FormDataKind FORM_DATA_KIND_PRIMARY = FormDataKind.PRIMARY;
+@Field final FormDataKind FORM_DATA_KIND_CONSOLIDATED = FormDataKind.CONSOLIDATED;
+
+/**
+ * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
+ */
+@Field final int CONSOLIDATED_RNU_NDFL_TEMPLATE_ID = 101
+@Field final int PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
 
 //>------------------< CONSOLIDATION >----------------------<
 
@@ -79,20 +82,21 @@ void consolidation() {
     //список нф-источников
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
 
-    logger.info(String.format("НФ-источников найдено: %d", sourcesInfo.size()))
+    List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
+
+    logger.info("Номера первичных НФ включенных в консолидацию: " + declarationDataIdList + ", общее количество : " + declarationDataIdList.size());
 
     List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
 
-    logger.info(String.format("ФЛ в ПНФ найдено: %d", ndflPersonList.size()));
-
     if (logger.containsLevel(LogLevel.ERROR)) {
-        throw new ServiceException("При получении источников возникли ошибки. Консолидация НФ не возможна.");
+        throw new ServiceException("При получении источников возникли ошибки. Консолидация НФ невозможна.");
     }
 
     //Карта в которой хранится record_id и NdflPerson в котором объединяются данные о даходах
-    SortedMap<Long, NdflPerson> ndflPersonMap = consolidateNdflPerson(ndflPersonList);
+    SortedMap<Long, NdflPerson> ndflPersonMap = consolidateNdflPerson(ndflPersonList, declarationDataIdList);
 
-    logger.info(String.format("ФЛ в КНФ найдено: %d", ndflPersonMap.size()))
+    logger.info(String.format("Количество физических лиц, загруженных в формы-источники: %d", ndflPersonList.size()));
+    logger.info(String.format("Количество уникальных физических лиц в формах-источниках по справочнику ФЛ: %d", ndflPersonMap.size()));
 
     //Актуализация первичного ключа запись, все одинаковые записи должны указывать на последнюю актуальную на данный момент версию
     println "consolidation start actualize"
@@ -105,13 +109,14 @@ void consolidation() {
         personIds.add(personId);
         ndflPerson.personId = personId;
     }
+
     println "consolidation end actualize(" + (System.currentTimeMillis() - time) + ")"
 
     //-----<INITIALIZE_CACHE_DATA>-----
-    Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersons(personIds);
+    Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersonsByDeclarationDataIdList(declarationDataIdList)
     Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPerson);
     //PersonId :  Документы
-    Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDul(personIds)
+    Map<Long, List<Map<String, RefBookValue>>> identityDocMap = getRefDulByDeclarationDataIdList(declarationDataIdList)
     //-----<INITIALIZE_CACHE_DATA_END>-----
 
     //разделы в которых идет сплошная нумерация
@@ -200,6 +205,83 @@ void consolidation() {
 
     logger.info(String.format("Консолидация завершена, новых записей создано: %d", (ndflPersonNum - 1)));
 
+}
+
+/**
+ * Получить "ДУЛ"
+ * @return
+ */
+Map<Long, Map<String, RefBookValue>> getRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
+    def result = [:]
+    declarationDataIdList.each {
+        def mapPersons = getRefDulByDeclarationDataId(it)
+        mapPersons.each { personId, refBookValue ->
+            result.put(personId, refBookValue)
+        }
+    }
+    return result
+}
+
+/**
+ * Получить "Документ, удостоверяющий личность (ДУЛ)"
+ */
+def getRefDulByDeclarationDataId(def long declarationDataId) {
+    if (dulCache.isEmpty()) {
+        String whereClause = String.format("person_id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
+
+        refBookMap.each { personId, refBookValues ->
+            Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
+            def dulList = dulCache.get(refBookPersonId);
+            if (dulList == null) {
+                dulList = [];
+                dulCache.put(refBookPersonId, dulList)
+            }
+            dulList.add(refBookValues);
+        }
+    }
+    return dulCache;
+}
+
+/**
+ * Получить "Физические лица"
+ * NDFL_PERSON.PERSON_ID будет ссылаться на актуальную записи справочника ФЛ только после проведения расчета
+ * @return
+ */
+Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataIdList(List<Long> declarationDataIdList) {
+    def result = [:]
+    declarationDataIdList.each {
+        def mapPersons = getRefPersonsByDeclarationDataId(it)
+        mapPersons.each { personId, refBookValue ->
+            result.put(personId, refBookValue)
+        }
+    }
+    return result
+}
+
+/**
+ * Получить "Физические лица"
+ * NDFL_PERSON.PERSON_ID будет ссылаться на актуальную записи справочника ФЛ только после проведения расчета
+ * @return
+ */
+Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId(def long declarationDataId) {
+    String whereClause = String.format("id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
+    return getRefBookByRecordWhere(REF_BOOK_PERSON_ID, whereClause)
+}
+
+/**
+ * Выгрузка из справочников по условию
+ * @param refBookId
+ * @param whereClause
+ * @return
+ */
+def getRefBookByRecordWhere(def long refBookId, def whereClause) {
+    Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataWhere(whereClause)
+    if (refBookMap == null || refBookMap.size() == 0) {
+        //throw new ScriptException("Не найдены записи справочника " + refBookId)
+        return Collections.emptyMap();
+    }
+    return refBookMap
 }
 
 /**
@@ -300,6 +382,9 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
             continue
         }
         List<NdflPerson> ndflPersonList = findNdflPersonWithData(declarationDataId);
+
+        //logger.info("Физических лиц в НФ "+declarationDataId+ ": " + ndflPersonList.size());
+
         result.addAll(ndflPersonList);
         i++;
     }
@@ -307,6 +392,21 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
     logger.info(String.format("НФ-источников выбрано для консолидации: %d", i))
 
     return result;
+}
+
+/**
+ * Получаем список идентификаторов деклараций которые попадут в консолидированную форму
+ * @param sourcesInfo
+ * @return
+ */
+List<Long> collectDeclarationDataIdList(List<Relation> sourcesInfo) {
+    def result = []
+    for (Relation relation : sourcesInfo) {
+        if (!result.contains(relation.declarationDataId)) {
+            result.add(relation.declarationDataId)
+        }
+    }
+    return result
 }
 
 /**
@@ -338,12 +438,9 @@ List<NdflPerson> findNdflPersonWithData(Long declarationDataId) {
  * @param refBookPerson
  * @return
  */
-Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList) {
+Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, List<Long> declarationDataIdList) {
 
-    //список уникальных id физлиц из справочника
-    List<Long> personIds = collectRefBookPersonIds(ndflPersonList)
-
-    Map<Long, Map<String, RefBookValue>> refBookPerson = getRefBookByRecordIds(RefBook.Id.PERSON.getId(), personIds)
+    Map<Long, Map<String, RefBookValue>> refBookPerson = getRefPersonsByDeclarationDataIdList(declarationDataIdList)
 
     Map<Long, NdflPerson> result = new TreeMap<Long, NdflPerson>();
 
@@ -426,7 +523,7 @@ Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String
 Long getActualPersonId(Long recordId) {
     Date version = getReportPeriodEndDate() - 1;
     List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).getUniqueRecordIds(version, "RECORD_ID = " + recordId);
-    if (personIds.size() != 1) {
+    if (personIds.isEmpty()) {
         logger.error("Ошибка при получении записи из справочника 'Физические лица' с recordId=" + recordId);
         return null;
     } else {
@@ -950,7 +1047,7 @@ def findReportPeriodCode(reportPeriod) {
 }
 
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
-//если проверки различаются то используется параметр {@link #FORM_DATA_KIND}
+//если проверки различаются то используется параметр {@link #FORM_DATA_KIND_CONSOLIDATED}
 //При внесении изменений учитывается что эта чать скрипта используется(копируется) и в первичной и в консолидированной
 
 //>------------------< REF BOOK >----------------------<
@@ -1730,7 +1827,7 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.PRIMARY)) {
                     // Спр12 ИНП первичная (Обязательное поле)
                     def inpList = inpMap.get(personRecord.get("id")?.value)
                     if (!ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
@@ -1769,7 +1866,7 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.PRIMARY)) {
                     // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
                     def allDocList = dulMap.get(personRecord.get("id")?.value)
                     // Вид документа
@@ -2286,6 +2383,62 @@ def checkDataCommon(
 //            }
 //        }
     }
+
+    // Общ12
+    if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.CONSOLIDATED)) {
+        // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
+        def mapDepartmentNotExistRnu = [
+                4:'Байкальский банк',
+                8:'Волго-Вятский банк',
+                20:'Дальневосточный банк',
+                27:'Западно-Сибирский банк',
+                32:'Западно-Уральский банк',
+                37:'Московский банк',
+                44:'Поволжский банк',
+                52:'Северный банк',
+                64:'Северо-Западный банк',
+                82:'Сибирский банк',
+                88:'Среднерусский банк',
+                97:'Уральский банк',
+                113:'Центральный аппарат ПАО Сбербанк',
+                102:'Центрально-Чернозёмный банк',
+                109:'Юго-Западный банк'
+        ]
+        def listDepartmentNotAcceptedRnu = []
+        List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+        for (DeclarationData dd : declarationDataList) {
+            // Подразделение
+            Long departmentCode = departmentService.get(dd.departmentId)?.code
+            mapDepartmentNotExistRnu.remove(departmentCode)
+
+            // Если налоговая форма не принята
+            if (!dd.state.equals(State.ACCEPTED)) {
+                listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
+            }
+        }
+        if (!mapDepartmentNotExistRnu.isEmpty()) {
+            // Период
+            def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+            def periodCode = period?.CODE?.stringValue
+            def periodName = period?.NAME?.stringValue
+            def calendarStartDate = reportPeriod?.calendarStartDate
+
+            def listDepartmentNotExistRnu = []
+            mapDepartmentNotExistRnu.each {
+                listDepartmentNotExistRnu.add(it.value)
+            }
+            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
+                        не созданы экземпляры консолидированных налоговых форм для следующих ТБ: "${listDepartmentNotExistRnu.join("\", \"")}".
+                        Данные этих форм не включены в отчетность!""")
+        }
+        if (!listDepartmentNotAcceptedRnu.isEmpty()) {
+            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
+                        имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: "${listDepartmentNotAcceptedRnu.join("\", \"")}".
+                        , для которых в системе существуют КНФ в текущем периоде, состояние которых <> "Принята">. Данные этих форм не включены в отчетность!""")
+        }
+    }
+
     println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
