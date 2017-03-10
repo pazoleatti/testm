@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -70,5 +69,15 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
 
     public void setNotifSource(String notifSource) {
         this.notifSource = notifSource;
+    }
+
+    @Override
+    public String toString() {
+        return "NdflPersonPrepayment{" +
+                "summ=" + summ +
+                ", notifNum='" + notifNum + '\'' +
+                ", notifDate=" + notifDate +
+                ", notifSource='" + notifSource + '\'' +
+                '}';
     }
 }

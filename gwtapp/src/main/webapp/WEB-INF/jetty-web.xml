@@ -37,8 +37,8 @@
 					<Put name="url">
                         jdbc:oracle:thin:@//172.19.214.46:1521/ORCL.APLANA.LOCAL
 					</Put>
-					<Put name="user">ndfl_1_0</Put>
-					<Put name="password">ndfl_1_0</Put>
+					<Put name="user">ndfl_next</Put>
+					<Put name="password">ndfl_next</Put>
 				</Get>
                 <Call name="init" />
 			</New>
