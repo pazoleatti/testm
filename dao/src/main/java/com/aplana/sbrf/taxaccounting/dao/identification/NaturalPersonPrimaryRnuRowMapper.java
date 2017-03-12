@@ -5,10 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.identification.Address;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
-import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * @author Andrey Drunk
@@ -16,6 +16,8 @@ import java.sql.SQLException;
 public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMapper {
 
     private Long asnuId;
+
+    private Map<Long, Long> fiasAddressIdsMap;
 
     public Long getAsnuId() {
         return asnuId;
@@ -25,12 +27,22 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         this.asnuId = asnuId;
     }
 
+    public Map<Long, Long> getFiasAddressIdsMap() {
+        return fiasAddressIdsMap;
+    }
+
+    public void setFiasAddressIdsMap(Map<Long, Long> fiasAddressIdsMap) {
+        this.fiasAddressIdsMap = fiasAddressIdsMap;
+    }
+
     @Override
     public NaturalPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
 
         NaturalPerson person = new NaturalPerson();
 
-        person.setPrimaryPersonId(SqlUtils.getLong(rs, "id"));
+        Long ndflPersonId = SqlUtils.getLong(rs, "id");
+
+        person.setPrimaryPersonId(ndflPersonId);
         person.setId(SqlUtils.getLong(rs, "person_id"));
 
         person.setSnils(rs.getString("snils"));
@@ -71,42 +83,47 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         person.setSex(SqlUtils.getInteger(rs, "sex"));
 
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
-        person.setAddress(buildAddress(rs));
+
+        //Используются только адреса которые прошли проверку по ФИАС
+        Long fiasAddressId = getFiasAddressId(ndflPersonId);
+
+        if (fiasAddressId != null) {
+            person.setAddress(buildAddress(rs));
+        }
 
         //rs.getString("additional_data")
         return person;
     }
 
+    public Address buildAddress(ResultSet rs) throws SQLException {
+        Address address = new Address();
+        address.setCountry(getCountryByCode(rs.getString("country_code")));
+        address.setRegionCode(rs.getString("region_code"));
+        address.setPostalCode(rs.getString("post_index"));
+        address.setDistrict(rs.getString("area"));
+        address.setCity(rs.getString("city"));
+        address.setLocality(rs.getString("locality"));
+        address.setStreet(rs.getString("street"));
+        address.setHouse(rs.getString("house"));
+        address.setBuild(rs.getString("building"));
+        address.setAppartment(rs.getString("flat"));
+        address.setAddressIno(rs.getString("address"));
+        //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
+        int addressType = (address.getAddressIno() != null && !address.getAddressIno().isEmpty()) ? 1 : 0;
+        address.setAddressType(addressType);
+        return address;
+    }
 
-    private Address buildAddress(ResultSet rs) throws SQLException {
-
-        if (getFiasAddres() != null) {
-            Address address = new Address();
-
-            address.setCountry(getCountryByCode(rs.getString("country_code")));
-            address.setRegionCode(rs.getString("region_code"));
-            address.setPostalCode(rs.getString("post_index"));
-            address.setDistrict(rs.getString("area"));
-            address.setCity(rs.getString("city"));
-            address.setLocality(rs.getString("locality"));
-            address.setStreet(rs.getString("street"));
-            address.setHouse(rs.getString("house"));
-            address.setBuild(rs.getString("building"));
-            address.setAppartment(rs.getString("flat"));
-            address.setAddressIno(rs.getString("address"));
-            //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
-            int addressType = (address.getAddressIno() != null && !address.getAddressIno().isEmpty()) ? 1 : 0;
-            address.setAddressType(addressType);
-
-            return address;
+    public Long getFiasAddressId(Long ndflPersonId) {
+        if (fiasAddressIdsMap != null) {
+            Long result = fiasAddressIdsMap.get(ndflPersonId);
+            if (result == null) {
+                logger.warn("Не найден адрес физического лица " + ndflPersonId);
+            }
+            return result;
         } else {
-            return null;
+            logger.warn("Не проинициализирован кэш справочника для проверки адресов физических лиц!");
         }
+        return null;
     }
-
-    public AddressObject getFiasAddres() {
-        //TODO Получить адрес в справонике фиас
-        return new AddressObject();
-    }
-
 }

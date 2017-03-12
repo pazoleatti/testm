@@ -10,25 +10,30 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
  */
 public abstract class AbstractDao {
 
+    /**
+     * из oracle.jdbc.OracleTypes
+     */
+    public static final int CURSOR = -10;
+
     @Autowired
     DBInfo dbInfo;
 
-	@Autowired
-	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-	
-	protected JdbcTemplate getJdbcTemplate() {
-		return (JdbcTemplate)namedParameterJdbcTemplate.getJdbcOperations();
-	}
-	
-	protected NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
-		return namedParameterJdbcTemplate;
-	}
-	
-	protected <T extends Number> T generateId(String sequenceName, Class<T> resultType) {
-		return getJdbcTemplate().queryForObject("select " + sequenceName + ".nextval from dual", resultType);
-	}
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    protected boolean isSupportOver(){
+    protected JdbcTemplate getJdbcTemplate() {
+        return (JdbcTemplate) namedParameterJdbcTemplate.getJdbcOperations();
+    }
+
+    protected NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
+        return namedParameterJdbcTemplate;
+    }
+
+    protected <T extends Number> T generateId(String sequenceName, Class<T> resultType) {
+        return getJdbcTemplate().queryForObject("select " + sequenceName + ".nextval from dual", resultType);
+    }
+
+    protected boolean isSupportOver() {
         return dbInfo.isSupportOver();
     }
 
