@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrey Drunk
@@ -26,4 +27,11 @@ public class FiasRefBookServiceImpl implements FiasRefBookService {
     public AddressObject findRegionByCode(String regionCode) {
         return fiasRefBookDao.findRegionByCode(regionCode);
     }
+
+    @Override
+    public Map<Long, Long> checkAddressByFias(Long declarationDataId) {
+        return fiasRefBookDao.checkAddressByFias(declarationDataId);
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
+import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -94,15 +95,12 @@ def calcTimeMillis(long time) {
 @Field List<Country> countryRefBookCache = [];
 
 List<Country> getCountryRefBookList() {
-
     if (countryRefBookCache.isEmpty()) {
         List<Map<String, RefBookValue>> refBookRecords = getRefBook(RefBook.Id.COUNTRY.getId());
-
         refBookRecords.each { refBookValueMap ->
             Country country = new Country();
             country.setId(refBookValueMap?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue());
             country.setCode(refBookValueMap?.get("CODE")?.getStringValue());
-
             countryRefBookCache.add(country);
         }
     }
@@ -127,7 +125,6 @@ List<DocType> getDocTypeRefBookList() {
 }
 
 @Field List<TaxpayerStatus> taxpayerStatusRefBookCache = [];
-
 List<TaxpayerStatus> getTaxpayerStatusRefBookList() {
     if (taxpayerStatusRefBookCache.isEmpty()) {
         List<Map<String, RefBookValue>> refBookRecords = getRefBook(RefBook.Id.DOCUMENT_CODES.getId());
@@ -136,10 +133,21 @@ List<TaxpayerStatus> getTaxpayerStatusRefBookList() {
             taxpayerStatus.setId(refBookValueMap?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue())
             taxpayerStatus.setName(refBookValueMap?.get("NAME")?.getStringValue());
             taxpayerStatus.setCode(refBookValueMap?.get("CODE")?.getStringValue());
+            taxpayerStatusRefBookCache.add(taxpayerStatus);
         }
     }
     return taxpayerStatusRefBookCache;
 }
+
+
+@Field Map<Long, Long> fiasAddressIdsCache = [];
+Map<Long, Long> getFiasAddressIdsMap() {
+    if (fiasAddressIdsCache.isEmpty()) {
+        fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id);
+    }
+    return fiasAddressIdsCache;
+}
+
 
 NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper() {
 
@@ -157,11 +165,13 @@ NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper() {
         [it.code, it]
     });
 
-
     List<TaxpayerStatus> taxpayerStatusList = getTaxpayerStatusRefBookList();
     naturalPersonRowMapper.setTaxpayerStatusCodeMap(taxpayerStatusList.collectEntries {
         [it.code, it]
     });
+
+    Map<Long, Long> fiasAddressIdsMap = getFiasAddressIdsMap();
+    naturalPersonRowMapper.setFiasAddressIdsMap(fiasAddressIdsMap);
 
     return naturalPersonRowMapper;
 }
@@ -176,7 +186,6 @@ NaturalPersonRefbookHandler createRefbookHandler() {
     refbookHandler.setCountryMap(countryList.collectEntries {
         [it.id, it]
     })
-
 
     List<DocType> docTypeList = getDocTypeRefBookList();
     refbookHandler.setDocTypeMap(docTypeList.collectEntries {
@@ -195,9 +204,7 @@ NaturalPersonRefbookHandler createRefbookHandler() {
  * Получить версию используемую для поиска записей в справочнике ФЛ
  */
 
-
 @Field Date refBookPersonVersionTo = null;
-
 def getRefBookPersonVersionTo() {
     if (refBookPersonVersionTo == null) {
         Calendar localCalendar = Calendar.getInstance();
@@ -237,52 +244,48 @@ def calculate() {
 
     logger.info("В ПНФ номер " + declarationData.id + " найдено записей о физ.лицах: " + primaryPersonDataList.size() + calcTimeMillis(time));
 
-    time = System.currentTimeMillis();
     Map<Long, NaturalPerson> primaryPersonMap = primaryPersonDataList.collectEntries {
         [it.getPrimaryPersonId(), it]
     }
-    logger.info("map to id: " + calcTimeMillis(time));
 
     //Заполнени временной таблицы версий
     time = System.currentTimeMillis();
     refBookPersonService.fillRecordVersions(getRefBookPersonVersionTo());
-    logger.info("fillRecordVersions: " + calcTimeMillis(time));
+    logger.info("Заполнение таблицы версий: " + calcTimeMillis(time));
 
     //Шаг 1. список физлиц первичной формы для создания записей в справочниках
     time = System.currentTimeMillis();
     List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper());
-    logger.info("step1 find insertRecords: " + insertPersonList.size() + calcTimeMillis(time));
+    logger.info("Предварительная выборка новых данных. Найдено записей: "+insertPersonList.size() + calcTimeMillis(time));
 
     time = System.currentTimeMillis();
     createNaturalPersonRefBookRecords(insertPersonList);
-    logger.info("createNaturalPersonRefBookRecords: " + calcTimeMillis(time));
+    logger.info("Создание записей: "+insertPersonList.size() + calcTimeMillis(time));
 
 
-    time = System.currentTimeMillis();
     //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
+    time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
-    logger.info("step2 similarityPersonMap: " + similarityPersonMap.size() + calcTimeMillis(time));
+    logger.info("Предварительная выборка по значимым параметрам. Найдено записей: " + similarityPersonMap.size() + calcTimeMillis(time));
+
 
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap);
-    //updateNaturalPersonRefBookReferenceRecords(primaryPersonMap, similarityPersonMap);
-    logger.info("updateNaturalPersonRefBookRecords: " + calcTimeMillis(time));
+    logger.info("Обновление записей " + calcTimeMillis(time));
 
     time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
-    logger.info("step3 checkSimilarityPersonMap: " + checkSimilarityPersonMap.size() + calcTimeMillis(time));
+    logger.info("Основная выборка по всем параметрам. Найдено записей: " + checkSimilarityPersonMap.size() + calcTimeMillis(time));
 
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap);
-    //updateNaturalPersonRefBookReferenceRecords(primaryPersonMap, similarityPersonMap);
-    logger.info("updateNaturalPersonRefBookRecords: " + calcTimeMillis(time));
-
-    logger.info("end find data: " + checkSimilarityPersonMap.size() + calcTimeMillis(timeFull));
+    logger.info("Обновление записей " + calcTimeMillis(time));
 
     logger.info("Завершение расчета ПНФ " + " " + calcTimeMillis(timeFull));
 }
 
-//---------------- identification ----------------
+//---------------- Identification ----------------
+// Далее идет код скрипта такой же как и в 1151111 возможно следует вынести его в отдельный сервис
 
 def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
 
@@ -353,35 +356,6 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
 
     }
     println "end create"
-}
-
-/**
- *
- * @param primaryPersonMap
- * @param similarityPersonMap
- * @return
- */
-def updateNaturalPersonRefBookReferenceRecords(Map<Long, NaturalPerson> primaryPersonMap, Map<Long, Map<Long, NaturalPerson>> similarityPersonMap) {
-    List<NaturalPerson> insertPersonList = new ArrayList<NaturalPerson>();
-    List<NaturalPerson> updatePersonList = new ArrayList<NaturalPerson>();
-    for (Map.Entry<Long, Map<Long, NaturalPerson>> entry : similarityPersonMap.entrySet()) {
-        Long primaryPersonId = entry.getKey();
-        Map<Long, NaturalPerson> similarityPersonValues= entry.getValue();
-        List<NaturalPerson> similarityPersonList = new ArrayList<NaturalPerson>(similarityPersonValues.values());
-        NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
-        NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
-        if (refBookPerson != null) {
-            primaryPerson.setId(refBookPerson.getId());
-            updatePersonList.add(primaryPerson);
-        } else {
-            //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
-            insertPersonList.add(primaryPerson);
-        }
-    }
-    //crete and update reference
-    createNaturalPersonRefBookRecords(insertPersonList);
-    //update reference to ref book
-    ndflPersonService.updateRefBookPersonReferences(updatePersonList);
 }
 
 
@@ -561,8 +535,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getReferenceValue()?.longValue();
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
-
-
 }
 
 PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
@@ -573,7 +545,6 @@ PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
     }
     return null;
 }
-
 /**
  * Метод установленный признак включения в отчетность на основе приоритета
  */
@@ -585,6 +556,7 @@ def updatePriority(List<PersonDocument> personDocumentList, AttributeChangeListe
     PersonDocument minimalPriorDoc = personDocumentList.min { it.getDocType().getPriority() }
 
     AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", minimalPriorDoc.getIncRep());
+    changeEvent.setType(AttributeChangeEventType.REFRESHED);
     changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, 1));
     attributeChangeListener.processAttr(changeEvent);
 
@@ -691,9 +663,6 @@ def mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
 
 def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
     //подготовка записей
-
-    println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList.size + ", refBookMapper=" + refBookMapper
-
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
@@ -809,6 +778,11 @@ def appendAttrInfo(Long refBookId, AttributeCountChangeListener attrCounter, Str
         }
     }
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 
 
 //------------------ IDENTIFICATION END --------------------------
@@ -3704,192 +3678,4 @@ def getErrorMsgAbsent(def inputList, def tableName) {
         resultMsg = " Раздел \"" + tableName + "\" № " + inputList.join(", ") + "."
     }
     return resultMsg
-}
-
-
-//-----------------
-
-/**
- * @author Andrey Drunk
- */
-public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMapper {
-
-    private Long asnuId;
-
-    public Long getAsnuId() {
-        return asnuId;
-    }
-
-    public void setAsnuId(Long asnuId) {
-        this.asnuId = asnuId;
-    }
-
-    @Override
-    public NaturalPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-        NaturalPerson person = new NaturalPerson();
-
-        person.setPrimaryPersonId(getLong(rs, "id"));
-        person.setId(getLong(rs, "person_id"));
-
-        person.setSnils(rs.getString("snils"));
-        person.setLastName(rs.getString("last_name"));
-        person.setFirstName(rs.getString("first_name"));
-        person.setMiddleName(rs.getString("middle_name"));
-        person.setBirthDate(rs.getDate("birth_day"));
-
-        person.setCitizenship(getCountryByCode(rs.getString("citizenship")));
-        person.setInn(rs.getString("inn_np"));
-        person.setInnForeign(rs.getString("inn_foreign"));
-
-        String inp = rs.getString("inp");
-        if (inp != null && asnuId != null) {
-            PersonIdentifier personIdentifier = new PersonIdentifier();
-            personIdentifier.setNaturalPerson(person);
-            personIdentifier.setInp(inp);
-            personIdentifier.setAsnuId(asnuId);
-            person.getPersonIdentityList().add(personIdentifier);
-        }
-
-        String documentTypeCode = rs.getString("id_doc_type");
-        String documentNumber = rs.getString("id_doc_number");
-
-        if (documentNumber != null && documentTypeCode != null) {
-            PersonDocument personDocument = new PersonDocument();
-            personDocument.setNaturalPerson(person);
-            personDocument.setDocumentNumber(documentNumber);
-            personDocument.setDocType(getDocTypeByCode(documentTypeCode));
-            person.getPersonDocumentList().add(personDocument);
-        }
-
-
-        person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
-        person.setAddress(buildAddress(rs));
-
-        //rs.getString("additional_data")
-        return person;
-    }
-
-
-    private Address buildAddress(ResultSet rs) throws SQLException {
-
-        if (getFiasAddres() != null) {
-            Address address = new Address();
-
-            address.setCountry(getCountryByCode(rs.getString("country_code")));
-            address.setRegionCode(rs.getString("region_code"));
-            address.setPostalCode(rs.getString("post_index"));
-            address.setDistrict(rs.getString("area"));
-            address.setCity(rs.getString("city"));
-            address.setLocality(rs.getString("locality"));
-            address.setStreet(rs.getString("street"));
-            address.setHouse(rs.getString("house"));
-            address.setBuild(rs.getString("building"));
-            address.setAppartment(rs.getString("flat"));
-            address.setAddressIno(rs.getString("address"));
-            //Тип адреса. Значения: 0 - в РФ 1 - вне РФ
-            int addressType = (address.getAddressIno() != null && !address.getAddressIno().isEmpty()) ? 1 : 0;
-            address.setAddressType(addressType);
-
-            return address;
-        } else {
-            return null;
-        }
-    }
-
-    public AddressObject getFiasAddres() {
-        //TODO Получить адрес в справонике фиас
-        return new AddressObject();
-    }
-
-}
-
-/**
- * Обработчик запроса данных из ПНФ
- *
- * @author Andrey Drunk
- */
-public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<NaturalPerson> {
-
-    private Map<String, Country> countryCodeMap;
-
-    private Map<String, TaxpayerStatus> taxpayerStatusCodeMap;
-
-    private Map<String, DocType> docTypeCodeMap;
-
-    protected Logger logger;
-
-    /**
-     * Возвращает значение целочисленного столбца. Если значения нет, то вернет null
-     * @param resultSet набор данных
-     * @param columnLabel название столбца
-     * @return целое число, либо null
-     * @throws SQLException
-     */
-    public static Integer getInteger(ResultSet resultSet, String columnLabel) throws SQLException {
-        Integer ret = resultSet.getInt(columnLabel);
-        return resultSet.wasNull()?null:ret;
-    }
-
-    public static Long getLong(ResultSet resultSet, String columnLabel) throws SQLException {
-        Long ret = resultSet.getLong(columnLabel);
-        return resultSet.wasNull()?null:ret;
-    }
-
-    public Map<String, Country> getCountryCodeMap() {
-        return countryCodeMap;
-    }
-
-    public void setCountryCodeMap(Map<String, Country> countryCodeMap) {
-        this.countryCodeMap = countryCodeMap;
-    }
-
-    public Map<String, TaxpayerStatus> getTaxpayerStatusCodeMap() {
-        return taxpayerStatusCodeMap;
-    }
-
-    public void setTaxpayerStatusCodeMap(Map<String, TaxpayerStatus> taxpayerStatusCodeMap) {
-        this.taxpayerStatusCodeMap = taxpayerStatusCodeMap;
-    }
-
-    public Map<String, DocType> getDocTypeCodeMap() {
-        return docTypeCodeMap;
-    }
-
-    public void setDocTypeCodeMap(Map<String, DocType> docTypeCodeMap) {
-        this.docTypeCodeMap = docTypeCodeMap;
-    }
-
-    public Logger getLogger() {
-        return logger;
-    }
-
-    public void setLogger(Logger logger) {
-        this.logger = logger;
-    }
-
-    public Country getCountryByCode(String code) {
-        if (code != null) {
-            return countryCodeMap != null ? countryCodeMap.get(code) : new Country(null, code);
-        } else {
-            return null;
-        }
-    }
-
-    public TaxpayerStatus getTaxpayerStatusByCode(String code) {
-        if (code != null) {
-            return taxpayerStatusCodeMap != null ? taxpayerStatusCodeMap.get(code) : new TaxpayerStatus(null, code);
-        } else {
-            return null;
-        }
-    }
-
-    public DocType getDocTypeByCode(String code) {
-        if (code != null) {
-            return docTypeCodeMap != null ? docTypeCodeMap.get(code) : new DocType(null, code);
-        } else {
-            return null;
-        }
-    }
-
 }

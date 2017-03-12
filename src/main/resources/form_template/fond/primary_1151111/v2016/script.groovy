@@ -3908,7 +3908,6 @@ List<TaxpayerStatus> getTaxpayerStatusRefBookList() {
 NaturalPersonPrimaryRowMapper createPrimaryRowMapper() {
 
     NaturalPersonPrimaryRowMapper naturalPersonRowMapper = new NaturalPersonPrimary1151111RowMapper();
-    //naturalPersonRowMapper.setAsnuId(declarationData.asnuId);
     naturalPersonRowMapper.setLogger(logger);
 
     List<Country> countryList = getCountryRefBookList();
@@ -3981,7 +3980,6 @@ def getRefBookPersonVersionFrom() {
     return getReportPeriodStartDate();
 }
 
-
 def calculate() {
 
     long timeFull = System.currentTimeMillis();
@@ -3997,54 +3995,52 @@ def calculate() {
 
     logger.info("В ПНФ номер " + declarationData.id + " найдено записей о физ.лицах: " + primaryPersonDataList.size() + calcTimeMillis(time));
 
-    time = System.currentTimeMillis();
     Map<Long, NaturalPerson> primaryPersonMap = primaryPersonDataList.collectEntries {
         [it.getPrimaryPersonId(), it]
     }
 
-
     //Заполнени временной таблицы версий
     time = System.currentTimeMillis();
     refBookPersonService.fillRecordVersions1151111(getRefBookPersonVersionTo());
-    logger.info("fillRecordVersions: " + calcTimeMillis(time));
+    logger.info("Заполнение таблицы версий: " + calcTimeMillis(time));
 
     //Шаг 1. список физлиц первичной формы для создания записей в справочниках
     time = System.currentTimeMillis();
     List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimary1151111(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper());
-    logger.info("step1 find insertRecords: " + insertPersonList.size() + calcTimeMillis(time));
+    logger.info("Предварительная выборка новых данных. Найдено записей: "+insertPersonList.size() + calcTimeMillis(time));
 
     time = System.currentTimeMillis();
     createNaturalPersonRefBookRecords(insertPersonList);
-    //logger.info("createNaturalPersonRefBookRecords: " + calcTimeMillis(time));
+    logger.info("Создание записей: "+insertPersonList.size() + calcTimeMillis(time));
 
 
-    time = System.currentTimeMillis();
     //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
+    time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimary1151111(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
-    logger.info("step2 similarityPersonMap: " + similarityPersonMap.size() + calcTimeMillis(time));
+    logger.info("Предварительная выборка по значимым параметрам. Найдено записей: " + similarityPersonMap.size() + calcTimeMillis(time));
+
 
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap);
-    //updateNaturalPersonRefBookReferenceRecords(primaryPersonMap, similarityPersonMap);
-    //logger.info("updateNaturalPersonRefBookRecords: " + calcTimeMillis(time));
+    logger.info("Обновление записей " + calcTimeMillis(time));
 
     time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimary1151111(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
-    logger.info("step3 checkSimilarityPersonMap: " + checkSimilarityPersonMap.size() + calcTimeMillis(time));
+    logger.info("Основная выборка по всем параметрам. Найдено записей: " + checkSimilarityPersonMap.size() + calcTimeMillis(time));
 
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap);
-    //updateNaturalPersonRefBookReferenceRecords(primaryPersonMap, similarityPersonMap);
-    logger.info("updateNaturalPersonRefBookRecords: " + calcTimeMillis(time));
-
-    logger.info("end find data: " + checkSimilarityPersonMap.size() + calcTimeMillis(timeFull));
+    logger.info("Обновление записей " + calcTimeMillis(time));
 
     logger.info("Завершение расчета ПНФ " + " " + calcTimeMillis(timeFull));
 }
 
 //---------------- identification ----------------
 
+
 def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
+
+    println "start create insertRecords=" + insertRecords
 
     if (insertRecords != null && !insertRecords.isEmpty()) {
 
@@ -4071,27 +4067,35 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
 
         }
 
+        println "insert address"
+
         //insert addresses batch
         insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), addressList, { address ->
             mapAddressAttr(address)
         });
 
-        //println "insert person"
+        println "insert person"
         //insert persons batch
         insertBatchRecords(RefBook.Id.PERSON.getId(), insertRecords, { person ->
             mapPersonAttr(person)
         });
+
+        println "insert personDocument"
 
         //insert documents batch
         insertBatchRecords(RefBook.Id.ID_DOC.getId(), documentList, { personDocument ->
             mapPersonDocumentAttr(personDocument)
         });
 
+
+        println "insert personIdentifier"
+
         //insert identifiers batch
         insertBatchRecords(RefBook.Id.ID_TAX_PAYER.getId(), identifierList, { personIdentifier ->
             mapPersonIdentifierAttr(personIdentifier)
         });
 
+        println "insert updateRefBookPersonReferences"
         //update reference to ref book7uuiuji
         ndflPersonService.updateRefBookPersonReferences(insertRecords);
 
@@ -4100,37 +4104,9 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
             String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
             logger.info(noticeMsg);
         }
-    }
 
-}
-
-/**
- *
- * @param primaryPersonMap
- * @param similarityPersonMap
- * @return
- */
-def updateNaturalPersonRefBookReferenceRecords(Map<Long, NaturalPerson> primaryPersonMap, Map<Long, Map<Long, NaturalPerson>> similarityPersonMap) {
-    List<NaturalPerson> insertPersonList = new ArrayList<NaturalPerson>();
-    List<NaturalPerson> updatePersonList = new ArrayList<NaturalPerson>();
-    for (Map.Entry<Long, Map<Long, NaturalPerson>> entry : similarityPersonMap.entrySet()) {
-        Long primaryPersonId = entry.getKey();
-        Map<Long, NaturalPerson> similarityPersonValues= entry.getValue();
-        List<NaturalPerson> similarityPersonList = new ArrayList<NaturalPerson>(similarityPersonValues.values());
-        NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
-        NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
-        if (refBookPerson != null) {
-            primaryPerson.setId(refBookPerson.getId());
-            updatePersonList.add(primaryPerson);
-        } else {
-            //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
-            insertPersonList.add(primaryPerson);
-        }
     }
-    //crete and update reference
-    createNaturalPersonRefBookRecords(insertPersonList);
-    //update reference to ref book
-    ndflPersonService.updateRefBookPersonReferences(updatePersonList);
+    println "end create"
 }
 
 

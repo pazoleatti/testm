@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
-import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -15,10 +14,6 @@ import java.util.Map;
  * @author Andrey Drunk
  */
 public interface RefBookPersonDao {
-
-    Map<Long, List<PersonData>> findRefBookPersonByPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version);
-
-    Map<Long, List<PersonData>> findRefBookPersonByPrimary1151111(Long declarationDataId, Long asnuId, Date version);
 
     //--------------------------- РНУ ---------------------------
 
