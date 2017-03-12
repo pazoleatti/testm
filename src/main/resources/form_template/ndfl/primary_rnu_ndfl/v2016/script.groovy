@@ -139,7 +139,9 @@ List<TaxpayerStatus> getTaxpayerStatusRefBookList() {
     return taxpayerStatusRefBookCache;
 }
 
-
+/**
+ * Карта соответствия адреса формы адресу в справочнике ФИАС
+ */
 @Field Map<Long, Long> fiasAddressIdsCache = [];
 Map<Long, Long> getFiasAddressIdsMap() {
     if (fiasAddressIdsCache.isEmpty()) {
@@ -2098,6 +2100,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 @Field final String R_INP = "Идентификаторы налогоплательщиков"
 @Field final String R_DUL = "Документы, удостоверяющий личность"
 
+
 // Реквизиты
 @Field final String C_ADDRESS = "Адрес регистрации в Российской Федерации "
 @Field final String C_CITIZENSHIP = "Гражданство (код страны)"
@@ -2310,6 +2313,14 @@ def checkDataReference(
     println "Проверки на соответствие справочникам / Выгрузка справочника Адреса: " + (System.currentTimeMillis() - time);
     logger.info("Проверки на соответствие справочникам / Выгрузка справочника Адреса: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    //поиск всех адресов формы в справочнике ФИАС
+    time = System.currentTimeMillis();
+    Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
+    logger.info(SUCCESS_GET_TABLE, R_FIAS, checkFiasAddressMap.size());
+    println "Проверки на соответствие справочникам / Выгрузка справочника "+R_FIAS+": " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочника "+R_FIAS+": (" + (System.currentTimeMillis() - time) + " ms)");
+
+
     //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
 
     long timeIsExistsAddress = 0
@@ -2324,7 +2335,7 @@ def checkDataReference(
         // Спр1 ФИАС
         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
         long tIsExistsAddress = System.currentTimeMillis();
-        if (!isExistsAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
+        if (!isExistsAddress(ndflPerson.id)) {
             logger.warn("""Ошибка в значении: Раздел "Реквизиты". Строка "${ndflPerson.rowNum}". Графа "Адрес регистрации в Российской Федерации ". $fioAndInp. Текст ошибки: "Адрес регистрации в Российской Федерации " не соответствует справочнику "$R_FIAS".""")
         }
         timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
@@ -3629,12 +3640,9 @@ def getOktmoAndKpp(def departmentParamId) {
  * Существует ли адрес в справочнике адресов
  */
 @Memoized
-boolean isExistsAddress(regionCode, area, city, locality, street) {
-    if (!regionCode || !area || !city || !locality || !street) {
-        return false
-    }
-
-    return fiasRefBookService.findAddress(regionCode, area, city, locality, street).size() > 0
+boolean isExistsAddress(ndflPersonId) {
+    Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
+    return (checkFiasAddressMap.get(ndflPersonId) != null)
 }
 
 /**
