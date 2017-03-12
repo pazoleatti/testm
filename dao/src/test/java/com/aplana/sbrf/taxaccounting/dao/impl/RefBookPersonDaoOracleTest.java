@@ -68,12 +68,6 @@ public class RefBookPersonDaoOracleTest {
     //private static final Long decl_data_id = 148731L; //вставка
     private  static final Long decl_data_id = 14873L; //обновление
 
-    @Test
-    public void testFindNdflPerson() {
-        long time = System.currentTimeMillis();
-        Map<Long, List<PersonData>> result = refBookPersonDao.findRefBookPersonByPrimaryRnuNdfl(decl_data_id, 1L, new Date());
-        printResult(time, result.size());
-    }
 
     @Test
     public void testFindNaturalPersonPrimaryDataFromNdfl() {
