@@ -142,7 +142,7 @@ List<TaxpayerStatus> getTaxpayerStatusRefBookList() {
 /**
  * Карта соответствия адреса формы адресу в справочнике ФИАС
  */
-@Field Map<Long, Long> fiasAddressIdsCache = [];
+@Field Map<Long, Long> fiasAddressIdsCache = [:];
 Map<Long, Long> getFiasAddressIdsMap() {
     if (fiasAddressIdsCache.isEmpty()) {
         fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id);
@@ -978,8 +978,15 @@ def prepareSpecificReport() {
     }
     PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters);
 
+    //Если записи не найдены, то система формирует предупреждение:
+    //Заголовок: "Предупреждение"
+    //Текст: "Физическое лицо: <Данные ФЛ> не найдено в форме", где <Данные ФЛ> - значение полей формы, по которым выполнялся поиск физического лица, через разделитель "; "
+    //Кнопки: "Закрыть"
+
     if (pagingResult.isEmpty()) {
-        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + resultReportParameters);
+        subreportParamsToString = { it.collect { /$it.value/ } join "; " }
+        logger.warn("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
+        //throw new ServiceException("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
     }
 
     pagingResult.getRecords().each() { ndflPerson ->
