@@ -1778,7 +1778,7 @@ def checkDataReference(
         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
         long tIsExistsAddress = System.currentTimeMillis();
         if (!isExistsAddress(ndflPerson.regionCode, ndflPerson.area, ndflPerson.city, ndflPerson.locality, ndflPerson.street)) {
-            logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum, C_ADDRESS, fioAndInp, C_ADDRESS, R_FIAS);
+            logger.warn("""Ошибка в значении: Раздел "Реквизиты". Строка "${ndflPerson.rowNum}". Графа "Адрес регистрации в Российской Федерации ". $fioAndInp. Текст ошибки: "Адрес регистрации в Российской Федерации " не соответствует справочнику "$R_FIAS".""")
         }
         timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
 
@@ -1826,13 +1826,11 @@ def checkDataReference(
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum, C_MIDDLE_NAME, fioAndInp, C_MIDDLE_NAME, R_PERSON);
                 }
 
-
                 if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
                     // Спр12 ИНП первичная (Обязательное поле)
                     def inpList = inpMap.get(personRecord.get("id")?.value)
-                    if (inpList == null || !ndflPerson.inp.equals(personRecord.get(RF_SNILS).value) && !inpList.contains(ndflPerson.inp)) {
-                        logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
-                                T_PERSON, ndflPerson.rowNum, C_INP, fioAndInp, C_INP, R_INP);
+                    if (!(ndflPerson.inp == personRecord.get(RF_SNILS)?.value || inpList?.contains(ndflPerson.inp))) {
+                        logger.warn("""Ошибка в значении: Раздел "Реквизиты". Строка "${ndflPerson.rowNum}". Графа "Уникальный код клиента". $fioAndInp. Текст ошибки: "Уникальный код клиента" не соответствует справочнику "Идентификаторы налогоплательщиков".""")
                     }
                 } else {
                     //Спр12.1 ИНП консолидированная - проверка соответствия RECORD_ID
@@ -1840,7 +1838,7 @@ def checkDataReference(
                     String recordId = String.valueOf(personRecord.get(RF_RECORD_ID).getNumberValue().longValue());
                     if (!ndflPerson.inp.equals(recordId)) {
                         //TODO turn_to_error
-                        logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum, C_INP, fioAndInp, C_INP, T_PERSON);
+                        logger.warn("""Ошибка в значении: Раздел "Реквизиты". Строка "${ndflPerson.rowNum}". Графа "Уникальный код клиента". $fioAndInp. Текст ошибки: "Уникальный код клиента" не соответствует справочнику "Идентификаторы налогоплательщиков".""")
                     }
                 }
 
@@ -1878,12 +1876,10 @@ def checkDataReference(
                         personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
                     }
                     if (!personDocTypeList.contains(ndflPerson.idDocType)) {
-                        logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
-                                T_PERSON, ndflPerson.rowNum, C_ID_DOC_TYPE, fioAndInp, C_ID_DOC_TYPE, R_PERSON);
+                        logger.warn("""Ошибка в значении: Раздел "Реквизиты". Строка "${ndflPerson.rowNum}". Графа "Код вида документа". $fioAndInp. Текст ошибки: "Код вида документа" не соответствует справочнику "Физические лица".""")
                     }
                     if (!personDocNumberList.contains(ndflPerson.idDocNumber)) {
-                        logger.warn(MESSAGE_ERROR_NOT_FOUND_REF,
-                                T_PERSON, ndflPerson.rowNum, C_ID_DOC_NUMBER, fioAndInp, C_ID_DOC_NUMBER, R_PERSON);
+                        logger.warn("""Ошибка в значении: Раздел "Реквизиты". Строка "${ndflPerson.rowNum}". Графа "Серия и номер документа". $fioAndInp. Текст ошибки: "Серия и номер документа" не соответствует справочнику "Физические лица".""")
                     }
                 } else {
                     def allDocList = dulMap.get(ndflPerson.personId)

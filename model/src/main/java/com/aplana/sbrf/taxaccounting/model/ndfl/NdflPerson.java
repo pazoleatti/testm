@@ -40,7 +40,7 @@ public class NdflPerson extends IdentityObject<Long> {
     private String firstName;
     private String middleName;
     private Date birthDay;
-    // Цифровой код гражданства
+    // Цифровой код гражданства (Графа 7)
     private String citizenship;
     private String innNp;
     private String innForeign;
@@ -48,7 +48,7 @@ public class NdflPerson extends IdentityObject<Long> {
     private String idDocType;
     // Серия и номер документа
     private String idDocNumber;
-    // Cтатус налогоплательщика
+    // Cтатус налогоплательщика (Графа 12)
     private String status;
     private String postIndex;
     // Код Региона
