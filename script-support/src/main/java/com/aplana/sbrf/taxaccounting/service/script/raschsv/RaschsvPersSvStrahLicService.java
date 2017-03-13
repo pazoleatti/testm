@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.raschsv;
 
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
@@ -31,7 +32,7 @@ public interface RaschsvPersSvStrahLicService {
      * @param raschsvPersSvStrahLicListList
      * @return
      */
-    Integer updatePersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicListList);
+    Integer updateRefBookPersonReferences(List<NaturalPerson> raschsvPersSvStrahLicListList);
 
     /**
      * Выборка ПерсСвСтрахЛиц

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -394,12 +395,12 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     @Override
-    public Integer updatePersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicListList) {
+    public Integer updateRefBookPersonReferences(List<NaturalPerson> raschsvPersSvStrahLicListList) {
         List<Map<String, Object>> batchValues = new ArrayList<Map<String, Object>>(raschsvPersSvStrahLicListList.size());
-        for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicListList) {
+        for (NaturalPerson raschsvPersSvStrahLic : raschsvPersSvStrahLicListList) {
             batchValues.add(
-                    new MapSqlParameterSource(RaschsvPersSvStrahLic.COL_ID, raschsvPersSvStrahLic.getId())
-                            .addValue(RaschsvPersSvStrahLic.COL_PERSON_ID, raschsvPersSvStrahLic.getPersonId())
+                    new MapSqlParameterSource(RaschsvPersSvStrahLic.COL_ID, raschsvPersSvStrahLic.getPrimaryPersonId())
+                            .addValue(RaschsvPersSvStrahLic.COL_PERSON_ID, raschsvPersSvStrahLic.getId())
                             .getValues());
         }
         int [] res = getNamedParameterJdbcTemplate().batchUpdate(SQL_UPDATE_PERS_SV_STRAH_LIC,

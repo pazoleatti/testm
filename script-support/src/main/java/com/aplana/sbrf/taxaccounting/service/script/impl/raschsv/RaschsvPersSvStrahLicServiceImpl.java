@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl.raschsv;
 
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvPersSvStrahLicService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,8 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     }
 
     @Override
-    public Integer updatePersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicListList) {
-        return raschsvPersSvStrahLicDao.updatePersSvStrahLic(raschsvPersSvStrahLicListList);
+    public Integer updateRefBookPersonReferences(List<NaturalPerson> raschsvPersSvStrahLicListList) {
+        return raschsvPersSvStrahLicDao.updateRefBookPersonReferences(raschsvPersSvStrahLicListList);
     }
 
     @Override

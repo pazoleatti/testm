@@ -3840,6 +3840,12 @@ RaschsvPersSvStrahLic parseRaschsvPersSvStrahLic(Object persSvStrahLicNode, Long
 @Field
 int SIMILARITY_THRESHOLD = 700;
 
+/**
+ * Тип первичной формы данные которой используются для идентификации 100 - РНУ, 200 - 1151111
+ */
+@Field
+int FORM_TYPE = 200;
+
 def calcTimeMillis(long time) {
     long currTime = System.currentTimeMillis();
     return " (" + (currTime - time) + " ms)";
@@ -3976,6 +3982,14 @@ def getRefBookPersonVersionFrom() {
     return getReportPeriodStartDate();
 }
 
+def updatePrimaryToRefBookPersonReferences(primaryDataRecords){
+    if (FORM_TYPE == 100){
+        ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
+    } else {
+        raschsvPersSvStrahLicService.updateRefBookPersonReferences(primaryDataRecords)
+    }
+}
+
 def calculate() {
 
     long timeFull = System.currentTimeMillis();
@@ -4030,8 +4044,9 @@ def calculate() {
 
     logger.info("Завершение расчета ПНФ " + " " + calcTimeMillis(timeFull));
 }
+//---------------- Identification ----------------
+// Далее идет код скрипта такой же как и в 1151111 возможно следует вынести его в отдельный сервис
 
-//---------------- identification ----------------
 def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
 
     int createCnt = 0;
@@ -4080,11 +4095,12 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
             mapPersonIdentifierAttr(personIdentifier)
         });
 
-        //update reference to ref book7uuiuji
-        ndflPersonService.updateRefBookPersonReferences(insertRecords);
+        //update reference to ref book
+
+        updatePrimaryToRefBookPersonReferences(insertRecords);
+
 
         //Выводим информацию о созданных записях
-
         for (NaturalPerson person : insertRecords) {
             String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
             logger.info(noticeMsg);
@@ -4104,6 +4120,8 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
  * @return
  */
 def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap, Map<Long, Map<Long, NaturalPerson>> similarityPersonMap) {
+
+    println "updateNaturalPersonRefBookRecords similarityPersonMap.size=" + similarityPersonMap.size()
 
     //Проходим по списку и определяем наиболее подходящюю запись, если подходящей записи не найдено то содадим ее
     List<NaturalPerson> updatePersonReferenceList = new ArrayList<NaturalPerson>();
@@ -4134,6 +4152,9 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
         NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
+
+        println "process primaryPerson=" + primaryPerson
+        println "refBookPerson=" + refBookPerson
 
         conformityMap.put(primaryPersonId, refBookPerson);
 
@@ -4248,16 +4269,15 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
     }
 
-    println "Start crete and update reference "
+    //println "crete and update reference"
 
     //crete and update reference
     createNaturalPersonRefBookRecords(insertPersonList);
 
     //update reference to ref book
     if (!updatePersonReferenceList.isEmpty()) {
-        ndflPersonService.updateRefBookPersonReferences(updatePersonReferenceList);
+        updatePrimaryToRefBookPersonReferences(updatePersonReferenceList);
     }
-
 
     insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { personDocument ->
         mapPersonDocumentAttr(personDocument)
@@ -4267,8 +4287,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         mapPersonIdentifierAttr(personIdentifier)
     });
 
-
     List<Map<String, RefBookValue>> refBookDocumentList = new ArrayList<Map<String, RefBookValue>>();
+
     for (PersonDocument personDoc : updateDocumentList) {
         Map<String, RefBookValue> values = mapPersonDocumentAttr(personDoc);
         fillSystemAliases(values, personDoc);
@@ -4281,18 +4301,12 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     }
 
 
-
     for (Map<String, RefBookValue> refBookValues : updatePersonList) {
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
-
-
     for (Map<String, RefBookValue> refBookValues : refBookDocumentList) {
-
-
-
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
@@ -4324,53 +4338,66 @@ PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
 }
 
 /**
- * Метод установленный признак включения в отчетность на основе приоритета
+ * Метод устанавливает признак включения в отчетность на основе приоритета
  */
 def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateDocumentList, AttributeCountChangeListener attrChangeListener) {
 
     List personDocumentList = naturalPerson.getPersonDocumentList();
 
-    PersonDocument minimalPriorDoc = personDocumentList.min { it.getDocType().getPriority() }
+    List includeToReportDocumentList = new ArrayList();
 
-    Long incDocTypeId = minimalPriorDoc.getDocType() != null ? minimalPriorDoc.getDocType().getId() : null;
+    if (!personDocumentList.isEmpty()) {
 
-    for (PersonDocument personDocument : personDocumentList) {
+        //сортировка чтобы при наличии одинаковых типов документов не перезаписывались признаки, статус всегда 1 будет только у одного документа
+        personDocumentList.sort { a, b -> a.id <=> b.id }
 
-        DocType docType = personDocument.getDocType()
+        PersonDocument minimalPriorDoc = personDocumentList.min { it.getDocType().getPriority() }
 
-        if ((docType != null && BaseWeigthCalculator.equalsNullSafe(docType.getId(), incDocTypeId))
-                && BaseWeigthCalculator.isEqualsNullSafeStr(personDocument.getDocumentNumber(), minimalPriorDoc.getDocumentNumber())) {
+        Long incDocTypeId = minimalPriorDoc.getDocType() != null ? minimalPriorDoc.getDocType().getId() : null;
 
-            if (!personDocument.getIncRep().equals(1)) {
-                personDocument.setIncRep(1);
+        for (PersonDocument personDocument : personDocumentList) {
 
-                AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", personDocument.getIncRep());
-                changeEvent.setType(AttributeChangeEventType.REFRESHED);
-                changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, 1));
-                attrChangeListener.processAttr(changeEvent);
+            DocType docType = personDocument.getDocType()
 
-                if (personDocument.getId() != null){
-                    updateDocumentList.add(personDocument);
+            if ((docType != null && BaseWeigthCalculator.equalsNullSafe(docType.getId(), incDocTypeId))
+                    && BaseWeigthCalculator.isEqualsNullSafeStr(personDocument.getDocumentNumber(), minimalPriorDoc.getDocumentNumber()) && includeToReportDocumentList.isEmpty()) {
+
+                if (!personDocument.getIncRep().equals(1)) {
+
+                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", personDocument.getIncRep());
+                    changeEvent.setType(AttributeChangeEventType.REFRESHED);
+
+                    RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, 1);
+                    changeEvent.setCurrentValue(refBookValue);
+                    attrChangeListener.processAttr(changeEvent);
+
+                    personDocument.setIncRep(1);
+
+                    if (personDocument.getId() != null) {
+                        includeToReportDocumentList.add(personDocument);
+                    }
                 }
+            } else {
 
+                if (!personDocument.getIncRep().equals(0)) {
+
+                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", personDocument.getIncRep());
+                    changeEvent.setType(AttributeChangeEventType.REFRESHED);
+
+                    RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, 0);
+                    changeEvent.setCurrentValue(refBookValue);
+                    attrChangeListener.processAttr(changeEvent);
+
+                    personDocument.setIncRep(0);
+
+                    if (personDocument.getId() != null) {
+                        updateDocumentList.add(personDocument);
+                    }
+                }
             }
 
-        } else {
-
-            if (!personDocument.getIncRep().equals(0)) {
-
-                AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", personDocument.getIncRep());
-                changeEvent.setType(AttributeChangeEventType.REFRESHED);
-                changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, 0));
-                attrChangeListener.processAttr(changeEvent);
-
-                personDocument.setIncRep(0);
-                if (personDocument.getId() != null) {
-                    updateDocumentList.add(personDocument);
-                }
-            }
+            updateDocumentList.addAll(includeToReportDocumentList);
         }
-
     }
 }
 
@@ -4475,7 +4502,7 @@ def mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
 
 def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
 
-    println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList + ", version="+getRefBookPersonVersionFrom()
+    println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList
 
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
@@ -4614,9 +4641,8 @@ def appendAttrInfo(Long refBookId, AttributeCountChangeListener attrCounter, Str
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+//--------------------------------------IDENTIFICATION END--------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------------------------
-
 /**
  * Получить "Физические лица"
  * RASCHSV_PERS_SV_STRAH_LIC.PERSON_ID будет ссылаться на актуальную записи справочника ФЛ только после проведения расчета

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.raschsv;
 
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public interface RaschsvPersSvStrahLicDao {
      * @param raschsvPersSvStrahLicListList
      * @return
      */
-    Integer updatePersSvStrahLic(List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicListList);
+    Integer updateRefBookPersonReferences(List<NaturalPerson> raschsvPersSvStrahLicListList);
 
     /**
      * Выборка ПерсСвСтрахЛиц
