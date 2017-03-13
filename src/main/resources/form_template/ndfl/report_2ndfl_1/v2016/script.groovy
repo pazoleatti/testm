@@ -370,7 +370,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 }
 
                 // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
-                def ndflPersonIncomesAll = findAllIncomes([np.id], startDate, endDate, priznakF)
+                def ndflPersonIncomesAll = findAllIncomes(np.id, startDate, endDate, priznakF)
 
                 // Сведения о доходах сгруппированные по ставке
                 def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomesAll)
@@ -382,7 +382,8 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 // Объединенные строки сведений об уведомлении, подтверждающие право на вычет
                 def unionDeductions = unionDeductionsForDeductionType(deductionsSelectedGroupedByDeductionTypeCode)
 
-                def ndflPersonPrepayments = ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(np.id, startDate, endDate)
+
+                def ndflPersonPrepayments = findPrepayments(np.id, startDate, endDate, priznakF)
 
                 ndflPersonIncomesGroupedByTaxRate.keySet().each { taxRateKey ->
                     СведДох(Ставка: taxRateKey) {
@@ -398,7 +399,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                         СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
                                                 КодДоход: incomeKey,
                                                 СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2),
-                                                Страница: i < monthGroup.size() / 2 ? 1 : 2
+                                                Страница: i < ndflPersonIncomesGroupedByIncomeCode.size() / 2 ? 1 : 2
                                         ) {
                                             def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey).get(0), deductionsSelectedForDeductionsInfo)
                                             deductionsFilteredForCurrIncome.each {
@@ -483,15 +484,17 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                 }
                             }
                         }
+                        // Доходы отобранные по датам для поля tax_date(Дата НДФЛ)
+                        def incomesByTaxDate =  ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, startDate, endDate)
 
                         СумИтНалПер(СумДохОбщ: ScriptUtils.round(getSumDohod(ndflPersonIncomesAll), 2),
                                 НалБаза: ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2),
                                 НалИсчисл: getNalIschisl(ndflPersonIncomesAll),
                                 АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
-                                НалУдерж: getNalUderzh(priznakF, ndflPersonIncomesAll),
-                                НалПеречисл: getNalPerechisl(priznakF, ndflPersonIncomesAll),
-                                НалУдержЛиш: getNalUderzhLish(priznakF, ndflPersonIncomesAll),
-                                НалНеУдерж: getNalNeUderzh(ndflPersonIncomesAll)) {
+                                НалУдерж: getNalUderzh(priznakF, incomesByTaxDate),
+                                НалПеречисл: getNalPerechisl(priznakF, incomesByTaxDate),
+                                НалУдержЛиш: getNalUderzhLish(priznakF, incomesByTaxDate),
+                                НалНеУдерж: getNalNeUderzh(priznakF, incomesByTaxDate)) {
 
                             if (np.status == "6") {
                                 ndflPersonPrepayments.each { prepayment ->
@@ -667,20 +670,18 @@ def filterDeductionsByIncomeCode(ndflPersonIncome, def ndflPersonDeductions) {
 /**
  * Получить авансы для ФЛ за период для доходов с одинаковым номером операции
  * @param ndflPersonId
- * @param startDate
- * @param endDate
- * @param ndflPersonIncomes
- * @return
- */
-def findPrepayments(def ndflPersonId, def startDate, def endDate, def ndflPersonIncomes) {
+* @param startDate
+* @param endDate
+*
+* @return
+*/
+def findPrepayments(def ndflPersonId, def startDate, def endDate, priznakF) {
     def toReturn = []
-    def selectedPrepayments = ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate)
-    for (p in selectedPrepayments) {
-        for (i in ndflPersonIncomes) {
-            if (p.operationId == i.operationId) toReturn << p
-        }
+    if (priznakF == "1") {
+        return ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate, true)
+    } else {
+        return ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate, false)
     }
-    return toReturn
 }
 
 // Фильтрация налоговых вычетов для сведений о суммах предоставленных налоговых вычетов
@@ -706,7 +707,12 @@ def groupByTaxRate(def incomes) {
     rates.each { rate -> toReturn[rate] = incomes.findAll { it.taxRate.equals(rate) } }
     return toReturn
 }
-
+/**
+ * Метод возвращает мапу, где ключ Integer сооветстувующий значениям месяцев из класа java.util.Calendar,
+ * а значение мапа, где ключ код дохода, а значение список соответствующих объектов NdflPersonIncome
+ * @param incomes
+ * @return
+ */
 def groupIncomesByMonth(incomes) {
     def groupByMonth = [:]
     def monthes = []
@@ -936,13 +942,22 @@ def getNalUderzhLish(def priznakF, def incomes) {
 }
 
 //Вычислить сумму для НалНеУдерж
-def getNalNeUderzh(def incomes) {
+def getNalNeUderzh(priznakF, incomes) {
     def toReturn = 0L
-    incomes.each {
-        if (it.notHoldingTax != null) {
-            toReturn += it.notHoldingTax
+    if (priznakF == "1") {
+        incomes.each {
+            if (it.notHoldingTax != null) {
+                toReturn += it.notHoldingTax
+            }
+        }
+    } else if (priznakF == "2") {
+        incomes.each {
+            if (it.notHoldingTax != null && it.calculatedTax > 0) {
+                toReturn += it.notHoldingTax
+            }
         }
     }
+
     return toReturn
 }
 
