@@ -113,18 +113,7 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriod(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate);
 
     /**
-     * Найти данные о доходах по КПП и ОКТМО для Физлица с учетом только даты начисления дохода
-     * @param ndflPersonId
-     * @param kpp
-     * @param oktmo
-     * @param startDate
-     * @param endDate
-     * @return
-     */
-    List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriodByAccruedDate(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate);
-
-    /**
-     * Найти данные о доходах ФЛ по идентификатору и интервалу
+     * Найти данные о доходах ФЛ по идентификатору и интервалу. Отбор происходит по дате начиления дохода
      *
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
@@ -133,6 +122,16 @@ public interface NdflPersonDao {
      * @return
      */
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
+
+    /**
+     * Найти данные о доходах ФЛ по идентификатору и интервалу. Отбор происходит по дате НДФЛ
+     *
+     * @param ndflPersonId
+     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate);
 
     /**
      * Найти данные о вычетах ФЛ с признаком вычета "Остальные"
@@ -160,9 +159,10 @@ public interface NdflPersonDao {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
 
     /**
      * Найти все NdflPerson по заданным параметрам

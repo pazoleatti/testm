@@ -129,7 +129,7 @@ public interface NdflPersonService {
     void deleteAll(long declarationDataId);
 
     /**
-     * Найти данные о доходах ФЛ по идентификатору интервалу
+     * Найти данные о доходах ФЛ по идентификатору интервалу. Отбор происходит по дате начиления дохода
      *
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
@@ -138,6 +138,17 @@ public interface NdflPersonService {
      * @return
      */
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
+
+    /**
+     * Найти данные о доходах ФЛ по идентификатору и интервалу. Отбор происходит по дате НДФЛ
+     *
+     * @param ndflPersonId
+     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param prFequals1   = true для НДФЛ(1) prFequals1 = false для НДФЛ(2)
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate);
 
     /**
      * Найти данные о вычетах ФЛ с признаком вычета "Остальные"
@@ -165,9 +176,10 @@ public interface NdflPersonService {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
 
 
     /**

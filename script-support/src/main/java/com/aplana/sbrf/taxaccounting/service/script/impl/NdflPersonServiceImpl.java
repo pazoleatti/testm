@@ -32,6 +32,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate) {
+        return ndflPersonDao.findIncomesByPeriodAndNdflPersonIdAndTaxDate(ndflPersonId, startDate, endDate);
+    }
+
+    @Override
     public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkOstalnie(long ndflPersonId, Date startDate, Date endDate) {
         return ndflPersonDao.findDeductionsWithDeductionsMarkOstalnie(ndflPersonId, startDate, endDate);
     }
@@ -63,8 +68,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate) {
-        return ndflPersonDao.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate);
+    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+        return ndflPersonDao.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate, prFequals1);
     }
 
     @Override
