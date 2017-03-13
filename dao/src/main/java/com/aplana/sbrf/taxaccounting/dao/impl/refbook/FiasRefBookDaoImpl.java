@@ -3,17 +3,23 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao;
-import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -165,6 +171,35 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
         }
     }
 
+    @Override
+    public Map<Long, Long> checkAddressByFias(Long declarationId) {
+        Map<Long, Long> result = new HashMap<Long, Long>();
+        SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("fias_pkg").withFunctionName("CheckAddrByFias");
+        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, new CheckAddressByFiasRowHandler(result)), new SqlParameter("p_declaration", Types.NUMERIC));
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("p_declaration", declarationId);
+        call.execute(params);
+        return result;
+    }
+
+    /**
+     * [ID, POST_INDEX, REGION_CODE, AREA, CITY, LOCALITY, STREET, NDFL_FULL_ADDR, AREA_TYPE, AREA_FNAME, CITY_TYPE, CITY_FNAME, LOC_TYPE, LOC_FNAME, STREET_TYPE, STREET_FNAME, FIAS_ID, FIAS_INDEX, FIAS_STREET, FIAS_STREET_TYPE, FIAS_CITY_ID, FIAS_CITY_NAME]
+     */
+    class CheckAddressByFiasRowHandler implements RowCallbackHandler {
+
+        Map<Long, Long> result;
+
+        public CheckAddressByFiasRowHandler(Map<Long, Long> result) {
+            this.result = result;
+        }
+
+        @Override
+        public void processRow(ResultSet rs) throws SQLException {
+            Long ndflPersonId = SqlUtils.getLong(rs, "id");
+            Long fiasId = SqlUtils.getLong(rs, "fias_id");
+            this.result.put(ndflPersonId, fiasId);
+        }
+    }
 
     /**
      * Получить листовой объект в иерархии адреса

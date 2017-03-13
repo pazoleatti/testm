@@ -22,7 +22,7 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
 
     private Map<String, DocType> docTypeCodeMap;
 
-    protected Logger logger;
+    protected Logger logger = new Logger();
 
     public Map<String, Country> getCountryCodeMap() {
         return countryCodeMap;
@@ -58,15 +58,39 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
 
     public Country getCountryByCode(String code) {
         if (code != null) {
-            return countryCodeMap != null ? countryCodeMap.get(code) : new Country(null, code);
+
+            if (countryCodeMap == null) {
+                logger.warn("Не проинициализирован кэш справочника 'ОК 025-2001 (Общероссийский классификатор стран мира)'!");
+                return null;
+            }
+
+            Country result = countryCodeMap.get(code);
+
+            if (result == null) {
+                logger.warn("В справочнике 'ОК 025-2001 (Общероссийский классификатор стран мира)' не найдена страна с кодом: " + code);
+            }
+
+            return result;
         } else {
             return null;
         }
     }
 
     public TaxpayerStatus getTaxpayerStatusByCode(String code) {
+
         if (code != null) {
-            return taxpayerStatusCodeMap != null ? taxpayerStatusCodeMap.get(code) : new TaxpayerStatus(null, code);
+
+            if (taxpayerStatusCodeMap == null) {
+                logger.warn("Не проинициализирован кэш справочника 'Статусы налогоплательщика'!");
+                return null;
+            }
+
+            TaxpayerStatus result = taxpayerStatusCodeMap.get(code);
+            if (result == null) {
+                logger.warn("В справочнике 'Статусы налогоплательщика' не найден статус с кодом: " + code);
+            }
+            return result;
+
         } else {
             return null;
         }
@@ -74,7 +98,19 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
 
     public DocType getDocTypeByCode(String code) {
         if (code != null) {
-            return docTypeCodeMap != null ? docTypeCodeMap.get(code) : new DocType(null, code);
+
+            if (docTypeCodeMap == null) {
+                logger.warn("Не проинициализирован кэш справочника 'Коды документов'!");
+                return null;
+            }
+
+            DocType result = docTypeCodeMap.get(code);
+
+            if (result == null) {
+                logger.warn("В справочнике 'Коды документов' не найден документ с кодом: " + code);
+            }
+
+            return result;
         } else {
             return null;
         }

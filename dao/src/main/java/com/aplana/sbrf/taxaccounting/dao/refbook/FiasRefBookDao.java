@@ -14,8 +14,9 @@ public interface FiasRefBookDao {
 
     /**
      * Пакетное добавление строк справочника ФИАС
+     *
      * @param tableName имя таблицы справочника
-     * @param records пакет строк, количество строк в пакете определяется в скрипте загрузки
+     * @param records   пакет строк, количество строк в пакете определяется в скрипте загрузки
      */
     void insertRecordsBatch(String tableName, List<Map<String, Object>> records);
 
@@ -26,18 +27,20 @@ public interface FiasRefBookDao {
 
     /**
      * Найти адресообразующий объект
+     *
      * @param regionCode код региона (обязательный параметр)
-     * @param area район
-     * @param city город
-     * @param locality населенный пункт
-     * @param street улица
+     * @param area       район
+     * @param city       город
+     * @param locality   населенный пункт
+     * @param street     улица
      * @return адресообразующий объект справочника
      */
     List<AddressObject> findAddress(String regionCode, String area, String city, String locality, String street);
 
     /**
      * Найти все адресообразующие обекты у которых код региона и наименование потомка совпадают
-     * @param regionCode код региона
+     *
+     * @param regionCode     код региона
      * @param descendantName наименование потомка
      * @return список подходящих объектов
      */
@@ -45,9 +48,20 @@ public interface FiasRefBookDao {
 
     /**
      * Найти регион по коду
+     *
      * @param regionCode код региона
      * @return адресообразующий объект справочника
      */
     AddressObject findRegionByCode(String regionCode);
+
+
+    /**
+     * Найти идентификаторы всех адресообразующих обектов в справочнике ФИАС соответствующие адресам указанным в РНУ-НДФЛ
+     *
+     * @param declarationId идентификатор декларации
+     * @return карта идентификатор записи РНУ-НДФЛ - идентификатор адреса в справочнике ФИАС
+     */
+    Map<Long, Long> checkAddressByFias(Long declarationId);
+
 
 }

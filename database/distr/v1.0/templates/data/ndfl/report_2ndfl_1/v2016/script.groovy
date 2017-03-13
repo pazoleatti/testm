@@ -250,8 +250,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
     // Получим код НО пром из справочника "Общие параметры"
     def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
 
-    // Имя файла
-    def fileName = generateXmlFileId(sberbankInnParam, kodNoProm)
+
 
     //Текущая страница представляющая порядковый номер файла
     def currentPageNumber = partNumber
@@ -259,7 +258,8 @@ def buildXml(def writer, boolean isForSpecificReport) {
     // инициализация данных о подразделении
     departmentParam = getDepartmentParam(declarationData.departmentId, declarationData.reportPeriodId)
     departmentParamRow = getDepartmentParamDetails(departmentParam?.id, declarationData.reportPeriodId)
-
+    // Имя файла
+    def fileName = generateXmlFileId(sberbankInnParam, kodNoProm)
     // Отчетный период
     reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
@@ -304,7 +304,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
     def nomKorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
     def kodNo = departmentParamRow?.TAX_ORGAN_CODE?.value
     def builder = new MarkupBuilder(writer)
-
+    builder.setDoubleQuotes(true)
     builder.setOmitNullAttributes(true)
     builder.Файл(ИдФайл: fileName,
             ВерсПрог: applicationVersion,
@@ -370,13 +370,10 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 }
 
                 // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
-                def ndflPersonIncomesFiltered = findAllIncomes(np.id, startDate, endDate, priznakF)
-
-                // Сведения о вычетах
-                // def ndflPersonDeductions = findDeductions(np.id, startDate, endDate, ndflPersonIncomesFiltered)
+                def ndflPersonIncomesAll = findAllIncomes([np.id], startDate, endDate, priznakF)
 
                 // Сведения о доходах сгруппированные по ставке
-                def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomesFiltered)
+                def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomesAll)
 
                 // Сведения о вычетах с признаком "Остальные"
                 def deductionsSelectedForDeductionsInfo = ndflPersonService.findDeductionsWithDeductionsMarkOstalnie(np.id, startDate, endDate)
@@ -487,14 +484,14 @@ def buildXml(def writer, boolean isForSpecificReport) {
                             }
                         }
 
-                        СумИтНалПер(СумДохОбщ: ScriptUtils.round(getSumDohod(ndflPersonIncomesFiltered), 2),
-                                НалБаза: ScriptUtils.round(getNalBaza(ndflPersonIncomesFiltered), 2),
-                                НалИсчисл: getNalIschisl(ndflPersonIncomesFiltered),
+                        СумИтНалПер(СумДохОбщ: ScriptUtils.round(getSumDohod(ndflPersonIncomesAll), 2),
+                                НалБаза: ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2),
+                                НалИсчисл: getNalIschisl(ndflPersonIncomesAll),
                                 АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
-                                НалУдерж: getNalUderzh(priznakF, ndflPersonIncomesFiltered),
-                                НалПеречисл: getNalPerechisl(priznakF, ndflPersonIncomesFiltered),
-                                НалУдержЛиш: getNalUderzhLish(priznakF, ndflPersonIncomesFiltered),
-                                НалНеУдерж: getNalNeUderzh(ndflPersonIncomesFiltered)) {
+                                НалУдерж: getNalUderzh(priznakF, ndflPersonIncomesAll),
+                                НалПеречисл: getNalPerechisl(priznakF, ndflPersonIncomesAll),
+                                НалУдержЛиш: getNalUderzhLish(priznakF, ndflPersonIncomesAll),
+                                НалНеУдерж: getNalNeUderzh(ndflPersonIncomesAll)) {
 
                             if (np.status == "6") {
                                 ndflPersonPrepayments.each { prepayment ->
@@ -513,8 +510,26 @@ def buildXml(def writer, boolean isForSpecificReport) {
     }
 
     saveNdflRefences()
+    saveFileInfo(currDate, fileName)
 
     //println(writer)
+}
+// Сохранение информации о файле в комментариях
+def saveFileInfo(currDate, fileName) {
+    def fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName, new Date())
+    def createUser = declarationService.getSystemUserInfo().getUser()
+
+    def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
+    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
+
+    def declarationDataFile = new DeclarationDataFile()
+    declarationDataFile.setDeclarationDataId(declarationData.id)
+    declarationDataFile.setUuid(fileUuid)
+    declarationDataFile.setUserName(createUser.getName())
+    declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
+    declarationDataFile.setFileTypeId(fileTypeId)
+    declarationDataFile.setDate(currDate)
+    declarationService.saveFile(declarationDataFile)
 }
 
 def saveNdflRefences() {
@@ -1262,24 +1277,6 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
     }
     allDeclarationData.removeAll(declarationsForRemove)
     return allDeclarationData
-}
-
-def initNdflPersons(def ndflPersonsGroupedByKppOktmo) {
-    ndflPersonsGroupedByKppOktmo.each { npGroup ->
-        def oktmo = npGroup.key.oktmo
-        def kpp = npGroup.key.kpp
-        npGroup.value.each {
-            def incomes = ndflPersonService.findIncomesForPersonByKppOktmo(it.id, kpp.toString(), oktmo.toString())
-            resetId(incomes)
-            def deductions = ndflPersonService.findDeductions(it.id)
-            resetId(deductions)
-            def prepayments = ndflPersonService.findPrepayments(it.id)
-            resetId(prepayments)
-            it.setIncomes(incomes)
-            it.setDeductions(deductions)
-            it.setPrepayments(prepayments)
-        }
-    }
 }
 
 /**

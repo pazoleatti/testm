@@ -4,29 +4,35 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Стандартные, социальные и имущественные налоговые вычеты
+ * Стандартные, социальные и имущественные налоговые вычеты (Раздел 3)
  * @author Andrey Drunk
  */
 public class NdflPersonDeduction extends NdflPersonOperation {
 
-    // Код вида вычета
+    // Код вычета (Графа 3)
     private String typeCode;
+    // Тип вычета (Графа 4)
     private String notifType;
     // Дата выдачи уведомления
     private Date notifDate;
+    // Номер (Графа 6)
     private String notifNum;
-    // Код налогового органа, выдавшего уведомление
+    // Код источника (Графа 7)
     private String notifSource;
+    // Сумма вычета согласно документу (Графа 8)
     private BigDecimal notifSumm;
-    // Дата начисления дохода
+    // Дата начисления дохода (Графа 10)
     private Date incomeAccrued;
+    // Код дохода (Графа 11)
     private String incomeCode;
+    // Сумма начисленного дохода (Графа 12)
     private BigDecimal incomeSumm;
     // Дата применения вычета в предыдущем периоде
     private Date periodPrevDate;
     private BigDecimal periodPrevSumm;
-    // Дата применения вычета в текущем периоде
+    // Дата применения вычета в текущем периоде (Графа 15)
     private Date periodCurrDate;
+    // Сумма применения вычета в текущем периоде (Графа 16)
     private BigDecimal periodCurrSumm;
 
     public static final String TABLE_NAME = "ndfl_person_deduction";

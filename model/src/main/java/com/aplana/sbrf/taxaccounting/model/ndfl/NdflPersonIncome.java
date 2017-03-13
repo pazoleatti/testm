@@ -9,42 +9,42 @@ import java.util.Date;
  */
 public class NdflPersonIncome extends NdflPersonOperation {
 
-    // Код вида дохода
+    // Код вида дохода (Графа 4)
     private String incomeCode;
-    // Признак вида дохода
+    // Признак вида дохода (Графа 5)
     private String incomeType;
     private String oktmo;
     private String kpp;
-    // Дата начисления дохода
+    // Дата начисления дохода (Графа 6)
     private Date incomeAccruedDate;
-    // Дата выплаты дохода
+    // Дата выплаты дохода (Графа 7)
     private Date incomePayoutDate;
-    // Сумма начисленного дохода
+    // Сумма начисленного дохода (Графа 10)
     private BigDecimal incomeAccruedSumm;
     // Сумма выплаченного дохода
     private BigDecimal incomePayoutSumm;
-    // Общая сумма вычетов
+    // Общая сумма вычетов (Графа 12)
     private BigDecimal totalDeductionsSumm;
-    // Налоговая база
+    // Налоговая база (Графа 13)
     private BigDecimal taxBase;
-    // Ставка
+    // Ставка (Графа 14)
     private Integer taxRate;
 
     /**
-     * Дата налога
+     * Дата налога (Графа 15)
      * Если заполнено поле "Сумма налога исчисленная", то это "Дата исчисления"
      * Если заполнено поле "Сумма налога удержанная", то это "Дата удержания"
      */
     private Date taxDate;
-    // Сумма налога исчисленная
+    // Сумма налога исчисленная (Графа 16)
     private Long calculatedTax;
-    // Сумма налога удержанная
+    // Сумма налога удержанная (Графа 17)
     private Long withholdingTax;
-    // Сумма налога, не удержанная налоговым агентом
+    // Сумма налога, не удержанная налоговым агентом (Графа 18)
     private Long notHoldingTax;
-    // Сумма налога, излишне удержанная налоговым агентом
+    // Сумма налога, излишне удержанная налоговым агентом (Графа 19)
     private Long overholdingTax;
-    // Сумма возвращенного налога
+    // Сумма возвращенного налога (Графа 20)
     private Long refoundTax;
     // Срок (дата) перечисления налога
     private Date taxTransferDate;
@@ -52,7 +52,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Date paymentDate;
     // Номер платежного поручения перечисления налога в бюджет
     private String paymentNumber;
-    // Сумма налога перечисленная
+    // Сумма налога перечисленная (Графа 24)
     private Integer taxSumm;
 
     public static final String TABLE_NAME = "ndfl_person_income";
