@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.identification;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -11,17 +10,13 @@ import java.util.List;
 /**
  * @author Andrey Drunk
  */
-public class NaturalPerson extends IdentityObject<Long> implements IdentityPerson {
+public class NaturalPerson extends RefBookObject implements IdentityPerson {
 
     /**
      * Идентификатор ФЛ в первичной форме
      */
     private Long primaryPersonId;
 
-    /**
-     * Идентификатор записи (buisiness key) в справочнике физлиц, заполняется при получении записи из БД
-     */
-    private Long recordId;
 
     /**
      * Фамилия
@@ -268,14 +263,6 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
         this.personDocumentList = personDocumentList;
     }
 
-    public Long getRecordId() {
-        return recordId;
-    }
-
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
-    }
-
     public Long getSourceId() {
         return sourceId;
     }
@@ -334,6 +321,7 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("id(refBook)", id)
                 .append("id(primary)", primaryPersonId)
+                .append("recordId", recordId)
                 .append("lastName", lastName)
                 .append("firstName", firstName)
                 .append("middleName", middleName)
@@ -354,6 +342,5 @@ public class NaturalPerson extends IdentityObject<Long> implements IdentityPerso
                 .append("weigth", weigth)
                 .toString();
     }
-
 
 }

@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
-import com.aplana.sbrf.taxaccounting.model.PersonData;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
@@ -98,10 +98,10 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
             StringBuffer msg = new StringBuffer();
 
-            msg.append("Для ФЛ " + buildNotice(personData) + " сходных записей найдено: " + personDataList.size()).append(" ");
+            msg.append("Для ФЛ " + IdentificationUtils.buildNotice((NaturalPerson) personData) + " сходных записей найдено: " + personDataList.size()).append(" ");
             DecimalFormat df = new DecimalFormat("0.00");
             for (IdentityPerson applicablePersonData : personDataList) {
-                msg.append("[").append(buildRefBookNotice(applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
+                msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
             }
 
             //Выбор из найденных записей одной записи с максимальной Степенью соответствия критериям
@@ -109,7 +109,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             if (identificatedPerson.getWeigth() > treshold) {
                 //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
                 if (personDataList.size() > 1) {
-                    msg.append(". Выбрана запись: [" + buildRefBookNotice(identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
+                    msg.append(". Выбрана запись: [" + IdentificationUtils.buildRefBookNotice((NaturalPerson) identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
                     logger.info(msg.toString());
                 }
 
@@ -125,86 +125,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         }
 
     }
-
-    public String buildRefBookNotice(IdentityPerson personData) {
-
-        StringBuffer sb = new StringBuffer();
-
-        sb.append("СНИЛС: " + personData.getSnils()).append(": ");
-
-        sb.append(emptyIfNull(personData.getLastName())).append(" ");
-        sb.append(emptyIfNull(personData.getFirstName())).append(" ");
-        sb.append(emptyIfNull(personData.getMiddleName())).append(" ");
-
-        NaturalPerson naturalPerson = (NaturalPerson) personData;
-
-        PersonDocument personDocument = naturalPerson.getIncludeReportDocument();
-
-        if (personDocument != null) {
-            if (personDocument.getDocType() != null) {
-                sb.append(personDocument.getDocType().getCode() != null ? ("код: " + personDocument.getDocType().getCode()) : "").append(", ");
-            }
-            sb.append(emptyIfNull(personDocument.getDocumentNumber()));
-        }
-
-        return sb.toString();
-    }
-
-
-    /**
-     * Формирует строку в виде
-     * <Номер в форме(ИНП)>: <Фамилия> <Имя> <Отчество>, <Название ДУЛ> № <Серия и номер ДУЛ>
-     *
-     * @return
-     */
-    public static String buildNotice(IdentityPerson identityPerson) {
-
-        NaturalPerson naturalPerson = (NaturalPerson) identityPerson;
-
-        StringBuffer sb = new StringBuffer();
-
-
-        //TODO для 115
-        /*if (naturalPerson.getPersonNumber() != null) {
-            sb.append("Номер: " + naturalPerson.getPersonNumber()).append(": ");
-        } else if (naturalPerson.getInp() != null) {
-            sb.append("ИНП: " + naturalPerson.getInp()).append(": ");
-        } else if (personData.getSnils() != null) {
-            sb.append("СНИЛС: " + personData.getSnils()).append(": ");
-        }*/
-
-        sb.append(emptyIfNull(naturalPerson.getPrimaryPersonId() + " - " + naturalPerson.getId())).append(" ");
-        sb.append(emptyIfNull(naturalPerson.getLastName())).append(" ");
-        sb.append(emptyIfNull(naturalPerson.getFirstName())).append(" ");
-        sb.append(emptyIfNull(naturalPerson.getMiddleName())).append(" ");
-
-        //if (naturalPerson.getDocumentTypeCode() != null) {
-        //    sb.append(naturalPerson.getDocumentTypeCode() != null ? ("код: " + personData.getDocumentTypeCode()) : "").append(", ");
-        //}
-        sb.append(Arrays.toString(naturalPerson.getPersonDocumentList().toArray()));
-        return sb.toString();
-    }
-
-    private static String emptyIfNull(String string) {
-        if (string != null) {
-            return string;
-        } else {
-            return "";
-        }
-    }
-
-
-    private List<PersonData> getApplicable(List<PersonData> personDataList, double treshold) {
-        List<PersonData> result = new ArrayList<PersonData>();
-        for (PersonData personData : personDataList) {
-            double weigth = personData.getWeigth();
-            if (weigth > treshold) {
-                result.add(personData);
-            }
-        }
-        return result;
-    }
-
 
     private static void calculateWeigth(IdentityPerson searchPersonData, List<IdentityPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators) {
         for (IdentityPerson personData : personDataList) {

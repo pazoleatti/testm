@@ -248,13 +248,23 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         checkLogger();
     }
 
+
+    @Test
+    public void createSpecificReportTest() throws Exception {
+        //ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
+        //reportHolder.getSubreportParamValues().put("lastName", "Иванов");
+        //testHelper.setScriptSpecificReportHolder(reportHolder);
+        //testHelper.execute(FormDataEvent.CREATE_SPECIFIC_REPORT);
+    }
+
+
     /**
      * Тест создания спецотчета "Спецотчет РНУ НДФЛ по физическому лицу"
      *
      * @throws IOException
      */
     //@Test
-    public void createSpecificReportTest() throws Exception {
+    public void createSpecificReportTestFull() throws Exception {
 
         ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
         reportHolder.getSubreportParamValues().put("lastName", "Иванов");

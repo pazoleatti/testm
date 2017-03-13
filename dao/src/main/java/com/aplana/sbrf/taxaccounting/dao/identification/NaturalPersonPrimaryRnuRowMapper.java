@@ -85,7 +85,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
 
         //Используются только адреса которые прошли проверку по ФИАС
-        Long fiasAddressId = getFiasAddressId(ndflPersonId);
+        Long fiasAddressId = getFiasAddressId(person, ndflPersonId);
 
         if (fiasAddressId != null) {
             person.setAddress(buildAddress(rs));
@@ -114,11 +114,12 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         return address;
     }
 
-    public Long getFiasAddressId(Long ndflPersonId) {
+    public Long getFiasAddressId(NaturalPerson person, Long ndflPersonId) {
+
         if (fiasAddressIdsMap != null) {
             Long result = fiasAddressIdsMap.get(ndflPersonId);
             if (result == null) {
-                logger.warn("Не найден адрес физического лица " + ndflPersonId);
+                logger.warn("Не найден адрес физического лица " + IdentificationUtils.buildNotice(person));
             }
             return result;
         } else {

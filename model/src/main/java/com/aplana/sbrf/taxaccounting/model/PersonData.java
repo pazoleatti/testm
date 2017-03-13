@@ -4,9 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 
 /**
  * Класс для передачи данных из ДАО в сервис
+ * Вместо этого класса используется NaturalPerson, который полностью описывает модель справочников, данный класс будет удален после тестирования
  *
  * @author Andrey Drunk
+ * @see com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
  */
+@Deprecated
 public class PersonData extends NaturalPerson {
 
     /**
@@ -97,10 +100,6 @@ public class PersonData extends NaturalPerson {
 
     public void setCitizenship(String citizenship) {
         this.citizenship = citizenship;
-    }
-
-    public String getStatus() {
-        return status;
     }
 
     public void setStatus(String status) {
