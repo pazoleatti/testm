@@ -3912,21 +3912,21 @@ NaturalPersonPrimaryRowMapper createPrimaryRowMapper() {
         [it.code, it]
     });
 
-    println "getCountryCodeMap "+naturalPersonRowMapper.getCountryCodeMap();
+    //println "getCountryCodeMap "+naturalPersonRowMapper.getCountryCodeMap();
 
     List<DocType> docTypeList = getDocTypeRefBookList();
     naturalPersonRowMapper.setDocTypeCodeMap(docTypeList.collectEntries {
         [it.code, it]
     });
 
-    println "getDocTypeCodeMap "+naturalPersonRowMapper.getDocTypeCodeMap();
+    //println "getDocTypeCodeMap "+naturalPersonRowMapper.getDocTypeCodeMap();
 
     List<TaxpayerStatus> taxpayerStatusList = getTaxpayerStatusRefBookList();
     naturalPersonRowMapper.setTaxpayerStatusCodeMap(taxpayerStatusList.collectEntries {
         [it.code, it]
     });
 
-    println "getTaxpayerStatusCodeMap "+naturalPersonRowMapper.getTaxpayerStatusCodeMap();
+    //println "getTaxpayerStatusCodeMap "+naturalPersonRowMapper.getTaxpayerStatusCodeMap();
 
     return naturalPersonRowMapper;
 }
@@ -3983,6 +3983,9 @@ def getRefBookPersonVersionFrom() {
 }
 
 def updatePrimaryToRefBookPersonReferences(primaryDataRecords){
+
+    ScriptUtils.checkInterrupted();
+
     if (FORM_TYPE == 100){
         ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
     } else {
@@ -4009,10 +4012,14 @@ def calculate() {
         [it.getPrimaryPersonId(), it]
     }
 
+    ScriptUtils.checkInterrupted();
+
     //Заполнени временной таблицы версий
     time = System.currentTimeMillis();
     refBookPersonService.fillRecordVersions1151111(getRefBookPersonVersionTo());
     logger.info("Заполнение таблицы версий: " + calcTimeMillis(time));
+
+    ScriptUtils.checkInterrupted();
 
     //Шаг 1. список физлиц первичной формы для создания записей в справочниках
     time = System.currentTimeMillis();
@@ -4023,6 +4030,7 @@ def calculate() {
     createNaturalPersonRefBookRecords(insertPersonList);
     logger.info("Создание записей: "+insertPersonList.size() + calcTimeMillis(time));
 
+    ScriptUtils.checkInterrupted();
 
     //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
     time = System.currentTimeMillis();
@@ -4033,6 +4041,8 @@ def calculate() {
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap);
     logger.info("Обновление записей " + calcTimeMillis(time));
+
+    ScriptUtils.checkInterrupted();
 
     time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimary1151111(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
@@ -4057,6 +4067,8 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
         List<PersonIdentifier> identifierList = new ArrayList<PersonIdentifier>();
 
         for (NaturalPerson person : insertRecords) {
+
+            ScriptUtils.checkInterrupted();
 
             Address address = person.getAddress();
             if (address != null) {
@@ -4121,7 +4133,7 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
  */
 def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap, Map<Long, Map<Long, NaturalPerson>> similarityPersonMap) {
 
-    println "updateNaturalPersonRefBookRecords similarityPersonMap.size=" + similarityPersonMap.size()
+    //println "updateNaturalPersonRefBookRecords similarityPersonMap.size=" + similarityPersonMap.size()
 
     //Проходим по списку и определяем наиболее подходящюю запись, если подходящей записи не найдено то содадим ее
     List<NaturalPerson> updatePersonReferenceList = new ArrayList<NaturalPerson>();
@@ -4144,6 +4156,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     HashMap<Long, NaturalPerson> conformityMap = new HashMap<Long, NaturalPerson>();
 
     for (Map.Entry<Long, Map<Long, NaturalPerson>> entry : similarityPersonMap.entrySet()) {
+        ScriptUtils.checkInterrupted();
+
         Long primaryPersonId = entry.getKey();
 
         Map<Long, NaturalPerson> similarityPersonValues = entry.getValue();
@@ -4153,8 +4167,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
 
-        println "process primaryPerson=" + primaryPerson
-        println "refBookPerson=" + refBookPerson
+        //println "process primaryPerson=" + primaryPerson
+        //println "refBookPerson=" + refBookPerson
 
         conformityMap.put(primaryPersonId, refBookPerson);
 
@@ -4172,6 +4186,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
     int updCnt = 0;
     for (Map.Entry<Long, NaturalPerson> entry : conformityMap.entrySet()) {
+        ScriptUtils.checkInterrupted();
+
         Long primaryPersonId = entry.getKey();
         NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
         NaturalPerson refBookPerson = entry.getValue();
@@ -4290,28 +4306,33 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     List<Map<String, RefBookValue>> refBookDocumentList = new ArrayList<Map<String, RefBookValue>>();
 
     for (PersonDocument personDoc : updateDocumentList) {
+        ScriptUtils.checkInterrupted();
         Map<String, RefBookValue> values = mapPersonDocumentAttr(personDoc);
         fillSystemAliases(values, personDoc);
         refBookDocumentList.add(values);
     }
 
     for (Map<String, RefBookValue> refBookValues : updateAddressList) {
+        ScriptUtils.checkInterrupted();
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.PERSON_ADDRESS.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
 
     for (Map<String, RefBookValue> refBookValues : updatePersonList) {
+        ScriptUtils.checkInterrupted();
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
     for (Map<String, RefBookValue> refBookValues : refBookDocumentList) {
+        ScriptUtils.checkInterrupted();
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
     for (Map<String, RefBookValue> refBookValues : updateIdentifierList) {
+        ScriptUtils.checkInterrupted();
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
@@ -4502,12 +4523,15 @@ def mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
 
 def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
 
-    println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList
+    //println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList
 
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
+
+            ScriptUtils.checkInterrupted();
+
             def values = refBookMapper(identityObject);
             recordList.add(createRefBookRecord(values));
         }
@@ -4517,6 +4541,9 @@ def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
 
         //установка id
         for (int i = 0; i < identityObjectList.size(); i++) {
+
+            ScriptUtils.checkInterrupted();
+
             Long id = generatedIds.get(i);
             IdentityObject identityObject = identityObjectList.get(i);
             identityObject.setId(id);
