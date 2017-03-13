@@ -22,6 +22,7 @@ create table tmp_dep_params
   lastname varchar2(100 char),
   docname varchar2(100 char),
   orgname varchar2(100 char),
-  reorgcode varchar2(100 char)
+  reorgcode varchar2(100 char),
+  row_num number
 );
 

@@ -508,7 +508,7 @@ create table ref_book_ndfl_detail
  okved              number(18),
  region             number(18),
  oktmo              number(18),
- phone              varchar2(20 char),
+ phone              varchar2(25 char),
  obligation         number(18),
  type               number(18),
  --Сведения о реорганизации
