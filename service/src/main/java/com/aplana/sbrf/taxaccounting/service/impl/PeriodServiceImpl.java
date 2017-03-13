@@ -465,11 +465,10 @@ public class PeriodServiceImpl implements PeriodService {
 	@Override
 	public Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType) {
 		List<Integer> departments = departmentService.getTaxFormDepartments(user, taxType, null, null);
-		if (user.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) || user.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)
-				|| user.hasRole(taxType, TARole.N_ROLE_CONTROL_NS) || user.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)
-				) {
+		if (user.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
+                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
 			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false, false));
-		} else if (user.hasRole(taxType, TARole.N_ROLE_OPER) || user.hasRole(taxType, TARole.F_ROLE_OPER)) {
+		} else if (user.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
 			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true, false));
 		} else {
 			return Collections.EMPTY_SET;
@@ -623,7 +622,7 @@ public class PeriodServiceImpl implements PeriodService {
 	}
 
 	public List<Integer> getAvailableDepartments(TaxType taxType, TAUser user, Operation operation, int departmentId) {
-		if (user.hasRole("ROLE_CONTROL_UNP")) {
+		if (user.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
 			switch (taxType) {
                 case NDFL:
                 case PFR:
@@ -641,7 +640,7 @@ public class PeriodServiceImpl implements PeriodService {
 					}
 					break;
 			}
-		} else if  (user.hasRole("ROLE_CONTROL_NS")) {
+		} else if (user.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
 			switch (taxType) {
                 case NDFL:
                 case PFR:
