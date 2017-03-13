@@ -519,6 +519,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
     }
 
+    //println "crete and update reference"
+
     //crete and update reference
     createNaturalPersonRefBookRecords(insertPersonList);
 
@@ -526,7 +528,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     if (!updatePersonReferenceList.isEmpty()) {
         ndflPersonService.updateRefBookPersonReferences(updatePersonReferenceList);
     }
-
 
     insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { personDocument ->
         mapPersonDocumentAttr(personDocument)
@@ -536,14 +537,10 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         mapPersonIdentifierAttr(personIdentifier)
     });
 
-
     List<Map<String, RefBookValue>> refBookDocumentList = new ArrayList<Map<String, RefBookValue>>();
 
-
     for (PersonDocument personDoc : updateDocumentList) {
-
         Map<String, RefBookValue> values = mapPersonDocumentAttr(personDoc);
-
         fillSystemAliases(values, personDoc);
         refBookDocumentList.add(values);
     }
@@ -616,7 +613,10 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
                 changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, 1));
                 attrChangeListener.processAttr(changeEvent);
 
-                updateDocumentList.add(personDocument);
+                if (personDocument.getId() != null){
+                    updateDocumentList.add(personDocument);
+                }
+
             }
 
         } else {
@@ -629,7 +629,10 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
                 attrChangeListener.processAttr(changeEvent);
 
                 personDocument.setIncRep(0);
-                updateDocumentList.add(personDocument);
+
+                if (personDocument.getId() != null){
+                    updateDocumentList.add(personDocument);
+                }
             }
         }
 
@@ -673,7 +676,7 @@ def updatePersonAttr(Map<String, RefBookValue> values, NaturalPerson person, Att
     putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
     putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
     putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, person.getSex(), attributeChangeListener);
+    putOrUpdate(values, "SEX", RefBookAttributeType.NUMBER, person.getSex(), attributeChangeListener);
     putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
     putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
     putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);

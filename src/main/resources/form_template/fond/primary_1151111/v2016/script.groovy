@@ -1,6 +1,11 @@
 package form_template.fond.primary_1151111.v2016
 
-import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.IdentityObject
+import com.aplana.sbrf.taxaccounting.model.PersonData
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.identification.*
+import com.aplana.sbrf.taxaccounting.dao.identification.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
 import com.aplana.sbrf.taxaccounting.dao.identification.*
@@ -25,7 +30,7 @@ import org.apache.poi.xssf.usermodel.*
 import org.codehaus.groovy.tools.DocGenerator
 
 import javax.script.ScriptException
-import java.awt.*
+import java.awt.Color;
 import java.util.List
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -4243,6 +4248,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
     }
 
+    println "Start crete and update reference "
+
     //crete and update reference
     createNaturalPersonRefBookRecords(insertPersonList);
 
@@ -4262,12 +4269,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
 
     List<Map<String, RefBookValue>> refBookDocumentList = new ArrayList<Map<String, RefBookValue>>();
-
-
     for (PersonDocument personDoc : updateDocumentList) {
-
         Map<String, RefBookValue> values = mapPersonDocumentAttr(personDoc);
-
         fillSystemAliases(values, personDoc);
         refBookDocumentList.add(values);
     }
@@ -4278,12 +4281,18 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     }
 
 
+
     for (Map<String, RefBookValue> refBookValues : updatePersonList) {
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.PERSON.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
+
+
     for (Map<String, RefBookValue> refBookValues : refBookDocumentList) {
+
+
+
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
@@ -4340,7 +4349,10 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
                 changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, 1));
                 attrChangeListener.processAttr(changeEvent);
 
-                updateDocumentList.add(personDocument);
+                if (personDocument.getId() != null){
+                    updateDocumentList.add(personDocument);
+                }
+
             }
 
         } else {
@@ -4353,7 +4365,9 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
                 attrChangeListener.processAttr(changeEvent);
 
                 personDocument.setIncRep(0);
-                updateDocumentList.add(personDocument);
+                if (personDocument.getId() != null) {
+                    updateDocumentList.add(personDocument);
+                }
             }
         }
 
@@ -4397,7 +4411,7 @@ def updatePersonAttr(Map<String, RefBookValue> values, NaturalPerson person, Att
     putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
     putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
     putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-    putOrUpdate(values, "SEX", RefBookAttributeType.STRING, person.getSex(), attributeChangeListener);
+    putOrUpdate(values, "SEX", RefBookAttributeType.NUMBER, person.getSex(), attributeChangeListener);
     putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
     putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
     putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
@@ -4461,7 +4475,7 @@ def mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
 
 def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
 
-    //println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList
+    println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList + ", version="+getRefBookPersonVersionFrom()
 
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
