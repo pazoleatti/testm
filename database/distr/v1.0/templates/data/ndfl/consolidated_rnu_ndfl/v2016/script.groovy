@@ -756,6 +756,10 @@ def getRelation(DeclarationData declarationData, Department department, ReportPe
 //------------------ PREPARE_SPECIFIC_REPORT ----------------------
 
 def prepareSpecificReport() {
+    def reportAlias = scriptSpecificReportHolder?.declarationSubreport?.alias;
+    if ('rnu_ndfl_person_db' != reportAlias) {
+        throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
+    }
     PrepareSpecificReportResult result = new PrepareSpecificReportResult();
     List<Column> tableColumns = createTableColumns();
     List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
@@ -904,25 +908,41 @@ def createRowColumns() {
 
 //------------------ Create Report ----------------------
 
-def createSpecificReport() {
 
-    def params = scriptSpecificReportHolder.subreportParamValues
+def createSpecificReport() {
+    switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
+        case 'rnu_ndfl_person_db': createSpecificReportPersonDb();
+            break;
+        case 'report_kpp_oktmo':
+        case 'rnu_ndfl_person_all_db': createSpecificReportDb();
+            break;
+        default:
+            throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
+    }
+}
+/**
+ * Спец. отчет "РНУ НДФЛ по физическому лицу". Данные макет извлекает непосредственно из бд
+ */
+def createSpecificReportPersonDb() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
-
     if (ndflPerson != null) {
-        //формирование отчета
-        def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-            calculateReportData(it, ndflPerson)
-        });
-
+        def params = [NDFL_PERSON_ID : ndflPerson.id];
+        def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
         declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-
         scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
-
     } else {
         throw new ServiceException("Не найдены данные для формирования отчета!");
     }
+}
+/**
+ * Формирует спец. отчеты, данные для которых макет извлекает непосредственно из бд
+ */
+def createSpecificReportDb() {
+    def params = [declarationId : declarationData.id]
+    def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
+    declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name + ".xlsx")
 }
 
 /**
@@ -964,88 +984,6 @@ String capitalize(String str) {
             .append(str.substring(1).toLowerCase())
             .toString();
 }
-
-void calculateReportData(writer, ndflPerson) {
-
-    //отчетный период
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-
-    //Идентификатор подразделения
-    def departmentId = declarationData.departmentId
-
-    //Подразделение
-    def department = departmentService.get(departmentId)
-
-    def reportPeriodCode = findReportPeriodCode(reportPeriod)
-
-    // Подготовка данных для СведОпер
-    def incomes = ndflPerson.incomes.sort { a, b -> (a.rowNum <=> b.rowNum) }
-    def deductions = ndflPerson.deductions.sort { a, b -> a.rowNum <=> b.rowNum }
-    def prepayments = ndflPerson.prepayments.sort { a, b -> a.rowNum <=> b.rowNum }
-    def operationList = incomes.collectEntries { personIncome ->
-        def key = personIncome.operationId
-        def value = ["ИдОпер": personIncome.operationId, "КПП": personIncome.kpp, "ОКТМО": personIncome.oktmo]
-        return [key, value]
-    }
-    def incomeOperations = mapToOperationId(incomes);
-    def deductionOperations = mapToOperationId(deductions);
-    def prepaymentOperations = mapToOperationId(prepayments);
-
-    def builder = new MarkupBuilder(writer)
-    builder.Файл() {
-        СлЧасть('КодПодр': department.sbrfCode) {}
-        ИнфЧасть('ПериодОтч': reportPeriodCode, 'ОтчетГод': reportPeriod?.taxPeriod?.year) {
-            ПолучДох(ndflPersonAttr(ndflPerson)) {}
-            operationList.each { key, value ->
-                СведОпер(value) {
-                    //доходы
-                    incomeOperations.get(key).each { personIncome ->
-                        СведДохНал(incomeAttr(personIncome)) {}
-                    }
-
-                    //Вычеты
-                    deductionOperations.get(key).each { personDeduction ->
-                        СведВыч(deductionAttr(personDeduction)) {}
-                    }
-
-                    //Авансовые платежи
-                    prepaymentOperations.get(key).each { personPrepayment ->
-                        СведАванс(prepaymentAttr(personPrepayment)) {}
-                    }
-                }
-            }
-        }
-    }
-}
-
-def mapToOperationId(collection) {
-    def result = [:]
-    collection.collectEntries(result) { personOperation ->
-        def key = personOperation.operationId
-        def value
-        if (result.containsKey(key)) {
-            value = result.get(key);
-        } else {
-            value = [].toList()
-        }
-        value.add(personOperation)
-        return [key, value]
-    }
-    return result;
-}
-
-/**
- * Находит код периода из справочника "Коды, определяющие налоговый (отчётный) период"
- */
-def findReportPeriodCode(reportPeriod) {
-    RefBookDataProvider dataProvider = refBookFactory.getDataProvider(RefBook.Id.PERIOD_CODE.getId())
-    Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
-    if (refBookValueMap.isEmpty()) {
-        throw new ServiceException("Некорректные данные в справочнике \"Коды, определяющие налоговый (отчётный) период\"");
-    }
-    return refBookValueMap.get("CODE").getStringValue();
-}
-
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
 //если проверки различаются то используется параметр {@link #FORM_DATA_KIND_CONSOLIDATED}
 //При внесении изменений учитывается что эта чать скрипта используется(копируется) и в первичной и в консолидированной
