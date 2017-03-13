@@ -13,7 +13,7 @@ public class AttributeChangeEvent {
      * @param attrName алиас
      * @param newValue значени
      */
-    AttributeChangeEvent(String attrName, Object newValue) {
+    public AttributeChangeEvent(String attrName, Object newValue) {
         this.attrName = attrName;
         this.newValue = newValue;
     }
@@ -47,27 +47,27 @@ public class AttributeChangeEvent {
         this.attrName = attrName;
     }
 
-    RefBookValue getCurrentValue() {
+    public RefBookValue getCurrentValue() {
         return currentValue;
     }
 
-    void setCurrentValue(RefBookValue refBookValue) {
-        this.currentValue = currentValue;
+    public void setCurrentValue(RefBookValue refBookValue) {
+        this.currentValue = refBookValue;
     }
 
-    AttributeChangeEventType getType() {
+    public AttributeChangeEventType getType() {
         return type;
     }
 
-    void setType(AttributeChangeEventType type) {
+    public void setType(AttributeChangeEventType type) {
         this.type = type;
     }
 
-    Object getNewValue() {
+    public Object getNewValue() {
         return newValue;
     }
 
-    void setNewValue(Object value) {
+    public void setNewValue(Object value) {
         this.newValue = value;
     }
 }
