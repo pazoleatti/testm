@@ -1,11 +1,25 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Xml.Schema;
 using VSAX3; //Версия 3.3.147.101
 
 class Schematron {
-	static void Main(string[] args) {
+
+	// параметры командной строки
+	private static string[] args;
+
+	static void Main(string[] appArgs) {
+		args = appArgs;
+    	Thread t = new Thread(check);
+		t.CurrentCulture = new CultureInfo("ru-RU");
+		t.Start();
+		t.Join();
+	}
+
+	static void check() {
 		Stopwatch pSw = new Stopwatch();
 		pSw.Start();
 		try {
@@ -20,15 +34,15 @@ class Schematron {
 			string xmlFleName = args[0];
 			string xsdFleName = args[1];
 			string xmlTargetFileName = args.Length == 2 ? xmlFleName : args[2] + ".xml";
-			
+
 			FileStream pXml = new FileStream(xmlFleName, FileMode.Open, FileAccess.Read);
 			XmlSchemaSet pXsd = new System.Xml.Schema.XmlSchemaSet();
 			pXsd.Add("", xsdFleName);
-			
+
 			// #1: Валидация Xml по Xsd без схематрона
 			// Версия: (3.3.145.301)+
 			//var reader = new SnpXmlValidatingReader {ValidatingType = EVsaxValidateType.SnpSax};
-			
+
 			// #2: Валидация Xml по Xsd со схематроном 'usch' с ограничением кол-ва ошибок по схематрону 100:
 			// Версия: (3.3.147.101)+
 			SnpXmlValidatingReader reader = new SnpXmlValidatingReader ();// { ValidatingType = EVsaxValidateType.SaxSchematronUsch, ErrorCounter = 100 };
@@ -36,25 +50,25 @@ class Schematron {
 			reader.ErrorCounter = 10000;
 			// #3: Валидация Xml по Xsd со схематроном 'snp' (Способ проверки добавленный в VSAX3* )
 			// Версия: (3.3.145.301)+
-			// * - расширение схематрона для пофрагментарной обработки файла (фирменный метод решающий вопрос проверки больших файлов, но 
+			// * - расширение схематрона для пофрагментарной обработки файла (фирменный метод решающий вопрос проверки больших файлов, но
 			// затратный по времени валидации по сравнению с предыдущим способом).
 			//var reader = new SnpXmlValidatingReader { ValidatingType = EVsaxValidateType.SaxSchematronSnp };
-			
+
 			bool result = reader.Validate(pXml, xmlTargetFileName, pXsd);
 			IVsaxErrorHandler errors = reader.ErrorHandler;
 			Console.WriteLine(result && errors.Errors.Count == 0 ? "Result: SUCCESS" : "Result: FAIL");
 			int errcounter = 0;
 			foreach (ErrorsStruct e in errors.Errors) {
-			    if (errcounter > 10000)
-                {
-                    break;
-                }
-                Console.WriteLine(e.XPath + " : " + e.ErrorText);
+				if (errcounter > 10000)
+				{
+					break;
+				}
+				Console.WriteLine(e.XPath + " : " + e.ErrorText);
 				errcounter++;
 			}
 			//VsaxProtocol.WriteProtocolTo("Protocol.xml", errors);
-			
-			reader.Close();	
+
+			reader.Close();
 		} catch (Exception e) {
 			Console.WriteLine("Result: FAIL");
 			Console.WriteLine(e.Message);
