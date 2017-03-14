@@ -1589,6 +1589,10 @@ RefBookDataProvider getProvider(def long providerId) {
  * @return
  */
 def checkData() {
+
+
+    ScriptUtils.checkInterrupted();
+
     long time = System.currentTimeMillis();
     // Реквизиты
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
@@ -1609,14 +1613,22 @@ def checkData() {
     println "Получение записей из таблиц НФДЛ: " + (System.currentTimeMillis() - time);
     logger.info("Получение записей из таблиц НФДЛ: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    ScriptUtils.checkInterrupted();
+
     // Проверки на соответствие справочникам
     checkDataReference(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+    ScriptUtils.checkInterrupted();
 
     // Общие проверки
     checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
+    ScriptUtils.checkInterrupted();
+
     // Проверки сведений о доходах
     checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+    ScriptUtils.checkInterrupted();
 
     // Проверки Сведения о вычетах
     checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
@@ -1707,11 +1719,20 @@ def checkDataReference(
     println "Проверки на соответствие справочникам / Выгрузка справочника Адреса: " + (System.currentTimeMillis() - time);
     logger.info("Проверки на соответствие справочникам / Выгрузка справочника Адреса: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    //поиск всех адресов формы в справочнике ФИАС
+    time = System.currentTimeMillis();
+    Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
+    logger.info(SUCCESS_GET_TABLE, R_FIAS, checkFiasAddressMap.size());
+    println "Проверки на соответствие справочникам / Выгрузка справочника " + R_FIAS + ": " + (System.currentTimeMillis() - time);
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочника " + R_FIAS + ": (" + (System.currentTimeMillis() - time) + " ms)");
+
     //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
 
     long timeIsExistsAddress = 0
     time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
+
+        ScriptUtils.checkInterrupted();
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "");
 
@@ -1925,6 +1946,9 @@ def checkDataReference(
 
     time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
+
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
 
         // Спр5 Код вида дохода (Необязательное поле)
@@ -1954,6 +1978,8 @@ def checkDataReference(
     time = System.currentTimeMillis();
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
         // Спр8 Код вычета (Обязательное поле)
@@ -1972,6 +1998,9 @@ def checkDataReference(
 
     time = System.currentTimeMillis();
     for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
+
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonPrepayment.ndflPersonId)
         // Спр9 Код налоговой иснпекции (Обязательное поле)
         if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
@@ -1999,6 +2028,8 @@ def checkDataCommon(
 
     long time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
+
+        ScriptUtils.checkInterrupted();
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
@@ -2031,26 +2062,11 @@ def checkDataCommon(
     time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
 
-        // Общ5 Принадлежность дат операций к отчетному периоду
-        // Дата начисления дохода (Необязательное поле)
-        if (ndflPersonIncome.incomeAccruedDate != null && (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate() || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_ACCRUED_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-
-        // Дата выплаты дохода (Необязательное поле)
-        if (ndflPersonIncome.incomePayoutDate != null && (ndflPersonIncome.incomePayoutDate < getReportPeriodStartDate() || ndflPersonIncome.incomePayoutDate > getReportPeriodEndDate())) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_PAYOUT_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Дата налога (Необязательное поле)
-        if (ndflPersonIncome.taxDate != null && (ndflPersonIncome.taxDate < getReportPeriodStartDate() || ndflPersonIncome.taxDate > getReportPeriodEndDate())) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Срок (дата) перечисления налога (Необязательное поле)
-        if (ndflPersonIncome.taxTransferDate != null && (ndflPersonIncome.taxTransferDate < getReportPeriodStartDate() || ndflPersonIncome.taxTransferDate > getReportPeriodEndDate())) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
+        // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         if (ndflPersonIncome.paymentDate == null && ndflPersonIncome.paymentNumber == null && ndflPersonIncome.taxSumm == null) {
@@ -2308,6 +2324,8 @@ def checkDataCommon(
 //        }
     }
 
+    ScriptUtils.checkInterrupted();
+
     // Общ12
     if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.CONSOLIDATED)) {
         // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
@@ -2374,6 +2392,8 @@ def checkDataCommon(
     time = System.currentTimeMillis();
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
         // Общ6 Принадлежность дат налоговых вычетов к отчетному периоду
@@ -2400,6 +2420,8 @@ def checkDataCommon(
     }
     println "Общие проверки / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    ScriptUtils.checkInterrupted();
 
     // Общ8 Отсутствие пропусков и повторений в нумерации строк
     time = System.currentTimeMillis();
@@ -2521,6 +2543,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     }
 
     ndflPersonIncomeCache.each {
+
+        ScriptUtils.checkInterrupted();
+
         for (NdflPersonIncome ndflPersonIncome : it.value) {
             def ndflPerson = personsCache.get(ndflPersonIncome.ndflPersonId)
             def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
@@ -2725,7 +2750,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate() &&
                                 it.taxRate == 13 && it.incomeCode != "1010"
                     } ?: []
-                    BigDecimal S2 = S2List.sum { (it.calculatedTax ?: 0) } ?: 0
+                    BigDecimal S2 = S2List.sum { it.calculatedTax ?: 0 } ?: 0
                     // Сумма по «Графа 16» текущей операции = S1 x 13% - S2
                     if (ndflPersonIncome.calculatedTax != S1 * 13 - S2) {
                         logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum}".Графа "Сумма налога исчисленная" $fioAndInp.
@@ -3175,6 +3200,9 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
     }
 
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
+
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
         // Выч14 Документ о праве на налоговый вычет.Код источника (Графа 7)

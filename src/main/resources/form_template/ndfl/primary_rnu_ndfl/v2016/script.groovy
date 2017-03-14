@@ -2348,6 +2348,9 @@ def getRefBookValue(def long refBookId, def Long recordId) {
  * @return
  */
 def checkData() {
+
+    ScriptUtils.checkInterrupted();
+
     long time = System.currentTimeMillis();
     // Реквизиты
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
@@ -2368,14 +2371,22 @@ def checkData() {
     println "Получение записей из таблиц НФДЛ: " + (System.currentTimeMillis() - time);
     logger.info("Получение записей из таблиц НФДЛ: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    ScriptUtils.checkInterrupted();
+
     // Проверки на соответствие справочникам
     checkDataReference(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+    ScriptUtils.checkInterrupted();
 
     // Общие проверки
     checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
+    ScriptUtils.checkInterrupted();
+
     // Проверки сведений о доходах
     checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+    ScriptUtils.checkInterrupted();
 
     // Проверки Сведения о вычетах
     checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
@@ -2478,6 +2489,8 @@ def checkDataReference(
     long timeIsExistsAddress = 0
     time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
+
+        ScriptUtils.checkInterrupted();
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "");
 
@@ -2701,6 +2714,9 @@ def checkDataReference(
 
     time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
+
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
 
         // Спр5 Код вида дохода (Необязательное поле)
@@ -2730,6 +2746,8 @@ def checkDataReference(
     time = System.currentTimeMillis();
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
         // Спр8 Код вычета (Обязательное поле)
@@ -2748,6 +2766,9 @@ def checkDataReference(
 
     time = System.currentTimeMillis();
     for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
+
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonPrepayment.ndflPersonId)
         // Спр9 Код налоговой иснпекции (Обязательное поле)
         if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
@@ -2775,6 +2796,8 @@ def checkDataCommon(
 
     long time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
+
+        ScriptUtils.checkInterrupted();
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
@@ -2806,6 +2829,8 @@ def checkDataCommon(
 
     time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
+
+        ScriptUtils.checkInterrupted();
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
 
@@ -3050,6 +3075,8 @@ def checkDataCommon(
 //        }
     }
 
+    ScriptUtils.checkInterrupted();
+
     // Общ12
     if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.CONSOLIDATED)) {
         // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
@@ -3116,6 +3143,8 @@ def checkDataCommon(
     time = System.currentTimeMillis();
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
 
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
         // Общ6 Принадлежность дат налоговых вычетов к отчетному периоду
@@ -3142,6 +3171,8 @@ def checkDataCommon(
     }
     println "Общие проверки / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    ScriptUtils.checkInterrupted();
 
     // Общ8 Отсутствие пропусков и повторений в нумерации строк
     time = System.currentTimeMillis();
@@ -3253,6 +3284,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     }
 
     ndflPersonIncomeCache.each {
+
+        ScriptUtils.checkInterrupted();
+
         for (NdflPersonIncome ndflPersonIncome : it.value) {
             def ndflPerson = personsCache.get(ndflPersonIncome.ndflPersonId)
             def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
@@ -3943,6 +3977,9 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
     }
 
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
+
+        ScriptUtils.checkInterrupted();
+
         def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
 
         // Выч14 Документ о праве на налоговый вычет.Код источника (Графа 7)
