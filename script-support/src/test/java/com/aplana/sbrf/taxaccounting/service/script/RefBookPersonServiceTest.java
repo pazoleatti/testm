@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -135,6 +136,21 @@ public class RefBookPersonServiceTest {
             return (dateStr != null && !dateStr.isEmpty()) ? new SimpleDateFormat("dd.MM.yyyy").parse(dateStr) : null;
         } catch (ParseException e) {
             return null;
+        }
+    }
+
+    @Test
+    public void buildNoticeTest() {
+        {
+            NaturalPerson naturalPerson = createNaturalPerson(1L, "999", "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null);
+            String notice = IdentificationUtils.buildNotice(naturalPerson);
+            System.out.println(notice);
+        }
+
+        {
+            NaturalPerson naturalPerson = createNaturalPerson(1L, null, "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null);
+            String notice = IdentificationUtils.buildNotice(naturalPerson);
+            System.out.println(notice);
         }
     }
 

@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.model.identification;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author Andrey Drunk
  */
-public class PersonDocument extends IdentityObject<Long> {
+public class PersonDocument extends RefBookObject {
 
     /**
      * Ссылка на ФЛ
@@ -70,9 +69,12 @@ public class PersonDocument extends IdentityObject<Long> {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("id", id)
                 .append("docType", docType)
                 .append("documentNumber", documentNumber)
                 .append("incRep", incRep)
                 .toString();
     }
+
+
 }

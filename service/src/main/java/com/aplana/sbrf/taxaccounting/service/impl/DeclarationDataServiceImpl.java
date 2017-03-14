@@ -1603,9 +1603,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> parameters, Connection connection) {
-
-        parameters.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xmlData);
-
+		if (xmlData != null) {
+			parameters.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xmlData);
+		}
         ByteArrayInputStream inputStream = compileReport(jrxmlTemplate);
 
         try {

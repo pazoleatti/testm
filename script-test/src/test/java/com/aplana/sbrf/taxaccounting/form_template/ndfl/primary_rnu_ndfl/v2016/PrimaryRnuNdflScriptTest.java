@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEvent;
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEventType;
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeCountChangeListener;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
@@ -248,13 +251,23 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         checkLogger();
     }
 
+
+    //@Test
+    public void createSpecificReportTest() throws Exception {
+        ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
+        reportHolder.getSubreportParamValues().put("lastName", "Иванов");
+        testHelper.setScriptSpecificReportHolder(reportHolder);
+        testHelper.execute(FormDataEvent.CREATE_SPECIFIC_REPORT);
+    }
+
+
     /**
      * Тест создания спецотчета "Спецотчет РНУ НДФЛ по физическому лицу"
      *
      * @throws IOException
      */
     //@Test
-    public void createSpecificReportTest() throws Exception {
+    public void createSpecificReportTestFull() throws Exception {
 
         ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
         reportHolder.getSubreportParamValues().put("lastName", "Иванов");
@@ -356,6 +369,28 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
 
     }
+
+    @Test
+    public void attrChangeListenerTest(){
+
+        AttributeCountChangeListener attrChangeListener = new AttributeCountChangeListener();
+
+        AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", 1);
+        changeEvent.setType(AttributeChangeEventType.REFRESHED);
+
+        RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, 0);
+        changeEvent.setCurrentValue(refBookValue);
+
+        attrChangeListener.processAttr(changeEvent);
+
+        Assert.assertNotNull(attrChangeListener.getMessages().get("INC_REP"));
+        Assert.assertTrue(attrChangeListener.isUpdate());
+        Assert.assertEquals(attrChangeListener.getMessages().get("INC_REP"), "0->1");
+
+        //System.out.println(attrChangeListener.getMessages().get("INC_REP"));
+
+    }
+
 
     public Date parseDate(String xmlDate) {
         try {

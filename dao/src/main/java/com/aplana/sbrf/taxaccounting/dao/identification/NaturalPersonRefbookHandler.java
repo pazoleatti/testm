@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.identification.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,9 +84,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         Address address = buildAddress(rs);
         naturalPerson.setAddress(address);
 
-
-        System.out.println(rowNum + ", primaryPersonId=" + primaryPersonId + ", [" + naturalPerson + "][" + Arrays.toString(naturalPerson.getPersonDocumentList().toArray()) + "][" + Arrays.toString(naturalPerson.getPersonIdentityList().toArray()) + "][" + address + "]");
-
+        //System.out.println(rowNum + ", primaryPersonId=" + primaryPersonId + ", [" + naturalPerson + "][" + Arrays.toString(naturalPerson.getPersonDocumentList().toArray()) + "][" + Arrays.toString(naturalPerson.getPersonIdentityList().toArray()) + "][" + address + "]");
 
     }
 
@@ -105,6 +102,11 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         if (personIdentifierId != null && !personIdentityMap.containsKey(personIdentifierId)) {
             PersonIdentifier personIdentifier = new PersonIdentifier();
             personIdentifier.setId(personIdentifierId);
+
+            personIdentifier.setRecordId(SqlUtils.getLong(rs, "tax_record_id"));
+            personIdentifier.setStatus(SqlUtils.getInteger(rs, "tax_status"));
+            personIdentifier.setVersion(rs.getDate("tax_version"));
+
             personIdentifier.setInp(rs.getString("inp"));
             personIdentifier.setAsnuId(SqlUtils.getLong(rs, "as_nu"));
             personIdentifier.setNaturalPerson(naturalPerson);
@@ -129,6 +131,11 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             DocType docType = getDocTypeById(docTypeId);
             PersonDocument personDocument = new PersonDocument();
             personDocument.setId(docId);
+
+            personDocument.setRecordId(SqlUtils.getLong(rs, "doc_record_id"));
+            personDocument.setStatus(SqlUtils.getInteger(rs, "doc_status"));
+            personDocument.setVersion(rs.getDate("doc_version"));
+
             personDocument.setDocType(docType);
             personDocument.setDocumentNumber(rs.getString("doc_number"));
             personDocument.setIncRep(SqlUtils.getInteger(rs, "inc_rep"));
@@ -144,6 +151,10 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         //person
         person.setId(refBookPersonId);
         person.setPrimaryPersonId(primaryPersonId);
+
+        person.setRecordId(SqlUtils.getLong(rs, "person_record_id"));
+        person.setStatus(SqlUtils.getInteger(rs, "person_status"));
+        person.setVersion(rs.getDate("person_version"));
 
         person.setLastName(rs.getString("last_name"));
         person.setFirstName(rs.getString("first_name"));
@@ -173,6 +184,12 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         Long addrId = SqlUtils.getLong(rs, "REF_BOOK_ADDRESS_ID");
         if (addrId != null) {
             Address address = new Address();
+
+            address.setId(addrId);
+            address.setRecordId(SqlUtils.getLong(rs, "addr_record_id"));
+            address.setStatus(SqlUtils.getInteger(rs, "addr_status"));
+            address.setVersion(rs.getDate("addr_version"));
+
             address.setAddressType(SqlUtils.getInteger(rs, "address_type"));
             address.setCountry(getCountryById(SqlUtils.getLong(rs, "country_id")));
             address.setRegionCode(rs.getString("region_code"));

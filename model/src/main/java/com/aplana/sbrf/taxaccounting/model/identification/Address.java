@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.model.identification;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author Andrey Drunk
  */
-public class Address extends IdentityObject<Long> {
+public class Address extends RefBookObject {
 
     /**
      * Адрес физлица
@@ -139,6 +138,7 @@ public class Address extends IdentityObject<Long> {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .append("id", id)
                 .append("addressType", addressType)
                 .append("regionCode", regionCode)
                 .append("postalCode", postalCode)

@@ -1142,6 +1142,7 @@ comment on column ndfl_person.building is 'Адрес регистрации в 
 comment on column ndfl_person.flat is 'Адрес регистрации в Российской Федерации.Квартира';
 comment on column ndfl_person.country_code is 'Код страны проживания вне РФ';
 comment on column ndfl_person.address is 'Адрес проживания вне РФ';
+comment on column ndfl_person.additional_data is 'Дополнительная информация';
 
 create sequence seq_ndfl_person start with 1000;
 ------------------------------------------------------------------------------------------------------

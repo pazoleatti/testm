@@ -41,7 +41,7 @@ import static org.mockito.Mockito.*;
  * Тестирование разбора xml-файла Расчета по страховым взносам
  */
 //TODO 06.03.2017 отклчил на время
-@Ignore
+
 public class RaschsvParseTest extends ScriptTestBase {
 
     /**
@@ -244,6 +244,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         return person;
     }
 
+    @Ignore
     @Test
     public void checkRaschsvValid() {
         initMock();
@@ -265,6 +266,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         checkLoggerErrorOrWarn();
     }
 
+    @Ignore
     @Test
     public void checkRaschsvInvalid() {
         initMock();
@@ -330,6 +332,7 @@ public class RaschsvParseTest extends ScriptTestBase {
      * Тестирование разбора xml
      * @throws IOException
      */
+    @Ignore
     @Test
     public void importDataTest() throws IOException {
         initMock();
@@ -338,6 +341,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         Map<String, Object> params = new HashedMap<String, Object>();
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(1L);
+        declarationData.setDepartmentReportPeriodId(1010);
         params.put("declarationData", declarationData);
 
         File dataFile = null;
@@ -396,6 +400,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         return null;
     }
 
+    @Ignore
     @Test
     public void checkRaschsvItog() {
         initMock();
@@ -450,6 +455,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         checkLoggerErrorOrWarn();
     }
 
+    @Ignore
     @Test
     public void checkRaschsvItogDop() {
         initMock();
@@ -498,6 +504,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         checkLoggerErrorOrWarn();
     }
 
+    @Ignore
     @Test
     public void deleteEventTest() {
         initMock();

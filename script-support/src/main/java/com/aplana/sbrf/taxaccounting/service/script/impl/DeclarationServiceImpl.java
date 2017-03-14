@@ -289,7 +289,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public JasperPrint createJasperReport(InputStream jrxmlTemplate, Map<String, Object> parameters, Closure xmlBuilder) {
-        ByteArrayInputStream xmlData = generateXmlData(xmlBuilder);
+        ByteArrayInputStream xmlData = xmlBuilder == null ? null : generateXmlData(xmlBuilder);
         return declarationDataService.createJasperReport(xmlData, jrxmlTemplate, parameters);
     }
 

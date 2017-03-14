@@ -5,8 +5,8 @@
 	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.collapse.row.span" value="false"/>
-	<parameter name="declarationId" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[15595]]></defaultValueExpression>
+	<parameter name="declarationId" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[15646]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[select row_number() over(partition by datas.declaration_data_id order by datas.kpp,datas.oktmo) rn,
@@ -27,7 +27,8 @@
                        count(distinct det.ndfl_person_id) pers_cnt,
                        sum(nvl(det.income_accrued_summ,0)) inc_accured,
                        sum(nvl(det.calculated_tax,0)) tax_calc
-                  from (select p.declaration_data_id,inc.kpp,inc.oktmo,inc.ndfl_person_id,inc.income_accrued_summ,inc.calculated_tax
+                  from (select p.declaration_data_id,inc.kpp,inc.oktmo,inc.ndfl_person_id,
+			inc.income_accrued_summ,inc.calculated_tax
                           from ndfl_person p join ndfl_person_income inc on (inc.ndfl_person_id=p.id)
                          where p.declaration_data_id=$P{declarationId}) det
                                      join declaration_data dd on (dd.id=det.declaration_data_id)
@@ -37,26 +38,32 @@
                                              sd.kpp,o.code oktmo
                                         from ref_book_ndfl s join ref_book_ndfl_detail sd on (sd.ref_book_ndfl_id=s.id)
                                                              join department d on (d.id=sd.department_id)
-                                                             left join ref_book_oktmo o on (o.id=sd.oktmo)) d on (d.kpp=tab.kpp and d.oktmo=tab.oktmo and d.dep_id=tab.department_id)
+                                                             left join ref_book_oktmo o on (o.id=sd.oktmo)) d on (d.kpp=tab.kpp and d.oktmo=tab.oktmo and
+											 d.dep_id=tab.department_id)
                            left join ndfl_person_income sinc on (sinc.kpp=tab.kpp and sinc.oktmo=tab.oktmo)
                            left join ndfl_person sp on (sp.id=sinc.ndfl_person_id)
                            left join declaration_data sdd on (sdd.id=sp.declaration_data_id)
-                           left join department_report_period sdrr on (sdrr.id=sdd.department_report_period_id and sdrr.report_period_id=tab.report_period_id)
+                           left join department_report_period sdrr on (sdrr.id=sdd.department_report_period_id and
+						         sdrr.report_period_id=tab.report_period_id)
                            left join declaration_template sdt on (sdt.id=sdd.declaration_template_id and sdt.form_kind=7)
           ) datas
   where not exists(select 1 from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
                     where decl.id=datas.rep_decl_id
                       and templ.form_kind=3)
     and ((datas.rep_decl_id=datas.declaration_data_id  and not exists(select 1
-                  from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
-                 where templ.form_kind=7
-                 and decl.kpp=datas.kpp
-                 and decl.oktmo=datas.oktmo)) or
+                                                                          from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
+                                                                                                     join ndfl_person sp on (sp.declaration_data_id=decl.id)
+                                                                                                     join ndfl_person_income sinc on (sinc.ndfl_person_id=sp.id)
+                                                                         where templ.form_kind=7
+                                                                           and sinc.kpp=datas.kpp
+                                                                           and sinc.oktmo=datas.oktmo)) or
          (datas.rep_decl_id<>datas.declaration_data_id and exists(select 1
-                  from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
-                 where templ.form_kind=7
-                 and decl.kpp=datas.kpp
-                 and decl.oktmo=datas.oktmo)))]]>
+                                                                    from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
+                                                                                               join ndfl_person sp on(sp.declaration_data_id=decl.id)
+                                                                                               join ndfl_person_income sinc on (sinc.ndfl_person_id=sp.id)
+                                                                   where templ.form_kind=7
+                                                                     and sinc.kpp=datas.kpp
+                                                                     and sinc.oktmo=datas.oktmo)))]]>
 	</queryString>
 	<field name="RN" class="java.math.BigDecimal"/>
 	<field name="KPP" class="java.lang.String"/>

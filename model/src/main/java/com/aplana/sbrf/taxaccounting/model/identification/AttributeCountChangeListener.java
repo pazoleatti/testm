@@ -16,16 +16,22 @@ public class AttributeCountChangeListener implements AttributeChangeListener {
 
     @Override
     public void processAttr(AttributeChangeEvent event) {
-        if (AttributeChangeEventType.CREATED.equals(event.type)) {
+        processAttr(null, event);
+    }
+
+
+    public void processAttr(String info, AttributeChangeEvent event) {
+        if (AttributeChangeEventType.CREATED.equals(event.getType())) {
             created++;
             //if (event.getValue() != null) {sb.append("[").append(event.getAttrName()).append(": ").append(event.getValue()).append("]")}
-        } else if (AttributeChangeEventType.REFRESHED.equals(event.type)) {
+        } else if (AttributeChangeEventType.REFRESHED.equals(event.getType())) {
             refreshed++;
-            msg.put(event.getAttrName(), new StringBuilder().append(event.getCurrentValue()).append("->").append(event.getNewValue()).toString());
-        } else if (AttributeChangeEventType.IGNORED.equals(event.type)) {
+            msg.put(event.getAttrName(), new StringBuilder().append(info != null ? info : "").append(event.getCurrentValue()).append("->").append(event.getNewValue()).toString());
+        } else if (AttributeChangeEventType.IGNORED.equals(event.getType())) {
             ignored++;
         }
     }
+
 
     public Map<String, String> getMessages() {
         return msg;

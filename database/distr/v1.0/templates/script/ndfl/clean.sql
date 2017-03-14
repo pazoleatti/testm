@@ -1,21 +1,10 @@
 DELETE FROM blob_data WHERE id IN (
-'bf172465-20b7-4ce2-ac43-5482ad310c08',
-'58adc3c2-66a0-4f11-98a2-defe682a092f',
-'b8406636-beb1-41d8-8f8a-cf4971309962',
-'f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71',
-'790782e0-2282-41f4-8735-7b50904703ac',
-'41303bf7-9765-463f-a34b-f0a280bfa7bf',
-'13765b29-f1b7-4ec0-a8a9-88196a6e45a1',
-'d372df40-e448-48f5-9879-994753822122',
-'77d802bf-e3b1-485b-ae52-41a21aac1034',
-'03f6d78d-bfd7-45bb-a16b-6c89131b76d1',
-'042c50fc-a590-46b5-bb50-d04cc3a9424a',
-'047f207c-113e-488d-8390-9afc248a3bc8',
-'04d9b114-1782-4d09-ad88-729e5605c6ff'
+	SELECT blob_data_id FROM declaration_subreport WHERE declaration_template_id IN (100, 101, 102, 103, 104) UNION
+	SELECT jrxml FROM declaration_template WHERE id                              IN (100, 101, 102, 103, 104) UNION
+	SELECT xsd   FROM declaration_template WHERE id                              IN (100, 101, 102, 103, 104)
 );
-
-DELETE FROM declaration_template WHERE id IN (100, 101, 102, 103, 104);
-DELETE FROM declaration_subreport WHERE id IN (1001, 1011, 1021, 1041);
+DELETE FROM declaration_subreport WHERE declaration_template_id                  IN (100, 101, 102, 103, 104);
+DELETE FROM declaration_template  WHERE id                                       IN (100, 101, 102, 103, 104);
 
 COMMIT;
 EXIT;
