@@ -10,6 +10,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.List;
  * @author Fail Mukhametdinov
  */
 @Component
+@PreAuthorize("isAuthenticated()")
 public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAction, GetManualMenuResult> {
 
     public static final String MANUAL_FOR_USERS = "Руководство для бизнес-пользователей";

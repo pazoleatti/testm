@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.*;
@@ -18,6 +19,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.Title;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
@@ -30,10 +32,15 @@ public class MembersPresenter extends Presenter<MembersPresenter.MyView, Members
 
     private final DispatchAsync dispatcher;
 
+    private boolean isFormModified;
+    private final PlaceManager placeManager;
+    private TAUserView selectUser;
+
     @Inject
-    public MembersPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
+    public MembersPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
         super(eventBus, view, proxy);
         this.dispatcher = dispatcher;
+        this.placeManager = placeManager;
         getView().setUiHandlers(this);
     }
 
@@ -68,6 +75,9 @@ public class MembersPresenter extends Presenter<MembersPresenter.MyView, Members
 	    void updateData(int pageNumber);
 	    void setFilterData(FilterValues values);
 	    void getBlobFromServer(String uuid);
+        void setMode(MembersView.FormMode mode);
+        void setCanEdit(boolean canEdit);
+        TAUserView getTAUserView();
     }
 
     @Override
@@ -76,13 +86,16 @@ public class MembersPresenter extends Presenter<MembersPresenter.MyView, Members
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
 	    GetFilterValues action = new GetFilterValues();
+        getView().setMode(MembersView.FormMode.READ);
 	    dispatcher.execute(action,
 		    CallbackUtils.defaultCallback(new AbstractCallback<FilterValues>() {
 					    @Override
 					    public void onSuccess(FilterValues result) {
 						    getView().setFilterData(result);
                             getView().updateData(0);
-					    }
+                            getView().setCanEdit(result.isCanEdit());
+                            getView().setMode(MembersView.FormMode.READ);
+                        }
 				    }, this));
     }
 
@@ -108,4 +121,50 @@ public class MembersPresenter extends Presenter<MembersPresenter.MyView, Members
 				}
 		);
 	}
+
+    @Override
+    public void onSave() {
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
+        final SaveUserAction action = new SaveUserAction();
+        action.setTaUserView(getView().getTAUserView());
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(new AbstractCallback<SaveUserResult>() {
+                    @Override
+                    public void onSuccess(SaveUserResult result) {
+                        LogAddEvent.fire(MembersPresenter.this, result.getUuid());
+                        selectUser = getView().getTAUserView();
+                        getView().setMode(MembersView.FormMode.EDIT);
+                        getView().updateData();
+                        setIsFormModified(false);
+                    }
+                }, this)
+        );
+    }
+
+
+    @Override
+    public void setIsFormModified(boolean isFormModified) {
+        this.isFormModified = isFormModified;
+        if (isFormModified) {
+            placeManager.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
+        } else {
+            placeManager.setOnLeaveConfirmation(null);
+        }
+    }
+
+    @Override
+    public boolean isFormModified() {
+        return isFormModified;
+    }
+
+    @Override
+    public TAUserView getSelectUser() {
+        return selectUser;
+    }
+
+    @Override
+    public void setSelectUser(TAUserView selectUser) {
+        this.selectUser = selectUser;
+    }
 }

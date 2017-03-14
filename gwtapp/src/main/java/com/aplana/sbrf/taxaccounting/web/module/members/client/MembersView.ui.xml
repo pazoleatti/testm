@@ -16,9 +16,9 @@
         .scroll {
             position: absolute !important;
             bottom: 30px;
-            right: 10px;
+            right: 0px;
             left: 10px;
-            top: 39px;
+            top: 0px;
         }
 
         .separator {
@@ -37,6 +37,36 @@
             margin-right: 5px;
         }
 
+        .editButton{
+            margin-left: 5px;
+            right: 5px;
+        }
+
+        .splitter {
+            position: absolute !important;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            top: 34px;
+            border-top: 1px solid #aeaeac;
+        }
+
+        .editFields {
+            width: 320px;
+            min-width: 150px;
+            margin-left: 5px;
+        }
+
+        .leftLabel {
+            width: 160px;
+            min-width: 160px;
+        }
+
+        .saveCancel {
+            position: absolute;
+            bottom: 0;
+            border-top: 1px solid #aeaeac;
+        }
     </ui:style>
 
     <fm:MainContainer>
@@ -68,31 +98,38 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-
                 <g:HorizontalPanel spacing="5" verticalAlignment="middle" height="30px" width="100%">
+                    <g:cell verticalAlignment="middle">
+                        <style:LinkButton title="Добавить пользователя" text="Добавить пользователя" ui:field="addButton" img="resources/img/row-add.png"/>
+                    </g:cell>
+
+                    <g:cell verticalAlignment="middle">
+                        <g:HTML ui:field="addButtonSeparator" addStyleNames="{style.separator}"/>
+                    </g:cell>
+
                     <g:cell horizontalAlignment="right">
                         <g:Label width="100px" text="Подразделение:"/>
                     </g:cell>
-                    <g:cell width="25%">
+                    <g:cell width="20%">
                         <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%"/>
                     </g:cell>
                     <g:cell horizontalAlignment="right">
                         <g:Label width="40px" text="Роль:"/>
                     </g:cell>
-                    <g:cell width="25%">
+                    <g:cell width="20%">
                         <r:RefBookPickerWidget ui:field="role" attributeIdInt="838" isHierarchical="false" width="100%"
                                                              multiSelect="true" versionEnabled="false"/>
                     </g:cell>
                     <g:cell horizontalAlignment="right">
                         <g:Label width="135px" wordWrap="false" text="Признак активности:"/>
                     </g:cell>
-                    <g:cell width="25%">
+                    <g:cell width="20%">
                         <g:ValueListBox width="100%" ui:field="isActiveBox"/>
                     </g:cell>
                     <g:cell horizontalAlignment="right">
                         <g:Label width="120px" wordWrap="false" text="Имя пользователя:"/>
                     </g:cell>
-                    <g:cell width="25%">
+                    <g:cell width="20%">
                         <g:TextBox width="100%" ui:field="userName"/>
                     </g:cell>
 
@@ -100,16 +137,119 @@
                         <g:HTML addStyleNames="{style.separator}"/>
                     </g:cell>
 
-                    <g:Button title="Найти" text="Найти" addStyleNames="{style.findButton}" ui:field="applyButton"/>
+                    <g:cell verticalAlignment="middle">
+                        <g:Button title="Найти" text="Найти" addStyleNames="{style.findButton}" ui:field="applyButton"/>
+                    </g:cell>
+
+                    <g:cell verticalAlignment="middle">
+                        <g:Button title="Завершить редактирование" text="Завершить редактирование"
+                              ui:field="cancelEdit" visible="false"/>
+                    </g:cell>
+
+                    <g:cell verticalAlignment="middle">
+                        <style:LinkButton title="Редактировать" text="Редактировать" addStyleNames="{style.editButton}" ui:field="edit" img="resources/img/pencil-16.png"/>
+                    </g:cell>
+
                 </g:HorizontalPanel>
 
-                <g:ResizeLayoutPanel addStyleNames="{style.scroll}">
-                    <style:GenericDataGrid ui:field="taUserFullCellTable" width="100%" height="100%"/>
-                </g:ResizeLayoutPanel>
+                <g:SplitLayoutPanel ui:field="tablePanel" addStyleNames="{style.splitter}">
+                    <g:center>
+                        <g:SimplePanel>
+                            <g:HTMLPanel>
+                                <g:ResizeLayoutPanel addStyleNames="{style.scroll}">
+                                    <style:GenericDataGrid ui:field="taUserFullCellTable" width="100%" height="100%" enabled="true"/>
+                                </g:ResizeLayoutPanel>
+                                <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
+                                                     showFastForwardButton="false" fastForwardRows="0"
+                                                     showLastPageButton="true" type="members"/>
+                            </g:HTMLPanel>
+                        </g:SimplePanel>
+                    </g:center>
+                    <g:east size="500">
+                        <g:SimplePanel>
+                            <g:HTMLPanel>
+                                <g:VerticalPanel height="100%">
+                                    <g:VerticalPanel spacing="10" >
+                                        <g:HorizontalPanel>
+                                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                                <g:Label text="Полное имя пользователя:" addStyleNames="{style.leftLabel}"/>
+                                            </g:cell>
+                                            <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                                                <g:TextBox ui:field="name" addStyleNames="{style.editFields}"/>
+                                            </g:cell>
+                                        </g:HorizontalPanel>
 
-                <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
-                                     showFastForwardButton="false" fastForwardRows="0"
-                                     showLastPageButton="true" type="members"/>
+                                        <g:HorizontalPanel>
+                                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                                <g:Label text="Логин:" addStyleNames="{style.leftLabel}"/>
+                                            </g:cell>
+                                            <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                                                <g:TextBox ui:field="userLogin" addStyleNames="{style.editFields}"/>
+                                            </g:cell>
+                                        </g:HorizontalPanel>
+
+                                        <g:HorizontalPanel>
+                                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                                <g:Label text="Электронная почта:" addStyleNames="{style.leftLabel}"/>
+                                            </g:cell>
+                                            <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                                                <g:TextBox ui:field="userMail" addStyleNames="{style.editFields}"/>
+                                            </g:cell>
+                                        </g:HorizontalPanel>
+
+                                        <g:HorizontalPanel>
+                                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                                <g:Label text="Признак активности:" addStyleNames="{style.leftLabel}"/>
+                                            </g:cell>
+                                            <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                                                <g:CheckBox ui:field="userActive" addStyleNames="{style.editFields}"/>
+                                            </g:cell>
+                                        </g:HorizontalPanel>
+
+                                        <g:HorizontalPanel>
+                                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                                <g:Label text="Подразделение:" addStyleNames="{style.leftLabel}"/>
+                                            </g:cell>
+                                            <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                                                <picker:DepartmentPickerPopupWidget ui:field="userDepartmentPicker" multiselection="false" addStyleNames="{style.editFields}"/>
+                                            </g:cell>
+                                        </g:HorizontalPanel>
+
+                                        <g:HorizontalPanel>
+                                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                                <g:Label text="Роль:" addStyleNames="{style.leftLabel}"/>
+                                            </g:cell>
+                                            <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                                                <r:RefBookPickerWidget ui:field="userRole" attributeIdInt="838" isHierarchical="false"
+                                                                       multiSelect="true" versionEnabled="false" addStyleNames="{style.editFields}"/>
+                                            </g:cell>
+                                        </g:HorizontalPanel>
+
+                                        <g:HorizontalPanel>
+                                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                                <g:Label text="АСНУ:" addStyleNames="{style.leftLabel}"/>
+                                            </g:cell>
+                                            <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                                                <r:RefBookPickerWidget ui:field="userAsnu" attributeIdInt="9003" isHierarchical="false"
+                                                                       multiSelect="true" versionEnabled="false" addStyleNames="{style.editFields}"/>
+                                            </g:cell>
+                                        </g:HorizontalPanel>
+
+                                    </g:VerticalPanel>
+
+                                    <g:HorizontalPanel ui:field="buttonBlock" height="30px" width="100%" spacing="5" addStyleNames="{style.saveCancel}">
+                                        <g:cell width="50%" horizontalAlignment="right">
+                                            <g:Button ui:field="save" enabled="true" text="Сохранить" width="80px"/>
+                                        </g:cell>
+                                        <g:cell width="50%" horizontalAlignment="left">
+                                            <g:Button ui:field="cancel" enabled="false" text="Отменить" width="80px"/>
+                                        </g:cell>
+                                    </g:HorizontalPanel>
+                                </g:VerticalPanel>
+                            </g:HTMLPanel>
+                        </g:SimplePanel>
+                    </g:east>
+                </g:SplitLayoutPanel>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

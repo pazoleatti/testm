@@ -13,6 +13,8 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
  */
 public class MainMenuPresenter extends AbstractMenuPresenter<MainMenuPresenter.MyView> {
 
+    private int rolesHashCode;
+
     @Inject
     public MainMenuPresenter(EventBus eventBus, MainMenuView view, DispatchAsync dispatchAsync) {
         super(eventBus, view, dispatchAsync);
@@ -25,11 +27,15 @@ public class MainMenuPresenter extends AbstractMenuPresenter<MainMenuPresenter.M
                 .defaultCallback(new AbstractCallback<GetMainMenuResult>() {
                     @Override
                     public void onSuccess(GetMainMenuResult result) {
+                        rolesHashCode = result.getRolesHashCode();
                         getView().setMenuItems(result.getMenuItems());
                     }
                 }, this));
-
         super.onReveal();
+    }
+
+    public int getRolesHashCode() {
+        return rolesHashCode;
     }
 
     public interface MyView extends AbstractMenuPresenter.MyView {

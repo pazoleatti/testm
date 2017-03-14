@@ -49,13 +49,20 @@ public interface TAUserService {
 	void setUserIsActive(String login, boolean isActive);
 
 	/**
-	 * Обновляет сведения о пользователе
+	 * Обновляет сведения о пользователе(Используется с СУДИР)
 	 *
 	 * @param user
 	 */
 	void updateUser(TAUser user);
 
-	/**
+    /**
+     * Обновляет сведения о пользователе
+     *
+     * @param user
+     */
+    void updateUser(TAUserView user);
+
+    /**
 	 * Заводит в системе нового пользователя
 	 *
 	 * @param user
@@ -63,7 +70,15 @@ public interface TAUserService {
 	 */
 	int createUser(TAUser user);
 
-	/**
+    /**
+     * Заводит в системе нового пользователя
+     *
+     * @param user
+     * @return
+     */
+    int createUser(TAUserView user);
+
+    /**
 	 * Возвращает список заведенных в системе пользователей. Включая активных и заблокированных.
 	 *
 	 * @return
