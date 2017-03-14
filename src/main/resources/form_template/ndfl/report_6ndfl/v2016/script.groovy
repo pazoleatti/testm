@@ -770,35 +770,36 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     mapNachislDoh6.each { stavka6, nachislDoh6 ->
         ScriptUtils.checkInterrupted()
         def sumDohObch2 = mapSumDohObch2.get(stavka6)
-        if (nachislDoh6 != sumDohObch2) {
+        if (Double.valueOf(nachislDoh6) != Double.valueOf(sumDohObch2)) {
             def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по ставке " + stavka6
             logger.error(msgErrorRes)
         }
     }
 
     // МежДок5
-    if (nachislDohDiv6 != sumDohDivObch2) {
+    if (Double.valueOf(nachislDohDiv6) != Double.valueOf(sumDohDivObch2)) {
         def msgErrorRes = sprintf(msgError, "сумме начисленного дохода в виде дивидендов")
         logger.error(msgErrorRes)
     }
 
     // МежДок6
+
     mapIschislNal6.each { stavka6, ischislNal6 ->
         def nalIschisl2 = mapNalIschisl2.get(stavka6)
-        if (ischislNal6 != nalIschisl2) {
+        if (Long.valueOf(ischislNal6) != Long.valueOf(nalIschisl2)) {
             def msgErrorRes = sprintf(msgError, "сумме налога исчисленного") + " по ставке " + stavka6
             logger.error(msgErrorRes)
         }
     }
 
     // МежДок7
-    if (neUderzNalIt6 != nalNeUderz2) {
+    if (Long.valueOf(neUderzNalIt6) != Long.valueOf(nalNeUderz2)) {
         def msgErrorRes = sprintf(msgError, "сумме налога, не удержанная налоговым агентом")
         logger.error(msgErrorRes)
     }
 
     // МежДок8
-    if (kolFl6 != kolFl2) {
+    if (Integer.valueOf(kolFl6) != Integer.valueOf(kolFl2)) {
         def msgErrorRes = sprintf(msgError, "количеству физических лиц, получивших доход")
         logger.error(msgErrorRes)
     }
