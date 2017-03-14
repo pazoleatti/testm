@@ -8,7 +8,7 @@ import java.util.Date;
  */
 public class NdflPersonPrepayment extends NdflPersonOperation {
 
-    // Сумма фиксированного авансового платежа
+    // Сумма фиксированного авансового платежа (Графа 4)
     private Long summ;
     private String notifNum;
     private Date notifDate;

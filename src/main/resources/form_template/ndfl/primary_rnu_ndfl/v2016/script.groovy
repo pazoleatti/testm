@@ -35,7 +35,8 @@ import java.util.regex.Pattern
  * Вид формы "Консолидированная", используется при определении проверок в частях
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataReference(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataCommon(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
- * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataIncome(java.lang.Object, java.lang.Object)}
+ * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataIncome(java.util.ArrayList, java.util.ArrayList, java.util.ArrayList, java.util.ArrayList)}
+ * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataDeduction(java.util.ArrayList, java.util.ArrayList, java.util.ArrayList)}
  *
  */
 
@@ -2308,10 +2309,10 @@ def checkData() {
     checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
     // Проверки сведений о доходах
-//    checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
+    checkDataIncome(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
 
     // Проверки Сведения о вычетах
-//    checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
+    checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
 
     println "Все проверки " + (System.currentTimeMillis() - time);
     logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
@@ -3097,7 +3098,6 @@ def checkDataCommon(
     time = System.currentTimeMillis();
 
     List<Integer> rowNumPersonList = ndflPersonService.findDublRowNum("NDFL_PERSON", declarationData.id)
-    logger.info("rowNumPersonList.size() = " + rowNumPersonList.size())
     def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
     List<Integer> rowNumPersonIncomeList = ndflPersonService.findDublRowNum("NDFL_PERSON_INCOME", declarationData.id)
     msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeList, T_PERSON_INCOME)
@@ -3129,8 +3129,11 @@ def checkDataCommon(
  * Проверки сведений о доходах
  * @param ndflPersonList
  * @param ndflPersonIncomeList
+ * @param ndflPersonDeductionList
+ * @param ndflPersonPrepaymentList
  */
-def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList) {
+def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
+                    List<NdflPersonPrepayment> ndflPersonPrepaymentList) {
 
     def personsCache = [:]
     ndflPersonList.each { ndflPerson ->
@@ -3139,70 +3142,85 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
         personsCache.put(ndflPerson.id, ndflPerson)
     }
-    def incomeAccruedDateConditionDataList = []
+
+    def ndflPersonPrepaymentCache = [:]
+    ndflPersonPrepaymentList.each { ndflPersonPrepayment ->
+        List<NdflPersonPrepayment> ndflPersonPrepaymentListByPersonIdList = ndflPersonPrepaymentCache.get(ndflPersonPrepayment.ndflPersonId)
+        ndflPersonPrepaymentListByPersonIdList.add(ndflPersonPrepayment)
+        ndflPersonPrepaymentCache.put(ndflPersonPrepayment.ndflPersonId, ndflPersonPrepaymentListByPersonIdList)
+    }
+
+    List<DateConditionData> dateConditionDataList = []
 
     // "Графа 6" = "Графе 7"
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["1010", "3020", "1110", "1400", "2001", "2010", "2012",
-                                                                              "2300", "2710", "2760", "2762", "2770", "2900", "4800"], ["00"], new Column6EqualsColumn7())
+    dateConditionDataList << new DateConditionData(["1010", "3020", "1110", "1400", "2001", "2010", "2012",
+                                                                 "2300", "2710", "2760", "2762", "2770", "2900", "4800"],
+            ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
     // "Графа 6" = "Графе 7"
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
-                                                                              "1541", "1542", "1543", "1544", "1545", "1546", "1547",
-                                                                              "1548", "1549", "1551", "1552", "1554"], ["01", "02"], new Column6EqualsColumn7())
+    dateConditionDataList << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
+                                                                 "1541", "1542", "1543", "1544", "1545", "1546", "1547",
+                                                                 "1548", "1549", "1551", "1552", "1554"],
+            ["01", "02"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
     // Соответствует маске 31.12.20**
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
-                                                                              "1541", "1542", "1543"], ["04"], new MatchMask("31.12.20\\d{2}"))
+    dateConditionDataList << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
+                                                                 "1541", "1542", "1543"],
+            ["04"], new MatchMask("31.12.20\\d{2}"), """"Соответствует маске 31.12.20**""")
 
     // Последний календарный день месяца
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000"], ["05"], new LastMonthCalendarDay())
+    dateConditionDataList << new DateConditionData(["2000"], ["05"], new LastMonthCalendarDay(), """"Последний календарный день месяца""")
 
     // "Графа 6" = "Графе 7"
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000", "2002"], ["07"], new Column6EqualsColumn7())
+    dateConditionDataList << new DateConditionData(["2000", "2002"], ["07"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
     // Если «графа 7» < 31.12.20**, то «графа 6» = «графа 7», иначе «графа 6» = 31.12.20**
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000", "2002"], ["08", "09", "10"], new Column7LastDayOfYear())
+    dateConditionDataList << new DateConditionData(["2000", "2002"], ["08", "09", "10"], new Column7LastDayOfYear(), """"«Графа 7 Раздел 2» < 31.12.20**, то «Графа 6 Раздел 2» = «Графа 7 Раздел 2», иначе «Графа 6 Раздел 2» = 31.12.20**""")
 
     // Последний календарный день месяца
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000", "2002"], ["11"], new LastMonthCalendarDay())
+    dateConditionDataList << new DateConditionData(["2000", "2002"], ["11"], new LastMonthCalendarDay(), """"Последний календарный день месяца""")
 
     // Если «графа 7» < 31.12.20**, то «графа 6» = «графа 7», иначе «графа 6» = 31.12.20**
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2000", "2002"], ["12"], new Column7LastDayOfYear())
+    dateConditionDataList << new DateConditionData(["2000", "2002"], ["12"], new Column7LastDayOfYear(), """"«Графа 7 Раздел 2» < 31.12.20**, то «Графа 6 Раздел 2» = «Графа 7 Раздел 2», иначе «Графа 6 Раздел 2» = 31.12.20**""")
 
     // "Графа 6" = "Графе 7"
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2520", "2720", "2740", "2750", "2790"], ["00"], new Column6EqualsColumn7())
+    dateConditionDataList << new DateConditionData(["2520", "2720", "2740", "2750", "2790"], ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
     // Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2610"], ["00"], new LastMonthCalendarDayButNotFree())
+    dateConditionDataList << new DateConditionData(["2610"], ["00"], new LastMonthCalendarDayButNotFree(), """Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день""")
 
     // "Графа 6" = "Графе 7"
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2640", "2641"], ["00"], new Column6EqualsColumn7())
+    dateConditionDataList << new DateConditionData(["2640", "2641"], ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
     // "Графа 6" = "Графе 7"
-    incomeAccruedDateConditionDataList << new IncomeAccruedDateConditionData(["2800"], ["00"], new Column6EqualsColumn7())
+    dateConditionDataList << new DateConditionData(["2800"], ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
     // Сгруппируем Сведения о доходах на основании принадлежности к плательщику
     def ndflPersonIncomeCache = [:]
     ndflPersonIncomeList.each { ndflPersonIncome ->
-        List<NdflPersonIncome> ndflPersonIncomeByNdflPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId)
+        List<NdflPersonIncome> ndflPersonIncomeByNdflPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
         ndflPersonIncomeByNdflPersonIdList.add(ndflPersonIncome)
         ndflPersonIncomeCache.put(ndflPersonIncome.ndflPersonId, ndflPersonIncomeByNdflPersonIdList)
     }
 
-    ndflPersonIncomeCache.each { ndflPersonId, ndflPersonIncomeByNdflPersonIdList ->
-        for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeByNdflPersonIdList) {
-
+    ndflPersonIncomeCache.each {
+        for (NdflPersonIncome ndflPersonIncome : it.value) {
             def ndflPerson = personsCache.get(ndflPersonIncome.ndflPersonId)
             def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
-
             // СведДох1 Дата начисления дохода (Графа 6)
-            incomeAccruedDateConditionDataList.each { incomeData ->
-                if (incomeData.incomeCodes.contains(ndflPersonIncome.incomeCode) && incomeData.incomeTypes.contains(ndflPersonIncome.incomeCode)) {
-                    if (incomeData.checker.check(ndflPersonIncome)) {
-                        def messageErrorIncomeAccruedDate = MESSAGE_ERROR_NOT_MATCH_RULE + " \"Если Графа 4 = %s и Графа 5 = %s, то Графа 6 = %s\""
-                        def textError = sprintf(messageErrorIncomeAccruedDate, ndflPersonIncome.incomeCode, ndflPersonIncome.incomeType, ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy"))
-                        logger.error(MESSAGE_ERROR_VALUE,
-                                T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_ACCRUED_DATE, fioAndInp, textError);
+            if (dateConditionDataList != null) {
+                dateConditionDataList.each { dateConditionData ->
+                    if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
+                        if (!dateConditionData.checker.check(ndflPersonIncome)) {
+                            logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
+                                ndflPersonIncome.rowNum
+                            }".Графа "Дата начисления дохода"=${ndflPersonIncome.incomeAccruedDate} $fioAndInp.
+                                Не выполнено условие: если «Графа 4 Раздел 2» = ${
+                                ndflPersonIncome.incomeCode
+                            } и «Графа 5 Раздел 2» = ${ndflPersonIncome.incomeType}, то ${
+                                dateConditionData.conditionMessage
+                            }.""")
+                        }
                     }
                 }
             }
@@ -3395,15 +3413,14 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     5. Значение "Графы 14" (taxRate) = 13
                     6. Значение "Графы 4" (incomeCode) != "1010"
                      */
-                    List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId)
+                    List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
                     List<NdflPersonIncome> S1List = ndflPersonIncomeCurrentList.findAll {
                         it.incomeAccruedDate <= ndflPersonIncome.incomeAccruedDate
                         it.incomeAccruedSumm != null && it.incomeAccruedSumm != 0 &&
                                 ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate() &&
-                                it.taxRate == 13 &&
-                                it.incomeCode != "1010"
-                    }
-                    BigDecimal S1 = S1List.sum { S1List.taxBase ?: 0 }
+                                it.taxRate == 13 && it.incomeCode != "1010"
+                    } ?: []
+                    BigDecimal S1 = S1List.sum { it.taxBase ?: 0 } ?: 0
                     /*
                     S2 - сумма значений по "Графе 16" (calculatedTax)
                     Для суммирования строк по "Графе 16" (calculatedTax) должны быть соблюдены ВСЕ следующие условия:
@@ -3413,24 +3430,31 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     3. Значение "Графы 14" (taxRate) = 13
                     4. Значение "Графы 4" (incomeCode) != "1010"
                      */
-                    List<NdflPersonIncome> S2List = ndflPersonIncomeCurrentList.findAll {
+                    List<NdflPersonIncome> S2List = S2List = ndflPersonIncomeCurrentList.findAll {
                         it.incomeAccruedDate < ndflPersonIncome.incomeAccruedDate
                         ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate() &&
-                                it.taxRate == 13 &&
-                                it.incomeCode != "1010"
-                    }
-                    BigDecimal S2 = S2List.sum { S1List.calculatedTax ?: 0 }
+                                it.taxRate == 13 && it.incomeCode != "1010"
+                    } ?: []
+                    BigDecimal S2 = S2List.sum { it.calculatedTax ?: 0 } ?: 0
                     // Сумма по «Графа 16» текущей операции = S1 x 13% - S2
                     if (ndflPersonIncome.calculatedTax != S1 * 13 - S2) {
-                        logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum
-                        }".Графа "Сумма налога исчисленная" $fioAndInp.
-                                Не выполнено условие: сумма по «Графа 16 Раздел 2» текущей операции = S1 x 13% - S2.""")
+                        logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum}".Графа "Сумма налога исчисленная" $fioAndInp.
+                                Не выполнено условие: сумма по «Графа 16 Раздел 2» текущей операции = S1 x 13%% - S2.""")
                     }
                 }
                 // СведДох6.3
                 if (ndflPersonIncome.taxRate == 13 && ndflPerson.status == "6") {
-                    // todo Написал Павлу Астахову вопрос: нет ли в постановке к этой проверке ошибки?
+                    List<NdflPersonPrepayment> ndflPersonPrepaymentListByBersonIdList = ndflPersonPrepaymentCache.get(ndflPersonIncome.ndflPersonId) ?: []
+                    if (!ndflPersonPrepaymentListByBersonIdList.isEmpty()) {
+                        List<NdflPersonPrepayment> ndflPersonPrepaymentCurrentList = ndflPersonPrepaymentListByBersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+                        Long ndflPersonPrepaymentSum = ndflPersonPrepaymentCurrentList.sum { it.summ } ?: 0
+                        if (!(new BigDecimal(ndflPersonIncome.calculatedTax) == ndflPersonIncome.taxBase ?: 0 * 13 - ndflPersonPrepaymentSum ?: 0)) {
+                            logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
+                                ndflPersonIncome.rowNum
+                            }".Графа "Сумма налога исчисленная" $fioAndInp.
+                            Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13% - «Графа 4 Раздел 4» .""")
+                        }
+                    }
                 }
             }
 
@@ -3457,14 +3481,20 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         && ndflPersonIncome.overholdingTax > 0
                 ) {
                     // «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» ≤ ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%)
-                    List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId)
-                    List<NdflPersonIncome> ndflPersonIncomePreviewList = ndflPersonIncomeCurrentList.findAll {
-                        it.incomeAccruedDate < ndflPersonIncome.incomeAccruedDate
+                    List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
+                    NdflPersonIncome ndflPersonIncomePreview = null
+                    if (!ndflPersonIncomeCurrentList.isEmpty()) {
+                        ndflPersonIncomePreview = ndflPersonIncomeCurrentList.find {
+                            it.incomeAccruedDate <= ndflPersonIncome.incomeAccruedDate &&
+                                    (ndflPersonIncomePreview == null || ndflPersonIncomePreview.incomeAccruedDate < it.incomeAccruedDate)
+                        }
                     }
-                    BigDecimal previewCalculatedTax = 0
-                    ndflPersonIncomePreviewList.each {
+                    if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax ?: 0 + ndflPersonIncomePreview.calculatedTax ?: 0
+                            && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm
+                            && ndflPersonIncome.withholdingTax <= (ndflPersonIncome.taxBase - ndflPersonIncome.calculatedTax) * 50)) {
+                        logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum}".Графа "Сумма налога удержанная" $fioAndInp.
+                                Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» ≤ ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%).""")
                     }
-                    // todo Написал Павлу Астахову вопрос: как определять предыдущую запись?
                 } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
                         || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1544", "1545",
                              "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "02")
@@ -3480,29 +3510,24 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     }
                 } else if (!(ndflPersonIncome.incomeCode != null)) {
                     if (!(ndflPersonIncome.withholdingTax != ndflPersonIncome.taxSumm)) {
-                        logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum
-                        }".Графа "Сумма налога удержанная" $fioAndInp.
-                                Не выполнено условие: если «Графа 4 Раздел 2» ≠ 0,
-                                то «Графа 17 Раздел 2» = «Графа 24 Раздел 2».""")
+                        logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum}".Графа "Сумма налога удержанная" $fioAndInp.
+                                Не выполнено условие: если «Графа 4 Раздел 2» ≠ 0, то «Графа 17 Раздел 2» = «Графа 24 Раздел 2».""")
                     }
                 }
             }
 
-            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId)
-            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll {
-                it.operationId == ndflPersonIncome.operationId
-            }
+            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
+            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
             // "Сумма Граф 16"
-            Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.calculatedTax ?: 0 }
+            Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.calculatedTax ?: 0 } ?: 0
             // "Сумма Граф 17"
-            Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.withholdingTax ?: 0 }
+            Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.withholdingTax ?: 0 } ?: 0
             // "Сумма Граф 18"
-            Long notHoldingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.notHoldingTax ?: 0 }
+            Long notHoldingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.notHoldingTax ?: 0 } ?: 0
             // "Сумма Граф 19"
-            Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.overholdingTax ?: 0 }
+            Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.overholdingTax ?: 0 } ?: 0
             // "Сумма Граф 20"
-            Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 }
+            Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
 
             // СведДох8 Сумма налога, не удержанная налоговым агентом (Графа 18)
             if (calculatedTaxSum > withholdingTaxSum) {
@@ -3538,6 +3563,97 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
 
             // СведДох11 Сумма налога перечисленная (Графа 24)
+            if (ndflPersonIncome.taxSumm != null) {
+
+                dateConditionDataList = []
+
+                // 1,2 "Графа 21" = "Графа 7" + "1 рабочий день"
+                dateConditionDataList << new DateConditionData(["1010", "3020", "1110", "1400", "2001", "2010",
+                                                                "2710", "2760", "2762", "2770", "2900", "4800"], ["00"],
+                        new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+                // 3,4 "Графа 21" ≤ "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" ≤ "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
+                dateConditionDataList << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
+                                                                "1541", "1542", "1543", "1544", "1545", "1546", "1547",
+                                                                "1548", "1549", "1551", "1552", "1553", "1554"], ["01", "02", "03", "04"],
+                        new Column21EqualsColumn7Plus30WorkingDays(), """«Графа 21 Раздел 2» ≤ «Графа 7 Раздел 2» + "30 календарных дней", если «Графа 7 Раздел 2» + "30 календарных дней" - выходной день, то «Графа 21 Раздел 2» ≤ "Следующий рабочий день" после «Графа 7 Раздел 2» + "30 календарных дней\"""")
+
+                // 6 "Графа 21" = "Графа 7" + "1 рабочий день"
+                dateConditionDataList << new DateConditionData(["2000"], ["05", "06", "07", "08", "09", "10", "11", "12"],
+                        new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+                // 7 "Графа 21" = "Графа 7" + "1 рабочий день"
+                dateConditionDataList << new DateConditionData(["2002"], ["07", "08", "09", "10"],
+                        new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+                // 8 "Графа 21" = "Графа 7" + "1 рабочий день"
+                dateConditionDataList << new DateConditionData(["2003"], ["13"],
+                        new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+                // 9 "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
+                dateConditionDataList << new DateConditionData(["2012", "2300"], ["00"],
+                        new Column21EqualsColumn7LastDayOfMonth(), """«Графа 21 Раздел 2» = Последний календарный день месяца для месяца «Графы 7 Раздел 2», если Последний календарный день месяца - выходной день, то «Графа 21 Раздел 2» = следующий рабочий день""")
+
+                // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
+                dateConditionDataList << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
+                        new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+                // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
+                dateConditionDataList << new DateConditionData(["2610", "2640", "2641", "2800"], ["00"],
+                        new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+                dateConditionDataList.each { dateConditionData ->
+                    if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
+                        if (!dateConditionData.checker.check(ndflPersonIncome)) {
+                            logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum}".Графа "Срок перечисления налога"=${ndflPersonIncome.taxTransferDate} и "Дата выплаты дохода"=${ndflPersonIncome.incomePayoutDate} $fioAndInp.
+                                Не выполнено условие: если «Графа 4 Раздел 2» = ${ndflPersonIncome.incomeCode} и «Графа 5 Раздел 2» = ${ndflPersonIncome.incomeType}, то ${dateConditionData.conditionMessage}.""")
+                        }
+                    } else if (["2520", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
+                        // 11 "Графа 21" = "Графа 7" + "1 рабочий день"
+                        /*
+                        Найти следующую за текущей строкой, удовлетворяющую условиям:
+                        "Графа 10" > "0"
+                        "Графа 5" ≠ "02"
+                        "Графа 5"≠ "14"
+                        "Графа 7" является минимальной из "Граф 7", удовлетворяющих условию: ("Графа 7" (следующей строки) ≥ "Графа 7" (текущей строки))
+                        "Графа 7" ≤ "31.12.20**" + "1 календарный день", где 31.12.20** - последний день текущего года
+                         */
+
+                        // Получим 1-ый рабочий день следующего года
+                        Calendar firstWorkingDay = Calendar.getInstance()
+                        firstWorkingDay.setTime(getReportPeriodStartDate())
+                        firstWorkingDay.set(Calendar.DAY_OF_YEAR, firstWorkingDay.getActualMaximum(Calendar.DAY_OF_YEAR))
+                        firstWorkingDay.add(Calendar.DATE, 1)
+                        if (firstWorkingDay.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                            firstWorkingDay.add(Calendar.DATE, 2);
+                        }
+                        if (firstWorkingDay.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                            firstWorkingDay.add(Calendar.DATE, 1);
+                        }
+
+                        // Найдем следующую за текущей строку в РНУ
+                        List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
+                        NdflPersonIncome ndflPersonIncomeFind = null;
+                        ndflPersonIncomeCurrentList.each {
+                            if (it.incomeAccruedSumm ?: 0 > 0 && !["02", "14"].contains(it.incomeType)
+                                    && (ndflPersonIncomeFind == null || ndflPersonIncomeFind.incomePayoutDate > it.incomePayoutDate)
+                                    && ndflPersonIncome.incomePayoutDate <= it.incomePayoutDate
+                                    && ndflPersonIncome.operationId < it.operationId) {
+                                if (it.incomePayoutDate.before(firstWorkingDay.getTime()) || it.incomePayoutDate.equals(firstWorkingDay.getTime())) {
+                                    ndflPersonIncomeFind = it
+                                }
+                            }
+                        }
+                        if (ndflPersonIncomeFind != null) {
+                            Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
+                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind)) {
+                                logger.error("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncomeFind.rowNum}".Графа "Срок перечисления налога"=${ndflPersonIncomeFind.taxTransferDate} и "Дата выплаты дохода"=${ndflPersonIncomeFind.incomePayoutDate} $fioAndInp.
+                                Не выполнено условие: если «Графа 4 Раздел 2» = ${ndflPersonIncomeFind.incomeCode} и «Графа 5 Раздел 2» = ${ndflPersonIncomeFind.incomeType}, то «Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день.""")
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -3560,39 +3676,43 @@ BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<Ndfl
     return sumNdflDeduction
 }
 
-class IncomeAccruedDateConditionData {
-
+/**
+ * Класс для соотнесения вида проверки в зависимости от значений "Код вида дохода" и "Признак вида дохода"
+ */
+class DateConditionData {
     List<String> incomeCodes
     List<String> incomeTypes
-    IncomeAccruedDateConditionChecker checker
+    DateConditionChecker checker
+    String conditionMessage
 
-    IncomeAccruedDateConditionData(List<String> incomeCodes, List<String> incomeTypes, IncomeAccruedDateConditionChecker checker) {
+    DateConditionData(List<String> incomeCodes, List<String> incomeTypes, DateConditionChecker checker, String conditionMessage) {
         this.incomeCodes = incomeCodes
         this.incomeTypes = incomeTypes
         this.checker = checker
+        this.conditionMessage = conditionMessage
     }
 }
 
-interface IncomeAccruedDateConditionChecker {
-    boolean check(NdflPersonIncome income)
+interface DateConditionChecker {
+    boolean check(NdflPersonIncome ndflPersonIncome)
 }
 
 /**
- * "Графа 6" = "Графе 7"
+ * Проверка: "Графа 6" = "Графе 7"
  */
-class Column6EqualsColumn7 implements IncomeAccruedDateConditionChecker {
+class Column6EqualsColumn7 implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome income) {
-        String accrued = income.incomeAccruedDate.format("dd.MM.yyyy")
-        String payout = income.incomePayoutDate.format("dd.MM.yyyy")
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
+        String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
         return accrued == payout
     }
 }
 
 /**
- * Проверка соответствия маске
+ * Проверка: Соответствия маске
  */
-class MatchMask implements IncomeAccruedDateConditionChecker {
+class MatchMask implements DateConditionChecker {
     String maskRegex
 
     MatchMask(String maskRegex) {
@@ -3600,8 +3720,11 @@ class MatchMask implements IncomeAccruedDateConditionChecker {
     }
 
     @Override
-    boolean check(NdflPersonIncome income) {
-        String accrued = income.incomeAccruedDate.format("dd.MM.yyyy")
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        if (ndflPersonIncome.incomeAccruedDate == null) {
+            return false
+        }
+        String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
         Pattern pattern = Pattern.compile(maskRegex)
         Matcher matcher = pattern.matcher(accrued)
         if (matcher.matches()) {
@@ -3612,13 +3735,16 @@ class MatchMask implements IncomeAccruedDateConditionChecker {
 }
 
 /**
- * Последний календарный день месяца
+ * Проверка "Последний календарный день месяца"
  */
-class LastMonthCalendarDay implements IncomeAccruedDateConditionChecker {
+class LastMonthCalendarDay implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome income) {
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        if (ndflPersonIncome.incomeAccruedDate == null) {
+            return false
+        }
         Calendar calendar = Calendar.getInstance()
-        calendar.setTime(income.incomeAccruedDate)
+        calendar.setTime(ndflPersonIncome.incomeAccruedDate)
         int currentMonth = calendar.get(Calendar.MONTH)
         calendar.add(calendar.DATE, 1)
         int comparedMonth = calendar.get(Calendar.MONTH)
@@ -3627,34 +3753,38 @@ class LastMonthCalendarDay implements IncomeAccruedDateConditionChecker {
 }
 
 /**
- * Если «графа 7» < 31.12.20**, то «графа 6» = «графа 7», иначе «графа 6» = 31.12.20**
+ * Проверка: Если «графа 7» < 31.12.20**, то «графа 6» = «графа 7», иначе «графа 6» = 31.12.20**
  */
-class Column7LastDayOfYear implements IncomeAccruedDateConditionChecker {
+class Column7LastDayOfYear implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome income) {
-        // Дата выплаты дохода (Графа 7)
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        if (ndflPersonIncome.incomePayoutDate == null) {
+            return false
+        }
         Calendar calendarPayout = Calendar.getInstance()
-        calendarPayout.setTime(income.incomePayoutDate)
+        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
         int month = calendarPayout.get(Calendar.MONTH)
         if (dayOfMonth != 31 || month != 12) {
-            return new Column6EqualsColumn7().check(income)
+            return new Column6EqualsColumn7().check(ndflPersonIncome)
         } else {
-            return new MatchMask("31.12.20\\d{2}").check(income)
+            return new MatchMask("31.12.20\\d{2}").check(ndflPersonIncome)
         }
     }
 }
 
 /**
- * Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
+ * Проверка: Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
  */
-class LastMonthCalendarDayButNotFree implements IncomeAccruedDateConditionChecker {
+class LastMonthCalendarDayButNotFree implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome income) {
-        boolean lastMonthDay = new LastMonthCalendarDay().check(income)
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        if (ndflPersonIncome.incomeAccruedDate == null) {
+            return false
+        }
+        boolean lastMonthDay = new LastMonthCalendarDay().check(ndflPersonIncome)
         Calendar calendar = Calendar.getInstance()
-        calendar.setTime(income.incomeAccruedDate)
-        // Получим номер дня в неделе
+        calendar.setTime(ndflPersonIncome.incomeAccruedDate)
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
         if (lastMonthDay && dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY) {
             return true
@@ -3666,19 +3796,100 @@ class LastMonthCalendarDayButNotFree implements IncomeAccruedDateConditionChecke
 }
 
 /**
+ * Проверка: "Графа 21" = "Графа 7" + "1 рабочий день"
+ */
+class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
+            return false
+        }
+        Calendar calendar21 = Calendar.getInstance();
+        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        Calendar calendar7 = Calendar.getInstance();
+        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
+
+        calendar7.add(Calendar.DATE, 1);
+        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+            calendar7.add(Calendar.DATE, 2);
+        }
+        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+            calendar7.add(Calendar.DATE, 1);
+        }
+
+        return calendar21.equals(calendar7);
+    }
+}
+
+/**
+ * Проверка: "Графа 21" ≤ "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" ≤ "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
+ */
+class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
+            return false
+        }
+        Calendar calendar21 = Calendar.getInstance();
+        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        Calendar calendar7 = Calendar.getInstance();
+        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
+
+        calendar7.add(Calendar.DATE, 30);
+        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+            calendar7.add(Calendar.DATE, 2);
+        }
+        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+            calendar7.add(Calendar.DATE, 1);
+        }
+
+        return calendar21.before(calendar7) || calendar21.equals(calendar7);
+    }
+}
+
+/**
+ * "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
+ */
+class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
+            return false
+        }
+        Calendar calendar21 = Calendar.getInstance();
+        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        Calendar calendar7 = Calendar.getInstance();
+        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
+
+        calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH));
+        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+            calendar7.add(Calendar.DATE, 2);
+        }
+        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+            calendar7.add(Calendar.DATE, 1);
+        }
+
+        return calendar21.equals(calendar7);
+    }
+}
+
+/**
  * Проверки Сведения о вычетах
+ * @param ndflPersonList
+ * @param ndflPersonIncomeList
+ * @param ndflPersonDeductionList
  */
 def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList) {
 
     for (NdflPerson ndflPerson : ndflPersonList) {
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "");
-        def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+        def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp ?: ""])
         ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
     }
 
     def mapNdflPersonIncome = [:]
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
-        String operationIdNdflPersonIdDate = "${ndflPersonIncome.operationId}_${ndflPersonIncome.ndflPersonId}_${ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate, "dd.MM.yyyy")}"
+        String operationIdNdflPersonIdDate = "${ndflPersonIncome.operationId}_${ndflPersonIncome.ndflPersonId}_${ndflPersonIncome.incomeAccruedDate ? ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate, "dd.MM.yyyy") : ""}"
         mapNdflPersonIncome.put(operationIdNdflPersonIdDate, ndflPersonIncome)
     }
 
