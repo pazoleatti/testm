@@ -7,7 +7,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -25,7 +24,9 @@ public class SUDIRRedirectLogoutSuccessHandler implements LogoutSuccessHandler {
 	private final static String WEBSEAL_HEADER_NAME = "iv_server_name";
 	// Путь к pkmslogout нужно указывать так, чтобы нивелировать наш корневой url,
 	// иначе получим 404 и логаут не сработает
-	private final static String WEBSEAL_LOGOUT_URL = "/pkmslogout";
+	private final static String WEBSEAL_LOGOUT_URL = "../../pkmslogout";
+	// Адрес для входа в приложение по умолчанию
+	private final static String REDIRECT_URL = "/login";
 
 	@Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -39,11 +40,11 @@ public class SUDIRRedirectLogoutSuccessHandler implements LogoutSuccessHandler {
 				response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=" + URLEncoder.encode(WEBSEAL_LOGOUT_URL, "UTF-8"));
 			} else {
 				LOG.info("LOGOUT: WEBSPHERE");
-				response.sendRedirect(contextPath + "/ibm_security_logout");
+				response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=" + REDIRECT_URL);
 			}
         } else {
 			LOG.info("LOGOUT: OTHER");
-            response.sendRedirect(contextPath + "/login");
+            response.sendRedirect(contextPath + REDIRECT_URL);
         }
     }
 
@@ -54,15 +55,6 @@ public class SUDIRRedirectLogoutSuccessHandler implements LogoutSuccessHandler {
 	 * @return факт использования WebSeal
 	 */
 	private boolean isWebsealUsed(HttpServletRequest request) {
-		boolean isSudir = false;
-		Cookie cookies[] = request.getCookies();
-		if (cookies != null && cookies.length != 0) {
-			for (Cookie cookie : cookies) {
-				if (cookie.getName().equals("IV_JCT"))
-					isSudir = true;
-			}
-		}
-		LOG.info("LOGOUT: isWebsealUsed (1 step) = " + isSudir); // todo удалить строку кода
-		return isSudir || request.getHeader(WEBSEAL_HEADER_NAME) != null;
+		return request.getHeader(WEBSEAL_HEADER_NAME) != null;
 	}
 }

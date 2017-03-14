@@ -14,7 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 @Component
-@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("isAuthenticated()")
 public class CheckReportNotificationHandler extends AbstractActionHandler<CheckReportNotificationAction, CheckReportNotificationResult> {
 
     public CheckReportNotificationHandler() {

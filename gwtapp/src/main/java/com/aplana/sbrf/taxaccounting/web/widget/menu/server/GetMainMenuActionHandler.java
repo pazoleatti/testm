@@ -29,6 +29,7 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.Properties;
  * http://conf.aplana.com/pages/viewpage.action?pageId=11382816
  */
 @Component
+@PreAuthorize("isAuthenticated()")
 public class GetMainMenuActionHandler extends
 		AbstractActionHandler<GetMainMenuAction, GetMainMenuResult> {
 
@@ -66,6 +68,7 @@ public class GetMainMenuActionHandler extends
 
 		List<MenuItem> menuItems = new ArrayList<MenuItem>();
 
+        securityService.updateUserRoles();
         TAUser currentUser = securityService.currentUserInfo().getUser();
 
         // НАЛОГИ
@@ -174,6 +177,8 @@ public class GetMainMenuActionHandler extends
 
 		GetMainMenuResult result = new GetMainMenuResult();
 		result.setMenuItems(menuItems);
+
+        result.setRolesHashCode(currentUser.getRoles().hashCode());
 
 		return result;
 	}
