@@ -35,9 +35,9 @@ switch (formDataEvent) {
         clearData()
         consolidation()
         generateXml()
-        // Формирование pdf-отчета формы
-        //TODO отключил из-за ошибки
-        //declarationService.createPdfReport(logger, declarationData, userInfo)
+        break
+    case FormDataEvent.AFTER_CALCULATE: // Формирование pdf-отчета формы
+        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesList()
