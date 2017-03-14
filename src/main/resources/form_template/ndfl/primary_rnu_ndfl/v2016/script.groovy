@@ -1355,6 +1355,7 @@ void processInfoPart(infoPart) {
     NdflPerson ndflPerson = transformNdflPersonNode(ndflPersonNode)
 
     def ndflPersonOperations = infoPart.'СведОпер'
+
     ndflPersonOperations.each {
         processNdflPersonOperation(ndflPerson, it)
     }
@@ -1365,13 +1366,19 @@ void processInfoPart(infoPart) {
 }
 
 void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode) {
-
+    def familia = ndflPerson.lastName != null ? ndflPerson.lastName + " ": ""
+    def imya = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
+    def otchestvo = ndflPerson.middleName != null ? ndflPerson.middleName : ""
     List<NdflPersonIncome> incomes = new ArrayList<NdflPersonIncome>();
+    // При создание объекто операций доходов выполняется проверка на соответствие дат отчетному периоду
     incomes.addAll(ndflPersonOperationsNode.'СведДохНал'.collect {
-        transformNdflPersonIncome(it)
+        transformNdflPersonIncome(it, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, familia + imya + otchestvo)
     });
+    // Если проверка на даты не прошла, то операция не добавляется.
+    if (incomes.contains(null)) {
+        return
+    }
     ndflPerson.incomes.addAll(incomes);
-
     List<NdflPersonDeduction> deductions = new ArrayList<NdflPersonDeduction>();
     deductions.addAll(ndflPersonOperationsNode.'СведВыч'.collect {
         transformNdflPersonDeduction(it)
@@ -1414,8 +1421,12 @@ NdflPerson transformNdflPersonNode(NodeChild node) {
     return ndflPerson
 }
 
-NdflPersonIncome transformNdflPersonIncome(NodeChild node) {
+NdflPersonIncome transformNdflPersonIncome(NodeChild node, String kpp, String oktmo, String inp, String fio) {
     def operationNode = node.parent();
+
+    if (operationNotRelateToCurrentPeriod(node, kpp, oktmo, inp, fio)) {
+        return null
+    }
 
     NdflPersonIncome personIncome = new NdflPersonIncome()
     personIncome.rowNum = toInteger(node.'@НомСтр')
@@ -1446,6 +1457,50 @@ NdflPersonIncome transformNdflPersonIncome(NodeChild node) {
     personIncome.taxSumm = toInteger(node.'@НалПерСумм')
     return personIncome
 }
+
+// Проверка на принадлежность операций периоду при загрузке ТФ
+boolean operationNotRelateToCurrentPeriod(NodeChild node, String kpp, String oktmo, String inp, String fio) {
+
+    Date incomeAccruedDate = toDate(node.'@ДатаДохНач')
+    Date incomePayoutDate = toDate(node.'@ДатаДохВыпл')
+    Date taxDate = toDate(node.'@ДатаНалог')
+    boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
+    boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
+    boolean taxDateOk = dateRelateToCurrentPeriod(taxDate)
+    if (!incomeAccruedDateOk) {
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач\" недопустимое значение: \"${node.'@ДатаДохНач'}\":дата операции не входит в отчетный период ТФ.\n" +
+                "КПП = $kpp.\n" +
+                "ОКТМО = $oktmo\n" +
+                "ФЛ ИНП = $inp\n" +
+                "ФИО = $fio")
+    }
+    if (!incomePayoutDateOk) {
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл\" недопустимое значение: \"${node.'@ДатаДохВыпл'}\":дата операции не входит в отчетный период ТФ.\n" +
+                "КПП = $kpp.\n" +
+                "ОКТМО = $oktmo\n" +
+                "ФЛ ИНП = $inp\n" +
+                "ФИО = $fio")
+    }
+    if (!taxDateOk) {
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог\" недопустимое значение: \"${node.'@ДатаНалог'}\":дата операции не входит в отчетный период ТФ.\n" +
+                "КПП = $kpp.\n" +
+                "ОКТМО = $oktmo\n" +
+                "ФЛ ИНП = $inp\n" +
+                "ФИО = $fio")
+    }
+    if (incomeAccruedDateOk && incomePayoutDateOk && taxDateOk) {
+        return false
+    }
+    return true
+}
+
+boolean dateRelateToCurrentPeriod(Date date) {
+    if (date==null || (date >= getReportPeriodCalendarStartDate() && date <= getReportPeriodEndDate())) {
+        return true
+    }
+    return false
+}
+
 
 NdflPersonDeduction transformNdflPersonDeduction(NodeChild node) {
 
@@ -1757,6 +1812,17 @@ def getDepartmentFullName(def id) {
 def getReportPeriodStartDate() {
     if (reportPeriodStartDate == null) {
         reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodStartDate
+}
+
+/**
+ * Получить календарную дату начала отчетного периода
+ * @return
+ */
+def getReportPeriodCalendarStartDate() {
+    if (reportPeriodStartDate == null) {
+        reportPeriodStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
     }
     return reportPeriodStartDate
 }
@@ -2654,24 +2720,7 @@ def checkDataCommon(
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
 
-        // Общ5 Принадлежность дат операций к отчетному периоду
-        // Дата начисления дохода (Необязательное поле)
-        if (ndflPersonIncome.incomeAccruedDate != null && (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate() || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_ACCRUED_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-
-        // Дата выплаты дохода (Необязательное поле)
-        if (ndflPersonIncome.incomePayoutDate != null && (ndflPersonIncome.incomePayoutDate < getReportPeriodStartDate() || ndflPersonIncome.incomePayoutDate > getReportPeriodEndDate())) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_INCOME_PAYOUT_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Дата налога (Необязательное поле)
-        if (ndflPersonIncome.taxDate != null && (ndflPersonIncome.taxDate < getReportPeriodStartDate() || ndflPersonIncome.taxDate > getReportPeriodEndDate())) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Срок (дата) перечисления налога (Необязательное поле)
-        if (ndflPersonIncome.taxTransferDate != null && (ndflPersonIncome.taxTransferDate < getReportPeriodStartDate() || ndflPersonIncome.taxTransferDate > getReportPeriodEndDate())) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum, C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
+        // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         if (ndflPersonIncome.paymentDate == null && ndflPersonIncome.paymentNumber == null && ndflPersonIncome.taxSumm == null) {
