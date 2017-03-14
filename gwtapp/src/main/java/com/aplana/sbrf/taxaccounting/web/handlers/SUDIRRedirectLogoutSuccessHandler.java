@@ -25,7 +25,7 @@ public class SUDIRRedirectLogoutSuccessHandler implements LogoutSuccessHandler {
 	private final static String WEBSEAL_HEADER_NAME = "iv_server_name";
 	// Путь к pkmslogout нужно указывать так, чтобы нивелировать наш корневой url,
 	// иначе получим 404 и логаут не сработает
-	private final static String WEBSEAL_LOGOUT_URL = "/pkmslogout";
+	private final static String WEBSEAL_LOGOUT_URL = "../../pkmslogout";
 
 	@Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
