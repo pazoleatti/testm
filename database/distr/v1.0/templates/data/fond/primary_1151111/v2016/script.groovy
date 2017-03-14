@@ -2273,6 +2273,8 @@ class TestDataHolder {
  */
 void importData() {
 
+    ScriptUtils.checkInterrupted();
+
     // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
     // Данный код отрабатывает, когда файл формы уже фактически сохранен в базу, поэтому при проверке сущестования формы для данного периода и подразделения не нужно учитывать данный файл в выборке
     def declarationDataList = declarationService.find(PRIMARY_1151111_TEMPLATE_ID, declarationData.departmentReportPeriodId)
@@ -2294,9 +2296,10 @@ void importData() {
         return
     }
 
+    ScriptUtils.checkInterrupted();
+
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
-
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
@@ -2311,6 +2314,8 @@ void importData() {
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
+
+    ScriptUtils.checkInterrupted();
 
     // Набор объектов ПерсСвСтрахЛиц
     def raschsvPersSvStrahLicList = []
@@ -2330,6 +2335,9 @@ void importData() {
                 if (raschetSvNode.name == NODE_NAME_RASCHET_SV) {
                     // Разбор узла РасчетСВ
                     raschetSvNode.childNodes().each { raschetSvChildNode ->
+
+                        ScriptUtils.checkInterrupted();
+
                         if (raschetSvChildNode.name == NODE_NAME_OBYAZ_PLAT_SV) {
                             // Разбор узла ОбязПлатСВ
                             parseRaschsvObyazPlatSv(raschetSvChildNode, declarationDataId)
@@ -2354,14 +2362,20 @@ void importData() {
             }
         }
     }
+    ScriptUtils.checkInterrupted();
+
     // Сохранение коллекции объектов ПерсСвСтрахЛиц
     if (raschsvPersSvStrahLicList.size() >= 0) {
         // При добавлении (обновлении) записей в справочнике Физические лица, в объект ПерсСвСтрахЛиц будет добавлена ссылка на запись в справочнике Физические лица
         raschsvPersSvStrahLicService.insertPersSvStrahLic(raschsvPersSvStrahLicList)
     }
 
+    ScriptUtils.checkInterrupted();
+
     // Сохранение Сведений о плательщике страховых взносов и Сведения о лице, подписавшем документ
     raschsvSvnpPodpisantService.insertRaschsvSvnpPodpisant(raschsvSvnpPodpisant)
+
+    ScriptUtils.checkInterrupted();
 
     // Расчет сводных показателей
     raschSvItog(fileNode, declarationDataId)
@@ -4876,9 +4890,14 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
 @Field final String RF_DOC_NUMBER = "DOC_NUMBER"
 
 def checkData() {
+
+    ScriptUtils.checkInterrupted();
+
     long time = System.currentTimeMillis();
     // Проверки xml
     checkDataXml()
+
+    ScriptUtils.checkInterrupted();
 
     // Проверки БД
     checkDataDB()
@@ -4933,6 +4952,9 @@ def checkDataDBPerson() {
 
     // Проверки по плательщику страховых взносов
     raschsvPersSvStrahLicList.each { raschsvPersSvStrahLic ->
+
+        ScriptUtils.checkInterrupted();
+
         def fioBirthday = raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.dataRozd
 
         // 3.1.1 Назначение ФЛ записи справочника "Физические лица"
@@ -5052,6 +5074,8 @@ def checkDataDBPerson() {
     println "Проверки по плательщику страховых взносов " + (System.currentTimeMillis() - time);
     logger.info("Проверки по плательщику страховых взносов: (" + (System.currentTimeMillis() - time) + " ms)");
 
+    ScriptUtils.checkInterrupted();
+
     // 3.2.1 Дубли физического лица рамках формы
     time = System.currentTimeMillis();
     def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonsByDeclarationDataId(declarationData.id)
@@ -5075,6 +5099,8 @@ def checkDataDBPerson() {
     }
     println "Дубли физического лица рамках формы " + (System.currentTimeMillis() - time);
     logger.info("Дубли физического лица рамках формы: (" + (System.currentTimeMillis() - time) + " ms)");
+
+    ScriptUtils.checkInterrupted();
 
     // 3.2.2 Дубли физического лица в разных формах
     time = System.currentTimeMillis();
@@ -5413,6 +5439,8 @@ def checkDataDBSum() {
         }
     }
 
+    ScriptUtils.checkInterrupted();
+
     // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину) (Проверки выполняются по всем РасчСВ_ОПС)
     if (raschsvSvnpPodpisant.nomKorr == 0) {
         if (nachislSvNePrevSum1 != svVyplMkSum1) {
@@ -5460,6 +5488,8 @@ def checkDataDBSum() {
             logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум3Посл3М = \"$nachislSvDop428_12Sum3\", " + pathAttr428_3 + ".Сум3Посл3М = \"$nachislSvDop428_3Sum3\"")
         }
     }
+
+    ScriptUtils.checkInterrupted();
 
     if (raschsvSvnpPodpisant.nomKorr == 0) {
         vyplSvDopMtMap.each { tarif, vyplSvDopMtSum ->
@@ -5528,6 +5558,8 @@ def checkDataDBSum() {
         }
     }
 
+    ScriptUtils.checkInterrupted();
+
     // 3.3.3.1 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОМС428)
     if (uplPerOmsSum1 != nachislSvOmsSum1) {
         def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум1Посл3М = \"$uplPerOmsSum1\""
@@ -5544,6 +5576,8 @@ def checkDataDBSum() {
         def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум3Посл3М = \"$nachislSvNePrevSum3\""
         logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
     }
+
+    ScriptUtils.checkInterrupted();
 
     // *********************************** РасчСВ_ОСС.ВНМ ***********************************
     RaschsvOssVnm raschsvOssVnm = raschsvOssVnmService.findOssVnm(declarationData.id)
@@ -5604,6 +5638,8 @@ def checkDataDBSum() {
         def pathAttrComp = pathAttrOss + ".НачислСВ.Сум3Посл3М = \"$ossNachislSvCurr3\", " + pathAttrOss + ".ВозмРасхСО.Сум3Посл3М = \"$ossVosmRashSoCurr3\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
+
+    ScriptUtils.checkInterrupted();
 
     // *********************************** РасхОССЗак ***********************************
     RaschsvRashOssZak raschsvRashOssZak = raschsvRashOssZakService.findRaschsvRashOssZak(declarationData.id)
@@ -5688,6 +5724,8 @@ def checkDataDBSum() {
         def pathAttrComp = kindAids.join(", ") + " = \"$ossZakRashFinFBSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
+
+    ScriptUtils.checkInterrupted();
 
     // *********************************** ВыплФинФБ ***********************************
     RaschsvVyplFinFb raschsvVyplFinFb = raschsvVyplFinFbService.findRaschsvVyplFinFb(declarationData.id)
@@ -5921,6 +5959,8 @@ def checkDataDBSum() {
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
 
+    ScriptUtils.checkInterrupted();
+
     // *********************************** ПравТариф3.1.427 ***********************************
     RaschsvPravTarif31427 raschsvPravTarif31427 = raschsvPravTarif31427Service.findRaschsvPravTarif31427(declarationData.id)
     def pathAttrPravTarif31427 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф3.1.427"
@@ -5953,6 +5993,8 @@ def checkDataDBSum() {
         }
     }
 
+    ScriptUtils.checkInterrupted();
+
     // *********************************** ПравТариф5.1.427 ***********************************
     RaschsvPravTarif51427 raschsvPravTarif51427 = raschsvPravTarif51427Service.findRaschsvPravTarif51427(declarationData.id)
     def pathAttrPravTarif51427 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.ПравТариф5.1.427"
@@ -5971,6 +6013,8 @@ def checkDataDBSum() {
             logger.warn("$pathAttrVal не может быть меньше $pathAttrComp")
         }
     }
+
+    ScriptUtils.checkInterrupted();
 
     // *********************************** ПравТариф7.1.427 ***********************************
     RaschsvPravTarif71427 raschsvPravTarif71427 = raschsvPravTarif71427Service.findRaschsvPravTarif71427(declarationData.id)
@@ -5997,14 +6041,17 @@ def checkDataDBSum() {
         }
     }
 
+    ScriptUtils.checkInterrupted();
+
     // *********************************** СвПримТариф9.1.427 ***********************************
     RaschsvSvPrimTarif91427 raschsvSvPrimTarif91427 = raschsvSvPrimTarif91427Service.findRaschsvSvPrimTarif91427(declarationData.id)
-    def pathAttrSvPrimTarif91427 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СвПримТариф9.1.427"
 
     // 3.3.9.1 Элементы не заполнены
     if (raschsvSvPrimTarif91427 != null) {
         logger.warn("Элементы блока Файл.Документ.РасчетСВ.ОбязПлатСВ.СвПримТариф9.1.427 заполняются только для ИП.")
     }
+
+    ScriptUtils.checkInterrupted();
 
     // *********************************** СвПримТариф2.2.425 ***********************************
     RaschsvSvPrimTarif22425 raschsvSvPrimTarif22425 = raschsvSvPrimTarif22425Service.findRaschsvSvPrimTarif22425(declarationData.id)
@@ -6041,6 +6088,8 @@ def checkDataDBSum() {
             }
         }
     }
+
+    ScriptUtils.checkInterrupted();
 
     // *********************************** СвПримТариф1.3.422 ***********************************
     RaschsvSvPrimTarif13422 raschsvSvPrimTarif13422 = raschsvSvPrimTarif13422Service.findRaschsvSvPrimTarif13422(declarationData.id)
@@ -6292,6 +6341,8 @@ def checkDataXml() {
                 } else if (documentChildNode.name == NODE_NAME_RASCHET_SV) {
                     // РасчетСВ
                     documentChildNode.childNodes().each { raschetSvChildNode ->
+
+                        ScriptUtils.checkInterrupted();
 
                         // ОбязПлатСВ
                         if (raschetSvChildNode.name == NODE_NAME_OBYAZ_PLAT_SV) {

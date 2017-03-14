@@ -46,7 +46,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Long overholdingTax;
     // Сумма возвращенного налога (Графа 20)
     private Long refoundTax;
-    // Срок (дата) перечисления налога
+    // Срок (дата) перечисления налога (Графа 21)
     private Date taxTransferDate;
     // Дата платежного поручения
     private Date paymentDate;
