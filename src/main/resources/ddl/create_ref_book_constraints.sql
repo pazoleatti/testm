@@ -36,6 +36,7 @@ alter table ref_book_person_category add constraint pk_ref_book_person_category 
 alter table sec_user_asnu add constraint pk_sec_user_asnu primary key(id);
 alter table ref_book_detach_tax_pay add constraint pk_ref_book_detach_tax_pay primary key(id);
 alter table ref_book_make_calc add constraint pk_ref_book_make_calc primary key(id);
+alter table ref_book_calendar add constraint pk_ref_book_calendar primary key (cdate);
 
 -- foreign keys
 alter table ref_book_region add constraint fk_ref_book_region_oktmo foreign key(oktmo) references ref_book_oktmo(id);
@@ -103,6 +104,7 @@ alter table ref_book_tax_place_type add constraint chk_ref_tax_place_type_status
 alter table ref_book_signatory_mark add constraint chk_ref_signatory_mark check(status between -1 and 2);
 alter table ref_book_detach_tax_pay add constraint chk_rbook_detach_tax_pay_st check(status between -1 and 2);
 alter table ref_book_make_calc add constraint chk_rbook_make_calc_st check(status between -1 and 2);
+alter table ref_book_calendar add constraint chk_ref_book_cal_work check (work in (0,1));
 
 --unique
 --create unique index unq_ref_book_oktmo_code_vers on ref_book_oktmo(code,version);
