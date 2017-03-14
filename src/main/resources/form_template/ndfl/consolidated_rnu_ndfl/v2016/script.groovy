@@ -49,6 +49,18 @@ switch (formDataEvent) {
 }
 
 /**
+ * Карта соответствия адреса формы адресу в справочнике ФИАС
+ */
+@Field Map<Long, Long> fiasAddressIdsCache = [:];
+
+Map<Long, Long> getFiasAddressIdsMap() {
+    if (fiasAddressIdsCache.isEmpty()) {
+        fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id);
+    }
+    return fiasAddressIdsCache;
+}
+
+/**
  * Вид формы "Консолидированная", используется при определении проверок в частях
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataReference(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataCommon(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
