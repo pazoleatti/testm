@@ -531,7 +531,7 @@ def getSumOfAccruedWhenIncomeCodeDiv(incomes) {
 def getSumOfDeductions(incomes) {
     def toReturn = new BigDecimal(0)
     incomes.each {
-        if (it.totalDeductionsSumm != null) {
+        if (it.totalDeductionsSumm != null && it.incomeAccruedDate != null && it.incomeAccruedSumm != null && it.incomeAccruedSumm != 0) {
             toReturn = toReturn.add(it.totalDeductionsSumm)
         }
     }
