@@ -2558,7 +2558,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 dateConditionDataList.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         if (!dateConditionData.checker.check(ndflPersonIncome)) {
-                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                                 ndflPersonIncome.rowNum ?: ""
                             }".Графа "Дата начисления дохода"=${ndflPersonIncome.incomeAccruedDate} $fioAndInp.
@@ -2575,12 +2575,12 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             // СведДох2 Сумма вычета (Графа 12)
             BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
             if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
-                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 logger.warn(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + "\"Графа 12 Раздел 2 = сумма значений граф 16 Раздел 3\"");
             }
             if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
-                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 logger.warn(MESSAGE_ERROR_VALUE,
                         T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + "\"сумма значений граф 16 Раздела 3 ≤ графа 10 Раздел 2\"");
             }
@@ -2591,7 +2591,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 Boolean conditionB = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status == "1"
                 Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
                 if (!(conditionA || conditionB || conditionC)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Ставка" $fioAndInp.
@@ -2602,7 +2602,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 }
             } else if (ndflPersonIncome.taxRate == 15) {
                 if (!(ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1")) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Ставка" $fioAndInp.
@@ -2610,7 +2610,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 }
             } else if (ndflPersonIncome.taxRate == 35) {
                 if (!(["2740", "3020", "2610"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status != "2")) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Ставка" $fioAndInp.
@@ -2620,7 +2620,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 def conditionA = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && ndflPersonIncome.incomeCode != "1010"
                 def conditionB = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
                 if (!(conditionA || conditionB)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Ставка" $fioAndInp.
@@ -2630,7 +2630,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 }
             } else if (ndflPersonIncome.taxRate == 9) {
                 if (!(ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1110" && ndflPerson.status == "1")) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Ставка" $fioAndInp.
@@ -2638,7 +2638,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 }
             } else {
                 if (!(ndflPerson.citizenship != "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1")) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Ставка" $fioAndInp.
@@ -2654,7 +2654,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (ndflPersonIncome.calculatedTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                     // «Графа 15 Раздел 2» ≠ «Графа 6 Раздел 2»
                     if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomeAccruedDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Дата исчисления" $fioAndInp.
@@ -2665,7 +2665,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (ndflPersonIncome.withholdingTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                     // «Графа 15 Раздел 2» ≠ «Графа 7 Раздел 2»
                     if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Дата удержания" $fioAndInp.
@@ -2679,7 +2679,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         !["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode)) {
                     // «Графа 15 Раздел 2» ≠ «Графа 7 Раздел 2»
                     if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Дата удержания" $fioAndInp.
@@ -2694,7 +2694,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate()) {
                     // «Графа 15 Раздел 2» ≠ «Графа 6 Раздел 2»
                     if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomeAccruedDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Дата удержания" $fioAndInp.
@@ -2713,7 +2713,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
                     int month = calendarPayout.get(Calendar.MONTH)
                     if (!(dayOfMonth == 31 && month == 12)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Дата удержания" $fioAndInp.
@@ -2727,7 +2727,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                     // «Графа 15 Раздел 2» ≠ «Графа 7 Раздел 2»
                     if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Дата удержания" $fioAndInp.
@@ -2742,7 +2742,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                     // «Графа 15 Раздел 2» ≠ «Графа 7 Раздел 2»
                     if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Дата удержания" $fioAndInp.
@@ -2757,7 +2757,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 // СведДох6.1
                 if (ndflPersonIncome.taxRate != 13) {
                     if (ndflPersonIncome.calculatedTax ?: 0 != ScriptUtils.round((ndflPersonIncome.taxBase ?: 0 * ndflPersonIncome.taxRate ?: 0), 0)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Сумма налога исчисленная" $fioAndInp.
@@ -2801,7 +2801,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     BigDecimal S2 = S2List.sum { it.calculatedTax ?: 0 } ?: 0
                     // Сумма по «Графа 16» текущей операции = S1 x 13% - S2
                     if (ndflPersonIncome.calculatedTax != ScriptUtils.round((S1 * 13 - S2), 0)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "Сумма налога исчисленная" $fioAndInp.
                                 Не выполнено условие: сумма по «Графа 16 Раздел 2» текущей операции = S1 x 13%% - S2.""")
                     }
@@ -2815,7 +2815,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         if (!(ndflPersonIncome.calculatedTax ==
                                 ScriptUtils.round((ndflPersonIncome.taxBase ?: 0 * 13 - ndflPersonPrepaymentSum ?: 0), 0))
                         ) {
-                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                                 ndflPersonIncome.rowNum ?: ""
                             }".Графа "Сумма налога исчисленная" $fioAndInp.
@@ -2836,7 +2836,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     // «Графа 17 Раздел 2» = «Графа 16 Раздел 2» = «Графа 24 Раздел 2»
                     if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax
                             && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Сумма налога удержанная" $fioAndInp.
@@ -2861,7 +2861,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax ?: 0 + ndflPersonIncomePreview.calculatedTax ?: 0
                             && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0
                             && ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax) * 50)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "Сумма налога удержанная" $fioAndInp.
                                 Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» ≤ ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%).""")
                     }
@@ -2870,7 +2870,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                              "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "02")
                 ) {
                     if (!(ndflPersonIncome.withholdingTax == 0 || ndflPersonIncome.withholdingTax == null)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
                         }".Графа "Сумма налога удержанная" $fioAndInp.
@@ -2881,7 +2881,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     }
                 } else if (!(ndflPersonIncome.incomeCode != null)) {
                     if (!(ndflPersonIncome.withholdingTax != ndflPersonIncome.taxSumm ?: 0)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "Сумма налога удержанная" $fioAndInp.
                                 Не выполнено условие: если «Графа 4 Раздел 2» ≠ 0, то «Графа 17 Раздел 2» = «Графа 24 Раздел 2».""")
                     }
@@ -2904,7 +2904,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             // СведДох8 Сумма налога, не удержанная налоговым агентом (Графа 18)
             if (calculatedTaxSum > withholdingTaxSum) {
                 if (!(notHoldingTaxSum == calculatedTaxSum - withholdingTaxSum)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Сумма налога, не удержанная налоговым агентом" $fioAndInp.
@@ -2916,7 +2916,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             // СведДох9 Сумма налога, излишне удержанная налоговым агентом (Графа 19)
             if (calculatedTaxSum < withholdingTaxSum) {
                 if (!(overholdingTaxSum == withholdingTaxSum - calculatedTaxSum)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Сумма налога, излишне удержанная налоговым агентом" $fioAndInp.
@@ -2928,7 +2928,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             // СведДох10 Сумма возвращенного налога (Графа 20)
             if (ndflPersonIncome.refoundTax > 0) {
                 if (!(refoundTaxSum <= overholdingTaxSum)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "Сумма возвращенного налога" $fioAndInp.
@@ -2980,7 +2980,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 dateConditionDataList.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         if (!dateConditionData.checker.check(ndflPersonIncome)) {
-                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "Срок перечисления налога"=${ndflPersonIncome.taxTransferDate} и "Дата выплаты дохода"=${ndflPersonIncome.incomePayoutDate} $fioAndInp.
                                 Не выполнено условие: если «Графа 4 Раздел 2» = ${ndflPersonIncome.incomeCode} и «Графа 5 Раздел 2» = ${ndflPersonIncome.incomeType}, то ${dateConditionData.conditionMessage}.""")
                         }
@@ -3023,7 +3023,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         if (ndflPersonIncomeFind != null) {
                             Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
                             if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind)) {
-                                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncomeFind.rowNum}".Графа "Срок перечисления налога"=${ndflPersonIncomeFind.taxTransferDate} и "Дата выплаты дохода"=${ndflPersonIncomeFind.incomePayoutDate} $fioAndInp.
                                 Не выполнено условие: если «Графа 4 Раздел 2» = ${ndflPersonIncomeFind.incomeCode} и «Графа 5 Раздел 2» = ${ndflPersonIncomeFind.incomeType}, то «Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день.""")
                             }
@@ -3278,7 +3278,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
 
         // Выч14 Документ о праве на налоговый вычет.Код источника (Графа 7)
         if (ndflPersonDeduction.typeCode == "1" && ndflPersonDeduction.notifSource != "0000") {
-            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                 ndflPersonDeduction.rowNum ?: ""
             }".Графа "Код источника" $fioAndInp.
@@ -3292,7 +3292,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
         String operationIdNdflPersonIdDate = "${ndflPersonDeduction.operationId}_${ndflPersonDeduction.ndflPersonId}_${ScriptUtils.formatDate(ndflPersonDeduction.incomeAccrued, "dd.MM.yyyy")}"
         NdflPersonIncome ndflPersonIncome = mapNdflPersonIncome.get(operationIdNdflPersonIdDate)
         if (ndflPersonIncome == null) {
-            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                 ndflPersonDeduction.rowNum ?: ""
             }" $fioAndInp.
@@ -3307,7 +3307,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
         } else {
             // Выч17 Начисленный доход.Код дохода (Графы 11)
             if (ndflPersonDeduction.incomeCode != ndflPersonIncome.incomeCode) {
-                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                     ndflPersonDeduction.rowNum ?: ""
                 }".Графа "Код дохода" $fioAndInp.
@@ -3318,7 +3318,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
 
             // Выч18 Начисленный доход.Сумма (Графы 12)
             if (!comparNumbEquals(ndflPersonDeduction.incomeSumm, ndflPersonIncome.incomeAccruedSumm)) {
-                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                     ndflPersonDeduction.rowNum ?: ""
                 }".Графа "Сумма начисленного дохода" $fioAndInp.
@@ -3330,7 +3330,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
 
         // Выч20 Применение вычета.Текущий период.Дата (Графы 15)
         if (ndflPersonDeduction.periodCurrDate != ndflPersonDeduction.incomeAccrued) {
-            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                 ndflPersonDeduction.rowNum ?: ""
             }".Графа "Дата применения вычета в текущем периоде" $fioAndInp.
@@ -3341,7 +3341,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
 
         // Выч21 Применение вычета.Текущий период.Сумма (Графы 16) (Графы 8)
         if (comparNumbGreater(ndflPersonDeduction.notifSumm ?: 0, ndflPersonDeduction.periodCurrSumm ?: 0)) {
-            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-572
+            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                 ndflPersonDeduction.rowNum ?: ""
             }".Графа "Сумма вычета согласно документу" $fioAndInp.
