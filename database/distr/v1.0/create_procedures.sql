@@ -1,5 +1,5 @@
 create or replace package person_pkg as
-/* Пакет для идентификации физических лиц*/
+/* Пакет для идентификации физических лиц */
   cursor persons_for_insert(c_declaration number) is
      select n.id,
             n.person_id,
