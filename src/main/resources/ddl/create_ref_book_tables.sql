@@ -648,6 +648,8 @@ comment on column sec_user_asnu.id is 'Уникальный идентифика
 comment on column sec_user_asnu.user_id is 'Пользователь, для которого предоставляется доступ к АС НУ';
 comment on column sec_user_asnu.asnu_id is 'АСНУ, к которой предоставляется доступ';
 
+create sequence seq_sec_user_asnu_id start with 10000;
+
 --Признак возложения обязанности по уплате налога на обособленное подразделение
 create table ref_book_detach_tax_pay
 (

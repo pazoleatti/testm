@@ -19,13 +19,15 @@ public class ManualMenuPresenter extends AbstractMenuPresenter<ManualMenuPresent
 
     private static final int NOTIFICATION_UPDATE_TIME = 30 * 1000; //30s
     private DialogPresenter dialogPresenter;
+    private MainMenuPresenter mainMenuPresenter;
 
     private Timer refreshTimer;
 
     @Inject
-    public ManualMenuPresenter(EventBus eventBus, ManualMenuView view, DialogPresenter dialogPresenter, DispatchAsync dispatchAsync) {
+    public ManualMenuPresenter(EventBus eventBus, ManualMenuView view, DialogPresenter dialogPresenter, MainMenuPresenter mainMenuPresenter, DispatchAsync dispatchAsync) {
         super(eventBus, view, dispatchAsync);
         this.dialogPresenter = dialogPresenter;
+        this.mainMenuPresenter = mainMenuPresenter;
     }
 
     @Override
@@ -74,11 +76,16 @@ public class ManualMenuPresenter extends AbstractMenuPresenter<ManualMenuPresent
     }
 
     public void updateNotificationCount() {
-        dispatchAsync.execute(new GetNotificationCountAction(), CallbackUtils
+        GetNotificationCountAction action = new GetNotificationCountAction();
+        action.setRolesHashCode(mainMenuPresenter.getRolesHashCode());
+        dispatchAsync.execute(action, CallbackUtils
                 .simpleCallback(new AbstractCallback<GetNotificationCountResult>() {
                     @Override
                     public void onSuccess(GetNotificationCountResult result) {
                         getView().updateNotificationCount(result.getNotificationCount());
+                        if (result.isEditedRoles()) {
+                            mainMenuPresenter.onReveal();
+                        }
                     }
                 }));
     }

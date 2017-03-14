@@ -1,4 +1,5 @@
 create or replace package person_pkg as
+/* Пакет для идентификации физических лиц */
   cursor persons_for_insert(c_declaration number) is
      select n.id,
             n.person_id,
@@ -1497,6 +1498,7 @@ end person_pkg;
 show errors;
 
 create or replace package fias_pkg
+/* Пакет для работы со справочником ФИАС */
 as
   
   cursor fias_addrs(c_region varchar2,c_area varchar2,c_city varchar2,c_locality varchar2,c_street varchar2,
