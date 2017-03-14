@@ -1435,25 +1435,31 @@ void processInfoPart(infoPart) {
 
     NdflPerson ndflPerson = transformNdflPersonNode(ndflPersonNode)
 
-    def ndflPersonOperations = infoPart.'СведОпер'
-
-    ndflPersonOperations.each {
-        processNdflPersonOperation(ndflPerson, it)
-    }
-
-    //Идентификатор декларации для которой загружаются данные
-    ndflPerson.declarationDataId = declarationData.getId()
-    ndflPersonService.save(ndflPerson)
-}
-
-void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode) {
     def familia = ndflPerson.lastName != null ? ndflPerson.lastName + " ": ""
     def imya = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
     def otchestvo = ndflPerson.middleName != null ? ndflPerson.middleName : ""
+    def fio = familia + imya + otchestvo
+    def ndflPersonOperations = infoPart.'СведОпер'
+
+    ndflPersonOperations.each {
+        processNdflPersonOperation(ndflPerson, it, fio)
+    }
+
+    //Идентификатор декларации для которой загружаются данные
+    if (ndflPerson.incomes != null && !ndflPerson.incomes.isEmpty()) {
+        ndflPerson.declarationDataId = declarationData.getId()
+        ndflPersonService.save(ndflPerson)
+    } else {
+        logger.warn("ФЛ ФИО = $fio ФЛ ИНП = ${ndflPerson.inp} Не загружен в систему поскольку не имеет операций в отчетном периоде")
+    }
+}
+
+void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode, String fio) {
+
     List<NdflPersonIncome> incomes = new ArrayList<NdflPersonIncome>();
     // При создание объекто операций доходов выполняется проверка на соответствие дат отчетному периоду
     incomes.addAll(ndflPersonOperationsNode.'СведДохНал'.collect {
-        transformNdflPersonIncome(it, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, familia + imya + otchestvo)
+        transformNdflPersonIncome(it, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, fio)
     });
     // Если проверка на даты не прошла, то операция не добавляется.
     if (incomes.contains(null)) {
