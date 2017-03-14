@@ -304,6 +304,12 @@ insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,refer
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9533,951,23,'Наименование документа, подтверждающего полномочия представителя','APPROVE_DOC_NAME',1,1,null,null,20,0,0,120,null);
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9534,951,24,'Наименование организации-представителя налогоплательщика','APPROVE_ORG_NAME',1,1,null,null,20,0,0,1000,null);
 
+insert into ref_book(id,name,visible,type,read_only,table_name,is_versioned) values(945,'Календарь',1,0,1,'REF_BOOK_CALENDAR',0);
+
+insert into ref_book_attribute(id,ref_book_id,name,alias,type,ord,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values(9451,945,'Дата','CDATE',3,1,1,null,10,1,1,null,1,0,null);
+insert into ref_book_attribute(id,ref_book_id,name,alias,type,ord,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values(9452,945,'Рабочий/Выходной','WORK',2,2,1,0,6,1,0,null,null,0,1);
+
+
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (960,'Параметры подразделения по сборам, взносам',0,0,0,null,'REF_BOOK_FOND');
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (961,'Параметры подразделения по сборам, взносам (таблица)',0,0,0,null,'REF_BOOK_FOND_DETAIL');
 

@@ -678,4 +678,15 @@ comment on column ref_book_make_calc.id is 'Уникальный идентиф�
 comment on column ref_book_make_calc.code is 'Код';
 comment on column ref_book_make_calc.name is 'Значение';
 
+--Календарь
+create table ref_book_calendar
+(
+  cdate date not null,
+  work  number(1) default 0 not null
+);
+
+comment on table ref_book_calendar is 'Календарь';
+comment on column ref_book_calendar.cdate is 'Дата';
+comment on column ref_book_calendar.work is 'Рабочий/Выходной';
+
 -----------------------------------------------------------------------------------------------------------------------------

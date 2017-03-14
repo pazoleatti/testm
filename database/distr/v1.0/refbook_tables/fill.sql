@@ -1,3 +1,6 @@
+prompt ref_book_calendar
+@@ref_book_calendar;
+
 prompt ref_book_fill_base
 @@ref_book_fill_base;
 

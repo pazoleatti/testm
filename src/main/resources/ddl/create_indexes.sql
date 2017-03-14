@@ -52,3 +52,5 @@ create index srch_fias_addrobj_postcode on fias_addrobj(replace(postalcode,' ','
 create index srch_fias_addrobj_regfnls on fias_addrobj(livestatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
 
 create index idx_log_entry_date on log_entry(creation_date);
+
+create index idx_ref_book_cal_work on ref_book_calendar(work);
