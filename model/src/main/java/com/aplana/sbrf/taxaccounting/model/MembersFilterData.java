@@ -17,7 +17,8 @@ public class MembersFilterData implements Serializable {
         MAIL,
         ACTIVE,
         DEPARTMENT,
-        ROLE
+        ROLE,
+        ASNU
     }
 
     private Boolean active;
