@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Моделька для представления "списка пользователей"
@@ -15,8 +16,11 @@ public class TAUserView implements Serializable {
     private String email;
     private Boolean active;
     private String roles;
+    private List<Long> taRoleIds;
     private String depName;
     private Integer depId;
+    private String asnu;
+    private List<Long> asnuIds;
 
     public Integer getId() {
         return id;
@@ -66,6 +70,14 @@ public class TAUserView implements Serializable {
         this.roles = roles;
     }
 
+    public List<Long> getTaRoleIds() {
+        return taRoleIds;
+    }
+
+    public void setTaRoleIds(List<Long> taRoleIds) {
+        this.taRoleIds = taRoleIds;
+    }
+
     public String getDepName() {
         return depName;
     }
@@ -80,5 +92,21 @@ public class TAUserView implements Serializable {
 
     public void setDepId(Integer depId) {
         this.depId = depId;
+    }
+
+    public List<Long> getAsnuIds() {
+        return asnuIds;
+    }
+
+    public void setAsnuIds(List<Long> asnuIds) {
+        this.asnuIds = asnuIds;
+    }
+
+    public String getAsnu() {
+        return asnu;
+    }
+
+    public void setAsnu(String asnu) {
+        this.asnu = asnu;
     }
 }

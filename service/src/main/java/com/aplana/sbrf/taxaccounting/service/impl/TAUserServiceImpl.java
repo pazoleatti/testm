@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.TARoleDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.WSException;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.logging.Log;
@@ -24,6 +27,8 @@ public class TAUserServiceImpl implements TAUserService {
 
 	@Autowired
 	private TAUserDao userDao;
+    @Autowired
+	private TARoleDao roleDao;
 	
 	@Autowired
     DepartmentService departmentService;
@@ -116,6 +121,36 @@ public class TAUserServiceImpl implements TAUserService {
 	}
 
     @Transactional(readOnly=false)
+    @Override
+    public void updateUser(TAUserView user) {
+        if(!existsUser(user.getLogin())) {
+            throw new ServiceException("Пользователя с login = " + user.getLogin() + " не существует.");
+        }
+        TAUser taUser = new TAUser();
+        taUser.setLogin(user.getLogin());
+        taUser.setName(user.getName());
+        taUser.setRoles(new ArrayList<TARole>());
+        for(Long roleId: user.getTaRoleIds()) {
+            taUser.getRoles().add(roleDao.getRole(roleId.intValue()));
+        }
+        if(!departmentService.existDepartment(user.getDepId())) {
+            throw new ServiceException("Назначенное пользователю " + user.getLogin() + " подразделение не присутствует в справочнике «Подразделения» Системы");
+        }
+        taUser.setDepartmentId(user.getDepId());
+        taUser.setAsnuIds(user.getAsnuIds());
+        try {
+            LOG.info("Обновленее информации пользователя " + user.getLogin() + " updateUser()");
+            taUser.setId(userDao.getUserIdByLogin(user.getLogin()));
+            userDao.updateUser(taUser);
+            userDao.setUserIsActive(taUser.getId(), user.getActive()?1:0);
+        } catch (DaoException e) {
+            LOG.error("Ошибка при обновлении информации пользователя " + user.getLogin() + " updateUser().", e);
+            throw new ServiceException("Ошибка при модификации пользователя " + user.getLogin() + "." + e.getLocalizedMessage());
+        }
+    }
+
+
+    @Transactional(readOnly=false)
 	@Override
 	public int createUser(TAUser user) {
 		if(existsUser(user.getLogin()))
@@ -126,7 +161,7 @@ public class TAUserServiceImpl implements TAUserService {
 				throw new WSException(WSException.SudirErrorCodes.SUDIR_008,
 						"Назначенная пользователю роль " + role.getAlias() + " не зарегестрирована в системе.");
 		}
-		
+
 		if(!departmentService.existDepartment(user.getDepartmentId()))
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_008,
 					"Назначенное пользователю подразделение не присутствует в справочнике «Подразделения» Системы");
@@ -138,13 +173,38 @@ public class TAUserServiceImpl implements TAUserService {
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_000 ,
 					"Ошибка при создании пользователя." + e.getLocalizedMessage());
 		}
-		
-		
 	}
 
-	@Override
+    @Transactional(readOnly=false)
+    @Override
+    public int createUser(TAUserView user) {
+        if (existsUser(user.getLogin())) {
+            throw new ServiceException("Пользователь с таким логином уже существует.");
+        }
+        TAUser taUser = new TAUser();
+        taUser.setLogin(user.getLogin());
+        taUser.setName(user.getName());
+        taUser.setRoles(new ArrayList<TARole>());
+        for(Long roleId: user.getTaRoleIds()) {
+            taUser.getRoles().add(roleDao.getRole(roleId.intValue()));
+        }
+        if(!departmentService.existDepartment(user.getDepId())) {
+            throw new ServiceException("Назначенное пользователю " + user.getLogin() + " подразделение не присутствует в справочнике «Подразделения» Системы");
+        }
+        taUser.setDepartmentId(user.getDepId());
+        taUser.setAsnuIds(user.getAsnuIds());
+        try {
+            LOG.info("Создание  пользователя " + user.getLogin() + " createUser()");
+            return userDao.createUser(taUser);
+        } catch (DaoException e) {
+            LOG.error("Ошибка при обновлении информации пользователя " + user.getLogin() + " updateUser().", e);
+            throw new ServiceException("Ошибка при модификации пользователя " + user.getLogin() + "." + e.getLocalizedMessage());
+        }
+    }
+
+    @Override
 	public List<TAUser> listAllUsers() {
-        LOG.info("Полученее списка пользоаателей  listAllUsers()");
+        LOG.info("Получение списка пользователей listAllUsers()");
 		List<TAUser> taUserList = new ArrayList<TAUser>();
 		for(Integer userId : userDao.getUserIds())
 			taUserList.add(userDao.getUser(userId));

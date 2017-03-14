@@ -74,8 +74,9 @@ public class TAUserDaoTest {
 		user.setName("");
 		user.setLogin(LOGIN_TEST_BANK.toLowerCase());
 		user.setRoles(roles);
-		
-		userDao.createUser(user);
+        user.setAsnuIds(new ArrayList<Long>());
+
+        userDao.createUser(user);
 		int userId = userDao.getUserIdByLogin(LOGIN_TEST_BANK.toLowerCase());
 		user.setId(userId);
 		Assert.assertEquals(user.getDepartmentId(), userDao.getUser(userId).getDepartmentId());
@@ -108,7 +109,8 @@ public class TAUserDaoTest {
 		user.setDepartmentId(3);
 		user.setEmail("@sard");
 		user.setLogin(LOGIN_CONTROL_BANK);
-		
+        user.setAsnuIds(new ArrayList<Long>());
+
 		TARole role = new TARole();
 		role.setAlias("N_ROLE_OPER");
 		role.setName("Оператор");

@@ -58,7 +58,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	};
 
-    private static final RowMapper<TAUserView> TA_USER_VIEW_MAPPER = new RowMapper<TAUserView>() {
+    private final RowMapper<TAUserView> TA_USER_VIEW_MAPPER = new RowMapper<TAUserView>() {
 
         @Override
         public TAUserView mapRow(ResultSet rs, int index) throws SQLException {
@@ -71,6 +71,13 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
             result.setEmail(rs.getString("email"));
             result.setRoles(rs.getString("role_names"));
             result.setDepName(rs.getString("path"));
+            List<Long> roles = new ArrayList<Long>();
+            for(TARole taRole: getRoles(result.getId())) {
+                roles.add((long)taRole.getId());
+            }
+            result.setTaRoleIds(roles);
+            result.setAsnu(rs.getString("asnu_names"));
+            result.setAsnuIds(getAsnuIds(result.getId()));
             return result;
         }
     };
@@ -103,33 +110,38 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			throw new DaoException("Пользователь с login = " + login + " не найден. " + e.toString());
 		}
 	}
-	
+
+    private List<TARole> getRoles(int userId) {
+        return getJdbcTemplate().query(
+                "select id, alias, name, tax_type from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?) order by id",
+                new Object[] { userId },
+                new int[] { Types.NUMERIC },
+                TA_ROLE_MAPPER
+        );
+    }
+
+    private List<Long> getAsnuIds(int userId) {
+        return getJdbcTemplate().query(
+                "select asnu_id from sec_user_asnu sua where sua.user_id = ?",
+                new Object[] { userId },
+                new int[] { Types.NUMERIC },
+                new RowMapper<Long>() {
+                    @Override
+                    public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return SqlUtils.getLong(rs, "asnu_id");
+                    }
+                }
+        );
+    }
+
 	private void initUser(TAUser user) {
 		if (user != null) {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("User found, login = " + user.getLogin() + ", id = " + user.getId());
 			}
 
-			List<TARole> userRoles = getJdbcTemplate().query(
-				"select id, alias, name, tax_type from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?)",
-				new Object[] { user.getId() },
-				new int[] { Types.NUMERIC },
-				TA_ROLE_MAPPER
-			);
-			user.setRoles(userRoles);
-
-            List<Long> asnuIds = getJdbcTemplate().query(
-                    "select asnu_id from sec_user_asnu sua where sua.user_id = ?",
-                    new Object[] { user.getId() },
-                    new int[] { Types.NUMERIC },
-                    new RowMapper<Long>() {
-                        @Override
-                        public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return SqlUtils.getLong(rs, "asnu_id");
-                        }
-                    }
-            );
-            user.setAsnuIds(asnuIds);
+			user.setRoles(getRoles(user.getId()));
+            user.setAsnuIds(getAsnuIds(user.getId()));
         }
 	}
 
@@ -173,7 +185,9 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 					return user.getRoles().size();
 				}
 			});
-			return keyHolder.getKey().intValue();
+            user.setId(keyHolder.getKey().intValue());
+            updateUserAsnu(user);
+            return keyHolder.getKey().intValue();
 		} catch (DataAccessException e) {
 			throw new DaoException("Пользователя с login = " + user.getLogin() + " не удалось сохранить." + e.getLocalizedMessage());
 		}
@@ -214,15 +228,12 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			if(rows == 0)
 				throw new DaoException("Пользователя с login = " + user.getLogin() + " не существует.");
 			LOG.debug("Update user meta info " + user);
-			
-			
 		} catch (DataAccessException e) {
 			throw new DaoException("Не удалось обновить метаинформацию о пользователе с login = " + user.getLogin() + "."
             + e.getLocalizedMessage());
 		}
-		if(!user.getRoles().isEmpty())
-			updateUserRoles(user);
-		
+       	updateUserRoles(user);
+        updateUserAsnu(user);
 	}
 	
 	private void updateUserRoles(final TAUser user) {
@@ -250,9 +261,34 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		} catch (DataAccessException e) {
 			throw new DaoException("Не удалось обновить роли для пользователя с login = " + user.getLogin() + "." + e.getLocalizedMessage());
 		}
-		
 	}
 
+    private void updateUserAsnu(final TAUser user) {
+        try {
+            getJdbcTemplate().update("delete from sec_user_asnu where user_id=?", user.getId());
+
+            if (!user.getAsnuIds().isEmpty()) {
+                getJdbcTemplate().batchUpdate("insert into sec_user_asnu (user_id, asnu_id, id) values " +
+                                "(?, ?, seq_sec_user_asnu_id.nextval)",
+                        new BatchPreparedStatementSetter() {
+                            @Override
+                            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                                Long asnuId = user.getAsnuIds().get(i);
+                                ps.setInt(1, user.getId());
+                                ps.setLong(2, asnuId);
+                            }
+
+                            @Override
+                            public int getBatchSize() {
+                                return user.getAsnuIds().size();
+                            }
+                        });
+            }
+            LOG.debug("User update roles success " + user);
+        } catch (DataAccessException e) {
+            throw new DaoException("Не удалось обновить АСНУ для пользователя с login = " + user.getLogin() + "." + e.getLocalizedMessage(), e);
+        }
+    }
 	@Override
 	public List<Integer> getUserIds() {
 		try {
@@ -340,6 +376,9 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                     case ROLE:
                         sql.append("role_names");
                         break;
+                    case ASNU:
+                        sql.append("asnu_names");
+                        break;
                     case NAME:
                     default:
                         sql.append("name");
@@ -370,7 +409,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
         return "with \n" +
                 "cov_rls as (\n" +
                     "select ur.user_id user_id, sr.name\n" +
-                    "from  sec_user_role ur\n" +
+                    "from sec_user_role ur\n" +
                     "join sec_role sr on ur.role_id=sr.id \n" +
                     "order by user_id\n" +
                 "),\n" +
@@ -378,6 +417,17 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                     "select cov_rls.user_id, listagg(cov_rls.name, ', ') within group(order by cov_rls.name) as role_concat\n" +
                     "from cov_rls\n" +
                     "group by cov_rls.user_id\n" +
+                "),\n" +
+                "cov_asnu as (\n" +
+                    "select ua.user_id user_id, rba.name\n" +
+                    "from sec_user_asnu ua\n" +
+                    "join ref_book_asnu rba on ua.asnu_id=rba.id \n" +
+                    "order by user_id\n" +
+                "),\n" +
+                "arg_asnu as (\n" +
+                    "select cov_asnu.user_id, listagg(cov_asnu.name, ', ') within group(order by cov_asnu.name) as asnu_concat\n" +
+                    "from cov_asnu\n" +
+                    "group by cov_asnu.user_id\n" +
                 "),\n" +
                 "deps as (\n" +
                     "select dep.id as dep_id, ltrim(sys_connect_by_path(dep.shortname, '/'), '/') as path\n" +
@@ -389,9 +439,11 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                     "from department dep\n" +
                     "where parent_id is null" +
                 ")\n" +
-                "select us.id, us.name, us.login, us.email, us.is_active as active, roless.role_concat as role_names, us.department_id as dep_id, deps.path\n" +
-                "from sec_user us, arg_rls roless, deps deps\n" +
-                "where us.department_id=deps.dep_id and roless.user_id=us.id";
+                "select us.id, us.name, us.login, us.email, us.is_active as active, roless.role_concat as role_names, asnu.asnu_concat as asnu_names, us.department_id as dep_id, deps.path\n" +
+                "from sec_user us \n" +
+                "join arg_rls roless on roless.user_id=us.id \n" +
+                "left join arg_asnu asnu on asnu.user_id=us.id \n" +
+                "join deps deps on us.department_id=deps.dep_id";
     }
 
     @Override

@@ -92,7 +92,7 @@ public class TARole implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return 0;
+		return alias.hashCode();
 	}
 
     @Override

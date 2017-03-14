@@ -33,6 +33,7 @@ prompt states
 
 prompt roles and system user
 @@sec_user;
+@@sec_user_role;
 
 commit;
 exit;

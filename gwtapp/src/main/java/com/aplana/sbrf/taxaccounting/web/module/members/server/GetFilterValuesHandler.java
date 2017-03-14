@@ -39,12 +39,13 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 
         TAUser currentUser = securityService.currentUserInfo().getUser();
 
+        result.setCanEdit(currentUser.hasRole(TARole.N_ROLE_ADMIN));
+
         List<TARole> allRoles = taRoleService.getAll();
 
         result.setRoles(allRoles);
 
 		Set<Integer> depIds = new HashSet<Integer>();
-        depIds.addAll(departmentService.getBADepartmentIds(currentUser));
 
 		if (currentUser.hasRole(TARole.N_ROLE_ADMIN)) {
             depIds.addAll(departmentService.listIdAll());
@@ -52,6 +53,13 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
             depIds.addAll(departmentService.getBADepartmentIds(currentUser));
         }
         result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
+
+        Set<Integer> userDepIds = new HashSet<Integer>();
+        for (Department department: departmentService.getDepartmentForSudir()) {
+            userDepIds.add(department.getId());
+        }
+        result.setUserDepIds(userDepIds);
+        result.setUserDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(userDepIds).values()));
 		return result;
 	}
 
