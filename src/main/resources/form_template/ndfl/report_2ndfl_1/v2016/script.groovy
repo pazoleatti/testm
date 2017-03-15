@@ -955,15 +955,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
  */
 def getDepartmentParamDetails(def departmentParamId, def reportPeriodId) {
     if (departmentParamRow == null) {
-        def filter = null
-        if (declarationData.oktmo != null) {
-            def oktmo = getOktmoByCode(declarationData.oktmo)?.id?.value
-            filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}' and OKTMO = ${oktmo}"
-        } else {
-            filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
-        }
-
-        def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, filter, null)
+        def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "REF_BOOK_NDFL_ID = $departmentParamId", null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }

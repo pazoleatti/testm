@@ -45,6 +45,8 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
         return BalancingVariants.LONG;
     }
 
+    private String msg;
+
     @Override
     protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
@@ -57,7 +59,7 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
             final String blobDataId = (String) params.get("blobDataId");
             BlobData blobData = blobDataService.get(blobDataId);
             lockDataService.updateState(lock, lockDate, "Загрузка файлов");
-            loadDeclarationDataService.uploadFile(logger, userInfo, blobData.getName(), blobData.getInputStream(), lock);
+            msg = loadDeclarationDataService.uploadFile(logger, userInfo, blobData.getName(), blobData.getInputStream(), lock);
         } else {
             String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
             lockDataService.lock(key, userInfo.getUser().getId(),
@@ -80,11 +82,35 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getNotificationMsg(Map<String, Object> params) {
-        return "Загрузка файлов завершена";
+        if (params.containsKey("blobDataId")) {
+            final String blobDataId = (String) params.get("blobDataId");
+            BlobData blobData = blobDataService.get(blobDataId);
+            String fileName;
+            if (blobData != null) {
+                fileName = blobData.getName();
+            } else {
+                fileName = blobDataId;
+            }
+            return "Загрузка файла \"" + fileName + "\" завершена" + (msg.isEmpty() ? "" : (": " + msg));
+        } else {
+            return "Загрузка файлов завершена";
+        }
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        return "Произошла непредвиденная ошибка при загрузке файлов";
+        if (params.containsKey("blobDataId")) {
+            final String blobDataId = (String) params.get("blobDataId");
+            BlobData blobData = blobDataService.get(blobDataId);
+            String fileName;
+            if (blobData != null) {
+                fileName = blobData.getName();
+            } else {
+                fileName = blobDataId;
+            }
+            return "Произошла непредвиденная ошибка при загрузке файла \"" + fileName + "\"";
+        } else {
+            return "Произошла непредвиденная ошибка при загрузке файлов";
+        }
     }
 }

@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Сервис загрузки ТФ деклараций
@@ -23,7 +21,7 @@ public interface LoadDeclarationDataService {
      * @param inputStream
      * @param lock
      */
-    void uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, String lock);
+    String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, String lock);
 
     /**
      *
