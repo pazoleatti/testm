@@ -104,7 +104,7 @@ alter table ref_book_tax_place_type add constraint chk_ref_tax_place_type_status
 alter table ref_book_signatory_mark add constraint chk_ref_signatory_mark check(status between -1 and 2);
 alter table ref_book_detach_tax_pay add constraint chk_rbook_detach_tax_pay_st check(status between -1 and 2);
 alter table ref_book_make_calc add constraint chk_rbook_make_calc_st check(status between -1 and 2);
-alter table ref_book_calendar add constraint chk_ref_book_cal_work check (work in (0,1));
+alter table ref_book_calendar add constraint chk_ref_book_cal_work check (ctype in (0,1));
 
 --unique
 --create unique index unq_ref_book_oktmo_code_vers on ref_book_oktmo(code,version);

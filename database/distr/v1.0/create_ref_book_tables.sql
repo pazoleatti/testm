@@ -648,6 +648,8 @@ comment on column sec_user_asnu.id is 'Уникальный идентифика
 comment on column sec_user_asnu.user_id is 'Пользователь, для которого предоставляется доступ к АС НУ';
 comment on column sec_user_asnu.asnu_id is 'АСНУ, к которой предоставляется доступ';
 
+create sequence seq_sec_user_asnu_id start with 10000;
+
 --Признак возложения обязанности по уплате налога на обособленное подразделение
 create table ref_book_detach_tax_pay
 (
@@ -682,11 +684,11 @@ comment on column ref_book_make_calc.name is 'Значение';
 create table ref_book_calendar
 (
   cdate date not null,
-  work  number(1) default 0 not null
+  ctype  number(1) default 0 not null
 );
 
 comment on table ref_book_calendar is 'Календарь';
 comment on column ref_book_calendar.cdate is 'Дата';
-comment on column ref_book_calendar.work is 'Рабочий/Выходной';
+comment on column ref_book_calendar.ctype is 'Рабочий/Выходной (0 -рабочий, 1 - выходной)';
 
 -----------------------------------------------------------------------------------------------------------------------------

@@ -29,10 +29,10 @@ import java.util.Map;
  *
  * @author auldanov
  */
-@Local(UserTaskLocal.class)
-@Remote(UserTaskRemote.class)
-@Stateless
-@Interceptors(SchedulerInterceptor.class)
+//@Local(UserTaskLocal.class)
+//@Remote(UserTaskRemote.class)
+//@Stateless
+//@Interceptors(SchedulerInterceptor.class)
 public class CleanDepartmentChangeTask extends AbstractUserTask {
 
 	private static final Log LOG = LogFactory.getLog(CleanDepartmentChangeTask.class);
