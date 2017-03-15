@@ -61,7 +61,8 @@ public final class LockData {
         IFRS("Формирование отчетности МСФО за период \"%s %s\""),
         CONFIGURATION_PARAMS("Блокировка конфигурационных параметров при загрузке ТФ"),
         SCHEDULER_TASK("Выполнение задачи планировщика \"%s\""),
-        LOAD_TRANSPORT_DATA("Импорт ТФ из каталога загрузки");
+        LOAD_TRANSPORT_DATA("Импорт ТФ из каталога загрузки"),
+        IMPORT_TRANSPORT_DATA("Загрузка файла \"%s\"");
 
         private String text;
 

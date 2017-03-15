@@ -82,7 +82,7 @@ public class TransportDataController {
             String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
             BalancingVariants balancingVariant = BalancingVariants.SHORT;
             LockData lockData = lockDataService.lock(key, userId,
-                    LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
+                    String.format(LockData.DescriptionTemplate.IMPORT_TRANSPORT_DATA.getText(), fileName),
                     LockData.State.IN_QUEUE.getText());
             if (lockData == null) {
                 try {
