@@ -689,6 +689,6 @@ create table ref_book_calendar
 
 comment on table ref_book_calendar is 'Календарь';
 comment on column ref_book_calendar.cdate is 'Дата';
-comment on column ref_book_calendar.ctype is 'Рабочий/Выходной';
+comment on column ref_book_calendar.ctype is 'Рабочий/Выходной (0 -рабочий, 1 - выходной)';
 
 -----------------------------------------------------------------------------------------------------------------------------
