@@ -29,6 +29,10 @@ import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.*
 import org.codehaus.groovy.tools.DocGenerator
 
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.DocumentBuilder
+import org.w3c.dom.Document
+
 import javax.script.ScriptException
 import java.awt.Color;
 import java.util.List
@@ -2275,13 +2279,31 @@ void importData() {
 
     ScriptUtils.checkInterrupted();
 
+    // Скопируем поток
+    ByteArrayOutputStream baos = new ByteArrayOutputStream()
+    byte[] buf = new byte[1024]
+    int n = 0
+    while ((n = ImportInputStream.read(buf)) >= 0)
+        baos.write(buf, 0, n)
+    byte[] content = baos.toByteArray()
+
+    // Проверим кодировку
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance()
+    DocumentBuilder documentBuilder = factory.newDocumentBuilder()
+    Document document = documentBuilder.parse(new ByteArrayInputStream(content));
+    logger.info(document.getXmlEncoding())
+    if (document.getXmlEncoding() != "windows-1251") {
+        logger.error("""Файл "UploadFileName" сформирован в кодировке отличной от "windows-1251".""")
+        return
+    }
+
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
 
-    def fileNode = new XmlSlurper().parse(ImportInputStream);
+    def fileNode = new XmlSlurper().parse(new ByteArrayInputStream(content));
     if (fileNode == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
