@@ -53,6 +53,6 @@ create index srch_fias_addrobj_regfnls on fias_addrobj(livestatus,regioncode,rep
 
 create index idx_log_entry_date on log_entry(creation_date);
 
-create index idx_ref_book_cal_work on ref_book_calendar(work);
+create index idx_ref_book_cal_work on ref_book_calendar(ctype);
 
 exit;
