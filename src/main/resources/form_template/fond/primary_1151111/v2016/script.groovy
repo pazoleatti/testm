@@ -27,6 +27,7 @@ import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.*
+import org.apache.commons.io.IOUtils
 import org.codehaus.groovy.tools.DocGenerator
 
 import javax.xml.parsers.DocumentBuilderFactory
@@ -2280,20 +2281,14 @@ void importData() {
     ScriptUtils.checkInterrupted();
 
     // Скопируем поток
-    ByteArrayOutputStream baos = new ByteArrayOutputStream()
-    byte[] buf = new byte[1024]
-    int n = 0
-    while ((n = ImportInputStream.read(buf)) >= 0)
-        baos.write(buf, 0, n)
-    byte[] content = baos.toByteArray()
+    byte[] content = IOUtils.toByteArray(ImportInputStream)
 
     // Проверим кодировку
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance()
     DocumentBuilder documentBuilder = factory.newDocumentBuilder()
     Document document = documentBuilder.parse(new ByteArrayInputStream(content));
-    logger.info(document.getXmlEncoding())
-    if (document.getXmlEncoding() != "windows-1251") {
-        logger.error("""Файл "UploadFileName" сформирован в кодировке отличной от "windows-1251".""")
+    if (document.getXmlEncoding().toLowerCase() != "windows-1251") {
+        logger.error("Файл 'UploadFileName' сформирован в кодировке отличной от 'windows-1251'.")
         return
     }
 
