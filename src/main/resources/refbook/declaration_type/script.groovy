@@ -312,6 +312,11 @@ def importPrimary1151111() {
     } finally {
         IOUtils.closeQuietly(inputStream)
     }
+    msgBuilder.append("Выполнено создание налоговой формы: ")
+            .append("№: \"").append(declarationDataId).append("\"")
+            .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+            .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
+            .append(", Вид: \"").append(declarationType.getName()).append("\"")
 }
 
 /**
@@ -1262,8 +1267,8 @@ def _importTF() {
 
     // АСНУ
     Long asnuId = null;
+    def asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
     if (asnuCode != null) {
-        def asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
         List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'");
         if (asnuIds.size() != 1) {
             RefBook refBook = refBookFactory.get(900L);
@@ -1327,6 +1332,12 @@ def _importTF() {
     } finally {
         IOUtils.closeQuietly(inputStream);
     }
+    msgBuilder.append("Выполнено создание налоговой формы: ")
+            .append("№: \"").append(declarationDataId).append("\"")
+            .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+            .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
+            .append(", Вид: \"").append(declarationType.getName()).append("\"")
+            .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
 }
 
 def readXml1151111() {
