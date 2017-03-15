@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
@@ -20,10 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author lhaziev
@@ -71,9 +69,10 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
      */
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, String lock) {
+    public String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, String lock) {
         ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream, logger, lock);
         logger.info(LogData.L35.getText(), importCounter.getSuccessCounter(), importCounter.getFailCounter());
+        return StringUtils.join(importCounter.getMsgList().toArray(), ", ", null);
     }
 
     private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger, String lock) {
@@ -96,6 +95,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         // Счетчики
         int success = 0;
         int fail = 0;
+        List<String> msgList = new ArrayList<String>();
         try {
             if (fileName.toLowerCase().endsWith(".zip")) {
                 File dataFile = null;
@@ -120,7 +120,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                             InputStream is = zf.getInputStream(entry);
                             Logger localLogger = new Logger();
                             try {
-                                if (loadFile(is, entry.getName(), userInfo, localLogger, lock)) {
+                                if (loadFile(is, entry.getName(), userInfo, localLogger, lock, msgList)) {
                                     success++;
                                 } else {
                                     fail++;
@@ -146,7 +146,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                 }
             } else {
                 try {
-                    if (loadFile(inputStream, fileName, userInfo, logger, lock)) {
+                    if (loadFile(inputStream, fileName, userInfo, logger, lock, msgList)) {
                         success++;
                     } else {
                         fail++;
@@ -169,10 +169,10 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
-        return new ImportCounter(success, fail);
+        return new ImportCounter(success, fail, msgList);
     }
 
-    private boolean loadFile(InputStream inputStream, String fileName, TAUserInfo userInfo, Logger logger, String lock) throws IOException {
+    private boolean loadFile(InputStream inputStream, String fileName, TAUserInfo userInfo, Logger logger, String lock, List<String> msgList) throws IOException {
         File dataFile = null;
         try {
             dataFile = File.createTempFile("dataFile", ".original");
@@ -186,12 +186,17 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                 InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
                 try {
                     Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                    StringBuilder msgBuilder = new StringBuilder();
                     additionalParameters.put("ImportInputStream", dataFileInputStream);
                     additionalParameters.put("UploadFileName", fileName);
                     additionalParameters.put("dataFile", dataFile);
+                    additionalParameters.put("msgBuilder", msgBuilder);
                     refBookScriptingService.executeScript(userInfo, RefBook.Id.DECLARATION_TEMPLATE.getId(), FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters);
                     if (logger.containsLevel(LogLevel.ERROR)) {
                         throw new ServiceException("Есть критические ошибки при выполнении скрипта");
+                    }
+                    if (msgBuilder.length() > 0) {
+                        msgList.add(msgBuilder.toString());
                     }
                 } finally {
                     IOUtils.closeQuietly(dataFileInputStream);

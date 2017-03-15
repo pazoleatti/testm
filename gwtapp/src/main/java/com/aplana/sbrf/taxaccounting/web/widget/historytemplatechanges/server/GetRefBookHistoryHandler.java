@@ -17,7 +17,7 @@ import java.util.List;
  * @author lhaziev
  */
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class GetRefBookHistoryHandler extends AbstractActionHandler<GetRefBookHistoryAction, GetRefBookHistoryResult> {
 
     @Autowired
