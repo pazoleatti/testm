@@ -111,7 +111,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             }
         });
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(importedData.size(), 2);
+        Assert.assertEquals(importedData.size(), 0);
         checkLogger();
     }
 

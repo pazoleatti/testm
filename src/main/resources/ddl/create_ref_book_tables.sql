@@ -684,11 +684,11 @@ comment on column ref_book_make_calc.name is 'Значение';
 create table ref_book_calendar
 (
   cdate date not null,
-  work  number(1) default 0 not null
+  ctype  number(1) default 0 not null
 );
 
 comment on table ref_book_calendar is 'Календарь';
 comment on column ref_book_calendar.cdate is 'Дата';
-comment on column ref_book_calendar.work is 'Рабочий/Выходной';
+comment on column ref_book_calendar.ctype is 'Рабочий/Выходной (0 -рабочий, 1 - выходной)';
 
 -----------------------------------------------------------------------------------------------------------------------------
