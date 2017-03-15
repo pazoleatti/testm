@@ -28,10 +28,10 @@ import java.util.UUID;
  *
  * @author auldanov
  */
-@Local(UserTaskLocal.class)
-@Remote(UserTaskRemote.class)
-@Stateless
-@Interceptors(SchedulerInterceptor.class)
+//@Local(UserTaskLocal.class)
+//@Remote(UserTaskRemote.class)
+//@Stateless
+//@Interceptors(SchedulerInterceptor.class)
 public class LoadRefBookDiasoftTask extends AbstractUserTask {
 
     @Autowired

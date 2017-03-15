@@ -79,6 +79,7 @@ public interface BlobDataService {
 
     /**
      * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
+     * Производит очистку таблиц BLOB_DATA, DECLARATION_REPORT, LOG
      * @return Количество удаленных запсией
      */
     int clean();

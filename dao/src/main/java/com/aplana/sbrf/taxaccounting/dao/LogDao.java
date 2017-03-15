@@ -13,4 +13,10 @@ public interface LogDao {
      * @param logId уникальный идентификатор группы логов {@link java.util.UUID}
      */
     void save(String logId);
+
+    /**
+     * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
+     * @return Количество удаленных запсией
+     */
+    int clean();
 }
