@@ -74,7 +74,7 @@ public class DeclarationListView extends
 
     private final static DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
-    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy'T'hh:mm:ss");
+    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy hh:mm:ss");
 
     @UiField
     Label declarationHeader;
