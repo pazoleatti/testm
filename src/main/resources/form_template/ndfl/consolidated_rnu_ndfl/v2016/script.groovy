@@ -40,7 +40,7 @@ switch (formDataEvent) {
         declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
-        getSourcesList()
+        getSourcesListForTemporarySolution()
         break
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
         prepareSpecificReport()
@@ -568,6 +568,46 @@ def clearData() {
 }
 
 //>------------------< GET SOURCES >----------------------<
+
+/**
+ * Система (замена шага 1 ОС для целевого решения):
+ * Ищет и включает в КНФ данные налоговых форм, у которых:
+ * Вид = РНУ НДФЛ (первичная)
+ * Состояние = "Принята"
+ * Подразделением = КНФ.Подразделение.
+ * Период = КНФ.Период
+ * Далее без изменений по сравнению с целевым решением
+ * @return
+ */
+def getSourcesListForTemporarySolution() {
+
+    if (!needSources) {
+        return
+    }
+
+    //отчетный период в котором выполняется консолидация
+    ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+
+    //Идентификатор подразделения по которому формируется консолидированная форма
+    def parentDepartmentId = declarationData.departmentId
+
+    Department department = departmentService.get(parentDepartmentId)
+
+    println "department="+department
+
+    List<DeclarationData> declarationDataList = findConsolidateDeclarationData(parentDepartmentId, declarationDataReportPeriod.id)
+
+    for (DeclarationData declarationData : declarationDataList) {
+        //Формируем связь источник-приемник
+        def relation = getRelation(declarationData, department, declarationDataReportPeriod)
+        sources.sourceList.add(relation)
+   }
+
+    sources.sourcesProcessedByScript = true
+    //logger.info("sources found: " + sources.sourceList.size)
+}
+
+
 
 /**
  * Получить набор НФ источников события FormDataEvent.GET_SOURCES.

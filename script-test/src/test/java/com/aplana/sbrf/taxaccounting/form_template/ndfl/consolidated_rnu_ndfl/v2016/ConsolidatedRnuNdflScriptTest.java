@@ -131,7 +131,39 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     }
 
+    @Test
+    public void getSourcesTemporarySolutionTest() throws Exception {
 
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setId(100);
+        declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
+
+        when(testHelper.getDeclarationService().getTemplate(eq(100))).thenReturn(declarationTemplate);
+        when(testHelper.getDepartmentService().getAllChildren(anyInt())).thenReturn(createDepartmentList());
+        when(testHelper.getDepartmentService().get(anyInt())).thenReturn(createDepartmentList().get(0));
+
+
+        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(Date.class), any(Date.class))).thenReturn(createReportPeriodList());
+        when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(1))).thenReturn(createFirstQuarterDeclarationData());
+        when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(2))).thenReturn(createHalfYearDeclarationData());
+
+        when(testHelper.getDepartmentReportPeriodService().get(eq(1))).thenReturn(createDepartmentReportPeriod(1, "01.01.2016"));
+        when(testHelper.getDepartmentReportPeriodService().get(eq(2))).thenReturn(createDepartmentReportPeriod(2, null));
+        when(testHelper.getDepartmentReportPeriodService().get(eq(3))).thenReturn(createDepartmentReportPeriod(3, "02.01.2016"));
+        when(testHelper.getDepartmentReportPeriodService().get(eq(4))).thenReturn(createDepartmentReportPeriod(4, "10.01.2016"));
+        when(testHelper.getDepartmentReportPeriodService().get(eq(5))).thenReturn(createDepartmentReportPeriod(5, "03.01.2016"));
+
+        testHelper.execute(FormDataEvent.GET_SOURCES);
+
+        FormSources sources = testHelper.getSources();
+
+        Assert.assertEquals(sources.getSourceList().size(), 6);
+        Assert.assertTrue(sources.isSourcesProcessedByScript());
+
+        checkLogger();
+    }
+
+    @Ignore("Тест отключен на время использования временного решения")
     @Test
     public void getSourcesTest() throws Exception {
 
