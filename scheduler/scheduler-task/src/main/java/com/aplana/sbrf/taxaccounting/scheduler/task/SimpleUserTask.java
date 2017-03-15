@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Local(UserTaskLocal.class)
-@Remote(UserTaskRemote.class)
-@Stateless
-@Interceptors(SchedulerInterceptor.class)
+//@Local(UserTaskLocal.class)
+//@Remote(UserTaskRemote.class)
+//@Stateless
+//@Interceptors(SchedulerInterceptor.class)
 public class SimpleUserTask extends AbstractUserTask {
 
 	private static final Log LOG = LogFactory.getLog(SimpleUserTask.class);
