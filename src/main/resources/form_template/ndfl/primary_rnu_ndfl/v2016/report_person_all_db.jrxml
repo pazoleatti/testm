@@ -103,7 +103,7 @@
 		</parameter>
 		<queryString>
 			<![CDATA[select row_number() over(partition by pers.declaration_data_id order by pers.id) rn,
-       nvl(pers.snils,pers.inp) inp,
+       pers.inp,
        pers.last_name,
        pers.first_name,
        pers.middle_name,
@@ -126,7 +126,8 @@
        pers.flat
   from ndfl_person pers
  where pers.declaration_data_id=$P{declarationId}
-   and pers.id between $P{minPersId} and $P{maxPersId}]]>
+   and pers.id between $P{minPersId} and $P{maxPersId}
+ order by pers.inp]]>
 		</queryString>
 		<field name="RN" class="java.math.BigDecimal"/>
 		<field name="INP" class="java.lang.String"/>
@@ -162,7 +163,7 @@
 			<defaultValueExpression><![CDATA[38954]]></defaultValueExpression>
 		</parameter>
 		<queryString>
-			<![CDATA[select /*+rule*/nvl(pers.snils,pers.inp) inp,
+			<![CDATA[select /*+rule*/pers.inp,
        inc.row_num,
        row_number() over(partition by inc.ndfl_person_id order by inc.id) rn,
        inc.operation_id,
@@ -189,7 +190,8 @@
        inc.tax_summ
 	from ndfl_person pers join ndfl_person_income inc on (inc.ndfl_person_id=pers.id)
  where pers.declaration_data_id=$P{declarationId}
-   and pers.id between $P{minPersId} and $P{maxPersId}]]>
+   and pers.id between $P{minPersId} and $P{maxPersId}
+ order by pers.inp,inc.income_accrued_date,inc.income_payout_date]]>
 		</queryString>
 		<field name="INP" class="java.lang.String"/>
 		<field name="ROW_NUM" class="java.math.BigDecimal"/>
@@ -228,7 +230,7 @@
 			<defaultValueExpression><![CDATA[38954]]></defaultValueExpression>
 		</parameter>
 		<queryString>
-			<![CDATA[select /*+rule*/nvl(pers.snils,pers.inp) inp,
+			<![CDATA[select /*+rule*/pers.inp,
        ded.row_num,
        row_number() over(partition by ded.ndfl_person_id order by ded.id) rn,
        ded.operation_id,
@@ -247,7 +249,8 @@
        ded.period_curr_summ
 	from ndfl_person pers join ndfl_person_deduction ded on (ded.ndfl_person_id=pers.id)
  where pers.declaration_data_id=$P{declarationId}
-   and pers.id between $P{minPersId} and $P{maxPersId}]]>
+   and pers.id between $P{minPersId} and $P{maxPersId}
+ order by pers.inp,ded.income_accrued]]>
 		</queryString>
 		<field name="INP" class="java.lang.String"/>
 		<field name="ROW_NUM" class="java.math.BigDecimal"/>
@@ -278,9 +281,9 @@
 			<defaultValueExpression><![CDATA[38954]]></defaultValueExpression>
 		</parameter>
 		<queryString>
-			<![CDATA[select /*+rule*/nvl(pers.snils,pers.inp) inp,
+			<![CDATA[select /*+rule*/pers.inp,
        prep.row_num,
-       row_number() over(partition by prep.ndfl_person_id order by prep.id) rn,
+       row_number() over(partition by prep.ndfl_person_id order by pers.inp,prep.id) rn,
        prep.operation_id,
        prep.summ,
        prep.notif_num,
@@ -288,7 +291,8 @@
        prep.notif_source
 	from ndfl_person pers join ndfl_person_prepayment prep on (prep.ndfl_person_id=pers.id)
  where pers.declaration_data_id=$P{declarationId}
-   and pers.id between $P{minPersId} and $P{maxPersId}]]>
+   and pers.id between $P{minPersId} and $P{maxPersId}
+]]>
 		</queryString>
 		<field name="INP" class="java.lang.String"/>
 		<field name="ROW_NUM" class="java.math.BigDecimal"/>
