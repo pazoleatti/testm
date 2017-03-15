@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 @Transactional
@@ -62,6 +64,20 @@ public class RaschsvSvnpPodpisantDaoImpl extends AbstractDao implements RaschsvS
             return getNamedParameterJdbcTemplate().queryForObject(SQL_SELECT, params, new RaschsvSvnpPodpisantRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
+        }
+    }
+
+    @Override
+    public List<RaschsvSvnpPodpisant> findRaschsvSvnpPodpisant(List<Long> declarationDataIds) {
+        try {
+            String sql = "SELECT " + SVNP_PODPISANT_COLS + " FROM " + RaschsvSvnpPodpisant.TABLE_NAME +
+                    " WHERE " + RaschsvSvnpPodpisant.COL_DECLARATION_DATA_ID + " in (:" + RaschsvSvnpPodpisant.COL_DECLARATION_DATA_ID + ")";
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue(RaschsvSvnpPodpisant.COL_DECLARATION_DATA_ID, declarationDataIds);
+
+            return getNamedParameterJdbcTemplate().query(sql, params, new RaschsvSvnpPodpisantRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<RaschsvSvnpPodpisant>();
         }
     }
 

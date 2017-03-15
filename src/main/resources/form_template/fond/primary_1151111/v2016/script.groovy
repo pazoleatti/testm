@@ -2275,29 +2275,6 @@ void importData() {
 
     ScriptUtils.checkInterrupted();
 
-    // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
-    // Данный код отрабатывает, когда файл формы уже фактически сохранен в базу, поэтому при проверке сущестования формы для данного периода и подразделения не нужно учитывать данный файл в выборке
-    def declarationDataList = declarationService.find(PRIMARY_1151111_TEMPLATE_ID, declarationData.departmentReportPeriodId)
-    DeclarationData declarationDataClone = declarationDataList?.find{ it.fileName != UploadFileName }
-    if (declarationDataClone != null) {
-
-        // Период
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-        def periodCode = period?.CODE?.stringValue
-        def periodName = period?.NAME?.stringValue
-        def calendarStartDate = reportPeriod?.calendarStartDate
-
-        // Подразделение
-        Department department = departmentService.get(declarationData.departmentId)
-
-        logger.error("""Файл \"$UploadFileName\" не загружен. Экземпляр формы уже существует в системе для подразделения \"${department.name}\"
-                    в периоде $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года.""")
-        return
-    }
-
-    ScriptUtils.checkInterrupted();
-
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
     if (logger.containsLevel(LogLevel.ERROR)) {
@@ -2308,6 +2285,52 @@ void importData() {
     if (fileNode == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
+
+    /*
+    Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее.
+    Данный код отрабатывает, когда файл формы уже фактически сохранен в базу, поэтому при проверке сущестования формы для данного периода и подразделения не нужно учитывать данный файл в выборке.
+    Для одного и того же периода и подразделения может быть загружено несколько форм с разными номерами корректировки.
+     */
+    // todo https://jira.aplana.com/browse/SBRFNDFL-621 раскомментировать после обновления стенда
+//    List<DeclarationData> declarationDataList = declarationService.find(PRIMARY_1151111_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+//    List<DeclarationData> declarationDataCloneList = declarationDataList.findAll{ it.fileName != UploadFileName }
+//    if (!declarationDataCloneList.isEmpty()) {
+//
+//        // Получим номер корректировки из xml
+//        Integer nomKorrXml = getNomKorrXml(fileNode) ? Integer.parseInt(getNomKorrXml(fileNode)) : 0
+//        logger.info("nomKorrXml = " + nomKorrXml)
+//
+//        // Получим номера корректировок, загруженных ранее xml
+//        List<Long> declarationDataIdList = []
+//        declarationDataCloneList.each {
+//            declarationDataIdList.add(it.id)
+//        }
+//        logger.info(declarationDataIdList.join(", "))
+//        List<RaschsvSvnpPodpisant> raschsvSvnpPodpisantList = raschsvSvnpPodpisantService.findRaschsvSvnpPodpisant(declarationDataIdList)
+//        List<Long> nomKorrList = []
+//        raschsvSvnpPodpisantList.each {
+//            nomKorrList.add(it.nomKorr)
+//        }
+//        logger.info(nomKorrList.join(", "))
+//
+//        if (nomKorrList.contains(nomKorrXml)) {
+//            // Период
+//            def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+//            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+//            def periodCode = period?.CODE?.stringValue
+//            def periodName = period?.NAME?.stringValue
+//            def calendarStartDate = reportPeriod?.calendarStartDate
+//
+//            // Подразделение
+//            Department department = departmentService.get(declarationData.departmentId)
+//
+//            logger.error("""Файл "$UploadFileName" не загружен. Экземпляр формы уже существует в системе для подразделения "${department.name}"
+//                        в периоде $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года с номером коректировки = "$nomKorrXml".""")
+//            return
+//        }
+//    }
+
+    ScriptUtils.checkInterrupted();
 
     // Запуск проверок, которые проводились при загрузке
     checkImportRaschsv(fileNode, UploadFileName)
@@ -2330,7 +2353,8 @@ void importData() {
     fileNode.childNodes().each { documentNode ->
         raschsvSvnpPodpisant.svnpTlph = documentNode.name
         if (documentNode.name == NODE_NAME_DOCUMENT) {
-            raschsvSvnpPodpisant.nomKorr = documentNode.attributes()["НомКорр"]
+            def nomKorr = documentNode.attributes()["НомКорр"]
+            raschsvSvnpPodpisant.nomKorr = nomKorr ? Integer.parseInt(nomKorr) : 0
             documentNode.childNodes().each { raschetSvNode ->
                 if (raschetSvNode.name == NODE_NAME_RASCHET_SV) {
                     // Разбор узла РасчетСВ
@@ -2490,6 +2514,13 @@ void importData() {
 @Field final CHECK_PERSON_OKSM = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд = \"%s\" ФЛ с СНИЛС \"%s\" транспортного файла \"%s\" не найден в справочнике ОКСМ"
 @Field final CHECK_PERSON_PERIOD = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц = \"'%s'/'%s'\" в транспортном файле \"%s\" не входит в отчетный период формы"
 @Field final CHECK_PERSON_DUL = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок = \"%s\" не соответствует порядку заполнения: знак \"N\" не проставляется, серия и номер документа отделяются знаком \" \" (\"пробел\")"
+
+/**
+ * Получение номера корректирующего периода
+ */
+def getNomKorrXml(def fileNode) {
+    return fileNode?."$NODE_NAME_DOCUMENT"?."@НомКорр" as String
+}
 
 /**
  * Существует ли CODE в справочнике ОКВЭД
