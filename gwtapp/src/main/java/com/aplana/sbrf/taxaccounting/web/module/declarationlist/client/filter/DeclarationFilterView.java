@@ -100,7 +100,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationTypePicker.setAttributeId(2071L);
         declarationTypePicker.setWidth("100%");
         declarationTypePicker.setPeriodDates(new Date(), new Date());
-        declarationTypePicker.setManualUpdate(true);
+        declarationTypePicker.setManualUpdate(false);
         declarationTypePicker.setMultiSelect(true);
 
         asnuPicker = new RefBookPickerWidget(false, false);
@@ -173,11 +173,16 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         this.formDataFilter = formDataFilter;
         departmentPicker.setValue(formDataFilter.getDepartmentIds());
         reportPeriodPicker.setValue(formDataFilter.getReportPeriodIds());
-        if (formDataFilter.getDeclarationTypeIds() != null) {
-            declarationTypePicker.setValue(formDataFilter.getDeclarationTypeIds());
-        } else {
-            declarationTypePicker.setValue(null);
-        }
+        asnuPicker.setSingleValue(formDataFilter.getAsnuId());
+        declarationKindPicker.setValue(formDataFilter.getFormKindIds());
+        declarationDataIdPicker.setValue(formDataFilter.getDeclarationDataIdStr());
+        taxOrganisationPicker.setText(formDataFilter.getTaxOrganCode());
+        kppPicker.setText(formDataFilter.getTaxOrganKpp());
+        oktmoPicker.setText(formDataFilter.getOktmo());
+        fileNamePicker.setText(formDataFilter.getFileName());
+        notePicker.setText(formDataFilter.getNote());
+        docStatePicker.setSingleValue(formDataFilter.getDocStateId());
+        declarationTypePicker.setValue(formDataFilter.getDeclarationTypeIds());
         formStatePicker.setValue(formDataFilter.getFormState());
         correctionTag.setValue(formDataFilter.getCorrectionTag());
     }
@@ -195,6 +200,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         formDataFilter.setFormState(formStatePicker.getValue());
         formDataFilter.setTaxOrganCode(taxOrganisationPicker.getValue());
         formDataFilter.setTaxOrganKpp(kppPicker.getValue());
+        formDataFilter.setOktmo(oktmoPicker.getValue());
         formDataFilter.setCorrectionTag(correctionTag.getValue());
         formDataFilter.setNote(notePicker.getValue());
         formDataFilter.setDeclarationDataIdStr(declarationDataIdPicker.getValue());
