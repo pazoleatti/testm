@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 public class DeclarationDataSearchResultItemMapper implements RowMapper<DeclarationDataSearchResultItem> {
 
@@ -34,7 +36,10 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         result.setDocStateId(SqlUtils.getLong(rs,"doc_state_id"));
         result.setDocState(rs.getString("doc_state"));
         result.setCreateDate(rs.getDate("creation_date"));
-        result.setDeclarationDataCreationDate(rs.getDate("decl_data_creation_date"));
+        Timestamp decl_data_creation_date = rs.getTimestamp("decl_data_creation_date");
+        if (decl_data_creation_date != null) {
+            result.setDeclarationDataCreationDate(new Date(decl_data_creation_date.getTime()));
+        }
         result.setImportDeclarationDataUserLogin(rs.getString("import_decl_data_user_login"));
         return result;
 	}

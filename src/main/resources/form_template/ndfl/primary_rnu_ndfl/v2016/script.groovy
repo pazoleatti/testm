@@ -2,6 +2,7 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
@@ -27,6 +28,8 @@ import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.*
+import java.sql.ResultSet
+import java.sql.SQLException
 import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -160,7 +163,8 @@ NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper() {
 
     NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper();
     naturalPersonRowMapper.setAsnuId(declarationData.asnuId);
-    naturalPersonRowMapper.setLogger(logger);
+
+    //naturalPersonRowMapper.setLogger(logger); //TODO отключил из-за предупреждений по справочнику ФИАС
 
     List<Country> countryList = getCountryRefBookList();
     naturalPersonRowMapper.setCountryCodeMap(countryList.collectEntries {
@@ -185,7 +189,7 @@ NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper() {
 
 NaturalPersonRefbookHandler createRefbookHandler() {
 
-    NaturalPersonRefbookHandler refbookHandler = new NaturalPersonRefbookHandler();
+    NaturalPersonRefbookHandler refbookHandler = new NaturalPersonRefbookScriptHandler();
 
     refbookHandler.setLogger(logger);
 
@@ -316,6 +320,7 @@ def calculate() {
 
     logger.info("Завершение расчета ПНФ " + " " + calcTimeMillis(timeFull));
 }
+
 //---------------- Identification ----------------
 // Далее идет код скрипта такой же как и в 1151111 возможно следует вынести его в отдельный сервис
 
@@ -378,8 +383,8 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
         for (NaturalPerson person : insertRecords) {
             String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
             logger.info(noticeMsg);
+            createCnt++;
         }
-
 
     }
 
@@ -395,11 +400,12 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
  */
 def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap, Map<Long, Map<Long, NaturalPerson>> similarityPersonMap) {
 
+    long time = System.currentTimeMillis();
+
     //println "updateNaturalPersonRefBookRecords similarityPersonMap.size=" + similarityPersonMap.size()
 
     //Проходим по списку и определяем наиболее подходящюю запись, если подходящей записи не найдено то содадим ее
     List<NaturalPerson> updatePersonReferenceList = new ArrayList<NaturalPerson>();
-
 
     List<NaturalPerson> insertPersonList = new ArrayList<NaturalPerson>();
     //список записей для обновления атрибутов справочника физлиц
@@ -417,7 +423,12 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     //primaryId - RefBookPerson
     HashMap<Long, NaturalPerson> conformityMap = new HashMap<Long, NaturalPerson>();
 
+    int msgCnt = 0;
+    int maxMsgCnt = 0;
     for (Map.Entry<Long, Map<Long, NaturalPerson>> entry : similarityPersonMap.entrySet()) {
+
+        long inTime = System.currentTimeMillis();
+
         ScriptUtils.checkInterrupted();
 
         Long primaryPersonId = entry.getKey();
@@ -427,10 +438,12 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         List<NaturalPerson> similarityPersonList = new ArrayList<NaturalPerson>(similarityPersonValues.values());
 
         NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
-        NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
 
-        //println "process primaryPerson=" + primaryPerson
-        //println "refBookPerson=" + refBookPerson
+        inTime = System.currentTimeMillis();
+        NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
+        if (msgCnt <= maxMsgCnt){
+            logger.info("identificate "+ calcTimeMillis(inTime));
+        }
 
         conformityMap.put(primaryPersonId, refBookPerson);
 
@@ -440,14 +453,29 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                 insertAddressList.add(primaryPerson.getAddress());
             }
         }
+
+        if (msgCnt <= maxMsgCnt){
+            logger.info("in identificate "+ calcTimeMillis(inTime));
+        }
+
+        msgCnt++;
     }
+
+    logger.info("identificate person, update address "+ calcTimeMillis(time));
 
     insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), insertAddressList, { address ->
         mapAddressAttr(address)
     });
 
+    time = System.currentTimeMillis();
+
     int updCnt = 0;
+    msgCnt = 0;
+    maxMsgCnt = 0;
     for (Map.Entry<Long, NaturalPerson> entry : conformityMap.entrySet()) {
+
+        long inTime = System.currentTimeMillis();
+
         ScriptUtils.checkInterrupted();
 
         Long primaryPersonId = entry.getKey();
@@ -478,6 +506,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                 }
             }
 
+
             //person
             Map<String, RefBookValue> refBookPersonValues = mapPersonAttr(refBookPerson);
             fillSystemAliases(refBookPersonValues, refBookPerson);
@@ -491,11 +520,13 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
             if (primaryPersonDocument != null) {
                 Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
                 PersonDocument personDocument = BaseWeigthCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
+
                 if (personDocument == null) {
                     insertDocumentList.add(primaryPersonDocument);
                     refBookPerson.getPersonDocumentList().add(primaryPersonDocument);
                 }
             }
+
 
             //check inc report
             checkIncReportFlag(refBookPerson, updateDocumentList, documentAttrCnt);
@@ -528,7 +559,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                 }
             }
 
-
             updatePersonReferenceList.add(primaryPerson);
 
             if (addressAttrCnt.isUpdate() || personAttrCnt.isUpdate() || documentAttrCnt.isUpdate() || taxpayerIdentityAttrCnt.isUpdate()) {
@@ -541,12 +571,24 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                         refBookPerson.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
                 updCnt++;
             }
+
+
+
         } else {
             //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
             insertPersonList.add(primaryPerson);
         }
+
+        if (msgCnt < maxMsgCnt){
+            logger.info("in identificate update "+ calcTimeMillis(inTime));
+        }
+
+        msgCnt++;
+
     }
 
+    logger.info("update person, documents, id "+ calcTimeMillis(time));
+    time = System.currentTimeMillis();
     //println "crete and update reference"
 
     //crete and update reference
@@ -556,6 +598,9 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     if (!updatePersonReferenceList.isEmpty()) {
         updatePrimaryToRefBookPersonReferences(updatePersonReferenceList);
     }
+
+    logger.info("update reference "+ calcTimeMillis(time));
+    time = System.currentTimeMillis();
 
     insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { personDocument ->
         mapPersonDocumentAttr(personDocument)
@@ -580,7 +625,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         getProvider(RefBook.Id.PERSON_ADDRESS.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
-
     for (Map<String, RefBookValue> refBookValues : updatePersonList) {
         ScriptUtils.checkInterrupted();
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
@@ -598,6 +642,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
+
+    logger.info("identificateion and update end "+ calcTimeMillis(time));
 
     logger.info("Обновлено записей: " + updCnt);
 
@@ -620,6 +666,14 @@ PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
     return null;
 }
 
+
+
+@Field
+def INCLUDE_TO_REPORT = 1;
+
+@Field
+def NOT_INCLUDE_TO_REPORT = 0;
+
 /**
  * Метод устанавливает признак включения в отчетность на основе приоритета
  */
@@ -627,60 +681,50 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     List personDocumentList = naturalPerson.getPersonDocumentList();
 
-    List includeToReportDocumentList = new ArrayList();
-
     if (!personDocumentList.isEmpty()) {
 
-        //сортировка чтобы при наличии одинаковых типов документов не перезаписывались признаки, статус всегда 1 будет только у одного документа
-        personDocumentList.sort { a, b -> a.id <=> b.id }
+        //сортировка по приоритету
+        personDocumentList.sort { a, b -> (a.getDocType()?.getPriority() <=> b.getDocType()?.getPriority()) ?: (a.id <=> b.id) }
 
-        PersonDocument minimalPriorDoc = personDocumentList.min { it.getDocType().getPriority() }
+        for (int i = 0; i < personDocumentList.size(); i++) {
 
-        Long incDocTypeId = minimalPriorDoc.getDocType() != null ? minimalPriorDoc.getDocType().getId() : null;
+            PersonDocument personDocument = personDocumentList.get(i);
 
-        for (PersonDocument personDocument : personDocumentList) {
+            String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
+            if (i == 0) {
+                if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
 
-            DocType docType = personDocument.getDocType()
-
-            if ((docType != null && BaseWeigthCalculator.equalsNullSafe(docType.getId(), incDocTypeId))
-                    && BaseWeigthCalculator.isEqualsNullSafeStr(personDocument.getDocumentNumber(), minimalPriorDoc.getDocumentNumber()) && includeToReportDocumentList.isEmpty()) {
-
-                if (!personDocument.getIncRep().equals(1)) {
-
-                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", personDocument.getIncRep());
+                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", INCLUDE_TO_REPORT);
                     changeEvent.setType(AttributeChangeEventType.REFRESHED);
+                    changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, personDocument.getIncRep()));
 
-                    RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, 1);
-                    changeEvent.setCurrentValue(refBookValue);
-                    attrChangeListener.processAttr(changeEvent);
+                    attrChangeListener.processAttr(docInf, changeEvent);
 
-                    personDocument.setIncRep(1);
+                    personDocument.setIncRep(INCLUDE_TO_REPORT);
 
                     if (personDocument.getId() != null) {
-                        includeToReportDocumentList.add(personDocument);
+                        updateDocumentList.add(personDocument);
                     }
                 }
             } else {
 
-                if (!personDocument.getIncRep().equals(0)) {
+                if (!personDocument.getIncRep().equals(NOT_INCLUDE_TO_REPORT)) {
 
-                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", personDocument.getIncRep());
+                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", NOT_INCLUDE_TO_REPORT);
                     changeEvent.setType(AttributeChangeEventType.REFRESHED);
 
-                    RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, 0);
-                    changeEvent.setCurrentValue(refBookValue);
-                    attrChangeListener.processAttr(changeEvent);
+                    changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, personDocument.getIncRep()));
+                    attrChangeListener.processAttr(docInf, changeEvent);
 
-                    personDocument.setIncRep(0);
+                    personDocument.setIncRep(NOT_INCLUDE_TO_REPORT);
 
                     if (personDocument.getId() != null) {
                         updateDocumentList.add(personDocument);
                     }
                 }
             }
-
-            updateDocumentList.addAll(includeToReportDocumentList);
         }
+
     }
 }
 
@@ -785,10 +829,11 @@ def mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
 
 def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
 
-    //println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList
-
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
+
+        logger.info("insert multiple records: refBookId="+refBookId + ", size="+identityObjectList.size())
+
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
 
@@ -1339,6 +1384,9 @@ String capitalize(String str) {
 
 void importData() {
 
+    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    logger.info("Начало загрузки данных первичной налоговой формы "+declarationData.id+". Дата начала отчетного периода: "+sdf.format(getReportPeriodStartDate())+", дата окончания: "+sdf.format(getReportPeriodEndDate()));
+
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
 
@@ -1462,10 +1510,20 @@ void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOpera
         transformNdflPersonIncome(it, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, fio)
     });
     // Если проверка на даты не прошла, то операция не добавляется.
+    // https://jira.aplana.com/browse/SBRFNDFL-581 - временное решение если дата не прошла то загружаем, но выводим сообщение
     if (incomes.contains(null)) {
-        return
+        //TODO return
     }
-    ndflPerson.incomes.addAll(incomes);
+
+    incomes.each {
+        if (it != null){
+            ndflPerson.incomes.add(it);
+        }
+    }
+
+    //ndflPerson.incomes.addAll(incomes);
+
+
     List<NdflPersonDeduction> deductions = new ArrayList<NdflPersonDeduction>();
     deductions.addAll(ndflPersonOperationsNode.'СведВыч'.collect {
         transformNdflPersonDeduction(it)
@@ -1582,7 +1640,9 @@ boolean operationNotRelateToCurrentPeriod(NodeChild node, String kpp, String okt
 }
 
 boolean dateRelateToCurrentPeriod(Date date) {
-    if (date==null || (date >= getReportPeriodCalendarStartDate() && date <= getReportPeriodEndDate())) {
+
+    //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
+    if (date==null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
         return true
     }
     return false
@@ -1795,7 +1855,7 @@ def prepaymentAttr(personPrepayment) {
 
 // Мапа <ID_Данные о физическом лице - получателе дохода, Физическое лицо: <ФИО> ИНП:<ИНП>>
 @Field def ndflPersonFLMap = [:]
-@Field final TEMPLATE_PERSON_FL = "Физическое лицо: \"%s\", ИНП: \"%s\""
+@Field final TEMPLATE_PERSON_FL = "ФИО клиента: \"%s\", Уникальный код клиента: \"%s\""
 
 // Виды документов, удостоверяющих личность Мапа <Идентификатор, Код>
 @Field def documentCodesCache = [:]
@@ -2263,60 +2323,56 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Реквизиты
 @Field final String C_ADDRESS = "Адрес регистрации в Российской Федерации "
 @Field final String C_CITIZENSHIP = "Гражданство (код страны)"
-@Field final String C_ID_DOC = "Документ, удостоверяющий личность"
-@Field final String C_ID_DOC_TYPE = "Код вида документа"
-@Field final String C_INC_REP = "Включается в отчетность"
-@Field final String C_ID_DOC_NUMBER = "Серия и номер документа"
+@Field final String C_ID_DOC = "Документ удостоверяющий личность.Номер"
+@Field final String C_ID_DOC_TYPE = "Документ удостоверяющий личность.Код"
 @Field final String C_STATUS = "Статус"
-@Field final String C_INCOME_CODE = "Код вида дохода"
-@Field final String C_INCOME_KIND = "Вид дохода"
 @Field final String C_RATE = "Ставка"
 @Field final String C_TYPE_CODE = "Код вычета"
-@Field final String C_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление"
-@Field final String C_LAST_NAME = "Фамилия"
-@Field final String C_FIRST_NAME = "Имя"
-@Field final String C_MIDDLE_NAME = "Отчество"
-@Field final String C_INP = "Уникальный код клиента"
-@Field final String C_BIRTH_DATE = "Дата рождения"
-@Field final String C_INN_NP = "ИНН  физического лица"
+@Field final String C_NOTIF_SOURCE = "Документ о праве на налоговый вычет.Код источника"
+@Field final String C_LAST_NAME = "Налогоплательщик.Фамилия"
+@Field final String C_FIRST_NAME = "Налогоплательщик.Имя"
+@Field final String C_MIDDLE_NAME = "Налогоплательщик.Отчество"
+@Field final String C_BIRTH_DATE = "Налогоплательщик.Дата рождения"
+@Field final String C_INN_NP = "ИНН.В Российской федерации"
 @Field final String C_SNILS = "СНИЛС"
-@Field final String C_INN_FOREIGN = "ИНН  иностранного гражданина"
-@Field final String C_REGION_CODE = "Код Региона"
-@Field final String C_AREA = "Район"
-@Field final String C_CITY = "Город"
-@Field final String C_LOCALITY = "Населенный пункт"
-@Field final String C_STREET = "Улица"
-@Field final String C_HOUSE = "Дом"
-@Field final String C_BUILDING = "Корпус"
-@Field final String C_FLAT = "Квартира"
+@Field final String C_INN_FOREIGN = "ИНН.В стране гражданства"
+@Field final String C_REGION_CODE = "Адрес регистрации в Российской Федерации.Код субъекта"
+@Field final String C_AREA = "Адрес регистрации в Российской Федерации.Район"
+@Field final String C_CITY = "Адрес регистрации в Российской Федерации.Город"
+@Field final String C_LOCALITY = "Адрес регистрации в Российской Федерации.Населенный пункт"
+@Field final String C_STREET = "Адрес регистрации в Российской Федерации.Улица"
+@Field final String C_HOUSE = "Адрес регистрации в Российской Федерации.Дом"
+@Field final String C_BUILDING = "Адрес регистрации в Российской Федерации.Корпус"
+@Field final String C_FLAT = "Адрес регистрации в Российской Федерации.Квартира"
 
 // Сведения о доходах и НДФЛ
-@Field final String C_INCOME_TYPE = "Признак вида дохода"
-@Field final String C_INCOME_ACCRUED_DATE = "Дата начисления дохода"
-@Field final String C_INCOME_PAYOUT_DATE = "Дата выплаты дохода"
-@Field final String C_INCOME_ACCRUED_SUMM = "Сумма начисленного дохода"
-@Field final String C_INCOME_PAYOUT_SUMM = "Сумма выплаченного дохода"
-@Field final String C_TOTAL_DEDUCTIONS_SUMM = "Общая сумма вычетов"
+@Field final String C_INCOME_CODE = "Доход.Вид.Код"
+@Field final String C_INCOME_TYPE = "Доход.Вид.Признак"
+@Field final String C_INCOME_ACCRUED_DATE = "Доход.Дата.Начисление"
+@Field final String C_INCOME_PAYOUT_DATE = "Доход.Дата.Выплата"
+@Field final String C_INCOME_ACCRUED_SUMM = "Доход.Сумма.Начисление"
+@Field final String C_INCOME_PAYOUT_SUMM = "Доход.Сумма.Выплата"
+@Field final String C_TOTAL_DEDUCTIONS_SUMM = "Сумма вычета"
 @Field final String C_TAX_BASE = "Налоговая база"
-@Field final String C_TAX_RATE = "Ставка налога"
-@Field final String C_TAX_DATE = "Дата налога"
-@Field final String C_CALCULATED_TAX = "Сумма налога исчисленная"
-@Field final String C_WITHHOLDING_TAX = "Сумма налога удержанная"
-@Field final String C_NOT_HOLDING_TAX = "Сумма налога, не удержанная налоговым агентом"
-@Field final String C_OVERHOLDING_TAX = "Сумма налога, излишне удержанная налоговым агентом"
-@Field final String C_REFOUND_TAX = "Сумма возвращенного налога"
-@Field final String C_TAX_TRANSFER_DATE = "Срок (дата) перечисления налога"
-@Field final String C_PAYMENT_DATE = "Дата платежного поручения"
-@Field final String C_PAYMENT_NUMBER = "Номер платежного поручения перечисления налога в бюджет"
-@Field final String C_TAX_SUMM = "Сумма налога перечисленная"
-@Field final String C_OKTMO = "ОКТМО"
-@Field final String C_KPP = "КПП"
+@Field final String C_TAX_RATE = "НДФЛ.Процентная ставка"
+@Field final String C_TAX_DATE = "НДФЛ.Расчет.Дата"
+@Field final String C_CALCULATED_TAX = "НДФЛ.Расчет.Сумма.Исчисленный"
+@Field final String C_WITHHOLDING_TAX = "НДФЛ.Расчет.Сумма.Удержанный"
+@Field final String C_NOT_HOLDING_TAX = "НДФЛ.Расчет.Сумма.Не удержанный"
+@Field final String C_OVERHOLDING_TAX = "НДФЛ.Расчет.Сумма.Излишне удержанный"
+@Field final String C_REFOUND_TAX = "НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику"
+@Field final String C_TAX_TRANSFER_DATE = "НДФЛ.Перечисление в бюджет.Срок"
+@Field final String C_PAYMENT_DATE = "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата"
+@Field final String C_PAYMENT_NUMBER = "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер"
+@Field final String C_TAX_SUMM = "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+@Field final String C_OKTMO = "Доход.Источник выплаты.ОКТМО"
+@Field final String C_KPP = "Доход.Источник выплаты.КПП"
 
 // Сведения о вычетах
-@Field final String C_NOTIF_DATE = "Дата выдачи уведомления"
-@Field final String C_INCOME_ACCRUED = "Дата начисления дохода"
-@Field final String C_PERIOD_PREV_DATE = "Дата применения вычета в предыдущем периоде"
-@Field final String C_PERIOD_CURR_DATE = "Дата применения вычета в текущем периоде"
+@Field final String C_NOTIF_DATE = "Документ о праве на налоговый вычет.Дата"
+@Field final String C_INCOME_ACCRUED = "Начисленный доход.Дата"
+@Field final String C_PERIOD_PREV_DATE = "Применение вычета.Предыдущий период.Дата"
+@Field final String C_PERIOD_CURR_DATE = "Применение вычета.Текущий период.Дата"
 
 // Поля справочника Физические лица
 @Field final String RF_LAST_NAME = "LAST_NAME"
@@ -2519,14 +2575,14 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_CITIZENSHIP, fioAndInp, C_CITIZENSHIP, R_CITIZENSHIP);
         }
 
-        // Спр3 Документ удостоверяющий личность (Обязательное поле)
+        // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
         if (!documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
 
             //TODO turn_to_error
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_ID_DOC_TYPE, fioAndInp, C_ID_DOC_TYPE, R_ID_DOC_TYPE);
         }
 
-        // Спр4 Статусы налогоплательщиков (Обязательное поле)
+        // Спр4 Статус (Обязательное поле)
         if (!taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
             //TODO turn_to_error
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_STATUS, fioAndInp, C_STATUS, R_STATUS);
@@ -2588,12 +2644,12 @@ def checkDataReference(
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_CITIZENSHIP, fioAndInp, C_CITIZENSHIP, R_PERSON);
                 }
 
-                // Спр15 ИНН (Необязательное поле)
+                // Спр15 ИНН.В Российской федерации (Необязательное поле)
                 if (ndflPerson.innNp != null && !ndflPerson.innNp.equals(personRecord.get(RF_INN).value)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_INN_NP, fioAndInp, C_INN_NP, R_PERSON);
                 }
 
-                // Спр16 ИНН в стране Гражданства (Необязательное поле)
+                // Спр16 ИНН.В стране гражданства (Необязательное поле)
                 if (ndflPerson.innForeign != null && !ndflPerson.innForeign.equals(personRecord.get(RF_INN_FOREIGN).value)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_INN_FOREIGN, fioAndInp, C_INN_FOREIGN, R_PERSON);
                 }
@@ -2613,12 +2669,12 @@ def checkDataReference(
                     if (!personDocTypeList.contains(ndflPerson.idDocType)) {
                         logger.warn("""Ошибка в значении: Раздел "Реквизиты". Строка "${
                             ndflPerson.rowNum ?: ""
-                        }". Графа "Код вида документа". $fioAndInp. Текст ошибки: "Код вида документа" не соответствует справочнику "Физические лица".""")
+                        }". Графа "Документ удостоверяющий личность.Код". $fioAndInp. Текст ошибки: "Документ удостоверяющий личность.Код" не соответствует справочнику "Физические лица".""")
                     }
                     if (!personDocNumberList.contains(ndflPerson.idDocNumber)) {
                         logger.warn("""Ошибка в значении: Раздел "Реквизиты". Строка "${
                             ndflPerson.rowNum ?: ""
-                        }". Графа "Серия и номер документа". $fioAndInp. Текст ошибки: "Серия и номер документа" не соответствует справочнику "Физические лица".""")
+                        }". Графа "Документ удостоверяющий личность.Номер". $fioAndInp. Текст ошибки: "Документ удостоверяющий личность.Номер" не соответствует справочнику "Физические лица".""")
                     }
                 } else {
                     def allDocList = dulMap.get(ndflPerson.personId)
@@ -2670,42 +2726,42 @@ def checkDataReference(
                     flat = address.get(RF_APPARTMENT).value
                 }
 
-                // Код Региона
+                // Адрес регистрации в Российской Федерации.Код субъекта
                 if (!ndflPerson.regionCode.equals(regionCode)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_REGION_CODE, fioAndInp, C_REGION_CODE, R_PERSON);
                 }
 
-                // Район
+                // Адрес регистрации в Российской Федерации.Район
                 if (!ndflPerson.area.equals(area)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_AREA, fioAndInp, C_AREA, R_PERSON);
                 }
 
-                // Город
+                // Адрес регистрации в Российской Федерации.Город
                 if (!ndflPerson.city.equals(city)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_CITY, fioAndInp, C_CITY, R_PERSON);
                 }
 
-                // Населенный пункт
+                // Адрес регистрации в Российской Федерации.Населенный пункт
                 if (!ndflPerson.locality.equals(locality)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_LOCALITY, fioAndInp, C_LOCALITY, R_PERSON);
                 }
 
-                // Улица
+                // Адрес регистрации в Российской Федерации.Улица
                 if (!ndflPerson.street.equals(street)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_STREET, fioAndInp, C_STREET, R_PERSON);
                 }
 
-                // Дом
+                // Адрес регистрации в Российской Федерации.Дом
                 if (!ndflPerson.house.equals(house)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_HOUSE, fioAndInp, C_HOUSE, R_PERSON);
                 }
 
-                // Корпус
+                // Адрес регистрации в Российской Федерации.Корпус
                 if (!ndflPerson.building.equals(building)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_BUILDING, fioAndInp, C_BUILDING, R_PERSON);
                 }
 
-                // Квартира
+                // Адрес регистрации в Российской Федерации.Квартира
                 if (!ndflPerson.flat.equals(flat)) {
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_FLAT, fioAndInp, C_FLAT, R_PERSON);
                 }
@@ -2730,20 +2786,20 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_CODE, fioAndInp, C_INCOME_CODE, R_INCOME_CODE);
         }
 
-        // Спр6 Вида дохода (Необязательное поле)
+        // Спр6 Доход.Вид.Признак (Необязательное поле)
         // При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
         if (ndflPersonIncome.incomeType != null) {
             def idIncomeCode = incomeKindMap.get(ndflPersonIncome.incomeType)
             if (!idIncomeCode) {
-                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_KIND, fioAndInp, C_INCOME_KIND, R_INCOME_KIND);
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_TYPE, fioAndInp, C_INCOME_TYPE, R_INCOME_KIND);
             } else if (!incomeCodeMap.get(idIncomeCode.value)) {
-                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_KIND, fioAndInp, C_INCOME_KIND, R_INCOME_KIND);
+                logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_TYPE, fioAndInp, C_INCOME_TYPE, R_INCOME_KIND);
             }
         }
 
-        // Спр7 Ставка (Необязательное поле)
+        // Спр7 НДФЛ.Процентная ставка (Необязательное поле)
         if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate.toString())) {
-            logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_RATE, fioAndInp, C_RATE, R_RATE);
+            logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_RATE, fioAndInp, C_TAX_RATE, R_RATE);
         }
     }
     println "Проверки на соответствие справочникам / NdflPersonIncome: " + (System.currentTimeMillis() - time);
@@ -2761,7 +2817,7 @@ def checkDataReference(
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_TYPE_CODE, fioAndInp, C_TYPE_CODE, R_TYPE_CODE);
         }
 
-        // Спр9 Код налоговой иснпекции (Обязательное поле)
+        // Спр9 Документ о праве на налоговый вычет.Код источника (Обязательное поле)
         if (ndflPersonDeduction.notifSource != null && !taxInspectionList.contains(ndflPersonDeduction.notifSource)) {
             //TODO turn_to_error
             logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
@@ -2776,10 +2832,15 @@ def checkDataReference(
         ScriptUtils.checkInterrupted();
 
         def fioAndInp = ndflPersonFLMap.get(ndflPersonPrepayment.ndflPersonId)
-        // Спр9 Код налоговой иснпекции (Обязательное поле)
+        // Спр9 Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Обязательное поле)
         if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
             //TODO turn_to_error
-            logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum ?: "", C_NOTIF_SOURCE, fioAndInp, C_NOTIF_SOURCE, R_NOTIF_SOURCE);
+            logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON_PREPAYMENT,
+                    ndflPersonPrepayment.rowNum ?: "",
+                    "Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление",
+                    fioAndInp,
+                    "Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление",
+                    R_NOTIF_SOURCE);
         }
     }
     println "Проверки на соответствие справочникам / NdflPersonPrepayment: " + (System.currentTimeMillis() - time);
@@ -2857,11 +2918,11 @@ def checkDataCommon(
                     //TODO turn_to_error
                     logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_CODE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
-                // Раздел 2. Графа 5 "Признак вида дохода" должна быть заполнена
+                // Раздел 2. Графа 5 "Доход.Вид.Признак" должна быть заполнена
                 if (ndflPersonIncome.incomeType == null) {
-                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_TYPE, emptyField])
+                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [script.this.C_INCOME_TYPE, emptyField])
                     //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_TYPE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", script.this.C_INCOME_TYPE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
             }
 
@@ -2869,7 +2930,7 @@ def checkDataCommon(
             if (ndflPersonIncome.incomePayoutDate == null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 emptyField += ", \"" + C_INCOME_PAYOUT_DATE + "\", \"" + C_INCOME_PAYOUT_SUMM + "\""
 
-                // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть НЕ заполнена
+                // Раздел 2. Графа 21 "НДФЛ.Перечисление в бюджет.Срок" должна быть НЕ заполнена
                 if (ndflPersonIncome.taxTransferDate != null) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_TRANSFER_DATE, emptyField])
                     //TODO turn_to_error
@@ -2883,13 +2944,13 @@ def checkDataCommon(
                 //TODO turn_to_error
                 logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
-            // 	Раздел 2. Графа 14 "Ставка налога" должна быть заполнена
+            // 	Раздел 2. Графа 14 "НДФЛ.Процентная ставка" должна быть заполнена
             if (ndflPersonIncome.taxRate == null) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_RATE, emptyField])
                 //TODO turn_to_error
                 logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
-            // 	Раздел 2. Графа 15 "Дата налога" должна быть заполнена
+            // 	Раздел 2. Графа 15 "НДФЛ.Расчет.Дата" должна быть заполнена
             if (ndflPersonIncome.taxDate == null) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_DATE, emptyField])
                 //TODO turn_to_error
@@ -2899,7 +2960,7 @@ def checkDataCommon(
             // если заполнены Раздел 2. Графы 22-24
             def notEmptyField = "заполнены " + getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
 
-            // Раздел 2. Графа 12 "Общая сумма вычетов" должна быть НЕ заполнена
+            // Раздел 2. Графа 12 "Сумма вычета" должна быть НЕ заполнена
             if (!ScriptUtils.isEmpty(ndflPersonIncome.totalDeductionsSumm)) {
                 def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TOTAL_DEDUCTIONS_SUMM, notEmptyField])
                 //TODO turn_to_error
@@ -2909,7 +2970,7 @@ def checkDataCommon(
             // если заполнены Раздел 2. Графы 7 и 11
             if (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
 
-                // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть заполнена
+                // Раздел 2. Графа 21 "НДФЛ.Перечисление в бюджет.Срок" должна быть заполнена
                 if (ndflPersonIncome.taxTransferDate == null) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_TRANSFER_DATE, notEmptyField])
                     //TODO turn_to_error
@@ -2918,27 +2979,27 @@ def checkDataCommon(
             }
         }
 
-        // если заполнена Раздел 2. Графа 6 "Дата начисления дохода"
+        // если заполнена Раздел 2. Графа 6 "Доход.Дата.Начисление"
         if (ndflPersonIncome.incomeAccruedDate != null) {
             def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_ACCRUED_DATE])
 
-            // Раздел 2. Графа 10 "Сумма начисленного дохода" должна быть заполнена
+            // Раздел 2. Графа 10 "Доход.Сумма.Начисление" должна быть заполнена
             if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
                 notEmptyField = "заполнены " + getQuotedFields([C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM])
 
-                // Раздел 2. Графа 16 "Сумма налога исчисленная" должна быть заполнена
+                // Раздел 2. Графа 16 "НДФЛ.Расчет.Сумма.Исчисленный" должна быть заполнена
                 if (ScriptUtils.isEmpty(ndflPersonIncome.calculatedTax)) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_CALCULATED_TAX, notEmptyField])
                     //TODO turn_to_error
                     logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_CALCULATED_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
                 }
-                // Раздел 2. Графа 18 "Сумма налога, не удержанная налоговым агентом" должна быть заполнена
+                // Раздел 2. Графа 18 "НДФЛ.Расчет.Сумма.Не удержанный" должна быть заполнена
                 if (ndflPersonIncome.notHoldingTax == null) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_NOT_HOLDING_TAX, notEmptyField])
                     //TODO turn_to_error
                     logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_NOT_HOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
                 }
-                // Раздел 2. Графа 19 "Сумма налога, излишне удержанная налоговым агентом" должна быть заполнена
+                // Раздел 2. Графа 19 "НДФЛ.Расчет.Сумма.Излишне удержанный" должна быть заполнена
                 if (ndflPersonIncome.overholdingTax == null) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_OVERHOLDING_TAX, notEmptyField])
                     //TODO turn_to_error
@@ -2950,30 +3011,30 @@ def checkDataCommon(
                 logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_ACCRUED_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
         } else {
-            // если заполнена Раздел 2. Графа 10 "Сумма начисленного дохода"
+            // если заполнена Раздел 2. Графа 10 "Доход.Сумма.Начисление"
             if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
                 def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_ACCRUED_SUMM])
 
-                // Раздел 2. Графа 6 "Дата начисления дохода" должна быть заполнена
+                // Раздел 2. Графа 6 "Доход.Дата.Начисление" должна быть заполнена
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_ACCRUED_DATE, notEmptyField])
                 //TODO turn_to_error
                 logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_ACCRUED_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             } else {
                 def emptyField = "не заполнены " + getQuotedFields([C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM])
 
-                // Раздел 2. Графа 16 "Сумма налога исчисленная" должна быть НЕ заполнена
+                // Раздел 2. Графа 16 "НДФЛ.Расчет.Сумма.Исчисленный" должна быть НЕ заполнена
                 if (!ScriptUtils.isEmpty(ndflPersonIncome.calculatedTax)) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_CALCULATED_TAX, emptyField])
                     //TODO turn_to_error
                     logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_CALCULATED_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
                 }
-                // Раздел 2. Графа 18 "Сумма налога, не удержанная налоговым агентом" должна быть НЕ заполнена
+                // Раздел 2. Графа 18 "НДФЛ.Расчет.Сумма.Не удержанный" должна быть НЕ заполнена
                 if (ndflPersonIncome.notHoldingTax != null) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_NOT_HOLDING_TAX, emptyField])
                     //TODO turn_to_error
                     logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_NOT_HOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
                 }
-                // Раздел 2. Графа 19 "Сумма налога, излишне удержанная налоговым агентом" должна быть НЕ заполнена
+                // Раздел 2. Графа 19 "НДФЛ.Расчет.Сумма.Излишне удержанный" должна быть НЕ заполнена
                 if (ndflPersonIncome.overholdingTax != null) {
                     def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_OVERHOLDING_TAX, emptyField])
                     //TODO turn_to_error
@@ -2982,58 +3043,59 @@ def checkDataCommon(
             }
         }
 
-        // если заполнена Раздел 2. Графа 7 "Дата выплаты дохода"
+        // если заполнена Раздел 2. Графа 7 "Доход.Дата.Выплата"
         if (ndflPersonIncome.incomePayoutDate != null) {
             def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_DATE])
 
-            // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода"
+            // если заполнена Раздел 2. Графа 11 "Доход.Сумма.Выплата"
             if (!ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 notEmptyField = "заполнены " + getQuotedFields([C_INCOME_PAYOUT_DATE, C_INCOME_PAYOUT_SUMM])
 
-                // Раздел 2. Графа 17 "Сумма налога удержанная" должна быть заполнена
+                // Раздел 2. Графа 17 "НДФЛ.Расчет.Сумма.Удержанный" должна быть заполнена
                 if (ScriptUtils.isEmpty(ndflPersonIncome.withholdingTax)) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_WITHHOLDING_TAX, notEmptyField])
                     //TODO turn_to_error
                     logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_WITHHOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
 
-                // Раздел 2. Графа 20 "Сумма возвращенного налога" должна быть заполнена
+                // Раздел 2. Графа 20 "НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику" должна быть заполнена
                 if (ndflPersonIncome.refoundTax == null) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_REFOUND_TAX, notEmptyField])
                     //TODO turn_to_error
                     logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_REFOUND_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
 
-                // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть заполнена
+                // Раздел 2. Графа 21 "НДФЛ.Перечисление в бюджет.Срок" должна быть заполнена
                 if (ndflPersonIncome.taxTransferDate == null) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_TRANSFER_DATE, notEmptyField])
                     //TODO turn_to_error
                     logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
             } else {
-                // Раздел 2. Графа 11 "Сумма выплаченного дохода" должна быть заполнена
+                // Раздел 2. Графа 11 "Доход.Сумма.Выплата" должна быть заполнена
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_PAYOUT_SUMM, notEmptyField])
                 //TODO turn_to_error
                 logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_PAYOUT_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
         } else {
-            // если не заполнена Раздел 2. Графа 7 "Дата выплаты дохода"
+            // если не заполнена Раздел 2. Графа 7 "Доход.Дата.Выплата"
 
-            // если заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода"
+            // если заполнена Раздел 2. Графа 11 "Доход.Сумма.Выплата"
             if (!ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
                 def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_SUMM])
 
-                // Раздел 2. Графа 7 "Дата выплаты дохода" должна быть заполнена
+                // Раздел 2. Графа 7 "Доход.Дата.Выплата" должна быть заполнена
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_PAYOUT_DATE, notEmptyField])
                 //TODO turn_to_error
                 logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_PAYOUT_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             } else {
-                // если НЕ заполнена Раздел 2. Графа 11 "Сумма выплаченного дохода"
+                // если НЕ заполнена Раздел 2. Графа 11 "Доход.Сумма.Выплата"
+
                 if (ndflPersonIncome.paymentDate == null &&
                         ndflPersonIncome.paymentNumber == null &&
                         ndflPersonIncome.taxSumm == null) {
 
-                    // Раздел 2. Графа 21 "Срок (дата) перечисления налога" должна быть НЕ заполнена
+                    // Раздел 2. Графа 21 "НДФЛ.Перечисление в бюджет.Срок" должна быть НЕ заполнена
                     if (ndflPersonIncome.taxTransferDate != null) {
                         def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_TRANSFER_DATE, emptyField])
                         //TODO turn_to_error
@@ -3046,7 +3108,7 @@ def checkDataCommon(
         // Раздел 2. Графа 22, 23, 24 Должны быть либо заполнены все 3 Графы, либо ни одна их них
         if (ndflPersonIncome.paymentDate != null || ndflPersonIncome.paymentNumber != null || !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
             def allField = getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
-            // Раздел 2. Графа 22 "Дата платежного поручения"
+            // Раздел 2. Графа 22 "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата"
             if (ndflPersonIncome.paymentDate == null) {
                 def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_PAYMENT_DATE, allField])
                 //TODO turn_to_error
@@ -3058,7 +3120,7 @@ def checkDataCommon(
                 //TODO turn_to_error
                 logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_PAYMENT_NUMBER, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
             }
-            // Раздел 2. Графа 24 "Сумма налога перечисленная"
+            // Раздел 2. Графа 24 "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
             if (ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
                 def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_TAX_SUMM, allField])
                 //TODO turn_to_error
@@ -3145,38 +3207,6 @@ def checkDataCommon(
 
     println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
-
-    time = System.currentTimeMillis();
-    for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
-
-        ScriptUtils.checkInterrupted();
-
-        def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
-
-        // Общ6 Принадлежность дат налоговых вычетов к отчетному периоду
-        // Дата выдачи уведомления (Обязательное поле)
-        if (ndflPersonDeduction.notifDate < getReportPeriodStartDate() || ndflPersonDeduction.notifDate > getReportPeriodEndDate()) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_NOTIF_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Дата начисления дохода (Обязательное поле)
-        if (ndflPersonDeduction.incomeAccrued < getReportPeriodStartDate() || ndflPersonDeduction.incomeAccrued > getReportPeriodEndDate()) {
-            //TODO turn_to_error
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_INCOME_ACCRUED, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Дата применения вычета в предыдущем периоде (Необязательное поле)
-        if (ndflPersonDeduction.periodPrevDate != null &&
-                (ndflPersonDeduction.periodPrevDate < getReportPeriodStartDate() || ndflPersonDeduction.periodPrevDate > getReportPeriodEndDate())) {
-            //TODO turn_to_error
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_PERIOD_PREV_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Дата применения вычета в текущем периоде (Обязательное поле)
-        if (ndflPersonDeduction.periodCurrDate < getReportPeriodStartDate() || ndflPersonDeduction.periodCurrDate > getReportPeriodEndDate()) {
-            //TODO turn_to_error
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_PERIOD_CURR_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-    }
-    println "Общие проверки / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
-    logger.info("Общие проверки / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
 
     ScriptUtils.checkInterrupted();
 
@@ -3296,7 +3326,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         for (NdflPersonIncome ndflPersonIncome : it.value) {
             def ndflPerson = personsCache.get(ndflPersonIncome.ndflPersonId)
             def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
-            // СведДох1 Дата начисления дохода (Графа 6)
+            // СведДох1 Доход.Дата.Начисление (Графа 6)
             if (dateConditionDataList != null) {
                 dateConditionDataList.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
@@ -3304,7 +3334,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                                 ndflPersonIncome.rowNum ?: ""
-                            }".Графа "Дата начисления дохода"=${ndflPersonIncome.incomeAccruedDate} $fioAndInp.
+                            }".Графа "Доход.Дата.Начисление"=${ndflPersonIncome.incomeAccruedDate} $fioAndInp.
                                 Не выполнено условие: если «Графа 4 Раздел 2» = ${
                                 ndflPersonIncome.incomeCode
                             } и «Графа 5 Раздел 2» = ${ndflPersonIncome.incomeType}, то ${
@@ -3328,7 +3358,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + "\"сумма значений граф 16 Раздела 3 ≤ графа 10 Раздел 2\"");
             }
 
-            // СведДох4 Процентная ставка (Графа 14)
+            // СведДох4 НДФЛ.Процентная ставка (Графа 14)
             if (ndflPersonIncome.taxRate == 13) {
                 Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
                 Boolean conditionB = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status == "1"
@@ -3337,7 +3367,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Ставка" $fioAndInp.
+                    }".Графа "НДФЛ.Процентная ставка" $fioAndInp.
                                 Текст ошибки: для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий:\\n
                                 «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2\\n
                                 «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» = 1\\n
@@ -3348,7 +3378,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Ставка" $fioAndInp.
+                    }".Графа "НДФЛ.Процентная ставка" $fioAndInp.
                                 Текст ошибки: для «Графа 14 Раздел 2 = 15» не выполнено условие: «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1.""")
                 }
             } else if (ndflPersonIncome.taxRate == 35) {
@@ -3356,7 +3386,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Ставка" $fioAndInp.
+                    }".Графа "НДФЛ.Процентная ставка" $fioAndInp.
                                 Текст ошибки: для «Графа 14 Раздел 2 = 35» не выполнено условие: «Графа 4 Раздел 2» = (2740 или 3020 или 2610) и «Графа 12 Раздел 1» ≠ 2.""")
                 }
             } else if (ndflPersonIncome.taxRate == 30) {
@@ -3366,7 +3396,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Ставка" $fioAndInp.
+                    }".Графа "НДФЛ.Процентная ставка" $fioAndInp.
                                 Текст ошибки: для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:\\n
                                 «Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 2» ≠ 1010\\n
                                 («Графа 4 Раздел 2» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2.""")
@@ -3376,7 +3406,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Ставка" $fioAndInp.
+                    }".Графа "НДФЛ.Процентная ставка" $fioAndInp.
                                 Текст ошибки: для «Графа 14 Раздел 2 = 9» не выполнено условие: «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1110 и «Графа 12 Раздел 1» = 1.""")
                 }
             } else {
@@ -3384,14 +3414,14 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Ставка" $fioAndInp.
+                    }".Графа "НДФЛ.Процентная ставка" $fioAndInp.
                                 Текст ошибки: для «Графа 14 Раздел 2 = ${
                         ndflPersonIncome.taxRate
                     }» не выполнено условие: «Графа 7 Раздел 1» ≠ 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1.""")
                 }
             }
 
-            // СведДох5 Дата налога (Графа 15)
+            // СведДох5 НДФЛ.Расчет.Дата (Графа 15)
             if (ndflPersonIncome.taxDate != null) {
                 // СведДох5.1
                 if (ndflPersonIncome.calculatedTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
@@ -3400,7 +3430,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Дата исчисления" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
                                 Не выполнено условие: если «Графа 16 Раздел 2» > "0" и «Графа 4 Раздел 2» ≠ 0, то «Графа 15 Раздел 2» = «Графа 6 Раздел 2».""")
                     }
                 }
@@ -3411,7 +3441,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Дата удержания" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
                                 Не выполнено условие: если «Графа 17 Раздел 2» > "0" и «Графа 4 Раздел 2» ≠ 0, то «Графа 15 Раздел 2» = «Графа 7 Раздел 2».""")
                     }
                 }
@@ -3425,7 +3455,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Дата удержания" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
                                 Не выполнено условие: если «Графа 18 Раздел 2» > "0" и «Графа 17 Раздел 2» < «Графа 16 Раздел 2» и «Графа 4 Раздел 2» ≠ 0 и («Графа 4 Раздел 2» ≠ 1530 или 1531 или 1533 или 1535 или 1536 или 1537 или 1539 или 1541 или 1542 или 1543*)"
                                 , то «Графа 15 Раздел 2» = «Графа 7 Раздел 2».""")
                     }
@@ -3440,7 +3470,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Дата удержания" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
                                 Не выполнено условие: если «Графа 18 Раздел 2» > 0 и «Графа 17 Раздел 2» < «Графа 16 Раздел 2» и («Графа 4 Раздел 2» = 1530 или 1531 или 1533 или 1535 или 1536 или 1537 или 1539 или 1541 или 1542 или 1543*) и «Графа 7 Раздел 2» = "текущий отчётный период"
                                 , то «Графа 15 Раздел 2» = «Графа 6 Раздел 2».""")
                     }
@@ -3459,7 +3489,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Дата удержания" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
                                 Не выполнено условие: если «Графа 18 Раздел 2» > "0" и «Графа 17 Раздел 2» < «Графа 16 Раздел 2» и («Графа 4 Раздел 2» = 1530 или 1531 или 1533 или 1535 или 1536 или 1537 или 1539 или 1541 или 1542) и «Графа 6 Раздел 2» ≠ "текущий отчётный период"
                                 , то «Графа 15 Раздел 2"» = "31.12.20**".""")
                     }
@@ -3473,7 +3503,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Дата удержания" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
                                 Не выполнено условие: если «Графа 19 Раздел 2» > "0" и «Графа 17 Раздел 2» > «Графа 16 Раздел 2» и «Графа 4 Раздел 2» ≠ 0
                                 , то «Графа 15 Раздел 2» = «Графа 7 Раздел 2».""")
                     }
@@ -3488,14 +3518,14 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Дата удержания" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
                                 Не выполнено условие: если «Графа 20 Раздел 2» > "0" и «Графа 17 Раздел 2» > «Графа 16 Раздел 2» и «Графа 19 Раздел 2» > "0" и «Графа 4 Раздел 2» = ≠ 0
                                 , то «Графа 15 Раздел 2» = «Графа 7 Раздел 2».""")
                     }
                 }
             }
 
-            // СведДох6 Сумма налога исчисленная (Графа 16)
+            // СведДох6 НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
             if (ndflPersonIncome.calculatedTax != null) {
                 // СведДох6.1
                 if (ndflPersonIncome.taxRate != 13) {
@@ -3503,7 +3533,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Сумма налога исчисленная" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Сумма.Исчисленный" $fioAndInp.
                                 Не выполнено условие: если «Графа 14 Раздел 2» ≠ "13", то «Графа 16" = «Графа 13 Раздел 2» × «Графа 14 Раздел 2», с округлением до целого числа по правилам округления.""")
                     }
                 }
@@ -3545,7 +3575,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     // Сумма по «Графа 16» текущей операции = S1 x 13% - S2
                     if (ndflPersonIncome.calculatedTax != ScriptUtils.round((S1 * 13 - S2), 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "Сумма налога исчисленная" $fioAndInp.
+                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "НДФЛ.Расчет.Сумма.Исчисленный" $fioAndInp.
                                 Не выполнено условие: сумма по «Графа 16 Раздел 2» текущей операции = S1 x 13%% - S2.""")
                     }
                 }
@@ -3561,14 +3591,14 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                                 ndflPersonIncome.rowNum ?: ""
-                            }".Графа "Сумма налога исчисленная" $fioAndInp.
+                            }".Графа "НДФЛ.Расчет.Сумма.Исчисленный" $fioAndInp.
                             Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13% - «Графа 4 Раздел 4» .""")
                         }
                     }
                 }
             }
 
-            // СведДох7 Сумма налога удержанная (Графа 17)
+            // СведДох7 НДФЛ.Расчет.Сумма.Удержанный (Графа 17)
             if (ndflPersonIncome.withholdingTax != null && ndflPersonIncome.withholdingTax != 0) {
                 // СведДох7.1
                 if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
@@ -3582,7 +3612,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Сумма налога удержанная" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Сумма.Удержанный" $fioAndInp.
                                 Не выполнено условие: если (((«Графа 4 Раздел 2» = 2520 или 2720 или 2740 или 2750 или 2790 или 4800) и «Графа 5 Раздел 2» = "13")
                                 или ((«графа 4» = 1530 или 1531 или 1532 или 1533 или 1535 или 1536 или 1537 или 1539 или 1541 или 1542 или 1543* или 1544 или 1545 или 1546 или 1547
                                 или 1548 или 1549 или 1551 или 1552 или 1554) и «Графа 5 Раздел 2» ≠ 02)) и «Графа 19 Раздел 2» = 0, то «Графа 17 Раздел 2» = «Графа 16 Раздел 2» = «Графа 24 Раздел 2».""")
@@ -3605,7 +3635,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0
                             && ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax) * 50)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "Сумма налога удержанная" $fioAndInp.
+                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "НДФЛ.Расчет.Сумма.Удержанный" $fioAndInp.
                                 Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» ≤ ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%).""")
                     }
                 } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
@@ -3616,7 +3646,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                             ndflPersonIncome.rowNum ?: ""
-                        }".Графа "Сумма налога удержанная" $fioAndInp.
+                        }".Графа "НДФЛ.Расчет.Сумма.Удержанный" $fioAndInp.
                                 Не выполнено условие: если ((«Графа 4 Раздел 2» = 2520 или 2720 или 2740 или 2750 или 2790 или 4800) и «Графа 5 Раздел 2» = "14")
                                 или ((«Графа 4 Раздел 2» = 1530 или 1531 или 1532 или 1533 или 1535 или 1536 или 1537 или 1539 или 1541 или 1542 или 1544
                                 или 1545 или 1546 или 1547 или 1548 или 1549 или 1551 или 1552 или 1554 ) и «Графа 5 Раздел 2» = "02"),
@@ -3625,7 +3655,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 } else if (!(ndflPersonIncome.incomeCode != null)) {
                     if (!(ndflPersonIncome.withholdingTax != ndflPersonIncome.taxSumm ?: 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "Сумма налога удержанная" $fioAndInp.
+                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "НДФЛ.Расчет.Сумма.Удержанный" $fioAndInp.
                                 Не выполнено условие: если «Графа 4 Раздел 2» ≠ 0, то «Графа 17 Раздел 2» = «Графа 24 Раздел 2».""")
                     }
                 }
@@ -3644,43 +3674,43 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             // "Сумма Граф 20"
             Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
 
-            // СведДох8 Сумма налога, не удержанная налоговым агентом (Графа 18)
+            // СведДох8 НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
             if (calculatedTaxSum > withholdingTaxSum) {
                 if (!(notHoldingTaxSum == calculatedTaxSum - withholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Сумма налога, не удержанная налоговым агентом" $fioAndInp.
+                    }".Графа "НДФЛ.Расчет.Сумма.Не удержанный" $fioAndInp.
                                 Не выполнено условие: «Сумма Граф 16 Раздел 2» > «Сумма Граф 17 Раздел 2» для текущей пары «Графа 2 Раздел 2» и «Графа 3 Раздел 2»,
                                 то «Сумма Граф 18 Раздел 2» = «Сумма Граф 16 Раздел 2» - «Сумма Граф 17 Раздел 2».""")
                 }
             }
 
-            // СведДох9 Сумма налога, излишне удержанная налоговым агентом (Графа 19)
+            // СведДох9 НДФЛ.Расчет.Сумма.Излишне удержанный (Графа 19)
             if (calculatedTaxSum < withholdingTaxSum) {
                 if (!(overholdingTaxSum == withholdingTaxSum - calculatedTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Сумма налога, излишне удержанная налоговым агентом" $fioAndInp.
+                    }".Графа "НДФЛ.Расчет.Сумма.Излишне удержанный" $fioAndInp.
                                 Не выполнено условие: «Сумма Граф 16 Раздел 2» < «Сумма Граф 17 Раздел 2» для текущей пары «Графа 2 Раздел 2» и «Графа 3 Раздел 2»,
                                 то «Сумма Граф 19 Раздел 2» = «Сумма Граф 17 Раздел 2» - «Сумма Граф 16 Раздел 2».""")
                 }
             }
 
-            // СведДох10 Сумма возвращенного налога (Графа 20)
+            // СведДох10 НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)
             if (ndflPersonIncome.refoundTax > 0) {
                 if (!(refoundTaxSum <= overholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
-                    }".Графа "Сумма возвращенного налога" $fioAndInp.
+                    }".Графа "НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику" $fioAndInp.
                                 Не выполнено условие: если «Графа 20 Раздел 2» > 0,
                                 то «Сумма Граф 20 Раздел 2» ≤ «Сумма Граф 19 Раздел 2» для текущей пары «Графа 2 Раздел 2» и «Графа 3 Раздел 2».""")
                 }
             }
 
-            // СведДох11 Сумма налога перечисленная (Графа 24)
+            // СведДох11 НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
             if (ndflPersonIncome.taxSumm != null) {
 
                 dateConditionDataList = []
@@ -3724,7 +3754,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         if (!dateConditionData.checker.check(ndflPersonIncome)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                            logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "Срок перечисления налога"=${ndflPersonIncome.taxTransferDate} и "Дата выплаты дохода"=${ndflPersonIncome.incomePayoutDate} $fioAndInp.
+                            logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "НДФЛ.Перечисление в бюджет.Срок"=${ndflPersonIncome.taxTransferDate} и "Доход.Дата.Выплата"=${ndflPersonIncome.incomePayoutDate} $fioAndInp.
                                 Не выполнено условие: если «Графа 4 Раздел 2» = ${ndflPersonIncome.incomeCode} и «Графа 5 Раздел 2» = ${ndflPersonIncome.incomeType}, то ${dateConditionData.conditionMessage}.""")
                         }
                     } else if (["2520", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
@@ -3767,7 +3797,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
                             if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind)) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                                logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncomeFind.rowNum}".Графа "Срок перечисления налога"=${ndflPersonIncomeFind.taxTransferDate} и "Дата выплаты дохода"=${ndflPersonIncomeFind.incomePayoutDate} $fioAndInp.
+                                logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncomeFind.rowNum}".Графа "НДФЛ.Перечисление в бюджет.Срок"=${ndflPersonIncomeFind.taxTransferDate} и "Доход.Дата.Выплата"=${ndflPersonIncomeFind.incomePayoutDate} $fioAndInp.
                                 Не выполнено условие: если «Графа 4 Раздел 2» = ${ndflPersonIncomeFind.incomeCode} и «Графа 5 Раздел 2» = ${ndflPersonIncomeFind.incomeType}, то «Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день.""")
                             }
                         }
@@ -4044,7 +4074,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
             }",
                             ссылка на таблицу "Реквизиты" = "${
                 ndflPersonDeduction.ndflPersonId
-            }" и "Дата начисления дохода" = "${
+            }" и "Доход.Дата.Начисление" = "${
                 ScriptUtils.formatDate(ndflPersonDeduction.incomeAccrued, "dd.MM.yyyy")
             }".""")
         } else {
@@ -4054,9 +4084,9 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
                 logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                     ndflPersonDeduction.rowNum ?: ""
                 }".Графа "Код дохода" $fioAndInp.
-                            Текст ошибки: "Сведения о вычетах"."Код дохода" = ${
+                            Текст ошибки: "Начисленный доход.Код дохода" = ${
                     ndflPersonDeduction.incomeCode
-                }" ≠ "Сведения о доходах"."Код дохода" = ${ndflPersonIncome.incomeCode}".""")
+                }" ≠ "Доход.Вид.Код" = ${ndflPersonIncome.incomeCode}".""")
             }
 
             // Выч18 Начисленный доход.Сумма (Графы 12)
@@ -4064,10 +4094,10 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                     ndflPersonDeduction.rowNum ?: ""
-                }".Графа "Сумма начисленного дохода" $fioAndInp.
-                            Текст ошибки: "Сведения о вычетах"."Сумма начисленного дохода" = ${
+                }".Графа "Доход.Сумма.Начисление" $fioAndInp.
+                            Текст ошибки: "Начисленный доход.Сумма" = ${
                     ndflPersonDeduction.incomeSumm
-                }" ≠ "Сведения о доходах"."Сумма начисленного дохода" = ${ndflPersonIncome.incomeAccruedSumm}".""")
+                }" ≠ "Доход.Сумма.Начисление" = ${ndflPersonIncome.incomeAccruedSumm}".""")
             }
         }
 
@@ -4076,21 +4106,21 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                 ndflPersonDeduction.rowNum ?: ""
-            }".Графа "Дата применения вычета в текущем периоде" $fioAndInp.
-                            Текст ошибки: "Дата применения вычета в текущем периоде" = "${
+            }".Графа "Применение вычета.Текущий период.Дата" $fioAndInp.
+                            Текст ошибки: "Применение вычета.Текущий период.Дата" = "${
                 ndflPersonDeduction.periodCurrDate
-            }" ≠ "Дата начисления дохода" = "${ndflPersonDeduction.incomeAccrued}".""")
+            }" ≠ "Начисленный доход.Дата" = "${ndflPersonDeduction.incomeAccrued}".""")
         }
 
-        // Выч21 Применение вычета.Текущий период.Сумма (Графы 16) (Графы 8)
+        // Выч21 Документ о праве на налоговый вычет.Сумма (Графы 16) (Графы 8)
         if (comparNumbGreater(ndflPersonDeduction.notifSumm ?: 0, ndflPersonDeduction.periodCurrSumm ?: 0)) {
             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             logger.warn("""Ошибка в значении: Раздел "Сведения о вычетах".Строка="${
                 ndflPersonDeduction.rowNum ?: ""
-            }".Графа "Сумма вычета согласно документу" $fioAndInp.
-                            Текст ошибки: "Сумма вычета согласно документу" = "${
+            }".Графа "Документ о праве на налоговый вычет.Сумма" $fioAndInp.
+                            Текст ошибки: "Документ о праве на налоговый вычет.Сумма" = "${
                 ndflPersonDeduction.notifSumm
-            }" > "Сумма применения вычета в текущем периоде" = "${ndflPersonDeduction.periodCurrSumm}".""")
+            }" > "Применение вычета.Текущий период.Сумма" = "${ndflPersonDeduction.periodCurrSumm}".""")
         }
     }
 }
@@ -4205,4 +4235,277 @@ def getErrorMsgAbsent(def inputList, def tableName) {
         resultMsg = " Раздел \"" + tableName + "\" № " + inputList.join(", ") + "."
     }
     return resultMsg
+}
+
+
+//TODO вынес handler в скрипт, чтобы не обновлять ядро на нексте
+
+/**
+ * @author Andrey Drunk
+ */
+public class NaturalPersonRefbookScriptHandler extends NaturalPersonRefbookHandler {
+
+    /**
+     *
+     */
+    private Map<Long, NaturalPerson> refbookPersonTempMap;
+
+    /**
+     * Карта для создания идкнтификаторов ФЛ
+     */
+    private Map<Long, Map<Long, PersonIdentifier>> identitiesMap;
+
+    /**
+     * Карта для создания документов ФЛ
+     */
+    private Map<Long, Map<Long, PersonDocument>> documentsMap;
+
+    /**
+     * Кэш справочника страны
+     */
+    private Map<Long, Country> countryMap;
+
+    /**
+     * Кэш справочника статусы Налогоплателищика
+     */
+    private Map<Long, TaxpayerStatus> taxpayerStatusMap;
+
+    /**
+     * Кэш справочника типы документов
+     */
+    private Map<Long, DocType> docTypeMap;
+
+    /**
+     *
+     */
+    public NaturalPersonRefbookScriptHandler() {
+        super();
+        refbookPersonTempMap = new HashMap<Long, NaturalPerson>();
+        identitiesMap = new HashMap<Long, Map<Long, PersonIdentifier>>();
+        documentsMap = new HashMap<Long, Map<Long, PersonDocument>>();
+    }
+
+    @Override
+    public void processRow(ResultSet rs, int rowNum, Map<Long, Map<Long, NaturalPerson>> map) throws SQLException {
+
+        //Идентификатор записи первичной формы
+        Long primaryPersonId = SqlUtils.getLong(rs, PRIMARY_PERSON_ID);
+
+        //if (primaryPersonId == null) {throw new ServiceException("Не задано значение PRIMARY_PERSON_ID");}
+
+        //Список сходных записей
+        Map<Long, NaturalPerson> similarityPersonMap = map.get(primaryPersonId);
+
+        if (similarityPersonMap == null) {
+            similarityPersonMap = new HashMap<Long, NaturalPerson>();
+            map.put(primaryPersonId, similarityPersonMap);
+        }
+
+        //Идентификатор справочника
+        Long refBookPersonId = SqlUtils.getLong(rs, REFBOOK_PERSON_ID);
+
+        NaturalPerson naturalPerson = similarityPersonMap.get(refBookPersonId);
+
+        if (naturalPerson == null) {
+            naturalPerson = buildNaturalPerson(rs, refBookPersonId, primaryPersonId);
+            similarityPersonMap.put(refBookPersonId, naturalPerson);
+        }
+
+
+        //Добавляем документы физлица
+        addPersonDocument(rs, naturalPerson);
+
+        //Добавляем идентификаторы
+        addPersonIdentifier(rs, naturalPerson);
+
+        //Адрес
+        Address address = buildAddress(rs);
+        naturalPerson.setAddress(address);
+
+        //System.out.println(rowNum + ", primaryPersonId=" + primaryPersonId + ", [" + naturalPerson + "][" + Arrays.toString(naturalPerson.getPersonDocumentList().toArray()) + "][" + Arrays.toString(naturalPerson.getPersonIdentityList().toArray()) + "][" + address + "]");
+
+    }
+
+    private void addPersonIdentifier(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+
+        Long primaryPersonId = naturalPerson.getPrimaryPersonId();
+        Long refBookPersonId = naturalPerson.getId();
+        Long personIdentifierId = SqlUtils.getLong(rs, "book_id_tax_payer_id");
+        Map<Long, PersonIdentifier> personIdentityMap = identitiesMap.get(refBookPersonId);
+
+        if (personIdentityMap == null) {
+            personIdentityMap = new HashMap<Long, PersonIdentifier>();
+            identitiesMap.put(refBookPersonId, personIdentityMap);
+        }
+
+        if (personIdentifierId != null && !personIdentityMap.containsKey(personIdentifierId)) {
+            PersonIdentifier personIdentifier = new PersonIdentifier();
+            personIdentifier.setId(personIdentifierId);
+
+            personIdentifier.setRecordId(SqlUtils.getLong(rs, "tax_record_id"));
+            personIdentifier.setStatus(SqlUtils.getInteger(rs, "tax_status"));
+            personIdentifier.setVersion(rs.getDate("tax_version"));
+
+            personIdentifier.setInp(rs.getString("inp"));
+            personIdentifier.setAsnuId(SqlUtils.getLong(rs, "as_nu"));
+            personIdentifier.setNaturalPerson(naturalPerson);
+            personIdentityMap.put(personIdentifierId, personIdentifier);
+            naturalPerson.getPersonIdentityList().add(personIdentifier);
+        }
+    }
+
+    private void addPersonDocument(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+        Long primaryPersonId = naturalPerson.getPrimaryPersonId();
+        Long refBookPersonId = naturalPerson.getId();
+        Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
+        Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(refBookPersonId);
+
+        if (pesonDocumentMap == null) {
+            pesonDocumentMap = new HashMap<Long, PersonDocument>();
+            documentsMap.put(refBookPersonId, pesonDocumentMap);
+        }
+
+        if (docId != null && !pesonDocumentMap.containsKey(docId)) {
+            Long docTypeId = SqlUtils.getLong(rs, "doc_id");
+            DocType docType = getDocTypeById(docTypeId);
+            PersonDocument personDocument = new PersonDocument();
+            personDocument.setId(docId);
+
+            personDocument.setRecordId(SqlUtils.getLong(rs, "doc_record_id"));
+            personDocument.setStatus(SqlUtils.getInteger(rs, "doc_status"));
+            personDocument.setVersion(rs.getDate("doc_version"));
+
+            personDocument.setDocType(docType);
+            personDocument.setDocumentNumber(rs.getString("doc_number"));
+            personDocument.setIncRep(SqlUtils.getInteger(rs, "inc_rep"));
+            personDocument.setNaturalPerson(naturalPerson);
+            pesonDocumentMap.put(docId, personDocument);
+            naturalPerson.getPersonDocumentList().add(personDocument);
+        }
+    }
+
+    private NaturalPerson buildNaturalPerson(ResultSet rs, Long refBookPersonId, Long primaryPersonId) throws SQLException {
+        NaturalPerson naturalPerson = refbookPersonTempMap.get(refBookPersonId);
+        if (naturalPerson != null) {
+            return naturalPerson;
+        } else {
+
+            NaturalPerson person = new NaturalPerson();
+
+            //person
+            person.setId(refBookPersonId);
+
+            //TODO Разделить модель на два класса NaturalPerson для представления данных первичной формы и данных справочника
+            //person.setPrimaryPersonId(primaryPersonId);
+
+            person.setRecordId(SqlUtils.getLong(rs, "person_record_id"));
+            person.setStatus(SqlUtils.getInteger(rs, "person_status"));
+            person.setVersion(rs.getDate("person_version"));
+
+            person.setLastName(rs.getString("last_name"));
+            person.setFirstName(rs.getString("first_name"));
+            person.setMiddleName(rs.getString("middle_name"));
+            person.setSex(SqlUtils.getInteger(rs, "sex"));
+            person.setInn(rs.getString("inn"));
+            person.setInnForeign(rs.getString("inn_foreign"));
+            person.setSnils(rs.getString("snils"));
+            person.setBirthDate(rs.getDate("birth_date"));
+
+            //ссылки на справочники
+            person.setTaxPayerStatus(getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
+            person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
+
+            //additional
+            person.setPension(SqlUtils.getInteger(rs, "pension"));
+            person.setMedical(SqlUtils.getInteger(rs, "medical"));
+            person.setSocial(SqlUtils.getInteger(rs, "social"));
+            person.setEmployee(SqlUtils.getInteger(rs, "employee"));
+            person.setSourceId(SqlUtils.getLong(rs, "source_id"));
+            person.setRecordId(SqlUtils.getLong(rs, "record_id"));
+
+            refbookPersonTempMap.put(refBookPersonId, person);
+
+            return person;
+        }
+
+
+    }
+
+    private Address buildAddress(ResultSet rs) throws SQLException {
+        Long addrId = SqlUtils.getLong(rs, "REF_BOOK_ADDRESS_ID");
+        if (addrId != null) {
+            Address address = new Address();
+
+            address.setId(addrId);
+            address.setRecordId(SqlUtils.getLong(rs, "addr_record_id"));
+            address.setStatus(SqlUtils.getInteger(rs, "addr_status"));
+            address.setVersion(rs.getDate("addr_version"));
+
+            address.setAddressType(SqlUtils.getInteger(rs, "address_type"));
+            address.setCountry(getCountryById(SqlUtils.getLong(rs, "country_id")));
+            address.setRegionCode(rs.getString("region_code"));
+            address.setPostalCode(rs.getString("postal_code"));
+            address.setDistrict(rs.getString("district"));
+            address.setCity(rs.getString("city"));
+            address.setLocality(rs.getString("locality"));
+            address.setStreet(rs.getString("street"));
+            address.setHouse(rs.getString("house"));
+            address.setBuild(rs.getString("build"));
+            address.setAppartment(rs.getString("appartment"));
+            address.setAddressIno(rs.getString("address"));
+            return address;
+        } else {
+            return null;
+        }
+    }
+
+    public Map<Long, Country> getCountryMap() {
+        return countryMap;
+    }
+
+    public void setCountryMap(Map<Long, Country> countryMap) {
+        this.countryMap = countryMap;
+    }
+
+    public Map<Long, TaxpayerStatus> getTaxpayerStatusMap() {
+        return taxpayerStatusMap;
+    }
+
+    public void setTaxpayerStatusMap(Map<Long, TaxpayerStatus> taxpayerStatusMap) {
+        this.taxpayerStatusMap = taxpayerStatusMap;
+    }
+
+    public Map<Long, DocType> getDocTypeMap() {
+        return docTypeMap;
+    }
+
+    public void setDocTypeMap(Map<Long, DocType> docTypeMap) {
+        this.docTypeMap = docTypeMap;
+    }
+
+    private TaxpayerStatus getTaxpayerStatusById(Long taxpayerStatusId) {
+        if (taxpayerStatusId != null) {
+            return taxpayerStatusMap != null ? taxpayerStatusMap.get(taxpayerStatusId) : new TaxpayerStatus(taxpayerStatusId, null);
+        } else {
+            return null;
+        }
+    }
+
+    private Country getCountryById(Long countryId) {
+        if (countryId != null) {
+            return countryMap != null ? countryMap.get(countryId) : new Country(countryId, null);
+        } else {
+            return null;
+        }
+    }
+
+    private DocType getDocTypeById(Long docTypeId) {
+        if (docTypeId != null) {
+            return docTypeMap != null ? docTypeMap.get(docTypeId) : new DocType(docTypeId, null);
+        } else {
+            return null;
+        }
+    }
+
+
 }

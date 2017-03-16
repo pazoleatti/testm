@@ -27,7 +27,12 @@ import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.*
+import org.apache.commons.io.IOUtils
 import org.codehaus.groovy.tools.DocGenerator
+
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.DocumentBuilder
+import org.w3c.dom.Document
 
 import javax.script.ScriptException
 import java.awt.Color;
@@ -2275,6 +2280,20 @@ void importData() {
 
     ScriptUtils.checkInterrupted();
 
+    // Скопируем поток
+    byte[] content = IOUtils.toByteArray(ImportInputStream)
+
+    // Проверим кодировку
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance()
+    DocumentBuilder documentBuilder = factory.newDocumentBuilder()
+    Document document = documentBuilder.parse(new ByteArrayInputStream(content));
+    if (document.getXmlEncoding().toLowerCase() != "windows-1251") {
+        logger.error("Файл 'UploadFileName' сформирован в кодировке отличной от 'windows-1251'.")
+        return
+    }
+
+    ScriptUtils.checkInterrupted();
+
     // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
     // Данный код отрабатывает, когда файл формы уже фактически сохранен в базу, поэтому при проверке сущестования формы для данного периода и подразделения не нужно учитывать данный файл в выборке
     def declarationDataList = declarationService.find(PRIMARY_1151111_TEMPLATE_ID, declarationData.departmentReportPeriodId)
@@ -2304,7 +2323,9 @@ void importData() {
         return
     }
 
-    def fileNode = new XmlSlurper().parse(ImportInputStream);
+    ScriptUtils.checkInterrupted();
+
+    def fileNode = new XmlSlurper().parse(new ByteArrayInputStream(content));
     if (fileNode == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
@@ -2330,7 +2351,8 @@ void importData() {
     fileNode.childNodes().each { documentNode ->
         raschsvSvnpPodpisant.svnpTlph = documentNode.name
         if (documentNode.name == NODE_NAME_DOCUMENT) {
-            raschsvSvnpPodpisant.nomKorr = documentNode.attributes()["НомКорр"]
+            def nomKorr = documentNode.attributes()["НомКорр"]
+            raschsvSvnpPodpisant.nomKorr = nomKorr ? Integer.parseInt(nomKorr) : 0
             documentNode.childNodes().each { raschetSvNode ->
                 if (raschetSvNode.name == NODE_NAME_RASCHET_SV) {
                     // Разбор узла РасчетСВ

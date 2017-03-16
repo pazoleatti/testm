@@ -17,7 +17,7 @@ import java.util.List;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasRole('ROLE_CONF')")
+@PreAuthorize("hasRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class GetDTVersionHistoryHandler extends AbstractActionHandler<GetDTVersionHistoryAction, GetDTVersionHistoryResult> {
     @Autowired
     private TemplateChangesService templateChangesService;
