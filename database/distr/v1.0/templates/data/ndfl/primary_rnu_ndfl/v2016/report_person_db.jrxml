@@ -148,7 +148,7 @@
 			<defaultValueExpression><![CDATA[12819]]></defaultValueExpression>
 		</parameter>
 		<queryString>
-			<![CDATA[select nvl(pers.snils,pers.inp) inp,
+			<![CDATA[select pers.inp,
        inc.row_num,
        row_number() over(partition by inc.ndfl_person_id order by inc.id) rn,
        inc.operation_id,
@@ -172,9 +172,17 @@
        inc.tax_transfer_date,
        inc.payment_date,
        inc.payment_number,
-       inc.tax_summ
+       inc.tax_summ,
+       (select count(*) from ref_book_ndfl n join ref_book_ndfl_detail d on (d.ref_book_ndfl_id=n.id)
+                                             join ref_book_oktmo o on (o.id=d.oktmo)
+         where n.department_id=drr.department_id
+           and d.kpp=inc.kpp
+           and o.code=inc.oktmo) cntpar
 	from ndfl_person pers join ndfl_person_income inc on (inc.ndfl_person_id=pers.id)
- where pers.id=$P{NDFL_PERSON_ID}]]>
+                        join declaration_data dd on (dd.id=pers.declaration_data_id)
+                        join department_report_period drr on (drr.id=dd.department_report_period_id)
+ where pers.id=$P{NDFL_PERSON_ID}
+ order by inc.income_accrued_date, inc.income_payout_date]]>
 		</queryString>
 		<field name="INP" class="java.lang.String"/>
 		<field name="ROW_NUM" class="java.math.BigDecimal"/>
@@ -201,13 +209,15 @@
 		<field name="PAYMENT_DATE" class="java.sql.Timestamp"/>
 		<field name="PAYMENT_NUMBER" class="java.lang.String"/>
 		<field name="TAX_SUMM" class="java.math.BigDecimal"/>
+		<field name="CNTPAR" class="java.math.BigDecimal"/>
+		<variable name="RowColor" class="java.lang.String"/>
 	</subDataset>
 	<subDataset name="dsMinuces" uuid="5da4eb6b-5d21-4d3f-b8e2-b50b75fdf867">
 		<parameter name="NDFL_PERSON_ID" class="java.lang.Long">
 			<defaultValueExpression><![CDATA[12819]]></defaultValueExpression>
 		</parameter>
 		<queryString>
-			<![CDATA[select nvl(pers.snils,pers.inp) inp,
+			<![CDATA[select pers.inp,
        ded.row_num,
        row_number() over(partition by ded.ndfl_person_id order by ded.id) rn,
        ded.operation_id,
@@ -225,7 +235,8 @@
        ded.period_curr_date,
        ded.period_curr_summ
 	from ndfl_person pers join ndfl_person_deduction ded on (ded.ndfl_person_id=pers.id)
- where pers.id=$P{NDFL_PERSON_ID}]]>
+ where pers.id=$P{NDFL_PERSON_ID}
+ order by ded.income_accrued]]>
 		</queryString>
 		<field name="INP" class="java.lang.String"/>
 		<field name="ROW_NUM" class="java.math.BigDecimal"/>
@@ -250,7 +261,7 @@
 			<defaultValueExpression><![CDATA[12819]]></defaultValueExpression>
 		</parameter>
 		<queryString>
-			<![CDATA[select nvl(pers.snils,pers.inp) inp,
+			<![CDATA[select pers.inp,
        prep.row_num,
        row_number() over(partition by prep.ndfl_person_id order by prep.id) rn,
        prep.operation_id,
