@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
+import org.apache.poi.ss.usermodel.CellStyle
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
@@ -72,7 +73,8 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 // Настройки подразделений по НДФЛ (таблица)
 @Field final long REF_BOOK_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
 
-@Field int REF_BOOK_OKTMO_ID = 96;
+@Field final int REF_BOOK_OKTMO_ID = 96;
+@Field final int REPORT_PERIOD_TYPE_ID = 8
 
 @Field final FORM_NAME_NDFL6 = "НДФЛ6"
 @Field final FORM_NAME_NDFL2 = "НДФЛ2"
@@ -111,7 +113,7 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field final ATTR_SUM_DOHOD2 = "СумДоход"
 
 @Field final String DATE_FORMAT_UNDERLINE = "yyyyMMdd"
-@Field final String DATE_FORMAT_DOT = "dd.MM.yyyy"
+@Field final String DATE_FORMAT_DOTTED = "dd.MM.yyyy"
 
 // Кэш провайдеров
 @Field def providerCache = [:]
@@ -185,7 +187,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
     ) {
         Документ(
                 КНД: "1151099",
-                ДатаДок: currDate.format(DATE_FORMAT_DOT),
+                ДатаДок: currDate.format(DATE_FORMAT_DOTTED),
                 Период: getPeriod(departmentParamIncomeRow, periodCode),
                 ОтчетГод: reportPeriod.taxPeriod.year,
                 КодНО: departmentParamIncomeRow?.TAX_ORGAN_CODE?.value,
@@ -397,9 +399,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                 }
                             }
                             СумДата(
-                                    ДатаФактДох: incomeAccruedDate?.format(DATE_FORMAT_DOT),
-                                    ДатаУдержНал: taxDate?.format(DATE_FORMAT_DOT),
-                                    СрокПрчслНал: transferDate?.format(DATE_FORMAT_DOT),
+                                    ДатаФактДох: incomeAccruedDate?.format(DATE_FORMAT_DOTTED),
+                                    ДатаУдержНал: taxDate?.format(DATE_FORMAT_DOTTED),
+                                    СрокПрчслНал: transferDate?.format(DATE_FORMAT_DOTTED),
                                     ФактДоход: ScriptUtils.round(incomePayoutSumm, 2),
                                     УдержНал: withholdingTax
                             ) {}
@@ -1398,8 +1400,8 @@ def createPrimaryRnuWithErrors() {
         ndflPersonPrimary.incomes.add(ndflPersonIncomePrimary)
     }
 
-    ndflPersonDeductionFromRNUConsolidatedList.each
-    ScriptUtils.checkInterrupted() {
+    ndflPersonDeductionFromRNUConsolidatedList.each {
+        ScriptUtils.checkInterrupted()
         NdflPersonDeduction ndflPersonDeductionPrimary = ndflPersonService.getDeduction(it.sourceId)
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonDeductionPrimary.ndflPersonId)
         ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)
