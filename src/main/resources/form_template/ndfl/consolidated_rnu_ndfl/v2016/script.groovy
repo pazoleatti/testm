@@ -2648,7 +2648,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // СведДох5 НДФЛ.Расчет.Дата (Графа 15)
             if (ndflPersonIncome.taxDate != null) {
-                // Должна быть выполняна хотя бы одна проверка
+                // Должна быть выполнена хотя бы одна проверка
                 boolean checkTaxDate = false
                 // СведДох5.1
                 if (ndflPersonIncome.calculatedTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
@@ -2734,7 +2734,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                         ndflPersonIncome.rowNum ?: ""
                     }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
-                                Не выполнено ни одно из условий проверок при «Графа 15 Раздел 2» ≠ "0" ${ndflPersonIncome.operationId}.""")
+                                Не выполнено ни одно из условий проверок при «Графа 15 Раздел 2» ≠ "0".""")
                 }
             }
 

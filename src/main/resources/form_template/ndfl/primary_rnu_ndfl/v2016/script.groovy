@@ -3411,7 +3411,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // СведДох5 НДФЛ.Расчет.Дата (Графа 15)
             if (ndflPersonIncome.taxDate != null) {
-                // Должна быть выполняна хотя бы одна проверка
+                // Должна быть выполнена хотя бы одна проверка
                 boolean checkTaxDate = false
                 // СведДох5.1
                 if (ndflPersonIncome.calculatedTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
