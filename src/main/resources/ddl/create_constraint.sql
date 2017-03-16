@@ -453,7 +453,7 @@ alter table log_entry add constraint pk_log_entry primary key(log_id,ord);
 
 --foreign keys
 alter table log add constraint fk_log_user foreign key(user_id) references sec_user(id);
-alter table log_entry add constraint fk_log_entry_log foreign key(log_id) references log(id);
+alter table log_entry add constraint fk_log_entry_log foreign key(log_id) references log(id) on delete cascade;
 alter table notification add constraint fk_notification_log foreign key(log_id) references log(id);
 alter table log_system add constraint fk_log_system_log foreign key(log_id) references log(id);
 
