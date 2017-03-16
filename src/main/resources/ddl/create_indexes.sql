@@ -80,6 +80,9 @@ create index srch_full_ref_pers_duble on ref_book_person (replace(lower(nvl(last
 create index srch_fias_addrobj_postcode on fias_addrobj(replace(postalcode,' ',''));
 create index srch_fias_addrobj_regfnls on fias_addrobj(livestatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
 
+create index i_log_system_log_id on log_system(log_id);
+create index i_notification_log_id on notification(log_id);
+create index fk_log_entry_log on log_entry(log_id);
 
 -- create indexes for all cascade forein keys
 --@@create_indexes_for_fk;
