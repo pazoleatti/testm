@@ -643,7 +643,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
-    logger.info("identificateion and update end "+ calcTimeMillis(time));
+    logger.info("identification and update end "+ calcTimeMillis(time));
 
     logger.info("Обновлено записей: " + updCnt);
 
@@ -2915,13 +2915,15 @@ def checkDataCommon(
                 if (ndflPersonIncome.incomeCode == null) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_CODE, emptyField])
                     //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_CODE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                    //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                    //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_CODE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
                 // Раздел 2. Графа 5 "Признак вида дохода" должна быть заполнена
                 if (ndflPersonIncome.incomeType == null) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_TYPE, emptyField])
                     //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_TYPE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                    //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                    //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_TYPE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
             }
 
@@ -2941,19 +2943,22 @@ def checkDataCommon(
             if (ScriptUtils.isEmpty(ndflPersonIncome.taxBase)) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_BASE, emptyField])
                 //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
             // 	Раздел 2. Графа 14 "Ставка налога" должна быть заполнена
             if (ndflPersonIncome.taxRate == null) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_RATE, emptyField])
                 //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
             // 	Раздел 2. Графа 15 "Дата налога" должна быть заполнена
             if (ndflPersonIncome.taxDate == null) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_DATE, emptyField])
                 //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
         } else {
             // если заполнены Раздел 2. Графы 22-24
@@ -2963,7 +2968,8 @@ def checkDataCommon(
             if (!ScriptUtils.isEmpty(ndflPersonIncome.totalDeductionsSumm)) {
                 def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TOTAL_DEDUCTIONS_SUMM, notEmptyField])
                 //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
             }
 
             // если заполнены Раздел 2. Графы 7 и 11
