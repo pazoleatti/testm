@@ -14,6 +14,11 @@ import java.util.Map;
 public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     /**
+     *
+     */
+    private Map<Long, NaturalPerson> refbookPersonTempMap;
+
+    /**
      * Карта для создания идкнтификаторов ФЛ
      */
     private Map<Long, Map<Long, PersonIdentifier>> identitiesMap;
@@ -43,6 +48,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
      */
     public NaturalPersonRefbookHandler() {
         super();
+        refbookPersonTempMap = new HashMap<Long, NaturalPerson>();
         identitiesMap = new HashMap<Long, Map<Long, PersonIdentifier>>();
         documentsMap = new HashMap<Long, Map<Long, PersonDocument>>();
     }
@@ -90,6 +96,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
 
     private void addPersonIdentifier(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
 
+        Long primaryPersonId = naturalPerson.getPrimaryPersonId();
         Long refBookPersonId = naturalPerson.getId();
         Long personIdentifierId = SqlUtils.getLong(rs, "book_id_tax_payer_id");
         Map<Long, PersonIdentifier> personIdentityMap = identitiesMap.get(refBookPersonId);
@@ -116,7 +123,7 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
     }
 
     private void addPersonDocument(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
-
+        Long primaryPersonId = naturalPerson.getPrimaryPersonId();
         Long refBookPersonId = naturalPerson.getId();
         Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
         Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(refBookPersonId);
@@ -146,38 +153,50 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
     }
 
     private NaturalPerson buildNaturalPerson(ResultSet rs, Long refBookPersonId, Long primaryPersonId) throws SQLException {
-        NaturalPerson person = new NaturalPerson();
+        NaturalPerson naturalPerson = refbookPersonTempMap.get(refBookPersonId);
+        if (naturalPerson != null) {
+            return naturalPerson;
+        } else {
 
-        //person
-        person.setId(refBookPersonId);
-        person.setPrimaryPersonId(primaryPersonId);
+            NaturalPerson person = new NaturalPerson();
 
-        person.setRecordId(SqlUtils.getLong(rs, "person_record_id"));
-        person.setStatus(SqlUtils.getInteger(rs, "person_status"));
-        person.setVersion(rs.getDate("person_version"));
+            //person
+            person.setId(refBookPersonId);
 
-        person.setLastName(rs.getString("last_name"));
-        person.setFirstName(rs.getString("first_name"));
-        person.setMiddleName(rs.getString("middle_name"));
-        person.setSex(SqlUtils.getInteger(rs, "sex"));
-        person.setInn(rs.getString("inn"));
-        person.setInnForeign(rs.getString("inn_foreign"));
-        person.setSnils(rs.getString("snils"));
-        person.setBirthDate(rs.getDate("birth_date"));
+            //TODO Разделить модель на два класса NaturalPerson для представления данных первичной формы и данных справочника
+            //person.setPrimaryPersonId(primaryPersonId);
 
-        //ссылки на справочники
-        person.setTaxPayerStatus(getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
-        person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
+            person.setRecordId(SqlUtils.getLong(rs, "person_record_id"));
+            person.setStatus(SqlUtils.getInteger(rs, "person_status"));
+            person.setVersion(rs.getDate("person_version"));
 
-        //additional
-        person.setPension(SqlUtils.getInteger(rs, "pension"));
-        person.setMedical(SqlUtils.getInteger(rs, "medical"));
-        person.setSocial(SqlUtils.getInteger(rs, "social"));
-        person.setEmployee(SqlUtils.getInteger(rs, "employee"));
-        person.setSourceId(SqlUtils.getLong(rs, "source_id"));
-        person.setRecordId(SqlUtils.getLong(rs, "record_id"));
+            person.setLastName(rs.getString("last_name"));
+            person.setFirstName(rs.getString("first_name"));
+            person.setMiddleName(rs.getString("middle_name"));
+            person.setSex(SqlUtils.getInteger(rs, "sex"));
+            person.setInn(rs.getString("inn"));
+            person.setInnForeign(rs.getString("inn_foreign"));
+            person.setSnils(rs.getString("snils"));
+            person.setBirthDate(rs.getDate("birth_date"));
 
-        return person;
+            //ссылки на справочники
+            person.setTaxPayerStatus(getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
+            person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
+
+            //additional
+            person.setPension(SqlUtils.getInteger(rs, "pension"));
+            person.setMedical(SqlUtils.getInteger(rs, "medical"));
+            person.setSocial(SqlUtils.getInteger(rs, "social"));
+            person.setEmployee(SqlUtils.getInteger(rs, "employee"));
+            person.setSourceId(SqlUtils.getLong(rs, "source_id"));
+            person.setRecordId(SqlUtils.getLong(rs, "record_id"));
+
+            refbookPersonTempMap.put(refBookPersonId, person);
+
+            return person;
+        }
+
+
     }
 
     private Address buildAddress(ResultSet rs) throws SQLException {

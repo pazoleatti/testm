@@ -9,7 +9,7 @@ import java.util.Date;
  */
 public class NdflPersonIncome extends NdflPersonOperation {
 
-    // Доход.Вид.Код (Графа 4)
+    // Доход.Вид.Код (Графа 4) (КодДох)
     private String incomeCode;
 
     // Доход.Вид.Признак (Графа 5)
@@ -48,7 +48,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     // НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
     private Long calculatedTax;
 
-    // НДФЛ.Расчет.Сумма.Удержанный (Графа 17)
+    // НДФЛ.Расчет.Сумма.Удержанный (Графа 17) (НУ)
     private Long withholdingTax;
 
     // НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
