@@ -1,10 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.gwtplatform.dispatch.shared.Result;
+
+import java.io.Serializable;
 
 public class TimerReportResult implements Result {
     private static final long serialVersionUID = 7859961980147513071L;
+
+    public static final Status STATUS_LOCKED = new Status(StatusReport.LOCKED);
+    public static final Status STATUS_NOT_EXIST = new Status(StatusReport.NOT_EXIST);
+    public static final Status STATUS_LIMIT = new Status(StatusReport.LIMIT);
 
     public enum StatusReport {
         EXIST, //существует
@@ -12,23 +18,52 @@ public class TimerReportResult implements Result {
         NOT_EXIST, //не существует
         LIMIT // превышен лимит требований по формированию отчета
     }
-    private StatusReport existReport;
-    private StatusReport existXMLReport; // только для PDF отчетов, отображается статус формированяи PDF
+
+    public static class Status implements IsSerializable, Serializable {
+        private StatusReport statusReport;
+        private String createDate;
+
+        public Status() {
+            this.statusReport = null;
+            this.createDate = "";
+        }
+
+        public Status(StatusReport statusReport) {
+            this.statusReport = statusReport;
+            this.createDate = "";
+        }
+
+        public Status(StatusReport statusReport, String createDate) {
+            this.statusReport = statusReport;
+            this.createDate = createDate;
+        }
+
+        public String getCreateDate() {
+            return createDate;
+        }
+
+        public StatusReport getStatusReport() {
+            return statusReport;
+        }
+    }
+
+    private Status existReport;
+    private Status existXMLReport; // только для PDF отчетов, отображается статус формированяи PDF
 
 
-    public StatusReport getExistReport() {
+    public Status getExistReport() {
         return existReport;
     }
 
-    public void setExistReport(StatusReport existReport) {
+    public void setExistReport(Status existReport) {
         this.existReport = existReport;
     }
 
-    public StatusReport getExistXMLReport() {
+    public Status getExistXMLReport() {
         return existXMLReport;
     }
 
-    public void setExistXMLReport(StatusReport existXMLReport) {
+    public void setExistXMLReport(Status existXMLReport) {
         this.existXMLReport = existXMLReport;
     }
 }

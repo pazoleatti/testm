@@ -530,7 +530,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
 }
 // Сохранение информации о файле в комментариях
 def saveFileInfo(currDate, fileName) {
-    def fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".XML", new Date())
+    def fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".xml", new Date())
     def createUser = declarationService.getSystemUserInfo().getUser()
 
     def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
