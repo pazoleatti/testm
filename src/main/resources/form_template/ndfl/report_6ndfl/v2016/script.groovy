@@ -20,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
+import org.apache.commons.lang3.StringUtils;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*
 
 switch (formDataEvent) {
@@ -136,6 +137,8 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field
 final OKTMO_CACHE = [:]
 
+// Мапа где ключ идентификатор NdflPerson, значение NdflPerson соответствующий идентификатору
+@Field Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
 /************************************* СОЗДАНИЕ XML *****************************************************************/
 def buildXml(def writer) {
     buildXml(writer, false)
@@ -1462,10 +1465,11 @@ def fillGeneralData(workbook) {
     String currentDate = new Date().format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
 
     XSSFCell cell1 = sheet.getRow(2).createCell(1)
-    cell1.setCellValue(declarationTypeName + " " + note)
+
+    cell1.setCellValue(StringUtils.defaultString(declarationTypeName) + " " + StringUtils.defaultString(note))
     cell1.setCellStyle(style)
     XSSFCell cell2 = sheet.getRow(3).createCell(1)
-    cell2.setCellValue(year + ":" + periodName)
+    cell2.setCellValue(year + ":" + StringUtils.defaultString(periodName))
     cell2.setCellStyle(style)
     XSSFCell cell3 = sheet.getRow(4).createCell(1)
     cell3.setCellValue(dateDelivery)
