@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -38,7 +39,7 @@ public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataL
         LogSystemAuditFilter auditFilter = action.getLogSystemFilter();
         TAUserInfo userInfo = securityService.currentUserInfo();
         PagingResult<LogSearchResultItem> records;
-        if (userInfo.getUser().hasRole("ROLE_ADMIN"))
+        if (userInfo.getUser().hasRole(TARole.N_ROLE_ADMIN))
 		    records = auditService.getLogsByFilter(auditFilter.convertTo());
         else
             records = auditService.getLogsBusiness(auditFilter.convertTo(), userInfo);

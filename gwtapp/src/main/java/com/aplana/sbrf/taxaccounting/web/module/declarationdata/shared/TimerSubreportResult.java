@@ -1,12 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.gwtplatform.dispatch.shared.Result;
 
+import java.io.Serializable;
 import java.util.Map;
 
 public class TimerSubreportResult implements Result {
     private static final long serialVersionUID = 1651645964813132154L;
+
+    public static final Status STATUS_LOCKED = new Status(StatusReport.LOCKED);
+    public static final Status STATUS_NOT_EXIST = new Status(StatusReport.NOT_EXIST);
+    public static final Status STATUS_LIMIT = new Status(StatusReport.LIMIT);
 
     public enum StatusReport {
         EXIST, //существует
@@ -14,13 +19,42 @@ public class TimerSubreportResult implements Result {
         NOT_EXIST, //не существует
         LIMIT // превышен лимит требований по формированию отчета
     }
-    private Map<String, StatusReport> mapExistReport;
 
-    public Map<String, StatusReport> getMapExistReport() {
+    public static class Status implements IsSerializable, Serializable {
+        private StatusReport statusReport;
+        private String createDate;
+
+        public Status() {
+            this.statusReport = null;
+            this.createDate = "";
+        }
+
+        public Status(StatusReport statusReport) {
+            this.statusReport = statusReport;
+            this.createDate = "";
+        }
+
+        public Status(StatusReport statusReport, String createDate) {
+            this.statusReport = statusReport;
+            this.createDate = createDate;
+        }
+
+        public String getCreateDate() {
+            return createDate;
+        }
+
+        public StatusReport getStatusReport() {
+            return statusReport;
+        }
+    }
+
+    private Map<String, Status> mapExistReport;
+
+    public Map<String, Status> getMapExistReport() {
         return mapExistReport;
     }
 
-    public void setMapExistReport(Map<String, StatusReport> mapExistReport) {
+    public void setMapExistReport(Map<String, Status> mapExistReport) {
         this.mapExistReport = mapExistReport;
     }
 }

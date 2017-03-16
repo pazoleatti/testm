@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -16,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,18 +33,23 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
 
     @Autowired
     private SecurityService securityService;
-
     @Autowired
     private ReportService reportService;
-
     @Autowired
     private LockDataService lockDataService;
-
     @Autowired
     private DeclarationDataService declarationDataService;
-
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    private BlobDataService blobDataService;
+
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
 
     public TimerSubreportDeclarationHandler() {
         super(TimerSubreportAction.class);
@@ -54,28 +61,30 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
         TimerSubreportResult result = new TimerSubreportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        Map<String, TimerSubreportResult.StatusReport> mapExistReport = new HashMap<String, TimerSubreportResult.StatusReport>();
+        Map<String, TimerSubreportResult.Status> mapExistReport = new HashMap<String, TimerSubreportResult.Status>();
         DeclarationData declaration = declarationDataService.get(action.getDeclarationDataId(), userInfo);
         List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
         for(DeclarationSubreport subreport: subreports) {
             final DeclarationDataReportType ddReportType = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport);
-            TimerSubreportResult.StatusReport status = getStatus(userInfo, action.getDeclarationDataId(), ddReportType);
+            TimerSubreportResult.Status status = getStatus(userInfo, action.getDeclarationDataId(), ddReportType);
             mapExistReport.put(subreport.getAlias(), status);
         }
         result.setMapExistReport(mapExistReport);
         return result;
     }
 
-    private TimerSubreportResult.StatusReport getStatus(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType ddReportType) {
+    private TimerSubreportResult.Status getStatus(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType ddReportType) {
         String key = declarationDataService.generateAsyncTaskKey(declarationDataId, ddReportType);
         if (!lockDataService.isLockExists(key, false)) {
-            if (reportService.getDec(userInfo, declarationDataId, ddReportType) == null) {
-                return TimerSubreportResult.StatusReport.NOT_EXIST;
+            String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+            if (uuid == null) {
+                return TimerSubreportResult.STATUS_NOT_EXIST;
             } else {
-                return TimerSubreportResult.StatusReport.EXIST;
+                BlobData blobData = blobDataService.get(uuid);
+                return new TimerSubreportResult.Status(TimerSubreportResult.StatusReport.EXIST, sdf.get().format(blobData.getCreationDate()));
             }
         }
-        return TimerSubreportResult.StatusReport.LOCKED;
+        return TimerSubreportResult.STATUS_LOCKED;
     }
 
     @Override
