@@ -37,7 +37,7 @@ import java.util.regex.Pattern
 /**
  * Вид формы "Консолидированная", используется при определении проверок в частях
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataReference(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
- * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataCommon(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)}
+ * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataCommon(java.util.ArrayList, java.util.ArrayList)}
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataIncome(java.util.ArrayList, java.util.ArrayList, java.util.ArrayList, java.util.ArrayList)}
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataDeduction(java.util.ArrayList, java.util.ArrayList, java.util.ArrayList)}
  *
@@ -2200,19 +2200,6 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
 }
 
 /**
- * Получить набор тербанков
- */
-def getTerBank() {
-    if (terBankCache.size() == 0) {
-        def refBookMap = getRefBookByFilter(REF_DEPARTMENT_ID, "PARENT_ID = 0")
-        refBookMap.each { refBook ->
-            terBankCache.put(refBook?.id?.numberValue, refBook?.NAME?.stringValue)
-        }
-    }
-    return terBankCache
-}
-
-/**
  * Получить все записи справочника по его идентификатору
  * @param refBookId - идентификатор справочника
  * @return - возвращает лист
@@ -2275,8 +2262,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 //>------------------< UTILS >----------------------<
 
 // Параметры для подразделения Мапа <ОКТМО, Лист_КПП>
-@Field final long REF_NDFL_ID = RefBook.Id.NDFL.id
-@Field final long REF_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
+@Field final long REF_BOOK_NDFL_ID = RefBook.Id.NDFL.id
+@Field final long REF_BOOK_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
 
 @Field final String MESSAGE_ERROR_NOT_FOUND_REF = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: \"%s\" не соответствует справочнику \"%s\"."
 @Field final String MESSAGE_ERROR_VALUE = "Ошибка в значении: Раздел \"%s\". Строка \"%s\". Графа \"%s\". %s. Текст ошибки: %s."
@@ -2441,7 +2428,7 @@ def checkData() {
     ScriptUtils.checkInterrupted();
 
     // Общие проверки
-    checkDataCommon(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+    checkDataCommon(ndflPersonList, ndflPersonIncomeList)
 
     ScriptUtils.checkInterrupted();
 
@@ -2850,16 +2837,11 @@ def checkDataReference(
 /**
  * Общие проверки
  */
-def checkDataCommon(
-        def ndflPersonList, def ndflPersonIncomeList, def ndflPersonDeductionList, def ndflPersonPrepaymentList) {
-
-    // Тербанки
-    //def mapTerBank = getTerBank()
+def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList) {
 
     // Параметры подразделения
-    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-263
-//    def departmentParam = getDepartmentParam()
-//    def mapOktmoAndKpp = getOktmoAndKpp(departmentParam.record_id.value)
+    def mapRefBookNdfl = getRefBookNdfl()
+    def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
 
     long time = System.currentTimeMillis();
     for (NdflPerson ndflPerson : ndflPersonList) {
@@ -2880,11 +2862,6 @@ def checkDataCommon(
 
         // Общ2 Корректность КПП, Пока необходимость данной проверки под вопросом
         // Общ3 Корректность ОКТМО, Пока необходимость данной проверки под вопросом
-
-        // Общ4 Дата рождения (Обязательное поле)
-        //if (ndflPerson.birthDay > getReportPeriodEndDate()) {
-        //    logger.error(MESSAGE_ERROR_VALUE, T_PERSON, ndflPerson.rowNum ?: "", C_BIRTH_DATE, fioAndInp, MESSAGE_ERROR_BIRTHDAY);
-        //}
 
         // Общ11 СНИЛС (Необязательное поле)
         if (ndflPerson.snils != null && !ScriptUtils.checkSnils(ndflPerson.snils)) {
@@ -3129,18 +3106,23 @@ def checkDataCommon(
         }
 
         // Общ10 Соответствие КПП и ОКТМО Тербанку
-        // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-263
-//        def kppList = mapOktmoAndKpp.get(ndflPersonIncome.oktmo)
-//        def msgErr = sprintf(MESSAGE_ERROR_NOT_FOUND_PARAM, [mapTerBank.get(declarationData.departmentId).value])
-//        if (kppList == null) {
-//            logger.error(MESSAGE_ERROR_VALUE,
-//                    T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_OKTMO, fioAndInp, msgErr);
-//        } else {
-//            if (!kppList.contains(ndflPersonIncome.kpp)) {
-//                logger.error(MESSAGE_ERROR_VALUE,
-//                        T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_KPP, fioAndInp, msgErr);
-//            }
-//        }
+        if (ndflPersonIncome.oktmo != null) {
+            def kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
+            if (kppList == null || !kppList.contains(ndflPersonIncome.kpp)) {
+                Department department = departmentService.get(declarationData.departmentId)
+                if (kppList == null) {
+                    logger.error("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Графа '$C_OKTMO' = '${ndflPersonIncome.oktmo}'." +
+                            " Текст ошибки: Указанные значения не найдены в Справочнике 'Настройки подразделений' для " +
+                            " ${department ? department.name : ""}"
+                    )
+                } else {
+                    logger.error("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Графа '$C_KPP' = '${ndflPersonIncome.kpp}'." +
+                            " Текст ошибки: Указанные значения не найдены в Справочнике 'Настройки подразделений' для " +
+                            " ${department ? department.name : ""}"
+                    )
+                }
+            }
+        }
     }
 
     ScriptUtils.checkInterrupted();
@@ -4141,9 +4123,9 @@ boolean comparNumbGreater(double d1, double d2) {
  * Получить параметры для конкретного тербанка
  * @return
  */
-def getDepartmentParam() {
+def getRefBookNdfl() {
     def departmentId = declarationData.departmentId
-    def departmentParamList = getProvider(REF_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+    def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
     if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
@@ -4155,26 +4137,41 @@ def getDepartmentParam() {
  * @param departmentParamId
  * @return
  */
-def getOktmoAndKpp(def departmentParamId) {
+def getRefBookNdflDetail(def departmentParamId) {
     def mapNdflDetail = [:]
     def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
-    def departmentParamTableList = getProvider(REF_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+    def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
     if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
     def kppList = []
+    def mapOktmo = getRefOktmoByDepartmentId()
     departmentParamTableList.each { departmentParamTable ->
-        kppList = mapNdflDetail.get(departmentParamTable?.OKTMO?.stringValue)
+
+        String oktmoCode = mapOktmo.get(departmentParamTable?.OKTMO?.referenceValue)?.CODE?.stringValue
+
+        kppList = mapNdflDetail.get(oktmoCode)
         if (kppList == null) {
             kppList = []
+        }
+
+        if (!kppList.contains(departmentParamTable?.KPP?.stringValue)) {
             kppList.add(departmentParamTable?.KPP?.stringValue)
-            mapNdflDetail.put(departmentParamTable?.OKTMO?.stringValue, kppList)
-        } else if (!kppList.contains(departmentParamTable?.KPP?.stringValue)) {
-            kppList.add(departmentParamTable?.KPP?.stringValue)
-            mapNdflDetail.put(departmentParamTable?.OKTMO?.stringValue, kppList)
+            mapNdflDetail.put(oktmoCode, kppList)
         }
     }
     return mapNdflDetail
+}
+
+/**
+ * Получить "ОКТМО"
+ */
+def getRefOktmoByDepartmentId() {
+    String whereClause = """
+        JOIN REF_BOOK_NDFL_DETAIL nd ON (frb.id = nd.OKTMO)
+        JOIN REF_BOOK_NDFL n ON (n.DEPARTMENT_ID = ${declarationData.departmentId} AND nd.REF_BOOK_NDFL_ID = n.ID)
+    """
+    return getRefBookByRecordVersionWhere(RefBook.Id.OKTMO.id, whereClause, getReportPeriodEndDate() - 1)
 }
 
 /**
