@@ -643,7 +643,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
-    logger.info("identificateion and update end "+ calcTimeMillis(time));
+    logger.info("identification and update end "+ calcTimeMillis(time));
 
     logger.info("Обновлено записей: " + updCnt);
 
@@ -2893,13 +2893,15 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (ndflPersonIncome.incomeCode == null) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_CODE, emptyField])
                     //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_CODE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                    //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                    //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_CODE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
                 // Раздел 2. Графа 5 "Доход.Вид.Признак" должна быть заполнена
                 if (ndflPersonIncome.incomeType == null) {
                     def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [script.this.C_INCOME_TYPE, emptyField])
                     //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", script.this.C_INCOME_TYPE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                    //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                    //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", script.this.C_INCOME_TYPE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
                 }
             }
 
@@ -2919,19 +2921,22 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (ScriptUtils.isEmpty(ndflPersonIncome.taxBase)) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_BASE, emptyField])
                 //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
             // 	Раздел 2. Графа 14 "НДФЛ.Процентная ставка" должна быть заполнена
             if (ndflPersonIncome.taxRate == null) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_RATE, emptyField])
                 //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
             // 	Раздел 2. Графа 15 "НДФЛ.Расчет.Дата" должна быть заполнена
             if (ndflPersonIncome.taxDate == null) {
                 def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_DATE, emptyField])
                 //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
+                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
             }
         } else {
             // если заполнены Раздел 2. Графы 22-24
@@ -2941,7 +2946,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (!ScriptUtils.isEmpty(ndflPersonIncome.totalDeductionsSumm)) {
                 def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TOTAL_DEDUCTIONS_SUMM, notEmptyField])
                 //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
+                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
+                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
             }
 
             // если заполнены Раздел 2. Графы 7 и 11
@@ -3243,7 +3249,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
     def ndflPersonPrepaymentCache = [:]
     ndflPersonPrepaymentList.each { ndflPersonPrepayment ->
-        List<NdflPersonPrepayment> ndflPersonPrepaymentListByPersonIdList = ndflPersonPrepaymentCache.get(ndflPersonPrepayment.ndflPersonId)
+        List<NdflPersonPrepayment> ndflPersonPrepaymentListByPersonIdList = ndflPersonPrepaymentCache.get(ndflPersonPrepayment.ndflPersonId) ?: []
         ndflPersonPrepaymentListByPersonIdList.add(ndflPersonPrepayment)
         ndflPersonPrepaymentCache.put(ndflPersonPrepayment.ndflPersonId, ndflPersonPrepaymentListByPersonIdList)
     }
@@ -3405,105 +3411,93 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // СведДох5 НДФЛ.Расчет.Дата (Графа 15)
             if (ndflPersonIncome.taxDate != null) {
+                // Должна быть выполнена хотя бы одна проверка
+                boolean checkTaxDate = false
                 // СведДох5.1
                 if (ndflPersonIncome.calculatedTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
-                    // «Графа 15 Раздел 2» ≠ «Графа 6 Раздел 2»
-                    if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomeAccruedDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum ?: ""
-                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
-                                Не выполнено условие: если «Графа 16 Раздел 2» > "0" и «Графа 4 Раздел 2» ≠ 0, то «Графа 15 Раздел 2» = «Графа 6 Раздел 2».""")
+                    // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
+                    if (ndflPersonIncome.taxDate == ndflPersonIncome.incomeAccruedDate) {
+                        checkTaxDate = true
                     }
                 }
                 // СведДох5.2
-                if (ndflPersonIncome.withholdingTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
-                    // «Графа 15 Раздел 2» ≠ «Графа 7 Раздел 2»
-                    if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum ?: ""
-                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
-                                Не выполнено условие: если «Графа 17 Раздел 2» > "0" и «Графа 4 Раздел 2» ≠ 0, то «Графа 15 Раздел 2» = «Графа 7 Раздел 2».""")
+                if (!checkTaxDate) {
+                    if (ndflPersonIncome.withholdingTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                        if (ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate) {
+                            checkTaxDate = true
+                        }
                     }
                 }
                 // СведДох5.3
-                if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                        ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
-                        ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null &&
-                        !["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode)) {
-                    // «Графа 15 Раздел 2» ≠ «Графа 7 Раздел 2»
-                    if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum ?: ""
-                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
-                                Не выполнено условие: если «Графа 18 Раздел 2» > "0" и «Графа 17 Раздел 2» < «Графа 16 Раздел 2» и «Графа 4 Раздел 2» ≠ 0 и («Графа 4 Раздел 2» ≠ 1530 или 1531 или 1533 или 1535 или 1536 или 1537 или 1539 или 1541 или 1542 или 1543*)"
-                                , то «Графа 15 Раздел 2» = «Графа 7 Раздел 2».""")
+                if (!checkTaxDate) {
+                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
+                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                            ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null &&
+                            !["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode)) {
+                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                        if (ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate) {
+                            checkTaxDate = true
+                        }
                     }
                 }
                 // СведДох5.4
-                if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                        ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
-                        ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode) &&
-                        ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate()) {
-                    // «Графа 15 Раздел 2» ≠ «Графа 6 Раздел 2»
-                    if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomeAccruedDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum ?: ""
-                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
-                                Не выполнено условие: если «Графа 18 Раздел 2» > 0 и «Графа 17 Раздел 2» < «Графа 16 Раздел 2» и («Графа 4 Раздел 2» = 1530 или 1531 или 1533 или 1535 или 1536 или 1537 или 1539 или 1541 или 1542 или 1543*) и «Графа 7 Раздел 2» = "текущий отчётный период"
-                                , то «Графа 15 Раздел 2» = «Графа 6 Раздел 2».""")
+                if (!checkTaxDate) {
+                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
+                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                            ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode) &&
+                            ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate()) {
+                        // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
+                        if (ndflPersonIncome.taxDate == ndflPersonIncome.incomeAccruedDate) {
+                            checkTaxDate = true
+                        }
                     }
                 }
                 // СведДох5.5
-                if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                        ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
-                        ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542"].contains(ndflPersonIncome.incomeCode) &&
-                        (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate() || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
-                    // «Графа 15 Раздел 2"» = "31.12.20**"
-                    Calendar calendarPayout = Calendar.getInstance()
-                    calendarPayout.setTime(ndflPersonIncome.taxDate)
-                    int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
-                    int month = calendarPayout.get(Calendar.MONTH)
-                    if (!(dayOfMonth == 31 && month == 12)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum ?: ""
-                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
-                                Не выполнено условие: если «Графа 18 Раздел 2» > "0" и «Графа 17 Раздел 2» < «Графа 16 Раздел 2» и («Графа 4 Раздел 2» = 1530 или 1531 или 1533 или 1535 или 1536 или 1537 или 1539 или 1541 или 1542) и «Графа 6 Раздел 2» ≠ "текущий отчётный период"
-                                , то «Графа 15 Раздел 2"» = "31.12.20**".""")
+                if (!checkTaxDate) {
+                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
+                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                            ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542"].contains(ndflPersonIncome.incomeCode) &&
+                            (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate() || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
+                        // «Графа 15 Раздел 2"» = "31.12.20**"
+                        Calendar calendarPayout = Calendar.getInstance()
+                        calendarPayout.setTime(ndflPersonIncome.taxDate)
+                        int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
+                        int month = calendarPayout.get(Calendar.MONTH)
+                        if (dayOfMonth == 31 && month == 12) {
+                            checkTaxDate = true
+                        }
                     }
                 }
                 // СведДох5.6
-                if (ndflPersonIncome.overholdingTax ?: 0 > 0 &&
-                        ndflPersonIncome.withholdingTax ?: 0 > ndflPersonIncome.calculatedTax ?: 0 &&
-                        ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
-                    // «Графа 15 Раздел 2» ≠ «Графа 7 Раздел 2»
-                    if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum ?: ""
-                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
-                                Не выполнено условие: если «Графа 19 Раздел 2» > "0" и «Графа 17 Раздел 2» > «Графа 16 Раздел 2» и «Графа 4 Раздел 2» ≠ 0
-                                , то «Графа 15 Раздел 2» = «Графа 7 Раздел 2».""")
+                if (!checkTaxDate) {
+                    if (ndflPersonIncome.overholdingTax ?: 0 > 0 &&
+                            ndflPersonIncome.withholdingTax ?: 0 > ndflPersonIncome.calculatedTax ?: 0 &&
+                            ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                        if (ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate) {
+                            checkTaxDate = true
+                        }
                     }
                 }
                 // СведДох5.7
-                if (ndflPersonIncome.refoundTax ?: 0 > 0 &&
-                        ndflPersonIncome.withholdingTax ?: 0 > ndflPersonIncome.calculatedTax ?: 0 &&
-                        ndflPersonIncome.overholdingTax ?: 0 &&
-                        ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
-                    // «Графа 15 Раздел 2» ≠ «Графа 7 Раздел 2»
-                    if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
-                            ndflPersonIncome.rowNum ?: ""
-                        }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
-                                Не выполнено условие: если «Графа 20 Раздел 2» > "0" и «Графа 17 Раздел 2» > «Графа 16 Раздел 2» и «Графа 19 Раздел 2» > "0" и «Графа 4 Раздел 2» = ≠ 0
-                                , то «Графа 15 Раздел 2» = «Графа 7 Раздел 2».""")
+                if (!checkTaxDate) {
+                    if (ndflPersonIncome.refoundTax ?: 0 > 0 &&
+                            ndflPersonIncome.withholdingTax ?: 0 > ndflPersonIncome.calculatedTax ?: 0 &&
+                            ndflPersonIncome.overholdingTax ?: 0 &&
+                            ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                        if (!(ndflPersonIncome.taxDate == ndflPersonIncome.incomePayoutDate)) {
+                            checkTaxDate = true
+                        }
                     }
+                }
+                if (!checkTaxDate) {
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                    logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
+                        ndflPersonIncome.rowNum ?: ""
+                    }".Графа "НДФЛ.Расчет.Дата" $fioAndInp.
+                                Не выполнено ни одно из условий проверок при «Графа 15 Раздел 2» ≠ "0".""")
                 }
             }
 
@@ -3574,7 +3568,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${
                                 ndflPersonIncome.rowNum ?: ""
                             }".Графа "НДФЛ.Расчет.Сумма.Исчисленный" $fioAndInp.
-                            Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13% - «Графа 4 Раздел 4» .""")
+                            Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13%% - «Графа 4 Раздел 4» .""")
                         }
                     }
                 }
@@ -3618,7 +3612,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             && ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax) * 50)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("""Ошибка в значении: Раздел "Сведения о доходах".Строка="${ndflPersonIncome.rowNum ?: ""}".Графа "НДФЛ.Расчет.Сумма.Удержанный" $fioAndInp.
-                                Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» ≤ ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%).""")
+                                Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» ≤ ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%%).""")
                     }
                 } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
                         || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1544", "1545",
