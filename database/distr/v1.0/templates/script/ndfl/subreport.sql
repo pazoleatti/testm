@@ -1,11 +1,11 @@
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1001,100,'РНУ НДФЛ по физическому лицу',1,'rnu_ndfl_person_db','03f6d78d-bfd7-45bb-a16b-6c89131b76d1',1);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1002,100,'РНУ НДФЛ по физическим лицам',2,'rnu_ndfl_person_all_db','f847146a-07ec-11e7-93ae-92361f002671',0);
+	(1002,100,'РНУ НДФЛ по всем ФЛ',2,'rnu_ndfl_person_all_db','f847146a-07ec-11e7-93ae-92361f002671',0);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1011,101,'РНУ НДФЛ по физическому лицу',1,'rnu_ndfl_person_db','042c50fc-a590-46b5-bb50-d04cc3a9424a',1);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1012,101,'РНУ НДФЛ по физическим лицам',2,'rnu_ndfl_person_all_db','005699a0-07ed-11e7-93ae-92361f002671',0);	
+	(1012,101,'РНУ НДФЛ по всем ФЛ',2,'rnu_ndfl_person_all_db','005699a0-07ed-11e7-93ae-92361f002671',0);	
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1013,101,'Отчетность по КПП, ОКТМО',3,'report_kpp_oktmo','d11ebeb4-07f2-11e7-93ae-92361f002671',0);		
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 

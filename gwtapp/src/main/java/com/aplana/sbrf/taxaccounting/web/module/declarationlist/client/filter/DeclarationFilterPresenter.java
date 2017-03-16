@@ -80,7 +80,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
         // происходит обращение к driver.flush(), а driver.edit еще не выполнился т.к не отработал асинхронный вызов
         DeclarationDataFilter defaultFilter = new DeclarationDataFilter();
         defaultFilter.setTaxType(taxType);
-        getView().setDataFilter(defaultFilter);
+        //getView().setDataFilter(defaultFilter);
         getView().setReportPeriodType(taxType.name());
         dispatchAsync.execute(action, CallbackUtils
 				        .defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {

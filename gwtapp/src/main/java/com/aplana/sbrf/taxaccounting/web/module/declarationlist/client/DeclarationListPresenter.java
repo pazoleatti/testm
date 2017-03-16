@@ -53,7 +53,7 @@ public class DeclarationListPresenter extends
     private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
     private List<Long> selectedItemIds;
     private TaxType taxType;
-    private boolean isReports;
+    private Boolean isReports;
     private boolean ready = false;
 
     @ProxyEvent
@@ -113,10 +113,11 @@ public class DeclarationListPresenter extends
 			LogShowEvent.fire(this, false);
 			super.prepareFromRequest(request);
             TaxType taxTypeOld = taxType;
+            Boolean isReportsOld = isReports;
 			taxType = TaxType.valueOf(request.getParameter(TYPE, ""));
             isReports = Boolean.parseBoolean(request.getParameter(REPORTS, "false"));
             getView().initTable(taxType, isReports);
-            if (taxTypeOld == null || !taxType.equals(taxTypeOld)) {
+            if (taxTypeOld == null || !taxType.equals(taxTypeOld) || isReportsOld == null || !isReportsOld.equals(isReports)) {
                 filterStates.clear();
                 getView().updateTitle(taxType);
                 selectedItemIds = null;
@@ -237,6 +238,16 @@ public class DeclarationListPresenter extends
         cloneFilter.setDeclarationTypeIds(filter.getDeclarationTypeIds());
         cloneFilter.setFormState(filter.getFormState());
         cloneFilter.setCorrectionTag(filter.getCorrectionTag());
+        cloneFilter.setAsnuId(filter.getAsnuId());
+        cloneFilter.setFormKindIds(filter.getFormKindIds());
+        cloneFilter.setFileName(filter.getFileName());
+        cloneFilter.setDeclarationDataIdStr(filter.getDeclarationDataIdStr());
+        cloneFilter.setDocStateId(filter.getDocStateId());
+        cloneFilter.setNote(filter.getNote());
+        cloneFilter.setOktmo(filter.getOktmo());
+        cloneFilter.setTaxOrganCode(filter.getTaxOrganCode());
+        cloneFilter.setTaxOrganKpp(filter.getTaxOrganKpp());
+
         // Если мы захотим чтобы для каждого налога запоминались другие параметры поиска (сортировка...),
         // то вместо создания нового мы должны будем получать фильтр из мапки и обновлять.
 

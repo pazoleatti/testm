@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.PersonData
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
 import com.aplana.sbrf.taxaccounting.dao.identification.*
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
 import com.aplana.sbrf.taxaccounting.dao.identification.*
@@ -27,10 +28,17 @@ import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.*
+import org.apache.commons.io.IOUtils
 import org.codehaus.groovy.tools.DocGenerator
 
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.DocumentBuilder
+import org.w3c.dom.Document
+
 import javax.script.ScriptException
-import java.awt.Color;
+import java.awt.Color
+import java.sql.ResultSet
+import java.sql.SQLException;
 import java.util.List
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2275,6 +2283,20 @@ void importData() {
 
     ScriptUtils.checkInterrupted();
 
+    // Скопируем поток
+    byte[] content = IOUtils.toByteArray(ImportInputStream)
+
+    // Проверим кодировку
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance()
+    DocumentBuilder documentBuilder = factory.newDocumentBuilder()
+    Document document = documentBuilder.parse(new ByteArrayInputStream(content));
+    if (document.getXmlEncoding().toLowerCase() != "windows-1251") {
+        logger.error("Файл 'UploadFileName' сформирован в кодировке отличной от 'windows-1251'.")
+        return
+    }
+
+    ScriptUtils.checkInterrupted();
+
     // Проверка того, чтобы форма для данного периода и подразделения не была загружена ранее
     // Данный код отрабатывает, когда файл формы уже фактически сохранен в базу, поэтому при проверке сущестования формы для данного периода и подразделения не нужно учитывать данный файл в выборке
     def declarationDataList = declarationService.find(PRIMARY_1151111_TEMPLATE_ID, declarationData.departmentReportPeriodId)
@@ -2304,7 +2326,9 @@ void importData() {
         return
     }
 
-    def fileNode = new XmlSlurper().parse(ImportInputStream);
+    ScriptUtils.checkInterrupted();
+
+    def fileNode = new XmlSlurper().parse(new ByteArrayInputStream(content));
     if (fileNode == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
@@ -2330,7 +2354,8 @@ void importData() {
     fileNode.childNodes().each { documentNode ->
         raschsvSvnpPodpisant.svnpTlph = documentNode.name
         if (documentNode.name == NODE_NAME_DOCUMENT) {
-            raschsvSvnpPodpisant.nomKorr = documentNode.attributes()["НомКорр"]
+            def nomKorr = documentNode.attributes()["НомКорр"]
+            raschsvSvnpPodpisant.nomKorr = nomKorr ? Integer.parseInt(nomKorr) : 0
             documentNode.childNodes().each { raschetSvNode ->
                 if (raschetSvNode.name == NODE_NAME_RASCHET_SV) {
                     // Разбор узла РасчетСВ
@@ -3947,7 +3972,7 @@ NaturalPersonPrimaryRowMapper createPrimaryRowMapper() {
 
 NaturalPersonRefbookHandler createRefbookHandler() {
 
-    NaturalPersonRefbookHandler refbookHandler = new NaturalPersonRefbookHandler();
+    NaturalPersonRefbookHandler refbookHandler = new NaturalPersonRefbookScriptHandler();
 
     refbookHandler.setLogger(logger);
 
@@ -4068,6 +4093,7 @@ def calculate() {
 
     logger.info("Завершение расчета ПНФ " + " " + calcTimeMillis(timeFull));
 }
+
 //---------------- Identification ----------------
 // Далее идет код скрипта такой же как и в 1151111 возможно следует вынести его в отдельный сервис
 
@@ -4130,8 +4156,8 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
         for (NaturalPerson person : insertRecords) {
             String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
             logger.info(noticeMsg);
+            createCnt++;
         }
-
 
     }
 
@@ -4147,11 +4173,12 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
  */
 def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap, Map<Long, Map<Long, NaturalPerson>> similarityPersonMap) {
 
+    long time = System.currentTimeMillis();
+
     //println "updateNaturalPersonRefBookRecords similarityPersonMap.size=" + similarityPersonMap.size()
 
     //Проходим по списку и определяем наиболее подходящюю запись, если подходящей записи не найдено то содадим ее
     List<NaturalPerson> updatePersonReferenceList = new ArrayList<NaturalPerson>();
-
 
     List<NaturalPerson> insertPersonList = new ArrayList<NaturalPerson>();
     //список записей для обновления атрибутов справочника физлиц
@@ -4169,7 +4196,12 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     //primaryId - RefBookPerson
     HashMap<Long, NaturalPerson> conformityMap = new HashMap<Long, NaturalPerson>();
 
+    int msgCnt = 0;
+    int maxMsgCnt = 0;
     for (Map.Entry<Long, Map<Long, NaturalPerson>> entry : similarityPersonMap.entrySet()) {
+
+        long inTime = System.currentTimeMillis();
+
         ScriptUtils.checkInterrupted();
 
         Long primaryPersonId = entry.getKey();
@@ -4179,10 +4211,12 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         List<NaturalPerson> similarityPersonList = new ArrayList<NaturalPerson>(similarityPersonValues.values());
 
         NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
-        NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
 
-        //println "process primaryPerson=" + primaryPerson
-        //println "refBookPerson=" + refBookPerson
+        inTime = System.currentTimeMillis();
+        NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
+        if (msgCnt <= maxMsgCnt){
+            logger.info("identificate "+ calcTimeMillis(inTime));
+        }
 
         conformityMap.put(primaryPersonId, refBookPerson);
 
@@ -4192,14 +4226,29 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                 insertAddressList.add(primaryPerson.getAddress());
             }
         }
+
+        if (msgCnt <= maxMsgCnt){
+            logger.info("in identificate "+ calcTimeMillis(inTime));
+        }
+
+        msgCnt++;
     }
+
+    logger.info("identificate person, update address "+ calcTimeMillis(time));
 
     insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), insertAddressList, { address ->
         mapAddressAttr(address)
     });
 
+    time = System.currentTimeMillis();
+
     int updCnt = 0;
+    msgCnt = 0;
+    maxMsgCnt = 0;
     for (Map.Entry<Long, NaturalPerson> entry : conformityMap.entrySet()) {
+
+        long inTime = System.currentTimeMillis();
+
         ScriptUtils.checkInterrupted();
 
         Long primaryPersonId = entry.getKey();
@@ -4230,6 +4279,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                 }
             }
 
+
             //person
             Map<String, RefBookValue> refBookPersonValues = mapPersonAttr(refBookPerson);
             fillSystemAliases(refBookPersonValues, refBookPerson);
@@ -4243,11 +4293,13 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
             if (primaryPersonDocument != null) {
                 Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
                 PersonDocument personDocument = BaseWeigthCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
+
                 if (personDocument == null) {
                     insertDocumentList.add(primaryPersonDocument);
                     refBookPerson.getPersonDocumentList().add(primaryPersonDocument);
                 }
             }
+
 
             //check inc report
             checkIncReportFlag(refBookPerson, updateDocumentList, documentAttrCnt);
@@ -4280,7 +4332,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                 }
             }
 
-
             updatePersonReferenceList.add(primaryPerson);
 
             if (addressAttrCnt.isUpdate() || personAttrCnt.isUpdate() || documentAttrCnt.isUpdate() || taxpayerIdentityAttrCnt.isUpdate()) {
@@ -4293,12 +4344,24 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                         refBookPerson.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
                 updCnt++;
             }
+
+
+
         } else {
             //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
             insertPersonList.add(primaryPerson);
         }
+
+        if (msgCnt < maxMsgCnt){
+            logger.info("in identificate update "+ calcTimeMillis(inTime));
+        }
+
+        msgCnt++;
+
     }
 
+    logger.info("update person, documents, id "+ calcTimeMillis(time));
+    time = System.currentTimeMillis();
     //println "crete and update reference"
 
     //crete and update reference
@@ -4308,6 +4371,9 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
     if (!updatePersonReferenceList.isEmpty()) {
         updatePrimaryToRefBookPersonReferences(updatePersonReferenceList);
     }
+
+    logger.info("update reference "+ calcTimeMillis(time));
+    time = System.currentTimeMillis();
 
     insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { personDocument ->
         mapPersonDocumentAttr(personDocument)
@@ -4332,7 +4398,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         getProvider(RefBook.Id.PERSON_ADDRESS.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
-
     for (Map<String, RefBookValue> refBookValues : updatePersonList) {
         ScriptUtils.checkInterrupted();
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
@@ -4350,6 +4415,8 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         Long uniqueId = refBookValues.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
+
+    logger.info("identificateion and update end "+ calcTimeMillis(time));
 
     logger.info("Обновлено записей: " + updCnt);
 
@@ -4372,6 +4439,14 @@ PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
     return null;
 }
 
+
+
+@Field
+def INCLUDE_TO_REPORT = 1;
+
+@Field
+def NOT_INCLUDE_TO_REPORT = 0;
+
 /**
  * Метод устанавливает признак включения в отчетность на основе приоритета
  */
@@ -4379,60 +4454,50 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     List personDocumentList = naturalPerson.getPersonDocumentList();
 
-    List includeToReportDocumentList = new ArrayList();
-
     if (!personDocumentList.isEmpty()) {
 
-        //сортировка чтобы при наличии одинаковых типов документов не перезаписывались признаки, статус всегда 1 будет только у одного документа
-        personDocumentList.sort { a, b -> a.id <=> b.id }
+        //сортировка по приоритету
+        personDocumentList.sort { a, b -> (a.getDocType()?.getPriority() <=> b.getDocType()?.getPriority()) ?: (a.id <=> b.id) }
 
-        PersonDocument minimalPriorDoc = personDocumentList.min { it.getDocType().getPriority() }
+        for (int i = 0; i < personDocumentList.size(); i++) {
 
-        Long incDocTypeId = minimalPriorDoc.getDocType() != null ? minimalPriorDoc.getDocType().getId() : null;
+            PersonDocument personDocument = personDocumentList.get(i);
 
-        for (PersonDocument personDocument : personDocumentList) {
+            String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
+            if (i == 0) {
+                if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
 
-            DocType docType = personDocument.getDocType()
-
-            if ((docType != null && BaseWeigthCalculator.equalsNullSafe(docType.getId(), incDocTypeId))
-                    && BaseWeigthCalculator.isEqualsNullSafeStr(personDocument.getDocumentNumber(), minimalPriorDoc.getDocumentNumber()) && includeToReportDocumentList.isEmpty()) {
-
-                if (!personDocument.getIncRep().equals(1)) {
-
-                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", personDocument.getIncRep());
+                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", INCLUDE_TO_REPORT);
                     changeEvent.setType(AttributeChangeEventType.REFRESHED);
+                    changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, personDocument.getIncRep()));
 
-                    RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, 1);
-                    changeEvent.setCurrentValue(refBookValue);
-                    attrChangeListener.processAttr(changeEvent);
+                    attrChangeListener.processAttr(docInf, changeEvent);
 
-                    personDocument.setIncRep(1);
+                    personDocument.setIncRep(INCLUDE_TO_REPORT);
 
                     if (personDocument.getId() != null) {
-                        includeToReportDocumentList.add(personDocument);
+                        updateDocumentList.add(personDocument);
                     }
                 }
             } else {
 
-                if (!personDocument.getIncRep().equals(0)) {
+                if (!personDocument.getIncRep().equals(NOT_INCLUDE_TO_REPORT)) {
 
-                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", personDocument.getIncRep());
+                    AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", NOT_INCLUDE_TO_REPORT);
                     changeEvent.setType(AttributeChangeEventType.REFRESHED);
 
-                    RefBookValue refBookValue = new RefBookValue(RefBookAttributeType.NUMBER, 0);
-                    changeEvent.setCurrentValue(refBookValue);
-                    attrChangeListener.processAttr(changeEvent);
+                    changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.NUMBER, personDocument.getIncRep()));
+                    attrChangeListener.processAttr(docInf, changeEvent);
 
-                    personDocument.setIncRep(0);
+                    personDocument.setIncRep(NOT_INCLUDE_TO_REPORT);
 
                     if (personDocument.getId() != null) {
                         updateDocumentList.add(personDocument);
                     }
                 }
             }
-
-            updateDocumentList.addAll(includeToReportDocumentList);
         }
+
     }
 }
 
@@ -4537,10 +4602,11 @@ def mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
 
 def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
 
-    //println "insertBatchRecords refBookId=" + refBookId + ", identityObjectList=" + identityObjectList
-
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
+
+        logger.info("insert multiple records: refBookId="+refBookId + ", size="+identityObjectList.size())
+
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
 
@@ -4684,6 +4750,7 @@ def appendAttrInfo(Long refBookId, AttributeCountChangeListener attrCounter, Str
 //----------------------------------------------------------------------------------------------------------------------
 //--------------------------------------IDENTIFICATION END--------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------
+
 /**
  * Получить "Физические лица"
  * RASCHSV_PERS_SV_STRAH_LIC.PERSON_ID будет ссылаться на актуальную записи справочника ФЛ только после проведения расчета
@@ -4958,7 +5025,7 @@ def checkDataDBPerson() {
         def fioBirthday = raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.dataRozd
 
         // 3.1.1 Назначение ФЛ записи справочника "Физические лица"
-        // Если personId, то он принимает значение 0
+        // Если personId не задан, то он принимает значение 0, а не null
         if (raschsvPersSvStrahLic.personId == null || raschsvPersSvStrahLic.personId == 0) {
             logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" или запись неактуальна для ФЛ " + fioBirthday)
         } else {
@@ -5405,34 +5472,34 @@ def checkDataDBSum() {
         }
 
         // 3.3.1.1 Сумма исчисленных взносов на ОПС равна сумме не превышающих и превышающих предельную величину базы (Проверки выполняются для каждого РасчСВ_ОПС)
-        if (nachislSvOpsCurr1 != nachislSvNePrevCurr1 + nachislSvPrevCurr1) {
+        if (!comparNumbEquals(nachislSvOpsCurr1, nachislSvNePrevCurr1 + nachislSvPrevCurr1)) {
             def pathAttrVal = pathAttrOps + ".НачислСВ.Сум1Посл3М = \"$nachislSvOpsCurr1\""
             def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevCurr1\", " + pathAttrOps + ".НачислСВПрев.Сум1Посл3М = \"$nachislSvPrevCurr1\"."
             logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
         }
-        if (nachislSvOpsCurr2 != nachislSvNePrevCurr2 + nachislSvPrevCurr2) {
+        if (!comparNumbEquals(nachislSvOpsCurr2, nachislSvNePrevCurr2 + nachislSvPrevCurr2)) {
             def pathAttrVal = pathAttrOps + ".НачислСВ.Сум2Посл3М = \"$nachislSvOpsCurr2\""
             def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevCurr2\", " + pathAttrOps + ".НачислСВПрев.Сум2Посл3М = \"$nachislSvPrevCurr2\"."
             logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
         }
-        if (nachislSvOpsCurr3 != nachislSvNePrevCurr3 + nachislSvPrevCurr3) {
+        if (!comparNumbEquals(nachislSvOpsCurr3, nachislSvNePrevCurr3 + nachislSvPrevCurr3)) {
             def pathAttrVal = pathAttrOps + ".НачислСВ.Сум3Посл3М = \"$nachislSvOpsCurr3\""
             def pathAttrComp = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevCurr3\", " + pathAttrOps + ".НачислСВПрев.Сум3Посл3М = \"$nachislSvPrevCurr3\"."
             logger.warn("Сумма исчисленных взносов на ОПС $pathAttrVal не равна сумме $pathAttrComp")
         }
 
         // 3.3.3.2 База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению (Проверки выполняются для каждого РасчСВ_ОМС)
-        if (bazNachislSvCurr1 != vyplNachislFlCurr1 + neOblozenCurr1) {
+        if (!!comparNumbEquals(bazNachislSvCurr1, vyplNachislFlCurr1 + neOblozenCurr1)) {
             def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум1Посл3М = \"$bazNachislSvCurr1\""
             def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум1Посл3М = \"$vyplNachislFlCurr1\", " + pathAttrOms + ".НеОбложенСВ.Сум1Посл3М = \"$neOblozenCurr1\"."
             logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
         }
-        if (bazNachislSvCurr2 != vyplNachislFlCurr2 + neOblozenCurr2) {
+        if (!comparNumbEquals(bazNachislSvCurr2, vyplNachislFlCurr2 + neOblozenCurr2)) {
             def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум2Посл3М = \"$bazNachislSvCurr2\""
             def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум2Посл3М = \"$vyplNachislFlCurr2\", " + pathAttrOms + ".НеОбложенСВ.Сум2Посл3М = \"$neOblozenCurr2\"."
             logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
         }
-        if (bazNachislSvCurr3 != vyplNachislFlCurr3 + neOblozenCurr3) {
+        if (!comparNumbEquals(bazNachislSvCurr3, vyplNachislFlCurr3 + neOblozenCurr3)) {
             def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум3Посл3М = \"$bazNachislSvCurr3\""
             def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум3Посл3М = \"$vyplNachislFlCurr3\", " + pathAttrOms + ".НеОбложенСВ.Сум3Посл3М = \"$neOblozenCurr3\"."
             logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
@@ -5443,32 +5510,32 @@ def checkDataDBSum() {
 
     // 3.3.1.2 Сумма исчисленных страховых взносов по всем ФЛ равна значению исчисленных страховых взносов по ОПС в целом (с базы не превышающих предельную величину) (Проверки выполняются по всем РасчСВ_ОПС)
     if (raschsvSvnpPodpisant.nomKorr == 0) {
-        if (nachislSvNePrevSum1 != svVyplMkSum1) {
+        if (!comparNumbEquals(nachislSvNePrevSum1, svVyplMkSum1)) {
             def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум1Посл3М = \"$nachislSvNePrevSum1\""
             logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
         }
-        if (nachislSvNePrevSum2 != svVyplMkSum2) {
+        if (!comparNumbEquals(nachislSvNePrevSum2, svVyplMkSum2)) {
             def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум2Посл3М = \"$nachislSvNePrevSum2\""
             logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
         }
-        if (nachislSvNePrevSum3 != svVyplMkSum3) {
+        if (!comparNumbEquals(nachislSvNePrevSum3, svVyplMkSum3)) {
             def pathAttrVal = pathAttrOps + ".НачислСВНеПрев.Сум3Посл3М = \"$nachislSvNePrevSum3\""
             logger.warn("$pathAttrVal не равен сумме исчисленных страховых взносов с базы исчисления страховых взносов, не превышающих предельную величину по всем ФЛ.")
         }
     }
 
     // 3.3.1.3 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОПС)
-    if (nachislSvOpsSum1 != uplPerOpsSum1) {
+    if (!comparNumbEquals(nachislSvOpsSum1, uplPerOpsSum1)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум1Посл3М = \"$nachislSvOpsSum1\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл1М = \"$uplPerOpsSum1\""
         logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
     }
-    if (nachislSvOpsSum2 != uplPerOpsSum2) {
+    if (!comparNumbEquals(nachislSvOpsSum2, uplPerOpsSum2)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум2Посл3М = \"$nachislSvOpsSum2\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл2М = \"$uplPerOpsSum2\""
         logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
     }
-    if (nachislSvOpsSum3 != uplPerOpsSum3) {
+    if (!comparNumbEquals(nachislSvOpsSum3, uplPerOpsSum3)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум3Посл3М = \"$nachislSvOpsSum3\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл3М = \"$uplPerOpsSum3\""
         logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
@@ -5478,13 +5545,13 @@ def checkDataDBSum() {
     if (raschsvSvnpPodpisant.nomKorr == 0) {
         def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
         def pathAttr428_3 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.3.НачислСВДоп"
-        if (nachislSvDop428_12Sum1 + nachislSvDop428_3Sum1 != svVyplMkDopSum1) {
+        if (!comparNumbEquals(nachislSvDop428_12Sum1 + nachislSvDop428_3Sum1, svVyplMkDopSum1)) {
             logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум1Посл3М = \"$nachislSvDop428_12Sum1\", " + pathAttr428_3 + ".Сум1Посл3М = \"$nachislSvDop428_3Sum1\"")
         }
-        if (nachislSvDop428_12Sum2 + nachislSvDop428_3Sum2 != svVyplMkDopSum2) {
+        if (!comparNumbEquals(nachislSvDop428_12Sum2 + nachislSvDop428_3Sum2, svVyplMkDopSum2)) {
             logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум2Посл3М = \"$nachislSvDop428_12Sum2\", " + pathAttr428_3 + ".Сум2Посл3М = \"$nachislSvDop428_3Sum2\"")
         }
-        if (nachislSvDop428_12Sum3 + nachislSvDop428_3Sum3 != svVyplMkDopSum3) {
+        if (!comparNumbEquals(nachislSvDop428_12Sum3 + nachislSvDop428_3Sum3, svVyplMkDopSum3)) {
             logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу по всем ФЛ не равна сумме: " + pathAttr428_12 + ".Сум3Посл3М = \"$nachislSvDop428_12Sum3\", " + pathAttr428_3 + ".Сум3Посл3М = \"$nachislSvDop428_3Sum3\"")
         }
     }
@@ -5506,15 +5573,15 @@ def checkDataDBSum() {
                 }
                 if (tarif == it) {
                     BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(prOsnSvDop)
-                    if (nachisl428_12Sum_1 != vyplSvDopMtSum) {
+                    if (!comparNumbEquals(nachisl428_12Sum_1, vyplSvDopMtSum)) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум1Посл3М = \"$nachisl428_12Sum_1\"")
                     }
                     BigDecimal nachisl428_12Sum_2 = nachisl428_12Sum2Map.get(prOsnSvDop)
-                    if (nachisl428_12Sum_2 != vyplSvDopMtSum) {
+                    if (!comparNumbEquals(nachisl428_12Sum_2, vyplSvDopMtSum)) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум2Посл3М = \"$nachisl428_12Sum_2\"")
                     }
                     BigDecimal nachisl428_12Sum_3 = nachisl428_12Sum3Map.get(prOsnSvDop)
-                    if (nachisl428_12Sum_3 != vyplSvDopMtSum) {
+                    if (!comparNumbEquals(nachisl428_12Sum_3, vyplSvDopMtSum)) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум3Посл3М = \"$nachisl428_12Sum_3\"")
                     }
                 }
@@ -5542,15 +5609,15 @@ def checkDataDBSum() {
                 }
                 if (tarif == it) {
                     BigDecimal nachisl428_3Sum_1 = nachisl428_3Sum1Map.get(klasUslTrud)
-                    if (nachisl428_3Sum_1 != vyplSvDopMtSum) {
+                    if (!comparNumbEquals(nachisl428_3Sum_1, vyplSvDopMtSum)) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум1Посл3М = \"$nachisl428_3Sum_1\"")
                     }
                     BigDecimal nachisl428_3Sum_2 = nachisl428_3Sum2Map.get(klasUslTrud)
-                    if (nachisl428_3Sum_2 != vyplSvDopMtSum) {
+                    if (!comparNumbEquals(nachisl428_3Sum_2, vyplSvDopMtSum)) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум2Посл3М = \"$nachisl428_3Sum_2\"")
                     }
                     BigDecimal nachisl428_3Sum_3 = nachisl428_3Sum3Map.get(klasUslTrud)
-                    if (nachisl428_3Sum_3 != vyplSvDopMtSum) {
+                    if (!comparNumbEquals(nachisl428_3Sum_3, vyplSvDopMtSum)) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункт 3 статьи 428) по всем ФЛ не равна суммам $pathAttr428_3" + ".Сум3Посл3М = \"$nachisl428_3Sum_3\"")
                     }
                 }
@@ -5561,17 +5628,17 @@ def checkDataDBSum() {
     ScriptUtils.checkInterrupted();
 
     // 3.3.3.1 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОМС428)
-    if (uplPerOmsSum1 != nachislSvOmsSum1) {
+    if (!comparNumbEquals(uplPerOmsSum1, nachislSvOmsSum1)) {
         def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум1Посл3М = \"$uplPerOmsSum1\""
         def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум1Посл3М = \"$nachislSvNePrevSum1\""
         logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
     }
-    if (uplPerOmsSum2 != nachislSvOmsSum2) {
+    if (!comparNumbEquals(uplPerOmsSum2, nachislSvOmsSum2)) {
         def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум2Посл3М = \"$uplPerOmsSum2\""
         def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум2Посл3М = \"$nachislSvNePrevSum2\""
         logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
     }
-    if (uplPerOmsSum3 != nachislSvOmsSum3) {
+    if (!comparNumbEquals(uplPerOmsSum3, nachislSvOmsSum3)) {
         def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум3Посл3М = \"$uplPerOmsSum3\""
         def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум3Посл3М = \"$nachislSvNePrevSum3\""
         logger.warn("Сумма страховых взносов, подлежащая уплате ОМС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
@@ -5623,17 +5690,17 @@ def checkDataDBSum() {
         }
     }
     // 3.3.4.1 Сумма подлежащая уплате равна исчислено + возмещено - произведено расходов
-    if (uplSvPrevCurr1 != ossNachislSvCurr1 + ossVosmRashSoCurr1) {
+    if (!comparNumbEquals(uplSvPrevCurr1, ossNachislSvCurr1 + ossVosmRashSoCurr1)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл1Посл3М.Сумма = \"$uplSvPrevCurr1\""
         def pathAttrComp = pathAttrOss + ".НачислСВ.Сум1Посл3М = \"$ossNachislSvCurr1\", " + pathAttrOss + ".ВозмРасхСО.Сум1Посл3М = \"$ossVosmRashSoCurr1\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
-    if (uplSvPrevCurr2 != ossNachislSvCurr2 + ossVosmRashSoCurr2) {
+    if (!comparNumbEquals(uplSvPrevCurr2, ossNachislSvCurr2 + ossVosmRashSoCurr2)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл2Посл3М.Сумма = \"$uplSvPrevCurr2\""
         def pathAttrComp = pathAttrOss + ".НачислСВ.Сум2Посл3М = \"$ossNachislSvCurr2\", " + pathAttrOss + ".ВозмРасхСО.Сум2Посл3М = \"$ossVosmRashSoCurr2\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
-    if (uplSvPrevCurr3 != ossNachislSvCurr3 + ossVosmRashSoCurr3) {
+    if (!comparNumbEquals(uplSvPrevCurr3, ossNachislSvCurr3 + ossVosmRashSoCurr3)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл3Посл3М.Сумма = \"$uplSvPrevCurr3\""
         def pathAttrComp = pathAttrOss + ".НачислСВ.Сум3Посл3М = \"$ossNachislSvCurr3\", " + pathAttrOss + ".ВозмРасхСО.Сум3Посл3М = \"$ossVosmRashSoCurr3\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
@@ -5693,33 +5760,33 @@ def checkDataDBSum() {
         }
     }
     // 3.3.4.2 Сумма ежемесячных пособий по уходу за ребенком равна сумме пособий за первого ребенка и второго и последующих детей
-    if (ezPosChislSluch != ezPos1ChislSluch + ezPos2ChislSluch) {
+    if (!comparNumbEquals(ezPosChislSluch, ezPos1ChislSluch + ezPos2ChislSluch)) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.ЧислСлуч = \"$ezPosChislSluch\""
         def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.ЧислСлуч = \"$ezPos1ChislSluch\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.ЧислСлуч = \"$ezPos2ChislSluch\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
-    if (ezPosKolVypl != ezPos1KolVypl + ezPos2KolVypl) {
+    if (!comparNumbEquals(ezPosKolVypl, ezPos1KolVypl + ezPos2KolVypl)) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.КолВыпл = \"$ezPosKolVypl\""
         def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.КолВыпл = \"$ezPos1KolVypl\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.КолВыпл = \"$ezPos2KolVypl\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
-    if (ezPosRashVsego != ezPos1RashVsego + ezPos2RashVsego) {
+    if (!comparNumbEquals(ezPosRashVsego, ezPos1RashVsego + ezPos2RashVsego)) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.РасхВсего = \"$ezPosRashVsego\""
         def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.РасхВсего = \"$ezPos1RashVsego\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.РасхВсего = \"$ezPos2RashVsego\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
-    if (ezPosRashFinFb != ezPos1RashFinFb + ezPos2RashFinFb) {
+    if (!comparNumbEquals(ezPosRashFinFb, ezPos1RashFinFb + ezPos2RashFinFb)) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.РасхФинФБ = \"$ezPosRashVsego\""
         def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.РасхФинФБ = \"$ezPos1RashVsego\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.РасхФинФБ = \"$ezPos2RashVsego\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     // 3.3.4.3 Итого равно сумме по всем видам пособий
-    if (ossZakRashVsegoItogo != ossZakRashVsegoSum) {
+    if (!comparNumbEquals(ossZakRashVsegoItogo, ossZakRashVsegoSum)) {
         def pathAttrVal = pathAttrOssZak + ".Итого.РасхВсего = \"$ossZakRashVsegoItogo\""
         def pathAttrComp = kindAids.join(", ") + " = \"$ossZakRashVsegoSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (ossZakRashFinFBItogo != ossZakRashFinFBSum) {
+    if (!comparNumbEquals(ossZakRashFinFBItogo, ossZakRashFinFBSum)) {
         def pathAttrVal = pathAttrOssZak + ".Итого.РасхФинФБ = \"$ossZakRashFinFBItogo\""
         def pathAttrComp = kindAids.join(", ") + " = \"$ossZakRashFinFBSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
@@ -5793,7 +5860,7 @@ def checkDataDBSum() {
             // 3.3.5.1 Всего расходов равно сумме расходов по всем видам пособий (ЧернобАЭС)
             // 3.3.5.3 Всего расходов равно сумме расходов по всем видам пособий (Маяк)
             BigDecimal chernobVsegoRashodSum = chernobPosVrNetrRashod + chernobPosBeremRodRashod + chernobUhodRebRashod
-            if (chernobVsegoRashod != chernobVsegoRashodSum) {
+            if (!comparNumbEquals(chernobVsegoRashod, chernobVsegoRashodSum)) {
                 def pathAttrVal = pathAttrVyplFinFB + nodeName + "Всего = \"$chernobVsegoRashod\""
                 def pathAttrComp = ["ПосВрНетр.Расход", "ПосБеремРод.Расход", "ЕжПосУходРеб.Расход"].join(", ") + " = \"$chernobVsegoRashodSum\""
                 logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
@@ -5801,13 +5868,13 @@ def checkDataDBSum() {
             // 3.3.5.2 Сумма ежемесячных пособий по уходу за ребенком равна сумме пособий за первого ребенка и второго и последующих детей
             // 3.3.5.4 Сумма ежемесячных пособий по уходу за ребенком равна сумме пособий за первого ребенка и второго и последующих детей
             BigDecimal chernobUhodRebRashodSum = chernobUhodReb1Rashod + chernobUhodReb2Rashod
-            if (chernobUhodRebRashod != chernobUhodRebRashodSum) {
+            if (!comparNumbEquals(chernobUhodRebRashod, chernobUhodRebRashodSum)) {
                 def pathAttrVal = pathAttrVyplFinFB + nodeName + "ЕжПосУходРеб.Расход = \"$chernobUhodRebRashod\""
                 def pathAttrComp = ["ЕжПосУходРеб1.Расход", "ЕжПосУходРеб2.Расход"].join(", ") + " = \"$chernobUhodRebRashodSum\""
                 logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
             }
             Integer chernobUhodRebKolVyplSum = chernobUhodReb1KolVypl + chernobUhodReb2KolVypl
-            if (chernobUhodRebKolVypl != chernobUhodRebKolVyplSum) {
+            if (!comparNumbEquals(chernobUhodRebKolVypl, chernobUhodRebKolVyplSum)) {
                 def pathAttrVal = pathAttrVyplFinFB + nodeName + "ЕжПосУходРеб.КолВыпл = \"$chernobUhodRebKolVypl\""
                 def pathAttrComp = ["ЕжПосУходРеб1.КолВыпл", "ЕжПосУходРеб2.КолВыпл"].join(", ") + " = \"$chernobUhodRebKolVyplSum\""
                 logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
@@ -5823,7 +5890,7 @@ def checkDataDBSum() {
                 }
             }
             // 3.3.5.5 Всего расходов равно пособиям по временной нетрудоспособности (Семипалат)
-            if (semipalatVsegoRashod != semipalatPosVrNetrRashod) {
+            if (!comparNumbEquals(semipalatVsegoRashod, semipalatPosVrNetrRashod)) {
                 def pathAttrVal = pathAttrVyplFinFB + ".СемипалатПолигон.Всего.Расход = \"$semipalatVsegoRashod\""
                 def pathAttrComp = pathAttrVyplFinFB + ".СемипалатПолигон.ПосВрНетр.Расход = \"$semipalatPosVrNetrRashod\""
                 logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
@@ -5886,19 +5953,19 @@ def checkDataDBSum() {
     }
 
     // 3.3.5.6 Всего пособий по нетрудоспособности равно сумме этих пособий по различным категориям
-    if (vsegoPosVrNetrChislPoluch != vsegoPosVrNetrChislPoluchSum) {
+    if (!comparNumbEquals(vsegoPosVrNetrChislPoluch, vsegoPosVrNetrChislPoluchSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосВрНетр.ЧислПолуч = \"$vsegoPosVrNetrChislPoluch\""
         def pathAttrComp = ["ЧернобАЭС.ПосВрНетр.ЧислПолуч", "ПОМаяк.ПосВрНетр.ЧислПолуч", "СемипалатПолигон.ПосВрНетр.ЧислПолуч",
                             "ПодрОсобРиск.ПосВрНетр.ЧислПолуч", "ДопФЗ255.ПосВрНетр.ЧислПолуч"].join(", ") + " = \"$vsegoPosVrNetrChislPoluchSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (vsegoPosVrNetrKolVypl != vsegoPosVrNetrKolVyplSum) {
+    if (!comparNumbEquals(vsegoPosVrNetrKolVypl, vsegoPosVrNetrKolVyplSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосВрНетр.КолВыпл = \"$vsegoPosVrNetrKolVypl\""
         def pathAttrComp = ["ЧернобАЭС.ПосВрНетр.КолВыпл", "ПОМаяк.ПосВрНетр.КолВыпл", "СемипалатПолигон.ПосВрНетр.КолВыпл",
                             "ПодрОсобРиск.ПосВрНетр.КолВыпл", "ДопФЗ255.ПосВрНетр.КолВыпл"].join(", ") + " = \"$vsegoPosVrNetrKolVyplSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (vsegoPosVrNetrRashod != vsegoPosVrNetrRashodSum) {
+    if (!comparNumbEquals(vsegoPosVrNetrRashod, vsegoPosVrNetrRashodSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосВрНетр.Расход = \"$vsegoPosVrNetrRashod\""
         def pathAttrComp = ["ЧернобАЭС.ПосВрНетр.Расход", "ПОМаяк.ПосВрНетр.Расход", "СемипалатПолигон.ПосВрНетр.Расход",
                             "ПодрОсобРиск.ПосВрНетр.Расход", "ДопФЗ255.ПосВрНетр.Расход"].join(", ") + " = \"$vsegoPosVrNetrRashodSum\""
@@ -5906,19 +5973,19 @@ def checkDataDBSum() {
     }
 
     // 3.3.5.7 Всего пособий беременности и родам равно сумме этих пособий по различным категориям
-    if (vsegoPosBeremRodChislPoluch != vsegoPosBeremRodChislPoluchSum) {
+    if (!comparNumbEquals(vsegoPosBeremRodChislPoluch, vsegoPosBeremRodChislPoluchSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосБеремРод.ЧислПолуч = \"$vsegoPosBeremRodChislPoluch\""
         def pathAttrComp = ["ЧернобАЭС.ПосБеремРод.ЧислПолуч", "ПОМаяк.ПосБеремРод.ЧислПолуч", "ПодрОсобРиск.ПосБеремРод.ЧислПолуч",
                             "ДопФЗ255.ПосБеремРод.ЧислПолуч"].join(", ") + " = \"$vsegoPosBeremRodChislPoluchSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (vsegoPosBeremRodKolVypl != vsegoPosBeremRodKolVyplSum) {
+    if (!comparNumbEquals(vsegoPosBeremRodKolVypl, vsegoPosBeremRodKolVyplSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосБеремРод.КолВыпл = \"$vsegoPosBeremRodKolVypl\""
         def pathAttrComp = ["ЧернобАЭС.ПосБеремРод.КолВыпл", "ПОМаяк.ПосБеремРод.КолВыпл", "ПодрОсобРиск.ПосБеремРод.КолВыпл",
                             "ДопФЗ255.ПосБеремРод.КолВыпл"].join(", ") + " = \"$vsegoPosBeremRodKolVyplSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (vsegoPosBeremRodRashod != vsegoPosBeremRodRashodSum) {
+    if (!comparNumbEquals(vsegoPosBeremRodRashod, vsegoPosBeremRodRashodSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ПосБеремРод.Расход = \"$vsegoPosBeremRodRashod\""
         def pathAttrComp = ["ЧернобАЭС.ПосБеремРод.Расход", "ПОМаяк.ПосБеремРод.Расход", "ПодрОсобРиск.ПосБеремРод.Расход",
                             "ДопФЗ255.ПосБеремРод.Расход"].join(", ") + " = \"$vsegoPosBeremRodRashodSum\""
@@ -5926,34 +5993,34 @@ def checkDataDBSum() {
     }
 
     // 3.3.5.8 Всего пособий по уходу за первым ребенком равно сумме этих пособий по различным категориям
-    if (vsegoEzPosUhodReb1ChislPoluch != vsegoEzPosUhodReb1ChislPoluchSum) {
+    if (!comparNumbEquals(vsegoEzPosUhodReb1ChislPoluch, vsegoEzPosUhodReb1ChislPoluchSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.ЧислПолуч = \"$vsegoEzPosUhodReb1ChislPoluch\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.ЧислПолуч", "ПОМаяк.ЕжПосУходРеб1.ЧислПолуч", "ПодрОсобРиск.ЕжПосУходРеб1.ЧислПолуч"].join(", ") + " = \"$vsegoEzPosUhodReb1ChislPoluchSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (vsegoEzPosUhodReb1KolVypl != vsegoEzPosUhodReb1KolVyplSum) {
+    if (!comparNumbEquals(vsegoEzPosUhodReb1KolVypl, vsegoEzPosUhodReb1KolVyplSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.КолВыпл = \"$vsegoEzPosUhodReb1KolVypl\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.КолВыпл", "ПОМаяк.ЕжПосУходРеб1.КолВыпл", "ПодрОсобРиск.ЕжПосУходРеб1.КолВыпл"].join(", ") + " = \"$vsegoEzPosUhodReb1KolVyplSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (vsegoEzPosUhodReb1Rashod != vsegoEzPosUhodReb1RashodSum) {
+    if (!comparNumbEquals(vsegoEzPosUhodReb1Rashod, vsegoEzPosUhodReb1RashodSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.Расход = \"$vsegoEzPosUhodReb1Rashod\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.Расход", "ПОМаяк.ЕжПосУходРеб1.Расход", "ПодрОсобРиск.ЕжПосУходРеб1.Расход"].join(", ") + " = \"$vsegoEzPosUhodReb1RashodSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
 
     // 3.3.5.9 Всего пособий по уходу за вторым ребенком и последующими равно сумме этих пособий по различным категориям
-    if (vsegoEzPosUhodReb2ChislPoluch != vsegoEzPosUhodReb2ChislPoluchSum) {
+    if (!comparNumbEquals(vsegoEzPosUhodReb2ChislPoluch, vsegoEzPosUhodReb2ChislPoluchSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.ЧислПолуч = \"$vsegoEzPosUhodReb2ChislPoluch\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.ЧислПолуч", "ПОМаяк.ЕжПосУходРеб1.ЧислПолуч", "ПодрОсобРиск.ЕжПосУходРеб1.ЧислПолуч"].join(", ") + " = \"$vsegoEzPosUhodReb2ChislPoluchSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (vsegoEzPosUhodReb2KolVypl != vsegoEzPosUhodReb2KolVyplSum) {
+    if (!comparNumbEquals(vsegoEzPosUhodReb2KolVypl, vsegoEzPosUhodReb2KolVyplSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.КолВыпл = \"$vsegoEzPosUhodReb2KolVypl\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.КолВыпл", "ПОМаяк.ЕжПосУходРеб1.КолВыпл", "ПодрОсобРиск.ЕжПосУходРеб1.КолВыпл"].join(", ") + " = \"$vsegoEzPosUhodReb2KolVyplSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
     }
-    if (vsegoEzPosUhodReb2Rashod != vsegoEzPosUhodReb2RashodSum) {
+    if (!comparNumbEquals(vsegoEzPosUhodReb2Rashod, vsegoEzPosUhodReb2RashodSum)) {
         def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.Расход = \"$vsegoEzPosUhodReb2Rashod\""
         def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.Расход", "ПОМаяк.ЕжПосУходРеб1.Расход", "ПодрОсобРиск.ЕжПосУходРеб1.Расход"].join(", ") + " = \"$vsegoEzPosUhodReb2RashodSum\""
         logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
@@ -6007,7 +6074,7 @@ def checkDataDBSum() {
 
     if (raschsvPravTarif51427 != null && opsOmsIsExistTarifPlat_08 == true) {
         // 3.3.7.2 Сумма доходов всего не менее суммы доходов по п.6 ст. 427
-        if (raschsvPravTarif51427.doh346_15vs < raschsvPravTarif51427.doh6_427) {
+        if (comparNumbGreater(raschsvPravTarif51427.doh6_427, raschsvPravTarif51427.doh346_15vs)) {
             def pathAttrVal = pathAttrPravTarif51427 + ".Дох346.15Вс = \"$raschsvPravTarif51427.doh346_15vs\""
             def pathAttrComp = pathAttrPravTarif51427 + ".Дох6.427 = \"$raschsvPravTarif51427.doh6_427\"."
             logger.warn("$pathAttrVal не может быть меньше $pathAttrComp")
@@ -6032,7 +6099,7 @@ def checkDataDBSum() {
         def dohCelPostPred = raschsvPravTarif71427.dohCelPostPred ?: 0
         def dohGrantPred = raschsvPravTarif71427.dohGrantPred ?: 0
         def dohEkDeyatPred = raschsvPravTarif71427.dohEkDeyatPred ?: 0
-        if (dohVsPred < dohCelPostPred + dohGrantPred + dohEkDeyatPred) {
+        if (comparNumbGreater(dohCelPostPred + dohGrantPred + dohEkDeyatPred, dohVsPred)) {
             def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПред = \"$raschsvPravTarif51427.dohVsPred\""
             def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПред = \"$dohCelPostPred\", "
             pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПред = \"$dohGrantPred\", "
@@ -6074,15 +6141,15 @@ def checkDataDBSum() {
         }
         // 3.3.10.1 Итого выплат равно сумме по всем иностранным гражданам
         if (raschsvSvnpPodpisant.nomKorr == 0) {
-            if (vyplatIt425Sum1 != svInoGrazdSum1) {
+            if (!comparNumbEquals(vyplatIt425Sum1, svInoGrazdSum1)) {
                 def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt425Sum1\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
             }
-            if (vyplatIt425Sum2 != svInoGrazdSum2) {
+            if (!comparNumbEquals(vyplatIt425Sum2, svInoGrazdSum2)) {
                 def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум2Посл3М = \"$vyplatIt425Sum2\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
             }
-            if (vyplatIt425Sum3 != svInoGrazdSum3) {
+            if (!comparNumbEquals(vyplatIt425Sum3, svInoGrazdSum3)) {
                 def pathAttrVal = pathAttrSvPrimTarif22425 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt425Sum3\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем иностранным гражданам.")
             }
@@ -6113,15 +6180,15 @@ def checkDataDBSum() {
 
         // 3.3.11.1 Итого выплат равно сумме по всем обучающимся
         if (raschsvSvnpPodpisant.nomKorr == 0) {
-            if (vyplatIt422Sum1 != svedObuchSum1) {
+            if (!comparNumbEquals(vyplatIt422Sum1, svedObuchSum1)) {
                 def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум1Посл3М = \"$vyplatIt422Sum1\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
             }
-            if (vyplatIt422Sum2 != svedObuchSum2) {
+            if (!comparNumbEquals(vyplatIt422Sum2, svedObuchSum2)) {
                 def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум2Посл3М = \"$vyplatIt422Sum2\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
             }
-            if (vyplatIt422Sum3 != svedObuchSum3) {
+            if (!comparNumbEquals(vyplatIt422Sum3, svedObuchSum3)) {
                 def pathAttrVal = pathAttrSvPrimTarif13422 + ".ВыплатИт.Сум3Посл3М = \"$vyplatIt422Sum3\""
                 logger.warn("$pathAttrVal не равен сумме выплат по всем обучающимся.")
             }
@@ -6448,9 +6515,7 @@ def checkDataXml() {
                                                     // 2.3.4 Значение кода тарифа
                                                     def tariffPayerCodeXml = vyplSvDopMtNode.attributes()[VYPL_SV_DOP_MT_TARIF]
                                                     actualTariffPayerCode = mapActualTariffPayerCode.get(tariffPayerCodeXml)
-                                                    // todo https://jira.aplana.com/browse/SBRFNDFL-595 Раскомментировать после обновления стенда
-//                                                    if (!actualTariffPayerCode && actualTariffPayerCode?.get(RF_FOR_OPS_DOP)?.value) {
-                                                    if (!actualTariffPayerCode) {
+                                                    if (!actualTariffPayerCode && actualTariffPayerCode?.get(RF_FOR_OPS_DOP)?.value) {
                                                         def pathAttr = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.СвВыплСВОПС.ВыплСВДоп.ВыплСВДопМТ.Тариф"
                                                         logger.warn("$pathAttr = \"$tariffPayerCodeXml\" ФЛ с СНИЛС = \"$snils\"  не найден (не действует) в справочнике \"Коды тарифа плательщика\".")
                                                     }
@@ -6486,6 +6551,16 @@ def checkDataXml() {
 }
 
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
+
+/**
+ * Сравнение чисел с плавающей точкой через эпсилон-окрестности
+ */
+boolean comparNumbEquals(def d1, def d2) {
+    return (Math.abs(d1 - d2) < 0.001)
+}
+boolean comparNumbGreater(double d1, double d2) {
+    return (d1 - d2 > 0.001)
+}
 
 /**
  * Получить Параметры подразделения по сборам, взносам
@@ -6948,4 +7023,280 @@ def getActualRefCitizenship() {
         }
     }
     return citizenshipActualCache;
+}
+
+
+
+
+
+//TODO вынес handler в скрипт, чтобы не обновлять ядро на нексте
+
+/**
+ * @author Andrey Drunk
+ */
+public class NaturalPersonRefbookScriptHandler extends NaturalPersonRefbookHandler {
+
+    /**
+     *
+     */
+    private Map<Long, NaturalPerson> refbookPersonTempMap;
+
+    /**
+     * Карта для создания идкнтификаторов ФЛ
+     */
+    private Map<Long, Map<Long, PersonIdentifier>> identitiesMap;
+
+    /**
+     * Карта для создания документов ФЛ
+     */
+    private Map<Long, Map<Long, PersonDocument>> documentsMap;
+
+    /**
+     * Кэш справочника страны
+     */
+    private Map<Long, Country> countryMap;
+
+    /**
+     * Кэш справочника статусы Налогоплателищика
+     */
+    private Map<Long, TaxpayerStatus> taxpayerStatusMap;
+
+    /**
+     * Кэш справочника типы документов
+     */
+    private Map<Long, DocType> docTypeMap;
+
+    /**
+     *
+     */
+    public NaturalPersonRefbookScriptHandler() {
+        super();
+        refbookPersonTempMap = new HashMap<Long, NaturalPerson>();
+        identitiesMap = new HashMap<Long, Map<Long, PersonIdentifier>>();
+        documentsMap = new HashMap<Long, Map<Long, PersonDocument>>();
+    }
+
+    @Override
+    public void processRow(ResultSet rs, int rowNum, Map<Long, Map<Long, NaturalPerson>> map) throws SQLException {
+
+        //Идентификатор записи первичной формы
+        Long primaryPersonId = SqlUtils.getLong(rs, PRIMARY_PERSON_ID);
+
+        //if (primaryPersonId == null) {throw new ServiceException("Не задано значение PRIMARY_PERSON_ID");}
+
+        //Список сходных записей
+        Map<Long, NaturalPerson> similarityPersonMap = map.get(primaryPersonId);
+
+        if (similarityPersonMap == null) {
+            similarityPersonMap = new HashMap<Long, NaturalPerson>();
+            map.put(primaryPersonId, similarityPersonMap);
+        }
+
+        //Идентификатор справочника
+        Long refBookPersonId = SqlUtils.getLong(rs, REFBOOK_PERSON_ID);
+
+        NaturalPerson naturalPerson = similarityPersonMap.get(refBookPersonId);
+
+        if (naturalPerson == null) {
+            naturalPerson = buildNaturalPerson(rs, refBookPersonId, primaryPersonId);
+            similarityPersonMap.put(refBookPersonId, naturalPerson);
+        }
+
+
+        //Добавляем документы физлица
+        addPersonDocument(rs, naturalPerson);
+
+        //Добавляем идентификаторы
+        addPersonIdentifier(rs, naturalPerson);
+
+        //Адрес
+        Address address = buildAddress(rs);
+        naturalPerson.setAddress(address);
+
+        //System.out.println(rowNum + ", primaryPersonId=" + primaryPersonId + ", [" + naturalPerson + "][" + Arrays.toString(naturalPerson.getPersonDocumentList().toArray()) + "][" + Arrays.toString(naturalPerson.getPersonIdentityList().toArray()) + "][" + address + "]");
+
+    }
+
+    private void addPersonIdentifier(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+
+        Long primaryPersonId = naturalPerson.getPrimaryPersonId();
+        Long refBookPersonId = naturalPerson.getId();
+        Long personIdentifierId = SqlUtils.getLong(rs, "book_id_tax_payer_id");
+        Map<Long, PersonIdentifier> personIdentityMap = identitiesMap.get(refBookPersonId);
+
+        if (personIdentityMap == null) {
+            personIdentityMap = new HashMap<Long, PersonIdentifier>();
+            identitiesMap.put(refBookPersonId, personIdentityMap);
+        }
+
+        if (personIdentifierId != null && !personIdentityMap.containsKey(personIdentifierId)) {
+            PersonIdentifier personIdentifier = new PersonIdentifier();
+            personIdentifier.setId(personIdentifierId);
+
+            personIdentifier.setRecordId(SqlUtils.getLong(rs, "tax_record_id"));
+            personIdentifier.setStatus(SqlUtils.getInteger(rs, "tax_status"));
+            personIdentifier.setVersion(rs.getDate("tax_version"));
+
+            personIdentifier.setInp(rs.getString("inp"));
+            personIdentifier.setAsnuId(SqlUtils.getLong(rs, "as_nu"));
+            personIdentifier.setNaturalPerson(naturalPerson);
+            personIdentityMap.put(personIdentifierId, personIdentifier);
+            naturalPerson.getPersonIdentityList().add(personIdentifier);
+        }
+    }
+
+    private void addPersonDocument(ResultSet rs, NaturalPerson naturalPerson) throws SQLException {
+        Long primaryPersonId = naturalPerson.getPrimaryPersonId();
+        Long refBookPersonId = naturalPerson.getId();
+        Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
+        Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(refBookPersonId);
+
+        if (pesonDocumentMap == null) {
+            pesonDocumentMap = new HashMap<Long, PersonDocument>();
+            documentsMap.put(refBookPersonId, pesonDocumentMap);
+        }
+
+        if (docId != null && !pesonDocumentMap.containsKey(docId)) {
+            Long docTypeId = SqlUtils.getLong(rs, "doc_id");
+            DocType docType = getDocTypeById(docTypeId);
+            PersonDocument personDocument = new PersonDocument();
+            personDocument.setId(docId);
+
+            personDocument.setRecordId(SqlUtils.getLong(rs, "doc_record_id"));
+            personDocument.setStatus(SqlUtils.getInteger(rs, "doc_status"));
+            personDocument.setVersion(rs.getDate("doc_version"));
+
+            personDocument.setDocType(docType);
+            personDocument.setDocumentNumber(rs.getString("doc_number"));
+            personDocument.setIncRep(SqlUtils.getInteger(rs, "inc_rep"));
+            personDocument.setNaturalPerson(naturalPerson);
+            pesonDocumentMap.put(docId, personDocument);
+            naturalPerson.getPersonDocumentList().add(personDocument);
+        }
+    }
+
+    private NaturalPerson buildNaturalPerson(ResultSet rs, Long refBookPersonId, Long primaryPersonId) throws SQLException {
+        NaturalPerson naturalPerson = refbookPersonTempMap.get(refBookPersonId);
+        if (naturalPerson != null) {
+            return naturalPerson;
+        } else {
+
+            NaturalPerson person = new NaturalPerson();
+
+            //person
+            person.setId(refBookPersonId);
+
+            //TODO Разделить модель на два класса NaturalPerson для представления данных первичной формы и данных справочника
+            //person.setPrimaryPersonId(primaryPersonId);
+
+            person.setRecordId(SqlUtils.getLong(rs, "person_record_id"));
+            person.setStatus(SqlUtils.getInteger(rs, "person_status"));
+            person.setVersion(rs.getDate("person_version"));
+
+            person.setLastName(rs.getString("last_name"));
+            person.setFirstName(rs.getString("first_name"));
+            person.setMiddleName(rs.getString("middle_name"));
+            person.setSex(SqlUtils.getInteger(rs, "sex"));
+            person.setInn(rs.getString("inn"));
+            person.setInnForeign(rs.getString("inn_foreign"));
+            person.setSnils(rs.getString("snils"));
+            person.setBirthDate(rs.getDate("birth_date"));
+
+            //ссылки на справочники
+            person.setTaxPayerStatus(getTaxpayerStatusById(SqlUtils.getLong(rs, "taxpayer_state")));
+            person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
+
+            //additional
+            person.setPension(SqlUtils.getInteger(rs, "pension"));
+            person.setMedical(SqlUtils.getInteger(rs, "medical"));
+            person.setSocial(SqlUtils.getInteger(rs, "social"));
+            person.setEmployee(SqlUtils.getInteger(rs, "employee"));
+            person.setSourceId(SqlUtils.getLong(rs, "source_id"));
+            person.setRecordId(SqlUtils.getLong(rs, "record_id"));
+
+            refbookPersonTempMap.put(refBookPersonId, person);
+
+            return person;
+        }
+
+
+    }
+
+    private Address buildAddress(ResultSet rs) throws SQLException {
+        Long addrId = SqlUtils.getLong(rs, "REF_BOOK_ADDRESS_ID");
+        if (addrId != null) {
+            Address address = new Address();
+
+            address.setId(addrId);
+            address.setRecordId(SqlUtils.getLong(rs, "addr_record_id"));
+            address.setStatus(SqlUtils.getInteger(rs, "addr_status"));
+            address.setVersion(rs.getDate("addr_version"));
+
+            address.setAddressType(SqlUtils.getInteger(rs, "address_type"));
+            address.setCountry(getCountryById(SqlUtils.getLong(rs, "country_id")));
+            address.setRegionCode(rs.getString("region_code"));
+            address.setPostalCode(rs.getString("postal_code"));
+            address.setDistrict(rs.getString("district"));
+            address.setCity(rs.getString("city"));
+            address.setLocality(rs.getString("locality"));
+            address.setStreet(rs.getString("street"));
+            address.setHouse(rs.getString("house"));
+            address.setBuild(rs.getString("build"));
+            address.setAppartment(rs.getString("appartment"));
+            address.setAddressIno(rs.getString("address"));
+            return address;
+        } else {
+            return null;
+        }
+    }
+
+    public Map<Long, Country> getCountryMap() {
+        return countryMap;
+    }
+
+    public void setCountryMap(Map<Long, Country> countryMap) {
+        this.countryMap = countryMap;
+    }
+
+    public Map<Long, TaxpayerStatus> getTaxpayerStatusMap() {
+        return taxpayerStatusMap;
+    }
+
+    public void setTaxpayerStatusMap(Map<Long, TaxpayerStatus> taxpayerStatusMap) {
+        this.taxpayerStatusMap = taxpayerStatusMap;
+    }
+
+    public Map<Long, DocType> getDocTypeMap() {
+        return docTypeMap;
+    }
+
+    public void setDocTypeMap(Map<Long, DocType> docTypeMap) {
+        this.docTypeMap = docTypeMap;
+    }
+
+    private TaxpayerStatus getTaxpayerStatusById(Long taxpayerStatusId) {
+        if (taxpayerStatusId != null) {
+            return taxpayerStatusMap != null ? taxpayerStatusMap.get(taxpayerStatusId) : new TaxpayerStatus(taxpayerStatusId, null);
+        } else {
+            return null;
+        }
+    }
+
+    private Country getCountryById(Long countryId) {
+        if (countryId != null) {
+            return countryMap != null ? countryMap.get(countryId) : new Country(countryId, null);
+        } else {
+            return null;
+        }
+    }
+
+    private DocType getDocTypeById(Long docTypeId) {
+        if (docTypeId != null) {
+            return docTypeMap != null ? docTypeMap.get(docTypeId) : new DocType(docTypeId, null);
+        } else {
+            return null;
+        }
+    }
+
+
 }
