@@ -37,6 +37,8 @@ import java.util.Map;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RefBookPersonDaoOracleTest {
 
+
+
     @Autowired
     RefBookSimpleDao refBookSimpleDao;
 
@@ -60,8 +62,8 @@ public class RefBookPersonDaoOracleTest {
     //14873
     //Для ФЛ Номер: 0765540960: Петров Матвей Юрьевич код: 21, 80 04 505050 сходных записей найдено: 2 [ИНП: 0765540960: Борисова Марфа Юрьевна 88 08 010203 (0,42)][ИНП: 0765540960: Петров Матвей Юрьевич 80 04 505050 (1,00)]. Выбрана запись: [ИНП: 0765540960: Петров Матвей Юрьевич 80 04 505050 (1,00)]
     //private static final Long decl_data_id = 148731L; //вставка
-    private static final Long decl_data_id = 14873L; //обновление
-
+    //private static final Long decl_data_id = 14873L; //обновление
+    private static final Long decl_data_id = 15491L; //дубликаты
 
     @Test
     public void testFindNaturalPersonPrimaryDataFromNdfl() {
@@ -92,9 +94,9 @@ public class RefBookPersonDaoOracleTest {
 
         System.out.println("   insertRecords=" + insertRecords);
 
-        PersonDocument doc = insertRecords.get(0).getPersonDocument();
+        //PersonDocument doc = insertRecords.get(0).getPersonDocument();
 
-        System.out.println("   insertRecords=" + doc);
+        //System.out.println("   insertRecords=" + doc);
 
         Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
 
@@ -104,6 +106,10 @@ public class RefBookPersonDaoOracleTest {
 
 
         Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
+
+
+
+
 
         size += checkRecords.size();
 
