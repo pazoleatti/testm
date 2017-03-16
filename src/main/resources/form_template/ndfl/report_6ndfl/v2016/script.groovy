@@ -694,19 +694,19 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     def sumStavkaNodes6 = fileNode6Ndfl.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
     sumStavkaNodes6.each { sumStavkaNode6 ->
         ScriptUtils.checkInterrupted()
-        def stavka6 = sumStavkaNode6.attributes()[ATTR_RATE] ?: 0
+        def stavka6 = Integer.valueOf(sumStavkaNode6.attributes()[ATTR_RATE]) ?: 0
 
         // МежДок4
-        def nachislDoh6 = sumStavkaNode6.attributes()[ATTR_NACHISL_DOH6] ?: 0
+        def nachislDoh6 = ScriptUtils.round(Double.valueOf(sumStavkaNode6.attributes()[ATTR_NACHISL_DOH6]), 2) ?: 0
         mapNachislDoh6.put(stavka6, nachislDoh6)
 
         // МежДок5
         if (stavka6 == RATE_THIRTEEN) {
-            nachislDohDiv6 = sumStavkaNode6.attributes()[ATTR_NACHISL_DOH_DIV6] ?: 0
+            nachislDohDiv6 = ScriptUtils.round(Double.valueOf(sumStavkaNode6.attributes()[ATTR_NACHISL_DOH_DIV6]), 2) ?: 0
         }
 
         // МежДок6
-        def ischislNal6 = sumStavkaNode6.attributes()[ATTR_ISCHISL_NAL6] ?: 0
+        def ischislNal6 = Long.valueOf(sumStavkaNode6.attributes()[ATTR_ISCHISL_NAL6]) ?: 0
         mapIschislNal6.put(stavka6, ischislNal6)
     }
 
@@ -714,10 +714,10 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     obobshPokazNodes6.each { obobshPokazNode6 ->
         ScriptUtils.checkInterrupted()
         // МежДок7
-        neUderzNalIt6 = obobshPokazNode6.attributes()[ATTR_NE_UDERZ_NAL_IT6] ?: 0
+        neUderzNalIt6 = Long.valueOf(obobshPokazNode6.attributes()[ATTR_NE_UDERZ_NAL_IT6]) ?: 0
 
         // МежДок8
-        kolFl6 = obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6] ?: 0
+        kolFl6 = Integer.valueOf(obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6]) ?: 0
     }
 
     // Суммы значений всех 2-НДФЛ сравниваются с одним 6-НДФЛ
@@ -733,7 +733,7 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
         def svedDohNodes = fileNode2Ndfl.depthFirst().grep { it.name() == NODE_NAME_SVED_DOH2 }
         svedDohNodes.each { svedDohNode ->
             ScriptUtils.checkInterrupted()
-            def stavka2 = svedDohNode.attributes()[ATTR_RATE] ?: 0
+            def stavka2 = Integer.valueOf(svedDohNode.attributes()[ATTR_RATE]) ?: 0
 
             // МежДок4
             def sumDohObch2 = mapSumDohObch2.get(stavka2)
@@ -745,11 +745,11 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
 
             def sumItNalPerNodes = svedDohNode.depthFirst().grep { it.name() == NODE_NAME_SUM_IT_NAL_PER2 }
             sumItNalPerNodes.each { sumItNalPerNode ->
-                sumDohObch2 += sumItNalPerNode.attributes()[ATTR_SUM_DOH_OBSH2] ?: 0
-                nalIschisl2 += sumItNalPerNode.attributes()[ATTR_NAL_ISCHISL2] ?: 0
+                sumDohObch2 += ScriptUtils.round(Double.valueOf(sumItNalPerNode.attributes()[ATTR_SUM_DOH_OBSH2]), 2) ?: 0
+                nalIschisl2 += Long.valueOf(sumItNalPerNode.attributes()[ATTR_NAL_ISCHISL2]) ?: 0
 
                 // МежДок7
-                nalNeUderz2 += sumItNalPerNode.attributes()[ATTR_NAL_NE_UDERZ2] ?: 0
+                nalNeUderz2 += Long.valueOf(sumItNalPerNode.attributes()[ATTR_NAL_NE_UDERZ2]) ?: 0
             }
             mapSumDohObch2.put(stavka2, sumDohObch2)
             mapNalIschisl2.put(stavka2, nalIschisl2)
@@ -770,14 +770,15 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     mapNachislDoh6.each { stavka6, nachislDoh6 ->
         ScriptUtils.checkInterrupted()
         def sumDohObch2 = mapSumDohObch2.get(stavka6)
-        if (Double.valueOf(nachislDoh6) != Double.valueOf(sumDohObch2)) {
+
+        if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
             def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по ставке " + stavka6
             logger.error(msgErrorRes)
         }
     }
 
     // МежДок5
-    if (Double.valueOf(nachislDohDiv6) != Double.valueOf(sumDohDivObch2)) {
+    if (ScriptUtils.round(nachislDohDiv6, 2) != ScriptUtils.round(sumDohDivObch2, 2)) {
         def msgErrorRes = sprintf(msgError, "сумме начисленного дохода в виде дивидендов")
         logger.error(msgErrorRes)
     }
@@ -786,20 +787,20 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
 
     mapIschislNal6.each { stavka6, ischislNal6 ->
         def nalIschisl2 = mapNalIschisl2.get(stavka6)
-        if (Long.valueOf(ischislNal6) != Long.valueOf(nalIschisl2)) {
+        if (ischislNal6 != nalIschisl2) {
             def msgErrorRes = sprintf(msgError, "сумме налога исчисленного") + " по ставке " + stavka6
             logger.error(msgErrorRes)
         }
     }
 
     // МежДок7
-    if (Long.valueOf(neUderzNalIt6) != Long.valueOf(nalNeUderz2)) {
+    if (neUderzNalIt6 != nalNeUderz2) {
         def msgErrorRes = sprintf(msgError, "сумме налога, не удержанная налоговым агентом")
         logger.error(msgErrorRes)
     }
 
     // МежДок8
-    if (Integer.valueOf(kolFl6) != Integer.valueOf(kolFl2)) {
+    if (kolFl6 != kolFl2) {
         def msgErrorRes = sprintf(msgError, "количеству физических лиц, получивших доход")
         logger.error(msgErrorRes)
     }
