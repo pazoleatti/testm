@@ -102,7 +102,7 @@ create or replace package person_pkg as
            addr.address_type,
            addr.address
       from (
-             select distinct n.id as person_id,first_value(fv.id) over(partition by n.id) ref_person_id
+             select distinct n.id as person_id,first_value(fv.id) over(partition by n.id order by fv.id) ref_person_id
                from  ndfl_person n join ref_book_person fv on (replace(lower(nvl(fv.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
                                                                and replace(lower(nvl(fv.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
                                                                and replace(lower(nvl(fv.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
@@ -670,7 +670,7 @@ create or replace package body person_pkg as
                addr.address_type,
                addr.address
           from (
-             select distinct n.id as person_id,first_value(fv.id) over(partition by n.id) ref_person_id
+             select distinct n.id as person_id,first_value(fv.id) over(partition by n.id order by fv.id) ref_person_id
                from  ndfl_person n join ref_book_person fv on (replace(lower(nvl(fv.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
                                                                and replace(lower(nvl(fv.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
                                                                and replace(lower(nvl(fv.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
@@ -1202,7 +1202,7 @@ create or replace package body person_pkg as
                addr.address_type,
                addr.address
           from (
-             select distinct n.id as person_id,first_value(fv.id) over(partition by n.id) ref_person_id
+             select distinct n.id as person_id,first_value(fv.id) over(partition by n.id order by fv.id) ref_person_id
                from  raschsv_pers_sv_strah_lic n join ref_book_person fv on (replace(lower(nvl(fv.last_name,'empty')),' ','') = replace(lower(nvl(n.familia,'empty')),' ','')
                                                                              and replace(lower(nvl(fv.first_name,'empty')),' ','') = replace(lower(nvl(n.imya,'empty')),' ','')
                                                                              and replace(lower(nvl(fv.middle_name,'empty')),' ','') = replace(lower(nvl(n.otchestvo,'empty')),' ','')

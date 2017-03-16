@@ -1,12 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.TableWithCheckedColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 import com.google.gwt.cell.client.*;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -16,13 +23,20 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
@@ -102,6 +116,7 @@ public class DeclarationListView extends
 
     //private ListDataProvider<DeclarationDataSearchResultItem> model;
     private Column<DeclarationDataSearchResultItem, Boolean> checkColumn;
+    private Header<Boolean> checkBoxHeader;
     private List<DeclarationDataSearchResultItem> checkedRows = new LinkedList<DeclarationDataSearchResultItem>();
 
     private final AsyncDataProvider<DeclarationDataSearchResultItem> dataProvider = new AsyncDataProvider<DeclarationDataSearchResultItem>() {
@@ -169,7 +184,6 @@ public class DeclarationListView extends
                 return selectionModel.isSelected(object);
             }
         };
-
         checkColumn.setFieldUpdater(new FieldUpdater<DeclarationDataSearchResultItem, Boolean>() {
             @Override
             public void update(int index, DeclarationDataSearchResultItem object, Boolean chcked) {
@@ -181,6 +195,32 @@ public class DeclarationListView extends
                 updateButton();
             }
         });
+
+        checkBoxHeader = new CheckBoxHeader() {
+            @Override
+            public Boolean getValue() {
+                for (DeclarationDataSearchResultItem item : declarationTable.getVisibleItems()) {
+                    if (!selectionModel.isSelected(item)) {
+                        return false;
+                    }
+                }
+                return declarationTable.getVisibleItems().size() > 0;
+            }
+            @Override
+            public void onBrowserEvent(Cell.Context context, Element elem, NativeEvent event) {
+                InputElement input = elem.getFirstChild().cast();
+                Boolean isChecked = input.isChecked();
+                for (DeclarationDataSearchResultItem item : declarationTable.getVisibleItems()) {
+                    selectionModel.setSelected(item, isChecked);
+                    if (isChecked) {
+                        checkedRows.add(item);
+                    } else {
+                        checkedRows.remove(item);
+                    }
+                }
+                updateButton();
+            }
+        };
 
         TextColumn<DeclarationDataSearchResultItem> declarationDataIdColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
@@ -361,7 +401,7 @@ public class DeclarationListView extends
 
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
-        declarationTable.addColumn(checkColumn, declarationTable.createResizableHeader("", checkColumn));
+        declarationTable.addColumn(checkColumn, checkBoxHeader);
         declarationTable.setColumnWidth(checkColumn, 2, Style.Unit.EM);
 
         if (!isReports) {
