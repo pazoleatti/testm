@@ -13,7 +13,9 @@ public class ImportCounter {
     private int failCounter = 0;
     private List<String> msgList;
 
-    public ImportCounter() {}
+    public ImportCounter() {
+        this.msgList = new ArrayList<String>();
+    }
 
     public ImportCounter(int successCounter, int failCounter, List<String> msgList) {
         this.successCounter = successCounter;
