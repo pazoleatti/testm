@@ -350,18 +350,22 @@ def buildNdflPerson(Map<String, RefBookValue> personRecord, Map<String, RefBookV
 
     ndflPerson.status = taxpayerStatusCodes.get(personRecord.get("TAXPAYER_STATE")?.getReferenceValue())
 
-    ndflPerson.postIndex = addressRecord.get("POSTAL_CODE")?.getStringValue()
-    ndflPerson.regionCode = addressRecord.get("REGION_CODE")?.getStringValue()
-    ndflPerson.area = addressRecord.get("DISTRICT")?.getStringValue()
-    ndflPerson.city = addressRecord.get("CITY")?.getStringValue()
-    ndflPerson.locality = addressRecord.get("LOCALITY")?.getStringValue()
-    ndflPerson.street = addressRecord.get("STREET")?.getStringValue()
-    ndflPerson.house = addressRecord.get("HOUSE")?.getStringValue()
-    ndflPerson.building = addressRecord.get("BUILD")?.getStringValue()
-    ndflPerson.flat = addressRecord.get("APPARTMENT")?.getStringValue()
-    ndflPerson.countryCode = countryCodes.get(addressRecord.get("COUNTRY_ID")?.getReferenceValue())
-    ndflPerson.address = addressRecord.get("ADDRESS")?.getStringValue()
-    //ndflPerson.additionalData = currentNdflPerson.additionalData
+    //адрес может быть не задан
+    if (addressRecord != null){
+        ndflPerson.postIndex = addressRecord.get("POSTAL_CODE")?.getStringValue()
+        ndflPerson.regionCode = addressRecord.get("REGION_CODE")?.getStringValue()
+        ndflPerson.area = addressRecord.get("DISTRICT")?.getStringValue()
+        ndflPerson.city = addressRecord.get("CITY")?.getStringValue()
+        ndflPerson.locality = addressRecord.get("LOCALITY")?.getStringValue()
+        ndflPerson.street = addressRecord.get("STREET")?.getStringValue()
+        ndflPerson.house = addressRecord.get("HOUSE")?.getStringValue()
+        ndflPerson.building = addressRecord.get("BUILD")?.getStringValue()
+        ndflPerson.flat = addressRecord.get("APPARTMENT")?.getStringValue()
+        ndflPerson.countryCode = countryCodes.get(addressRecord.get("COUNTRY_ID")?.getReferenceValue())
+        ndflPerson.address = addressRecord.get("ADDRESS")?.getStringValue()
+        //ndflPerson.additionalData = currentNdflPerson.additionalData
+    }
+
     return ndflPerson
 }
 
@@ -592,15 +596,13 @@ def getSourcesListForTemporarySolution() {
 
     Department department = departmentService.get(parentDepartmentId)
 
-    println "department="+department
-
     List<DeclarationData> declarationDataList = findConsolidateDeclarationData(parentDepartmentId, declarationDataReportPeriod.id)
 
     for (DeclarationData declarationData : declarationDataList) {
         //Формируем связь источник-приемник
         def relation = getRelation(declarationData, department, declarationDataReportPeriod)
         sources.sourceList.add(relation)
-   }
+    }
 
     sources.sourcesProcessedByScript = true
     //logger.info("sources found: " + sources.sourceList.size)
