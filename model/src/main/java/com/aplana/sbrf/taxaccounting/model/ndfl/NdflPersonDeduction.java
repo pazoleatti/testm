@@ -11,28 +11,41 @@ public class NdflPersonDeduction extends NdflPersonOperation {
 
     // Код вычета (Графа 3)
     private String typeCode;
-    // Тип вычета (Графа 4)
+
+    // Документ о праве на налоговый вычет.Тип (Графа 4)
     private String notifType;
-    // Дата выдачи уведомления
+
+    // Документ о праве на налоговый вычет.Дата (Графа 5)
     private Date notifDate;
-    // Номер (Графа 6)
+
+    // Документ о праве на налоговый вычет.Номер (Графа 6)
     private String notifNum;
-    // Код источника (Графа 7)
+
+    // Документ о праве на налоговый вычет.Код источника (Графа 7)
     private String notifSource;
-    // Сумма вычета согласно документу (Графа 8)
+
+    // Документ о праве на налоговый вычет.Сумма (Графа 8)
     private BigDecimal notifSumm;
-    // Дата начисления дохода (Графа 10)
+
+    // Начисленный доход.Дата (Графа 10)
     private Date incomeAccrued;
-    // Код дохода (Графа 11)
+
+    // Начисленный доход.Код дохода (Графа 11)
     private String incomeCode;
-    // Сумма начисленного дохода (Графа 12)
+
+    // Начисленный доход.Сумма (Графа 12)
     private BigDecimal incomeSumm;
-    // Дата применения вычета в предыдущем периоде
+
+    // Применение вычета.Предыдущий период.Дата (Графа 13)
     private Date periodPrevDate;
+
+    // Применение вычета.Предыдущий период.Сумма (Графа 14)
     private BigDecimal periodPrevSumm;
-    // Дата применения вычета в текущем периоде (Графа 15)
+
+    // Применение вычета.Текущий период.Дата (Графа 15)
     private Date periodCurrDate;
-    // Сумма применения вычета в текущем периоде (Графа 16)
+
+    // Применение вычета.Текущий период.Сумма (Графа 16)
     private BigDecimal periodCurrSumm;
 
     public static final String TABLE_NAME = "ndfl_person_deduction";
