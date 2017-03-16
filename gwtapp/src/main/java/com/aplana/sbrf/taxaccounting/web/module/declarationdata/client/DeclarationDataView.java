@@ -96,7 +96,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiField
     DropdownButton printAnchor;
 
-    private LinkButton printToXml, printToExcel;
+    private LinkButton printToXml, downloadExcelButton;
+    private HorizontalPanel printToExcelPanel;
 
     private Timer timerExcel, timerXML, timerPDF, timerAccept, timerSpecific, timerCheck;
     private boolean isVisiblePDF;
@@ -117,17 +118,33 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             }
         });
 
-        printToExcel = new LinkButton("Сформировать в XLSX");
+        LinkButton printToExcel = new LinkButton("Сформировать в XLSX");
         printToExcel.setHeight("20px");
         printToExcel.setDisableImage(true);
         printToExcel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().viewReport(false, DeclarationDataReportType.EXCEL_DEC);
+                    getUiHandlers().viewReport(false, true, DeclarationDataReportType.EXCEL_DEC);
                 }
             }
         });
+        downloadExcelButton = new LinkButton(" (Скачать)");
+        downloadExcelButton.setHeight("20px");
+        downloadExcelButton.setDisableImage(true);
+        downloadExcelButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().viewReport(false, false, DeclarationDataReportType.EXCEL_DEC);
+                }
+            }
+        });
+        downloadExcelButton.setVisible(false);
+        printToExcelPanel = new HorizontalPanel();
+        printToExcelPanel.add(printToExcel);
+        printToExcelPanel.add(downloadExcelButton);
+
 
         timerExcel = new Timer() {
             @Override
@@ -229,7 +246,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @Override
     public void showDownloadButtons(boolean show) {
-        printToExcel.setVisible(show);
+        printToExcelPanel.setVisible(show);
         printToXml.setVisible(show);
     }
 
@@ -411,7 +428,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiHandler("viewPdf")
     public void onViewPdfButton(ClickEvent event){
         if (isVisiblePDF) {
-            getUiHandlers().viewReport(false, DeclarationDataReportType.PDF_DEC);
+            getUiHandlers().viewReport(false, false, DeclarationDataReportType.PDF_DEC);
         }
     }
 
@@ -430,15 +447,17 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     public void updatePrintReportButtonName(DeclarationDataReportType type, boolean isLoad) {
         if (DeclarationDataReportType.EXCEL_DEC.equals(type)) {
             if (isLoad) {
-                printToExcel.setText("Выгрузить в xlsx");
+//                printToExcel.setText("Выгрузить в xlsx");
+                downloadExcelButton.setVisible(true);
                 timerExcel.cancel();
             } else {
-                printToExcel.setText("Сформировать xlsx");
+                downloadExcelButton.setVisible(true);
+//                printToExcel.setText("Сформировать xlsx");
             }
         } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
-            printToExcel.setVisible(false);
+            printToExcelPanel.setVisible(false);
             if (isLoad) {
-                printToExcel.setVisible(true);
+                printToExcelPanel.setVisible(true);
                 printToXml.setVisible(true);
                 printAnchor.setEnabled(true);
                 timerXML.cancel();
@@ -447,7 +466,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             } else {
                 viewPdf.setVisible(false);
                 printToXml.setVisible(false);
-                printToExcel.setVisible(false);
+                printToExcelPanel.setVisible(false);
                 printAnchor.setEnabled(false);
                 timerSpecific.cancel();
             }
@@ -519,31 +538,49 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     public void setSubreports(List<DeclarationSubreport> subreports) {
         printAnchor.clear();
         printAnchor.addItem(DeclarationDataReportType.XML_DEC.getReportType().getName(), printToXml);
-        printAnchor.addItem(DeclarationDataReportType.EXCEL_DEC.getReportType().getName(), printToExcel);
+        printAnchor.addItem(DeclarationDataReportType.EXCEL_DEC.getReportType().getName(), printToExcelPanel);
 
         for(final DeclarationSubreport subreport: subreports) {
-            LinkButton linkButton = new LinkButton("Сформировать \"" + subreport.getName() + "\"");
-            linkButton.setHeight("20px");
-            linkButton.setDisableImage(true);
-            linkButton.addClickHandler(new ClickHandler() {
+            LinkButton createButton = new LinkButton("Сформировать \"" + subreport.getName() + "\"");
+            createButton.setHeight("20px");
+            createButton.setDisableImage(true);
+            createButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     if (getUiHandlers() != null) {
-                        getUiHandlers().viewReport(false, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport));
+                        getUiHandlers().viewReport(false, true, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport));
                     }
                 }
             });
-            printAnchor.addItem(subreport.getAlias(), linkButton);
+            LinkButton downloadButton = new LinkButton(" (Скачать)");
+            downloadButton.setHeight("20px");
+            downloadButton.setDisableImage(true);
+            downloadButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().viewReport(false, false, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport));
+                    }
+                }
+            });
+            downloadButton.setVisible(false);
+            HorizontalPanel horizontalPanel = new HorizontalPanel();
+            horizontalPanel.add(createButton);
+            horizontalPanel.add(downloadButton);
+            printAnchor.addItem(subreport.getAlias(), horizontalPanel);
         }
     }
 
-    public void updatePrintSubreportButtonName(DeclarationSubreport subreport, boolean exist) {
-        LinkButton linkButton = (LinkButton) printAnchor.getItem(subreport.getAlias());
-        if (linkButton != null) {
+    @Override
+    public void updatePrintSubreportButtonName(DeclarationSubreport subreport, boolean exist, String title) {
+        LinkButton downloadButton = (LinkButton)((HorizontalPanel) printAnchor.getItem(subreport.getAlias())).getWidget(1);
+        if (downloadButton != null) {
             if (exist) {
-                linkButton.setText("Выгрузить \"" + subreport.getName() + "\"");
+                downloadButton.setTitle(title);
+                downloadButton.setVisible(true);
             } else {
-                linkButton.setText("Сформировать \"" + subreport.getName() + "\"");
+                downloadButton.setTitle("");
+                downloadButton.setVisible(false);
             }
         }
     }

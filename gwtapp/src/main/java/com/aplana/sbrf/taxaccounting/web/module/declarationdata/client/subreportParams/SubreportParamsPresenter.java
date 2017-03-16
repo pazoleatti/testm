@@ -141,6 +141,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
             action.setTaxType(declarationDataPresenter.getTaxType());
             action.setType(declarationSubreport.getAlias());
             action.setSubreportParamValues(getView().getFieldsValues());
+            action.setCreate(true);
             if (selectRecord) {
                 action.setSelectedRow(getView().getSelectedRow());
             }

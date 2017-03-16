@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
+import org.apache.poi.ss.usermodel.CellStyle
 import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
@@ -72,7 +73,8 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 // Настройки подразделений по НДФЛ (таблица)
 @Field final long REF_BOOK_NDFL_DETAIL_ID = RefBook.Id.NDFL_DETAIL.id
 
-@Field int REF_BOOK_OKTMO_ID = 96;
+@Field final int REF_BOOK_OKTMO_ID = 96;
+@Field final int REPORT_PERIOD_TYPE_ID = 8
 
 @Field final FORM_NAME_NDFL6 = "НДФЛ6"
 @Field final FORM_NAME_NDFL2 = "НДФЛ2"
@@ -111,7 +113,7 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field final ATTR_SUM_DOHOD2 = "СумДоход"
 
 @Field final String DATE_FORMAT_UNDERLINE = "yyyyMMdd"
-@Field final String DATE_FORMAT_DOT = "dd.MM.yyyy"
+@Field final String DATE_FORMAT_DOTTED = "dd.MM.yyyy"
 
 // Кэш провайдеров
 @Field def providerCache = [:]
@@ -185,7 +187,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
     ) {
         Документ(
                 КНД: "1151099",
-                ДатаДок: currDate.format(DATE_FORMAT_DOT),
+                ДатаДок: currDate.format(DATE_FORMAT_DOTTED),
                 Период: getPeriod(departmentParamIncomeRow, periodCode),
                 ОтчетГод: reportPeriod.taxPeriod.year,
                 КодНО: departmentParamIncomeRow?.TAX_ORGAN_CODE?.value,
@@ -397,9 +399,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                 }
                             }
                             СумДата(
-                                    ДатаФактДох: incomeAccruedDate?.format(DATE_FORMAT_DOT),
-                                    ДатаУдержНал: taxDate?.format(DATE_FORMAT_DOT),
-                                    СрокПрчслНал: transferDate?.format(DATE_FORMAT_DOT),
+                                    ДатаФактДох: incomeAccruedDate?.format(DATE_FORMAT_DOTTED),
+                                    ДатаУдержНал: taxDate?.format(DATE_FORMAT_DOTTED),
+                                    СрокПрчслНал: transferDate?.format(DATE_FORMAT_DOTTED),
                                     ФактДоход: ScriptUtils.round(incomePayoutSumm, 2),
                                     УдержНал: withholdingTax
                             ) {}
@@ -445,7 +447,7 @@ class PairPersonOperationId {
 }
 
 def saveFileInfo(currDate, fileName) {
-    def fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".XML", new Date())
+    def fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".xml", new Date())
     def createUser = declarationService.getSystemUserInfo().getUser()
 
     def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
@@ -694,19 +696,19 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     def sumStavkaNodes6 = fileNode6Ndfl.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
     sumStavkaNodes6.each { sumStavkaNode6 ->
         ScriptUtils.checkInterrupted()
-        def stavka6 = sumStavkaNode6.attributes()[ATTR_RATE] ?: 0
+        def stavka6 = Integer.valueOf(sumStavkaNode6.attributes()[ATTR_RATE]) ?: 0
 
         // МежДок4
-        def nachislDoh6 = sumStavkaNode6.attributes()[ATTR_NACHISL_DOH6] ?: 0
+        def nachislDoh6 = ScriptUtils.round(Double.valueOf(sumStavkaNode6.attributes()[ATTR_NACHISL_DOH6]), 2) ?: 0
         mapNachislDoh6.put(stavka6, nachislDoh6)
 
         // МежДок5
         if (stavka6 == RATE_THIRTEEN) {
-            nachislDohDiv6 = sumStavkaNode6.attributes()[ATTR_NACHISL_DOH_DIV6] ?: 0
+            nachislDohDiv6 = ScriptUtils.round(Double.valueOf(sumStavkaNode6.attributes()[ATTR_NACHISL_DOH_DIV6]), 2) ?: 0
         }
 
         // МежДок6
-        def ischislNal6 = sumStavkaNode6.attributes()[ATTR_ISCHISL_NAL6] ?: 0
+        def ischislNal6 = Long.valueOf(sumStavkaNode6.attributes()[ATTR_ISCHISL_NAL6]) ?: 0
         mapIschislNal6.put(stavka6, ischislNal6)
     }
 
@@ -714,10 +716,10 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     obobshPokazNodes6.each { obobshPokazNode6 ->
         ScriptUtils.checkInterrupted()
         // МежДок7
-        neUderzNalIt6 = obobshPokazNode6.attributes()[ATTR_NE_UDERZ_NAL_IT6] ?: 0
+        neUderzNalIt6 = Long.valueOf(obobshPokazNode6.attributes()[ATTR_NE_UDERZ_NAL_IT6]) ?: 0
 
         // МежДок8
-        kolFl6 = obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6] ?: 0
+        kolFl6 = Integer.valueOf(obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6]) ?: 0
     }
 
     // Суммы значений всех 2-НДФЛ сравниваются с одним 6-НДФЛ
@@ -733,7 +735,7 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
         def svedDohNodes = fileNode2Ndfl.depthFirst().grep { it.name() == NODE_NAME_SVED_DOH2 }
         svedDohNodes.each { svedDohNode ->
             ScriptUtils.checkInterrupted()
-            def stavka2 = svedDohNode.attributes()[ATTR_RATE] ?: 0
+            def stavka2 = Integer.valueOf(svedDohNode.attributes()[ATTR_RATE]) ?: 0
 
             // МежДок4
             def sumDohObch2 = mapSumDohObch2.get(stavka2)
@@ -745,11 +747,11 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
 
             def sumItNalPerNodes = svedDohNode.depthFirst().grep { it.name() == NODE_NAME_SUM_IT_NAL_PER2 }
             sumItNalPerNodes.each { sumItNalPerNode ->
-                sumDohObch2 += sumItNalPerNode.attributes()[ATTR_SUM_DOH_OBSH2] ?: 0
-                nalIschisl2 += sumItNalPerNode.attributes()[ATTR_NAL_ISCHISL2] ?: 0
+                sumDohObch2 += ScriptUtils.round(Double.valueOf(sumItNalPerNode.attributes()[ATTR_SUM_DOH_OBSH2]), 2) ?: 0
+                nalIschisl2 += Long.valueOf(sumItNalPerNode.attributes()[ATTR_NAL_ISCHISL2]) ?: 0
 
                 // МежДок7
-                nalNeUderz2 += sumItNalPerNode.attributes()[ATTR_NAL_NE_UDERZ2] ?: 0
+                nalNeUderz2 += Long.valueOf(sumItNalPerNode.attributes()[ATTR_NAL_NE_UDERZ2]) ?: 0
             }
             mapSumDohObch2.put(stavka2, sumDohObch2)
             mapNalIschisl2.put(stavka2, nalIschisl2)
@@ -770,14 +772,15 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     mapNachislDoh6.each { stavka6, nachislDoh6 ->
         ScriptUtils.checkInterrupted()
         def sumDohObch2 = mapSumDohObch2.get(stavka6)
-        if (Double.valueOf(nachislDoh6) != Double.valueOf(sumDohObch2)) {
+
+        if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
             def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по ставке " + stavka6
             logger.error(msgErrorRes)
         }
     }
 
     // МежДок5
-    if (Double.valueOf(nachislDohDiv6) != Double.valueOf(sumDohDivObch2)) {
+    if (ScriptUtils.round(nachislDohDiv6, 2) != ScriptUtils.round(sumDohDivObch2, 2)) {
         def msgErrorRes = sprintf(msgError, "сумме начисленного дохода в виде дивидендов")
         logger.error(msgErrorRes)
     }
@@ -786,20 +789,20 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
 
     mapIschislNal6.each { stavka6, ischislNal6 ->
         def nalIschisl2 = mapNalIschisl2.get(stavka6)
-        if (Long.valueOf(ischislNal6) != Long.valueOf(nalIschisl2)) {
+        if (ischislNal6 != nalIschisl2) {
             def msgErrorRes = sprintf(msgError, "сумме налога исчисленного") + " по ставке " + stavka6
             logger.error(msgErrorRes)
         }
     }
 
     // МежДок7
-    if (Long.valueOf(neUderzNalIt6) != Long.valueOf(nalNeUderz2)) {
+    if (neUderzNalIt6 != nalNeUderz2) {
         def msgErrorRes = sprintf(msgError, "сумме налога, не удержанная налоговым агентом")
         logger.error(msgErrorRes)
     }
 
     // МежДок8
-    if (Integer.valueOf(kolFl6) != Integer.valueOf(kolFl2)) {
+    if (kolFl6 != kolFl2) {
         def msgErrorRes = sprintf(msgError, "количеству физических лиц, получивших доход")
         logger.error(msgErrorRes)
     }
@@ -1397,8 +1400,8 @@ def createPrimaryRnuWithErrors() {
         ndflPersonPrimary.incomes.add(ndflPersonIncomePrimary)
     }
 
-    ndflPersonDeductionFromRNUConsolidatedList.each
-    ScriptUtils.checkInterrupted() {
+    ndflPersonDeductionFromRNUConsolidatedList.each {
+        ScriptUtils.checkInterrupted()
         NdflPersonDeduction ndflPersonDeductionPrimary = ndflPersonService.getDeduction(it.sourceId)
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonDeductionPrimary.ndflPersonId)
         ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)

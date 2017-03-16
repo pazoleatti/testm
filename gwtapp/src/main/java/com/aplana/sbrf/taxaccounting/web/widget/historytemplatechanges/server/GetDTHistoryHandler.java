@@ -19,7 +19,7 @@ import java.util.List;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasRole('N_ROLE_CONF', 'F_ROLE_CONF')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class GetDTHistoryHandler extends AbstractActionHandler<GetDTHistoryAction, GetDTHistoryResult> {
 
     @Autowired
