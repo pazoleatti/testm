@@ -2435,38 +2435,6 @@ def checkDataCommon(
     println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
 
-    time = System.currentTimeMillis();
-    for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
-
-        ScriptUtils.checkInterrupted();
-
-        def fioAndInp = ndflPersonFLMap.get(ndflPersonDeduction.ndflPersonId)
-
-        // Общ6 Принадлежность дат налоговых вычетов к отчетному периоду
-        // Документ о праве на налоговый вычет.Дата (Обязательное поле)
-        if (ndflPersonDeduction.notifDate < getReportPeriodStartDate() || ndflPersonDeduction.notifDate > getReportPeriodEndDate()) {
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_NOTIF_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Начисленный доход.Дата (Обязательное поле)
-        if (ndflPersonDeduction.incomeAccrued < getReportPeriodStartDate() || ndflPersonDeduction.incomeAccrued > getReportPeriodEndDate()) {
-            //TODO turn_to_error
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_INCOME_ACCRUED, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Применение вычета.Предыдущий период.Дата (Необязательное поле)
-        if (ndflPersonDeduction.periodPrevDate != null &&
-                (ndflPersonDeduction.periodPrevDate < getReportPeriodStartDate() || ndflPersonDeduction.periodPrevDate > getReportPeriodEndDate())) {
-            //TODO turn_to_error
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_PERIOD_PREV_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-        // Применение вычета.Текущий период.Дата (Обязательное поле)
-        if (ndflPersonDeduction.periodCurrDate < getReportPeriodStartDate() || ndflPersonDeduction.periodCurrDate > getReportPeriodEndDate()) {
-            //TODO turn_to_error
-            logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "", C_PERIOD_CURR_DATE, fioAndInp, MESSAGE_ERROR_DATE);
-        }
-    }
-    println "Общие проверки / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
-    logger.info("Общие проверки / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
-
     ScriptUtils.checkInterrupted();
 
     // Общ8 Отсутствие пропусков и повторений в нумерации строк
