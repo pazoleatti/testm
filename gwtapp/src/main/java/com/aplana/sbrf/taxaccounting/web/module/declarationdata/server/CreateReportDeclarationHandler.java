@@ -66,8 +66,8 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
         Logger logger = new Logger();
         String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
-            String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ddReportType);
-            if (uuid != null) {
+            final String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ddReportType);
+            if (uuid != null && !action.isCreate()) {
                 result.setStatus(CreateAsyncTaskStatus.EXIST);
                 return result;
             } else {
@@ -110,6 +110,9 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
 
                         @Override
                         public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                            if (uuid != null) {
+                                reportService.deleteDec(uuid);
+                            }
                         }
 
                         @Override

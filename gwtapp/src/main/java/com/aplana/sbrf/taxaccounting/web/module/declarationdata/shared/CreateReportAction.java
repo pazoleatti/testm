@@ -21,6 +21,7 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
     private String type;
     private Map<String, Object> subreportParamValues;
     private DataRow<Cell> selectedRow;
+    private boolean create;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -68,6 +69,14 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     public void setSelectedRow(DataRow<Cell> selectedRow) {
         this.selectedRow = selectedRow;
+    }
+
+    public boolean isCreate() {
+        return create;
+    }
+
+    public void setCreate(boolean create) {
+        this.create = create;
     }
 
     @Override

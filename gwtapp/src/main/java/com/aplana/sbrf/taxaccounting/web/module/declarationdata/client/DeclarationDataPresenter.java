@@ -124,7 +124,7 @@ public class DeclarationDataPresenter
 
         void setSubreports(List<DeclarationSubreport> subreports);
 
-        void updatePrintSubreportButtonName(DeclarationSubreport subreport, boolean exist);
+        void updatePrintSubreportButtonName(DeclarationSubreport subreport, boolean exist, String title);
 
         void setVisiblePDF(boolean isVisiblePDF);
 
@@ -324,15 +324,15 @@ public class DeclarationDataPresenter
                     @Override
                     public void onSuccess(TimerSubreportResult result) {
                         for(DeclarationSubreport subreport: subreports) {
-                            TimerSubreportResult.StatusReport status = result.getMapExistReport().get(subreport.getAlias());
+                            TimerSubreportResult.Status status = result.getMapExistReport().get(subreport.getAlias());
                             if (status != null) {
-                                switch (status) {
+                                switch (status.getStatusReport()) {
                                     case EXIST:
-                                        getView().updatePrintSubreportButtonName(subreport, true);
+                                        getView().updatePrintSubreportButtonName(subreport, true, status.getCreateDate());
                                         break;
                                     case LOCKED:
                                     case NOT_EXIST:
-                                        getView().updatePrintSubreportButtonName(subreport, false);
+                                        getView().updatePrintSubreportButtonName(subreport, false, null);
                                         break;
                                 }
                             }
@@ -575,7 +575,7 @@ public class DeclarationDataPresenter
     }
 
     @Override
-    public void viewReport(final boolean force, final DeclarationDataReportType type) {
+    public void viewReport(final boolean force, final boolean create, final DeclarationDataReportType type) {
         if (type.isSubreport() && !type.getSubreport().getDeclarationSubreportParams().isEmpty()) {
             // Открываем форму со списком параметров для спец. отчета
             subreportParamsPresenter.setSubreport(type.getSubreport());
@@ -587,6 +587,7 @@ public class DeclarationDataPresenter
             action.setForce(force);
             action.setTaxType(taxType);
             action.setType(type.getReportAlias());
+            action.setCreate(create);
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<CreateReportResult>() {
                         @Override
@@ -599,7 +600,7 @@ public class DeclarationDataPresenter
                                 Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                     @Override
                                     public void yes() {
-                                        viewReport(true, type);
+                                        viewReport(true, create, type);
                                     }
                                 });
                             } else if (CreateAsyncTaskStatus.EXIST.equals(result.getStatus())) {

@@ -12,7 +12,7 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void accept(boolean accepted, boolean force, boolean cancelTask);
 	void delete();
 	void check(boolean force);
-    void viewReport(boolean force, DeclarationDataReportType type);
+    void viewReport(boolean force, boolean create, DeclarationDataReportType type);
 	void downloadXml();
 	void onInfoClicked();
     TaxType getTaxType();
