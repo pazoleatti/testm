@@ -13,66 +13,97 @@ import java.util.*;
  */
 public class NdflPerson extends IdentityObject<Long> {
 
-    /**
-     * Порядковый номер строки
-     */
+    // №пп
     private Integer rowNum;
 
-    /**
-     * Ссылка на справочник физлиц
-     */
+    // Физическое лицо
     private Long personId;
 
-    /**
-     * Идентификатор ФЛ REF_BOOK_PERSON.RECORD_ID
-     */
+    // Идентификатор ФЛ REF_BOOK_PERSON.RECORD_ID
     private Long recordId;
 
-    /**
-     * Ссылка на декларацию к которой относятся данные
-     */
+    // Идентификатор налоговой формы к которой относятся данные
     private Long declarationDataId;
+
     // Уникальный код клиента
     private String inp;
+
     // СНИЛС
     private String snils;
+
+    // Налогоплательщик.Фамилия
     private String lastName;
+
+    // Налогоплательщик.Имя
     private String firstName;
+
+    // Налогоплательщик.Отчество
     private String middleName;
+
+    // Налогоплательщик.Дата рождения
     private Date birthDay;
-    // Цифровой код гражданства (Графа 7)
+
+    // Гражданство (код страны) (Графа 7)
     private String citizenship;
+
+    // ИНН.В Российской федерации
     private String innNp;
+
+    // ИНН.В стране гражданства
     private String innForeign;
-    // Код вида документа
+
+    // Документ удостоверяющий личность.Код
     private String idDocType;
-    // Серия и номер документа
+
+    // Документ удостоверяющий личность.Номер
     private String idDocNumber;
-    // Cтатус налогоплательщика (Графа 12)
+
+    // Cтатус (Графа 12)
     private String status;
+
+    // Адрес регистрации в Российской Федерации.Индекс
     private String postIndex;
-    // Код Региона
+
+    // Адрес регистрации в Российской Федерации.Код субъекта
     private String regionCode;
-    // Район
+
+    // Адрес регистрации в Российской Федерации.Район
     private String area;
-    // Город
+
+    // Адрес регистрации в Российской Федерации.Город
     private String city;
-    // Населенный пункт
+
+    // Адрес регистрации в Российской Федерации.Населенный пункт
     private String locality;
-    // Улица
+
+    // Адрес регистрации в Российской Федерации.Улица
     private String street;
-    // Дом
+
+    // Адрес регистрации в Российской Федерации.Дом
     private String house;
-    // Корпус
+
+    // Адрес регистрации в Российской Федерации.Корпус
     private String building;
-    // Квартира
+
+    // Адрес регистрации в Российской Федерации.Квартира
     private String flat;
+
+    // Код страны проживания вне РФ
     private String countryCode;
+
+    // Адрес проживания вне РФ
     private String address;
+
+    // Дополнительная информация
     private String additionalData;
 
+    // Сведения о доходах физического лица
     private List<NdflPersonIncome> incomes;
+
+    // Стандартные, социальные и имущественные налоговые вычеты
     private List<NdflPersonDeduction> deductions;
+
+    // Cведения о доходах в виде авансовых платежей
     private List<NdflPersonPrepayment> prepayments;
 
     public NdflPerson() {
