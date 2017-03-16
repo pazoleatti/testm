@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
@@ -140,9 +139,14 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 }
             }
         });
+
+        HTML separator = new HTML();
+        separator.setWidth("5px");
+
         downloadExcelButton.setVisible(false);
         printToExcelPanel = new HorizontalPanel();
         printToExcelPanel.add(printToExcel);
+        printToExcelPanel.add(separator);
         printToExcelPanel.add(downloadExcelButton);
 
 
@@ -444,15 +448,15 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void updatePrintReportButtonName(DeclarationDataReportType type, boolean isLoad) {
+    public void updatePrintReportButtonName(DeclarationDataReportType type, boolean isLoad, String title) {
         if (DeclarationDataReportType.EXCEL_DEC.equals(type)) {
             if (isLoad) {
-//                printToExcel.setText("Выгрузить в xlsx");
                 downloadExcelButton.setVisible(true);
+                downloadExcelButton.setTitle(title);
                 timerExcel.cancel();
             } else {
                 downloadExcelButton.setVisible(true);
-//                printToExcel.setText("Сформировать xlsx");
+                downloadExcelButton.setTitle("");
             }
         } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
             printToExcelPanel.setVisible(false);
@@ -552,9 +556,14 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                     }
                 }
             });
+
+            HTML separator = new HTML();
+            separator.setWidth("5px");
+
             LinkButton downloadButton = new LinkButton(" (Скачать)");
             downloadButton.setHeight("20px");
             downloadButton.setDisableImage(true);
+            downloadButton.setVisible(false);
             downloadButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -563,9 +572,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                     }
                 }
             });
-            downloadButton.setVisible(false);
+
             HorizontalPanel horizontalPanel = new HorizontalPanel();
             horizontalPanel.add(createButton);
+            horizontalPanel.add(separator);
             horizontalPanel.add(downloadButton);
             printAnchor.addItem(subreport.getAlias(), horizontalPanel);
         }
@@ -573,7 +583,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @Override
     public void updatePrintSubreportButtonName(DeclarationSubreport subreport, boolean exist, String title) {
-        LinkButton downloadButton = (LinkButton)((HorizontalPanel) printAnchor.getItem(subreport.getAlias())).getWidget(1);
+        LinkButton downloadButton = (LinkButton)((HorizontalPanel) printAnchor.getItem(subreport.getAlias())).getWidget(2);
         if (downloadButton != null) {
             if (exist) {
                 downloadButton.setTitle(title);
