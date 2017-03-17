@@ -30,6 +30,7 @@ import java.util.regex.Pattern
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверить
         checkData()
+        checkDataConsolidated()
         break
     case FormDataEvent.CALCULATE: //консолидирование с формированием фиктивного xml
         clearData()
@@ -70,9 +71,7 @@ Map<Long, Long> getFiasAddressIdsMap() {
  * {@link form_template.ndfl.consolidated_rnu_ndfl.v2016.script#checkDataDeduction(java.util.ArrayList, java.util.ArrayList, java.util.ArrayList)}
  *
  */
-
-@Field final FormDataKind FORM_DATA_KIND_PRIMARY = FormDataKind.PRIMARY;
-@Field final FormDataKind FORM_DATA_KIND_CONSOLIDATED = FormDataKind.CONSOLIDATED;
+@Field final FormDataKind FORM_DATA_KIND = FormDataKind.CONSOLIDATED;
 
 /**
  * Идентификатор шаблона РНУ-НДФЛ (консолидированная)
@@ -1039,8 +1038,81 @@ String capitalize(String str) {
             .append(str.substring(1).toLowerCase())
             .toString();
 }
+
+/**
+ * Проверки которые относятся только к консолидированной
+ * @return
+ */
+def checkDataConsolidated(){
+
+    // Общ12
+    if (FORM_DATA_KIND.equals(FormDataKind.CONSOLIDATED)) {
+        // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
+        def mapDepartmentNotExistRnu = [
+                4  : 'Байкальский банк',
+                8  : 'Волго-Вятский банк',
+                20 : 'Дальневосточный банк',
+                27 : 'Западно-Сибирский банк',
+                32 : 'Западно-Уральский банк',
+                37 : 'Московский банк',
+                44 : 'Поволжский банк',
+                52 : 'Северный банк',
+                64 : 'Северо-Западный банк',
+                82 : 'Сибирский банк',
+                88 : 'Среднерусский банк',
+                97 : 'Уральский банк',
+                113: 'Центральный аппарат ПАО Сбербанк',
+                102: 'Центрально-Чернозёмный банк',
+                109: 'Юго-Западный банк'
+        ]
+        def listDepartmentNotAcceptedRnu = []
+        List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
+        for (DeclarationData dd : declarationDataList) {
+            // Подразделение
+            Long departmentCode = departmentService.get(dd.departmentId)?.code
+            mapDepartmentNotExistRnu.remove(departmentCode)
+
+            // Если налоговая форма не принята
+            if (!dd.state.equals(State.ACCEPTED)) {
+                listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
+            }
+        }
+
+        // Период
+        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+        def periodCode = period?.CODE?.stringValue
+        def periodName = period?.NAME?.stringValue
+        def calendarStartDate = reportPeriod?.calendarStartDate
+
+        if (!mapDepartmentNotExistRnu.isEmpty()) {
+            def listDepartmentNotExistRnu = []
+            mapDepartmentNotExistRnu.each {
+                listDepartmentNotExistRnu.add(it.value)
+            }
+            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
+                        не созданы экземпляры консолидированных налоговых форм для следующих ТБ: "${
+                listDepartmentNotExistRnu.join("\", \"")
+            }".
+                        Данные этих форм не включены в отчетность!""")
+        }
+        if (!listDepartmentNotAcceptedRnu.isEmpty()) {
+            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
+                        имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: "${
+                listDepartmentNotAcceptedRnu.join("\", \"")
+            }".
+                        , для которых в системе существуют КНФ в текущем периоде, состояние которых <> "Принята">. Данные этих форм не включены в отчетность!""")
+        }
+    }
+
+}
+
+
+
+
+
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
-//если проверки различаются то используется параметр {@link #FORM_DATA_KIND_CONSOLIDATED}
+//если проверки различаются то используется параметр {@link #FORM_DATA_KIND}
 //При внесении изменений учитывается что эта чать скрипта используется(копируется) и в первичной и в консолидированной
 
 //>------------------< REF BOOK >----------------------<
@@ -1827,7 +1899,7 @@ def checkDataReference(
                     logger.warn(MESSAGE_ERROR_NOT_FOUND_REF, T_PERSON, ndflPerson.rowNum ?: "", C_MIDDLE_NAME, fioAndInp, C_MIDDLE_NAME, R_PERSON);
                 }
 
-                if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                     // Спр12 ИНП первичная (Обязательное поле)
                     def inpList = inpMap.get(personRecord.get("id")?.value)
                     if (!(ndflPerson.inp == personRecord.get(RF_SNILS)?.value || inpList?.contains(ndflPerson.inp))) {
@@ -1869,7 +1941,7 @@ def checkDataReference(
                 }
 
 
-                if (FORM_DATA_KIND_PRIMARY.equals(FormDataKind.PRIMARY)) {
+                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                     // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)
                     def allDocList = dulMap.get(personRecord.get("id")?.value)
                     // Вид документа
@@ -2344,12 +2416,12 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (kppList == null || !kppList.contains(ndflPersonIncome.kpp)) {
                 Department department = departmentService.get(declarationData.departmentId)
                 if (kppList == null) {
-                    logger.error("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Графа '$C_OKTMO' = '${ndflPersonIncome.oktmo}'." +
+                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Графа '$C_OKTMO' = '${ndflPersonIncome.oktmo}'." +
                             " Текст ошибки: Указанные значения не найдены в Справочнике 'Настройки подразделений' для " +
                             " ${department ? department.name : ""}"
                     )
                 } else {
-                    logger.error("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Графа '$C_KPP' = '${ndflPersonIncome.kpp}'." +
+                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Графа '$C_KPP' = '${ndflPersonIncome.kpp}'." +
                             " Текст ошибки: Указанные значения не найдены в Справочнике 'Настройки подразделений' для " +
                             " ${department ? department.name : ""}"
                     )
@@ -2359,66 +2431,6 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     }
 
     ScriptUtils.checkInterrupted();
-
-    // Общ12
-    if (FORM_DATA_KIND_CONSOLIDATED.equals(FormDataKind.CONSOLIDATED)) {
-        // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
-        def mapDepartmentNotExistRnu = [
-                4  : 'Байкальский банк',
-                8  : 'Волго-Вятский банк',
-                20 : 'Дальневосточный банк',
-                27 : 'Западно-Сибирский банк',
-                32 : 'Западно-Уральский банк',
-                37 : 'Московский банк',
-                44 : 'Поволжский банк',
-                52 : 'Северный банк',
-                64 : 'Северо-Западный банк',
-                82 : 'Сибирский банк',
-                88 : 'Среднерусский банк',
-                97 : 'Уральский банк',
-                113: 'Центральный аппарат ПАО Сбербанк',
-                102: 'Центрально-Чернозёмный банк',
-                109: 'Юго-Западный банк'
-        ]
-        def listDepartmentNotAcceptedRnu = []
-        List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
-        for (DeclarationData dd : declarationDataList) {
-            // Подразделение
-            Long departmentCode = departmentService.get(dd.departmentId)?.code
-            mapDepartmentNotExistRnu.remove(departmentCode)
-
-            // Если налоговая форма не принята
-            if (!dd.state.equals(State.ACCEPTED)) {
-                listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
-            }
-        }
-
-        // Период
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-        def periodCode = period?.CODE?.stringValue
-        def periodName = period?.NAME?.stringValue
-        def calendarStartDate = reportPeriod?.calendarStartDate
-
-        if (!mapDepartmentNotExistRnu.isEmpty()) {
-            def listDepartmentNotExistRnu = []
-            mapDepartmentNotExistRnu.each {
-                listDepartmentNotExistRnu.add(it.value)
-            }
-            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
-                        не созданы экземпляры консолидированных налоговых форм для следующих ТБ: "${
-                listDepartmentNotExistRnu.join("\", \"")
-            }".
-                        Данные этих форм не включены в отчетность!""")
-        }
-        if (!listDepartmentNotAcceptedRnu.isEmpty()) {
-            logger.warn("""За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")} года
-                        имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: "${
-                listDepartmentNotAcceptedRnu.join("\", \"")
-            }".
-                        , для которых в системе существуют КНФ в текущем периоде, состояние которых <> "Принята">. Данные этих форм не включены в отчетность!""")
-        }
-    }
 
     println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");

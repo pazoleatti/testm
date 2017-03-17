@@ -97,6 +97,11 @@
         padding-left: 14px;
         padding-right: 6px;
     }
+
+    .downloadLinkButton {
+        border-spacing: 5px 0;
+    }
+
 </ui:style>
 
     <fm:MainContainer>

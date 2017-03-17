@@ -112,7 +112,7 @@ public class DeclarationDataPresenter
 
         void stopTimerReport(DeclarationDataReportType type);
 
-        void updatePrintReportButtonName(DeclarationDataReportType type, boolean isLoad);
+        void updatePrintReportButtonName(DeclarationDataReportType type, boolean isLoad, String title);
 
         void setPdfPage(int page);
 
@@ -264,8 +264,8 @@ public class DeclarationDataPresenter
                             //перезапуск таймера XML, выполняется если был запущен таймер ожидания PDF при этом нету XML
                             getView().stopTimerReport(type);
                             onTimerReport(DeclarationDataReportType.XML_DEC, false);
-                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
-                            getView().updatePrintReportButtonName(type, true);
+                        } else if (result.getExistReport().getStatusReport().equals(TimerReportResult.StatusReport.EXIST)) {
+                            getView().updatePrintReportButtonName(type, true, result.getExistReport().getCreateDate());
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {
                                 onTimerReport(DeclarationDataReportType.PDF_DEC, false);
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);
@@ -278,7 +278,7 @@ public class DeclarationDataPresenter
                                             " Форма предварительного просмотра недоступна");
                                 }
                             }
-                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и нет блокировки(т.е. задачу отменили или ошибка при формировании)
+                        } else if (result.getExistReport().getStatusReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и нет блокировки(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(type);
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {
                                 getView().showNoPdf("Область предварительного просмотра");
@@ -291,8 +291,8 @@ public class DeclarationDataPresenter
                                             " Форма предварительного просмотра недоступна");
                                 }
                             }
-                            getView().updatePrintReportButtonName(type, false);
-                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.LIMIT)) {
+                            getView().updatePrintReportButtonName(type, false, null);
+                        } else if (result.getExistReport().getStatusReport().equals(TimerReportResult.StatusReport.LIMIT)) {
                             getView().stopTimerReport(type);
                             if (DeclarationDataReportType.PDF_DEC.equals(type)) {
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
@@ -300,7 +300,7 @@ public class DeclarationDataPresenter
                             } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
                                 getView().showNoPdf("Область предварительного просмотра");
                             }
-                            getView().updatePrintReportButtonName(type, false);
+                            getView().updatePrintReportButtonName(type, false, null);
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {
                                 getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение налоговой формы данными":"Заполнение уведомления данными");
@@ -308,7 +308,7 @@ public class DeclarationDataPresenter
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
                                         " Идет формирование формы предварительного просмотра");
                             }
-                            getView().updatePrintReportButtonName(type, false);
+                            getView().updatePrintReportButtonName(type, false, null);
                             getView().startTimerReport(type);
                         }
                     }
