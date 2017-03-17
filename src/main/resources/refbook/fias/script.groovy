@@ -29,7 +29,15 @@ switch (formDataEvent) {
 @Field
 def BATCH_SIZE_MAX = 1000
 
+def calcTimeMillis(long time) {
+    long currTime = System.currentTimeMillis();
+    return " (" + (currTime - time) + " ms)";
+}
+
 void importData() {
+
+    long time = System.currentTimeMillis();
+    logger.info("Начало импорта данных справочника ФИАС");
 
     //Очистка данных перед импортом
     importFiasDataService.clearAll()
@@ -39,24 +47,8 @@ void importData() {
     //Строим карту Guid адресных объектов, заранее так как будет нужна иерархия
     def addressObjectGuidsMap = buidGuidsMap(getInputStream(archive, itemsMap, "AS_ADDROBJ_"), QName.valueOf('Object'), QName.valueOf('AOGUID'));
 
-    //Карта содержит guid из таблицы house которые используются в таблице room, сгенерированный id проставляется при импорте таблицы house
-    def houseGuidsMap = buidGuidsMap(getInputStream(archive, itemsMap, "AS_ROOM_"), QName.valueOf('Room'), QName.valueOf('HOUSEGUID'))
 
     //Начинаем заливать данные из таблиц справочника
-    startImport(getInputStream(archive, itemsMap, "AS_OPERSTAT_"),
-            QName.valueOf('OperationStatus'),
-            RefBook.Table.FIAS_OPERSTAT.getTable(),
-            { generatedId, attr ->
-                operationStatusRowMapper(generatedId, attr)
-            })
-
-    startImport(getInputStream(archive, itemsMap, "AS_SOCRBASE_"),
-            QName.valueOf('AddressObjectType'),
-            RefBook.Table.FIAS_SOCRBASE.getTable(),
-            { generatedId, attr ->
-                addressObjectTypeRowMapper(generatedId, attr)
-            })
-
     startImport(getInputStream(archive, itemsMap, "AS_ADDROBJ_"),
             QName.valueOf('Object'),
             RefBook.Table.FIAS_ADDR_OBJECT.getTable(),
@@ -64,32 +56,14 @@ void importData() {
                 addressObjectRowMapper(generatedId, addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
             })
 
-    startImport(getInputStream(archive, itemsMap, "AS_HOUSE_"),
-            QName.valueOf('House'),
-            RefBook.Table.FIAS_HOUSE.getTable(),
-            { generatedId, attr ->
-                houseRowMapper(generatedId, addressObjectGuidsMap, houseGuidsMap, attr)
-            })
-
-    startImport(getInputStream(archive, itemsMap, "AS_HOUSEINT_"),
-            QName.valueOf('HouseInterval'),
-            RefBook.Table.FIAS_HOUSEINT.getTable(),
-            { generatedId, attr ->
-                houseIntervalRowMapper(generatedId, addressObjectGuidsMap, attr)
-            })
-
-    startImport(getInputStream(archive, itemsMap, "AS_ROOM_"),
-            QName.valueOf('Room'),
-            RefBook.Table.FIAS_ROOM.getTable(),
-            { generatedId, attr ->
-                roomRowMapper(generatedId, houseGuidsMap, attr)
-            })
-
     if (logger.containsLevel(LogLevel.ERROR)) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
     } else {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
     }
+
+    logger.info("Завершение импорта данных справочника ФИАС. Записей загружено: "+addressObjectGuidsMap.size() + calcTimeMillis(time));
+
 }
 
 void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
@@ -138,8 +112,7 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
         reader?.close()
     }
 
-
-    println "Fias ${importedElementName} (${i} rows) import to ${tableName} end (" + (System.currentTimeMillis() - time) + " ms)"
+    println "Fias ${importedElementName} (${i-1} rows) import to ${tableName} end (" + (System.currentTimeMillis() - time) + " ms)"
 }
 
 def createItemsMap(inArchive) {
