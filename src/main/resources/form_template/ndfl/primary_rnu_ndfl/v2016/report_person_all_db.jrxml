@@ -127,7 +127,7 @@
   from ndfl_person pers
  where pers.declaration_data_id=$P{declarationId}
    and pers.id between $P{minPersId} and $P{maxPersId}
- order by pers.inp]]>
+ order by pers.id]]>
 		</queryString>
 		<field name="RN" class="java.math.BigDecimal"/>
 		<field name="INP" class="java.lang.String"/>
@@ -165,7 +165,7 @@
 		<queryString>
 			<![CDATA[select /*+rule*/pers.inp,
        inc.row_num,
-       row_number() over(partition by inc.ndfl_person_id order by inc.id) rn,
+       row_number() over(partition by pers.id order by inc.income_accrued_date,inc.income_payout_date,inc.id) rn,
        inc.operation_id,
        inc.income_code,
        inc.income_type,
@@ -191,7 +191,7 @@
 	from ndfl_person pers join ndfl_person_income inc on (inc.ndfl_person_id=pers.id)
  where pers.declaration_data_id=$P{declarationId}
    and pers.id between $P{minPersId} and $P{maxPersId}
- order by pers.inp,inc.income_accrued_date,inc.income_payout_date]]>
+ order by pers.id,inc.income_accrued_date,inc.income_payout_date]]>
 		</queryString>
 		<field name="INP" class="java.lang.String"/>
 		<field name="ROW_NUM" class="java.math.BigDecimal"/>
@@ -232,7 +232,7 @@
 		<queryString>
 			<![CDATA[select /*+rule*/pers.inp,
        ded.row_num,
-       row_number() over(partition by ded.ndfl_person_id order by ded.id) rn,
+       row_number() over(partition by pers.inp order by pers.inp,ded.income_accrued,ded.id) rn,
        ded.operation_id,
        ded.income_code,
        ded.type_code,
@@ -291,8 +291,7 @@
        prep.notif_source
 	from ndfl_person pers join ndfl_person_prepayment prep on (prep.ndfl_person_id=pers.id)
  where pers.declaration_data_id=$P{declarationId}
-   and pers.id between $P{minPersId} and $P{maxPersId}
-]]>
+   and pers.id between $P{minPersId} and $P{maxPersId}]]>
 		</queryString>
 		<field name="INP" class="java.lang.String"/>
 		<field name="ROW_NUM" class="java.math.BigDecimal"/>
@@ -373,7 +372,7 @@
 				<text><![CDATA[Подразделение]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="2c4439b0-2ca4-4b4c-91ad-9395def5104e" x="98" y="0" width="195" height="18"/>
+				<reportElement uuid="2c4439b0-2ca4-4b4c-91ad-9395def5104e" x="98" y="0" width="261" height="18"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -471,10 +470,10 @@
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:column width="23" uuid="5cbeb33a-043a-42a0-bd64-2121ac6fb67c">
+					<jr:column width="29" uuid="5cbeb33a-043a-42a0-bd64-2121ac6fb67c">
 						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
 							<staticText>
-								<reportElement uuid="ff1a0859-2263-413d-9fcc-278abdbbb48e" x="0" y="0" width="23" height="12">
+								<reportElement uuid="ff1a0859-2263-413d-9fcc-278abdbbb48e" x="0" y="0" width="29" height="12">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 									<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="false"/>
 								</reportElement>
@@ -486,7 +485,7 @@
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
-								<reportElement uuid="8650a1e8-e775-42dc-8446-99e8da8ee835" x="0" y="0" width="23" height="21">
+								<reportElement uuid="8650a1e8-e775-42dc-8446-99e8da8ee835" x="0" y="0" width="29" height="21">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -496,8 +495,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField isBlankWhenNull="true">
-								<reportElement uuid="1cba382a-5c07-4515-830b-063492fe6c82" mode="Transparent" x="0" y="0" width="23" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField pattern="###0" isBlankWhenNull="true">
+								<reportElement uuid="1cba382a-5c07-4515-830b-063492fe6c82" mode="Transparent" x="0" y="0" width="29" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1225,7 +1224,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="10" rowSpan="1">
-							<textField isBlankWhenNull="true">
+							<textField pattern="###0" isBlankWhenNull="true">
 								<reportElement uuid="a8edb663-eef7-411c-9db3-5fabe91db3b1" mode="Transparent" x="0" y="0" width="38" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1904,7 +1903,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="10" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="75f021e1-9d4c-46e2-8c6f-01b081e69834" mode="Transparent" x="0" y="0" width="117" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1939,7 +1938,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="10" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="cc827c86-88c1-4f17-a90a-5ef40cbcbd2b" mode="Transparent" x="0" y="0" width="116" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -2042,10 +2041,10 @@
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:column width="30" uuid="ec66d86e-f623-459e-849c-fe56f1802c94">
+					<jr:column width="39" uuid="ec66d86e-f623-459e-849c-fe56f1802c94">
 						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
 							<staticText>
-								<reportElement uuid="a4a83b49-2014-426e-9ba1-0386e2a684c9" x="0" y="0" width="30" height="10">
+								<reportElement uuid="a4a83b49-2014-426e-9ba1-0386e2a684c9" x="0" y="0" width="39" height="10">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -2056,7 +2055,7 @@
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
 							<staticText>
-								<reportElement uuid="d2472f52-21c8-43c5-8df9-4c553e0411fd" mode="Transparent" x="0" y="0" width="30" height="38" forecolor="#000000" backcolor="#FFFFFF">
+								<reportElement uuid="d2472f52-21c8-43c5-8df9-4c553e0411fd" mode="Transparent" x="0" y="0" width="39" height="38" forecolor="#000000" backcolor="#FFFFFF">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="3. Свед о вычет"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
@@ -2067,8 +2066,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="20b69640-2704-44e8-af6d-72dfc7322ee2" mode="Transparent" x="0" y="0" width="30" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField pattern="###0" isBlankWhenNull="true">
+								<reportElement uuid="20b69640-2704-44e8-af6d-72dfc7322ee2" mode="Transparent" x="0" y="0" width="39" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -2203,7 +2202,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="f3a0890a-c637-4f01-8f24-8100d2a63812" mode="Transparent" x="0" y="0" width="101" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -2306,7 +2305,7 @@ ID операции]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="43745b2c-8493-42eb-9aba-a770b1ddadcf" mode="Transparent" x="0" y="0" width="98" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -2409,7 +2408,7 @@ ID операции]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="682a606e-6c62-4321-ac41-033aa09ff282" mode="Transparent" x="0" y="0" width="102" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -2479,7 +2478,7 @@ ID операции]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="3915affc-2e49-4cfc-9d44-ac511081e446" mode="Transparent" x="0" y="0" width="102" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -2547,10 +2546,10 @@ ID операции]]></text>
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:column width="33" uuid="5c4adc00-3962-4ce0-a758-90944e5e7f34">
+					<jr:column width="39" uuid="5c4adc00-3962-4ce0-a758-90944e5e7f34">
 						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
 							<staticText>
-								<reportElement uuid="9938f532-6522-4066-b2e5-4f776fb98255" x="0" y="0" width="33" height="10">
+								<reportElement uuid="9938f532-6522-4066-b2e5-4f776fb98255" x="0" y="0" width="39" height="10">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -2561,7 +2560,7 @@ ID операции]]></text>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="58" rowSpan="1">
 							<staticText>
-								<reportElement uuid="f8ac86eb-321e-4181-97f6-f0cd1bb6c113" mode="Transparent" x="0" y="0" width="33" height="58" forecolor="#000000" backcolor="#FFFFFF">
+								<reportElement uuid="f8ac86eb-321e-4181-97f6-f0cd1bb6c113" mode="Transparent" x="0" y="0" width="39" height="58" forecolor="#000000" backcolor="#FFFFFF">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="4. Аванс платеж"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
@@ -2572,8 +2571,8 @@ ID операции]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="11" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="78ca01cf-6d09-4fb0-aa24-90741188a62b" mode="Transparent" x="0" y="0" width="33" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField pattern="###0" isBlankWhenNull="true">
+								<reportElement uuid="78ca01cf-6d09-4fb0-aa24-90741188a62b" mode="Transparent" x="0" y="0" width="39" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -2744,7 +2743,7 @@ ID операции]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="11" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
+							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
 								<reportElement uuid="fee7b882-9ba7-4b5b-9218-60c14053566d" mode="Transparent" x="0" y="0" width="168" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
