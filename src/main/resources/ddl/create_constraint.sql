@@ -333,7 +333,6 @@ alter table raschsv_itog_strah_lic add constraint pk_raschsv_itog_strah_lic prim
 alter table raschsv_itog_vypl add constraint pk_raschsv_itog_vypl primary key(id);
 alter table raschsv_itog_vypl_dop add constraint pk_raschsv_itog_vypl_dop primary key(id);
 
-
 --foreign keys
 alter table raschsv_svnp_podpisant add constraint fk_raschsv_svnp_podp_declarat foreign key (declaration_data_id) references declaration_data (id) on delete cascade;
 alter table raschsv_obyaz_plat_sv add constraint fk_raschsv_obyaz_plat_declarat foreign key (declaration_data_id) references declaration_data (id) on delete cascade;
@@ -390,30 +389,15 @@ alter table raschsv_itog_vypl_dop add constraint fk_raschsv_itog_vypl_dop_strah 
 -- ФИАС
 ------------------------------------------------------------------------------------------------------------------------------
 -- primary keys
-alter table fias_operstat add constraint pk_fias_operstat primary key (id);
-alter table fias_socrbase add constraint pk_fias_sorcbase primary key (id);
 alter table fias_addrobj add constraint pk_fias_addrobj primary key (id);
-alter table fias_house add constraint pk_fias_house primary key (id);
-alter table fias_houseint add constraint pk_fias_houseint primary key (id);
-alter table fias_room add constraint pk_fias_room primary key (id);
 
 -- foreign keys
 alter table fias_addrobj add constraint fk_fias_addrobj_parentid foreign key (parentguid) references fias_addrobj (id) on delete cascade;
-alter table fias_addrobj add constraint fk_fias_addrobj_operstatus foreign key (operstatus) references fias_operstat (id);
-alter table fias_house add constraint fk_fias_house_aoguid foreign key (aoguid) references fias_addrobj (id) on delete cascade;
-alter table fias_houseint add constraint fk_fias_houseint_aoguid foreign key (aoguid) references fias_addrobj (id) on delete cascade;
-alter table fias_room add constraint fk_fias_room_houseguid foreign key (houseguid) references fias_house (id) on delete cascade;
-
 -- checks
 alter table fias_addrobj add constraint chk_fias_addrobj_centstatus check (centstatus between 0 and 3);
 alter table fias_addrobj add constraint chk_fias_addrobj_currstatus check (currstatus between 0 and 99);
 alter table fias_addrobj add constraint chk_fias_addrobj_divtype check (divtype in (0,1,2));
 alter table fias_addrobj add constraint chk_fias_addrobj_livestatus check (livestatus in (0,1));
-alter table fias_house add constraint chk_fias_house_divtype check (divtype between 0 and 2);
-alter table fias_house add constraint chk_fias_house_eststatus check (eststatus between 0 and 3);
-alter table fias_house add constraint chk_fias_house_strstatus check (strstatus between 0 and 3);
-alter table fias_houseint add constraint chk_fias_houseint_intstatus check (intstatus between 0 and 3);
-alter table fias_room add constraint chk_fias_room_livestatus check (livestatus in (0,1));
 
 --------------------------------------------------------------------------------------------------------
 --                                      ФП "НДФЛ"

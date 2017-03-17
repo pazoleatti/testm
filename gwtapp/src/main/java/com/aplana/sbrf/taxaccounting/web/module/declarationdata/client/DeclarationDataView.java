@@ -330,8 +330,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @Override
     public void setImportTf(String userName) {
-        importTf.setText(userName);
-        importTfLabel.setTitle(userName);
+         importTf.setText(userName);
+         importTfLabel.setTitle(userName);
     }
 
     @Override
@@ -455,7 +455,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 downloadExcelButton.setTitle(title);
                 timerExcel.cancel();
             } else {
-                downloadExcelButton.setVisible(true);
+                downloadExcelButton.setVisible(false);
                 downloadExcelButton.setTitle("");
             }
         } else if (DeclarationDataReportType.XML_DEC.equals(type)) {

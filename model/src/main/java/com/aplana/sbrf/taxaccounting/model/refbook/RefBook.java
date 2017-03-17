@@ -101,12 +101,7 @@ public class RefBook implements Serializable {
 		ATTACH_FILE_TYPE(934),						// Категории прикрепленных файлов
 		TAX_INSPECTION(935),						// Коды налоговых органов
 		NDFL_RATE(936),								// Ставка НДФЛ
-		FIAS_OPERSTAT(1010), 						// < ФИАС
-		FIAS_SOCRBASE(1020),
-		FIAS_ADDR_OBJECT(1030),
-		FIAS_HOUSE(1040),
-		FIAS_HOUSEINT(1050),
-		FIAS_ROOM(1060), 							// ФИАС >
+		FIAS_ADDR_OBJECT(1030),						// ФИАС - Адресные объекты
 		// редактируемые
 		TAX_PLACE_TYPE_CODE(2),						// Коды представления налоговой декларации по месту нахождения (учёта)
 		COUNTRY(10), 								// Страны
@@ -168,12 +163,7 @@ public class RefBook implements Serializable {
 		NDFL_DETAIL("REF_BOOK_NDFL_DETAIL"),
         FOND("REF_BOOK_FOND"),
         FOND_DETAIL("REF_BOOK_FOND_DETAIL"),
-		FIAS_OPERSTAT("FIAS_OPERSTAT"),
-		FIAS_SOCRBASE("FIAS_SOCRBASE"),
-		FIAS_ADDR_OBJECT("FIAS_ADDROBJ"),
-		FIAS_HOUSE("FIAS_HOUSE"),
-		FIAS_HOUSEINT("FIAS_HOUSEINT"),
-		FIAS_ROOM("FIAS_ROOM");
+		FIAS_ADDR_OBJECT("FIAS_ADDROBJ");
 
 		private final String table;
 

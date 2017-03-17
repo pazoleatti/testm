@@ -45,10 +45,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
         void setCorrectionTagList(List<Boolean> list);
 
-        void clean();
-
-        void clearFilter();
-
         void setReportPeriodType(String type);
 
         void setUserDepartmentId(Integer userDepartmentId);
@@ -95,7 +91,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                             getView().setFormStateList(asList(null, State.CREATED, State.PREPARED, State.ACCEPTED));
                             getView().setCorrectionTagList(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
                             getView().setAsnuFilter(result.getAsnuIds());
-                            getView().clearFilter();
                             if (dataFilter != null){
                                 getView().setDataFilter(dataFilter);
                             } else {

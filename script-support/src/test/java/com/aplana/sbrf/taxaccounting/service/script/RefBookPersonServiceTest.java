@@ -4,6 +4,9 @@ import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,9 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -153,5 +154,41 @@ public class RefBookPersonServiceTest {
             System.out.println(notice);
         }
     }
+
+    public void putValue(Map<String, RefBookValue> values, String attrName, RefBookAttributeType type, Object value) {
+        values.put(attrName, new RefBookValue(type, value));
+    }
+
+    @Test
+    public void buildRefBookNoticeTest() {
+
+        Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
+        putValue(values, RefBook.RECORD_ID_ALIAS, RefBookAttributeType.NUMBER, 112233L);
+        putValue(values, "LAST_NAME", RefBookAttributeType.STRING, "Сидоров");
+        putValue(values, "FIRST_NAME", RefBookAttributeType.STRING, "Иван");
+        putValue(values, "MIDDLE_NAME", RefBookAttributeType.STRING, "Иванович");
+        putValue(values, "SEX", RefBookAttributeType.NUMBER, 1);
+        putValue(values, "INN", RefBookAttributeType.STRING, "123456");
+        putValue(values, "INN_FOREIGN", RefBookAttributeType.STRING, "123456");
+        putValue(values, "SNILS", RefBookAttributeType.STRING, "123456");
+        putValue(values, "RECORD_ID", RefBookAttributeType.NUMBER, 654987);
+        putValue(values, "BIRTH_DATE", RefBookAttributeType.DATE, new Date());
+        putValue(values, "BIRTH_PLACE", RefBookAttributeType.STRING, "MSK");
+        putValue(values, "ADDRESS", RefBookAttributeType.REFERENCE, 987654L);
+        putValue(values, "PENSION", RefBookAttributeType.NUMBER, 2);
+        putValue(values, "MEDICAL", RefBookAttributeType.NUMBER, 1);
+        putValue(values, "SOCIAL", RefBookAttributeType.NUMBER, 2);
+        putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, 1);
+        putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, 123L);
+        putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, 654L);
+        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, 4L);
+        putValue(values, "OLD_ID", RefBookAttributeType.REFERENCE, null);
+
+        String value = IdentificationUtils.buildRefBookNotice(values);
+
+        System.out.println(value);
+
+    }
+
 
 }
