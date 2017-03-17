@@ -1568,7 +1568,11 @@ NdflPerson transformNdflPersonNode(NodeChild node) {
 NdflPersonIncome transformNdflPersonIncome(NodeChild node, String kpp, String oktmo, String inp, String fio) {
     def operationNode = node.parent();
 
-    if (operationNotRelateToCurrentPeriod(node, kpp, oktmo, inp, fio)) {
+    Date incomeAccruedDate = toDate(node.'@ДатаДохНач')
+    Date incomePayoutDate = toDate(node.'@ДатаДохВыпл')
+    Date taxDate = toDate(node.'@ДатаНалог')
+    if (operationNotRelateToCurrentPeriod(incomeAccruedDate, incomePayoutDate, taxDate,
+            kpp, oktmo, inp, fio)) {
         return null
     }
 
@@ -1603,30 +1607,30 @@ NdflPersonIncome transformNdflPersonIncome(NodeChild node, String kpp, String ok
 }
 
 // Проверка на принадлежность операций периоду при загрузке ТФ
-boolean operationNotRelateToCurrentPeriod(NodeChild node, String kpp, String oktmo, String inp, String fio) {
-
-    Date incomeAccruedDate = toDate(node.'@ДатаДохНач')
-    Date incomePayoutDate = toDate(node.'@ДатаДохВыпл')
-    Date taxDate = toDate(node.'@ДатаНалог')
+boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
+                                          String kpp, String oktmo, String inp, String fio) {
+    // Доход.Дата.Начисление
     boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
+    // Доход.Дата.Выплата
     boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
+    // НДФЛ.Расчет.Дата
     boolean taxDateOk = dateRelateToCurrentPeriod(taxDate)
     if (!incomeAccruedDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач\" недопустимое значение: \"${node.'@ДатаДохНач'}\":дата операции не входит в отчетный период ТФ.\n" +
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач\" недопустимое значение: \"${incomeAccruedDate ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
                 "КПП = $kpp.\n" +
                 "ОКТМО = $oktmo\n" +
                 "ФЛ ИНП = $inp\n" +
                 "ФИО = $fio")
     }
     if (!incomePayoutDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл\" недопустимое значение: \"${node.'@ДатаДохВыпл'}\":дата операции не входит в отчетный период ТФ.\n" +
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл\" недопустимое значение: \"${incomePayoutDate ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
                 "КПП = $kpp.\n" +
                 "ОКТМО = $oktmo\n" +
                 "ФЛ ИНП = $inp\n" +
                 "ФИО = $fio")
     }
     if (!taxDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог\" недопустимое значение: \"${node.'@ДатаНалог'}\":дата операции не входит в отчетный период ТФ.\n" +
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог\" недопустимое значение: \"${taxDateOk ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
                 "КПП = $kpp.\n" +
                 "ОКТМО = $oktmo\n" +
                 "ФЛ ИНП = $inp\n" +
@@ -2838,6 +2842,9 @@ def checkDataReference(
  */
 def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList) {
 
+    // Map<NdflPerson.id, NdflPerson>
+    def mapNdflPerson = [:]
+
     // Параметры подразделения
     def mapRefBookNdfl = getRefBookNdfl()
     def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
@@ -2849,7 +2856,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
-        ndflPersonFLMap.put(ndflPerson.id, fioAndInp)
+        mapNdflPerson.put(ndflPerson.id, ndflPerson)
 
         println "ndflPerson.rowNum=" + ndflPerson.rowNum
 
@@ -2875,238 +2882,118 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         ScriptUtils.checkInterrupted();
 
-        def fioAndInp = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
+        NdflPerson ndflPerson = mapNdflPerson.get(ndflPersonIncome.ndflPersonId)
+        def fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + ndflPerson.middleName ?: "";
+        def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
 
         // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
+        operationNotRelateToCurrentPeriod(ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.taxDate,
+                ndflPersonIncome.kpp, ndflPersonIncome.oktmo, ndflPerson.inp, fio)
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
-        if (ndflPersonIncome.paymentDate == null && ndflPersonIncome.paymentNumber == null && ndflPersonIncome.taxSumm == null) {
-            // если не заполнены Раздел 2. Графы 22-24
-            def emptyField = "не заполнены " + getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
-
-            // если не заполнена Раздел 2. Графа 21
-            if (ndflPersonIncome.taxTransferDate == null) {
-                emptyField += ", \"" + C_TAX_TRANSFER_DATE + "\""
-
-                // Раздел 2. Графа 4 "Код вида дохода" должна быть заполнена
-                if (ndflPersonIncome.incomeCode == null) {
-                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_CODE, emptyField])
-                    //TODO turn_to_error
-                    //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
-                    //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_CODE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-                }
-                // Раздел 2. Графа 5 "Доход.Вид.Признак" должна быть заполнена
-                if (ndflPersonIncome.incomeType == null) {
-                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [script.this.C_INCOME_TYPE, emptyField])
-                    //TODO turn_to_error
-                    //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
-                    //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", script.this.C_INCOME_TYPE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-                }
-            }
-
-            // если НЕ заполнены Раздел 2. Графы 7 и 11
-            if (ndflPersonIncome.incomePayoutDate == null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
-                emptyField += ", \"" + C_INCOME_PAYOUT_DATE + "\", \"" + C_INCOME_PAYOUT_SUMM + "\""
-
-                // Раздел 2. Графа 21 "НДФЛ.Перечисление в бюджет.Срок" должна быть НЕ заполнена
-                if (ndflPersonIncome.taxTransferDate != null) {
-                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_TRANSFER_DATE, emptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-                }
-            }
-
-            // 	Раздел 2. Графа 13 "Налоговая база" должна быть заполнена
-            if (ScriptUtils.isEmpty(ndflPersonIncome.taxBase)) {
-                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_BASE, emptyField])
-                //TODO turn_to_error
-                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
-                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_BASE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-            }
-            // 	Раздел 2. Графа 14 "НДФЛ.Процентная ставка" должна быть заполнена
-            if (ndflPersonIncome.taxRate == null) {
-                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_RATE, emptyField])
-                //TODO turn_to_error
-                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
-                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_RATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-            }
-            // 	Раздел 2. Графа 15 "НДФЛ.Расчет.Дата" должна быть заполнена
-            if (ndflPersonIncome.taxDate == null) {
-                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_DATE, emptyField])
-                //TODO turn_to_error
-                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
-                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-            }
-        } else {
-            // если заполнены Раздел 2. Графы 22-24
-            def notEmptyField = "заполнены " + getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
-
-            // Раздел 2. Графа 12 "Сумма вычета" должна быть НЕ заполнена
-            if (!ScriptUtils.isEmpty(ndflPersonIncome.totalDeductionsSumm)) {
-                def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TOTAL_DEDUCTIONS_SUMM, notEmptyField])
-                //TODO turn_to_error
-                //https://jira.aplana.com/browse/SBRFNDFL-581 Не должны выполняться вычеркнутые проверки, остальные проверки аналогичны целевому решению
-                //logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TOTAL_DEDUCTIONS_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-            }
-
-            // если заполнены Раздел 2. Графы 7 и 11
-            if (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
-
-                // Раздел 2. Графа 21 "НДФЛ.Перечисление в бюджет.Срок" должна быть заполнена
-                if (ndflPersonIncome.taxTransferDate == null) {
-                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_TRANSFER_DATE, notEmptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-                }
-            }
-        }
-
-        // если заполнена Раздел 2. Графа 6 "Доход.Дата.Начисление"
-        if (ndflPersonIncome.incomeAccruedDate != null) {
-            def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_ACCRUED_DATE])
-
-            // Раздел 2. Графа 10 "Доход.Сумма.Начисление" должна быть заполнена
-            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
-                notEmptyField = "заполнены " + getQuotedFields([C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM])
-
-                // Раздел 2. Графа 16 "НДФЛ.Расчет.Сумма.Исчисленный" должна быть заполнена
-                if (ScriptUtils.isEmpty(ndflPersonIncome.calculatedTax)) {
-                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_CALCULATED_TAX, notEmptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_CALCULATED_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-                }
-                // Раздел 2. Графа 18 "НДФЛ.Расчет.Сумма.Не удержанный" должна быть заполнена
-                if (ndflPersonIncome.notHoldingTax == null) {
-                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_NOT_HOLDING_TAX, notEmptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_NOT_HOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-                }
-                // Раздел 2. Графа 19 "НДФЛ.Расчет.Сумма.Излишне удержанный" должна быть заполнена
-                if (ndflPersonIncome.overholdingTax == null) {
-                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_OVERHOLDING_TAX, notEmptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_OVERHOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-                }
-            } else {
-                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_ACCRUED_SUMM, notEmptyField])
-                //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_ACCRUED_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-            }
-        } else {
-            // если заполнена Раздел 2. Графа 10 "Доход.Сумма.Начисление"
-            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
-                def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_ACCRUED_SUMM])
-
-                // Раздел 2. Графа 6 "Доход.Дата.Начисление" должна быть заполнена
-                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_ACCRUED_DATE, notEmptyField])
-                //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_ACCRUED_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-            } else {
-                def emptyField = "не заполнены " + getQuotedFields([C_INCOME_ACCRUED_DATE, C_INCOME_ACCRUED_SUMM])
-
-                // Раздел 2. Графа 16 "НДФЛ.Расчет.Сумма.Исчисленный" должна быть НЕ заполнена
-                if (!ScriptUtils.isEmpty(ndflPersonIncome.calculatedTax)) {
-                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_CALCULATED_TAX, emptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_CALCULATED_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-                }
-                // Раздел 2. Графа 18 "НДФЛ.Расчет.Сумма.Не удержанный" должна быть НЕ заполнена
-                if (ndflPersonIncome.notHoldingTax != null) {
-                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_NOT_HOLDING_TAX, emptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_NOT_HOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-                }
-                // Раздел 2. Графа 19 "НДФЛ.Расчет.Сумма.Излишне удержанный" должна быть НЕ заполнена
-                if (ndflPersonIncome.overholdingTax != null) {
-                    def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_OVERHOLDING_TAX, emptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_OVERHOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-                }
-            }
-        }
-
-        // если заполнена Раздел 2. Графа 7 "Доход.Дата.Выплата"
-        if (ndflPersonIncome.incomePayoutDate != null) {
-            def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_DATE])
-
-            // если заполнена Раздел 2. Графа 11 "Доход.Сумма.Выплата"
-            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
-                notEmptyField = "заполнены " + getQuotedFields([C_INCOME_PAYOUT_DATE, C_INCOME_PAYOUT_SUMM])
-
-                // Раздел 2. Графа 17 "НДФЛ.Расчет.Сумма.Удержанный" должна быть заполнена
-                if (ScriptUtils.isEmpty(ndflPersonIncome.withholdingTax)) {
-                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_WITHHOLDING_TAX, notEmptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_WITHHOLDING_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-                }
-
-                // Раздел 2. Графа 20 "НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику" должна быть заполнена
-                if (ndflPersonIncome.refoundTax == null) {
-                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_REFOUND_TAX, notEmptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_REFOUND_TAX, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-                }
-
-                // Раздел 2. Графа 21 "НДФЛ.Перечисление в бюджет.Срок" должна быть заполнена
-                if (ndflPersonIncome.taxTransferDate == null) {
-                    def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_TAX_TRANSFER_DATE, notEmptyField])
-                    //TODO turn_to_error
-                    logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-                }
-            } else {
-                // Раздел 2. Графа 11 "Доход.Сумма.Выплата" должна быть заполнена
-                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_PAYOUT_SUMM, notEmptyField])
-                //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_PAYOUT_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-            }
-        } else {
-            // если не заполнена Раздел 2. Графа 7 "Доход.Дата.Выплата"
-
-            // если заполнена Раздел 2. Графа 11 "Доход.Сумма.Выплата"
-            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
-                def notEmptyField = "заполнена " + getQuotedFields([C_INCOME_PAYOUT_SUMM])
-
-                // Раздел 2. Графа 7 "Доход.Дата.Выплата" должна быть заполнена
-                def msgErrMustFill = sprintf(MESSAGE_ERROR_MUST_FILL, [C_INCOME_PAYOUT_DATE, notEmptyField])
-                //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_INCOME_PAYOUT_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrMustFill);
-            } else {
-                // если НЕ заполнена Раздел 2. Графа 11 "Доход.Сумма.Выплата"
-
-                if (ndflPersonIncome.paymentDate == null &&
-                        ndflPersonIncome.paymentNumber == null &&
-                        ndflPersonIncome.taxSumm == null) {
-
-                    // Раздел 2. Графа 21 "НДФЛ.Перечисление в бюджет.Срок" должна быть НЕ заполнена
-                    if (ndflPersonIncome.taxTransferDate != null) {
-                        def msgErrNotMustFill = sprintf(MESSAGE_ERROR_NOT_MUST_FILL, [C_TAX_TRANSFER_DATE, emptyField])
-                        //TODO turn_to_error
-                        logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_TRANSFER_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrNotMustFill);
-                    }
-                }
-            }
-        }
-
-        // Раздел 2. Графа 22, 23, 24 Должны быть либо заполнены все 3 Графы, либо ни одна их них
-        if (ndflPersonIncome.paymentDate != null || ndflPersonIncome.paymentNumber != null || !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
-            def allField = getQuotedFields([C_PAYMENT_DATE, C_PAYMENT_NUMBER, C_TAX_SUMM])
-            // Раздел 2. Графа 22 "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата"
-            if (ndflPersonIncome.paymentDate == null) {
-                def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_PAYMENT_DATE, allField])
-                //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_PAYMENT_DATE, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
-            }
-            // Раздел 2. Графа 23 "Номер платежного поручения перечисления налога в бюджет"
-            if (ndflPersonIncome.paymentNumber == null) {
-                def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_PAYMENT_NUMBER, allField])
-                //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_PAYMENT_NUMBER, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
-            }
-            // Раздел 2. Графа 24 "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
-            if (ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
-                def msgErrFill = sprintf(MESSAGE_ERROR_NOT_FILL, [C_TAX_SUMM, allField])
-                //TODO turn_to_error
-                logger.warn(MESSAGE_ERROR_VALUE, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "", C_TAX_SUMM, fioAndInp, MESSAGE_ERROR_NOT_MATCH_RULE + msgErrFill);
+        List<ColumnFillConditionData> columnFillConditionDataList = []
+        //1 Раздел 2. Графы 4,5 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column22And23And24NotFill(),
+                new Column4And5Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Вид.Код (Графа 4)='${ndflPersonIncome.incomeCode ?: ""}', Доход.Вид.Признак (Графа 5)='${ndflPersonIncome.incomeType ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 4,5 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24."
+        )
+        //2 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column10Fill(),
+                new Column6Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10."
+        )
+        //3 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column11Fill(),
+                new Column7Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11."
+        )
+        //4 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column6Fill(),
+                new Column10Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6."
+        )
+        //5 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column7Fill(),
+                new Column11Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7."
+        )
+        //6 Раздел 2. Графа 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22,23,24
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column22And23And24Fill(),
+                new Column12NotFill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Сумма вычета (Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22,23,24."
+        )
+        //7 Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column22And23And24NotFill(),
+                new Column13And14And15Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Налоговая база (Графа 13)='${ndflPersonIncome.taxBase ?: ""}', НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}', НДФЛ.Расчет.Дата (Графа 15)='${ndflPersonIncome.taxDate ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24."
+        )
+        //8 Раздел 2. Графа 16 должна быть заполнена, если заполнены Раздел 2. Графы 6,10
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column6And10Fill(),
+                new Column16Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 16 должна быть заполнена, если заполнены Раздел 2. Графы 6,10."
+        )
+        //9 Раздел 2. Графа 18 или 19 должна быть заполнена, если заполнены Раздел 2. Графы 6,10
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column6And10Fill(),
+                new Column18Or19Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)='${ndflPersonIncome.notHoldingTax ?: ""}', НДФЛ.Расчет.Сумма.Излишне удержанный (Графа 19)='${ndflPersonIncome.overholdingTax ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 18 или 19 должна быть заполнена, если заполнены Раздел 2. Графы 6,10."
+        )
+        //10 Раздел 2. Графа 17 должна быть заполнена, если заполнены Раздел 2. Графы 7,11
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column7And11Fill(),
+                new Column17Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Удержанный (Графа 17)='${ndflPersonIncome.withholdingTax ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 17 должна быть заполнена, если заполнены Раздел 2. Графы 7,11."
+        )
+        //11 Раздел 2. Графа 20 должна быть заполнена, если заполнены Раздел 2. Графы 7,11
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column7And11Fill(),
+                new Column20Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)='${ndflPersonIncome.refoundTax ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 20 должна быть заполнена, если заполнены Раздел 2. Графы 7,11."
+        )
+        //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,23,24
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column7And11Or22And23And24Fill(),
+                new Column21Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,24,25."
+        )
+        //12 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7,11 и 23,23,24
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column7And11And22And23And24NotFill(),
+                new Column21NotFill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7,11 и 23,24,25."
+        )
+        //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new ColumnTrueFillOrNotFill(),
+                new Column22And23And24FillOrColumn22And23And24NotFill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Платежное поручение.Дата (Графа 22)='${ndflPersonIncome.paymentDate ?: ""}', НДФЛ.Перечисление в бюджет.Платежное поручение.Номер (Графа 23)='${ndflPersonIncome.paymentNumber ?: ""}', НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)='${ndflPersonIncome.taxSumm ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них."
+        )
+        columnFillConditionDataList.each { columnFillConditionData ->
+            if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
+                    !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
+                logger.warn(columnFillConditionData.conditionMessage)
             }
         }
 
@@ -3166,6 +3053,215 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
     println "Общие проверки / Проверки на отсутсвие повторений: " + (System.currentTimeMillis() - time);
     logger.info("Общие проверки / Проверки на отсутсвие повторений: (" + (System.currentTimeMillis() - time) + " ms)");
+}
+
+/**
+ * Класс для проверки заполненности полей
+ */
+class ColumnFillConditionData {
+    ColumnFillConditionChecker columnConditionCheckerAsIs
+    ColumnFillConditionChecker columnConditionCheckerToBe
+    String conditionMessage
+
+    ColumnFillConditionData(ColumnFillConditionChecker columnConditionCheckerAsIs, ColumnFillConditionChecker columnConditionCheckerToBe, String conditionMessage) {
+        this.columnConditionCheckerAsIs = columnConditionCheckerAsIs
+        this.columnConditionCheckerToBe = columnConditionCheckerToBe
+        this.conditionMessage = conditionMessage
+    }
+}
+interface ColumnFillConditionChecker {
+    boolean check(NdflPersonIncome ndflPersonIncome)
+}
+/**
+ * Проверка: "Раздел 2. Графа 4,5 заполнены"
+ */
+class Column4And5Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.incomeCode) && !ScriptUtils.isEmpty(ndflPersonIncome.incomeType)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графа 6 заполнена"
+ */
+class Column6Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ndflPersonIncome.incomeAccruedDate != null
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графа 7 заполнена"
+ */
+class Column7Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ndflPersonIncome.incomePayoutDate != null
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графа 10 заполнена"
+ */
+class Column10Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 6, 10 заполнены"
+ */
+class Column6And10Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ndflPersonIncome.incomeAccruedDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графа 11 заполнена"
+ */
+class Column11Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 7, 11 заполнены"
+ */
+class Column7And11Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графа 12 НЕ заполнена"
+ */
+class Column12NotFill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ScriptUtils.isEmpty(ndflPersonIncome.totalDeductionsSumm)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 13, 14, 15 заполнены"
+ */
+class Column13And14And15Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.taxBase) && !ScriptUtils.isEmpty(ndflPersonIncome.taxRate) && ndflPersonIncome.taxDate != null
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 16 заполнена"
+ */
+class Column16Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.calculatedTax)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 17 заполнена"
+ */
+class Column17Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.withholdingTax)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графа 18 или 19 заполнена"
+ */
+class Column18Or19Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.notHoldingTax) || !ScriptUtils.isEmpty(ndflPersonIncome.overholdingTax)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 20 заполнена"
+ */
+class Column20Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.refoundTax)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 21 заполнена"
+ */
+class Column21Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ndflPersonIncome.taxTransferDate != null
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 21 НЕ заполнена"
+ */
+class Column21NotFill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ndflPersonIncome.taxTransferDate == null
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 7, 11 ИЛИ 22, 23, 24 заполнены"
+ */
+class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) ||
+                (ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm))
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 7, 11 И 22, 23, 24 НЕ заполнены"
+ */
+class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return (ndflPersonIncome.incomePayoutDate == null && ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) &&
+                (ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm))
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 22, 23, 24 НЕ заполнены"
+ */
+class Column22And23And24NotFill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графы 22, 23, 24 заполнены"
+ */
+class Column22And23And24Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)
+    }
+}
+/**
+ * 	Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна их них
+ */
+class Column22And23And24FillOrColumn22And23And24NotFill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return new Column22And23And24NotFill().check(ndflPersonIncome) || new Column22And23And24Fill().check(ndflPersonIncome)
+    }
+}
+/**
+ * 	Всегда возвращает true
+ */
+class ColumnTrueFillOrNotFill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return true
+    }
 }
 
 /**
