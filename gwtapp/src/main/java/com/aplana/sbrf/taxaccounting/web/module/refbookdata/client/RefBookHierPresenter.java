@@ -106,7 +106,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     public void onRelevanceDateChanged(Date relevanceDate) {
         commonEditPresenter.clean(false, false);
         commonEditPresenter.setNeedToReload();
-        SearchButtonEvent.fire(this, relevanceDate, getView().getSearchPattern(), getView().getExactSearch());
+        SearchButtonEvent.fire(this, relevanceDate, null, null, getView().getSearchPattern(), getView().getExactSearch());
     }
 
     @Override
@@ -140,7 +140,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     @Override
     public void searchButtonClicked() {
-        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
+        SearchButtonEvent.fire(this, getView().getRelevanceDate(), null, null, getView().getSearchPattern(), getView().getExactSearch());
     }
 
     @Override

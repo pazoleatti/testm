@@ -61,6 +61,17 @@ public interface RefBookFactory {
      */
     String getSearchQueryStatement(String query, Long refBookId, boolean exactSearch);
 
+	/**
+	 * Метод возвращает строку для фильтрации справочника по
+	 * определенному строковому ключу и дополнительным строковым параметрам присоединенным с условием "И"
+	 * @param parameters - дополнительные строковые параметры, ключ - имя поля в таблице, значение поля в таблице
+	 * @param refBookId - справочник
+	 * @param exactSearch - точное соответствие
+	 *
+	 * @return строку фильтрации для поиска по справочнику
+	 */
+	String getSearchQueryStatementWithAdditionalStringParameters(Map<String, String> parameters, String searchPattern, Long refBookId, boolean exactSearch);
+
     String getSearchQueryStatement(String query, Long refBookId);
 
     /**

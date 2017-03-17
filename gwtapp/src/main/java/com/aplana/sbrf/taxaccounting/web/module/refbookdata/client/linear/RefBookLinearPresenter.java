@@ -128,6 +128,8 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     @Override
     public void onSearch(SearchButtonEvent event) {
         dataProvider.relevanceDate = event.getRelevanceDate();
+        dataProvider.lastNamePattrern = event.getLastName();
+        dataProvider.firstNamePattern = event.getFirstName();
         dataProvider.searchPattern = event.getSearchPattern();
         dataProvider.exactSearch = event.isExactSearch();
         getView().updateTable();
@@ -179,8 +181,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         getView().updateTable();
     }
 
-    public void initState(Date relevanceDate, String searchPattern, boolean exactSearch) {
+    public void initState(Date relevanceDate, String lastName, String firstName, String searchPattern, boolean exactSearch) {
         dataProvider.relevanceDate = relevanceDate;
+        dataProvider.lastNamePattrern = lastName;
+        dataProvider.firstNamePattern = firstName;
         dataProvider.searchPattern = searchPattern;
         dataProvider.exactSearch = exactSearch;
         /*getView().updateTable();*/
@@ -214,6 +218,8 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
 
         Date relevanceDate;
+        String lastNamePattrern;
+        String firstNamePattern;
         String searchPattern;
         Boolean exactSearch;
 
@@ -227,6 +233,8 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
             action.setRefBookId(refBookId);
             action.setPagingParams(new PagingParams(range.getStart()+1, range.getLength()));
             action.setRelevanceDate(relevanceDate);
+            action.setLastNamePattern(lastNamePattrern);
+            action.setFirstNamePattern(firstNamePattern);
             action.setSearchPattern(searchPattern);
             action.setExactSearch(exactSearch);
             action.setSortColumnIndex(getView().getSortColumnIndex());

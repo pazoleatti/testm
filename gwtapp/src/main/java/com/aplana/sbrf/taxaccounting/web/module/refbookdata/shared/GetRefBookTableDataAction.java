@@ -11,6 +11,8 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 	long refBookId;
 	PagingParams pagingParams;
 	Date relevanceDate;
+	private String lastNamePattern;
+	private String firstNamePattern;
     private String searchPattern;
     private boolean exactSearch;
     private Long recordId;
@@ -41,6 +43,22 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 	public void setRelevanceDate(Date relevanceDate) {
 		this.relevanceDate = relevanceDate;
 	}
+
+    public String getLastNamePattern() {
+        return lastNamePattern;
+    }
+
+    public void setLastNamePattern(String lastNamePattern) {
+        this.lastNamePattern = lastNamePattern;
+    }
+
+    public String getFirstNamePattern() {
+        return firstNamePattern;
+    }
+
+    public void setFirstNamePattern(String firstNamePattern) {
+        this.firstNamePattern = firstNamePattern;
+    }
 
     public String getSearchPattern() {
         return searchPattern;
