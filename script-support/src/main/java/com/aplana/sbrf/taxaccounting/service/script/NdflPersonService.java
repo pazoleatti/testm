@@ -122,6 +122,17 @@ public interface NdflPersonService {
     PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters);
 
     /**
+     * Найти все NdflPerson по заданным параметрам
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param parameters        карта наименований параметров и значений
+     * @return результат запроса
+     * @startIndex - стартовый индекс
+     * @pageSize - размер страницы
+     */
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize);
+
+    /**
      * Удаляет все данные о физлицах из декларации
      *
      * @param declarationDataId
@@ -145,7 +156,6 @@ public interface NdflPersonService {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1   = true для НДФЛ(1) prFequals1 = false для НДФЛ(2)
      * @return
      */
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate);
@@ -180,19 +190,6 @@ public interface NdflPersonService {
      * @return
      */
     List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
-
-
-    /**
-     * Найти все NdflPerson по заданным параметрам
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param parameters        карта наименований параметров и значений
-     * @return результат запроса
-     * @startIndex - стартовый индекс
-     * @pageSize - размер страницы
-     */
-    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize);
-
 
     /**
      * Возвращает количество Физлиц для декларации

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.raschsv;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -157,12 +158,12 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
     }
 
     @Override
-    public List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> subreportParams) {
+    public List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
         MapSqlParameterSource sqlParams = new MapSqlParameterSource();
         String query = new String(SQL_SELECT_PERSONS);
         sqlParams.addValue(RaschsvPersSvStrahLic.COL_DECLARATION_DATA_ID, declarationDataId);
-        for (String alias : subreportParams.keySet()) {
-            Object paramValue = subreportParams.get(alias);
+        for (String alias : parameters.keySet()) {
+            Object paramValue = parameters.get(alias);
             if (paramValue != null) {
                 if (alias.equalsIgnoreCase(SUBREPORT_PARAM_LASTNAME_ALIAS)) {
                     query += " AND LOWER(p." + RaschsvPersSvStrahLic.COL_FAMILIA + ") LIKE LOWER(:" + RaschsvPersSvStrahLic.COL_FAMILIA + ")";
@@ -185,19 +186,32 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
                 }
             }
         }
-        if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS) != null && subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS) != null) {
+        if (parameters.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS) != null && parameters.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS) != null) {
             query += " AND p." + RaschsvPersSvStrahLic.COL_DATA_ROZD + " BETWEEN :birthdayFrom AND :birthdayBefore";
-            sqlParams.addValue("birthdayFrom", subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS));
-            sqlParams.addValue("birthdayBefore", subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS));
-        } else if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS) != null) {
+            sqlParams.addValue("birthdayFrom", parameters.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS));
+            sqlParams.addValue("birthdayBefore", parameters.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS));
+        } else if (parameters.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS) != null) {
             query += " AND p." + RaschsvPersSvStrahLic.COL_DATA_ROZD + " >= :" + RaschsvPersSvStrahLic.COL_DATA_ROZD;
-            sqlParams.addValue(RaschsvPersSvStrahLic.COL_DATA_ROZD, subreportParams.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS));
-        } else if (subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS) != null) {
+            sqlParams.addValue(RaschsvPersSvStrahLic.COL_DATA_ROZD, parameters.get(SUBREPORT_PARAM_BIRHDAY_FROM_ALIAS));
+        } else if (parameters.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS) != null) {
             query += " AND p." + RaschsvPersSvStrahLic.COL_DATA_ROZD + " <= :" + RaschsvPersSvStrahLic.COL_DATA_ROZD;
-            sqlParams.addValue(RaschsvPersSvStrahLic.COL_DATA_ROZD, subreportParams.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS));
+            sqlParams.addValue(RaschsvPersSvStrahLic.COL_DATA_ROZD, parameters.get(SUBREPORT_PARAM_BIRHDAY_BEFORE_ALIAS));
         }
+
+        // Пейджинг
+        String totalQuery = query;
+        if (pagingParams != null) {
+            long lastindex = pagingParams.getStartIndex() + pagingParams.getCount();
+            totalQuery = "select * from \n (" +
+                    "select rating.*, rownum rnum from \n (" +
+                    query + ") rating where rownum < " +
+                    lastindex +
+                    ") where rnum >= " +
+                    pagingParams.getStartIndex();
+        }
+
         List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = new ArrayList<RaschsvPersSvStrahLic>();
-        raschsvPersSvStrahLicList.addAll(getNamedParameterJdbcTemplate().query(query, sqlParams, new RaschsvPersSvStrahLicRowMapper()));
+        raschsvPersSvStrahLicList.addAll(getNamedParameterJdbcTemplate().query(totalQuery, sqlParams, new RaschsvPersSvStrahLicRowMapper()));
 
         raschsvPersSvStrahLicList = findSvVyplAndVyplSvDopByPersons(raschsvPersSvStrahLicList);
         return raschsvPersSvStrahLicList;

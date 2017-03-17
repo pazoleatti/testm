@@ -44,9 +44,11 @@ switch (formDataEvent) {
         getSourcesListForTemporarySolution()
         break
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
+        // Подготовка для последующего формирования спецотчета
         prepareSpecificReport()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        // Формирование спецотчета
         createSpecificReport()
         break
 }
@@ -835,7 +837,12 @@ def prepareSpecificReport() {
             resultReportParameters.put(key, value)
         }
     }
-    PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters);
+
+    // Ограничение числа выводимых записей
+    int startIndex = 1
+    int pageSize = 100
+
+    PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters, startIndex, pageSize);
 
     if (pagingResult.isEmpty()) {
         throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + resultReportParameters);
@@ -2729,7 +2736,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         if (!dateConditionData.checker.check(ndflPersonIncome)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                            logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'.Строка='${ndflPersonIncome.rowNum ?: ""}'.Графа Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}' $fioAndInp." +
+                            logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'.Строка='${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}' $fioAndInp." +
                                     " Не выполнено условие: если «Графа 4 Раздел 2»='${ndflPersonIncome.incomeCode}' и «Графа 5 Раздел 2»='${ndflPersonIncome.incomeType}', то ${dateConditionData.conditionMessage}.")
                         }
                     }
@@ -2756,7 +2763,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
                 if (!(conditionA || conditionB || conditionC)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate}' $fioAndInp." +
+                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}' $fioAndInp." +
                             " Текст ошибки: для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий:\\n" +
                             " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2\\n" +
                             " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» = 1\\n" +
@@ -2765,13 +2772,13 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             } else if (ndflPersonIncome.taxRate == 15) {
                 if (!(ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1")) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate}' $fioAndInp." +
+                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}' $fioAndInp." +
                             " Текст ошибки: для «Графа 14 Раздел 2 = 15» не выполнено условие: «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1.")
                 }
             } else if (ndflPersonIncome.taxRate == 35) {
                 if (!(["2740", "3020", "2610"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status != "2")) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate}' $fioAndInp." +
+                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}' $fioAndInp." +
                             " Текст ошибки: для «Графа 14 Раздел 2 = 35» не выполнено условие: «Графа 4 Раздел 2» = (2740 или 3020 или 2610) и «Графа 12 Раздел 1» ≠ 2.")
                 }
             } else if (ndflPersonIncome.taxRate == 30) {
@@ -2779,7 +2786,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 def conditionB = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
                 if (!(conditionA || conditionB)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}' . НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate}' $fioAndInp." +
+                    logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}' . НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}' $fioAndInp." +
                             " Текст ошибки: для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:\\n" +
                             " «Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 2» ≠ 1010\\n" +
                             " («Графа 4 Раздел 2» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2.")

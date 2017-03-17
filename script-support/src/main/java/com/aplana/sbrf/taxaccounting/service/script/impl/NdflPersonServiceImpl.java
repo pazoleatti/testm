@@ -47,14 +47,6 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize) {
-        if (parameters == null) {
-            parameters = new HashMap<String, Object>();
-        }
-        return ndflPersonDao.findNdflPersonByParameters(declarationDataId, parameters, new PagingParams(startIndex, pageSize));
-    }
-
-    @Override
     public int getCountNdflPerson(long declarationDataId) {
         String query = "select np.id from ndfl_person np where declaration_data_id = :declarationDataId";
         Map<String, Object> parameters = new HashMap<String, Object>();
@@ -135,6 +127,14 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> subreportParameters) {
         return ndflPersonDao.findNdflPersonByParameters(declarationDataId, subreportParameters, new PagingParams());
+    }
+
+    @Override
+    public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize) {
+        if (parameters == null) {
+            parameters = new HashMap<String, Object>();
+        }
+        return ndflPersonDao.findNdflPersonByParameters(declarationDataId, parameters, new PagingParams(startIndex, pageSize));
     }
 
     @Override
