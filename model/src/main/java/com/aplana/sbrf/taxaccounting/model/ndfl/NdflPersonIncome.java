@@ -15,17 +15,17 @@ public class NdflPersonIncome extends NdflPersonOperation {
     // Доход.Вид.Признак (Графа 5)
     private String incomeType;
 
-    // Доход.Источник выплаты.ОКТМО
-    private String oktmo;
-
-    // Доход.Источник выплаты.КПП
-    private String kpp;
-
     // Доход.Дата.Начисление (Графа 6)
     private Date incomeAccruedDate;
 
     // Доход.Дата.Выплата (Графа 7)
     private Date incomePayoutDate;
+
+    // Доход.Источник выплаты.ОКТМО (Графа 8)
+    private String oktmo;
+
+    // Доход.Источник выплаты.КПП (Графа 9)
+    private String kpp;
 
     // Доход.Сумма.Начисление (Графа 10)
     private BigDecimal incomeAccruedSumm;
