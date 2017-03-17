@@ -68,7 +68,7 @@ public enum DeclarationDataSearchOrdering {
     /**
      * Имя пользователя, загрузившего ТФ
      */
-    IMPORT_USER_LOGIN,
+    IMPORT_USER_NAME,
     /**
      * Дата и время создания формы
      */

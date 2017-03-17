@@ -330,8 +330,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @Override
     public void setImportTf(String userName) {
-        importTf.setText(userName);
-        importTfLabel.setTitle(userName);
+         importTf.setText(userName);
+         importTfLabel.setTitle(userName);
     }
 
     @Override

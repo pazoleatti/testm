@@ -40,7 +40,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         if (decl_data_creation_date != null) {
             result.setDeclarationDataCreationDate(new Date(decl_data_creation_date.getTime()));
         }
-        result.setImportDeclarationDataUserLogin(rs.getString("import_decl_data_user_login"));
+        result.setImportDeclarationDataUserName(rs.getString("import_decl_data_user_name"));
         return result;
 	}
 }

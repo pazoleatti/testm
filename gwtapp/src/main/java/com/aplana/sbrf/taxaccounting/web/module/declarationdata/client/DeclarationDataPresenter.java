@@ -208,22 +208,19 @@ public class DeclarationDataPresenter
                                         getView().setOktmo(declarationData.getOktmo());
                                         getView().setTaxOrganCode(declarationData.getTaxOrganCode());
                                         getView().setStateED(result.getStateEDName());
-                                        getView().setImportTf(result.getUserLoginImportTf());
                                     } else {
                                         if (result.getAsnuName() != null && !result.getAsnuName().isEmpty()) {
                                             getView().setPropertyBlockVisible(false, false, false, false, true, true, taxType);
                                             getView().setAsnuName(result.getAsnuName());
                                             getView().setFileName(result.getFileName());
-                                            getView().setImportTf(result.getUserLoginImportTf());
                                         } else {
-                                            getView().setImportTf(result.getUserLoginImportTf());
-                                            getView().setPropertyBlockVisible(false, false, false, false, false, true, taxType);
+                                            getView().setPropertyBlockVisible(false, false, false, false, false, (result.getUserNameImportTf() != null && !result.getUserNameImportTf().isEmpty()), taxType);
                                         }
                                     }
                                 } else {
-                                    getView().setImportTf(result.getUserLoginImportTf());
                                     getView().setPropertyBlockVisible(false, false, false, false, false, true, taxType);
                                 }
+                                getView().setImportTf(result.getUserNameImportTf());
 								getView()
 										.setBackButton(
 												"#"

@@ -28,30 +28,24 @@ public class GetDeclarationDataHandler
 
     @Autowired
     private DeclarationDataService declarationDataService;
-
     @Autowired
     private DepartmentService departmentService;
-
     @Autowired
     private DeclarationDataAccessService declarationAccessService;
-
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
-
     @Autowired
     private SecurityService securityService;
-
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     private RefBookFactory rbFactory;
-
     @Autowired
     private LogBusinessService logBusinessService;
+    @Autowired
+    private TAUserService userService;
 
     public GetDeclarationDataHandler() {
         super(GetDeclarationDataAction.class);
@@ -75,7 +69,10 @@ public class GetDeclarationDataHandler
         result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
         result.setCanRecalculate(permittedEvents.contains(FormDataEvent.CALCULATE));
 
-        result.setUserLoginImportTf(logBusinessService.getUserLoginImportTf(declaration.getId()));
+        String userLogin = logBusinessService.getUserLoginImportTf(declaration.getId());
+        if (userLogin != null && !userLogin.isEmpty()) {
+            result.setUserNameImportTf(userService.getUser(userLogin).getName());
+        }
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         TaxType taxType = declarationTemplate.getType().getTaxType();

@@ -339,11 +339,11 @@ public class DeclarationListView extends
             }
         };
 
-        TextColumn<DeclarationDataSearchResultItem> importTfUserLoginColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+        TextColumn<DeclarationDataSearchResultItem> importTfUserNameColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
-                if (object.getImportDeclarationDataUserLogin() != null) {
-                    return object.getImportDeclarationDataUserLogin();
+                if (object.getImportDeclarationDataUserName() != null) {
+                    return object.getImportDeclarationDataUserName();
                 } else {
                     return "";
                 }
@@ -397,7 +397,7 @@ public class DeclarationListView extends
         stateColumn.setSortable(true);
         fileNameColumn.setSortable(true);
         declarationDataCreationDateColumn.setSortable(true);
-        importTfUserLoginColumn.setSortable(true);
+        importTfUserNameColumn.setSortable(true);
 
         reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
@@ -405,8 +405,10 @@ public class DeclarationListView extends
         declarationTable.setColumnWidth(checkColumn, 2, Style.Unit.EM);
 
         if (!isReports) {
-            declarationTable.addColumn(declarationDataIdColumn, declarationTable.createResizableHeader(DECLARATION_DATA_ID_TITLE, declarationKindColumn));
+            declarationTable.addColumn(declarationDataIdColumn, declarationTable.createResizableHeader(DECLARATION_DATA_ID_TITLE, declarationDataIdColumn));
+            declarationTable.setColumnWidth(declarationDataIdColumn, 4, Style.Unit.EM);
             declarationTable.addColumn(declarationKindColumn, declarationTable.createResizableHeader(DECLARATION_KIND_TITLE, declarationKindColumn));
+            declarationTable.setColumnWidth(declarationKindColumn, 8.7, Style.Unit.EM);
         }
         declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
         declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
@@ -419,25 +421,33 @@ public class DeclarationListView extends
 
         declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
         declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
+        declarationTable.setColumnWidth(stateColumn, 6.5, Style.Unit.EM);
 
         if (isReports && taxType == TaxType.NDFL) {
             declarationTable.addColumn(declarationKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationKppColumn));
+            declarationTable.setColumnWidth(declarationKppColumn, 6, Style.Unit.EM);
             declarationTable.addColumn(declarationOktmoColumn, declarationTable.createResizableHeader(OKTMO_TITLE, declarationOktmoColumn));
+            declarationTable.setColumnWidth(declarationOktmoColumn, 6, Style.Unit.EM);
             declarationTable.addColumn(declarationTaxOrganColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
+            declarationTable.setColumnWidth(declarationTaxOrganColumn, 4, Style.Unit.EM);
             declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
+            declarationTable.setColumnWidth(declarationDocStateColumn, 7, Style.Unit.EM);
             declarationTable.addColumn(declarationCreateDateColumn, declarationTable.createResizableHeader(CREATE_DATE_TITLE, declarationCreateDateColumn));
+            declarationTable.setColumnWidth(declarationCreateDateColumn, 10, Style.Unit.EM);
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE_REPORT, fileNameColumn));
             declarationTable.addColumn(declarationNoteColumn, declarationTable.createResizableHeader(NOTE_TITLE, declarationNoteColumn));
         } else {
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
             if (taxType == TaxType.PFR) {
                 declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
+                declarationTable.setColumnWidth(declarationDocStateColumn, 7, Style.Unit.EM);
             }
         }
 
         if (!isReports) {
             declarationTable.addColumn(declarationDataCreationDateColumn, declarationTable.createResizableHeader(DECLARATION_DATA_CREATION_DATE_TITLE, declarationDataCreationDateColumn));
-            declarationTable.addColumn(importTfUserLoginColumn, declarationTable.createResizableHeader(DECLARATION_DATA_IMPORT_TF_TITLE, importTfUserLoginColumn));
+            declarationTable.setColumnWidth(declarationDataCreationDateColumn, 8.7, Style.Unit.EM);
+            declarationTable.addColumn(importTfUserNameColumn, declarationTable.createResizableHeader(DECLARATION_DATA_IMPORT_TF_TITLE, importTfUserNameColumn));
         }
     }
 
@@ -640,7 +650,7 @@ public class DeclarationListView extends
         } else if(DECLARATION_DATA_CREATION_DATE_TITLE.equals(sortByColumn)){
             this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_DATA_CREATE_DATE;
         } else if(DECLARATION_DATA_IMPORT_TF_TITLE.equals(sortByColumn)){
-            this.sortByColumn = DeclarationDataSearchOrdering.IMPORT_USER_LOGIN;
+            this.sortByColumn = DeclarationDataSearchOrdering.IMPORT_USER_NAME;
         } else {
 			this.sortByColumn = DeclarationDataSearchOrdering.ID;
 		}
