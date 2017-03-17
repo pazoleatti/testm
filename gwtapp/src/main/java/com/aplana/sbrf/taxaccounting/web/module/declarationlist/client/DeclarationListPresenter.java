@@ -125,7 +125,6 @@ public class DeclarationListPresenter extends
             String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
             if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
                     (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
-                filterPresenter.getView().clean();
                 filterStates.clear();
                 selectedItemIds = null;
             }

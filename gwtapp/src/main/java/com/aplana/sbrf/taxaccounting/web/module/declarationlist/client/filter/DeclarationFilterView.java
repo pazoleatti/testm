@@ -607,25 +607,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     }
 
     @Override
-    public void clean() {
-        formStatePicker.setValue(null);
-        declarationTypePicker.setValue(null);
-        reportPeriodPicker.setValue(null);
-        departmentPicker.setValue(null);
-        asnuPicker.setValue(null);
-        if (getUiHandlers() != null) {
-            getUiHandlers().onApplyFilter();
-        }
-    }
-
-    @Override
-    public void clearFilter() {
-        kppPicker.setValue("");
-        taxOrganisationPicker.setValue("");
-        fileNamePicker.setValue("");
-    }
-
-    @Override
     public void setReportPeriodType(String type) {
         reportPeriodPicker.setType(type);
     }
