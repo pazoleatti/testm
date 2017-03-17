@@ -32,12 +32,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, t
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (401, 'Настройки асинхронных задач', 0, 0, 0, null, 'ASYNC_TASK_TYPE');
 
 -- Фиас
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1010,'ФИАС Статус действия',0,0,1,null, 'fias_operstat');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1020,'ФИАС Типы адресных объектов',0,0,1,null, 'fias_socrbase');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1030,'ФИАС Реестр адресообразующих объектов',0,0,1,null, 'fias_addrobj');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1040,'ФИАС Реестр объектов адресации',0,0,1,null, 'fias_house');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1050,'ФИАС Интервалы домов',0,0,1,null, 'fias_houseint');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1060,'ФИАС Сведения по помещениям',0,0,1,null, 'fias_room');
 
 UPDATE ref_book SET is_versioned = 0 WHERE id IN (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 400, 401, 510, 511, 106);
 

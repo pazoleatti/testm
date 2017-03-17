@@ -47,12 +47,7 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
 
     @Override
     public void clearAll() {
-        getJdbcTemplate().update("delete from fias_room");
-        getJdbcTemplate().update("delete from fias_houseint");
-        getJdbcTemplate().update("delete from fias_house");
         getJdbcTemplate().update("delete from fias_addrobj");
-        getJdbcTemplate().update("delete from fias_socrbase");
-        getJdbcTemplate().update("delete from fias_operstat");
     }
 
     class AddressObjectRowMapper implements RowMapper<AddressObject> {

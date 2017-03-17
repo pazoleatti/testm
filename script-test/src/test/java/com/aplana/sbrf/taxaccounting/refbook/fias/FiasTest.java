@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import net.sf.sevenzipjbinding.ArchiveFormat;
 import net.sf.sevenzipjbinding.IInArchive;
-import net.sf.sevenzipjbinding.PropID;
 import net.sf.sevenzipjbinding.SevenZip;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 import org.junit.Assert;
@@ -18,12 +17,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
@@ -35,6 +32,8 @@ import static org.mockito.Mockito.doAnswer;
  * @author Andrey Drunk
  */
 public class FiasTest extends RefBookScriptTestBase {
+
+    public static final Logger LOGGER = Logger.getLogger(FiasTest.class.getName());
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
@@ -49,8 +48,8 @@ public class FiasTest extends RefBookScriptTestBase {
                 Object[] args = invocation.getArguments();
                 String tableName = (String) args[0];
                 List<Map<String, Object>> rowsList = (List<Map<String, Object>>) args[1];
-                //System.out.println("Test " + rowsList.size() + " rows insert to " + tableName);
-                //createInserts(tableName, rowsList);
+                LOGGER.info("Test " + rowsList.size() + " rows insert to " + tableName);
+                createInserts(tableName, rowsList);
                 return null;
             }
         }).when(importFiasDataService).insertRecords(anyString(), anyList());
@@ -114,7 +113,7 @@ public class FiasTest extends RefBookScriptTestBase {
     private void createInserts(String tableName, List<Map<String, Object>> rowsList) {
         for (Map<String, Object> row : rowsList) {
             //вставка в БД
-            System.out.println(createInsert(tableName, row));
+            LOGGER.info(createInsert(tableName, row));
         }
     }
 
