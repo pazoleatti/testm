@@ -75,11 +75,15 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                 LOG.info("Запускаем проверку xml.");
                 process = (new ProcessBuilder(params)).start();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
+                BufferedReader readerE = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                 try {
                     if (Thread.interrupted()) {
                         throw new TAInterruptedException();
                     }
                     String s = reader.readLine();
+                    String e = readerE.readLine();
+                    LOG.info(s);
+                    LOG.info(e);
                     if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
                         logger.info("Проверка xml по xsd завершена успешно.");
                     } else if(s!=null) {
@@ -95,10 +99,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                                 }
                             }
                         }
+                    } else {
+                        logger.warn("Не удалось заустить проверку xml по xsd.");
+                        //throw new ServiceException("");
                     }
                 } finally {
                     processDestroy();
                     reader.close();
+                    readerE.close();
                 }
             } catch (UnsupportedEncodingException e) {
                 LOG.error("", e);
@@ -192,12 +200,16 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                         throw new TAInterruptedException();
                     }
                 }
-                logger.info("Проверка выполнена по файлу xsd %s", blobData.getName());
-                fileInfo(logger, vsax3File);
+                if (!logger.containsLevel(LogLevel.ERROR) && !logger.containsLevel(LogLevel.WARNING)) {
+                    logger.info("Проверка выполнена по файлу xsd %s", blobData.getName());
+                    fileInfo(logger, vsax3File);
+                }
             }
         } catch (IOException e) {
             LOG.error("", e);
-            throw new ServiceException("", e);
+            logger.warn("Произошла ошибка ввода-вывода. Проверка не выполнена.");
+            return false;
+            //throw new ServiceException("", e);
         } finally {
             if (xsdFile != null && !xsdFile.delete()){
                 LOG.warn(String.format(NOT_DELETE_WARN, xsdFile.getName()));
