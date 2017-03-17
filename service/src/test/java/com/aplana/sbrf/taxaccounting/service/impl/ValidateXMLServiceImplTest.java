@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,7 +17,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.ClassUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
@@ -188,7 +190,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         data.setId(5l);
 		// при маленьком таймауте проверка не должна пройти
 		Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, 1000L));
-        Assert.assertEquals(3, logger.getEntries().size());
+        Assert.assertEquals(2, logger.getEntries().size());
     }
 
     @Override
