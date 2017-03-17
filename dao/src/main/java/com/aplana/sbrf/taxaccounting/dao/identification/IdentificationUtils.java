@@ -3,11 +3,39 @@ package com.aplana.sbrf.taxaccounting.dao.identification;
 import com.aplana.sbrf.taxaccounting.model.identification.DocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 /**
  * @author Andrey Drunk
  */
 public class IdentificationUtils {
+
+    public static String getVal(Map<String, RefBookValue> refBookPersonRecord, String attrName) {
+        RefBookValue refBookValue = refBookPersonRecord.get(attrName);
+        if (refBookValue != null) {
+            return refBookValue.toString();
+        } else {
+            return null;
+        }
+    }
+
+    public static String buildRefBookNotice(Map<String, RefBookValue> refBookPersonRecord) {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Номер '").append(getVal(refBookPersonRecord, "RECORD_ID")).append("': ");
+        sb.append(getVal(refBookPersonRecord, "LAST_NAME")).append(" ");
+        sb.append(getVal(refBookPersonRecord, "FIRST_NAME")).append(" ");
+        sb.append(getVal(refBookPersonRecord, "MIDDLE_NAME")).append(" ");
+        sb.append(" [id=").append(getVal(refBookPersonRecord, RefBook.RECORD_ID_ALIAS)).append("]");
+
+        return sb.toString();
+
+    }
 
 
     /**
@@ -29,7 +57,7 @@ public class IdentificationUtils {
      */
     public static String buildNotice(NaturalPerson naturalPerson) {
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         if (naturalPerson.getNum() != null) {
             sb.append("Номер '").append(naturalPerson.getNum()).append("': ");
@@ -79,11 +107,7 @@ public class IdentificationUtils {
 
 
     private static String emptyIfNull(String string) {
-        if (string != null) {
-            return string;
-        } else {
-            return "";
-        }
+        return StringUtils.defaultString(string);
     }
 
 }
