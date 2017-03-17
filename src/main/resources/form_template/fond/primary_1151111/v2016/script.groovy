@@ -103,10 +103,12 @@ switch (formDataEvent) {
         checkData()
         break
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
+        // Подготовка для последующего формирования спецотчета
         println "!PREPARE_SPECIFIC_REPORT!"
         prepareSpecificReport()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        // Формирование спецотчета
         println "!CREATE_SPECIFIC_REPORT!"
         createSpecificReport()
         break
@@ -287,10 +289,12 @@ RaschsvPersSvStrahLic getrRaschsvPersSvStrahLic(id) {
 }
 
 // Находит в базе данных список List RaschsvPersSvStrahLic
-List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicList() {
+List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicList(int startIndex, int pageSize) {
     def declarationId = declarationData.getId()
     def params = scriptSpecificReportHolder.getSubreportParamValues()
-    raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
+    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-627 раскомментировать после обновления стенда
+//    return raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params, startIndex, pageSize)
+    return raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
 }
 
 def prepareSpecificReport() {
@@ -298,7 +302,12 @@ def prepareSpecificReport() {
     List<Column> tableColumns = createTableColumns();
     List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
     def rowColumns = createRowColumns()
-    List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = getrRaschsvPersSvStrahLicList()
+
+    // Ограничение числа выводимых записей
+    int startIndex = 1
+    int pageSize = 100
+
+    List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = getrRaschsvPersSvStrahLicList(startIndex, pageSize)
 
     def lastNameWidth = 4
     def firstNameWidth = 4

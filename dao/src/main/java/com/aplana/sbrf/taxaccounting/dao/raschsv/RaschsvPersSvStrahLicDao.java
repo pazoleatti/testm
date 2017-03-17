@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.raschsv;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 
@@ -50,10 +51,11 @@ public interface RaschsvPersSvStrahLicDao {
     /**
      * Найти физлиц по параметрам спецотчета
      * @param declarationDataId - идентификатор декларации
-     * @param params - параметры спецотчета
+     * @param parameters - параметры спецотчета
+     * @param pagingParams      параметры вывода результата
      * @return
      */
-    List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
+    List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
 
     /**
      * Найти дубли в одной форме
