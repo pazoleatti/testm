@@ -102,7 +102,7 @@
 			<defaultValueExpression><![CDATA[38954]]></defaultValueExpression>
 		</parameter>
 		<queryString>
-			<![CDATA[select row_number() over(partition by pers.declaration_data_id order by pers.inp,pers.id) rn,
+			<![CDATA[select row_number() over(partition by pers.declaration_data_id order by pers.id) rn,
        pers.inp,
        pers.last_name,
        pers.first_name,
@@ -127,7 +127,7 @@
   from ndfl_person pers
  where pers.declaration_data_id=$P{declarationId}
    and pers.id between $P{minPersId} and $P{maxPersId}
- order by pers.inp]]>
+ order by pers.id]]>
 		</queryString>
 		<field name="RN" class="java.math.BigDecimal"/>
 		<field name="INP" class="java.lang.String"/>
@@ -165,7 +165,7 @@
 		<queryString>
 			<![CDATA[select /*+rule*/pers.inp,
        inc.row_num,
-       row_number() over(partition by pers.inp order by inc.income_accrued_date,inc.income_payout_date,inc.id) rn,
+       row_number() over(partition by pers.id order by inc.income_accrued_date,inc.income_payout_date,inc.id) rn,
        inc.operation_id,
        inc.income_code,
        inc.income_type,
@@ -191,7 +191,7 @@
 	from ndfl_person pers join ndfl_person_income inc on (inc.ndfl_person_id=pers.id)
  where pers.declaration_data_id=$P{declarationId}
    and pers.id between $P{minPersId} and $P{maxPersId}
- order by pers.inp,inc.income_accrued_date,inc.income_payout_date]]>
+ order by pers.id,inc.income_accrued_date,inc.income_payout_date]]>
 		</queryString>
 		<field name="INP" class="java.lang.String"/>
 		<field name="ROW_NUM" class="java.math.BigDecimal"/>
