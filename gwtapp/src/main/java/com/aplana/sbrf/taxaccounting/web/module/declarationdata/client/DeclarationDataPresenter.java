@@ -55,7 +55,7 @@ public class DeclarationDataPresenter
     public static final String DECLARATION_UPDATE_MSG = "Область предварительного просмотра. Расчет налоговой формы выполнен.";
     public static final String DECLARATION_UPDATE_MSG_D = "Область предварительного просмотра. Расчет уведомления выполнен.";
 
-    public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить налоговую форму?";
+    public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить форму?";
     public static final String DECLARATION_DELETE_Q_D = "Вы уверены, что хотите удалить уведомление?";
     public static final String DECLARATION_DELETE_MSG = "Налоговая форма удалена";
     public static final String DECLARATION_DELETE_MSG_D = "Уведомление удалено";
