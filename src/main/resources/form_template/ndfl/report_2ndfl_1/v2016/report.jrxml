@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ref_ndfl_ref" language="groovy" pageWidth="842" pageHeight="20000" orientation="Landscape" whenNoDataType="NoDataSection" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="4487ae25-5c53-429a-8f89-b8df12083233">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ref_ndfl_ref" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="4487ae25-5c53-429a-8f89-b8df12083233">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
-	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.auto.fit.row" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.auto.fit.column" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1"/>
+	<property name="net.sf.jasperreports.export.xls.one.page.no.pagination" value="apply"/>
 	<parameter name="declarationId" class="java.lang.Long">
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
@@ -35,20 +35,16 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="31">
+		<band height="47" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="7ae04640-7bbf-43f0-9141-3172767e1a8f" x="0" y="0" width="802" height="20"/>
+				<reportElement uuid="7ae04640-7bbf-43f0-9141-3172767e1a8f" x="0" y="0" width="555" height="20"/>
 				<textElement>
 					<font fontName="Arial" size="10" isBold="true" pdfFontName="Arial.TTF" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Реестр справок]]></text>
 			</staticText>
-		</band>
-	</title>
-	<columnHeader>
-		<band height="27">
 			<staticText>
-				<reportElement uuid="da83acf1-1408-476f-89d9-e33f47f151ae" x="0" y="0" width="45" height="27">
+				<reportElement uuid="da83acf1-1408-476f-89d9-e33f47f151ae" x="0" y="20" width="45" height="27">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Реестр справок"/>
 				</reportElement>
 				<box>
@@ -65,7 +61,7 @@
 справки]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="5f923fc8-8a96-4d7b-b50d-5c878a13185a" mode="Transparent" x="45" y="0" width="133" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="5f923fc8-8a96-4d7b-b50d-5c878a13185a" mode="Transparent" x="45" y="20" width="128" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -80,7 +76,7 @@
 				<text><![CDATA[Фамилия]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="8f1e388c-ce44-4963-abe9-f82cbd9aaee6" mode="Transparent" x="178" y="0" width="100" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="8f1e388c-ce44-4963-abe9-f82cbd9aaee6" mode="Transparent" x="173" y="20" width="88" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -95,7 +91,7 @@
 				<text><![CDATA[Имя]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="10a1612b-23b8-4e1f-9c63-5b55a8f10ae2" mode="Transparent" x="278" y="0" width="94" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="10a1612b-23b8-4e1f-9c63-5b55a8f10ae2" mode="Transparent" x="261" y="20" width="85" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -110,7 +106,7 @@
 				<text><![CDATA[Отчество]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="3cfc32e3-7ddd-4c5b-a799-0b532b466ebd" mode="Transparent" x="372" y="0" width="60" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="3cfc32e3-7ddd-4c5b-a799-0b532b466ebd" mode="Transparent" x="346" y="20" width="55" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -126,7 +122,7 @@
 рождения]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="81e0213e-1356-40da-b04a-212684d6b864" mode="Transparent" x="432" y="0" width="370" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="81e0213e-1356-40da-b04a-212684d6b864" mode="Transparent" x="401" y="20" width="154" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -141,7 +137,7 @@
 				<text><![CDATA[Текст ошибки от ФНС]]></text>
 			</staticText>
 		</band>
-	</columnHeader>
+	</title>
 	<detail>
 		<band height="14">
 			<textField isStretchWithOverflow="true">
@@ -160,7 +156,7 @@
 				<textFieldExpression><![CDATA[$F{NUM}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="0985cf55-18ce-4118-99e3-f8ebb261db09" stretchType="RelativeToBandHeight" mode="Transparent" x="45" y="0" width="133" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="0985cf55-18ce-4118-99e3-f8ebb261db09" stretchType="RelativeToBandHeight" mode="Transparent" x="45" y="0" width="128" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -175,7 +171,7 @@
 				<textFieldExpression><![CDATA[$F{SURNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="62d6111c-801d-4a47-bce2-16905870813d" stretchType="RelativeToTallestObject" mode="Transparent" x="278" y="0" width="94" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="62d6111c-801d-4a47-bce2-16905870813d" stretchType="RelativeToTallestObject" mode="Transparent" x="261" y="0" width="85" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -190,7 +186,7 @@
 				<textFieldExpression><![CDATA[$F{LASTNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="dd.MM.yyyy" isBlankWhenNull="false">
-				<reportElement uuid="43cbecc3-8c84-43a7-a66a-0815dafc9454" stretchType="RelativeToTallestObject" mode="Transparent" x="372" y="0" width="60" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="43cbecc3-8c84-43a7-a66a-0815dafc9454" stretchType="RelativeToTallestObject" mode="Transparent" x="346" y="0" width="55" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -205,7 +201,7 @@
 				<textFieldExpression><![CDATA[$F{BIRTHDAY}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement uuid="5e1ad161-87f3-4bfd-94ce-1d64817a6813" stretchType="RelativeToTallestObject" mode="Transparent" x="432" y="0" width="370" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="5e1ad161-87f3-4bfd-94ce-1d64817a6813" stretchType="RelativeToTallestObject" mode="Transparent" x="401" y="0" width="154" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -217,11 +213,11 @@
 					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5" spacingAfter="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($F{ERRTEXT}.length()>80)?
+				<textFieldExpression><![CDATA[($F{ERRTEXT}.length()>50)?
 $F{ERRTEXT0} : $F{ERRTEXT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="f983376d-0191-44bc-815f-ede3acabe9bf" stretchType="RelativeToTallestObject" mode="Transparent" x="178" y="0" width="100" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="f983376d-0191-44bc-815f-ede3acabe9bf" stretchType="RelativeToTallestObject" mode="Transparent" x="173" y="0" width="88" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -238,6 +234,6 @@ $F{ERRTEXT0} : $F{ERRTEXT}]]></textFieldExpression>
 		</band>
 	</detail>
 	<columnFooter>
-		<band height="13"/>
+		<band height="13" splitType="Stretch"/>
 	</columnFooter>
 </jasperReport>
