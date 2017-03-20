@@ -445,7 +445,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
                 .append(" (select ds.name from REF_BOOK_DOC_STATE ds where ds.id = dec.doc_state_id) as doc_state,")
                 .append(" (select lb.log_date from log_business lb where lb.event_id = " + FormDataEvent.CREATE.getCode() + " and lb.declaration_data_id = dec.id and rownum = 1) as decl_data_creation_date,")
-                .append(" (select su.name from log_business lb join sec_user su on su.login=lb.user_login where lb.event_id = " + FormDataEvent.IMPORT_TRANSPORT_FILE.getCode() + " and lb.declaration_data_id = dec.id and rownum = 1) as import_decl_data_user_name");
+                .append(" (select su.name from log_business lb join sec_user su on su.login=lb.user_login where lb.event_id = " + FormDataEvent.CREATE.getCode() + " and lb.declaration_data_id = dec.id and rownum = 1) as import_decl_data_user_name");
     }
 
     public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {

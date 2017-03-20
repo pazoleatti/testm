@@ -130,6 +130,6 @@ public class LogBusinessDaoTest {
 		logBusiness.setNote("the best note");
 		logBusinessDao.add(logBusiness);
 
-		assertEquals(LOGIN_CONTROL_BANK, logBusinessDao.getUserLoginImportTf(1));
+		assertEquals(LOGIN_CONTROL_BANK, logBusinessDao.getFormCreationUserName(1));
 	}
 }

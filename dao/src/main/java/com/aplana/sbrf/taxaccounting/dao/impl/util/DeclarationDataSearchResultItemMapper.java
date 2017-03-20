@@ -29,18 +29,18 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
         result.setTaxOrganCode(rs.getString("tax_organ_code"));
         result.setTaxOrganKpp(rs.getString("kpp"));
         result.setOktmo(rs.getString("oktmo"));
-        result.setAsnuId(SqlUtils.getLong(rs,"asnu_id"));
+        result.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
         result.setFileName(rs.getString("file_name"));
-        result.setDeclarationFormKind(DeclarationFormKind.fromId(SqlUtils.getLong(rs,"form_kind")));
+        result.setDeclarationFormKind(DeclarationFormKind.fromId(SqlUtils.getLong(rs, "form_kind")));
         result.setNote(rs.getString("note"));
-        result.setDocStateId(SqlUtils.getLong(rs,"doc_state_id"));
+        result.setDocStateId(SqlUtils.getLong(rs, "doc_state_id"));
         result.setDocState(rs.getString("doc_state"));
         result.setCreateDate(rs.getDate("creation_date"));
         Timestamp decl_data_creation_date = rs.getTimestamp("decl_data_creation_date");
         if (decl_data_creation_date != null) {
             result.setDeclarationDataCreationDate(new Date(decl_data_creation_date.getTime()));
         }
-        result.setImportDeclarationDataUserName(rs.getString("import_decl_data_user_name"));
+        result.setDeclarationDataCreationUserName(rs.getString("import_decl_data_user_name"));
         return result;
 	}
 }

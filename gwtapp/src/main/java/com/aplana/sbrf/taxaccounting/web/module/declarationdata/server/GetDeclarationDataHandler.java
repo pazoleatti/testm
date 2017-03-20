@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -51,6 +52,13 @@ public class GetDeclarationDataHandler
         super(GetDeclarationDataAction.class);
     }
 
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+        }
+    };
+
     @Override
     public GetDeclarationDataResult execute(GetDeclarationDataAction action,
                                             ExecutionContext context) throws ActionException {
@@ -69,10 +77,11 @@ public class GetDeclarationDataHandler
         result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
         result.setCanRecalculate(permittedEvents.contains(FormDataEvent.CALCULATE));
 
-        String userLogin = logBusinessService.getUserLoginImportTf(declaration.getId());
+        String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
         if (userLogin != null && !userLogin.isEmpty()) {
-            result.setUserNameImportTf(userService.getUser(userLogin).getName());
+            result.setCreationUserName(userService.getUser(userLogin).getName());
         }
+        result.setCreationDate(sdf.get().format(logBusinessService.getFormCreationDate(declaration.getId())));
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         TaxType taxType = declarationTemplate.getType().getTaxType();

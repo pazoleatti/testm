@@ -48,7 +48,7 @@ public interface LogBusinessDao {
 	 * Получить имя пользователя, загрузившего ТФ
 	 * @param declarationDataId код декларации
 	 */
-	String getUserLoginImportTf(long declarationDataId);
+	String getFormCreationUserName(long declarationDataId);
 
 	/**
 	 * добавить информацию в историю событий деклараций

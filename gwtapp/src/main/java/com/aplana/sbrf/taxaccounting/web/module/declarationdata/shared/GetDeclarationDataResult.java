@@ -25,7 +25,8 @@ public class GetDeclarationDataResult implements Result {
     private boolean isVisiblePDF;
     private DeclarationData declarationData;
     private DeclarationFormKind declarationFormKind;
-    private String userNameImportTf;
+    private String creationUserName;
+    private String creationDate;
     /**
      * Тип формы, пока не используем
      */
@@ -196,11 +197,19 @@ public class GetDeclarationDataResult implements Result {
         this.declarationFormKind = declarationFormKind;
     }
 
-    public String getUserNameImportTf() {
-        return userNameImportTf;
+    public String getCreationUserName() {
+        return creationUserName;
     }
 
-    public void setUserNameImportTf(String userNameImportTf) {
-        this.userNameImportTf = userNameImportTf;
+    public void setCreationUserName(String creationUserName) {
+        this.creationUserName = creationUserName;
+    }
+
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
     }
 }

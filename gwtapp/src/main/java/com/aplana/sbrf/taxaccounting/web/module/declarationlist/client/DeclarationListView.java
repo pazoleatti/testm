@@ -51,7 +51,7 @@ public class DeclarationListView extends
     public static final String DECLARATION_KIND_TITLE = "Тип налоговой формы";
     public static final String DECLARATION_DATA_ID_TITLE = "Номер формы";
     public static final String DECLARATION_DATA_CREATION_DATE_TITLE = "Дата и время создания формы";
-    public static final String DECLARATION_DATA_IMPORT_TF_TITLE = "ТФ загружен";
+    public static final String DECLARATION_DATA_IMPORT_TF_TITLE = "Создал";
     public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
@@ -301,12 +301,6 @@ public class DeclarationListView extends
                 return object.getOktmo();
             }
         };
-        TextColumn<DeclarationDataSearchResultItem> declarationCreateDateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-            @Override
-            public String getValue(DeclarationDataSearchResultItem object) {
-                return object.getCreateDate() != null ? DATE_FORMAT.format(object.getCreateDate()) : null;
-            }
-        };
         TextColumn<DeclarationDataSearchResultItem> declarationDocStateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
@@ -342,8 +336,8 @@ public class DeclarationListView extends
         TextColumn<DeclarationDataSearchResultItem> importTfUserNameColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
-                if (object.getImportDeclarationDataUserName() != null) {
-                    return object.getImportDeclarationDataUserName();
+                if (object.getDeclarationDataCreationUserName() != null) {
+                    return object.getDeclarationDataCreationUserName();
                 } else {
                     return "";
                 }
@@ -391,7 +385,6 @@ public class DeclarationListView extends
         declarationKppColumn.setSortable(true);
         declarationOktmoColumn.setSortable(true);
         declarationDocStateColumn.setSortable(true);
-        declarationCreateDateColumn.setSortable(true);
         declarationNoteColumn.setSortable(true);
         declarationAsnuColumn.setSortable(true);
         stateColumn.setSortable(true);
@@ -404,9 +397,10 @@ public class DeclarationListView extends
         declarationTable.addColumn(checkColumn, checkBoxHeader);
         declarationTable.setColumnWidth(checkColumn, 2, Style.Unit.EM);
 
+        declarationTable.addColumn(declarationDataIdColumn, declarationTable.createResizableHeader(DECLARATION_DATA_ID_TITLE, declarationDataIdColumn));
+        declarationTable.setColumnWidth(declarationDataIdColumn, 4, Style.Unit.EM);
+
         if (!isReports) {
-            declarationTable.addColumn(declarationDataIdColumn, declarationTable.createResizableHeader(DECLARATION_DATA_ID_TITLE, declarationDataIdColumn));
-            declarationTable.setColumnWidth(declarationDataIdColumn, 4, Style.Unit.EM);
             declarationTable.addColumn(declarationKindColumn, declarationTable.createResizableHeader(DECLARATION_KIND_TITLE, declarationKindColumn));
             declarationTable.setColumnWidth(declarationKindColumn, 8.7, Style.Unit.EM);
         }
@@ -432,8 +426,9 @@ public class DeclarationListView extends
             declarationTable.setColumnWidth(declarationTaxOrganColumn, 4, Style.Unit.EM);
             declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
             declarationTable.setColumnWidth(declarationDocStateColumn, 7, Style.Unit.EM);
-            declarationTable.addColumn(declarationCreateDateColumn, declarationTable.createResizableHeader(CREATE_DATE_TITLE, declarationCreateDateColumn));
-            declarationTable.setColumnWidth(declarationCreateDateColumn, 10, Style.Unit.EM);
+            declarationTable.addColumn(declarationDataCreationDateColumn, declarationTable.createResizableHeader(DECLARATION_DATA_CREATION_DATE_TITLE, declarationDataCreationDateColumn));
+            declarationTable.setColumnWidth(declarationDataCreationDateColumn, 8.7, Style.Unit.EM);
+            declarationTable.addColumn(importTfUserNameColumn, declarationTable.createResizableHeader(DECLARATION_DATA_IMPORT_TF_TITLE, importTfUserNameColumn));
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE_REPORT, fileNameColumn));
             declarationTable.addColumn(declarationNoteColumn, declarationTable.createResizableHeader(NOTE_TITLE, declarationNoteColumn));
         } else {

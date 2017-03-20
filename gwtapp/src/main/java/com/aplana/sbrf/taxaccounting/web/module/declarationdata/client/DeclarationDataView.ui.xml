@@ -5,6 +5,10 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
 <ui:style>
+    @external .headerAttr;
+    @external .depAttr;
+    @external .headerAttrName;
+
     .titleText {
         font-size: 14px !important;
         color: #636460;
@@ -24,11 +28,18 @@
         font-weight: bold;
         max-height: 54px;
         overflow: hidden;
+        height: 17px;
+    }
+
+    .headerDepAttr {
+        font-size: 12px;
+        font-weight: bold;
+        max-height: 40px;
+        overflow: hidden;
     }
 
     .depAttr{
         line-height: 17px;
-        height: 17px;
     }
 
     .headerAttrName {
@@ -45,7 +56,12 @@
         -ms-text-overflow: ellipsis;
     }
 
-    .depatmentBlock {
+    .departmentBlock {
+        max-width: 560px;
+        min-width: 350px;
+    }
+
+    .declarationDataIdBlock {
         max-width: 560px;
         min-width: 350px;
     }
@@ -138,29 +154,34 @@
                 <g:HorizontalPanel width="100%" addStyleNames="{style.infoPanel}">
                     <!--Подразделение. Левая часть-->
                     <g:cell>
-                        <g:HorizontalPanel spacing="2" height="58px" addStyleNames="{style.depatmentBlock}">
-                            <g:cell width="95px">
-                                <g:VerticalPanel horizontalAlignment="right" width="95px">
+                        <g:VerticalPanel>
+                            <g:HorizontalPanel spacing="2" addStyleNames="{style.departmentBlock}">
+                                <g:cell width="95px">
                                     <g:Label text="Подразделение:" addStyleNames="{style.headerAttrName}"/>
+                                </g:cell>
+                                <g:cell horizontalAlignment="left">
+                                    <g:Label ui:field="department" addStyleNames="{style.headerDepAttr}, {style.depAttr}"/>
+                                </g:cell>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel spacing="2" addStyleNames="{style.declarationDataIdBlock}">
+                                <g:cell width="95px" horizontalAlignment="right" >
                                     <g:Label text="Номер формы:" ui:field="declarationDataIdLabel" addStyleNames="{style.headerAttrName}"/>
-                                </g:VerticalPanel>
-                            </g:cell>
-                            <g:cell horizontalAlignment="left">
-                                <g:VerticalPanel addStyleNames="{style.infoValuesBlock}">
-                                    <g:Label ui:field="department" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                </g:cell>
+                                <g:cell horizontalAlignment="left">
                                     <g:Label ui:field="declarationDataId" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
-                                </g:VerticalPanel>
-                            </g:cell>
-                        </g:HorizontalPanel>
+                                </g:cell>
+                            </g:HorizontalPanel>
+                        </g:VerticalPanel>
                     </g:cell>
                     <!--Инфо по форме. Середина-->
-                    <g:cell horizontalAlignment="left" width="45%">
-                        <g:HorizontalPanel ui:field="centerBlock" height="58px" addStyleNames="{style.centerBlock}" >
+                    <g:cell horizontalAlignment="left" width="40%">
+                        <g:HorizontalPanel ui:field="centerBlock" addStyleNames="{style.centerBlock}" >
                             <g:cell>
                                 <g:VerticalPanel spacing="2" horizontalAlignment="right" width="140px">
                                     <g:Label ui:field="formKindLabel" text="Тип налоговой формы:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Период:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Состояние:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="stateEDLabel" text="Состояние ЭД:" addStyleNames="{style.headerAttrName}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                             <g:cell>
@@ -168,33 +189,24 @@
                                     <g:Label ui:field="formKind" addStyleNames="{style.headerAttr}, {style.depAttr} "/>
                                     <g:Label ui:field="reportPeriod" addStyleNames="{style.reportPeriodLabel}, {style.depAttr}"/>
                                     <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                    <g:Label ui:field="stateED" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                         </g:HorizontalPanel>
                     </g:cell>
-                    <g:cell horizontalAlignment="left" width="45%">
-                        <g:HorizontalPanel ui:field="propertyBlock" height="58px" addStyleNames="{style.centerBlock}">
-                            <g:cell>
-                                <g:VerticalPanel spacing="2" horizontalAlignment="right" width="140px">
-                                    <g:Label ui:field="kppLabel" text="КПП:" addStyleNames="{style.headerAttrName}"/>
-                                    <g:Label ui:field="oktmoLabel" text="ОКТМО:" addStyleNames="{style.headerAttrName}"/>
-                                    <g:Label ui:field="taxOrganCodeLabel" text="Код НО:" addStyleNames="{style.headerAttrName}"/>
-                                    <g:Label ui:field="stateEDLabel" text="Состояние ЭД:" addStyleNames="{style.headerAttrName}"/>
-                                    <g:Label ui:field="asnuLabel" text="АСНУ:" addStyleNames="{style.headerAttrName}"/>
-                                    <g:Label ui:field="importTfLabel" text="ТФ загружен:" addStyleNames="{style.headerAttrName}"/>
-                                </g:VerticalPanel>
-                            </g:cell>
-                            <g:cell>
-                                <g:VerticalPanel spacing="2" addStyleNames="{style.infoValuesBlock}">
-                                    <g:Label ui:field="kpp" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
-                                    <g:Label ui:field="oktmo" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
-                                    <g:Label ui:field="taxOrganCode" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
-                                    <g:Label ui:field="stateED" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
-                                    <g:Label ui:field="asnu" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
-                                    <g:Label ui:field="importTf" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
-                                </g:VerticalPanel>
-                            </g:cell>
-                        </g:HorizontalPanel>
+                    <g:cell horizontalAlignment="left" width="50%">
+                        <g:SimplePanel ui:field="propertyBlock" height="58px">
+                            <g:HorizontalPanel addStyleNames="{style.centerBlock}">
+                                <g:cell>
+                                    <g:VerticalPanel ui:field="leftAttrPanel" spacing="2" horizontalAlignment="right" width="185px">
+                                    </g:VerticalPanel>
+                                </g:cell>
+                                <g:cell>
+                                    <g:VerticalPanel ui:field="rightAttrPanel"  spacing="2" addStyleNames="{style.infoValuesBlock}">
+                                    </g:VerticalPanel>
+                                </g:cell>
+                            </g:HorizontalPanel>
+                        </g:SimplePanel>
                     </g:cell>
                     <g:cell width="10%">
                         <g:Label width="100%"/>
