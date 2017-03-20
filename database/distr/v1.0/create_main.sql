@@ -2309,7 +2309,7 @@ create table log_entry
     log_level     number(1)             not null,
     message       varchar2(2000 char),
     type          varchar2(255 char),
-    object        varchar2(255)
+    object        varchar2(255 char)
 );
 
 comment on table log_entry is 'Сообщения в журнале';
