@@ -117,10 +117,18 @@
        pers.status,
        pers.post_index,
        pers.region_code,
-       pers.area,
-       pers.city,
-       pers.locality,
-       pers.street,
+       case when pers.area is not null and length(pers.area)>20 then pers.area||chr(10)
+            else pers.area
+       end area,
+       case when pers.city is not null and length(pers.city)>20 then pers.city||chr(10)
+            else pers.city
+       end city,
+       case when pers.locality is not null and length(pers.locality)>20 then pers.locality||chr(10)
+            else pers.locality
+       end locality,
+       case when pers.street is not null and length(pers.street)>30 then pers.street||chr(10)
+            else pers.street
+       end street,
        pers.house,
        pers.building,
        pers.flat
@@ -372,7 +380,7 @@
 				<text><![CDATA[Подразделение]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="2c4439b0-2ca4-4b4c-91ad-9395def5104e" x="98" y="0" width="261" height="18"/>
+				<reportElement uuid="2c4439b0-2ca4-4b4c-91ad-9395def5104e" x="98" y="0" width="297" height="18"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -392,7 +400,7 @@
 				<textFieldExpression><![CDATA[$F{PERNAME}+" "+$F{REPYEAR}+" г."]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="49c78ad1-c2ef-4016-91a7-21ab82e89016" x="0" y="36" width="359" height="18">
+				<reportElement uuid="49c78ad1-c2ef-4016-91a7-21ab82e89016" x="0" y="36" width="395" height="18">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Заголовок"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -430,7 +438,7 @@
 				<reportElement uuid="d289244f-8b6e-4b61-bfa2-2c017bc393b7" x="0" y="122" width="100" height="1"/>
 			</break>
 			<staticText>
-				<reportElement uuid="c459eeca-8a9f-4d76-b78e-60531f2f4ecc" mode="Transparent" x="0" y="103" width="359" height="20" forecolor="#000000" backcolor="#FFFFFF">
+				<reportElement uuid="c459eeca-8a9f-4d76-b78e-60531f2f4ecc" mode="Transparent" x="0" y="103" width="395" height="20" forecolor="#000000" backcolor="#FFFFFF">
 					<printWhenExpression><![CDATA[$F{CNT_PERS}>500]]></printWhenExpression>
 				</reportElement>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
@@ -440,7 +448,7 @@
 				<text><![CDATA[Отчет предназначен для тестирования. Отображается 500 первых физ лиц]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e98c2432-df8b-4506-bc00-9bc052cfd05d" mode="Transparent" x="0" y="83" width="359" height="20" forecolor="#000000" backcolor="#FFFFFF">
+				<reportElement uuid="e98c2432-df8b-4506-bc00-9bc052cfd05d" mode="Transparent" x="0" y="83" width="395" height="20" forecolor="#000000" backcolor="#FFFFFF">
 					<printWhenExpression><![CDATA[$F{CNT_PERS}>500]]></printWhenExpression>
 				</reportElement>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
@@ -454,7 +462,7 @@
 	<detail>
 		<band height="35">
 			<componentElement>
-				<reportElement uuid="d5854fd2-6485-4383-b8f0-2ef8c1f2cf91" key="table 4" x="0" y="7" width="822" height="28">
+				<reportElement uuid="d5854fd2-6485-4383-b8f0-2ef8c1f2cf91" key="table 4" stretchType="RelativeToBandHeight" x="0" y="7" width="822" height="28">
 					<property name="net.sf.jasperreports.page.break.no.pagination" value="apply"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
@@ -495,8 +503,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="###0" isBlankWhenNull="true">
-								<reportElement uuid="1cba382a-5c07-4515-830b-063492fe6c82" mode="Transparent" x="0" y="0" width="29" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="###0" isBlankWhenNull="true">
+								<reportElement uuid="1cba382a-5c07-4515-830b-063492fe6c82" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="29" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -529,8 +537,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="4fa5f7b6-ec9b-48c7-b103-c3247997f58d" mode="Transparent" x="0" y="0" width="102" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="4fa5f7b6-ec9b-48c7-b103-c3247997f58d" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="102" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -563,8 +571,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="9d3ad4ff-8d47-4ffa-b2a1-1ec110a88d3d" mode="Transparent" x="0" y="0" width="109" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="9d3ad4ff-8d47-4ffa-b2a1-1ec110a88d3d" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="109" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -597,8 +605,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="6f9633f1-3828-476c-94e3-117afd75fc82" mode="Transparent" x="0" y="0" width="107" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="6f9633f1-3828-476c-94e3-117afd75fc82" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="107" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -631,8 +639,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="4d7bd9f2-9196-4cec-b5a3-cf7a91bc81fc" mode="Transparent" x="0" y="0" width="108" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="4d7bd9f2-9196-4cec-b5a3-cf7a91bc81fc" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="108" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -665,8 +673,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="dd.MM.yyyy" isBlankWhenNull="true">
-								<reportElement uuid="1364efad-402f-455c-a99f-ef4cd37ab150" mode="Transparent" x="0" y="0" width="102" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="dd.MM.yyyy" isBlankWhenNull="true">
+								<reportElement uuid="1364efad-402f-455c-a99f-ef4cd37ab150" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="102" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -699,8 +707,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="d0eb400e-e91b-418e-8417-aeefe9bebed9" mode="Transparent" x="0" y="0" width="71" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="d0eb400e-e91b-418e-8417-aeefe9bebed9" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="71" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -733,8 +741,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="be93a86e-9f11-4045-bf82-e0652b2f849c" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="be93a86e-9f11-4045-bf82-e0652b2f849c" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -767,8 +775,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="984f3754-c162-45cf-97ca-3a6cab4dec0f" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="984f3754-c162-45cf-97ca-3a6cab4dec0f" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -801,8 +809,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="2b5cd9e8-79e0-4484-b974-9d8ad9f54aa9" mode="Transparent" x="0" y="0" width="100" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="2b5cd9e8-79e0-4484-b974-9d8ad9f54aa9" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="100" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -835,8 +843,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="3212f231-92ac-4cc2-8308-38e9bd6eb1d7" mode="Transparent" x="0" y="0" width="101" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="3212f231-92ac-4cc2-8308-38e9bd6eb1d7" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="101" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -869,8 +877,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="f89834e3-0c43-4d5b-abcc-6cd02b18d11d" mode="Transparent" x="0" y="0" width="50" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="f89834e3-0c43-4d5b-abcc-6cd02b18d11d" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="50" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -902,8 +910,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="2c792fd5-e46f-45f4-bdab-e40c8beea1fe" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="2c792fd5-e46f-45f4-bdab-e40c8beea1fe" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -935,8 +943,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="0e22303d-71af-4ff0-9354-43f41eff6335" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="0e22303d-71af-4ff0-9354-43f41eff6335" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -945,10 +953,10 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="90" uuid="57e166aa-1bfa-4cce-9228-3bd2ae88cdd1">
+					<jr:column width="140" uuid="57e166aa-1bfa-4cce-9228-3bd2ae88cdd1">
 						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
 							<staticText>
-								<reportElement uuid="73997dd2-0d3a-4185-a365-f3bc4c968165" x="0" y="0" width="90" height="12">
+								<reportElement uuid="73997dd2-0d3a-4185-a365-f3bc4c968165" x="0" y="0" width="140" height="12">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -959,7 +967,7 @@
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
-								<reportElement uuid="00d96e5b-4cb5-4157-b9f3-0de0ef8c0831" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="00d96e5b-4cb5-4157-b9f3-0de0ef8c0831" mode="Transparent" x="0" y="0" width="140" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -968,8 +976,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="956ff5c7-865c-422d-9442-570f93efa8e6" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="956ff5c7-865c-422d-9442-570f93efa8e6" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="140" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -978,10 +986,10 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="90" uuid="3678aba0-6238-492c-850a-a9ae75c5bb98">
+					<jr:column width="121" uuid="3678aba0-6238-492c-850a-a9ae75c5bb98">
 						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
 							<staticText>
-								<reportElement uuid="60a4a774-87cd-4eab-95ad-c756c7e828d9" x="0" y="0" width="90" height="12">
+								<reportElement uuid="60a4a774-87cd-4eab-95ad-c756c7e828d9" x="0" y="0" width="121" height="12">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -992,7 +1000,7 @@
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
-								<reportElement uuid="5acf0258-6363-49a1-b5e9-cb6c0d85afa7" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="5acf0258-6363-49a1-b5e9-cb6c0d85afa7" mode="Transparent" x="0" y="0" width="121" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1001,8 +1009,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="1deb86a3-8a67-4c3d-801a-6cea60677a9c" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="1deb86a3-8a67-4c3d-801a-6cea60677a9c" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="121" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1011,10 +1019,10 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="90" uuid="3e223c27-a1cc-464d-9808-cdf94a1242c2">
+					<jr:column width="165" uuid="3e223c27-a1cc-464d-9808-cdf94a1242c2">
 						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
 							<staticText>
-								<reportElement uuid="c23b35bf-8d5d-4199-9da6-74b3dea003cd" x="0" y="0" width="90" height="12">
+								<reportElement uuid="c23b35bf-8d5d-4199-9da6-74b3dea003cd" x="0" y="0" width="165" height="12">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -1025,7 +1033,7 @@
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
-								<reportElement uuid="18aa56a6-cd18-4356-b5d2-9c34f2cde8c1" mode="Transparent" x="0" y="0" width="90" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="18aa56a6-cd18-4356-b5d2-9c34f2cde8c1" mode="Transparent" x="0" y="0" width="165" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1034,8 +1042,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="2a5220cf-9271-47aa-87ca-49eb8d03ff89" mode="Transparent" x="0" y="0" width="90" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="2a5220cf-9271-47aa-87ca-49eb8d03ff89" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="165" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1044,10 +1052,10 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="145" uuid="5e3e27bb-e38e-496a-bd96-8961203cf41d">
+					<jr:column width="175" uuid="5e3e27bb-e38e-496a-bd96-8961203cf41d">
 						<jr:tableHeader style="table_TH" height="12" rowSpan="1">
 							<staticText>
-								<reportElement uuid="1309c1a5-c36f-4a90-9fbc-49706ad6f457" x="0" y="0" width="145" height="12">
+								<reportElement uuid="1309c1a5-c36f-4a90-9fbc-49706ad6f457" x="0" y="0" width="175" height="12">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -1058,7 +1066,7 @@
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="21" rowSpan="1">
 							<staticText>
-								<reportElement uuid="48a36d06-29e9-4887-877f-2a0cd100bb1a" mode="Transparent" x="0" y="0" width="145" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="48a36d06-29e9-4887-877f-2a0cd100bb1a" mode="Transparent" x="0" y="0" width="175" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1068,7 +1076,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
 							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-								<reportElement uuid="e67c0a8f-b1df-46b7-83f9-5af57a9fe62f" mode="Transparent" x="0" y="0" width="145" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="e67c0a8f-b1df-46b7-83f9-5af57a9fe62f" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="175" height="13" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1100,8 +1108,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="76bed615-fd64-4d37-b762-b281c943f6fa" mode="Transparent" x="0" y="0" width="58" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="76bed615-fd64-4d37-b762-b281c943f6fa" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="58" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1133,8 +1141,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="80ebdd6e-a330-45c2-950b-83e7a014f20d" mode="Transparent" x="0" y="0" width="57" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="80ebdd6e-a330-45c2-950b-83e7a014f20d" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="57" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1166,8 +1174,8 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="table 1_TH" height="13" rowSpan="1">
-							<textField pattern="" isBlankWhenNull="true">
-								<reportElement uuid="9d1da319-f1ab-4ebb-8b72-d01e8bae2edb" mode="Transparent" x="0" y="0" width="63" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+								<reportElement uuid="9d1da319-f1ab-4ebb-8b72-d01e8bae2edb" stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="63" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
