@@ -119,7 +119,7 @@ void consolidation() {
     logger.info("Выгрузка справочника Физические лица: записей найдено "+refBookPersonMap.size() + calcTimeMillis(time));
 
     //id, Map<String, RefBookValue>
-    Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPerson);
+    Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPersonMap);
     logger.info("Выгрузка справочника Адреса физических лиц: записей найдено "+addressMap.size() + calcTimeMillis(time));
 
     //id, List<Map<String, RefBookValue>>
@@ -171,7 +171,7 @@ void consolidation() {
         List<Map<String, RefBookValue>> personDocumentsList = personDocMap.get(refBookPersonId)
 
         //TODO удалить
-        logger.info("personDocumentsList "+personDocumentsList)
+        //logger.info("personDocumentsList "+personDocumentsList)
 
         //Выбираем ДУЛ с признаком включения в отчетность 1
         Map<String, RefBookValue> personDocumentRecord = personDocumentsList?.find {
