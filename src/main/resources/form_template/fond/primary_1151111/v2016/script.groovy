@@ -2331,8 +2331,8 @@ void importData() {
 
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (logger.containsLevel(LogLevel.WARNING)) {
+        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     ScriptUtils.checkInterrupted();

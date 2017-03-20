@@ -1404,7 +1404,7 @@ void importData() {
     }
 
     if (logger.containsLevel(LogLevel.WARNING)) {
-        throw new ServiceException("ТФ не соответствует XSD-схеме РНУ НФДЛ. Загрузка невозможна.");
+        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
