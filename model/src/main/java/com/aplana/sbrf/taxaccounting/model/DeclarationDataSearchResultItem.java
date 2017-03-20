@@ -89,7 +89,7 @@ public class DeclarationDataSearchResultItem implements Serializable {
     /**
      * Имя пользователя, загрузившего ТФ
      */
-    private String importDeclarationDataUserName;
+    private String declarationDataCreationUserName;
 
 	public Long getDeclarationDataId() {
 		return declarationDataId;
@@ -275,11 +275,11 @@ public class DeclarationDataSearchResultItem implements Serializable {
         this.declarationDataCreationDate = declarationDataCreationDate;
     }
 
-    public String getImportDeclarationDataUserName() {
-        return importDeclarationDataUserName;
+    public String getDeclarationDataCreationUserName() {
+        return declarationDataCreationUserName;
     }
 
-    public void setImportDeclarationDataUserName(String importDeclarationDataUserName) {
-        this.importDeclarationDataUserName = importDeclarationDataUserName;
+    public void setDeclarationDataCreationUserName(String declarationDataCreationUserName) {
+        this.declarationDataCreationUserName = declarationDataCreationUserName;
     }
 }

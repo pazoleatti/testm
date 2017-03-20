@@ -52,8 +52,13 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	}
 
     @Override
-    public String getUserLoginImportTf(long declarationDataId) {
-        return logBusinessDao.getUserLoginImportTf(declarationDataId);
+    public Date getFormCreationDate(long declarationDataId) {
+        return logBusinessDao.getFormCreationDate(declarationDataId);
+    }
+
+    @Override
+    public String getFormCreationUserName(long declarationDataId) {
+        return logBusinessDao.getFormCreationUserName(declarationDataId);
     }
 
     @Override

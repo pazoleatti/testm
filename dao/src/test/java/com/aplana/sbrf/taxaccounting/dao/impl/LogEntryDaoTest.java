@@ -62,19 +62,22 @@ public class LogEntryDaoTest {
         logger.error("E1");
         logger.error("E2");
         logger.warn("W1");
-        logger.warn("W2");
+        logger.warnExp("W2", "type", "obj");
         logEntryDao.save(logger.getEntries(), UID_WITHOUT_LOG_ENTRY_2);
         List<LogEntry> lel = logEntryDao.get(UID_WITHOUT_LOG_ENTRY_2);
 
         Assert.assertEquals(lel.size(), 4);
         Assert.assertEquals(lel.get(0).getMessage(), "E1");
         Assert.assertEquals(lel.get(3).getLevel(), LogLevel.WARNING);
+        Assert.assertEquals(lel.get(3).getType(), "type");
+        Assert.assertEquals(lel.get(3).getObject(), "obj");
     }
 
     @Test
     public void testGetEmptyPage() {
         List<LogEntry> emptyPage = logEntryDao.get(UID_WITHOUT_LOG_ENTRY_3, 1, 10);
         Assert.assertTrue(emptyPage.isEmpty());
+
     }
 
     @Test
@@ -84,6 +87,8 @@ public class LogEntryDaoTest {
         Assert.assertEquals(page.size(), 2);
         Assert.assertEquals(page.get(0).getOrd(), 2);
         Assert.assertEquals(page.get(1).getOrd(), 3);
+        Assert.assertEquals(page.get(1).getType(), "type");
+        Assert.assertEquals(page.get(1).getObject(), "obj1");
     }
 
     @Test(expected = RuntimeException.class)

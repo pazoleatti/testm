@@ -8,6 +8,9 @@ import java.util.Date;
  */
 public class LogEntry implements Serializable {
 
+    private static final int MAX_TYPE_LENGTH = 255;
+    private static final int MAX_OBJECT_LENGTH = 255;
+
     /**
      * Идентификатор группы сообщений {@link java.util.UUID}
      */
@@ -34,6 +37,15 @@ public class LogEntry implements Serializable {
     private String message;
 
     /**
+     * Тип
+     */
+    private String type;
+
+    /**
+     * Объект
+     */
+    private String object;
+    /**
      * Конструктор по-умолчанию
      * Напрямую использоваться не должен, создан для совместимости с GWT
      */
@@ -52,6 +64,14 @@ public class LogEntry implements Serializable {
         this.date = new Date();
     }
 
+    public LogEntry(LogLevel level, String message, String type, String object) {
+        this.level = level;
+        this.message = message;
+        setType(type);
+        setObject(object);
+        this.date = new Date();
+    }
+
     /**
      * Конструктор копирования
      * Используется при разбиение одного большого сообщения на маленькие
@@ -64,6 +84,8 @@ public class LogEntry implements Serializable {
         this.date = logEntry.date;
         this.level = logEntry.level;
         this.message = logEntry.message;
+        this.type = logEntry.type;
+        this.object = logEntry.object;
     }
 
     public String getLogId() {
@@ -106,6 +128,31 @@ public class LogEntry implements Serializable {
         this.message = message;
     }
 
+    public String getObject() {
+        return object;
+    }
+
+    public void setObject(String object) {
+        if (object != null && object.length() > MAX_OBJECT_LENGTH) {
+            this.object = object.substring(0, MAX_OBJECT_LENGTH);
+        } else {
+            this.object = object;
+        }
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        if (type != null && type.length() > MAX_TYPE_LENGTH) {
+            this.type = type.substring(0, MAX_TYPE_LENGTH);
+
+        } else {
+            this.type = type;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -117,6 +164,8 @@ public class LogEntry implements Serializable {
         if (logId != null ? !logId.equals(logEntry.logId) : logEntry.logId != null) return false;
         if (date != null ? !date.equals(logEntry.date) : logEntry.date != null) return false;
         if (level != logEntry.level) return false;
+        if (type != null ? type.equals(logEntry.type) : logEntry.type == null) return false;
+        if (object != null ? object.equals(logEntry.object) : logEntry.object == null) return false;
         return message != null ? message.equals(logEntry.message) : logEntry.message == null;
     }
 
@@ -127,6 +176,8 @@ public class LogEntry implements Serializable {
         result = 31 * result + (date != null ? date.hashCode() : 0);
         result = 31 * result + (level != null ? level.hashCode() : 0);
         result = 31 * result + (message != null ? message.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (object != null ? object.hashCode() : 0);
         return result;
     }
 
@@ -138,6 +189,8 @@ public class LogEntry implements Serializable {
                 ", date=" + date +
                 ", level=" + level +
                 ", message='" + message + '\'' +
+                ", type='" + type + '\'' +
+                ", object='" + object + '\'' +
                 '}';
     }
 }

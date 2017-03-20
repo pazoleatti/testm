@@ -962,7 +962,11 @@ public final class ScriptUtils {
                         groupCount++;
                         String groupCols = groupString.getString(prevRow);
                         if (groupCols != null) {
-                            logger.log(logLevel, GROUP_WRONG_ITOG, groupCols);
+                            if (fatal) {
+                                logger.error(GROUP_WRONG_ITOG, groupCols);
+                            } else {
+                                logger.warn(GROUP_WRONG_ITOG, groupCols);
+                            }
                         }
                     }
                 }
@@ -983,7 +987,11 @@ public final class ScriptUtils {
                     groupCount++;
                     String groupCols = groupString.getString(row);
                     if (groupCols != null) {
-                        logger.log(logLevel, GROUP_WRONG_ITOG, groupCols);
+                        if (fatal) {
+                            logger.error(GROUP_WRONG_ITOG, groupCols);
+                        } else {
+                            logger.warn(GROUP_WRONG_ITOG, groupCols);
+                        }
                     }
                 }
             }

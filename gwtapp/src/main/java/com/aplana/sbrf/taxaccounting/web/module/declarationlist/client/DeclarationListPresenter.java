@@ -283,7 +283,7 @@ public class DeclarationListPresenter extends
     @Override
     public void delete() {
         LogCleanEvent.fire(this);
-        Dialog.confirmMessageYesClose(Dialog.CONFIRM_MESSAGE, "Вы уверены, что хотите удалить налоговую форму?", new DialogHandler() {
+        Dialog.confirmMessageYesClose(Dialog.CONFIRM_MESSAGE, "Вы уверены, что хотите удалить форму?", new DialogHandler() {
             @Override
             public void yes() {
 
