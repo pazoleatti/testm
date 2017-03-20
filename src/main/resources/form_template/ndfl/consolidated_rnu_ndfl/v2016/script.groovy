@@ -170,9 +170,6 @@ void consolidation() {
 
         List<Map<String, RefBookValue>> personDocumentsList = personDocMap.get(refBookPersonId)
 
-        //TODO удалить
-        //logger.info("personDocumentsList "+personDocumentsList)
-
         //Выбираем ДУЛ с признаком включения в отчетность 1
         Map<String, RefBookValue> personDocumentRecord = personDocumentsList?.find {
             it.get("INC_REP")?.getNumberValue() == 1
@@ -230,7 +227,7 @@ void consolidation() {
 
     }
 
-    logger.info(String.format("Консолидация завершена, новых записей создано: %d", (ndflPersonNum - 1)));
+    logger.info("Консолидация завершена, новых записей создано: "+(ndflPersonNum - 1) + calcTimeMillis(time));
 
 }
 
@@ -243,6 +240,11 @@ String getVal(Map<String, RefBookValue> refBookPersonRecord, String attrName) {
     }
 }
 
+/**
+ * TODO Использовать метод com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils#buildRefBookNotice(java.util.Map)
+ * @param refBookPersonRecord
+ * @return
+ */
 String buildRefBookNotice(Map<String, RefBookValue> refBookPersonRecord) {
     StringBuilder sb = new StringBuilder();
     sb.append("Номер '").append(getVal(refBookPersonRecord, "RECORD_ID")).append("': ");
@@ -253,41 +255,58 @@ String buildRefBookNotice(Map<String, RefBookValue> refBookPersonRecord) {
     return sb.toString();
 }
 
-
 /**
- * Получить "ДУЛ"
+ * Получить Записи справочника адреса физлиц, по записям из справочника физлиц
+ * @param personMap
  * @return
  */
-Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
-    def result = [:]
-    declarationDataIdList.each {
-        def personsDocumentsMap = getActualRefDulByDeclarationDataId(it)
-        personsDocumentsMap.each { personId, refBookValue ->
-            result.put(personId, refBookValue)
+Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
+    Map<Long, Map<String, RefBookValue>> result = new HashMap<Long, Map<String, RefBookValue>>();
+    def addressIds = [];
+    personMap.each { recordId, person ->
+        if (person.get("ADDRESS").value != null) {
+            Long addressId = person.get("ADDRESS")?.getReferenceValue();
+            //адрес может быть не задан
+            if (addressId != null) {
+                addressIds.add(addressId);
+            }
         }
     }
-    return result
+
+    if (addressIds.size() > 0) {
+        Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).getRecordData(addressIds)
+        refBookMap.each { addressId, address ->
+            result.put(addressId, address)
+        }
+    }
+    return result;
 }
 
 /**
- * Получить "Документ, удостоверяющий личность (ДУЛ)"
+ * Получить "ДУЛ" по всем физлицам указвнных в НФ
+ * @return
  */
-def getRefDulByDeclarationDataId(def long declarationDataId) {
-    if (dulCache.isEmpty()) {
-        String whereClause = String.format("person_id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
+Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
+    Map<Long, List<Map<String, RefBookValue>>> result = new HashMap<Long, List<Map<String, RefBookValue>>>();
+    declarationDataIdList.each {
+        String whereClause = """
+            JOIN ref_book_person p ON (frb.person_id = p.id)
+            JOIN ndfl_person np ON (np.declaration_data_id = ${it} AND p.id = np.person_id)
+        """
+
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
 
         refBookMap.each { personId, refBookValues ->
             Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
-            def dulList = dulCache.get(refBookPersonId);
+            List<Map<String, RefBookValue>> dulList = result.get(refBookPersonId);
             if (dulList == null) {
-                dulList = [];
-                dulCache.put(refBookPersonId, dulList)
+                dulList = new ArrayList<Map<String, RefBookValue>>();
+                result.put(refBookPersonId, dulList);
             }
             dulList.add(refBookValues);
         }
     }
-    return dulCache;
+    return result
 }
 
 /**
@@ -297,7 +316,7 @@ def getRefDulByDeclarationDataId(def long declarationDataId) {
  */
 Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataIdList(List<Long> declarationDataIdList) {
     //Если исходных форм достаточно много то можно переделать запрос на получение списка declarationDataIdList
-    def result = [:]
+    def result = new HashMap<Long, Map<String, RefBookValue>>()
     declarationDataIdList.each {
         Map mapPersons = personRecordIdToValuesMap = getActualRefPersonsByDeclarationDataId(it)
         mapPersons.each { recordId, refBookValue ->
@@ -305,49 +324,6 @@ Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataIdList(
         }
     }
     return result
-}
-
-/**
- * Получить "Физические лица"
- * NDFL_PERSON.PERSON_ID будет ссылаться на актуальную записи справочника ФЛ только после проведения расчета
- * @return
- */
-Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId(def long declarationDataId) {
-    String whereClause = String.format("id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
-    return getRefBookByRecordWhere(REF_BOOK_PERSON_ID, whereClause)
-}
-
-
-/**
- * Выгрузка из справочников по условию
- * @param refBookId
- * @param whereClause
- * @return
- */
-def getRefBookByRecordWhere(def long refBookId, def whereClause) {
-    Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataWhere(whereClause)
-    if (refBookMap == null || refBookMap.size() == 0) {
-        //throw new ScriptException("Не найдены записи справочника " + refBookId)
-        return Collections.emptyMap();
-    }
-    return refBookMap
-}
-
-/**
- * Получить коллекцию идентификаторов записей справочника "Физические лица"
- * @param ndflPersonList
- * @return
- */
-def collectRefBookPersonIds(List<NdflPerson> ndflPersonList) {
-    Set<Long> personIdSet = new HashSet<Long>();
-    for (NdflPerson ndflPerson : ndflPersonList) {
-        if (ndflPerson.personId != null) {
-            personIdSet.add(ndflPerson.personId);
-        } else {
-            throw new ServiceException("Не указан параметр 'Идентификатор ФЛ', необходимо выполнить расчет налоговой формы c id=" + ndflPerson.declarationDataId)
-        }
-    }
-    return new ArrayList<Long>(personIdSet);
 }
 
 /**
@@ -530,30 +506,6 @@ Map<Long, List<NdflPersonOperation>> mapToPesonId(List<NdflPersonOperation> oper
         result.get(ndflPersonId).add(personOperation);
     }
     return result;
-}
-
-/**
- * Получить Записи справочника адреса физлиц, по записям из справочника физлиц
- * @param personMap
- * @return
- */
-Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
-    Map<Long, Map<String, RefBookValue>> addressMap = Collections.emptyMap();
-    def addressIds = [];
-    personMap.each { recordId, person ->
-        if (person.get("ADDRESS").value != null) {
-            Long addressId = person.get("ADDRESS")?.getReferenceValue();
-            //адрес может быть не задан
-            if (addressId != null) {
-                addressIds.add(addressId);
-            }
-        }
-    }
-
-    if (addressIds.size() > 0) {
-        addressMap = getRefAddress(addressIds)
-    }
-    return addressMap;
 }
 
 /**
@@ -1328,7 +1280,7 @@ Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId(decl
             JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
         """
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
-    def refBookMapResult = [:]
+    def refBookMapResult = new HashMap<Long, Map<String, RefBookValue>>();
     refBookMap.each { personId, refBookValue ->
         Long refBookRecordId = refBookValue.get(RF_RECORD_ID).value
         refBookMapResult.put(refBookRecordId, refBookValue)
@@ -1500,11 +1452,15 @@ def getRefAddress(def addressIds) {
     return addressCache;
 }
 
+
 /**
  * Получить "Документ, удостоверяющий личность (ДУЛ)"
  */
-Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId(declarationDataId) {
+Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
     if (dulActualCache.isEmpty()) {
+
+        def declarationDataId = declarationData.id
+
         String whereClause = """
             JOIN ref_book_person p ON (frb.person_id = p.id)
             JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
@@ -1823,7 +1779,7 @@ def checkDataReference(
 
     time = System.currentTimeMillis();
     // ДУЛ Map<person_id, List<RefBook>>
-    def dulMap = getActualRefDulByDeclarationDataId(declarationData.id)
+    def dulMap = getActualRefDulByDeclarationDataId()
     logger.info(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
     println "Проверки на соответствие справочникам / Выгрузка справочника ДУЛ: " + (System.currentTimeMillis() - time);
     logger.info("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ: (" + (System.currentTimeMillis() - time) + " ms)");
