@@ -2303,11 +2303,13 @@ create sequence seq_log start with 1;
 
 create table log_entry 
 (
-    log_id        varchar2(36)  not null,
-    ord           number(9)     not null,
-    creation_date timestamp     not null,
-    log_level number(1)         not null,
-    message varchar2(2000 char)
+    log_id        varchar2(36)          not null,
+    ord           number(9)             not null,
+    creation_date timestamp             not null,
+    log_level     number(1)             not null,
+    message       varchar2(2000 char),
+    type          varchar2(255 char),
+    object        varchar2(255)
 );
 
 comment on table log_entry is 'Сообщения в журнале';
@@ -2316,6 +2318,8 @@ comment on column log_entry.ord is 'Порядковый номер сообще
 comment on column log_entry.creation_date is 'Дата-время, включая мс';
 comment on column log_entry.log_level is 'Уровень важности (0 - информация, 1 - предупреждение, 2 - ошибка)';
 comment on column log_entry.message is 'Текст сообщения';
+comment on column log_entry.type is 'Тип';
+comment on column log_entry.object is 'Объект';
 
 create sequence seq_log_entry start with 1;
 --------------------------------------------------------------------------------------------------------------------------
