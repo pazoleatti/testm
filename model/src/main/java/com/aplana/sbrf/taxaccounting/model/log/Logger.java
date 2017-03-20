@@ -48,23 +48,51 @@ public class Logger {
 	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
 	 */
 	public void info(String message, Object... args) {
-		log(LogLevel.INFO, message, false, args);
+		log(LogLevel.INFO, message, null, null, false, args);
 	}
+
+	/**
+	 * Добавить информационное сообщение в журнал (это сообщения, не требующие особой реакции пользователя)
+	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+	 */
+	public void infoExp(String message, String type, String object, Object... args) {
+		log(LogLevel.INFO, message, type, object, false, args);
+	}
+
 	/**
 	 * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то) 
 	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)} 
 	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
 	 */
 	public void warn(String message, Object...args) {
-		log(LogLevel.WARNING, message, false, args);
+		log(LogLevel.WARNING, message, null, null, false, args);
 	}
+
+	/**
+	 * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то)
+	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+	 */
+	public void warnExp(String message, String type, String object, Object... args) {
+		log(LogLevel.WARNING, message, type, object, false, args);
+	}
+
 	/**
 	 * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы)
 	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)} 
 	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
 	 */
 	public void error(String message, Object...args) {
-		log(LogLevel.ERROR, message, false, args);
+		log(LogLevel.ERROR, message, null, null, false, args);
+	}
+	/**
+	 * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы)
+	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+	 */
+	public void errorExp(String message, String type, String object, Object... args) {
+		log(LogLevel.ERROR, message, type, object, false, args);
 	}
 
     /**
@@ -73,23 +101,49 @@ public class Logger {
      * @param args набор объектов для подставновки в текст сообщения, может не задаваться
      */
     public void infoIfNotExist(String message, Object... args) {
-        log(LogLevel.INFO, message, true, args);
+        log(LogLevel.INFO, message, null, null, true, args);
     }
+    /**
+     * Добавить информационное сообщение в журнал (это сообщения, не требующие особой реакции пользователя). Сообщение не добавляется, если оно уже существует в списке сообщений
+     * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+     * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+     */
+    public void infoIfNotExistExp(String message, String type, String object, Object... args) {
+        log(LogLevel.INFO, message, type, object, true, args);
+    }
+
     /**
      * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то). Сообщение не добавляется, если оно уже существует в списке сообщений
      * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
      * @param args набор объектов для подставновки в текст сообщения, может не задаваться
      */
     public void warnIfNotExist(String message, Object...args) {
-        log(LogLevel.WARNING, message, true, args);
+        log(LogLevel.WARNING, message, null, null, true, args);
+    }
+    /**
+     * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то). Сообщение не добавляется, если оно уже существует в списке сообщений
+     * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+     * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+     */
+    public void warnIfNotExistExp(String message, String type, String object, Object... args) {
+        log(LogLevel.WARNING, message, type, object, true, args);
+    }
+
+    /**
+     * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы). Сообщение не добавляется, если оно уже существует в списке сообщений
+     * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+     * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+     */
+    public void errorIfNotExistExp(String message, Object...args) {
+        log(LogLevel.ERROR, message, null, null, true, args);
     }
     /**
      * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы). Сообщение не добавляется, если оно уже существует в списке сообщений
      * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
      * @param args набор объектов для подставновки в текст сообщения, может не задаваться
      */
-    public void errorIfNotExist(String message, Object...args) {
-        log(LogLevel.ERROR, message, true, args);
+    public void errorIfNotExistExp(String message, String type, String object, Object... args) {
+        log(LogLevel.ERROR, message, type, object, true, args);
     }
 	
 	/**
@@ -102,7 +156,7 @@ public class Logger {
         if (msg != null && msg.length() > MAX_EXCEPTION_LOG_MESSAGE_LENGTH) {
             msg = msg.substring(0, MAX_EXCEPTION_LOG_MESSAGE_LENGTH - 1) + '…';
         }
-        log(LogLevel.ERROR, "Ошибка: %s", false, msg);
+        log(LogLevel.ERROR, "Ошибка: %s", null, null, false, msg);
 		LOG.error("Unhandled exception: " + msg, e);
 	}
 
@@ -124,18 +178,13 @@ public class Logger {
         entries.add(topPosition, entry);
     }
 
-    // для скриптов
-    public void log(LogLevel level, String message, Object...args) {
-        log(level, message, false, args);
-    }
-
-    private void log(LogLevel level, String message, boolean excludeIfNotExist, Object...args) {
+    private void log(LogLevel level, String message, String type, String object, boolean excludeIfNotExist, Object...args) {
         String extMessage = String.format(message, args);
         if (messageDecorator != null) {
             extMessage = messageDecorator.getDecoratedMessage(extMessage);
         }
 
-        LogEntry entry = new LogEntry(level, extMessage);
+        LogEntry entry = new LogEntry(level, extMessage, type, object);
         if (!excludeIfNotExist || !entries.contains(entry)) {
             entries.add(entry);
         }

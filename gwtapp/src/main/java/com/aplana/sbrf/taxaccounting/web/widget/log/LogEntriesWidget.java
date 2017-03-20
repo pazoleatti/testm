@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryDateCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryImageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryIndexCell;
-import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
+import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryTextCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.core.client.GWT;
@@ -40,7 +40,13 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 		initWidget(uiBinder.createAndBindUi(this));
 
 		Column<LogEntry, LogEntry> messageColumn = new Column<LogEntry, LogEntry>(
-				new LogEntryMessageCell()) {
+				new LogEntryTextCell(){
+                    @Override
+                    public String getStringValue(LogEntry value) {
+                        return value.getMessage();
+                    }
+                }) {
+
 			@Override
 			public LogEntry getValue(LogEntry object) {
 				return object;
@@ -71,12 +77,42 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 			}
 		};
 
+        Column<LogEntry, LogEntry> typeColumn = new Column<LogEntry, LogEntry>(
+                new LogEntryTextCell(){
+                    @Override
+                    public String getStringValue(LogEntry value) {
+                        return value.getType()!=null?value.getType():"";
+                    }
+                }) {
+            @Override
+            public LogEntry getValue(LogEntry object) {
+                return object;
+            }
+        };
+
+        Column<LogEntry, LogEntry> objectColumn = new Column<LogEntry, LogEntry>(
+                new LogEntryTextCell(){
+                    @Override
+                    public String getStringValue(LogEntry value) {
+                        return value.getObject()!=null?value.getObject():"";
+                    }
+                }) {
+            @Override
+            public LogEntry getValue(LogEntry object) {
+                return object;
+            }
+        };
+
 		logCellTable.addColumn(indexColumn);
 		logCellTable.setColumnWidth(indexColumn, "30px");
         logCellTable.addColumn(dateColumn);
         logCellTable.setColumnWidth(dateColumn, "110px");
 		logCellTable.addColumn(imageColumn);
 		logCellTable.addColumn(messageColumn);
+		logCellTable.addColumn(typeColumn);
+        logCellTable.setColumnWidth(typeColumn, "100px");
+        logCellTable.addColumn(objectColumn);
+        logCellTable.setColumnWidth(objectColumn, "100px");
 	}
 
     @Override
