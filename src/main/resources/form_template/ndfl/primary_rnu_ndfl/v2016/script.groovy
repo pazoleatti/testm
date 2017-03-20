@@ -1175,7 +1175,7 @@ def prepareSpecificReport() {
 
     // Ограничение числа выводимых записей
     int startIndex = 1
-    int pageSize = 100
+    int pageSize = 10
 
     PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters, startIndex, pageSize);
 
