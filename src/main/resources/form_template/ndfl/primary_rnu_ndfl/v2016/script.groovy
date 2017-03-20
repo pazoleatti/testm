@@ -3000,47 +3000,47 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Налоговая база (Графа 13)='${ndflPersonIncome.taxBase ?: ""}', НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}', НДФЛ.Расчет.Дата (Графа 15)='${ndflPersonIncome.taxDate ?: ""}'. $fioAndInp." +
                         " Текст ошибки: Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24."
         )
-        //8 Раздел 2. Графа 16 должна быть заполнена, если заполнены Раздел 2. Графы 6,10
+        //8 Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 16
         columnFillConditionDataList << new ColumnFillConditionData(
-                new Column6And10Fill(),
                 new Column16Fill(),
-                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 16 должна быть заполнена, если заполнены Раздел 2. Графы 6,10."
-        )
-        //9 Раздел 2. Графа 18 или 19 должна быть заполнена, если заполнены Раздел 2. Графы 6,10
-        columnFillConditionDataList << new ColumnFillConditionData(
                 new Column6And10Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}', Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 16."
+        )
+        //9 Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
+        columnFillConditionDataList << new ColumnFillConditionData(
                 new Column18Or19Fill(),
-                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)='${ndflPersonIncome.notHoldingTax ?: ""}', НДФЛ.Расчет.Сумма.Излишне удержанный (Графа 19)='${ndflPersonIncome.overholdingTax ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 18 или 19 должна быть заполнена, если заполнены Раздел 2. Графы 6,10."
+                new Column6And10Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}', Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19."
         )
-        //10 Раздел 2. Графа 17 должна быть заполнена, если заполнены Раздел 2. Графы 7,11
+        //10 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17
         columnFillConditionDataList << new ColumnFillConditionData(
-                new Column7And11Fill(),
                 new Column17Fill(),
-                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Удержанный (Графа 17)='${ndflPersonIncome.withholdingTax ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 17 должна быть заполнена, если заполнены Раздел 2. Графы 7,11."
-        )
-        //11 Раздел 2. Графа 20 должна быть заполнена, если заполнены Раздел 2. Графы 7,11
-        columnFillConditionDataList << new ColumnFillConditionData(
                 new Column7And11Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm}. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17."
+        )
+        //11 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20
+        columnFillConditionDataList << new ColumnFillConditionData(
                 new Column20Fill(),
-                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)='${ndflPersonIncome.refoundTax ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 20 должна быть заполнена, если заполнены Раздел 2. Графы 7,11."
+                new Column7And11Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm ?: ""}. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20."
         )
         //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column7And11Or22And23And24Fill(),
                 new Column21Fill(),
                 "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,24,25."
+                        " Текст ошибки: Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 22,23,24."
         )
-        //12 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7,11 и 23,23,24
+        //12 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7,11 и 22,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column7And11And22And23And24NotFill(),
                 new Column21NotFill(),
                 "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7,11 и 23,24,25."
+                        " Текст ошибки: Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7,11 и 22,23,24."
         )
         //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них
         columnFillConditionDataList << new ColumnFillConditionData(
@@ -3053,6 +3053,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
                     !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
                 logger.warn(columnFillConditionData.conditionMessage)
+//                println(columnFillConditionData.conditionMessage)
             }
         }
 
@@ -3268,8 +3269,7 @@ class Column21NotFill implements ColumnFillConditionChecker {
 class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) ||
-                (ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm))
+        return (new Column7And11Fill().check(ndflPersonIncome)) || (new Column22And23And24Fill().check(ndflPersonIncome))
     }
 }
 /**
@@ -3278,8 +3278,7 @@ class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
 class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return (ndflPersonIncome.incomePayoutDate == null && ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) &&
-                (ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm))
+        return !(new Column7And11Fill().check(ndflPersonIncome)) && (new Column22And23And24NotFill().check(ndflPersonIncome))
     }
 }
 /**
@@ -3306,7 +3305,7 @@ class Column22And23And24Fill implements ColumnFillConditionChecker {
 class Column22And23And24FillOrColumn22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return new Column22And23And24NotFill().check(ndflPersonIncome) || new Column22And23And24Fill().check(ndflPersonIncome)
+        return (new Column22And23And24NotFill().check(ndflPersonIncome)) || (new Column22And23And24Fill().check(ndflPersonIncome))
     }
 }
 /**
