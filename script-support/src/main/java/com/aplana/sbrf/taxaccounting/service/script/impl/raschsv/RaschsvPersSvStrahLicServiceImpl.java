@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl.raschsv;
 
 import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.RaschsvPersSvStrahLic;
 import com.aplana.sbrf.taxaccounting.service.script.raschsv.RaschsvPersSvStrahLicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +44,17 @@ public class RaschsvPersSvStrahLicServiceImpl implements RaschsvPersSvStrahLicSe
     }
 
     @Override
-    public List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params) {
-        return raschsvPersSvStrahLicDao.findPersonBySubreportParams(declarationDataId, params);
+    public List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> parameters) {
+        return raschsvPersSvStrahLicDao.findPersonBySubreportParams(declarationDataId, parameters, new PagingParams());
+    }
+
+    @Override
+    public List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize) {
+        if (parameters == null) {
+            parameters = new HashMap<String, Object>();
+        }
+
+        return raschsvPersSvStrahLicDao.findPersonBySubreportParams(declarationDataId, parameters, new PagingParams(startIndex, pageSize));
     }
 
     @Override

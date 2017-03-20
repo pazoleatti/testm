@@ -52,10 +52,20 @@ public interface RaschsvPersSvStrahLicService {
     /**
      * Выборка "Персонифицированных сведений о застрахованных лицах"
      * @param declarationDataId - идентификатор декларации
-     * @param params - параметры спецотчета
+     * @param parameters - параметры спецотчета
      * @return
      */
-    List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> params);
+    List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> parameters);
+
+    /**
+     * Выборка "Персонифицированных сведений о застрахованных лицах"
+     * @param declarationDataId - идентификатор декларации
+     * @param parameters - параметры спецотчета
+     * @startIndex - стартовый индекс
+     * @pageSize - размер страницы
+     * @return
+     */
+    List<RaschsvPersSvStrahLic> findPersonBySubreportParams(Long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize);
 
     /**
      * Найти дубли в одной форме

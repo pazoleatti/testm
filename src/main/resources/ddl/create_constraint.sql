@@ -333,7 +333,6 @@ alter table raschsv_itog_strah_lic add constraint pk_raschsv_itog_strah_lic prim
 alter table raschsv_itog_vypl add constraint pk_raschsv_itog_vypl primary key(id);
 alter table raschsv_itog_vypl_dop add constraint pk_raschsv_itog_vypl_dop primary key(id);
 
-
 --foreign keys
 alter table raschsv_svnp_podpisant add constraint fk_raschsv_svnp_podp_declarat foreign key (declaration_data_id) references declaration_data (id) on delete cascade;
 alter table raschsv_obyaz_plat_sv add constraint fk_raschsv_obyaz_plat_declarat foreign key (declaration_data_id) references declaration_data (id) on delete cascade;
@@ -394,7 +393,6 @@ alter table fias_addrobj add constraint pk_fias_addrobj primary key (id);
 
 -- foreign keys
 alter table fias_addrobj add constraint fk_fias_addrobj_parentid foreign key (parentguid) references fias_addrobj (id) on delete cascade;
-
 -- checks
 alter table fias_addrobj add constraint chk_fias_addrobj_centstatus check (centstatus between 0 and 3);
 alter table fias_addrobj add constraint chk_fias_addrobj_currstatus check (currstatus between 0 and 99);

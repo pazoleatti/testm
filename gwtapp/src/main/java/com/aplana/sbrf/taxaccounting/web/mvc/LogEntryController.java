@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -61,12 +63,31 @@ public class LogEntryController {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
         //resp.setContentLength((int) file.length());
-        resp.setHeader("Content-Disposition", "attachment; filename=\"messages.csv\"");
 
+        resp.setHeader("Content-Disposition", createHeader(logEntryList != null && !logEntryList.isEmpty() ? logEntryList.get(0).getMessage() : ""));
         OutputStream out = resp.getOutputStream();
         IOUtils.copy(fis, out);
 
         fis.close();
         out.close();
     }
+
+
+    /**
+     * Формирует заголовок с именем файла для выгрузки журнала сообщений
+     *
+     * @param headerMsg заглавное сообщение
+     * @return
+     */
+    public static String createHeader(String headerMsg) {
+        //"20170317_112234_Журнал_сообщений"
+        StringBuffer sb = new StringBuffer();
+        sb.append("attachment; filename=\"");
+        sb.append(new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
+        sb.append("_Messages.csv");
+        sb.append("\"");
+        return sb.toString();
+    }
+
+
 }

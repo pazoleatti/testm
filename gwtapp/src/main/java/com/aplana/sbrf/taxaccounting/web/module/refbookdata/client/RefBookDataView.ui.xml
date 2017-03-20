@@ -119,9 +119,16 @@
                         <d:DateMaskBoxPicker ui:field="relevanceDate" width="110px"/>
                     </g:HorizontalPanel>
 
+                    <g:HorizontalPanel verticalAlignment="middle">
+                        <g:HTML ui:field="separator1" addStyleNames="{style.verSep}"/>
+                        <g:Label ui:field="lastName" text="Фамилия: " addStyleNames="{style.marginRight2}"/>
+                        <g:TextBox width="210px" ui:field="filterLastName" addStyleNames="{style.marginRight5}"/>
+                        <g:Label ui:field="firstName" text="Имя: " addStyleNames="{style.marginRight2}"/>
+                        <g:TextBox width="210px" ui:field="filterFirstName" addStyleNames="{style.marginRight2}"/>
+                    </g:HorizontalPanel>
                     <g:cell>
                         <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
-                            <g:HTML ui:field="separator1" addStyleNames="{style.verSep}"/>
+                            <g:HTML ui:field="separator2" addStyleNames="{style.verSep}"/>
                             <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}"/>
                             <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
                         </g:HorizontalPanel>
