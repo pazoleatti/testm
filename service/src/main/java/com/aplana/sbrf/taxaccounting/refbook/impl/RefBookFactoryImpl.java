@@ -42,25 +42,25 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     private static final Log LOG = LogFactory.getLog(RefBookFactoryImpl.class);
 
-	private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-		@Override
-		protected SimpleDateFormat initialValue() {
-			return new SimpleDateFormat("dd.MM.yyyy");
-		}
-	};
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
-	// Список простых редактируемых версионируемых справочников
-	private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
-			TAX_PLACE_TYPE_CODE.getId(), COUNTRY.getId(), DETACH_TAX_PAY.getId(), MAKE_CALC.getId(), MARK_SIGNATORY_CODE.getId(),
-			DOCUMENT_CODES.getId(), PERSON_ADDRESS.getId(), ID_DOC.getId(), TAXPAYER_STATUS.getId(), PERSON.getId(),
-			ID_TAX_PAYER.getId(), DEDUCTION_TYPE.getId(), INCOME_CODE.getId(), REGION.getId(), PRESENT_PLACE.getId(),
-			OKVED.getId(), REORGANIZATION.getId(), FILL_BASE.getId(), TARIFF_PAYER.getId(), HARD_WORK.getId(),
-			KBK.getId(), PERSON_CATEGORY.getId(), NDFL.getId(), NDFL_DETAIL.getId(), FOND.getId(),
-			FOND_DETAIL.getId(), NDFL_REFERENCES.getId(),
+    // Список простых редактируемых версионируемых справочников
+    private static final List<Long> simpleEditableRefBooks = Arrays.asList(new Long[]{
+            TAX_PLACE_TYPE_CODE.getId(), COUNTRY.getId(), DETACH_TAX_PAY.getId(), MAKE_CALC.getId(), MARK_SIGNATORY_CODE.getId(),
+            DOCUMENT_CODES.getId(), PERSON_ADDRESS.getId(), ID_DOC.getId(), TAXPAYER_STATUS.getId(), PERSON.getId(),
+            ID_TAX_PAYER.getId(), DEDUCTION_TYPE.getId(), INCOME_CODE.getId(), REGION.getId(), PRESENT_PLACE.getId(),
+            OKVED.getId(), REORGANIZATION.getId(), FILL_BASE.getId(), TARIFF_PAYER.getId(), HARD_WORK.getId(),
+            KBK.getId(), PERSON_CATEGORY.getId(), NDFL.getId(), NDFL_DETAIL.getId(), FOND.getId(),
+            FOND_DETAIL.getId(), NDFL_REFERENCES.getId(),
 
-			// справочник ОКТМО отдельным списком идет, так как является версионируемым, но только для чтения
-			OKTMO.getId()
-	});
+            // справочник ОКТМО отдельным списком идет, так как является версионируемым, но только для чтения
+            OKTMO.getId()
+    });
 
     @Autowired
     private RefBookDao refBookDao;
@@ -78,7 +78,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Override
     public List<RefBook> getAll(boolean onlyVisible) {
-		//TODO: избавиться от лишнего аргумента null (Marat Fayzullin 10.02.2014)
+        //TODO: избавиться от лишнего аргумента null (Marat Fayzullin 10.02.2014)
         return onlyVisible ? refBookDao.getAllVisible(null) : refBookDao.getAll(null);
     }
 
@@ -89,36 +89,36 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Override
     public RefBookDataProvider getDataProvider(Long refBookId) {
-		RefBook refBook = get(refBookId);
+        RefBook refBook = get(refBookId);
 
-		if (simpleEditableRefBooks.contains(refBookId)) {
-			RefBookSimpleDataProvider dataProvider = (RefBookSimpleDataProvider) applicationContext.getBean("refBookSimpleDataProvider", RefBookDataProvider.class);
-			dataProvider.setRefBook(refBook);
-			return dataProvider;
-		}
+        if (simpleEditableRefBooks.contains(refBookId)) {
+            RefBookSimpleDataProvider dataProvider = (RefBookSimpleDataProvider) applicationContext.getBean("refBookSimpleDataProvider", RefBookDataProvider.class);
+            dataProvider.setRefBook(refBook);
+            return dataProvider;
+        }
 
         if (DEPARTMENT.getId() == refBookId) {
             return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
         }
-		if (CONFIGURATION_PARAM.getId() == refBookId) {
+        if (CONFIGURATION_PARAM.getId() == refBookId) {
             RefBookConfigurationParam dataProvider = applicationContext.getBean("refBookConfigurationParam", RefBookConfigurationParam.class);
             dataProvider.setRefBook(refBook);
             return dataProvider;
-		}
-		if (AUDIT_FIELD.getId() == refBookId) {
+        }
+        if (AUDIT_FIELD.getId() == refBookId) {
             RefBookAuditFieldList dataProvider = applicationContext.getBean("refBookAuditFieldList", RefBookAuditFieldList.class);
-			dataProvider.setRefBook(refBook);
+            dataProvider.setRefBook(refBook);
             return dataProvider;
         }
-		if (EMAIL_CONFIG.getId() == refBookId) {
+        if (EMAIL_CONFIG.getId() == refBookId) {
             return applicationContext.getBean("refBookRefBookEmailConfig", RefBookEmailConfigProvider.class);
         }
-		if (ASYNC_CONFIG.getId() == refBookId) {
+        if (ASYNC_CONFIG.getId() == refBookId) {
             return applicationContext.getBean("refBookAsyncConfigProvider", RefBookAsyncConfigProvider.class);
         }
         if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
             RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-			dataProvider.setWhereClause("ID <> -1");
+            dataProvider.setWhereClause("ID <> -1");
             dataProvider.setRefBook(refBook);
             return dataProvider;
         } else {
@@ -135,7 +135,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     @Override
     public String getSearchQueryStatement(String query, Long refBookId, boolean exactSearch) {
-        if (query == null || query.isEmpty()){
+        if (query == null || query.isEmpty()) {
             return null;
         }
 
@@ -148,7 +148,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
                 continue;
             }
 
-            if (resultSearch.length() > 0){
+            if (resultSearch.length() > 0) {
                 resultSearch.append(" or ");
             }
 
@@ -174,9 +174,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
                             .append("')");
                     break;
                 case REFERENCE:
-                    if (isSimpleRefBool(refBookId)){
+                    if (isSimpleRefBool(refBookId)) {
                         String fullAlias = getStackAlias(attribute);
-                        switch (getLastAttribute(attribute).getAttributeType()){
+                        switch (getLastAttribute(attribute).getAttributeType()) {
                             case STRING:
                                 resultSearch
                                         .append("LOWER(")
@@ -227,6 +227,136 @@ public class RefBookFactoryImpl implements RefBookFactory {
         return resultSearch.toString();
     }
 
+    @Override
+    public String getSearchQueryStatementWithAdditionalStringParameters(Map<String, String> parameters, String searchPattern, Long refBookId, boolean exactSearch) {
+        if (searchPattern != null && !searchPattern.isEmpty()) {
+            String q = StringUtils.cleanString(searchPattern);
+            q = q.toLowerCase().replaceAll("\'", "\\\\\'");
+            StringBuilder resultSearch = new StringBuilder();
+            RefBook refBook = get(refBookId);
+            for (RefBookAttribute attribute : refBook.getAttributes()) {
+                if (attribute.getAlias().equals(RECORD_PARENT_ID_ALIAS) || attribute.getAlias().equals("IS_ACTIVE") || parameters.containsKey(attribute.getAlias())) {
+                    continue;
+                }
+
+                if (resultSearch.length() > 0) {
+                    resultSearch.append(" or ");
+                }
+
+                switch (attribute.getAttributeType()) {
+                    case STRING:
+                        resultSearch
+                                .append("LOWER(")
+                                .append(attribute.getAlias())
+                                .append(")");
+                        break;
+                    case NUMBER:
+                        resultSearch
+                                .append("TO_CHAR(")
+                                .append(attribute.getAlias())
+                                .append(")");
+                        break;
+                    case DATE:
+                        resultSearch
+                                .append("TRUNC(")
+                                .append(attribute.getAlias())
+                                .append(") = TO_DATE('")
+                                .append(q)
+                                .append("')");
+                        break;
+                    case REFERENCE:
+                        if (isSimpleRefBool(refBookId)) {
+                            String fullAlias = getStackAlias(attribute);
+                            switch (getLastAttribute(attribute).getAttributeType()) {
+                                case STRING:
+                                    resultSearch
+                                            .append("LOWER(")
+                                            .append(fullAlias)
+                                            .append(")");
+                                    break;
+                                case NUMBER:
+                                    resultSearch
+                                            .append("TO_CHAR(")
+                                            .append(fullAlias)
+                                            .append(")");
+                                    break;
+                                case DATE:
+                                    resultSearch.append(fullAlias);
+                                    break;
+                                default:
+                                    throw new RuntimeException("Unknown RefBookAttributeType");
+                            }
+                        } else {
+                            resultSearch
+                                    .append("TO_CHAR(")
+                                    .append(attribute.getAlias())
+                                    .append(")");
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException("Unknown RefBookAttributeType");
+
+                }
+
+                if (attribute.getAttributeType() != RefBookAttributeType.DATE) {
+                    if (exactSearch) {
+                        resultSearch
+                                .append(" like ")
+                                .append("'")
+                                .append(q)
+                                .append("'");
+                    } else {
+                        resultSearch
+                                .append(" like ")
+                                .append("'%")
+                                .append(q)
+                                .append("%'");
+                    }
+                }
+                if (!parameters.isEmpty()) {
+                    resultSearch.append(" and ")
+                            .append(buildQueryFromParams(parameters, exactSearch));
+                }
+            }
+            return resultSearch.toString();
+        } else {
+            if (parameters.isEmpty()) {
+                return null;
+            } else {
+                return buildQueryFromParams(parameters, exactSearch).toString();
+            }
+        }
+    }
+
+    private StringBuilder buildQueryFromParams(Map<String, String> parameters, boolean exactSearch) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        for (Map.Entry<String, String> param : parameters.entrySet()) {
+            if (queryBuilder.length() > 0) {
+                queryBuilder.append(" and ");
+            }
+            String q = StringUtils.cleanString(param.getValue());
+            q = q.toLowerCase().replaceAll("\'", "\\\\\'");
+            queryBuilder.append("LOWER(")
+                    .append(param.getKey())
+                    .append(")");
+            if (exactSearch) {
+                queryBuilder
+                        .append(" like ")
+                        .append("'")
+                        .append(q)
+                        .append("'");
+            } else {
+                queryBuilder
+                        .append(" like ")
+                        .append("'%")
+                        .append(q)
+                        .append("%'");
+            }
+        }
+        return queryBuilder;
+    }
+
     /**
      * Метод возврадет полный алиас для ссылочного атрибута вида
      * user.city.name
@@ -234,7 +364,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
      * @param attribute
      * @return
      */
-    private String getStackAlias(RefBookAttribute attribute){
+    private String getStackAlias(RefBookAttribute attribute) {
         switch (attribute.getAttributeType()) {
             case STRING:
             case DATE:
@@ -243,7 +373,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
             case REFERENCE:
                 RefBook rb = get(attribute.getRefBookId());
                 RefBookAttribute nextAttribute = rb.getAttribute(attribute.getRefBookAttributeId());
-                return attribute.getAlias()+"."+getStackAlias(nextAttribute);
+                return attribute.getAlias() + "." + getStackAlias(nextAttribute);
             default:
                 throw new RuntimeException("Unknown RefBookAttributeType");
         }
@@ -256,13 +386,13 @@ public class RefBookFactoryImpl implements RefBookFactory {
      * @param attribute ссылочный атрибут для которого нужно получить последний не ссылочный атрибут
      * @return
      */
-    private RefBookAttribute getLastAttribute(RefBookAttribute attribute){
-        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)){
+    private RefBookAttribute getLastAttribute(RefBookAttribute attribute) {
+        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
             RefBook rb = getByAttribute(attribute.getRefBookAttributeId());
             RefBookAttribute nextAttribute = rb.getAttribute(attribute.getRefBookAttributeId());
 
             return getLastAttribute(nextAttribute);
-        } else{
+        } else {
             return attribute;
         }
     }
@@ -273,7 +403,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
      * @param refBookId
      * @return
      */
-    private boolean isSimpleRefBool(Long refBookId){
+    private boolean isSimpleRefBool(Long refBookId) {
         // TODO Левыкин: нереализованный метод?
         return true;
     }

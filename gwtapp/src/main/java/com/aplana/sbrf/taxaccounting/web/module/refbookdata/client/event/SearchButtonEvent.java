@@ -13,11 +13,21 @@ import java.util.Date;
 public class SearchButtonEvent extends GwtEvent<SearchButtonEvent.SearchHandler> {
 
     private Date relevanceDate;
+    private String lastName;
+    private String firstName;
     private String searchPattern;
     private boolean exactSearch;
 
     public Date getRelevanceDate() {
         return relevanceDate;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
     }
 
     public String getSearchPattern() {
@@ -28,8 +38,10 @@ public class SearchButtonEvent extends GwtEvent<SearchButtonEvent.SearchHandler>
         return exactSearch;
     }
 
-    public SearchButtonEvent(Date relevanceDate, String searchPattern, boolean exactSearch) {
+    public SearchButtonEvent(Date relevanceDate, String lastName, String firstName, String searchPattern, boolean exactSearch) {
         this.relevanceDate = relevanceDate;
+        this.lastName = lastName;
+        this.firstName = firstName;
         this.searchPattern = searchPattern;
         this.exactSearch = exactSearch;
     }
@@ -54,7 +66,6 @@ public class SearchButtonEvent extends GwtEvent<SearchButtonEvent.SearchHandler>
         void onSearch(SearchButtonEvent event);
     }
 
-    public static void fire(HasHandlers source, Date date, String pattern, boolean exactSearch) {
-        source.fireEvent(new SearchButtonEvent(date, pattern, exactSearch));
-    }
+    public static void fire(HasHandlers source, Date date, String lastName, String firstName, String pattern, boolean exactSearch) {
+        source.fireEvent(new SearchButtonEvent(date, lastName, firstName, pattern, exactSearch));    }
 }

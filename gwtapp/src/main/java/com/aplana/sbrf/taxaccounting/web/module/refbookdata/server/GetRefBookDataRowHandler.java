@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -17,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -26,11 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @PreAuthorize("isAuthenticated()")
@@ -74,13 +67,27 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
         } else {
             filter = action.getFilter();
         }
+        String lastNamePattern = action.getLastNamePattern();
+        String firstNamePattern = action.getFirstNamePattern();
         String searchPattern = action.getSearchPattern();
-        if (searchPattern != null && !searchPattern.isEmpty()) {
+
+
+        if (searchPattern != null && !searchPattern.isEmpty() && firstNamePattern == null && lastNamePattern == null) {
             if (filter != null && !filter.isEmpty()) {
                 filter += " and (" + refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch()) + ")";
             } else {
                 filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
             }
+        } else if (firstNamePattern != null && lastNamePattern != null) {
+            Map<String, String> params = new HashMap<String, String>();
+            if (lastNamePattern != null && !lastNamePattern.isEmpty()) {
+                params.put("LAST_NAME", lastNamePattern);
+            }
+            if (firstNamePattern != null && !firstNamePattern.isEmpty()) {
+                params.put("FIRST_NAME", firstNamePattern);
+            }
+            filter = refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
+
         }
 
         if (action.getRecordId() != null) {
@@ -123,17 +130,18 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 
     /**
      * Разыменование ссылок
-	 * @param refBook справочник, строки которого разыменовываем
-	 * @param refBookPage исходные данные для разыменовывания
-	 * @param rows пустой список, в который должен быть записан результат
+     *
+     * @param refBook     справочник, строки которого разыменовываем
+     * @param refBookPage исходные данные для разыменовывания
+     * @param rows        пустой список, в который должен быть записан результат
      */
     public static void dereference(RefBook refBook, List<Map<String, RefBookValue>> refBookPage, List<RefBookDataRow> rows, RefBookHelper refBookHelper, Map<RefBookAttribute, Column> columnMap) {
-		if (refBookPage.isEmpty()) {
-			return;
-		}
-		List<RefBookAttribute> attributes = refBook.getAttributes();
-		// разыменовывание ссылок
-		Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage, false);
+        if (refBookPage.isEmpty()) {
+            return;
+        }
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+        // разыменовывание ссылок
+        Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage, false);
 
         for (Map<String, RefBookValue> record : refBookPage) {
             Map<String, String> tableRowData = new HashMap<String, String>();
@@ -169,10 +177,10 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                         case REFERENCE:
                             if (value.getReferenceValue() == null) tableCell = "";
                             else {
-								Map<Long, String> row = dereferenceValues.get(attribute.getId());
-								if (row == null) {
-									throw new com.aplana.sbrf.taxaccounting.model.exception.ServiceException("Can't to dereference value");
-								}
+                                Map<Long, String> row = dereferenceValues.get(attribute.getId());
+                                if (row == null) {
+                                    throw new com.aplana.sbrf.taxaccounting.model.exception.ServiceException("Can't to dereference value");
+                                }
                                 tableCell = getColumn(attribute, columnMap).getFormatter().format(row.get(value.getReferenceValue()));
                             }
                             break;
@@ -207,6 +215,23 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 return referenceColumn;
         }
         return null;
+    }
+
+    private String addParameterToFilter(String parameterName, String parameterValue, Boolean exactSearch) {
+        StringBuilder query = new StringBuilder();
+        query.append("LOWER(").append(parameterName).append(")");
+        if (exactSearch) {
+            query.append(" LIKE ")
+                    .append("'")
+                    .append(parameterValue)
+                    .append("'");
+        } else {
+            query.append(" LIKE ")
+                    .append("'%")
+                    .append(parameterValue)
+                    .append("%'");
+        }
+        return query.toString();
     }
 
     @Override

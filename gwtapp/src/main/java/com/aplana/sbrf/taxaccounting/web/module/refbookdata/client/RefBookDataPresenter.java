@@ -108,6 +108,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
         void setRefBookNameDesc(String desc);
         Date getRelevanceDate();
+        /** Метод для получения строки с поля Фамилия*/
+        String getLastName();
+        /** Метод для получения строки с поля Имя*/
+        String getFirstName();
         /** Метод для получения строки с поля фильтрации*/
         String getSearchPattern();
         /** Метод для получения признака точного соответствия*/
@@ -214,7 +218,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void onRelevanceDateChanged() {
         /*dataInterface.initState(getView().getRelevanceDate(), getView().getSearchPattern());*/
-        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
+        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getLastName(), getView().getFirstName(), getView().getSearchPattern(), getView().getExactSearch());
     }
 
     @Override
@@ -273,7 +277,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             getView().updateMode(mode);
                                                             refBookLinearPresenter.setMode(mode);
                                                     /*refBookLinearPresenter.setRange(new Range(0, 500));*/
-                                                            refBookLinearPresenter.initState(getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
+                                                            refBookLinearPresenter.initState(getView().getRelevanceDate(), getView().getLastName(), getView().getFirstName(), getView().getSearchPattern(), getView().getExactSearch());
                                                             refBookLinearPresenter.updateTable();
                                                             //т.к. не срабатывает событие onSelectionChange приповторном переходе
 //                                                            editFormPresenter.show(recordId);
@@ -352,7 +356,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     @Override
     public void onSearchClick() {
-        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern(), getView().getExactSearch());
+        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getLastName(), getView().getFirstName(),
+                getView().getSearchPattern(), getView().getExactSearch());
         /*dataInterface.initState(getView().getRelevanceDate(), getView().getSearchPattern());
         dataInterface.updateData();*/
     }

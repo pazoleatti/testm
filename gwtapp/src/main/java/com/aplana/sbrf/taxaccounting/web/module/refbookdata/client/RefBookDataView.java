@@ -28,11 +28,12 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     interface Binder extends UiBinder<Widget, RefBookDataView> {
 	}
 
+    private final String REF_BOOK_PERSONS_NAME = "Физические лица";
 
 	@UiField
 	Panel contentPanel, mainPanel;
 	@UiField
-	Label titleDesc, editModeLabel, relevanceDateLabel;
+	Label titleDesc, editModeLabel, relevanceDateLabel, lastName, firstName;
 	@UiField
     DateMaskBoxPicker relevanceDate;
     @UiField
@@ -44,9 +45,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     CheckBox exactSearch;
     @UiField
-    HTML separator, separator1;
+    HTML separator, separator1, separator2;
     @UiField
-    TextBox filterText;
+    TextBox filterText, filterLastName, filterFirstName;
     @UiField
     LinkButton sendQuery;
     @UiField
@@ -58,6 +59,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     SplitLayoutPanel tablePanel;
 
+
     public static final int DEFAULT_TABLE_PANEL_TOP_POSITION = 34;
     private static final int LOCK_INFO_BLOCK_HEIGHT = 25;
 
@@ -66,7 +68,10 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     private LinkButton printToExcel, printToCSV;
     private boolean uploadAvailable;
 
-	@Inject
+    public RefBookDataView() {
+    }
+
+    @Inject
 	public RefBookDataView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
 
@@ -144,7 +149,24 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @Override
 	public void setRefBookNameDesc(String desc) {
 		titleDesc.setText(desc);
+		defineRefBookType(desc);
 	}
+
+	private void defineRefBookType(String desc) {
+        if (desc.equalsIgnoreCase(REF_BOOK_PERSONS_NAME)) {
+            lastName.setVisible(true);
+            filterLastName.setVisible(true);
+            firstName.setVisible(true);
+            filterFirstName.setVisible(true);
+            separator1.setVisible(true);
+        } else {
+            lastName.setVisible(false);
+            filterLastName.setVisible(false);
+            firstName.setVisible(false);
+            filterFirstName.setVisible(false);
+            separator1.setVisible(false);
+        }
+    }
 
 	@Override
 	public Date getRelevanceDate() {
@@ -315,6 +337,16 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         relevanceDate.setVisible(isVersioned);
         relevanceDateLabel.setVisible(isVersioned);
         separator1.setVisible(isVersioned);
+    }
+
+    @Override
+    public String getLastName() {
+        return filterLastName.getText();
+    }
+
+    @Override
+    public String getFirstName() {
+        return filterFirstName.getText();
     }
 
     @Override
