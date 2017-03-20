@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,9 +39,15 @@ public interface LogBusinessService {
 	 */
 	void add(Long formDataId, Long declarationId, TAUserInfo userInfo, FormDataEvent event, String note);
 
+    /**
+     * Получить дату создания файла
+     * @param declarationDataId
+     * @return
+     */
+    Date getFormCreationDate(long declarationDataId);
 	/**
 	 * Получить имя пользователя, загрузившего ТФ
      * @param declarationDataId код декларации
 	 */
-	String getUserLoginImportTf(long declarationDataId);
+	String getFormCreationUserName(long declarationDataId);
 }

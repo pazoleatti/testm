@@ -29,10 +29,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     public static final String DATE_BOX_TITLE = "Дата формирования налоговой формы";
     public static final String DATE_BOX_TITLE_D = "Дата формирования уведомления";
-    private static final int TABLE_TOP2 = 103;
-    private static final int TABLE_TOP3 = 110;
-    private static final int TABLE_TOP4 = 125;
-    private static final int TABLE_TOP5 = 142;
+    private static final int TABLE_TOP3 = 105;
+    private static final int TABLE_TOP4 = 124;
 
 	@UiField
 	Button recalculateButton;
@@ -72,11 +70,16 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Label title;
 
 	@UiField
-    HorizontalPanel propertyBlock;
+    SimplePanel propertyBlock;
+
     @UiField
-    Label kpp, oktmo, taxOrganCode, stateED, asnu, importTf;
+    VerticalPanel leftAttrPanel, rightAttrPanel;
+
     @UiField
-    Label kppLabel, oktmoLabel, taxOrganCodeLabel, stateEDLabel, asnuLabel, importTfLabel;
+    Label stateED, stateEDLabel;
+
+    private Label kpp, oktmo, taxOrganCode,asnu, createUserName, createDate;
+    private Label kppLabel, oktmoLabel, taxOrganCodeLabel, asnuLabel, createUserNameLabel, createDateLabel;
 
 	@UiField
     PdfViewerWidget pdfViewer;
@@ -104,7 +107,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Inject
 	@UiConstructor
 	public DeclarationDataView(final Binder uiBinder) {
-		initWidget(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
         printToXml = new LinkButton("Выгрузить в XML");
         printToXml.setHeight("20px");
         printToXml.setDisableImage(true);
@@ -218,7 +221,43 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         timerAccept.cancel();
         timerSpecific.cancel();
         timerCheck.cancel();
-	}
+
+        kppLabel = new Label("КПП:");
+        kppLabel.addStyleName("headerAttrName");
+        kpp = new Label("");
+        kpp.addStyleName("headerAttr");
+        kpp.addStyleName("depAttr");
+
+        oktmoLabel = new Label("ОКТМО:");
+        oktmoLabel.addStyleName("headerAttrName");
+        oktmo = new Label("");
+        oktmo.addStyleName("headerAttr");
+        oktmo.addStyleName("depAttr");
+
+        taxOrganCodeLabel = new Label("Код НО:");
+        taxOrganCodeLabel.addStyleName("headerAttrName");
+        taxOrganCode = new Label("");
+        taxOrganCode.addStyleName("headerAttr");
+        taxOrganCode.addStyleName("depAttr");
+
+        asnuLabel = new Label("АСНУ:");
+        asnuLabel.addStyleName("headerAttrName");
+        asnu = new Label("");
+        asnu.addStyleName("headerAttr");
+        asnu.addStyleName("depAttr");
+
+        createUserNameLabel = new Label("Создал:");
+        createUserNameLabel.addStyleName("headerAttrName");
+        createUserName = new Label("");
+        createUserName.addStyleName("headerAttr");
+        createUserName.addStyleName("depAttr");
+
+        createDateLabel = new Label("Дата и время создания формы:");
+        createDateLabel.addStyleName("headerAttrName");
+        createDate = new Label("");
+        createDate.addStyleName("headerAttr");
+        createDate.addStyleName("depAttr");
+    }
 
     @Override
     public void showState(State state) {
@@ -315,7 +354,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     public void setStateED(String stateED) {
         this.stateED.setText(stateED);
         this.stateED.setTitle(stateED);
-
     }
 
     @Override
@@ -329,43 +367,72 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void setImportTf(String userName) {
-         importTf.setText(userName);
-         importTfLabel.setTitle(userName);
+    public void setCreateUserName(String userName) {
+         createUserName.setText(userName);
+         createUserName.setTitle(userName);
     }
 
     @Override
-    public void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, boolean isVisibleImportTf, TaxType taxType) {
-        kpp.setVisible(isVisibleKpp);
-        kppLabel.setVisible(isVisibleKpp);
+    public void setCreateDate(String createDate) {
+        this.createDate.setText(createDate);
+        this.createDate.setTitle(createDate);
+    }
 
-        oktmo.setVisible(isVisibleOktmo);
-        oktmoLabel.setVisible(isVisibleOktmo);
+    @Override
+    public void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, TaxType taxType) {
+        leftAttrPanel.clear();
+        rightAttrPanel.clear();
 
-        taxOrganCode.setVisible(isVisibleTaxOrgan);
-        taxOrganCodeLabel.setVisible(isVisibleTaxOrgan);
+        if (isVisibleKpp) {
+            leftAttrPanel.add(kppLabel);
+            rightAttrPanel.add(kpp);
+        }
 
-        stateED.setVisible(isVisibleStateED);
+        if (isVisibleKpp) {
+            leftAttrPanel.add(oktmoLabel);
+            rightAttrPanel.add(oktmo);
+        }
+
+        if (isVisibleTaxOrgan) {
+            leftAttrPanel.add(taxOrganCodeLabel);
+            rightAttrPanel.add(taxOrganCode);
+        }
+
+        if (isVisibleAsnu) {
+            leftAttrPanel.add(asnuLabel);
+            rightAttrPanel.add(asnu);
+        }
+
+        leftAttrPanel.add(createUserNameLabel);
+        rightAttrPanel.add(createUserName);
+        leftAttrPanel.add(createDateLabel);
+        rightAttrPanel.add(createDate);
+
         stateEDLabel.setVisible(isVisibleStateED);
+        stateED.setVisible(isVisibleStateED);
 
-        asnu.setVisible(isVisibleAsnu);
-        asnuLabel.setVisible(isVisibleAsnu);
-
-        importTf.setVisible(isVisibleImportTf);
-        importTfLabel.setVisible(isVisibleImportTf);
-
-        declarationDataId.setVisible(isVisibleImportTf);
-        declarationDataIdLabel.setVisible(isVisibleImportTf);
-
-        int num = (isVisibleKpp?1:0) +
+        int propertyBlockSize = 2 + (isVisibleKpp?1:0) +
                 (isVisibleOktmo?1:0) +
                 (isVisibleTaxOrgan?1:0) +
-                (isVisibleStateED?1:0) +
-                (isVisibleAsnu?1:0) +
-                (isVisibleImportTf?1:0);
+                (isVisibleAsnu?1:0);
 
-        int top = (num == 5) ? TABLE_TOP5 :  (num == 4) ? TABLE_TOP4 :
-                  ((num == 3) ? TABLE_TOP3 : TABLE_TOP2);
+        int centerBlockSize = 3 + (isVisibleStateED?1:0);
+
+        if (propertyBlockSize > centerBlockSize) {
+            propertyBlock.getElement().getStyle().setOverflowY(Style.Overflow.SCROLL);
+        } else {
+            propertyBlock.getElement().getStyle().clearOverflowY();
+        }
+
+        int top;
+        if (isVisibleStateED) {
+            top = TABLE_TOP4;
+            propertyBlock.getElement().getStyle().setHeight(78, Style.Unit.PX);
+        } else {
+            top = TABLE_TOP3;
+            propertyBlock.getElement().getStyle().setHeight(58, Style.Unit.PX);
+        }
+
         noPdfPanel.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
         pdfViewer.getElement().getStyle().setProperty("top", top, Style.Unit.PX);
     }

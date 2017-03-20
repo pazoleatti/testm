@@ -102,11 +102,13 @@ public class DeclarationDataPresenter
 
         void setAsnuName(String asnuName);
 
-        void setImportTf(String userName);
+        void setCreateUserName(String userName);
 
         void setFileName(String guid);
 
-        void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, boolean isVisibleTf, TaxType taxType);
+        void setCreateDate(String createDate);
+
+        void setPropertyBlockVisible(boolean isVisibleKpp, boolean isVisibleOktmo, boolean isVisibleTaxOrgan, boolean isVisibleStateED, boolean isVisibleAsnu, TaxType taxType);
 
         void startTimerReport(DeclarationDataReportType type);
 
@@ -203,24 +205,25 @@ public class DeclarationDataPresenter
                                 getView().setSubreports(result.getSubreports());
                                 if (taxType.equals(TaxType.NDFL)){
                                     if (DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind())) {
-                                        getView().setPropertyBlockVisible(true, true, true, result.getStateEDName() != null, false, false, taxType);
+                                        getView().setPropertyBlockVisible(true, true, true, result.getStateEDName() != null, false, taxType);
                                         getView().setKpp(declarationData.getKpp());
                                         getView().setOktmo(declarationData.getOktmo());
                                         getView().setTaxOrganCode(declarationData.getTaxOrganCode());
                                         getView().setStateED(result.getStateEDName());
                                     } else {
                                         if (result.getAsnuName() != null && !result.getAsnuName().isEmpty()) {
-                                            getView().setPropertyBlockVisible(false, false, false, false, true, true, taxType);
+                                            getView().setPropertyBlockVisible(false, false, false, false, true, taxType);
                                             getView().setAsnuName(result.getAsnuName());
                                             getView().setFileName(result.getFileName());
                                         } else {
-                                            getView().setPropertyBlockVisible(false, false, false, false, false, (result.getUserNameImportTf() != null && !result.getUserNameImportTf().isEmpty()), taxType);
+                                            getView().setPropertyBlockVisible(false, false, false, false, false, taxType);
                                         }
                                     }
                                 } else {
-                                    getView().setPropertyBlockVisible(false, false, false, false, false, true, taxType);
+                                    getView().setPropertyBlockVisible(false, false, false, false, false, taxType);
                                 }
-                                getView().setImportTf(result.getUserNameImportTf());
+                                getView().setCreateUserName(result.getCreationUserName());
+                                getView().setCreateDate(result.getCreationDate());
 								getView()
 										.setBackButton(
 												"#"
