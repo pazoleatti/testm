@@ -292,9 +292,7 @@ RaschsvPersSvStrahLic getrRaschsvPersSvStrahLic(id) {
 List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicList(int startIndex, int pageSize) {
     def declarationId = declarationData.getId()
     def params = scriptSpecificReportHolder.getSubreportParamValues()
-    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-627 раскомментировать после обновления стенда
-//    return raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params, startIndex, pageSize)
-    return raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
+    return raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params, startIndex, pageSize)
 }
 
 def prepareSpecificReport() {
@@ -305,7 +303,7 @@ def prepareSpecificReport() {
 
     // Ограничение числа выводимых записей
     int startIndex = 1
-    int pageSize = 100
+    int pageSize = 10
 
     List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = getrRaschsvPersSvStrahLicList(startIndex, pageSize)
 

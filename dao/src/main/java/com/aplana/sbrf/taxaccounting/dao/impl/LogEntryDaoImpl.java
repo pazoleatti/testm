@@ -35,6 +35,8 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             result.setDate(new Date(rs.getTimestamp("creation_date").getTime()));
             result.setLevel(LogLevel.fromId(rs.getInt("log_level")));
             result.setMessage(rs.getString("message"));
+            result.setType(rs.getString("type"));
+            result.setObject(rs.getString("object"));
 
             return result;
         }
@@ -103,7 +105,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         final List<LogEntry> splitLogEntries = splitBigMessage(logEntries);
 
         getJdbcTemplate().batchUpdate(
-                "insert into log_entry (log_id, ord, creation_date, log_level, message) values (?, ?, ?, ?, ?)",
+                "insert into log_entry (log_id, ord, creation_date, log_level, message, type, object) values (?, ?, ?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -116,6 +118,8 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
                         ps.setTimestamp(3, new java.sql.Timestamp(logEntry.getDate().getTime()));
                         ps.setInt(4, logEntry.getLevel().getId());
                         ps.setString(5, logEntry.getMessage());
+                        ps.setString(6, logEntry.getType());
+                        ps.setString(7, logEntry.getObject());
                     }
 
                     @Override
@@ -149,7 +153,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     public PagingResult<LogEntry> get(@NotNull String logId, int offset, int length) {
         List<LogEntry> records = getJdbcTemplate().query(
                 "select " +
-                        "t.log_id, t.ord, t.creation_date, t.log_level, t.message " +
+                        "t.log_id, t.ord, t.creation_date, t.log_level, t.message, t.type, t.object " +
                 "from " +
                         "(select l.*, row_number() " + (isSupportOver()?"over(order by l.ord)":"over()") +  " as rn from log_entry l where l.log_id = ?) t " +
                 "where " +
