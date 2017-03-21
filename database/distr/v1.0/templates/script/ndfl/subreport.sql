@@ -7,7 +7,7 @@ INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blo
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1012,101,'РНУ НДФЛ по всем ФЛ',2,'rnu_ndfl_person_all_db','005699a0-07ed-11e7-93ae-92361f002671',0);	
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1013,101,'Отчетность по КПП, ОКТМО',3,'report_kpp_oktmo','d11ebeb4-07f2-11e7-93ae-92361f002671',0);		
+	(1013,101,'Реестр сформированной отчетности',3,'report_kpp_oktmo','d11ebeb4-07f2-11e7-93ae-92361f002671',0);		
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1021,102,'2-НДФЛ 1',1,'report_2ndfl','047f207c-113e-488d-8390-9afc248a3bc8',0);	
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
