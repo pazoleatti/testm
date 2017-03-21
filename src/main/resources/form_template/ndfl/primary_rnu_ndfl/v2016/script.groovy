@@ -435,7 +435,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         inTime = System.currentTimeMillis();
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
         if (msgCnt <= maxMsgCnt){
-            logger.info("identificate (" + calcTimeMillis(inTime));
+            logger.info("Идентификация (" + calcTimeMillis(inTime));
         }
 
         conformityMap.put(primaryPersonId, refBookPerson);
@@ -448,13 +448,13 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
 
         if (msgCnt <= maxMsgCnt){
-            logger.info("in identificate (" + calcTimeMillis(inTime));
+            logger.info("Идентификация (" + calcTimeMillis(inTime));
         }
 
         msgCnt++;
     }
 
-    logger.info("identificate person, update address (" + calcTimeMillis(time));
+    logger.info("Идентификация ФЛ, обновление адресов (" + calcTimeMillis(time));
 
     insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), insertAddressList, { address ->
         mapAddressAttr(address)
@@ -573,14 +573,14 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
 
         if (msgCnt < maxMsgCnt){
-            logger.info("in identificate update (" + calcTimeMillis(inTime));
+            logger.info("Обновление (" + calcTimeMillis(inTime));
         }
 
         msgCnt++;
 
     }
 
-    logger.info("update person, documents, id (" + calcTimeMillis(time));
+    logger.info("Обновление ФЛ, документов (" + calcTimeMillis(time));
     time = System.currentTimeMillis();
     //println "crete and update reference"
 
@@ -592,7 +592,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         updatePrimaryToRefBookPersonReferences(updatePersonReferenceList);
     }
 
-    logger.info("update reference (" + calcTimeMillis(time));
+    logger.info("Обновление справочников (" + calcTimeMillis(time));
     time = System.currentTimeMillis();
 
     insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { personDocument ->
@@ -636,7 +636,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
-    logger.info("identification and update end (" + calcTimeMillis(time));
+    logger.info("Идентификация и обновление (" + calcTimeMillis(time));
 
     logger.info("Обновлено записей: " + updCnt);
 
@@ -825,7 +825,7 @@ def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
 
-        logger.info("insert multiple records: refBookId=" + refBookId + ", size="+identityObjectList.size())
+        logger.info("Добавление записей: refBookId=" + refBookId + ", size="+identityObjectList.size())
 
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
