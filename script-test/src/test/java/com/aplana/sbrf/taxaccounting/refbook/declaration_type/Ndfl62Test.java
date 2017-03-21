@@ -70,10 +70,16 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(DECLARATION_DATA_ID);
         declarationData.setDeclarationTemplateId(DECLARATION_TEMPLATE_ID);
+        declarationData.setDepartmentReportPeriodId(1);
+
+        DeclarationType declarationType = new DeclarationType();
+        declarationType.setName("dt");
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
         declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
+        declarationTemplate.setType(declarationType);
+
 
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL2_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE.XML"), anyLong()))
                 .thenReturn(Arrays.asList(declarationData));
@@ -156,6 +162,19 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.DOC_STATE.getId()))).thenReturn(docStateProvider);
         when(docStateProvider.getUniqueRecordIds(any(Date.class), eq("KND = '1166009'"))).thenReturn(Arrays.asList(DOC_STATE_REQUIRED_ID));
 
+        TaxPeriod taxPeriod = new TaxPeriod();
+        ReportPeriod rp = new ReportPeriod();
+        rp.setTaxPeriod(taxPeriod);
+        rp.setName("abc");
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        drp.setReportPeriod(rp);
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(drp);
+        Department department = new Department();
+        department.setName("abc");
+        when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
+
+        testHelper.setMsgBuilder(new StringBuilder());
+
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
 
         ArgumentCaptor<Map> argumentUpdate = ArgumentCaptor.forClass(Map.class);
@@ -208,9 +227,13 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         declarationData.setId(DECLARATION_DATA_ID);
         declarationData.setDeclarationTemplateId(DECLARATION_TEMPLATE_ID);
 
+        DeclarationType declarationType = new DeclarationType();
+        declarationType.setName("dt");
+
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
         declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
+        declarationTemplate.setType(declarationType);
 
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL2_9979_9979_7707083893997950001_20160602_344B2B8C-3DC6-7097-E054-00144F6713DE.XML"), anyLong()))
                 .thenReturn(Arrays.asList(declarationData));

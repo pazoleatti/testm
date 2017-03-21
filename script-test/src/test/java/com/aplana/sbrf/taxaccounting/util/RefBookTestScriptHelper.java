@@ -60,6 +60,7 @@ public class RefBookTestScriptHelper {
     private ImportFiasDataService importFiasDataService;
     private BlobDataService blobDataService;
     private DepartmentService departmentService;
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     // Заданы константно
     private Logger logger = new Logger();
@@ -79,6 +80,7 @@ public class RefBookTestScriptHelper {
     private final ScriptTestMockHelper mockHelper;
     private Integer accountPeriodId; // необходим для БО: форма 101 и 102
     private IInArchive fiasArchive;
+    private StringBuilder msgBuilder;
 
     /**
      * Сервис работы со скриптами справочников в тестовом режиме
@@ -114,6 +116,7 @@ public class RefBookTestScriptHelper {
         importFiasDataService = mockHelper.mockImportFiasDataService();
         blobDataService = mockHelper.mockBlobDataService();
         departmentService = mockHelper.mockDepartmentService();
+        departmentReportPeriodService = mockHelper.mockDepartmentReportPeriodService();
     }
 
     public void setImportFileInputStream(InputStream importFileInputStream) {
@@ -133,6 +136,7 @@ public class RefBookTestScriptHelper {
         bindings.put("declarationService", declarationService);
         bindings.put("formTypeService", formTypeService);
         bindings.put("departmentService", departmentService);
+        bindings.put("departmentReportPeriodService", departmentReportPeriodService);
         bindings.put("blobDataServiceDaoImpl", blobDataService);
 
         bindings.put("uniqueRecordId", uniqueRecordId);
@@ -149,6 +153,7 @@ public class RefBookTestScriptHelper {
         bindings.put("importFiasDataService", importFiasDataService);
         bindings.put("userInfo", new TAUserInfo());
         bindings.put("dataFile", dataFile);
+        bindings.put("msgBuilder", msgBuilder);
 
         if (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE ||
                 formDataEvent == FormDataEvent.IMPORT ||
@@ -376,7 +381,23 @@ public class RefBookTestScriptHelper {
         this.departmentService = departmentService;
     }
 
+    public DepartmentReportPeriodService getDepartmentReportPeriodService() {
+        return departmentReportPeriodService;
+    }
+
+    public void setDepartmentReportPeriodService(DepartmentReportPeriodService departmentReportPeriodService) {
+        this.departmentReportPeriodService = departmentReportPeriodService;
+    }
+
     public ImportFiasDataService getImportFiasDataService() {
         return importFiasDataService;
+    }
+
+    public StringBuilder getMsgBuilder() {
+        return msgBuilder;
+    }
+
+    public void setMsgBuilder(StringBuilder msgBuilder) {
+        this.msgBuilder = msgBuilder;
     }
 }
