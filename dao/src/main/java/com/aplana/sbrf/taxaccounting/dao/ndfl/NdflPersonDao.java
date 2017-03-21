@@ -124,6 +124,18 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
 
     /**
+     * Метод делает то же что и findIncomesByPeriodAndNdflPersonId, только в рамках временного решения для https://conf.aplana.com/pages/viewpage.action?pageId=27176125 п.24.3
+     * нет обора по условию .Раздел 2.Графа 10 ≠ 0
+     *
+     * @param ndflPersonId
+     * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param prFequals1   = true для НДФЛ(1) prFequals1 = false для НДФЛ(2)
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdTemp(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
+
+    /**
      * Найти данные о доходах ФЛ по идентификатору и интервалу. Отбор происходит по дате НДФЛ
      *
      * @param ndflPersonId
