@@ -7,7 +7,7 @@ insert into log (id, creation_date) values ('3-3-3', to_date('01.01.2013 12.01.0
 insert into log (id, creation_date) values ('4-4-4', to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'));
 insert into log_entry (log_id, ord, creation_date, log_level, message) values ('4-4-4', 1, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 0, 'panic!');
 insert into log_entry (log_id, ord, creation_date, log_level, message) values ('4-4-4', 2, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 0, 'panic!');
-insert into log_entry (log_id, ord, creation_date, log_level, message) values ('4-4-4', 3, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 0, 'panic!');
+insert into log_entry (log_id, ord, creation_date, log_level, message, type, object) values ('4-4-4', 3, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 0, 'panic!', 'type', 'obj1');
 
 insert into log (id, creation_date) values ('5-5-5', to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'));
 insert into log_entry (log_id, ord, creation_date, log_level, message) values ('5-5-5', 0, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 0, 'panic!');

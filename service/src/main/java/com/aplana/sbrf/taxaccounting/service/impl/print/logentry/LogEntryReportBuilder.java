@@ -17,6 +17,8 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
     private static final String SECOND_COLUMN = "Дата-время";
     private static final String THIRD_COLUMN = "Тип сообщения";
 	private static final String FOURTH_COLUMN = "Текст сообщения";
+    private static final String FIFTH_COLUMN = "Тип";
+    private static final String SIXTH_COLUMN = "Объект";
 
     private static final ThreadLocal<SimpleDateFormat> DATE_DATA_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -25,7 +27,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
         }
     };
 
-    private static String[] headers = new String[]{FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN};
+    private static String[] headers = new String[]{FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN, FIFTH_COLUMN, SIXTH_COLUMN};
     private static final String ENCODING = "windows-1251";
 
     private List<LogEntry> list;
@@ -95,6 +97,8 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
                 break;
         }
         entries.add(item.getMessage());
+        entries.add(item.getType());
+        entries.add(item.getObject());
         return entries.toArray(new String[entries.size()]);
     }
 }

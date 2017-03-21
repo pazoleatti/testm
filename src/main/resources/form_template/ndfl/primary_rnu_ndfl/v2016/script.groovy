@@ -97,7 +97,7 @@ int FORM_TYPE = 100;
 
 def calcTimeMillis(long time) {
     long currTime = System.currentTimeMillis();
-    return " (" + (currTime - time) + " ms)";
+    return (currTime - time) + " мс)";
 }
 
 @Field List<Country> countryRefBookCache = [];
@@ -266,7 +266,7 @@ def calculate() {
     //Получаем список всех ФЛ в первичной НФ
     List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper());
 
-    logger.info("В ПНФ номер " + declarationData.id + " найдено записей о физ.лицах: " + primaryPersonDataList.size() + calcTimeMillis(time));
+    logger.info("В ПНФ номер " + declarationData.id + " получены записи о физ.лицах (" + primaryPersonDataList.size() + " записей, " + calcTimeMillis(time));
 
     //println "Find primary data in " + declarationData.id + " found: " + primaryPersonDataList.size() + " person " + calcTimeMillis(time)
 
@@ -277,50 +277,50 @@ def calculate() {
     //Заполнени временной таблицы версий
     time = System.currentTimeMillis();
     refBookPersonService.fillRecordVersions(getRefBookPersonVersionTo());
-    logger.info("Заполнение таблицы версий: " + calcTimeMillis(time));
+    logger.info("Заполнение таблицы версий (" + calcTimeMillis(time));
 
     //println "Fill version table " + calcTimeMillis(time)
 
     //Шаг 1. список физлиц первичной формы для создания записей в справочниках
     time = System.currentTimeMillis();
     List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper());
-    logger.info("Предварительная выборка новых данных. Найдено записей: " + insertPersonList.size() + calcTimeMillis(time));
+    logger.info("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + calcTimeMillis(time));
 
     //println "Select for insert " + insertPersonList.size() + " person " + calcTimeMillis(time)
 
     time = System.currentTimeMillis();
     createNaturalPersonRefBookRecords(insertPersonList);
-    logger.info("Создание записей: " + insertPersonList.size() + calcTimeMillis(time));
+    logger.info("Создание (" + insertPersonList.size() + " записей, " + calcTimeMillis(time));
 
     //println "Insert: " + insertPersonList.size() + calcTimeMillis(time)
 
     //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
     time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
-    logger.info("Предварительная выборка по значимым параметрам. Найдено записей: " + similarityPersonMap.size() + calcTimeMillis(time));
+    logger.info("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + calcTimeMillis(time));
 
     //println "Select for update: " + similarityPersonMap.size() + calcTimeMillis(time)
 
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap);
-    logger.info("Обновление записей " + calcTimeMillis(time));
+    logger.info("Обновление записей (" + calcTimeMillis(time));
 
     //println "Update ref: " + calcTimeMillis(time)
 
     time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
-    logger.info("Основная выборка по всем параметрам. Найдено записей: " + checkSimilarityPersonMap.size() + calcTimeMillis(time));
+    logger.info("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + calcTimeMillis(time));
 
     //println "Select for check: " + calcTimeMillis(time)
 
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap);
-    logger.info("Обновление записей " + calcTimeMillis(time));
+    logger.info("Обновление записей (" + calcTimeMillis(time));
 
     //println "Update reference: " + calcTimeMillis(time)
     //println "End: " + calcTimeMillis(timeFull)
 
-    logger.info("Завершение расчета ПНФ " + " " + calcTimeMillis(timeFull));
+    logger.info("Завершение расчета ПНФ (" + calcTimeMillis(timeFull));
 }
 
 //---------------- Identification ----------------
@@ -444,7 +444,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         inTime = System.currentTimeMillis();
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
         if (msgCnt <= maxMsgCnt){
-            logger.info("identificate "+ calcTimeMillis(inTime));
+            logger.info("identificate (" + calcTimeMillis(inTime));
         }
 
         conformityMap.put(primaryPersonId, refBookPerson);
@@ -457,13 +457,13 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
 
         if (msgCnt <= maxMsgCnt){
-            logger.info("in identificate "+ calcTimeMillis(inTime));
+            logger.info("in identificate (" + calcTimeMillis(inTime));
         }
 
         msgCnt++;
     }
 
-    logger.info("identificate person, update address "+ calcTimeMillis(time));
+    logger.info("identificate person, update address (" + calcTimeMillis(time));
 
     insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), insertAddressList, { address ->
         mapAddressAttr(address)
@@ -582,14 +582,14 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
 
         if (msgCnt < maxMsgCnt){
-            logger.info("in identificate update "+ calcTimeMillis(inTime));
+            logger.info("in identificate update (" + calcTimeMillis(inTime));
         }
 
         msgCnt++;
 
     }
 
-    logger.info("update person, documents, id "+ calcTimeMillis(time));
+    logger.info("update person, documents, id (" + calcTimeMillis(time));
     time = System.currentTimeMillis();
     //println "crete and update reference"
 
@@ -601,7 +601,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         updatePrimaryToRefBookPersonReferences(updatePersonReferenceList);
     }
 
-    logger.info("update reference "+ calcTimeMillis(time));
+    logger.info("update reference (" + calcTimeMillis(time));
     time = System.currentTimeMillis();
 
     insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { personDocument ->
@@ -645,7 +645,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
-    logger.info("identification and update end "+ calcTimeMillis(time));
+    logger.info("identification and update end (" + calcTimeMillis(time));
 
     logger.info("Обновлено записей: " + updCnt);
 
@@ -834,7 +834,7 @@ def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
 
-        logger.info("insert multiple records: refBookId="+refBookId + ", size="+identityObjectList.size())
+        logger.info("insert multiple records: refBookId=" + refBookId + ", size="+identityObjectList.size())
 
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
@@ -1016,13 +1016,13 @@ Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
  * Получить актуальные на отчетную дату записи справочника "Физические лица"
  * @return Map < person_id , Map < имя_поля , значение_поля > >
  */
-Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId() {
+Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId(declarationDataId) {
     String whereClause = """
             JOIN ref_book_person p ON (frb.record_id = p.record_id)
-            JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+            JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
         """
     def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
-    def refBookMapResult = [:]
+    def refBookMapResult = new HashMap<Long, Map<String, RefBookValue>>();
     refBookMap.each { personId, refBookValue ->
         Long refBookRecordId = refBookValue.get(RF_RECORD_ID).value
         refBookMapResult.put(refBookRecordId, refBookValue)
@@ -1175,7 +1175,7 @@ def prepareSpecificReport() {
 
     // Ограничение числа выводимых записей
     int startIndex = 1
-    int pageSize = 100
+    int pageSize = 10
 
     PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters, startIndex, pageSize);
 
@@ -1404,7 +1404,7 @@ void importData() {
     }
 
     if (logger.containsLevel(LogLevel.WARNING)) {
-        throw new ServiceException("ТФ не соответствует XSD-схеме РНУ НФДЛ. Загрузка невозможна.");
+        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
@@ -2284,8 +2284,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 @Field final String MESSAGE_ERROR_ABSENT = " Отсутсвуют строки:"
 
 
-@Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" размером %d."
-@Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" в колличестве %d."
+@Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" (%d записей)."
+@Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" (%d записей)."
 
 // Таблицы
 @Field final String T_PERSON = "Реквизиты"
@@ -2405,22 +2405,26 @@ def checkData() {
     long time = System.currentTimeMillis();
     // Реквизиты
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    println "Получены записи таблицы '$T_PERSON' (${ndflPersonList.size()} записей)."
     logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
 
     // Сведения о доходах и НДФЛ
     List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+    println "Получены записи таблицы '$T_PERSON_INCOME' (${ndflPersonList.size()} записей)."
     logger.info(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
 
     // Сведения о вычетах
     List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+    println "Получены записи таблицы '$T_PERSON_DEDUCTION' (${ndflPersonList.size()} записей)."
     logger.info(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
 
     // Сведения о доходах в виде авансовых платежей
     List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+    println "Получены записи таблицы '$T_PERSON_PREPAYMENT' (${ndflPersonList.size()} записей)."
     logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
 
-    println "Получение записей из таблиц НФДЛ: " + (System.currentTimeMillis() - time);
-    logger.info("Получение записей из таблиц НФДЛ: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)");
 
     ScriptUtils.checkInterrupted();
 
@@ -2442,8 +2446,8 @@ def checkData() {
     // Проверки Сведения о вычетах
     checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList)
 
-    println "Все проверки " + (System.currentTimeMillis() - time);
-    logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Все проверки (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Все проверки (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -2456,10 +2460,12 @@ def checkDataReference(
     long time = System.currentTimeMillis();
     // Страны
     def citizenshipCodeMap = getRefCountryCode()
+    println "Получен справочник '$R_CITIZENSHIP' (${citizenshipCodeMap.size()} записей).";
     logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
 
     // Виды документов, удостоверяющих личность
     def documentTypeMap = getRefDocumentTypeCode()
+    println "Получен справочник '$R_ID_DOC_TYPE' (${documentTypeMap.size()} записей).";
     logger.info(SUCCESS_GET_REF_BOOK, R_ID_DOC_TYPE, documentTypeMap.size())
 
     // Статус налогоплательщика
@@ -2486,29 +2492,29 @@ def checkDataReference(
     def taxInspectionList = getRefNotifSource()
     logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
-    println "Проверки на соответствие справочникам / Выгрузка справочников: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочников: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     // ФЛ Map<person_id, RefBook>
-    def personMap = getActualRefPersonsByDeclarationDataId()
+    def personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
     logger.info(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
-    println "Проверки на соответствие справочникам / Выгрузка справочника Физические лица: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника Физические лица: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     // ИНП Map<person_id, List<RefBook>>
     def inpMap = getActualRefInpMapByDeclarationDataId()
     logger.info(SUCCESS_GET_TABLE, R_INP, inpMap.size())
-    println "Проверки на соответствие справочникам / Выгрузка справочника ИНП: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника ИНП: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     // ДУЛ Map<person_id, List<RefBook>>
     def dulMap = getActualRefDulByDeclarationDataId()
     logger.info(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
-    println "Проверки на соответствие справочникам / Выгрузка справочника ДУЛ: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)");
 
     // Получим Мапу адресов
     // Адреса
@@ -2525,15 +2531,15 @@ def checkDataReference(
         addressMap = getRefAddress(addressIds)
         logger.info(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
     }
-    println "Проверки на соответствие справочникам / Выгрузка справочника Адреса: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника Адреса: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)");
 
     //поиск всех адресов формы в справочнике ФИАС
     time = System.currentTimeMillis();
     Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
     logger.info(SUCCESS_GET_TABLE, R_FIAS, checkFiasAddressMap.size());
-    println "Проверки на соответствие справочникам / Выгрузка справочника " + R_FIAS + ": " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника " + R_FIAS + ": (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
 
     long timeIsExistsAddress = 0
     time = System.currentTimeMillis();
@@ -2795,11 +2801,11 @@ def checkDataReference(
             }
         }
     }
-    println "Проверки на соответствие справочникам / NdflPerson: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / NdflPerson: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
 
-    println "Проверки на соответствие справочникам / Проверка существования адреса: " + timeIsExistsAddress;
-    logger.info("Проверки на соответствие справочникам / Проверка существования адреса: (" + timeIsExistsAddress + " ms)");
+    println "Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)";
+    logger.info("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)");
 
     time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
@@ -2850,8 +2856,8 @@ def checkDataReference(
                     " Текст ошибки: 'НДФЛ.Процентная ставка (Графа 14)' не соответствует справочнику '$R_RATE'.")
         }
     }
-    println "Проверки на соответствие справочникам / NdflPersonIncome: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
@@ -2873,8 +2879,8 @@ def checkDataReference(
                     " Текст ошибки: 'Документ о праве на налоговый вычет.Код источника (Графа 7)' не соответствует справочнику '$R_NOTIF_SOURCE'.")
         }
     }
-    println "Проверки на соответствие справочникам / NdflPersonDeduction: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / NdflPersonDeduction: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION}' (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION}' (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
@@ -2889,8 +2895,8 @@ def checkDataReference(
                     " Текст ошибки: 'Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Графа 7)' не соответствует справочнику '$R_NOTIF_SOURCE'.")
         }
     }
-    println "Проверки на соответствие справочникам / NdflPersonPrepayment: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки на соответствие справочникам / NdflPersonPrepayment: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -2914,8 +2920,6 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         def fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
         mapNdflPerson.put(ndflPerson.id, ndflPerson)
 
-        println "ndflPerson.rowNum=" + ndflPerson.rowNum
-
         // Общ1 Корректность ИНН (Необязательное поле)
         if (ndflPerson.innNp != null && !ScriptUtils.checkControlSumInn(ndflPerson.innNp)) {
             //TODO turn_to_error
@@ -2929,8 +2933,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     " Текст ошибки: Некорректное значение 'СНИЛС'.")
         }
     }
-    println "Общие проверки / NdflPerson: " + (System.currentTimeMillis() - time);
-    logger.info("Общие проверки / NdflPerson: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
@@ -2996,47 +3000,47 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Налоговая база (Графа 13)='${ndflPersonIncome.taxBase ?: ""}', НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}', НДФЛ.Расчет.Дата (Графа 15)='${ndflPersonIncome.taxDate ?: ""}'. $fioAndInp." +
                         " Текст ошибки: Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24."
         )
-        //8 Раздел 2. Графа 16 должна быть заполнена, если заполнены Раздел 2. Графы 6,10
+        //8 Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 16
         columnFillConditionDataList << new ColumnFillConditionData(
-                new Column6And10Fill(),
                 new Column16Fill(),
-                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 16 должна быть заполнена, если заполнены Раздел 2. Графы 6,10."
-        )
-        //9 Раздел 2. Графа 18 или 19 должна быть заполнена, если заполнены Раздел 2. Графы 6,10
-        columnFillConditionDataList << new ColumnFillConditionData(
                 new Column6And10Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}', Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 16."
+        )
+        //9 Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
+        columnFillConditionDataList << new ColumnFillConditionData(
                 new Column18Or19Fill(),
-                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)='${ndflPersonIncome.notHoldingTax ?: ""}', НДФЛ.Расчет.Сумма.Излишне удержанный (Графа 19)='${ndflPersonIncome.overholdingTax ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 18 или 19 должна быть заполнена, если заполнены Раздел 2. Графы 6,10."
+                new Column6And10Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}', Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19."
         )
-        //10 Раздел 2. Графа 17 должна быть заполнена, если заполнены Раздел 2. Графы 7,11
+        //10 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17
         columnFillConditionDataList << new ColumnFillConditionData(
-                new Column7And11Fill(),
                 new Column17Fill(),
-                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Удержанный (Графа 17)='${ndflPersonIncome.withholdingTax ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 17 должна быть заполнена, если заполнены Раздел 2. Графы 7,11."
-        )
-        //11 Раздел 2. Графа 20 должна быть заполнена, если заполнены Раздел 2. Графы 7,11
-        columnFillConditionDataList << new ColumnFillConditionData(
                 new Column7And11Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm}. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17."
+        )
+        //11 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20
+        columnFillConditionDataList << new ColumnFillConditionData(
                 new Column20Fill(),
-                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)='${ndflPersonIncome.refoundTax ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 20 должна быть заполнена, если заполнены Раздел 2. Графы 7,11."
+                new Column7And11Fill(),
+                "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm ?: ""}. $fioAndInp." +
+                        " Текст ошибки: Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20."
         )
         //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column7And11Or22And23And24Fill(),
                 new Column21Fill(),
                 "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,24,25."
+                        " Текст ошибки: Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 22,23,24."
         )
-        //12 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7,11 и 23,23,24
+        //12 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7,11 и 22,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column7And11And22And23And24NotFill(),
                 new Column21NotFill(),
                 "Ошибка в значении: Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}'. $fioAndInp." +
-                        " Текст ошибки: Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7,11 и 23,24,25."
+                        " Текст ошибки: Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7,11 и 22,23,24."
         )
         //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них
         columnFillConditionDataList << new ColumnFillConditionData(
@@ -3049,6 +3053,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
                     !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
                 logger.warn(columnFillConditionData.conditionMessage)
+//                println(columnFillConditionData.conditionMessage)
             }
         }
 
@@ -3070,8 +3075,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
     ScriptUtils.checkInterrupted();
 
-    println "Общие проверки / NdflPersonIncome: " + (System.currentTimeMillis() - time);
-    logger.info("Общие проверки / NdflPersonIncome: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Общие проверки / '$T_PERSON_INCOME' (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки / '$T_PERSON_INCOME' (" + (System.currentTimeMillis() - time) + " мс)");
 
     ScriptUtils.checkInterrupted();
 
@@ -3102,8 +3107,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         logger.warn(MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent);
     }
 
-    println "Общие проверки / Проверки на отсутсвие повторений: " + (System.currentTimeMillis() - time);
-    logger.info("Общие проверки / Проверки на отсутсвие повторений: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -3264,8 +3269,7 @@ class Column21NotFill implements ColumnFillConditionChecker {
 class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return (ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) ||
-                (ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm))
+        return (new Column7And11Fill().check(ndflPersonIncome)) || (new Column22And23And24Fill().check(ndflPersonIncome))
     }
 }
 /**
@@ -3274,8 +3278,7 @@ class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
 class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return (ndflPersonIncome.incomePayoutDate == null && ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) &&
-                (ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm))
+        return !(new Column7And11Fill().check(ndflPersonIncome)) && (new Column22And23And24NotFill().check(ndflPersonIncome))
     }
 }
 /**
@@ -3302,7 +3305,7 @@ class Column22And23And24Fill implements ColumnFillConditionChecker {
 class Column22And23And24FillOrColumn22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return new Column22And23And24NotFill().check(ndflPersonIncome) || new Column22And23And24Fill().check(ndflPersonIncome)
+        return (new Column22And23And24NotFill().check(ndflPersonIncome)) || (new Column22And23And24Fill().check(ndflPersonIncome))
     }
 }
 /**
@@ -3614,7 +3617,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     if (ndflPersonIncome.calculatedTax != ScriptUtils.round((S1 * 13 - S2), 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME' .Строка='${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax}' $fioAndInp." +
-                                " Не выполнено условие: сумма по «Графа 16 Раздел 2» текущей операции = S1 x 13%% - S2.")
+                                " Не выполнено условие: «Графа 16 Раздел 2» ≠ «Сумма Граф 13 Раздел 2» с начала периода на отчетную дату x 13%% - «Сумма Граф 16 Раздел 2» за предыдущие отчетные периоды.")
                     }
                 }
                 // СведДох6.3
@@ -3628,7 +3631,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         ) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             logger.warn("Ошибка в значении: Раздел '$T_PERSON_INCOME'. Строка='${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax}' $fioAndInp" +
-                                    " Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13%% - «Графа 4 Раздел 4» .")
+                                    " Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13%% - «Графа 4 Раздел 4».")
                         }
                     }
                 }

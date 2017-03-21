@@ -204,6 +204,28 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdTemp(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+        String priznakFClause;
+        if (prFequals1) {
+            priznakFClause = "";
+        } else {
+            priznakFClause = " AND npi.NOT_HOLDING_TAX > 0";
+        }
+        String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
+                " WHERE npi.ndfl_person_id = :ndflPersonId" +
+                " AND npi.INCOME_ACCRUED_DATE between :startDate AND :endDate" + priznakFClause;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
     public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate) {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 " WHERE npi.ndfl_person_id = :ndflPersonId" +

@@ -32,6 +32,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdTemp(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+        return ndflPersonDao.findIncomesByPeriodAndNdflPersonIdTemp(ndflPersonId, startDate, endDate, prFequals1);
+    }
+
+    @Override
     public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate) {
         return ndflPersonDao.findIncomesByPeriodAndNdflPersonIdAndTaxDate(ndflPersonId, startDate, endDate);
     }
