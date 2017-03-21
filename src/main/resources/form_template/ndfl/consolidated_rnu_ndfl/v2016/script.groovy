@@ -980,7 +980,15 @@ def createSpecificReportDb() {
     def params = [declarationId : declarationData.id]
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name + ".xlsx")
+    setNameOfSpecificReport()
+}
+
+/**
+ * Задание имени файла спецотчета
+ * @return
+ */
+def setNameOfSpecificReport() {
+    scriptSpecificReportHolder.setFileName("Отчетность_по_КПП,ОКТМО" + ".xlsx")
 }
 
 /**
