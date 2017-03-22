@@ -65,6 +65,8 @@ public class DeclarationDataPresenter
 
 	public interface MyView extends View,
 			HasUiHandlers<DeclarationDataUiHandlers> {
+        void showCheck(boolean show);
+
 		void showAccept(boolean show);
 
 		void showReject(boolean show);
@@ -245,6 +247,7 @@ public class DeclarationDataPresenter
 
                                 getView().setPdfPage(0);
                                 getView().showState(declarationData.getState());
+								getView().showCheck(result.isCanCheck());
 								getView().showAccept(result.isCanAccept());
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());

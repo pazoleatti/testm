@@ -312,6 +312,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         LOG.info(String.format("Проверка данных налоговой формы %s", id));
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CHECK);
         DeclarationData dd = declarationDataDao.get(id);
         Logger scriptLogger = new Logger();
         try {

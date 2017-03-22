@@ -32,6 +32,7 @@ public class GetDeclarationDataResult implements Result {
      */
     private String declarationFormType;
 
+	private boolean canCheck;
 	private boolean canAccept;
 	private boolean canReject;
     private boolean canDelete;
@@ -44,6 +45,14 @@ public class GetDeclarationDataResult implements Result {
 
     public void setCanRecalculate(boolean canRecalculate) {
         this.canRecalculate = canRecalculate;
+    }
+
+    public boolean isCanCheck() {
+        return canCheck;
+    }
+
+    public void setCanCheck(boolean canCheck) {
+        this.canCheck = canCheck;
     }
 
     public boolean isCanAccept() {

@@ -280,6 +280,27 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
     }
 
+    private void canCheck(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
+        DeclarationData declaration = declarationDataDao.get(declarationDataId);
+        // Обновлять декларацию можно только если она не принята
+        if (declaration.getState().equals(State.ACCEPTED)) {
+            throw new AccessDeniedException("Налоговая форма должна находиться в статусе отличной от \"Принята\"");
+        }
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+
+        // Нет прав на АСНУ
+        if (!checkUserAsnu(userInfo, declaration)) {
+            throw new AccessDeniedException("Нет прав на АСНУ декларации");
+        }
+
+        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
+
+        // Обновлять декларацию могут только контолёр текущего уровня и
+        // контролёр УНП
+        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
+    }
+
     @Override
     public void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent scriptEvent) {
         checkEvents(userInfo, declarationDataId, scriptEvent, null);
@@ -308,6 +329,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
                 break;
             case CHANGE_STATUS_ED:
                 canChangeStatus(userInfo, declarationDataId, checkedSet);
+                break;
+            case CHECK:
+                canCheck(userInfo, declarationDataId, checkedSet);
                 break;
             default:
                 throw new AccessDeniedException("Операция не предусмотрена в системе");

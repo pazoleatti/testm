@@ -274,6 +274,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
+    public void showCheck(boolean show) {
+        checkButton.setVisible(show);
+    }
+
+    @Override
 	public void showAccept(boolean show) {
 		acceptButton.setVisible(show);
 	}

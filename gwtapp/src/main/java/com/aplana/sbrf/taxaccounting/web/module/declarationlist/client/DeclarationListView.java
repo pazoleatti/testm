@@ -683,6 +683,7 @@ public class DeclarationListView extends
                 changeStatusED = false;
             }
             if (State.ACCEPTED.equals(row.getState())) {
+                check = false;
                 calculate = false;
                 accept = false;
                 delete = false;
