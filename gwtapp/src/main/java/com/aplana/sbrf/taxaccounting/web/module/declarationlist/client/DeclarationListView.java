@@ -10,13 +10,17 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
-import com.google.gwt.cell.client.*;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -88,7 +92,7 @@ public class DeclarationListView extends
 
     private final static DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
-    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy hh:mm:ss");
+    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
     @UiField
     Label declarationHeader;
@@ -97,7 +101,7 @@ public class DeclarationListView extends
 	Panel filterContentPanel;
 
 	@UiField
-    Button checkButton, recalculateButton, deleteButton, acceptButton, cancelButton;
+    Button checkButton, recalculateButton, deleteButton, acceptButton, cancelButton, changeStatusEDButton;
 
 	@UiField
     GenericDataGrid<DeclarationDataSearchResultItem> declarationTable;
@@ -166,10 +170,14 @@ public class DeclarationListView extends
             create.setVisible(false);
             createReports.setVisible(true);
             downloadReports.setVisible(true);
+            recalculateButton.setVisible(false);
+            changeStatusEDButton.setVisible(true);
         } else {
             create.setVisible(true);
             createReports.setVisible(false);
             downloadReports.setVisible(false);
+            recalculateButton.setVisible(true);
+            changeStatusEDButton.setVisible(false);
         }
         Style tableStyle = tableWrapper.getElement().getStyle();
         tableStyle.setProperty("top", (isReports) ?
@@ -326,7 +334,7 @@ public class DeclarationListView extends
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
                 if (object.getDeclarationDataCreationDate() != null) {
-                    return DATE_TIME_FORMAT.format(object.getDeclarationDataCreationDate());
+                    return DATE_TIME_FORMAT.format(object.getDeclarationDataCreationDate(), TimeZone.createTimeZone(-180));
                 } else {
                     return "";
                 }
@@ -471,6 +479,11 @@ public class DeclarationListView extends
     @UiHandler("checkButton")
     public void onCheck(ClickEvent event){
         getUiHandlers().check();
+    }
+
+    @UiHandler("changeStatusEDButton")
+    public void onchangeStatusED(ClickEvent event){
+        getUiHandlers().changeStatusED();
     }
 
 
@@ -664,15 +677,19 @@ public class DeclarationListView extends
         boolean delete = check;
         boolean accept = check;
         boolean cancel = check;
+        boolean changeStatusED = check && getUiHandlers().getIsReports();
         for(DeclarationDataSearchResultItem row: checkedRows) {
             if (State.CREATED.equals(row.getState())) {
                 accept = false;
                 cancel = false;
+                changeStatusED = false;
             }
             if (State.PREPARED.equals(row.getState())) {
                 delete = false;
+                changeStatusED = false;
             }
             if (State.ACCEPTED.equals(row.getState())) {
+                check = false;
                 calculate = false;
                 accept = false;
                 delete = false;
@@ -683,6 +700,7 @@ public class DeclarationListView extends
         deleteButton.setEnabled(delete);
         acceptButton.setEnabled(accept);
         cancelButton.setEnabled(cancel);
+        changeStatusEDButton.setEnabled(changeStatusED);
     }
 
     @Override

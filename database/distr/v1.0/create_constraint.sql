@@ -239,7 +239,7 @@ alter table form_data add constraint form_data_chk_accruing check (accruing in (
 alter table form_data add constraint form_data_chk_edited check (edited in (0, 1));
 alter table form_data add constraint form_data_chk_sorted_backup check (sorted_backup in (0, 1));
 alter table sec_user add constraint sec_user_chk_is_active check (is_active in (0, 1));
-alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
+alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 26, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
 alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));

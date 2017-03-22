@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
@@ -56,6 +57,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final DeclarationFilterPresenter filterPresenter;
 	protected final DeclarationCreationPresenter creationPresenter;
     protected final DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter;
+    protected final ChangeStatusEDPresenter changeStatusEDPresenter;
 
     static final Object TYPE_filterPresenter = new Object();
 
@@ -63,13 +65,15 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	                             PlaceManager placeManager, DispatchAsync dispatcher,
 	                             DeclarationFilterPresenter filterPresenter,
 								 DeclarationCreationPresenter creationPresenter,
-                                 DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter) {
+                                 DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter,
+                                 ChangeStatusEDPresenter changeStatusEDPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
 		this.filterPresenter = filterPresenter;
 		this.creationPresenter = creationPresenter;
         this.declarationDownloadReportsPresenter = declarationDownloadReportsPresenter;
+        this.changeStatusEDPresenter = changeStatusEDPresenter;
 	}
 
 	@Override

@@ -21,4 +21,5 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
     void revealPlaceRequest();
     void onTimerSubsreport(boolean isTimer);
     void onFilesCommentsDialog();
+    void changeStatusED();
 }

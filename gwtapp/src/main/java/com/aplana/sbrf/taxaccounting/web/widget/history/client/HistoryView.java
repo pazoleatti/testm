@@ -29,8 +29,6 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
         HistoryPresenter.MyView {
 
     public static final String MODAL_WINDOW_TITLE = "Информация по налоговой форме";
-    public static final String MODAL_WINDOW_TITLE_D = "Информация по форме/уведомлению";
-    public static final String MODAL_WINDOW_TITLE_E = "Информация по форме";
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
     private static final String DECLARATION_SAVE_EVENT = "Обновление";
     @UiField

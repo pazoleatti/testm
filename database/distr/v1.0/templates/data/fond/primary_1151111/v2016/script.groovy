@@ -103,10 +103,12 @@ switch (formDataEvent) {
         checkData()
         break
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
+        // Подготовка для последующего формирования спецотчета
         println "!PREPARE_SPECIFIC_REPORT!"
         prepareSpecificReport()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        // Формирование спецотчета
         println "!CREATE_SPECIFIC_REPORT!"
         createSpecificReport()
         break
@@ -287,10 +289,10 @@ RaschsvPersSvStrahLic getrRaschsvPersSvStrahLic(id) {
 }
 
 // Находит в базе данных список List RaschsvPersSvStrahLic
-List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicList() {
+List<RaschsvPersSvStrahLic> getrRaschsvPersSvStrahLicList(int startIndex, int pageSize) {
     def declarationId = declarationData.getId()
     def params = scriptSpecificReportHolder.getSubreportParamValues()
-    raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params)
+    return raschsvPersSvStrahLicService.findPersonBySubreportParams(declarationId, params, startIndex, pageSize)
 }
 
 def prepareSpecificReport() {
@@ -298,7 +300,12 @@ def prepareSpecificReport() {
     List<Column> tableColumns = createTableColumns();
     List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
     def rowColumns = createRowColumns()
-    List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = getrRaschsvPersSvStrahLicList()
+
+    // Ограничение числа выводимых записей
+    int startIndex = 1
+    int pageSize = 10
+
+    List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = getrRaschsvPersSvStrahLicList(startIndex, pageSize)
 
     def lastNameWidth = 4
     def firstNameWidth = 4
@@ -2322,8 +2329,9 @@ void importData() {
 
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (logger.containsLevel(LogLevel.WARNING)) {
+        // todo https://jira.aplana.com/browse/SBRFNDFL-706
+//        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     ScriptUtils.checkInterrupted();
@@ -2597,8 +2605,8 @@ void checkImportRaschsv(fileNode, fileName) {
     checkTariff_2_2_425(fileNode, fileName)
     checkFL(fileNode, fileName)
 
-    println "checkImportRaschsv " + (System.currentTimeMillis() - time);
-    logger.info("checkImportRaschsv: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки xml при загрузке (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки xml при загрузке (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -3887,7 +3895,7 @@ int FORM_TYPE = 200;
 
 def calcTimeMillis(long time) {
     long currTime = System.currentTimeMillis();
-    return " (" + (currTime - time) + " ms)";
+    return (currTime - time) + " мс)";
 }
 
 @Field List<Country> countryRefBookCache = [];
@@ -4045,7 +4053,7 @@ def calculate() {
     //Получаем список всех ФЛ в первичной НФ
     List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFrom1151111(declarationData.id, createPrimaryRowMapper());
 
-    logger.info("В ПНФ номер " + declarationData.id + " найдено записей о физ.лицах: " + primaryPersonDataList.size() + calcTimeMillis(time));
+    logger.info("В ПНФ номер " + declarationData.id + " найдено записей о физ.лицах (" + primaryPersonDataList.size() + " записей, " + calcTimeMillis(time));
 
     Map<Long, NaturalPerson> primaryPersonMap = primaryPersonDataList.collectEntries {
         [it.getPrimaryPersonId(), it]
@@ -4056,42 +4064,42 @@ def calculate() {
     //Заполнени временной таблицы версий
     time = System.currentTimeMillis();
     refBookPersonService.fillRecordVersions1151111(getRefBookPersonVersionTo());
-    logger.info("Заполнение таблицы версий: " + calcTimeMillis(time));
+    logger.info("Заполнение таблицы версий (" + calcTimeMillis(time));
 
     ScriptUtils.checkInterrupted();
 
     //Шаг 1. список физлиц первичной формы для создания записей в справочниках
     time = System.currentTimeMillis();
     List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimary1151111(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper());
-    logger.info("Предварительная выборка новых данных. Найдено записей: "+insertPersonList.size() + calcTimeMillis(time));
+    logger.info("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + calcTimeMillis(time));
 
     time = System.currentTimeMillis();
     createNaturalPersonRefBookRecords(insertPersonList);
-    logger.info("Создание записей: "+insertPersonList.size() + calcTimeMillis(time));
+    logger.info("Создание записей (" + insertPersonList.size() + " записей, " + calcTimeMillis(time));
 
     ScriptUtils.checkInterrupted();
 
     //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
     time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimary1151111(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
-    logger.info("Предварительная выборка по значимым параметрам. Найдено записей: " + similarityPersonMap.size() + calcTimeMillis(time));
+    logger.info("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + calcTimeMillis(time));
 
 
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, similarityPersonMap);
-    logger.info("Обновление записей " + calcTimeMillis(time));
+    logger.info("Обновление записей (" + calcTimeMillis(time));
 
     ScriptUtils.checkInterrupted();
 
     time = System.currentTimeMillis();
     Map<Long, Map<Long, NaturalPerson>> checkSimilarityPersonMap = refBookPersonService.findPersonForCheckFromPrimary1151111(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
-    logger.info("Основная выборка по всем параметрам. Найдено записей: " + checkSimilarityPersonMap.size() + calcTimeMillis(time));
+    logger.info("Основная выборка по всем параметрам (" + checkSimilarityPersonMap.size() + " записей, " + calcTimeMillis(time));
 
     time = System.currentTimeMillis();
     updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap);
-    logger.info("Обновление записей " + calcTimeMillis(time));
+    logger.info("Обновление записей (" + calcTimeMillis(time));
 
-    logger.info("Завершение расчета ПНФ " + " " + calcTimeMillis(timeFull));
+    logger.info("Завершение расчета ПНФ (" + calcTimeMillis(timeFull));
 }
 
 //---------------- Identification ----------------
@@ -4215,7 +4223,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         inTime = System.currentTimeMillis();
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
         if (msgCnt <= maxMsgCnt){
-            logger.info("identificate "+ calcTimeMillis(inTime));
+            logger.info("Идентификация (" + calcTimeMillis(inTime));
         }
 
         conformityMap.put(primaryPersonId, refBookPerson);
@@ -4228,13 +4236,13 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
 
         if (msgCnt <= maxMsgCnt){
-            logger.info("in identificate "+ calcTimeMillis(inTime));
+            logger.info("Идентификация (" + calcTimeMillis(inTime));
         }
 
         msgCnt++;
     }
 
-    logger.info("identificate person, update address "+ calcTimeMillis(time));
+    logger.info("Идентификация ФЛ, обновление адресов (" + calcTimeMillis(time));
 
     insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), insertAddressList, { address ->
         mapAddressAttr(address)
@@ -4353,14 +4361,14 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         }
 
         if (msgCnt < maxMsgCnt){
-            logger.info("in identificate update "+ calcTimeMillis(inTime));
+            logger.info("Идентификация и обновление (" + calcTimeMillis(inTime));
         }
 
         msgCnt++;
 
     }
 
-    logger.info("update person, documents, id "+ calcTimeMillis(time));
+    logger.info("Обновление ФЛ, документов, id (" + calcTimeMillis(time));
     time = System.currentTimeMillis();
     //println "crete and update reference"
 
@@ -4372,7 +4380,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         updatePrimaryToRefBookPersonReferences(updatePersonReferenceList);
     }
 
-    logger.info("update reference "+ calcTimeMillis(time));
+    logger.info("Обновление справочников (" + calcTimeMillis(time));
     time = System.currentTimeMillis();
 
     insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { personDocument ->
@@ -4416,7 +4424,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
     }
 
-    logger.info("identificateion and update end "+ calcTimeMillis(time));
+    logger.info("Идентификация и обновление (" + calcTimeMillis(time));
 
     logger.info("Обновлено записей: " + updCnt);
 
@@ -4605,7 +4613,7 @@ def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
 
-        logger.info("insert multiple records: refBookId="+refBookId + ", size="+identityObjectList.size())
+        logger.info("Добавление записей: refBookId="+refBookId + ", size="+identityObjectList.size())
 
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
@@ -4968,8 +4976,8 @@ def checkData() {
 
     // Проверки БД
     checkDataDB()
-    println "Все проверки " + (System.currentTimeMillis() - time);
-    logger.info("Все проверки: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Все проверки (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Все проверки (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -4983,8 +4991,8 @@ def checkDataDB() {
     // Суммовые проверки
     long time = System.currentTimeMillis();
     checkDataDBSum()
-    println "Суммовые проверки " + (System.currentTimeMillis() - time);
-    logger.info("Суммовые проверки: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Суммовые проверки (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Суммовые проверки (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -5003,17 +5011,17 @@ def checkDataDBPerson() {
 
     // ФЛ Map<person_id, RefBook>
     def personMap = getActualRefPersonsByDeclarationDataId()
-    logger.info("Получены записи таблицы \"%s\" в колличестве %d.", "Физические лица", personMap.size())
+    logger.info("Получены записи таблицы \"%s\" в количестве (%d записей).", "Физические лица", personMap.size())
 
     // ДУЛ Map<person_id, List<RefBook>>
     def dulMap = getActualRefDulByDeclarationDataId()
-    logger.info("Получены записи таблицы \"%s\" в колличестве %d.", "ДУЛ", dulMap.size())
+    logger.info("Получены записи таблицы \"%s\" (%d записей).", "ДУЛ", dulMap.size())
 
     // Коды видов документов
     def documentTypeActualList = getActualRefDocument()
 
-    println "Загрузка справочников для проверок записей в БД " + (System.currentTimeMillis() - time);
-    logger.info("Загрузка справочников для проверок записей в БД: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Загрузка справочников для проверок записей в БД (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Загрузка справочников для проверок записей в БД (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
 
@@ -5138,8 +5146,8 @@ def checkDataDBPerson() {
         }
     }
 
-    println "Проверки по плательщику страховых взносов " + (System.currentTimeMillis() - time);
-    logger.info("Проверки по плательщику страховых взносов: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки по плательщику страховых взносов (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки по плательщику страховых взносов (" + (System.currentTimeMillis() - time) + " мс)");
 
     ScriptUtils.checkInterrupted();
 
@@ -5164,8 +5172,8 @@ def checkDataDBPerson() {
             logger.warn(msgError + ids)
         }
     }
-    println "Дубли физического лица рамках формы " + (System.currentTimeMillis() - time);
-    logger.info("Дубли физического лица рамках формы: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Дубли физического лица рамках формы (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Дубли физического лица рамках формы (" + (System.currentTimeMillis() - time) + " мс)");
 
     ScriptUtils.checkInterrupted();
 
@@ -5202,8 +5210,8 @@ def checkDataDBPerson() {
             logger.warn(msgError + declarationDataInfo.join(", "))
         }
     }
-    println "Дубли физического лица в разных формах " + (System.currentTimeMillis() - time);
-    logger.info("Дубли физического лица в разных формах: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Дубли физического лица в разных формах (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Дубли физического лица в разных формах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -6227,8 +6235,9 @@ def getNumberMonth(def currMonth, def endDate) {
 def checkDataXml() {
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, null)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (logger.containsLevel(LogLevel.WARNING)) {
+        // todo https://jira.aplana.com/browse/SBRFNDFL-706
+//        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     def xmlStream = declarationService.getXmlStream(declarationData.id)
@@ -6285,8 +6294,8 @@ def checkDataXml() {
     // Коды категорий застрахованных лиц
     def listPersonCategory = getActualPersonCategory()
 
-    println "Загрузка справочников для xml-проверок: " + (System.currentTimeMillis() - time);
-    logger.info("Загрузка справочников для xml-проверок: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Загрузка справочников для xml-проверок (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Загрузка справочников для xml-проверок (" + (System.currentTimeMillis() - time) + " мс)");
 
     // ------------Проверки по плательщику страховых взносов RASCHSV_SVNP_PODPISANT
     time = System.currentTimeMillis();
@@ -6544,8 +6553,8 @@ def checkDataXml() {
             }
         }
     }
-    println "Проверки xml: " + (System.currentTimeMillis() - time);
-    logger.info("Проверки xml: (" + (System.currentTimeMillis() - time) + " ms)");
+    println "Проверки xml (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки xml (" + (System.currentTimeMillis() - time) + " мс)");
 
     // ------------Сводные данные об обязательствах плательщика
 }

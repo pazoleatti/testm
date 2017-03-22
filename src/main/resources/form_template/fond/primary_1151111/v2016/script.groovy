@@ -2330,7 +2330,8 @@ void importData() {
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
     if (logger.containsLevel(LogLevel.WARNING)) {
-        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
+        // todo https://jira.aplana.com/browse/SBRFNDFL-706
+//        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     ScriptUtils.checkInterrupted();
@@ -5580,6 +5581,7 @@ def checkDataDBSum() {
                 }
                 if (tarif == it) {
                     BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(prOsnSvDop)
+                    def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
                     if (!comparNumbEquals(nachisl428_12Sum_1, vyplSvDopMtSum)) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум1Посл3М = \"$nachisl428_12Sum_1\"")
                     }
@@ -6234,8 +6236,9 @@ def getNumberMonth(def currMonth, def endDate) {
 def checkDataXml() {
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, null)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (logger.containsLevel(LogLevel.WARNING)) {
+        // todo https://jira.aplana.com/browse/SBRFNDFL-706
+//        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     def xmlStream = declarationService.getXmlStream(declarationData.id)
