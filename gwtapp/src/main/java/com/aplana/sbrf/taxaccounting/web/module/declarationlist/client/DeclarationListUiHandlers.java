@@ -16,5 +16,6 @@ public interface DeclarationListUiHandlers extends UiHandlers {
     void accept(boolean accepted);
     void delete();
     void check();
-
+    void changeStatusED();
+    Boolean getIsReports();
 }

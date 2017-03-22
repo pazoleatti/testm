@@ -10,6 +10,7 @@ INSERT INTO event (id,name) VALUES (8,'Получение данных');
 INSERT INTO event (id,name) VALUES (9,'Получение защищенных данных');
 INSERT INTO event (id,name) VALUES (10,'Тестирование скриптов');
 INSERT INTO event (id,name) VALUES (11,'Миграция из АС "Ведение РНУ"');
+INSERT INTO event (id,name) VALUES (26, 'Изменить состояние ЭД');
 INSERT INTO event (id,name) VALUES (101,'Утвердить из "Создана"');
 INSERT INTO event (id,name) VALUES (102,'Вернуть из "Утверждена" в "Создана"');
 INSERT INTO event (id,name) VALUES (103,'Принять из "Утверждена"');
