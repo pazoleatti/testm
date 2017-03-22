@@ -513,6 +513,15 @@ def importAnswer1151111() {
                 declarationService.setDocStateId(declarationData.id, docStateId)
             }
         }
+
+        def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        def departmentName = departmentService.get(declarationData.departmentId)
+
+        msgBuilder.append("Выполнена загрузка ответа ФНС для формы: ")
+                .append("№: \"").append(declarationData.id).append("\"")
+                .append(", Период: \"").append(departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName()).append("\"")
+                .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
+                .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"");
     }
 }
 
@@ -1050,6 +1059,14 @@ def importNdflResponse() {
             if (logger.containsLevel(LogLevel.ERROR)) {
                 return
             }
+            def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            def departmentName = departmentService.get(declarationData.departmentId)
+
+            msgBuilder.append("Выполнена загрузка ответа ФНС для формы: ")
+                    .append("№: \"").append(declarationData.id).append("\"")
+                    .append(", Период: \"").append(departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName()).append("\"")
+                    .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
+                    .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"");
         }
     }
     // "Дата-время файла" = "Дата и время документа" раздела Параметры файла ответа

@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1393"/>
+	<property name="ireport.y" value="1389"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -243,7 +243,7 @@
 ).substring(0,2)]]></variableExpression>
 			<initialValueExpression><![CDATA[(     (         ($F{Ставка} == null )  ?         "--" :         ($F{Ставка} + "--").substring(0, 2)     ) ).substring(0,2)]]></initialValueExpression>
 		</variable>
-		<filterExpression><![CDATA[!($F{НомСтр}=="1"|| $F{НомСтр}.equals("1"))]]></filterExpression>
+		<filterExpression><![CDATA[!($F{НомСтр}=="1" || $F{НомСтр}==null|| $F{НомСтр}=="")]]></filterExpression>
 	</subDataset>
 	<parameter name="LIST_COUNT" class="java.lang.String">
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
@@ -410,7 +410,7 @@
 	<variable name="ПодпНаимОрг" class="java.lang.String">
 		<variableExpression><![CDATA[$F{НаимОрг2}==null ?
     "----------------------------------------------------------------------------------------------------------------------------------------------------------------" :
-    ($F{Отчество2}+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
+    ($F{НаимОрг2}+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
 		<initialValueExpression><![CDATA[$F{НаимОрг2}==null ?     "----------------------------------------------------------------------------------------------------------------------------------------------------------------" :     ($F{Отчество2}+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></initialValueExpression>
 	</variable>
 	<variable name="ПодпДокНаим" class="java.lang.String">
@@ -564,22 +564,22 @@
 	<variable name="НеУдержНалИт" class="java.lang.String">
 		<variableExpression><![CDATA[(
     (
-        ($F{НеУдержНалИт} == null  || $F{УдержНалИт} == "")  ?
+        ($F{НеУдержНалИт} == null  || $F{НеУдержНалИт} == "")  ?
         "0--------------" :
           ($F{НеУдержНалИт}.indexOf(".") < 0 ?
             ($F{НеУдержНалИт} + "-----------------").substring(0, 15) :
             ($F{НеУдержНалИт}.substring(0, ($F{НеУдержНалИт}.indexOf(".")))+"-----------------").substring(0, 15)
           )
     )  + "." +
-    (($F{НеУдержНалИт} == null )  ?
-        "--" :
+    (($F{НеУдержНалИт} == null || $F{НеУдержНалИт} == "")  ?
+        "00" :
         ($F{НеУдержНалИт}.indexOf(".") < 0 ?
             "--" :
             ($F{НеУдержНалИт}.substring(($F{НеУдержНалИт}.indexOf("."))+1, $F{НеУдержНалИт}.length())+"--").substring(0,2)
         )
     )
 ).substring(0,18)]]></variableExpression>
-		<initialValueExpression><![CDATA[(     (         ($F{НеУдержНалИт} == null  || $F{УдержНалИт} == "")  ?         "0--------------" :           ($F{НеУдержНалИт}.indexOf(".") < 0 ?             ($F{НеУдержНалИт} + "-----------------").substring(0, 15) :             ($F{НеУдержНалИт}.substring(0, ($F{НеУдержНалИт}.indexOf(".")))+"-----------------").substring(0, 15)           )     )  + "." +     (($F{НеУдержНалИт} == null )  ?         "--" :         ($F{НеУдержНалИт}.indexOf(".") < 0 ?             "--" :             ($F{НеУдержНалИт}.substring(($F{НеУдержНалИт}.indexOf("."))+1, $F{НеУдержНалИт}.length())+"--").substring(0,2)         )     ) ).substring(0,18)]]></initialValueExpression>
+		<initialValueExpression><![CDATA[(     (         ($F{НеУдержНалИт} == null  || $F{НеУдержНалИт} == "")  ?         "0--------------" :           ($F{НеУдержНалИт}.indexOf(".") < 0 ?             ($F{НеУдержНалИт} + "-----------------").substring(0, 15) :             ($F{НеУдержНалИт}.substring(0, ($F{НеУдержНалИт}.indexOf(".")))+"-----------------").substring(0, 15)           )     )  + "." +     (($F{НеУдержНалИт} == null || $F{НеУдержНалИт} == "")  ?         "00" :         ($F{НеУдержНалИт}.indexOf(".") < 0 ?             "--" :             ($F{НеУдержНалИт}.substring(($F{НеУдержНалИт}.indexOf("."))+1, $F{НеУдержНалИт}.length())+"--").substring(0,2)         )     ) ).substring(0,18)]]></initialValueExpression>
 	</variable>
 	<variable name="ВозврНалИт" class="java.lang.String">
 		<variableExpression><![CDATA[(
@@ -1056,7 +1056,7 @@
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="842" splitType="Stretch">
+		<band height="847">
 			<printWhenExpression><![CDATA[$V{PAGE_NUMBER}==1]]></printWhenExpression>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="3eb7f805-0ede-4ce7-8d2d-229a315e9f39" x="175" y="23" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -8923,8 +8923,11 @@
 			</textField>
 		</band>
 		<band height="193">
+			<break>
+				<reportElement uuid="92e1c8bd-b035-4234-b2bf-cd0ffc3a7600" x="0" y="0" width="100" height="1"/>
+			</break>
 			<staticText>
-				<reportElement uuid="44debce7-991e-4ca9-9566-a4153a167299" x="0" y="0" width="593" height="23" isPrintWhenDetailOverflows="true">
+				<reportElement uuid="44debce7-991e-4ca9-9566-a4153a167299" x="0" y="2" width="595" height="21" isPrintWhenDetailOverflows="true">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Приложение №2"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -9835,6 +9838,9 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИсчислНал}.charAt(14)]]></textFieldExpression>
 			</textField>
+			<break>
+				<reportElement uuid="70d73750-2db9-4ae3-8579-f25eb06653f4" x="0" y="0" width="100" height="1"/>
+			</break>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="2629353d-ad78-44cd-a73d-8858928e1a4d" x="437" y="125" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
@@ -13660,10 +13666,10 @@
 	<summary>
 		<band height="69">
 			<staticText>
-				<reportElement uuid="f99b9faf-6349-4527-b07e-034461bf29ef" x="151" y="6" width="429" height="20"/>
-				<textElement textAlignment="Right">
-					<font fontName="Arial" size="9"/>
-					<paragraph rightIndent="10"/>
+				<reportElement uuid="f99b9faf-6349-4527-b07e-034461bf29ef" mode="Transparent" x="151" y="6" width="429" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<paragraph lineSpacing="Single" rightIndent="10"/>
 				</textElement>
 				<text><![CDATA[Достоверность и полноту сведений, указанных на этой странице, подтверждаю:]]></text>
 			</staticText>
@@ -13678,16 +13684,18 @@
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="77dd5e84-b175-4e50-a792-b2778d688b50" x="328" y="26" width="89" height="20"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Arial" size="9"/>
+				<reportElement uuid="77dd5e84-b175-4e50-a792-b2778d688b50" mode="Transparent" x="328" y="26" width="89" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[(подпись)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="6a07c710-c7f0-4865-9260-c807bd961f45" x="513" y="26" width="74" height="20"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Arial" size="9"/>
+				<reportElement uuid="6a07c710-c7f0-4865-9260-c807bd961f45" mode="Transparent" x="513" y="26" width="67" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[(дата)]]></text>
 			</staticText>
