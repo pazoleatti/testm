@@ -5228,8 +5228,8 @@ def checkDataDBSum() {
     BigDecimal svVyplMkDopSum1 = 0
     BigDecimal svVyplMkDopSum2 = 0
     BigDecimal svVyplMkDopSum3 = 0
-    // Сведения о сумме выплат по доп.тарифам
-    Map<Integer, BigDecimal> vyplSvDopMtMap = [:]
+    // Map<Тариф, Array<Сумма_выплат_по_месяцам>> Сведения о сумме выплат по доп.тарифам
+    Map<Integer, List<BigDecimal>> vyplSvDopMtMap = [:]
     // Перебор ПерсСвСтрахЛиц
     List<RaschsvPersSvStrahLic> raschsvPersSvStrahLicList = raschsvPersSvStrahLicService.findPersons(declarationData.id)
     for (RaschsvPersSvStrahLic raschsvPersSvStrahLic : raschsvPersSvStrahLicList) {
@@ -5254,19 +5254,24 @@ def checkDataDBSum() {
         if (raschsvVyplSvDopMtList != null) {
             raschsvVyplSvDopMtList.each { raschsvVyplSvDopMt ->
                 if (raschsvVyplSvDopMt.mesyac != null) {
-                    def numberMonth = getNumberMonth(Integer.parseInt(raschsvVyplSvDopMt.mesyac), getReportPeriodEndDate())
-                    if (numberMonth == 1) {
-                        svVyplMkDopSum1 += raschsvVyplSvDopMt.nachislSv ?: 0
-                    } else if (numberMonth == 2) {
-                        svVyplMkDopSum2 += raschsvVyplSvDopMt.nachislSv ?: 0
-                    } else if (numberMonth == 3) {
-                        svVyplMkDopSum3 += raschsvVyplSvDopMt.nachislSv ?: 0
-                    }
-                }
+                    BigDecimal nachislSvCurr = raschsvVyplSvDopMt.nachislSv ?: 0
 
-                BigDecimal vyplSvDopMtSum = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: 0
-                vyplSvDopMtSum += raschsvVyplSvDopMt.nachislSv ?: 0
-                vyplSvDopMtMap.put(raschsvVyplSvDopMt.tarif, vyplSvDopMtSum)
+                    // Сведения о сумме выплат по доп.тарифам в пользу физ.лица по месяцам
+                    Integer numberMonth = getNumberMonth(Integer.parseInt(raschsvVyplSvDopMt.mesyac), getReportPeriodEndDate())
+                    if (numberMonth == 1) {
+                        svVyplMkDopSum1 += nachislSvCurr
+                    } else if (numberMonth == 2) {
+                        svVyplMkDopSum2 += nachislSvCurr
+                    } else if (numberMonth == 3) {
+                        svVyplMkDopSum3 += nachislSvCurr
+                    }
+
+                    // Сведения о сумме выплат по доп.тарифам в пользу физ.лица по месяцам в разрезе тарифов
+                    List<BigDecimal> vyplSvDopMtSumList = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: [3]
+                    vyplSvDopMtSumList[numberMonth - 1] = vyplSvDopMtSumList[numberMonth - 1] ?: 0
+                    vyplSvDopMtSumList[numberMonth - 1] += nachislSvCurr
+                    vyplSvDopMtMap.put(raschsvVyplSvDopMt.tarif, vyplSvDopMtSumList)
+                }
             }
         }
     }
@@ -5567,7 +5572,7 @@ def checkDataDBSum() {
     ScriptUtils.checkInterrupted();
 
     if (raschsvSvnpPodpisant.nomKorr == 0) {
-        vyplSvDopMtMap.each { tarif, vyplSvDopMtSum ->
+        vyplSvDopMtMap.each { tarif, vyplSvDopMtSumList ->
             // 3.3.2.2 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу (п 1 и 2 статьи 428)
             ["22", "21"].each {
                 def prOsnSvDop = null
@@ -5580,17 +5585,17 @@ def checkDataDBSum() {
                         break
                 }
                 if (tarif == it) {
+                    String pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
                     BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(prOsnSvDop)
-                    def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
-                    if (!comparNumbEquals(nachisl428_12Sum_1, vyplSvDopMtSum)) {
+                    if (!comparNumbEquals(nachisl428_12Sum_1, vyplSvDopMtSumList[0])) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум1Посл3М = \"$nachisl428_12Sum_1\"")
                     }
                     BigDecimal nachisl428_12Sum_2 = nachisl428_12Sum2Map.get(prOsnSvDop)
-                    if (!comparNumbEquals(nachisl428_12Sum_2, vyplSvDopMtSum)) {
+                    if (!comparNumbEquals(nachisl428_12Sum_2, vyplSvDopMtSumList[1])) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум2Посл3М = \"$nachisl428_12Sum_2\"")
                     }
                     BigDecimal nachisl428_12Sum_3 = nachisl428_12Sum3Map.get(prOsnSvDop)
-                    if (!comparNumbEquals(nachisl428_12Sum_3, vyplSvDopMtSum)) {
+                    if (!comparNumbEquals(nachisl428_12Sum_3, vyplSvDopMtSumList[2])) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум3Посл3М = \"$nachisl428_12Sum_3\"")
                     }
                 }
@@ -5936,7 +5941,7 @@ def checkDataDBSum() {
         // 3.3.5.9 Всего пособий по уходу за вторым ребенком и последующими равно сумме этих пособий по различным категориям
         if (raschsvVyplPrichina.nodeName == "Всего") {
             for (RaschsvRashVypl raschsvRashVypl : raschsvVyplPrichina.raschsvRashVyplList) {
-                if (raschsvRashVypl.nodeName == "ЕжПосУходРеб1" || raschsvRashVypl.nodeName == "ЕжПосУходРеб2") {
+                if (raschsvRashVypl.nodeName == "ЕжПосУходРеб1") {
                     vsegoEzPosUhodReb1ChislPoluch = raschsvRashVypl.chislPoluch ?: 0
                     vsegoEzPosUhodReb1KolVypl = raschsvRashVypl.kolVypl ?: 0
                     vsegoEzPosUhodReb1Rashod = raschsvRashVypl.rashod ?: 0
