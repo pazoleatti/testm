@@ -4,8 +4,8 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="false"/>
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1389"/>
+	<property name="ireport.x" value="89"/>
+	<property name="ireport.y" value="1296"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -653,10 +653,10 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+($V{PAGE_NUMBER})).substring(("00"+($V{PAGE_NUMBER})).length()-3).charAt(2)]]></textFieldExpression>
 			</textField>
 			<image hAlign="Center">
-				<reportElement uuid="c7d91d93-1615-403c-b3ec-90880cee8199" x="15" y="11" width="101" height="42"/>
+				<reportElement uuid="c7d91d93-1615-403c-b3ec-90880cee8199" x="14" y="11" width="101" height="42"/>
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarCode1}).processString() )]]></imageExpression>
 			</image>
 			<textField isBlankWhenNull="true">
@@ -713,7 +713,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+($V{PAGE_NUMBER})).substring(("00"+($V{PAGE_NUMBER})).length()-3).charAt(1)]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="cfdb1826-8a14-40c2-b8c6-952b67985f9d" mode="Transparent" x="140" y="33" width="35" height="20" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
@@ -791,23 +791,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(0)]]></textFieldExpression>
-			</textField>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="49dbe151-6d9d-4bdb-9b94-d8ae259d7f3a" x="385" y="33" width="15" height="19" isPrintWhenDetailOverflows="true">
-					<property name="ireport.layer" value="1"/>
-				</reportElement>
-				<box>
-					<pen lineColor="#666666"/>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+($V{PAGE_NUMBER})).substring(("00"+($V{PAGE_NUMBER})).length()-3).charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="cf5f92b4-3f65-4480-94d8-70e5462d1661" x="235" y="33" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -979,38 +963,6 @@
 				</textElement>
 				<text><![CDATA[Стр.]]></text>
 			</staticText>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="63dc5ca5-86af-4155-b111-9f13767b88a0" x="415" y="33" width="15" height="19" isPrintWhenDetailOverflows="true">
-					<property name="ireport.layer" value="1"/>
-				</reportElement>
-				<box>
-					<pen lineColor="#666666"/>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(5)]]></textFieldExpression>
-			</textField>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="cf4386ad-be73-4807-b446-4b33f64e795c" x="400" y="33" width="15" height="19" isPrintWhenDetailOverflows="true">
-					<property name="ireport.layer" value="1"/>
-				</reportElement>
-				<box>
-					<pen lineColor="#666666"/>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(4)]]></textFieldExpression>
-			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="8634941d-1124-4155-be36-92776e9b41e2" x="205" y="33" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
@@ -1053,6 +1005,12 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(6)]]></textFieldExpression>
 			</textField>
+			<rectangle>
+				<reportElement uuid="540ad72a-7368-4229-a6b1-c439136cb54b" x="1" y="11" width="13" height="13" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="de9e90f7-8936-4332-8615-182f98c3eb9e" x="115" y="11" width="13" height="13" backcolor="#000000"/>
+			</rectangle>
 		</band>
 	</pageHeader>
 	<detail>
@@ -1388,7 +1346,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+($V{PAGE_NUMBER})).substring(("00"+($V{PAGE_NUMBER})).length()-3).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="1b7902e3-dd44-4fe9-b1be-7344bd39c66c" x="370" y="23" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1402,55 +1360,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(2)]]></textFieldExpression>
-			</textField>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
-					<property name="ireport.layer" value="1"/>
-				</reportElement>
-				<box>
-					<pen lineColor="#666666"/>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(3)]]></textFieldExpression>
-			</textField>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
-					<property name="ireport.layer" value="1"/>
-				</reportElement>
-				<box>
-					<pen lineColor="#666666"/>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(4)]]></textFieldExpression>
-			</textField>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="23" width="15" height="19" isPrintWhenDetailOverflows="true">
-					<property name="ireport.layer" value="1"/>
-				</reportElement>
-				<box>
-					<pen lineColor="#666666"/>
-					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(5)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+($V{PAGE_NUMBER})).substring(("00"+($V{PAGE_NUMBER})).length()-3).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="false">
 				<reportElement uuid="9c4a287b-afc2-4c2f-b6c5-bcbb45c01d4b" x="340" y="23" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -1464,17 +1374,8 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00000"+($V{PAGE_NUMBER})).substring(("00000"+($V{PAGE_NUMBER})).length()-6).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+($V{PAGE_NUMBER})).substring(("00"+($V{PAGE_NUMBER})).length()-3).charAt(0)]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement uuid="af25d9c2-dc2c-42dd-85dc-e057079563ed" x="450" y="0" width="150" height="42" isPrintWhenDetailOverflows="true"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Arial" size="8" isBold="false" pdfEncoding="Identity-H"/>
-				</textElement>
-				<text><![CDATA[Приложение №1
-к приказу ФНС России
-от "__"________2015 г. №______]]></text>
-			</staticText>
 			<staticText>
 				<reportElement uuid="2c336801-47ee-41f8-ba91-6ed5102a1a06" x="0" y="80" width="600" height="24" isPrintWhenDetailOverflows="true">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Приложение №2"/>
@@ -4534,7 +4435,6 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00"+$P{LIST_COUNT}).substring(("00"+$P{LIST_COUNT}).length()-3).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="d212fdbd-9ef8-4941-b2a8-97a415214d2c" x="529" y="312" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -4548,7 +4448,6 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00"+$P{LIST_COUNT}).substring(("00"+$P{LIST_COUNT}).length()-3).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="cb205449-0c69-4cb2-b64f-4f93310912c7" x="499" y="312" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -4562,7 +4461,6 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00"+$P{LIST_COUNT}).substring(("00"+$P{LIST_COUNT}).length()-3).charAt(0)]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement uuid="38b74fff-182e-47be-9eef-0d60d06c2cd0" x="1" y="338" width="593" height="1"/>
@@ -8921,6 +8819,18 @@
 				</textElement>
 				<textFieldExpression><![CDATA["."]]></textFieldExpression>
 			</textField>
+			<rectangle>
+				<reportElement uuid="0dd5f888-0a3e-4e42-8639-7135e0ed0f24" x="2" y="1" width="13" height="13" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="500edcc6-6b81-4d86-825f-47fb7ac6a8c6" x="116" y="1" width="13" height="13" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="025f8492-b02a-4a5f-a60c-edb1460de11e" x="2" y="827" width="13" height="13" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="b501a27c-e8f1-4009-a0b2-bfc186ef9043" x="579" y="827" width="13" height="13" backcolor="#000000"/>
+			</rectangle>
 		</band>
 		<band height="193">
 			<break>
