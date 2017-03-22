@@ -5497,7 +5497,7 @@ def checkDataDBSum() {
         }
 
         // 3.3.3.2 База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению (Проверки выполняются для каждого РасчСВ_ОМС)
-        if (!!comparNumbEquals(bazNachislSvCurr1, vyplNachislFlCurr1 + neOblozenCurr1)) {
+        if (!comparNumbEquals(bazNachislSvCurr1, vyplNachislFlCurr1 + neOblozenCurr1)) {
             def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум1Посл3М = \"$bazNachislSvCurr1\""
             def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум1Посл3М = \"$vyplNachislFlCurr1\", " + pathAttrOms + ".НеОбложенСВ.Сум1Посл3М = \"$neOblozenCurr1\"."
             logger.warn("$pathAttrVal не равен сумме: $pathAttrComp")
