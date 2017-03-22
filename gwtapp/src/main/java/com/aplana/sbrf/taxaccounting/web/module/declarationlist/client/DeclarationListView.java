@@ -166,11 +166,13 @@ public class DeclarationListView extends
             create.setVisible(false);
             createReports.setVisible(true);
             downloadReports.setVisible(true);
+            recalculateButton.setVisible(false);
             changeStatusEDButton.setVisible(true);
         } else {
             create.setVisible(true);
             createReports.setVisible(false);
             downloadReports.setVisible(false);
+            recalculateButton.setVisible(true);
             changeStatusEDButton.setVisible(false);
         }
         Style tableStyle = tableWrapper.getElement().getStyle();

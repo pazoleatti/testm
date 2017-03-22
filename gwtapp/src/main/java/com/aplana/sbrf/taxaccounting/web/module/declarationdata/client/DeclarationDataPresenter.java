@@ -251,7 +251,7 @@ public class DeclarationDataPresenter
 								getView().showAccept(result.isCanAccept());
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
-								getView().showRecalculateButton(result.isCanRecalculate());
+								getView().showRecalculateButton(result.isCanRecalculate() && !isReports);
 								getView().showChangeStatusEDButton(result.isCanChangeStatusED());
 
                                 onTimerReport(DeclarationDataReportType.XML_DEC, false);
