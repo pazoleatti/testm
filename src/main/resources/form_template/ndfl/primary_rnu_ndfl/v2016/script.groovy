@@ -3546,19 +3546,13 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // СведДох2 Сумма вычета (Графа 12)
             BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
-            if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
+            if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction) && comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                        "Сумма вычета (Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: ""}', сумма значений Применение вычета.Текущий период.Сумма (Раздел 3 Графа 16)='${sumNdflDeduction}'")
+                        "Сумма вычета (Раздел 2 Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: ""}', Доход.Сумма.Начисление (Раздел 2 Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'" +
+                                ", сумма значений Применение вычета.Текущий период.Сумма (Раздел 3 Графа 16)='${sumNdflDeduction ?: ""}'")
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
                         "Значение не соответствует правилу: Графа 12 Раздел 2 = сумма значений граф 16 Раздел 3")
-            }
-            if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
-                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                        "Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}', сумма значений Применение вычета.Текущий период.Сумма (Раздел 3 Графа 16)='${sumNdflDeduction}'")
-                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
-                        "Значение не соответствует правилу: сумма значений граф 16 Раздела 3 <= графа 10 Раздел 2")
             }
 
             // СведДох4 НДФЛ.Процентная ставка (Графа 14)
