@@ -1875,7 +1875,7 @@ def checkDataReference(
             }
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                     "Графы ${address.join(", ")}")
-            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ ФИАС", fioAndInp, pathError,
+            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
                     "'Адрес регистрации в Российской Федерации' не соответствует справочнику '$R_FIAS'")
         }
         timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
