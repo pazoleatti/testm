@@ -3,17 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.State;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -261,6 +251,35 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
 	}
 
+    private void canChangeStatus(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
+        DeclarationData declaration = declarationDataDao.get(declarationDataId);
+        // Обновлять декларацию можно только если она не принята
+        if (!declaration.getState().equals(State.ACCEPTED)) {
+            throw new AccessDeniedException("Налоговая форма должна находиться в статусе \"Принята\"");
+        }
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+
+        // Нет прав на АСНУ
+        if (!checkUserAsnu(userInfo, declaration)) {
+            throw new AccessDeniedException("Нет прав на АСНУ декларации");
+        }
+
+        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
+
+        if (!userInfo.getUser().hasRoles(declarationTemplate.getType().getTaxType(), TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+            throw new AccessDeniedException("Нет прав на изменение состояния ЭД");
+        }
+
+        if (!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
+            throw new AccessDeniedException("Для данной формы нельзя измененить состояния ЭД");
+        }
+
+        // Обновлять декларацию могут только контолёр текущего уровня и
+        // контролёр УНП
+        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
+    }
+
     @Override
     public void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent scriptEvent) {
         checkEvents(userInfo, declarationDataId, scriptEvent, null);
@@ -286,6 +305,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
                 break;
             case CALCULATE:
                 canRefresh(userInfo, declarationDataId, checkedSet);
+                break;
+            case CHANGE_STATUS_ED:
+                canChangeStatus(userInfo, declarationDataId, checkedSet);
                 break;
             default:
                 throw new AccessDeniedException("Операция не предусмотрена в системе");

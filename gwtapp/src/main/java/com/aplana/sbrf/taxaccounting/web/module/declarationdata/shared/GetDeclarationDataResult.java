@@ -36,6 +36,7 @@ public class GetDeclarationDataResult implements Result {
 	private boolean canReject;
     private boolean canDelete;
     private boolean canRecalculate;
+    private boolean canChangeStatusED;
 
     public boolean isCanRecalculate() {
         return canRecalculate;
@@ -108,6 +109,14 @@ public class GetDeclarationDataResult implements Result {
 	public void setDocDate(Date docDate) {
 		this.docDate = docDate;
 	}
+
+    public boolean isCanChangeStatusED() {
+        return canChangeStatusED;
+    }
+
+    public void setCanChangeStatusED(boolean canChangeStatusED) {
+        this.canChangeStatusED = canChangeStatusED;
+    }
 
     public Integer getReportPeriodYear() {
         return reportPeriodYear;

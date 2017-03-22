@@ -87,6 +87,7 @@
                 <g:Button text="Удалить" ui:field="deleteButton" addStyleNames="{style.marginRight5}"/>
                 <g:Button text="Принять" ui:field="acceptButton" addStyleNames="{style.marginRight5}"/>
                 <g:Button text="Вернуть в Создана" ui:field="cancelButton" addStyleNames="{style.marginRight5}"/>
+                <g:Button text="Изменить Состояние ЭД" ui:field="changeStatusEDButton" addStyleNames="{style.marginRight5}"/>
 
                 <g:ResizeLayoutPanel addStyleNames="{style.table}" ui:field="tableWrapper">
                     <style:GenericDataGrid ui:field="declarationTable" width="100%" height="100%"/>

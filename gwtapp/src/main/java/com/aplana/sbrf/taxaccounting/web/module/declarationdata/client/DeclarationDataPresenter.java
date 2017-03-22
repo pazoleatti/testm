@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.comments.DeclarationDeclarationFilesCommentsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams.SubreportParamsPresenter;
@@ -74,7 +75,9 @@ public class DeclarationDataPresenter
 
 		void showDelete(boolean show);
 
-		void setType(String type);
+        void showChangeStatusEDButton(boolean show);
+
+        void setType(String type);
 
         void setFormKind(String formKype);
 
@@ -139,6 +142,7 @@ public class DeclarationDataPresenter
 	private final HistoryPresenter historyPresenter;
     private final SubreportParamsPresenter subreportParamsPresenter;
     private final DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter;
+    private final ChangeStatusEDPresenter changeStatusEDPresenter;
 	private long declarationId;
     private DeclarationData declarationData;
     private String taxName;
@@ -151,7 +155,8 @@ public class DeclarationDataPresenter
 									final MyProxy proxy, DispatchAsync dispatcher,
 									PlaceManager placeManager, DialogPresenter dialogPresenter,
 									HistoryPresenter historyPresenter, SubreportParamsPresenter subreportParamsPresenter,
-                                    SourcesPresenter sourcesPresenter, DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter) {
+                                    SourcesPresenter sourcesPresenter, DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter,
+                                    ChangeStatusEDPresenter changeStatusEDPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.historyPresenter = historyPresenter;
@@ -160,6 +165,7 @@ public class DeclarationDataPresenter
         this.sourcesPresenter = sourcesPresenter;
         this.subreportParamsPresenter = subreportParamsPresenter;
         this.declarationFilesCommentsPresenter = declarationFilesCommentsPresenter;
+        this.changeStatusEDPresenter = changeStatusEDPresenter;
 		getView().setUiHandlers(this);
 	}
 
@@ -224,13 +230,15 @@ public class DeclarationDataPresenter
                                 }
                                 getView().setCreateUserName(result.getCreationUserName());
                                 getView().setCreateDate(result.getCreationDate());
+
+                                boolean isReports = TaxType.NDFL.equals(taxType) && DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind());
 								getView()
 										.setBackButton(
 												"#"
 														+ DeclarationListNameTokens.DECLARATION_LIST
 														+ ";nType="
 														+ result.getTaxType()
-                                                        + (TaxType.NDFL.equals(taxType) && DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind())?(";"+ DeclarationListPresenter.REPORTS + "=" + true):""), result.getTaxType()
+                                                        + (isReports?(";" + DeclarationListPresenter.REPORTS + "=" + true):""), result.getTaxType()
                                         .getName());
 								getView().setTitle(result.getDeclarationType(), result.getTaxType().equals(TaxType.DEAL));
 								updateTitle(result.getDeclarationType());
@@ -241,6 +249,7 @@ public class DeclarationDataPresenter
 								getView().showReject(result.isCanReject());
 								getView().showDelete(result.isCanDelete());
 								getView().showRecalculateButton(result.isCanRecalculate());
+								getView().showChangeStatusEDButton(result.isCanChangeStatusED());
 
                                 onTimerReport(DeclarationDataReportType.XML_DEC, false);
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);
@@ -654,4 +663,27 @@ public class DeclarationDataPresenter
         addToPopupSlot(declarationFilesCommentsPresenter);
     }
 
+    @Override
+    public void changeStatusED() {
+        changeStatusEDPresenter.init(declarationData.getDocState(), new ChangeStatusEDPresenter.ChangeStatusHandler() {
+            @Override
+            public void setDocState(Long docStateId) {
+                LogCleanEvent.fire(DeclarationDataPresenter.this);
+                ChangeStatusEDDeclarationDataAction action = new ChangeStatusEDDeclarationDataAction();
+                action.setDeclarationId(declarationId);
+                action.setDocStateId(docStateId);
+                dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<ChangeStatusEDDeclarationDataResult>() {
+                            @Override
+                            public void onSuccess(ChangeStatusEDDeclarationDataResult result) {
+                                LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                                changeStatusEDPresenter.hide();
+                                revealPlaceRequest();
+                            }
+                        }, DeclarationDataPresenter.this));
+            }
+        });
+        LogCleanEvent.fire(DeclarationDataPresenter.this);
+        addToPopupSlot(changeStatusEDPresenter);
+    }
 }

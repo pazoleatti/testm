@@ -396,4 +396,12 @@ public interface DeclarationDataService {
      */
     public String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
 
+    /**
+     * Изменение Состояния ЭД
+     * @param logger
+     * @param userInfo
+     * @param declarationDataId
+     * @param docStateId
+     */
+    void changeDocState(Logger logger, TAUserInfo userInfo, long declarationDataId, Long docStateId);
 }

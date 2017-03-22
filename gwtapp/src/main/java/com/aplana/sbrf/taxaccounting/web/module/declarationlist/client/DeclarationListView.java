@@ -97,7 +97,7 @@ public class DeclarationListView extends
 	Panel filterContentPanel;
 
 	@UiField
-    Button checkButton, recalculateButton, deleteButton, acceptButton, cancelButton;
+    Button checkButton, recalculateButton, deleteButton, acceptButton, cancelButton, changeStatusEDButton;
 
 	@UiField
     GenericDataGrid<DeclarationDataSearchResultItem> declarationTable;
@@ -166,10 +166,12 @@ public class DeclarationListView extends
             create.setVisible(false);
             createReports.setVisible(true);
             downloadReports.setVisible(true);
+            changeStatusEDButton.setVisible(true);
         } else {
             create.setVisible(true);
             createReports.setVisible(false);
             downloadReports.setVisible(false);
+            changeStatusEDButton.setVisible(false);
         }
         Style tableStyle = tableWrapper.getElement().getStyle();
         tableStyle.setProperty("top", (isReports) ?
@@ -473,6 +475,11 @@ public class DeclarationListView extends
         getUiHandlers().check();
     }
 
+    @UiHandler("changeStatusEDButton")
+    public void onchangeStatusED(ClickEvent event){
+        getUiHandlers().changeStatusED();
+    }
+
 
     private void updateCheckBoxHeader(boolean value) {
         if (declarationTable.getHeaderBuilder() instanceof TableWithCheckedColumn) {
@@ -664,13 +671,16 @@ public class DeclarationListView extends
         boolean delete = check;
         boolean accept = check;
         boolean cancel = check;
+        boolean changeStatusED = check && getUiHandlers().getIsReports();
         for(DeclarationDataSearchResultItem row: checkedRows) {
             if (State.CREATED.equals(row.getState())) {
                 accept = false;
                 cancel = false;
+                changeStatusED = false;
             }
             if (State.PREPARED.equals(row.getState())) {
                 delete = false;
+                changeStatusED = false;
             }
             if (State.ACCEPTED.equals(row.getState())) {
                 calculate = false;
@@ -683,6 +693,7 @@ public class DeclarationListView extends
         deleteButton.setEnabled(delete);
         acceptButton.setEnabled(accept);
         cancelButton.setEnabled(cancel);
+        changeStatusEDButton.setEnabled(changeStatusED);
     }
 
     @Override
