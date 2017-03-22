@@ -1387,15 +1387,15 @@ void importData() {
 
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
+    if (logger.containsLevel(LogLevel.WARNING)) {
+        // todo https://jira.aplana.com/browse/SBRFNDFL-706
+//        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
+    }
 
     InputStream xmlInputStream = ImportInputStream;
 
     if (xmlInputStream == null) {
         throw new ServiceException("Отсутствует значение параметра ImportInputStream!");
-    }
-
-    if (logger.containsLevel(LogLevel.WARNING)) {
-        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
@@ -3152,7 +3152,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие или отсутствие значения в графе в зависимости от условий",
                         fioAndInp, columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
-//                println(String.format("Ошибка в значении: %s. Текст ошибки: %s."), columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
+//                println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage))
             }
         }
 
@@ -3210,6 +3210,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, "", "№пп (Графа 1)")
         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Отсутствие пропусков и повторений в нумерации строк", "", pathError,
                 MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent)
+//        println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", pathError, MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent))
     }
 
     println "Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)";
