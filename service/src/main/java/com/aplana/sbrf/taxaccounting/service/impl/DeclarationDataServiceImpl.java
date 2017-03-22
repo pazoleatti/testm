@@ -134,6 +134,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private RefBookFactory refBookFactory;
     @Autowired
     private BDUtils bdUtils;
+    @Autowired
+    private DeclarationTypeService declarationTypeService;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -1447,7 +1449,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         switch (reportType) {
             case CREATE_FORMS_DEC:
             case CREATE_REPORTS_DEC:
-                return reportType.getDescription();
+                int declarationTypeId = (Integer)params.get("declarationTypeId");
+                int departmentReportPeriodId = (Integer)params.get("departmentReportPeriodId");
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
+                Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                DeclarationType declarationType = declarationTypeService.get(declarationTypeId);
+                return String.format(reportType.getDescription(),
+                        declarationType.getName(),
+                        departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName(),
+                        departmentReportPeriod.getCorrectionDate() != null
+                                ? " с датой сдачи корректировки " + sdf.get().format(departmentReportPeriod.getCorrectionDate())
+                                : "",
+                        department.getName()
+                );
         }
         throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
     }
