@@ -2438,16 +2438,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         // Общ10 Соответствие КПП и ОКТМО Тербанку
         if (ndflPersonIncome.oktmo != null) {
             def kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
-            if (kppList == null || !kppList.contains(ndflPersonIncome.kpp)) {
+            if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
                 Department department = departmentService.get(declarationData.departmentId)
                 if (kppList == null) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                             "Доход.Источник выплаты.ОКТМО (Графа 8)='${ndflPersonIncome.oktmo ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие КПП и ОКТМО Тербанку", fioAndInp, pathError,
                             "Значение 'Доход.Источник выплаты.ОКТМО (Графа 8)' не найдено в Справочнике '$R_DETAIL' для подразделения '${department ? department.name : ""}'")
-
-                }
-                if (!kppList.contains(ndflPersonIncome.kpp)) {
+                } else {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                             "Доход.Источник выплаты.КПП (Графа 9)='${ndflPersonIncome.kpp ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие КПП и ОКТМО Тербанку", fioAndInp, pathError,
