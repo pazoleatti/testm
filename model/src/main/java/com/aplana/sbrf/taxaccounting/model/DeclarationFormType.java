@@ -10,6 +10,9 @@ public class DeclarationFormType implements Serializable {
 	private static final long serialVersionUID = 1L;
 
     public static final int DECLARATION_TYPE_1151111 = 1;
+    public static final int DECLARATION_TYPE_2NDFL_1 = 3;
+    public static final int DECLARATION_TYPE_2NDFL_2 = 4;
+    public static final int DECLARATION_TYPE_6NDFL = 5;
 
 	private long id;
 	private String name;

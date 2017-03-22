@@ -45,6 +45,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
 	Button checkButton;
 	@UiField
+	Button changeStatusEDButton;
+	@UiField
 	Anchor returnAnchor;
 	@UiField
     LinkButton infoAnchor;
@@ -272,6 +274,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
+    public void showCheck(boolean show) {
+        checkButton.setVisible(show);
+    }
+
+    @Override
 	public void showAccept(boolean show) {
 		acceptButton.setVisible(show);
 	}
@@ -298,7 +305,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		deleteButton.setVisible(show);
 	}
 
-	@Override
+    @Override
+    public void showChangeStatusEDButton(boolean show) {
+        changeStatusEDButton.setVisible(show);
+    }
+
+    @Override
 	public void setType(String type) {
 //		this.formType.setText(type);
 	}
@@ -491,10 +503,15 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		getUiHandlers().delete();
 	}
 
-	@UiHandler("checkButton")
-	public void onCheck(ClickEvent event){
-		getUiHandlers().check(false);
+	@UiHandler("changeStatusEDButton")
+	public void onChangeStatusED(ClickEvent event){
+		getUiHandlers().changeStatusED();
 	}
+
+    @UiHandler("checkButton")
+    public void onCheck(ClickEvent event){
+        getUiHandlers().check(false);
+    }
 
     @UiHandler("viewPdf")
     public void onViewPdfButton(ClickEvent event){

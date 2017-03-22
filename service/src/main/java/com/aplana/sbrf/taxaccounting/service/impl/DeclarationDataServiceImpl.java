@@ -129,8 +129,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private DeclarationDataFileDao declarationDataFileDao;
     @Autowired
-    private ApplicationContext applicationContext;
-    @Autowired
     private TAUserService userService;
     @Autowired
     private RefBookFactory refBookFactory;
@@ -314,6 +312,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         LOG.info(String.format("Проверка данных налоговой формы %s", id));
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CHECK);
         DeclarationData dd = declarationDataDao.get(id);
         Logger scriptLogger = new Logger();
         try {
@@ -1699,6 +1698,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (reportFile != null)
                 reportFile.delete();
         }
+    }
 
+    @Override
+    public void changeDocState(Logger logger, TAUserInfo userInfo, long declarationDataId, Long docStateId) {
+        declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CHANGE_STATUS_ED);
+        DeclarationData declarationData = get(declarationDataId, userInfo);
+        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        additionalParameters.put("docStateId", docStateId);
+        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CHANGE_STATUS_ED, logger, additionalParameters);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
+        }
+        declarationDataDao.setDocStateId(declarationDataId, docStateId);
+        String note;
+        if (docStateId != null) {
+            RefBookDataProvider stateEDProvider = rbFactory.getDataProvider(RefBook.Id.DOC_STATE.getId());
+            note = "Состояние ЭД установлено на \"" +stateEDProvider.getRecordData(docStateId).get("NAME").getStringValue()+"\"";
+        } else {
+            note = "Состояние ЭД удалено";
+        }
+        logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.CHANGE_STATUS_ED, note);
     }
 }

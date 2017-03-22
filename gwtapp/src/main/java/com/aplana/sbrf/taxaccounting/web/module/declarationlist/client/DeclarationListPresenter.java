@@ -11,9 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
@@ -94,8 +92,8 @@ public class DeclarationListPresenter extends
 	public DeclarationListPresenter(EventBus eventBus, DeclarationListPresenterBase.MyView view, MyProxy proxy,
 	                         PlaceManager placeManager, DispatchAsync dispatcher,
 	                         DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter,
-                             DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter);
+                             DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter, ChangeStatusEDPresenter changeStatusEDPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter, changeStatusEDPresenter);
 		getView().setUiHandlers(this);
         History.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
@@ -354,5 +352,34 @@ public class DeclarationListPresenter extends
                         onFind();
                     }
                 }, DeclarationListPresenter.this));
+    }
+
+    @Override
+    public void changeStatusED() {
+        changeStatusEDPresenter.init(null, new ChangeStatusEDPresenter.ChangeStatusHandler() {
+            @Override
+            public void setDocState(Long docStateId) {
+                LogCleanEvent.fire(DeclarationListPresenter.this);
+                ChangeStatusEDDeclarationListAction action = new ChangeStatusEDDeclarationListAction();
+                action.setDeclarationIds(getView().getSelectedIds());
+                action.setDocStateId(docStateId);
+                dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<ChangeStatusEDDeclarationListResult>() {
+                            @Override
+                            public void onSuccess(ChangeStatusEDDeclarationListResult result) {
+                                LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                                changeStatusEDPresenter.hide();
+                                onFind();
+                            }
+                        }, DeclarationListPresenter.this));
+            }
+        });
+        LogCleanEvent.fire(DeclarationListPresenter.this);
+        addToPopupSlot(changeStatusEDPresenter);
+    }
+
+    @Override
+    public Boolean getIsReports() {
+        return isReports;
     }
 }
