@@ -55,7 +55,7 @@ public class GetDeclarationDataHandler
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         }
     };
 
