@@ -5581,6 +5581,7 @@ def checkDataDBSum() {
                 }
                 if (tarif == it) {
                     BigDecimal nachisl428_12Sum_1 = nachisl428_12Sum1Map.get(prOsnSvDop)
+                    def pathAttr428_12 = "Файл.Документ.РасчетСВ.ОбязПлатСВ.РасчСВ_ОПС_ОМС.РасчСВ_ОПС428.РасчСВ_428.1-2.НачислСВДоп"
                     if (!comparNumbEquals(nachisl428_12Sum_1, vyplSvDopMtSum)) {
                         logger.warn("Сумма исчисленных страховых взносов по дополнительному тарифу (пункты 1 и 2 статьи 428) по всем ФЛ не равна суммам $pathAttr428_12" + ".Сум1Посл3М = \"$nachisl428_12Sum_1\"")
                     }

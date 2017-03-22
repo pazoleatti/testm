@@ -67,17 +67,9 @@ switch (formDataEvent) {
 
 /************************************* СОЗДАНИЕ XML *****************************************************************/
 
-// Временная переменная имитирующая номер страницы для разбиения на части количество физических лиц в декларации
-@Field
-int pageNumber = 1
-
 // Количество физических лиц в одном xml-файле
 @Field
 final int NUMBER_OF_PERSONS = 3000
-
-// Список физических лиц для форммирования xml файла
-@Field
-final ndflPersons = []
 
 // Кэш провайдеров
 @Field
@@ -103,10 +95,6 @@ def reportPeriod = null
 @Field
 def reportPeriodEndDate = null
 
-// Кэш Дата окончания отчетного периода
-@Field
-def reportPeriodEndDateCache = [:]
-
 @Field
 def formType = null
 
@@ -115,9 +103,6 @@ final String DATE_FORMAT_FLATTEN = "yyyyMMdd"
 
 @Field
 final String DATE_FORMAT_DOTTED = "dd.MM.yyyy"
-
-@Field
-final String DATE_FORMAT_MONTH = "MM"
 
 @Field
 final int REF_BOOK_NDFL_ID = 950
@@ -159,31 +144,16 @@ final String NDFL_2_S_PRIZNAKOM_1 = "2 НДФЛ (1)"
 final String NDFL_2_S_PRIZNAKOM_2 = "2 НДФЛ (2)"
 
 @Field
-final String NDFL_6 = "6 НДФЛ"
-
-@Field
 final String VERS_FORM = "5.04"
 
 @Field
-final String INN_YUR = "7707083893"
-
-@Field
 final String KND = "1151078"
-
-@Field
-final String PRIZNAK_KODA_VICHETA_STANDARTNIY = "Стандартный"
 
 @Field
 final String PRIZNAK_KODA_VICHETA_IMUSCHESTVENNIY = "Имущественный"
 
 @Field
 final String PRIZNAK_KODA_VICHETA_SOTSIALNIY = "Социальный"
-
-@Field
-final String PRIZNAK_KODA_VICHETA_INVESTITSIONNIY = "Инвестиционный"
-
-@Field
-final String PRIZNAK_KODA_VICHETA_OSTALNIE = "Остальные"
 
 @Field
 final String PART_NUMBER = "partNumber"
@@ -223,10 +193,6 @@ final NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
 
 @Field
 final OKTMO_CACHE = [:]
-
-@Field
-def asnu
-
 
 def buildXml(def writer) {
     buildXml(writer, false)
@@ -630,8 +596,10 @@ def filterIncomes(selectedIncomeRows, def priznakF) {
 
 def findAllIncomes(def ndflPersonId, def startDate, def endDate, priznakF) {
     def toReturn
+    // Временно строки отбираются без учета условия КНФ.Раздел 2.Графа 10 ≠ 0
     if (priznakF == "1") {
-        toReturn = ndflPersonService.findIncomesByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate, Boolean.TRUE)
+        //toReturn = ndflPersonService.findIncomesByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate, Boolean.TRUE)
+        toReturn = ndflPersonService.findIncomesByPeriodAndNdflPersonIdTemp(ndflPersonId, startDate, endDate, Boolean.TRUE)
     } else if (priznakF == "2") {
         toReturn = ndflPersonService.findIncomesByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate, Boolean.FALSE)
     }

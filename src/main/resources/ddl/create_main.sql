@@ -1263,7 +1263,8 @@ create table ndfl_person_prepayment
 );
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
-
+comment on column ndfl_person_prepayment.ndfl_person_id is 'Идентификатор в справочнике физлиц';
+comment on column ndfl_person_prepayment.source_id is 'Cсылка на запись которая является источником при формирование консолидированной формы';
 comment on column ndfl_person_prepayment.row_num is '№пп';
 comment on column ndfl_person_prepayment.operation_id is 'ID операции';
 comment on column ndfl_person_prepayment.summ is 'Сумма фиксированного авансового платежа';

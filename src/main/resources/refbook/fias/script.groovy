@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly
 import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 
 import java.io.*;
 import net.sf.sevenzipjbinding.*;
@@ -83,6 +84,9 @@ void startImport(fiasInputStream, importedElementName, tableName, rowMapper) {
     try {
 
         while (reader.hasNext()) {
+
+            ScriptUtils.checkInterrupted();
+
             XMLEvent event = reader.nextEvent()
 
             //Обрабатываем все элементы импорта
@@ -332,6 +336,9 @@ def buidGuidsMap(fiasInputStream, elementName, attrName) {
     int i = 1;
     try {
         while (reader.hasNext()) {
+
+            ScriptUtils.checkInterrupted();
+
             XMLEvent event = reader.nextEvent()
             if (event.isStartElement() && event.getName().equals(elementName)) {
                 Iterator iterator = event.getAttributes()
