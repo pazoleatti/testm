@@ -55,7 +55,7 @@ public class GetDeclarationDataHandler
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         }
     };
 
@@ -72,10 +72,12 @@ public class GetDeclarationDataHandler
         result.setDeclarationData(declaration);
         result.setDocDate(docDate != null ? docDate : new Date());
 
+        result.setCanCheck(permittedEvents.contains(FormDataEvent.CHECK));
         result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED));
         result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
         result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
         result.setCanRecalculate(permittedEvents.contains(FormDataEvent.CALCULATE));
+        result.setCanChangeStatusED(permittedEvents.contains(FormDataEvent.CHANGE_STATUS_ED));
 
         String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
         if (userLogin != null && !userLogin.isEmpty()) {

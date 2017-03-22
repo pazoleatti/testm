@@ -38,6 +38,7 @@ public enum FormDataEvent implements Serializable {
     CREATE_FORMS(23, "Создание экземпляров форм"), // Вызывается не для экземпляра формы
     CREATE_REPORTS(24, "Сформировать отчетность"), // Вызывается не для экземпляра формы
 
+    CHANGE_STATUS_ED(26, "Изменить состояние ЭД"),
 
     MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),

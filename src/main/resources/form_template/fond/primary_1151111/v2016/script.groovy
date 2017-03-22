@@ -2330,7 +2330,8 @@ void importData() {
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
     if (logger.containsLevel(LogLevel.WARNING)) {
-        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
+        // todo https://jira.aplana.com/browse/SBRFNDFL-706
+//        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     ScriptUtils.checkInterrupted();
@@ -6234,8 +6235,9 @@ def getNumberMonth(def currMonth, def endDate) {
 def checkDataXml() {
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, null)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (logger.containsLevel(LogLevel.WARNING)) {
+        // todo https://jira.aplana.com/browse/SBRFNDFL-706
+//        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     def xmlStream = declarationService.getXmlStream(declarationData.id)

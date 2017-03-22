@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditClientUIModule
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.client.CommonParameterModule;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataModule;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDClientModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.DeclarationVersionListModule;
@@ -102,5 +103,6 @@ public class ClientModule extends AbstractPresenterModule {
         install(new IfrsModule());
         install(new LockModule());
         install(new CommonParameterModule());
+        install(new ChangeStatusEDClientModule());
 	}
 }
