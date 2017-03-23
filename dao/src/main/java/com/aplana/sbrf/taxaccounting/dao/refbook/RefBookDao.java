@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.FormLink;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
@@ -386,21 +385,6 @@ public interface RefBookDao {
      * @param excludeUseCheck идентификаторы справочников, которые игнорируются при проверке использования
      */
     List<String> isVersionUsedInDepartmentConfigs(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck);
-
-    /**
-     * Проверка использования записи в налоговых формах
-     * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds список уникальных идентификаторов записей справочника
-     * @param versionFrom дата начала периода
-     * @param versionTo дата конца периода
-     * @param restrictPeriod
-     *      false - возвращает ссылки-использования, период которых НЕ пересекается с указанным периодом
-     *      true - возвращает ссылки-использования, период которых пересекается с указанным периодом
-     *      null - возвращает все ссылки-использования на указанную запись справочника, без учета периода
-     * @return результаты проверки. Сообщения об ошибках
-     */
-    List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                                  Boolean restrictPeriod);
 
     /**
      * Проверка использования записи в справочниках

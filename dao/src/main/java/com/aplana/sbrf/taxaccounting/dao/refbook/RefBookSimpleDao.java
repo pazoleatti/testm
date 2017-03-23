@@ -32,6 +32,8 @@ public interface RefBookSimpleDao {
     PagingResult<Map<String, RefBookValue>> getRecords(RefBook refBook, Date version, PagingParams pagingParams,
                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
+	PagingResult<Map<String, RefBookValue>> getRecords(RefBook refBook, Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
+
     /**
      * Получает запись по уникальному идентификатору
      * @param refBook справочник

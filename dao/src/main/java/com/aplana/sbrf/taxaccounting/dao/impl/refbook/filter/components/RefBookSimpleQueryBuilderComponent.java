@@ -18,7 +18,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -220,25 +225,46 @@ public class RefBookSimpleQueryBuilderComponent {
      */
     public PreparedStatementData psGetRecordsQuery(RefBook refBook, Long recordId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
                                                    String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId) {
-        PreparedStatementData ps = new PreparedStatementData();
-        if (version != null) {
-            ps.appendQuery(String.format(WITH_STATEMENT, refBook.getTableName(), refBook.getTableName()));
-            ps.addParam(version);
-            ps.addParam(version);
-        } else {
-            if (uniqueRecordId != null) {
-                ps.appendQuery(String.format(sqlRecordVersions(), refBook.getTableName(), refBook.getTableName()));
-                ps.addParam(uniqueRecordId);
-                ps.addParam(VersionedObjectStatus.NORMAL.getId());
-            } else if (recordId != null) {
-                ps.appendQuery(String.format(sqlRecordVersionsByRecordId(), refBook.getTableName(), recordId));
-                ps.addParam(VersionedObjectStatus.NORMAL.getId());
-            } else {
-                ps.appendQuery(String.format(sqlRecordVersionsAll(), refBook.getTableName()));
-                ps.addParam(VersionedObjectStatus.NORMAL.getId());
-            }
-        }
+		PreparedStatementData ps = new PreparedStatementData();
+		if (version != null) {
+			ps.appendQuery(String.format(WITH_STATEMENT, refBook.getTableName(), refBook.getTableName()));
+			ps.addParam(version);
+			ps.addParam(version);
+			return psGetRecordsQuery(refBook, ps, true, sortAttribute, filter, pagingParams, isSortAscending, onlyId);
+		} else {
+			if (uniqueRecordId != null) {
+				ps.appendQuery(String.format(sqlRecordVersions(), refBook.getTableName(), refBook.getTableName()));
+				ps.addParam(uniqueRecordId);
+				ps.addParam(VersionedObjectStatus.NORMAL.getId());
+			} else if (recordId != null) {
+				ps.appendQuery(String.format(sqlRecordVersionsByRecordId(), refBook.getTableName(), recordId));
+				ps.addParam(VersionedObjectStatus.NORMAL.getId());
+			} else {
+				ps.appendQuery(String.format(sqlRecordVersionsAll(), refBook.getTableName()));
+				ps.addParam(VersionedObjectStatus.NORMAL.getId());
+			}
+			return psGetRecordsQuery(refBook, ps, false, sortAttribute, filter, pagingParams, isSortAscending, onlyId);
+		}
+	}
 
+	private static final String WITH_STATEMENT_INTERVAL =
+			"WITH t AS (SELECT r.record_id, r.version, r.status FROM {0} " +
+			"r WHERE r.status >= 0 AND r.version <= ? " +  /* берем записи, которые действуют на дату окончания периода*/
+			"AND NOT exists (SELECT 1 FROM {0} " +  /* отсеиваем записи, которые перестали действовать на дату начала периода*/
+			"s WHERE s.record_id = r.record_id AND s.status IN (-1, 2) AND s.version < ?))";
+	private static final String WITH_STATEMENT2 =
+			"with t as (select version, record_id from {0} r where status = 0 and version <= ?) ";
+	public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+		PreparedStatementData ps = new PreparedStatementData();
+		//ps.appendQuery(MessageFormat.format(WITH_STATEMENT_INTERVAL, refBook.getTableName()));
+		ps.appendQuery(MessageFormat.format(WITH_STATEMENT2, refBook.getTableName()));
+		ps.addParam(versionTo);
+		//ps.addParam(versionFrom);
+		return psGetRecordsQuery(refBook, ps, true, null, filter, pagingParams, false, false);
+	}
+
+	public PreparedStatementData psGetRecordsQuery(RefBook refBook, PreparedStatementData ps, boolean checkVersion, RefBookAttribute sortAttribute,
+												   String filter, PagingParams pagingParams, boolean isSortAscending, boolean onlyId) {
         ps.appendQuery("SELECT * FROM (");
         if (onlyId) {
             ps.appendQuery("SELECT ");
@@ -251,7 +277,7 @@ public class RefBookSimpleQueryBuilderComponent {
         ps.appendQuery("(SELECT frb.id AS ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
 
-        if (version == null) {
+        if (!checkVersion) {
             ps.appendQuery(",  t.version AS ");
             ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
             ps.appendQuery(",");
@@ -302,7 +328,7 @@ public class RefBookSimpleQueryBuilderComponent {
         } else {
             ps.appendQuery(" ORDER BY frb.id");
         }
-        if (version == null) {
+        if (!checkVersion) {
             ps.appendQuery(" , t.version\n");
         }
 
@@ -704,8 +730,8 @@ public class RefBookSimpleQueryBuilderComponent {
         }
         StringBuilder builder = sql.getQuery();
         builder.delete(builder.lastIndexOf(",\n"), builder.length());
-        sql.append("\nWHERE id = ").append(uniqueRecordId);
-
+        sql.append("\nWHERE id = :id");
+		sql.addNamedParam("id", uniqueRecordId);
         return sql;
     }
 

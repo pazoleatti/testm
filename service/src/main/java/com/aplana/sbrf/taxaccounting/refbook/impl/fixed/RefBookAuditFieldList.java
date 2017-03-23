@@ -65,6 +65,11 @@ public class RefBookAuditFieldList extends AbstractPermanentRefBook {
         return records;
     }
 
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, String filter) {
+		throw new UnsupportedOperationException();
+	}
+
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordDataWhere(String where) {
         throw new UnsupportedOperationException();

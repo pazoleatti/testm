@@ -2,18 +2,33 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookLinkModel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
@@ -26,7 +41,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Универсальный провайдер данных
@@ -37,8 +60,12 @@ import java.util.*;
 @Service("refBookUniversal")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
-public class RefBookUniversal extends AbstractRefBookDataProvider {
+public class RefBookUniversal implements RefBookDataProvider {
 
+	@Autowired
+	protected RefBookDao refBookDao;
+	@Autowired
+	protected RefBookFactory refBookFactory;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -109,6 +136,11 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
                                                               String filter, RefBookAttribute sortAttribute) {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
+
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+		return getRecords(versionTo, pagingParams, filter, null);
+	}
 
     @Override
     public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
@@ -829,37 +861,6 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
             used = true;
         }
 
-        //Проверка использования в нф
-        List<FormLink> forms = isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
-        for (FormLink form : forms) {
-            //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
-            //if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
-                //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
-                //formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
-                //        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
-                /*
-                reportService.delete(form.getFormDataId(), null);
-                List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
-                for (ReportType interruptedType : interruptedReportTypes) {
-                    List<String> taskKeyList = new ArrayList<String>();
-                    if (ReportType.CSV.equals(interruptedType) || ReportType.EXCEL.equals(interruptedType)) {
-                        taskKeyList.addAll(formDataService.generateReportKeys(interruptedType, form.getFormDataId(), null));
-                    } else {
-                        taskKeyList.add(formDataService.generateTaskKey(form.getFormDataId(), interruptedType));
-                    }
-                    for(String key: taskKeyList) {
-                        LockData lockData = lockService.getLock(key);
-                        if (lockData != null) {
-                            lockService.interruptTask(lockData, logger.getTaUserInfo().getUser().getId(), true, cause);
-                        }
-                    }
-                }*/
-            //} else {
-                logger.error(form.getMsg());
-                used = true;
-            //}
-        }
-
         //Проверка использования в настройках подразделений
         List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
                 RefBook.WithTable.getTablesIdByRefBook(refBookId) != null ?
@@ -1276,16 +1277,5 @@ public class RefBookUniversal extends AbstractRefBookDataProvider {
             return versionEnd;
         }
         return null;
-    }
-
-    @Override
-    public List<Long> usedInRefBookIds() {
-        if (refBookId == 603L || refBookId == 601L) {
-            return Arrays.asList(604L);
-        }
-        if (refBookId == 15L || refBookId == 17L) {
-            return Arrays.asList(542L);
-        }
-        return new ArrayList<Long>();
     }
 }
