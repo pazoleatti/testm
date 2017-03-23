@@ -1979,6 +1979,20 @@ comment on column declaration_subreport_params.required is 'Признак об�
 ------------------------------------------------------------------------------------------------------------------------------
 -- Таблицы для справочника ФИАС
 --------------------------------------------------------------------------------------------------------------------------
+--Типы адресных объектов
+create table fias_socrbase
+(
+  scname    varchar2(10 char),
+  socrname  varchar2(50 char) not null,
+  kod_t_st  varchar2(4 char) not null,
+  lev       number
+);
+comment on table fias_socrbase  is 'Справочник "Типы адресных объектов"';
+comment on column fias_socrbase.scname  is 'Краткое наименование типа объекта';
+comment on column fias_socrbase.socrname  is 'Полное наименование типа объекта';
+comment on column fias_socrbase.kod_t_st  is 'Ключевое поле';
+comment on column fias_socrbase.lev  is 'Уровень адресного объекта';
+
 -- Сведения
 create table fias_addrobj
 (
