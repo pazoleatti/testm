@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,14 +81,14 @@ public class LogEntryController {
      * @return
      */
     public static String createHeader(String headerMsg) {
-        //"20170317_112234_Журнал_сообщений"
+        //Журнал_сообщений_yyyy-mm-dd_hh-mm-ss.xlsx
         StringBuffer sb = new StringBuffer();
         sb.append("attachment; filename=\"");
-        sb.append(new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
-        sb.append("_Messages.csv");
+        sb.append("Messages_");
+        sb.append(new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
+        sb.append(".csv");
         sb.append("\"");
         return sb.toString();
     }
-
 
 }

@@ -173,7 +173,7 @@ public class RaschsvParseTest extends ScriptTestBase {
         when(kbkProvider.getRecordsCount(any(Date.class), eq("CODE = '10302330010000116'"))).thenReturn(0);
 
         DeclarationService declarationService = mock(DeclarationService.class);
-        Mockito.doThrow(new IllegalArgumentException()).when(declarationService).validateDeclaration(any(DeclarationData.class), any(TAUserInfo.class), any(Logger.class), any(File.class));
+        Mockito.doThrow(new IllegalArgumentException()).when(declarationService).validateDeclaration(any(DeclarationData.class), any(TAUserInfo.class), any(Logger.class), any(File.class), any(String.class));
     }
 
     public void initIdentificatePersonMock() {

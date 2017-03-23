@@ -348,7 +348,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
 
         ArgumentCaptor<DeclarationDataFile> argumentSaveFile = ArgumentCaptor.forClass(DeclarationDataFile.class);
         verify(testHelper.getDeclarationService(), Mockito.times(1)).saveFile(argumentSaveFile.capture());
-        verify(testHelper.getDeclarationService(), Mockito.times(1)).validateDeclaration(any(Logger.class), any(File.class), anyString());
+        verify(testHelper.getDeclarationService(), Mockito.times(1)).validateDeclaration(any(TAUserInfo.class), any(Logger.class), any(File.class), anyString(), anyString());
 
         DeclarationDataFile resultFile = argumentSaveFile.getValue();
         Assert.assertEquals(DECLARATION_DATA_ID.longValue(), resultFile.getDeclarationDataId());
@@ -426,7 +426,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
 
         ArgumentCaptor<DeclarationDataFile> argumentSaveFile = ArgumentCaptor.forClass(DeclarationDataFile.class);
         verify(testHelper.getDeclarationService(), Mockito.times(1)).saveFile(argumentSaveFile.capture());
-        verify(testHelper.getDeclarationService(), Mockito.times(1)).validateDeclaration(any(Logger.class), any(File.class), anyString());
+        verify(testHelper.getDeclarationService(), Mockito.times(1)).validateDeclaration(any(TAUserInfo.class), any(Logger.class), any(File.class), anyString(), anyString());
 
         DeclarationDataFile resultFile = argumentSaveFile.getValue();
         Assert.assertEquals(DECLARATION_DATA_ID.longValue(), resultFile.getDeclarationDataId());

@@ -77,6 +77,7 @@ create index srch_refb_tax_payer_inp_asnu on ref_book_id_tax_payer(as_nu,lower(i
 create index srch_ref_book_person_inn on ref_book_person(replace(inn, ' ', ''));
 create index srch_ref_book_person_inn_f on ref_book_person(replace(inn_foreign, ' ', ''));
 create index srch_full_ref_pers_duble on ref_book_person (replace(lower(nvl(last_name,'empty')),' ',''), replace(lower(nvl(first_name,'empty')),' ',''), replace(lower(nvl(middle_name,'empty')),' ',''), birth_date, replace(replace(nvl(snils,'empty'),' ',''),'-',''), replace(nvl(inn,'empty'),' ',''), replace(nvl(inn_foreign,'empty'),' ',''));
+
 create index srch_fias_addrobj_postcode on fias_addrobj(replace(postalcode,' ',''));
 create index srch_fias_addrobj_regfnls on fias_addrobj(livestatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
 
