@@ -111,7 +111,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
 	@Override
-	public PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+	public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
 		return getRecords(versionTo, pagingParams, filter, null);
 	}
 
