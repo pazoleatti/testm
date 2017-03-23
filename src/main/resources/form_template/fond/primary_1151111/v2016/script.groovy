@@ -5752,17 +5752,17 @@ def checkDataDBSum() {
     // 3.3.4.1 Сумма подлежащая уплате равна исчислено + возмещено - произведено расходов
     if (!comparNumbEquals(uplSvPrevCurr1, ossNachislSvCurr1 + ossVosmRashSoCurr1)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл1Посл3М.Сумма = \"$uplSvPrevCurr1\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум1Посл3М = \"$ossNachislSvCurr1\", " + pathAttrOss + ".ВозмРасхСО.Сум1Посл3М = \"$ossVosmRashSoCurr1\"."
+        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум1Посл3М = \"$ossNachislSvCurr1\" + " + pathAttrOss + ".ВозмРасхСО.Сум1Посл3М = \"$ossVosmRashSoCurr1\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (!comparNumbEquals(uplSvPrevCurr2, ossNachislSvCurr2 + ossVosmRashSoCurr2)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл2Посл3М.Сумма = \"$uplSvPrevCurr2\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум2Посл3М = \"$ossNachislSvCurr2\", " + pathAttrOss + ".ВозмРасхСО.Сум2Посл3М = \"$ossVosmRashSoCurr2\"."
+        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум2Посл3М = \"$ossNachislSvCurr2\" + " + pathAttrOss + ".ВозмРасхСО.Сум2Посл3М = \"$ossVosmRashSoCurr2\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (!comparNumbEquals(uplSvPrevCurr3, ossNachislSvCurr3 + ossVosmRashSoCurr3)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл3Посл3М.Сумма = \"$uplSvPrevCurr3\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум3Посл3М = \"$ossNachislSvCurr3\", " + pathAttrOss + ".ВозмРасхСО.Сум3Посл3М = \"$ossVosmRashSoCurr3\"."
+        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум3Посл3М = \"$ossNachislSvCurr3\" + " + pathAttrOss + ".ВозмРасхСО.Сум3Посл3М = \"$ossVosmRashSoCurr3\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
 
