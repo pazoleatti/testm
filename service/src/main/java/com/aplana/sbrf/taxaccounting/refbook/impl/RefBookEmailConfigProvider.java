@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Service("refBookRefBookEmailConfig")
 @Transactional
-public class RefBookEmailConfigProvider extends AbstractRefBookDataProvider {
+public class RefBookEmailConfigProvider implements RefBookDataProvider {
 
     @Autowired
     RefBookEmailConfigDao dao;
@@ -38,6 +38,11 @@ public class RefBookEmailConfigProvider extends AbstractRefBookDataProvider {
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return dao.getRecords();
     }
+
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+		return getRecords(versionTo, pagingParams, filter, null);
+	}
 
     @Override
     public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {

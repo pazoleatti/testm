@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.gwtplatform.dispatch.shared.Result;
 
 import java.io.Serializable;
 
-public class TimerReportResult implements Result {
+public class TimerReportResult extends DeclarationDataResult {
     private static final long serialVersionUID = 7859961980147513071L;
 
     public static final Status STATUS_LOCKED = new Status(StatusReport.LOCKED);

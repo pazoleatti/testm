@@ -72,6 +72,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                 .defaultCallback(new AbstractCallback<GetSubreportResult>() {
                     @Override
                     public void onSuccess(GetSubreportResult result) {
+                        if (!declarationDataPresenter.checkExistDeclarationData(result)) return;
                         selectRecord = declarationSubreport.isSelectRecord();
                         getView().setSubreport(declarationSubreport, result.getRefBookParamInfoMap(), result.getStartDate(), result.getEndDate());
                     }
@@ -96,6 +97,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                     .defaultCallback(new AbstractCallback<PrepareSubreportResult>() {
                         @Override
                         public void onSuccess(PrepareSubreportResult result) {
+                            if (!declarationDataPresenter.checkExistDeclarationData(result)) return;
                             LogCleanEvent.fire(SubreportParamsPresenter.this);
                             LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
                             if (result.getPrepareSpecificReportResult() == null) {
@@ -149,6 +151,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                     .defaultCallback(new AbstractCallback<CreateReportResult>() {
                         @Override
                         public void onSuccess(CreateReportResult result) {
+                            if (!declarationDataPresenter.checkExistDeclarationData(result)) return;
                             LogCleanEvent.fire(SubreportParamsPresenter.this);
                             LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
                             if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {

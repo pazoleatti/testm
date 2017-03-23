@@ -3,9 +3,12 @@ package com.aplana.sbrf.taxaccounting.service.script;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormLink;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -103,37 +106,6 @@ public interface RefBookService {
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
      */
     void deleteRecordVersions(String tableName, List<Long> uniqueRecordIds);
-
-    /**
-     * Проверка использования записи в налоговых формах
-     * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds список уникальных идентификаторов записей справочника
-     * @param versionFrom дата начала периода
-     * @param versionTo дата конца периода
-     * @param restrictPeriod
-     *      false - возвращает ссылки-использования, период которых НЕ пересекается с указанным периодом
-     *      true - возвращает ссылки-использования, период которых пересекается с указанным периодом
-     *      null - возвращает все ссылки-использования на указанную запись справочника, без учета периода
-     * @return результаты проверки. Сообщения об ошибках
-     */
-    List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                        Boolean restrictPeriod);
-
-    /**
-     * Проверка использования записи в справочниках
-     * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds список уникальных идентификаторов записей справочника
-     * @param versionFrom дата начала периода
-     * @param versionTo дата конца периода
-     * @param restrictPeriod
-     *      false - возвращает ссылки-использования, период которых НЕ пересекается с указанным периодом
-     *      true - возвращает ссылки-использования, период которых пересекается с указанным периодом
-     *      null - возвращает все ссылки-использования на указанную запись справочника, без учета периода
-     * @param excludeUseCheck идентификаторы справочников, которые игнорируются при проверке использования
-     * @return результаты проверки. Сообщения об ошибках
-     */
-    List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                         Boolean restrictPeriod, List<Long> excludeUseCheck);
 
     /**
      * Проверяет есть ли ссылки на запись справочника в настройках подразделений

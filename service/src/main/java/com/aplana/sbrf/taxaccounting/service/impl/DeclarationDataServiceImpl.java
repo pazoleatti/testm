@@ -1246,6 +1246,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (ddReportType == null)
             return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
                     "налоговая форма",
+                    declarationId,
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriod.getCorrectionDate() != null
                             ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1731,5 +1732,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             note = "Состояние ЭД удалено";
         }
         logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.CHANGE_STATUS_ED, note);
+    }
+
+    @Override
+    public boolean existDeclarationData(long declarationDataId) {
+        return declarationDataDao.existDeclarationData(declarationDataId);
     }
 }

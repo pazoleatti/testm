@@ -3,8 +3,14 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.FormLink;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -23,10 +29,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @Ignore("Включать только локально, со включенным тестом не коммитить!")
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -484,77 +499,6 @@ public class RefBookOracleTest {
         assertTrue(result.contains("В настройке подразделения \"Волго-Вятский банк\" для налога \"Учет контролируемых сделок\" в периоде \"первый квартал 2016\" указана ссылка на версию!"));
         assertTrue(result.contains("В настройке подразделения \"Среднерусский банк\" для налога \"Учет контролируемых сделок\" в периоде \"первый квартал 2015\" указана ссылка на версию!"));
         assertTrue(result.contains("В настройке подразделения \"Среднерусский банк\" для налога \"Учет контролируемых сделок\" в периоде \"первый квартал 2016\" указана ссылка на версию!"));
-    }
-
-    @Test
-    public void isVersionUsedInFormsTest() {
-
-        /********************* Пересекается ***********************/
-
-        List<FormLink> result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2013), getDate(1, 1, 2014), true);
-        assertEquals(0, result.size());
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2013), getDate(1, 1, 2015), true);
-        assertEquals(1, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2015\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2016), getDate(1, 3, 2016), true);
-        assertEquals(0, result.size());
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2017), null, true);
-        assertEquals(1, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2017\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2016), null, true);
-        assertEquals(1, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2017\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2012), null, true);
-        assertEquals(2, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2017\"."));
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2015\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2018), null, true);
-        assertEquals(0, result.size());
-
-        /********************* Не пересекается ***********************/
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2013), getDate(1, 1, 2014), false);
-        assertEquals(2, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2017\"."));
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2015\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2013), getDate(1, 1, 2015), false);
-        assertEquals(1, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2017\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2016), getDate(1, 3, 2016), false);
-        assertEquals(2, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2017\"."));
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2015\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2017), null, false);
-        assertEquals(1, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2015\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2016), null, false);
-        assertEquals(1, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2015\"."));
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2012), null, false);
-        assertEquals(0, result.size());
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2018), null, false);
-        assertEquals(2, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2017\"."));
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2015\"."));
-
-        /********************* Вообще все независимо от периода ***********************/
-
-        result = refBookDao.isVersionUsedInForms(35L, Arrays.asList(32L), getDate(1, 1, 2018), null, null);
-        assertEquals(2, result.size());
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2017\"."));
-        assertTrue(findForm(result, "Существует экземпляр  формы, который содержит ссылку на запись! Тип: \"Первичная\", Вид: \"(РНУ-4) Простой регистр налогового учета \"доходы\"\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2015\"."));
     }
 
     @Test

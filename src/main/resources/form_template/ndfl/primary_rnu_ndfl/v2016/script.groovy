@@ -437,9 +437,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
         inTime = System.currentTimeMillis();
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
-        if (msgCnt <= maxMsgCnt){
-            logger.info("Идентификация (" + calcTimeMillis(inTime));
-        }
 
         conformityMap.put(primaryPersonId, refBookPerson);
 
@@ -2087,6 +2084,7 @@ def getRefIncomeCode() {
     def refBookMap = getRefBook(REF_BOOK_INCOME_CODE_ID)
     refBookMap.each { refBook ->
         mapResult.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+//        logger.info("getRefIncomeCode ${refBook?.id?.numberValue} ${refBook?.CODE?.stringValue}")
     }
     return mapResult;
 }
@@ -2097,15 +2095,16 @@ def getRefIncomeCode() {
  */
 def getRefIncomeType() {
     // Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
-    def mapResult = [:]
+    Map<String, List<Long>> mapResult = [:]
     def refBookList = getRefBook(REF_BOOK_INCOME_KIND_ID)
     refBookList.each { refBook ->
         String mark = refBook?.MARK?.stringValue
-        List<String> incomeTypeIdList = mapResult.get(mark)
+        List<Long> incomeTypeIdList = mapResult.get(mark)
         if (incomeTypeIdList == null) {
             incomeTypeIdList = []
         }
         incomeTypeIdList.add(refBook?.INCOME_TYPE_ID?.referenceValue)
+//        logger.info("getRefIncomeType $mark ${refBook?.INCOME_TYPE_ID?.referenceValue}")
         mapResult.put(mark, incomeTypeIdList)
     }
     return mapResult
@@ -2221,7 +2220,7 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
  */
 def getRefBook(def long refBookId) {
     // Передаем как аргумент только срок действия версии справочника
-    def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, null, null)
+    def refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
 
     if (refBookList == null || refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
@@ -2237,7 +2236,7 @@ def getRefBook(def long refBookId) {
  */
 List<Map<String, RefBookValue>> getRefBookByFilter(def long refBookId, def filter) {
     // Передаем как аргумент только срок действия версии справочника
-    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, filter)
     return refBookList
 }
 

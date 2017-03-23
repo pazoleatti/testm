@@ -12,7 +12,7 @@
             <fm:HeaderContainer>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label text="Загрузка транспортных файлов"/>
+                        <g:Label text="Загрузка файлов"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>

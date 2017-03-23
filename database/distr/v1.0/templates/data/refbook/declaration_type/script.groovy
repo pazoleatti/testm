@@ -252,13 +252,14 @@ def importPrimary1151111() {
         return
     }
 
-    if (results.size() > 1) {
-        def departmentIds = results*.DEPARTMENT_ID*.getReferenceValue()*.intValue()
-        def departmentsMap = departmentService.getDepartments(departmentIds)
-        def joinName = departmentsMap.values()*.getName().join(', ')
-        logger.error("Файл «%s» не загружен: Найдено несколько подразделений, для которого указан КПП \"%s\": \"%s\"", UploadFileName, kpp, joinName)
-        return
-    }
+    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-722
+//    if (results.size() > 1) {
+//        def departmentIds = results*.DEPARTMENT_ID*.getReferenceValue()*.intValue()
+//        def departmentsMap = departmentService.getDepartments(departmentIds)
+//        def joinName = departmentsMap.values()*.getName().join(', ')
+//        logger.error("Файл «%s» не загружен: Найдено несколько подразделений, для которого указан КПП \"%s\": \"%s\"", UploadFileName, kpp, joinName)
+//        return
+//    }
     def departmentId = results.get(0).DEPARTMENT_ID.getReferenceValue().intValue()
     def departmentName = departmentService.get(departmentId)
 
@@ -447,7 +448,7 @@ def importAnswer1151111() {
             logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
             return
         }
-        declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
         if (logger.containsLevel(LogLevel.ERROR)) {
             return
         }
@@ -986,7 +987,7 @@ def importNdflResponse() {
             return
         }
 
-        declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             return

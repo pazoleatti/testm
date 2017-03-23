@@ -13,10 +13,18 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -29,7 +37,13 @@ import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -41,6 +55,8 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
  */
 @Repository
 public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDao {
+
+	private static final Log LOG = LogFactory.getLog(RefBookSimpleDaoImpl.class);
 
     @Autowired
     private RefBookDao refBookDao;
@@ -65,14 +81,33 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     public PagingResult<Map<String, RefBookValue>> getRecords(RefBook refBook, Date version, PagingParams pagingParams,
                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, pagingParams, isSortAscending, false);
-
         List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
 
-        ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, null, isSortAscending, false);
-        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        result.setTotalCount(refBookDao.getRecordsCount(ps));
+		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+		if (pagingParams != null) {
+			ps = queryBuilder.psGetRecordsQuery(refBook, null, null, version, sortAttribute, filter, null, isSortAscending, false);
+			result.setTotalCount(refBookDao.getRecordsCount(ps));
+		} else {
+			result.setTotalCount(records.size());
+		}
         return result;
     }
+
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getRecords(RefBook refBook, Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+		PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, pagingParams, filter);
+		LOG.debug(ps.getQuery().toString());
+		List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
+
+		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+		if (pagingParams != null) {
+			ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, null, filter);
+			result.setTotalCount(refBookDao.getRecordsCount(ps));
+		} else {
+			result.setTotalCount(records.size());
+		}
+		return result;
+	}
 
     /**
      * Получает запись по уникальному идентификатору
@@ -250,7 +285,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      * Возвращает информацию по версии записи справочника
      *
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
-     * @return версия
+     * @return информация о периоде действия версии справочника
      */
     @Override
     public RefBookRecordVersion getRecordVersionInfo(RefBook refBook, Long uniqueRecordId) {
@@ -802,17 +837,15 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      * Обновляет значения атрибутов у указанной версии
      * @param refBook справочник
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
-     * @param records список значений атрибутов
+     * @param record список значений атрибутов
      */
     @Override
-    public void updateRecordVersion(RefBook refBook, Long uniqueRecordId, Map<String, RefBookValue> records) {
+    public void updateRecordVersion(RefBook refBook, Long uniqueRecordId, Map<String, RefBookValue> record) {
         try {
-            if (records.isEmpty()) {
+            if (record.isEmpty()) {
                 return;
             }
-
-            PreparedStatementData ps = queryBuilder.psUpdateRecordVersion(refBook, uniqueRecordId, records);
-
+            PreparedStatementData ps = queryBuilder.psUpdateRecordVersion(refBook, uniqueRecordId, record);
             getNamedParameterJdbcTemplate().update(ps.getQueryString(), ps.getNamedParams());
         } catch (Exception ex) {
             throw new DaoException("Не удалось обновить значения справочника", ex);

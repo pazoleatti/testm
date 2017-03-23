@@ -22,7 +22,7 @@ public class NumericColumn extends Column implements Serializable {
 	public static final int MAX_PRECISION = 19;
 
 	/**
-	 * Максимально допустимое колличество значений для числового столбца
+	 * Максимально допустимое количество значений для числового столбца
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
 	 */
 	public static final int MAX_LENGTH = 38;
@@ -38,7 +38,7 @@ public class NumericColumn extends Column implements Serializable {
 	}
 
 	/**
-	 * Задает точность столбца, т.е. колличество знаков справа от запятой. Аналогично положительным {@link BigDecimal}
+	 * Задает точность столбца, т.е. количество знаков справа от запятой. Аналогично положительным {@link BigDecimal}
 	 *
 	 * @return возвращает точность
 	 */

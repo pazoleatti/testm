@@ -36,7 +36,7 @@ import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
  */
 @Service("refBookDepartment")
 @Transactional
-public class RefBookDepartment extends AbstractRefBookDataProvider {
+public class RefBookDepartment implements RefBookDataProvider {
 
     private static final String FILTER_BY_DEPARTMENT = "DEPARTMENT_ID = %d";
 
@@ -109,6 +109,11 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
+
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+		return getRecords(versionTo, pagingParams, filter, null);
+	}
 
     @Override
     public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
@@ -582,11 +587,6 @@ public class RefBookDepartment extends AbstractRefBookDataProvider {
         //Проверка использования в нф
         RefBook refBook = refBookDao.getByAttribute(refBookAttribute.getId());
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
-        List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), Arrays.asList(referenceId), new Date(100, 0, 1), null, null);
-        for (FormLink form : forms) {
-            logger.error(form.getMsg());
-            used = true;
-        }
         List<RefBookAttribute> attributeList = refBookDao.getAttributesByReferenceId(refBookAttribute.getRefBookId());
         for(RefBookAttribute referenceRefBookAttribute: attributeList) {
             RefBook refBookReference = refBookDao.getByAttribute(referenceRefBookAttribute.getId());

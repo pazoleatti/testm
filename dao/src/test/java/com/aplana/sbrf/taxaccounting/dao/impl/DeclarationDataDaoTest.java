@@ -44,7 +44,9 @@ public class DeclarationDataDaoTest {
 	
 	@Test
 	public void testGet() {
-		DeclarationData d1 = declarationDataDao.get(1);
+        assertTrue(declarationDataDao.existDeclarationData(1));
+
+        DeclarationData d1 = declarationDataDao.get(1);
 		assertEquals(1, d1.getId().intValue());
 		assertEquals(1, d1.getDeclarationTemplateId());
         assertEquals(102, d1.getDepartmentReportPeriodId().intValue());
@@ -86,7 +88,12 @@ public class DeclarationDataDaoTest {
 		declarationDataDao.get(1000l);
 	}
 
-	@Test
+    @Test
+    public void testGetDataNotExisted2() {
+        assertFalse(declarationDataDao.existDeclarationData(1000l));
+    }
+
+    @Test
 	public void testSetAccepted() {
 		declarationDataDao.setStatus(3l, State.CREATED);
 		DeclarationData d3 = declarationDataDao.get(3l);

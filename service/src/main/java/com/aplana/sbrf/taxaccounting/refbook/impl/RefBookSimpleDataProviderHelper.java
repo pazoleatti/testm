@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookSimpleDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.FormLink;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -51,8 +50,6 @@ public class RefBookSimpleDataProviderHelper {
         }
     };
 
-    @Autowired
-    private RefBookSimpleDataProvider provider;
     @Autowired
     private RefBookFactory rbFactory;
     @Autowired
@@ -284,7 +281,7 @@ public class RefBookSimpleDataProviderHelper {
                 }
 
                 //Ищем все ссылки на запись справочника в новом периоде
-                checkUsages(refBook, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, logger, CROSS_ERROR_MSG);
+                //Deprecated: checkUsages(refBook, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, logger, CROSS_ERROR_MSG);
                 if (logger != null) {
                     logger.info("Установлена дата окончания актуальности версии " + formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1)) + " для предыдущей версии");
                 }
@@ -317,9 +314,10 @@ public class RefBookSimpleDataProviderHelper {
         }
     }
 
+	@Deprecated // пока нет ни иерархичных справочников, ни использования универсальной структуры
     void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
         //Проверка использования
-        if (refBook.isHierarchic()) {
+        /*if (refBook.isHierarchic()) {
             //Поиск среди дочерних элементов
             for (Long uniqueRecordId : uniqueRecordIds) {
                 List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBook.getId(), uniqueRecordId, versionFrom);
@@ -337,28 +335,30 @@ public class RefBookSimpleDataProviderHelper {
                     throw new ServiceException(errorMsg);
                 }
             }
-        }
+        }*/
 
-        boolean used = false;
+        //boolean used = false;
 
-        //Проверка использования в справочниках
-        List<String> refBooks = refBookDao.isVersionUsedInRefBooks(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
+		// 2017-03-17 неактуально, так как проверяются только справочники в универсальной структуре хранения
+		//Проверка использования в справочниках
+		/*List<String> refBooks = refBookDao.isVersionUsedInRefBooks(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
                 RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
                         Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
         for (String refBookMsg : refBooks) {
             logger.error(refBookMsg);
             used = true;
-        }
+        }*/
 
+		// 2017-03-17 неактуально, так как таблица FORM_DATA у нас не используется
         //Проверка использования в нф
-        List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
+        /*List<FormLink> forms = provider.isVersionUsedInForms(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
         for (FormLink form : forms) {
             //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
             //if (refBook.getId() == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
                 //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
                 //formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo(),
                 //        TaskInterruptCause.REFBOOK_RECORD_MODIFY.setArgs(refBook.getName()));
-                /*
+                *//*
                 reportService.delete(form.getFormDataId(), null);
                 List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
                 for (ReportType interruptedType : interruptedReportTypes) {
@@ -374,15 +374,16 @@ public class RefBookSimpleDataProviderHelper {
                             lockService.interruptTask(lockData, logger.getTaUserInfo().getUser().getId(), true, cause);
                         }
                     }
-                }*/
+                }*//*
             //} else {
                 logger.error(form.getMsg());
                 used = true;
             //}
-        }
+        }*/
 
+		// 2017-03-17 неактуально, запрос обращается к универсальной структуре
         //Проверка использования в настройках подразделений
-        List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
+        /*List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBook.getId(), uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
                 RefBook.WithTable.getTablesIdByRefBook(refBook.getId()) != null ?
                         Arrays.asList(RefBook.WithTable.getTablesIdByRefBook(refBook.getId())) : null);
         for (String configMsg : configs) {
@@ -392,7 +393,7 @@ public class RefBookSimpleDataProviderHelper {
 
         if (used) {
             throw new ServiceException(errorMsg);
-        }
+        }*/
     }
 
     List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
