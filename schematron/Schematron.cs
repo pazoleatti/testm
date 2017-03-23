@@ -33,7 +33,7 @@ class Schematron {
 			}
 			string xmlFleName = args[0];
 			string xsdFleName = args[1];
-			string xmlTargetFileName = args.Length == 2 ? xmlFleName : args[2] + ".xml";
+			string xmlTargetFileName = args.Length == 2 ? xmlFleName : args[2];
 
 			FileStream pXml = new FileStream(xmlFleName, FileMode.Open, FileAccess.Read);
 			XmlSchemaSet pXsd = new System.Xml.Schema.XmlSchemaSet();

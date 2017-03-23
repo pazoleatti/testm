@@ -18,6 +18,7 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.win32.W32APIOptions;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,28 +115,23 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     }
 
     @Override
-    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String xsdBlobDataId) {
-		return validate(data, userInfo, logger, isErrorFatal, xmlFile, xsdBlobDataId, VALIDATION_TIMEOUT);
+    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId) {
+		return validate(data, userInfo, logger, isErrorFatal, xmlFile, fileName, xsdBlobDataId, VALIDATION_TIMEOUT);
 	}
 
-	@Override
-    public boolean validate(Logger logger, File xmlFile, String xsdBlobDataId, boolean isErrorFatal) {
-        return isValid(logger, isErrorFatal, xmlFile, xsdBlobDataId, VALIDATION_TIMEOUT);
-    }
-
-	boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String xsdBlobDataId, long timeout) {
+	boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
         if (xsdBlobDataId == null) {
             xsdBlobDataId = declarationTemplateService.get(data.getDeclarationTemplateId()).getXsdId();
         }
         if (xmlFile != null){
-            return isValid(logger, isErrorFatal, xmlFile, xsdBlobDataId, timeout);
+            return isValid(logger, isErrorFatal, xmlFile, fileName, xsdBlobDataId, timeout);
         } else {
-            return isValid(data, userInfo, logger, isErrorFatal, xsdBlobDataId, timeout);
+            return isValid(data, userInfo, logger, isErrorFatal, fileName, xsdBlobDataId, timeout);
         }
     }
 
-    boolean isValid(Logger logger, boolean isErrorFatal, File xmlFile, String xsdBlobDataId, long timeout) {
-        String[] params = new String[3];
+    boolean isValid(Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
+        String[] params = new String[StringUtils.isNotBlank(fileName)?4:3];
 
         FileOutputStream outputStream;
         InputStream inputStream;
@@ -165,6 +161,10 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 				outputStream.close();
 			}
             params[2] = xsdFile.getAbsolutePath();
+
+            if (StringUtils.isNotBlank(fileName)) {
+                params[3] = fileName;
+            }
 
             ProcessRunner runner = new ProcessRunner(params, logger, isErrorFatal);
             Thread threadRunner = new Thread(runner);
@@ -215,16 +215,16 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
     }
 
-    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, String xsdBlobDataId, long timeout) {
+    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, String fileName, String xsdBlobDataId, long timeout) {
         BlobData xmlBlob = blobDataService.get(reportService.getDec(userInfo, data.getId(), DeclarationDataReportType.XML_DEC));
         File xmlFileBD = null;
         try {
-            String fileName = xmlBlob.getName().substring(0, xmlBlob.getName().lastIndexOf('.'));
-            xmlFileBD = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, fileName, "xml"));
+            String xmlFileName = xmlBlob.getName().substring(0, xmlBlob.getName().lastIndexOf('.'));
+            xmlFileBD = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, xmlFileName, "xml"));
             FileOutputStream outputStream = new FileOutputStream(xmlFileBD);
             InputStream inputStream = xmlBlob.getInputStream();
             unzip(outputStream, inputStream);
-            return isValid(logger, isErrorFatal, xmlFileBD, xsdBlobDataId, timeout);
+            return isValid(logger, isErrorFatal, xmlFileBD, fileName, xsdBlobDataId, timeout);
         } catch (IOException e) {
             LOG.error("", e);
             throw new ServiceException("", e);

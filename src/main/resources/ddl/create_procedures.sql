@@ -1498,7 +1498,7 @@ end person_pkg;
 show errors;
 
 create or replace package fias_pkg
-/* Пакет для работы со справочником ФИАС */
+-- Пакет для поиска адресов в справочнике ФИАС
 as
   
   cursor fias_addrs(c_region varchar2,c_area varchar2,c_city varchar2,c_locality varchar2,c_street varchar2,
@@ -1560,30 +1560,68 @@ as
     city ndfl_person.city%type,
     locality ndfl_person.locality%type,
     street ndfl_person.street%type,
-    ndfl_full_addr varchar2(2000 char),
-    area_type varchar2(10 char),
-    area_fname varchar2(200 char),
-    city_type varchar2(10 char),
-    city_fname varchar2(200 char),
-    loc_type varchar2(10 char),
-    loc_fname varchar2(200 char),
-    street_type varchar2(10 char),
-    street_fname varchar2(200 char),
-    fias_id fias_addrobj.id%type,
-    fias_index fias_addrobj.postalcode%type,
-    fias_street  fias_addrobj.formalname%type,
+    ndfl_full_addr    varchar2(2000 char),
+    area_type         varchar2(10 char),
+    area_fname        varchar2(200 char),
+    city_type         varchar2(10 char),
+    city_fname        varchar2(200 char),
+    loc_type          varchar2(10 char),
+    loc_fname         varchar2(200 char),
+    street_type       varchar2(10 char),
+    street_fname      varchar2(200 char),
+    fias_id           fias_addrobj.id%type,
+    fias_index        fias_addrobj.postalcode%type,
+    fias_street       fias_addrobj.formalname%type,
     fias_street_type  fias_addrobj.shortname%type,
-    fias_city_id  fias_addrobj.id%type,
-    fias_city_name  fias_addrobj.formalname%type
+    fias_city_id      fias_addrobj.id%type,
+    fias_city_name    fias_addrobj.formalname%type
   );
+
+  type TCheckExistsAddrByFias is record
+  (
+    id              ndfl_person.id%type,
+    post_index      ndfl_person.post_index%type,
+    region_code     ndfl_person.region_code%type,
+    area            ndfl_person.area%type,
+    city            ndfl_person.city%type,
+    locality        ndfl_person.locality%type,
+    street          ndfl_person.street%type,
+    ndfl_full_addr  varchar2(2000 char),
+    area_type       varchar2(10 char),
+    area_fname      varchar2(200 char),
+    city_type       varchar2(10 char),
+    city_fname      varchar2(200 char),
+    loc_type        varchar2(10 char),
+    loc_fname       varchar2(200 char),
+    street_type     varchar2(10 char),
+    street_fname    varchar2(200 char),
+    chk_index       number,
+    chk_region      number,
+    chk_area        number,
+    chk_city        number,
+    chk_loc         number,
+    chk_street      number
+  );
+
   type TTblFiasAddr is table of fias_addrs%rowtype;
   type TTblCheckAddrByFias is table of TCheckAddrByFias;
+  type TTblCheckExistsAddrByFias is table of TCheckExistsAddrByFias;
   
+  -- Получить все подходящие адреса из ФИАС
   function GetFiasAddrs(p_region varchar2,p_area varchar2,p_city varchar2,p_locality varchar2,p_street varchar2,
                         p_area_type varchar2,p_city_type varchar2,p_locality_type varchar2,p_street_type varchar2,
                         p_post_index varchar2) return TTblFiasAddr pipelined;
   
+  -- Проверить существование элемента адреса с учетом родительского элемента
+  function CheckAddrElement(p_region varchar2,p_check_element varchar2,p_parent_element varchar2,p_check_type varchar2 default '') return number;
+  
+  -- Выполнить проверку на полное совпадение с ФИАС адресов, указанных в декларации
+  -- возвращается курсор на таблицу типа TTblCheckAddrByFias
   function CheckAddrByFias(p_declaration number) return ref_cursor;
+
+  -- Выполнить проверку на наличие/отсутствие в ФИАС элементов адресов, указанных в декларации
+  -- возвращается курсор на таблицу типа TTblCheckExistsAddrByFias
+  function CheckExistsAddrByFias(p_declaration number) return ref_cursor;
   
 end fias_pkg;
 /
@@ -1634,6 +1672,9 @@ create or replace package body fias_pkg as
      where n.id=c_ndfl;
 
                  
+  -------------------------------------------------------------------------------------------------------------
+  -- Получить все подходящие адреса из ФИАС
+  -------------------------------------------------------------------------------------------------------------
   function GetFiasAddrs(p_region varchar2,p_area varchar2,p_city varchar2,p_locality varchar2,p_street varchar2,
                         p_area_type varchar2,p_city_type varchar2,p_locality_type varchar2,p_street_type varchar2,
                         p_post_index varchar2) return TTblFiasAddr pipelined 
@@ -1657,6 +1698,34 @@ create or replace package body fias_pkg as
     end if;
    end GetFiasAddrs;
 
+  -------------------------------------------------------------------------------------------------------------
+  -- Проверить существование элемента адреса с учетом родительского элемента
+  -------------------------------------------------------------------------------------------------------------
+  function CheckAddrElement(p_region varchar2,p_check_element varchar2,p_parent_element varchar2,p_check_type varchar2 default '') return number
+  is
+    v_result number;
+  begin
+    select decode(count(*),0,0,1) into v_result
+      from (
+            select c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
+                   substr(sys_connect_by_path(formalname,';'),2) full_addr
+              from (select * from fias_addrobj t
+                    where t.regioncode=p_region
+                      and t.livestatus=1
+                   ) c
+             start with c.parentguid is null 
+           connect by prior c.aoid=c.parentguid
+           ) f 
+     where replace(lower(f.formalname),' ','')=replace(lower(p_check_element),' ','')
+       and instr(full_addr,p_parent_element)>0;
+    
+    return v_result;
+  end;
+
+  -------------------------------------------------------------------------------------------------------------
+  -- Выполнить проверку на полное совпадение с ФИАС адресов, указанных в декларации
+  -- возвращается курсор на таблицу типа TTblCheckAddrByFias
+  -------------------------------------------------------------------------------------------------------------
   function CheckAddrByFias(p_declaration number) return ref_cursor
   is
     v_ref ref_cursor;
@@ -1674,7 +1743,7 @@ create or replace package body fias_pkg as
               select tab.*,
                      nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||
                      nvl2(tab.loc_fname,tab.loc_fname||',','')||nvl2(tab.street_fname,tab.street_fname||',','') ndfl_full_addr,
-                     (select min(id) id
+                     (select min(id)
                         from table(fias_pkg.GetFiasAddrs(tab.region_code,trim(lower(tab.area_fname)),trim(lower(tab.city_fname)),trim(lower(tab.loc_fname)),trim(lower(tab.street_fname)),
                                                          trim(lower(tab.area_type)),trim(lower(tab.city_type)),trim(lower(tab.loc_type)),trim(lower(tab.street_type)),tab.post_index)) f
                        where lower(f.full_addr||',')=lower(nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||
@@ -1684,37 +1753,73 @@ create or replace package body fias_pkg as
                       select n.id,
                              n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
                              case when instr(lower(n.area)||' ','р-н. ')>0 then substr(n.area||' ',instr(lower(n.area)||' ','р-н. '),4)
+                                  when instr(lower(n.area)||' ','р-н ')>0 then substr(n.area||' ',instr(lower(n.area)||' ','р-н '),3)
                                   else ''
                              end area_type,
                              case when instr(lower(n.area),' р-н.')>0 then trim(substr(n.area,1,instr(lower(n.area),'р-н.')-1))
+                                  when instr(lower(n.area),' р-н')>0 then trim(substr(n.area,1,instr(lower(n.area),'р-н')-1))
                                   else n.area
                              end area_fname,
                              case when instr(lower(n.city)||' ','г ')>0 then substr(n.city||' ',instr(lower(n.city)||' ','г '),2) 
                                   when instr(lower(n.city)||' ','тер. ')>0 then substr(n.city||' ',instr(lower(n.city)||' ','тер. '),4)
+                                  when n.city is null and n.region_code='77' then 'г'
+                                  when n.city is null and n.region_code='78' then 'г'
+                                  when n.city is null and n.region_code='92' then 'г'
+                                  when n.city is null and n.region_code='99' then 'г'
                                   else ''
                              end city_type,
-                             case when instr(lower(n.city),'г ')>0 then trim(substr(n.city,instr(lower(n.city),'г '),length(n.city)-2))
-                                  when instr(lower(n.city),' г')>0 then trim(substr(n.city,1,instr(lower(n.city),' г')-1))
+                             case when instr(lower(n.city),' г')>0 then trim(substr(n.city,1,instr(lower(n.city),' г')-1))
+                                  when instr(lower(n.city),'г ')>0 then trim(substr(n.city,instr(lower(n.city),'г '),length(n.city)-2))
                                   when instr(lower(n.city),'тер. ')>0 then trim(substr(n.city,instr(lower(n.city),'тер. ')+4))
+                                  when n.city is null and n.region_code='77' then 'Москва'
+                                  when n.city is null and n.region_code='78' then 'Санкт-Петербург'
+                                  when n.city is null and n.region_code='92' then 'Севастополь'
+                                  when n.city is null and n.region_code='99' then 'Байконур'
                                   else n.city
                              end city_fname,
                              case when instr(lower(n.street)||' ','ул ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','ул '),3) 
                                   when instr(lower(n.street)||' ','ул. ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','ул. '),4) 
-                                  else ''
+                                  when instr(lower(n.street)||' ','мкр ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','мкр '),4) 
+                                  when instr(lower(n.street)||' ','пр-кт ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','пр-кт '),6) 
+                                  when instr(lower(n.street)||' ','пер ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','пер '),4) 
+                                  when instr(lower(n.street)||' ','б-р ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','б-р '),4) 
+                                  when instr(lower(n.street)||' ','б ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','б '),2) 
+                                  when instr(lower(n.street)||' ','пл ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','пл '),3) 
+                                  when instr(lower(n.street)||' ','наб ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','наб '),4) 
+                                  when instr(lower(n.street)||' ','ш ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','ш '),2) 
+                                  else 'ул'
                              end street_type,
                              case when instr(lower(n.street),'ул ')>0 then trim(substr(n.street,instr(lower(n.street),'ул ')+2))
                                   when instr(lower(n.street),' ул')>0 then trim(substr(n.street,1,instr(lower(n.street),' ул')-1))
                                   when instr(lower(n.street),'ул. ')>0 then trim(substr(n.street,instr(lower(n.street),'ул. ')+3))
                                   when instr(lower(n.street),' ул.')>0 then trim(substr(n.street,1,instr(lower(n.street),' ул.')-1))
+                                  when instr(lower(n.street),' мкр')>0 then trim(substr(n.street,1,instr(lower(n.street),' мкр')-1))
+                                  when instr(lower(n.street),' пр-кт')>0 then trim(substr(n.street,1,instr(lower(n.street),' пр-кт')-1))
+                                  when instr(lower(n.street),' пер')>0 then trim(substr(n.street,1,instr(lower(n.street),' пер')-1))
+                                  when instr(lower(n.street),' б-р')>0 then trim(substr(n.street,1,instr(lower(n.street),' б-р')-1))
+                                  when instr(lower(n.street),' б')>0 then trim(substr(n.street,1,instr(lower(n.street),' б')-1))
+                                  when instr(lower(n.street),' пл')>0 then trim(substr(n.street,1,instr(lower(n.street),' пл')-1))
+                                  when instr(lower(n.street),' наб')>0 then trim(substr(n.street,1,instr(lower(n.street),' наб')-1))
+                                  when instr(lower(n.street),' ш')>0 then trim(substr(n.street,1,instr(lower(n.street),' ш')-1))
                                   else n.street
                              end street_fname,
                              case when instr(lower(n.locality)||' ','г ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','г '),2) 
+                                  when instr(lower(n.locality)||' ','рп ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','рп '),3)
                                   when instr(lower(n.locality)||' ','тер. ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','тер. '),4)
                                   when instr(lower(n.locality)||' ','аул. ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','аул. '),5)
+                                  when instr(lower(n.locality)||' ','пгт ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','пгт '),5)
+                                  when instr(lower(n.locality)||' ','п ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','п '),2)
+                                  when instr(lower(n.locality)||' ','д ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','д '),2)
+                                  when instr(lower(n.locality)||' ','с ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','с '),2)
                                   else ''
                              end loc_type,
                              case when instr(lower(n.locality),'г ')>0 then trim(substr(n.locality,instr(lower(n.locality),'г '),length(n.locality)-2))
                                   when instr(lower(n.locality),' г')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' г')-1))
+                                  when instr(lower(n.locality),' рп')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' рп')-1))
+                                  when instr(lower(n.locality),' пгт')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' пгт')-1))
+                                  when instr(lower(n.locality),' п')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' п')-1))
+                                  when instr(lower(n.locality),' д')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' д')-1))
+                                  when instr(lower(n.locality),' с')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' с')-1))
                                   when instr(lower(n.locality),'тер. ')>0 then trim(substr(n.locality,instr(lower(n.locality),'тер. ')+4))
                                   when instr(lower(n.locality),'аул. ')>0 then trim(substr(n.locality,instr(lower(n.locality),'аул. ')+4))
                                   else n.locality
@@ -1724,6 +1829,125 @@ create or replace package body fias_pkg as
                       ) tab
                 ) n left join fias_addrobj f on (f.id=n.fa_id) left join fias_addrobj fc on (fc.id=f.parentguid);
     
+    return v_ref;
+  end;
+
+  -- Выполнить проверку на наличие/отсутствие в ФИАС элементов адресов, указанных в декларации
+  -- возвращается курсор на таблицу типа TTblCheckExistsAddrByFias
+  function CheckExistsAddrByFias(p_declaration number) return ref_cursor
+  is
+    v_ref ref_cursor;
+  begin
+    open v_ref for
+      select tab.id,tab.post_index,tab.region_code,tab.area,tab.city,tab.locality,tab.street,
+             nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||
+             nvl2(tab.loc_fname,tab.loc_fname||',','')||nvl2(tab.street_fname,tab.street_fname||',','') ndfl_full_addr,
+             tab.area_type,tab.area_fname,tab.city_type,tab.city_fname,
+             tab.loc_type,tab.loc_fname,tab.street_type,tab.street_fname,
+             (select decode(count(*),0,0,1) 
+                from fias_addrobj f 
+               where f.regioncode=tab.region_code 
+                 and f.postalcode=tab.post_index) chk_index,
+             (select decode(count(*),0,0,1) 
+                from fias_addrobj f 
+               where f.regioncode=tab.region_code) chk_region,
+             fias_pkg.CheckAddrElement(tab.region_code,tab.area_fname,',') chk_area,
+             fias_pkg.CheckAddrElement(tab.region_code,tab.city_fname,nvl2(tab.area_fname,tab.area_fname||';',';')) chk_city,
+             fias_pkg.CheckAddrElement(tab.region_code,tab.loc_fname,nvl2(tab.area_fname,tab.area_fname||';',';')) chk_loc,
+             fias_pkg.CheckAddrElement(tab.region_code,tab.street_fname,nvl2(tab.area_fname,tab.area_fname||';','')||nvl2(tab.city_fname,tab.city_fname||';','')||nvl2(tab.loc_fname,tab.loc_fname||';','')) chk_street
+             /*(select decode(count(*),0,0,1) 
+                from fias_addrobj f 
+               where f.regioncode=tab.region_code 
+                 and replace(lower(f.formalname),' ','')=replace(lower(tab.area_fname),' ','')) chk_area,
+             (select decode(count(*),0,0,1) 
+                from fias_addrobj f 
+               where f.regioncode=tab.region_code 
+                 and replace(lower(f.formalname),' ','')=replace(lower(tab.city_fname),' ','')) chk_city,
+             (select decode(count(*),0,0,1) 
+                from fias_addrobj f 
+               where f.regioncode=tab.region_code 
+                 and replace(lower(f.formalname),' ','')=replace(lower(tab.loc_fname),' ','')) chk_loc,
+             (select decode(count(*),0,0,1) 
+                from fias_addrobj f 
+               where f.regioncode=tab.region_code 
+                 and replace(lower(f.formalname),' ','')=replace(lower(tab.street_fname),' ','')) chk_street*/
+        from (select n.id,
+                     n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
+                     case when instr(lower(n.area)||' ','р-н. ')>0 then substr(n.area||' ',instr(lower(n.area)||' ','р-н. '),4)
+                          when instr(lower(n.area)||' ','р-н ')>0 then substr(n.area||' ',instr(lower(n.area)||' ','р-н '),3)
+                          else ''
+                     end area_type,
+                     case when instr(lower(n.area),' р-н.')>0 then trim(substr(n.area,1,instr(lower(n.area),'р-н.')-1))
+                          when instr(lower(n.area),' р-н')>0 then trim(substr(n.area,1,instr(lower(n.area),'р-н')-1))
+                          else n.area
+                     end area_fname,
+                     case when instr(lower(n.city)||' ','г ')>0 then substr(n.city||' ',instr(lower(n.city)||' ','г '),2) 
+                          when instr(lower(n.city)||' ','тер. ')>0 then substr(n.city||' ',instr(lower(n.city)||' ','тер. '),4)
+                          when n.city is null and n.region_code='77' then 'г'
+                          when n.city is null and n.region_code='78' then 'г'
+                          when n.city is null and n.region_code='92' then 'г'
+                          when n.city is null and n.region_code='99' then 'г'
+                          else ''
+                     end city_type,
+                     case when instr(lower(n.city),' г')>0 then trim(substr(n.city,1,instr(lower(n.city),' г')-1))
+                          when instr(lower(n.city),'г ')>0 then trim(substr(n.city,instr(lower(n.city),'г '),length(n.city)-2))
+                          when instr(lower(n.city),'тер. ')>0 then trim(substr(n.city,instr(lower(n.city),'тер. ')+4))
+                          when n.city is null and n.region_code='77' then 'Москва'
+                          when n.city is null and n.region_code='78' then 'Санкт-Петербург'
+                          when n.city is null and n.region_code='92' then 'Севастополь'
+                          when n.city is null and n.region_code='99' then 'Байконур'
+                          else n.city
+                     end city_fname,
+                     case when instr(lower(n.street)||' ','ул ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','ул '),3) 
+                          when instr(lower(n.street)||' ','ул. ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','ул. '),4) 
+                          when instr(lower(n.street)||' ','мкр ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','мкр '),4) 
+                          when instr(lower(n.street)||' ','пр-кт ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','пр-кт '),6) 
+                          when instr(lower(n.street)||' ','пер ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','пер '),4) 
+                          when instr(lower(n.street)||' ','б-р ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','б-р '),4) 
+                          when instr(lower(n.street)||' ','б ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','б '),2) 
+                          when instr(lower(n.street)||' ','пл ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','пл '),3) 
+                          when instr(lower(n.street)||' ','наб ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','наб '),4) 
+                          when instr(lower(n.street)||' ','ш ')>0 then substr(n.street||' ',instr(lower(n.street)||' ','ш '),2) 
+                          else ''
+                     end street_type,
+                     case when instr(lower(n.street),'ул ')>0 then trim(substr(n.street,instr(lower(n.street),'ул ')+2))
+                          when instr(lower(n.street),' ул')>0 then trim(substr(n.street,1,instr(lower(n.street),' ул')-1))
+                          when instr(lower(n.street),'ул. ')>0 then trim(substr(n.street,instr(lower(n.street),'ул. ')+3))
+                          when instr(lower(n.street),' ул.')>0 then trim(substr(n.street,1,instr(lower(n.street),' ул.')-1))
+                          when instr(lower(n.street),' мкр')>0 then trim(substr(n.street,1,instr(lower(n.street),' мкр')-1))
+                          when instr(lower(n.street),' пр-кт')>0 then trim(substr(n.street,1,instr(lower(n.street),' пр-кт')-1))
+                          when instr(lower(n.street),' пер')>0 then trim(substr(n.street,1,instr(lower(n.street),' пер')-1))
+                          when instr(lower(n.street),' б-р')>0 then trim(substr(n.street,1,instr(lower(n.street),' б-р')-1))
+                          when instr(lower(n.street),' б')>0 then trim(substr(n.street,1,instr(lower(n.street),' б')-1))
+                          when instr(lower(n.street),' пл')>0 then trim(substr(n.street,1,instr(lower(n.street),' пл')-1))
+                          when instr(lower(n.street),' наб')>0 then trim(substr(n.street,1,instr(lower(n.street),' наб')-1))
+                          when instr(lower(n.street),' ш')>0 then trim(substr(n.street,1,instr(lower(n.street),' ш')-1))
+                          else n.street
+                     end street_fname,
+                     case when instr(lower(n.locality)||' ','г ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','г '),2) 
+                          when instr(lower(n.locality)||' ','рп ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','рп '),3)
+                          when instr(lower(n.locality)||' ','тер. ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','тер. '),4)
+                          when instr(lower(n.locality)||' ','аул. ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','аул. '),5)
+                          when instr(lower(n.locality)||' ','пгт ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','пгт '),5)
+                          when instr(lower(n.locality)||' ','п ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','п '),2)
+                          when instr(lower(n.locality)||' ','д ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','д '),2)
+                          when instr(lower(n.locality)||' ','с ')>0 then substr(n.locality||' ',instr(lower(n.locality)||' ','с '),2)
+                          else ''
+                     end loc_type,
+                     case when instr(lower(n.locality),'г ')>0 then trim(substr(n.locality,instr(lower(n.locality),'г '),length(n.locality)-2))
+                          when instr(lower(n.locality),' г')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' г')-1))
+                          when instr(lower(n.locality),' рп')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' рп')-1))
+                          when instr(lower(n.locality),' пгт')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' пгт')-1))
+                          when instr(lower(n.locality),' п')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' п')-1))
+                          when instr(lower(n.locality),' д')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' д')-1))
+                          when instr(lower(n.locality),' с')>0 then trim(substr(n.locality,1,instr(lower(n.locality),' с')-1))
+                          when instr(lower(n.locality),'тер. ')>0 then trim(substr(n.locality,instr(lower(n.locality),'тер. ')+4))
+                          when instr(lower(n.locality),'аул. ')>0 then trim(substr(n.locality,instr(lower(n.locality),'аул. ')+4))
+                          else n.locality
+                     end loc_fname
+                from ndfl_person n
+              where n.declaration_data_id=p_declaration) tab;
+
     return v_ref;
   end;
 
