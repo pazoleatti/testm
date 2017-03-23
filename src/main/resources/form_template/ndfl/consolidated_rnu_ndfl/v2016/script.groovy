@@ -95,6 +95,10 @@ void consolidation() {
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
+    if (declarationDataIdList.isEmpty()){
+        throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
+    }
+
     logger.info("Номера первичных НФ включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + calcTimeMillis(time));
 
     List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
