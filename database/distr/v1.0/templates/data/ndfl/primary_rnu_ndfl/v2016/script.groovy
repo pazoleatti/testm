@@ -437,9 +437,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
         inTime = System.currentTimeMillis();
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
-        if (msgCnt <= maxMsgCnt){
-            logger.info("Идентификация (" + calcTimeMillis(inTime));
-        }
 
         conformityMap.put(primaryPersonId, refBookPerson);
 
