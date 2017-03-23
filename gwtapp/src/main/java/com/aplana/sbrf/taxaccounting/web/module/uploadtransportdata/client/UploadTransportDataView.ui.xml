@@ -12,7 +12,7 @@
             <fm:HeaderContainer>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label text="Загрузка транспортных файлов"/>
+                        <g:Label text="Загрузка файлов"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>
@@ -32,7 +32,7 @@
                         </g:FormPanel>
                     </g:HorizontalPanel>
 
-                    <g:HorizontalPanel visible="false">
+                    <g:HorizontalPanel>
                         <g:Button ui:field="loadButton" width="300px"
                                   text="Обработать файлы из каталога загрузки"
                                   title="Загружаются файлы из каталогов загруки"/>
