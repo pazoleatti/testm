@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class NdflPersonIncomeCommonValue {
 
-    // Колличество ФЛ
+    // Коллчество ФЛ
     private Integer countPerson;
 
     // Сумма налога удержанная
