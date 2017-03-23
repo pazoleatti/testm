@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl.fixed;
 
 import com.aplana.sbrf.taxaccounting.model.AuditFieldList;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -66,7 +67,7 @@ public class RefBookAuditFieldList extends AbstractPermanentRefBook {
     }
 
 	@Override
-	public PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, String filter) {
+	public PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
 		throw new UnsupportedOperationException();
 	}
 

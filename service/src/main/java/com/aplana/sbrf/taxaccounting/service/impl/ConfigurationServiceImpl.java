@@ -83,7 +83,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public List<Map<String, String>> getEmailConfig() {
         RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId());
-        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
+		PagingParams pagingParams = null;
+        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), pagingParams, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         for (Map<String, RefBookValue> value : values) {
             Map<String, String> record = new HashMap<String, String>();
@@ -98,7 +99,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public List<Map<String, String>> getAsyncConfig() {
         RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ASYNC_CONFIG.getId());
-        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
+		PagingParams pagingParams = null;
+        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), pagingParams, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         for (Map<String, RefBookValue> value : values) {
             Map<String, String> record = new HashMap<String, String>();

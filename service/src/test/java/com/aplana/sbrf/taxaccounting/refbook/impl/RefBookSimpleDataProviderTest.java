@@ -68,7 +68,8 @@ public class RefBookSimpleDataProviderTest {
     @Test
     public void getRecordsInvokesDao() throws Exception {
         Date version = new GregorianCalendar(1983, Calendar.JULY, 22).getTime();
-        provider.getRecords(version, null, null, null);
+		PagingParams pagingParams = null;
+        provider.getRecords(version, pagingParams, null, null);
 
         verify(daoMock, atLeastOnce()).getRecords(
                 any(RefBook.class), eq(version), any(PagingParams.class),

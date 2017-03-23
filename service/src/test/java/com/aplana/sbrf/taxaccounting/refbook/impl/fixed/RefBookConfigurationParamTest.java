@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl.fixed;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -47,7 +48,8 @@ public class RefBookConfigurationParamTest {
     // Без фильтра
     @Test
     public void getRecords1Test() {
-        PagingResult<Map<String, RefBookValue>> records = refBookConfigurationParam.getRecords(new Date(), null, null, null);
+		PagingParams pagingParams = null;
+        PagingResult<Map<String, RefBookValue>> records = refBookConfigurationParam.getRecords(new Date(), pagingParams, null, null);
         Assert.assertEquals(ConfigurationParam.values().length, records.size());
     }
 
