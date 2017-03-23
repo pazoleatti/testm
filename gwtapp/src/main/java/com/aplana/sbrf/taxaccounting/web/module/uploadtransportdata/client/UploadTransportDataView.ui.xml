@@ -20,7 +20,7 @@
         <fm:body>
             <fm:BodyContainer>
                 <g:VerticalPanel spacing="10">
-                    <g:HorizontalPanel>
+                    <g:HorizontalPanel ui:field="uploadPanel">
                         <g:Button ui:field="uploadButton" width="300px"
                                   text="Загрузить файл"
                                   title="Загружаются только те файлы, которые пользователь предоставляет системе по нажатию этой кнопки"/>
@@ -32,7 +32,7 @@
                         </g:FormPanel>
                     </g:HorizontalPanel>
 
-                    <g:HorizontalPanel>
+                    <g:HorizontalPanel ui:field="loadPanel">
                         <g:Button ui:field="loadButton" width="300px"
                                   text="Обработать файлы из каталога загрузки"
                                   title="Загружаются файлы из каталогов загруки"/>
