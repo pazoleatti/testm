@@ -601,7 +601,11 @@ public class RaschsvPersSvStrahLicDaoImpl extends AbstractDao implements Raschsv
             raschsvPersSvStrahLic.setImya(rs.getString(RaschsvPersSvStrahLic.COL_IMYA));
             raschsvPersSvStrahLic.setOtchestvo(rs.getString(RaschsvPersSvStrahLic.COL_OTCHESTVO));
             raschsvPersSvStrahLic.setPersonId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_PERSON_ID));
-            raschsvPersSvStrahLic.setRecordId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_RECORD_ID));
+
+            // Идентификатор ФЛ REF_BOOK_PERSON.RECORD_ID
+            if (SqlUtils.isExistColumn(rs, RaschsvPersSvStrahLic.COL_RECORD_ID)) {
+                raschsvPersSvStrahLic.setRecordId(SqlUtils.getLong(rs, RaschsvPersSvStrahLic.COL_RECORD_ID));
+            }
 
             return raschsvPersSvStrahLic;
         }

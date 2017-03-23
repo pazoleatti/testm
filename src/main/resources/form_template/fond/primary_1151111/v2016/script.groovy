@@ -2298,7 +2298,7 @@ void importData() {
     DocumentBuilder documentBuilder = factory.newDocumentBuilder()
     Document document = documentBuilder.parse(new ByteArrayInputStream(content));
     if (document.getXmlEncoding().toLowerCase() != "windows-1251") {
-        logger.error("Файл 'UploadFileName' сформирован в кодировке отличной от 'windows-1251'.")
+        logger.error("Файл '$UploadFileName' сформирован в кодировке отличной от 'windows-1251'.")
         return
     }
 
@@ -2901,24 +2901,33 @@ def checkTariff_2_2_425(fileNode, fileName) {
             payment?."$NODE_NAME_SV_PRIM_TARIF2_2_425".each { tariff ->
                 tariff?."$NODE_NAME_SV_INO_GRAZD".each { inGra ->
                     def innFl = inGra?."@ИННФЛ" as String
-                    def snils = inGra?."@СНИЛС" as String
                     def countryCode = inGra?."@Гражд" as String
-                    def surname = inGra?."$NODE_NAME_FIO"?."@Фамилия" as String
-                    def firstName = inGra?."$NODE_NAME_FIO"?."@Имя" as String
+
+                    String snils = inGra?."@СНИЛС" ?: "" as String
+                    String lastName = inGra?."$NODE_NAME_FIO"?."@Фамилия" as String
+                    String firstName = inGra?."$NODE_NAME_FIO"?."@Имя" as String
+                    String middleName = inGra?."$NODE_NAME_FIO"?."@Отчество" ?: "" as String
+                    String fioAndSNILS = "ФИО: " + lastName + " " + firstName + (middleName ? " " + middleName : "") + ", СНИЛС: $snils"
 
                     // 1.5.1 Корректность ИНН иностранного гражданина и лица без гражданства
                     if (innFl && (INN_IP_LENGTH != innFl?.length() || !ScriptUtils.checkControlSumInn(innFl))) {
-                        logger.error(CHECK_TARIFF_INN, innFl, fileName)
+                        String pathError = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СвПримТариф2.2.425.СвИноГражд.ИННФЛ"
+                        logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность ИНН иностранного гражданина и лица без гражданства", fioAndSNILS, pathError,
+                                "$pathError='${innFl}' в транспортном файле '$fileName' некорректный")
                     }
 
                     // 1.5.2 Корректность СНИЛС иностранного гражданина и лица без гражданства
                     if (snils && !ScriptUtils.checkSnils(snils)) {
-                        logger.error(CHECK_TARIFF_SNILS, snils, fileName)
+                        String pathError = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СвПримТариф2.2.425.СвИноГражд.СНИЛС"
+                        logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность СНИЛС иностранного гражданина и лица без гражданства", fioAndSNILS, pathError,
+                                "$pathError='${snils}' в транспортном файле '$fileName' некорректный")
                     }
 
                     // 1.5.3 Поиск кода гражданства иностранного гражданина и лица без гражданства в справочнике
                     if (countryCode && !isExistsOKSM(countryCode)) {
-                        logger.error(CHECK_TARIFF_COUNTRY, countryCode, surname, firstName)
+                        String pathError = "Файл.Документ.РасчетСВ.ОбязПлатСВ.СвПримТариф2.2.425.СвИноГражд.Гражд"
+                        logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Поиск кода гражданства иностранного гражданина и лица без гражданства в справочнике 'ОКСМ'", fioAndSNILS, pathError,
+                                "$pathError='${countryCode}' не найден в справочнике ОКСМ")
                     }
                 }
             }
@@ -2939,13 +2948,21 @@ def checkFL(fileNode, fileName) {
             def personPeriod = person?."@Период" as String
             def personYear = person?."@ОтчетГод" as String
 
+            String snils = person?."$NODE_NAME_DAN_FL_POLUCH"?."@СНИЛС" ?: "" as String
+            String lastName = person?."$NODE_NAME_DAN_FL_POLUCH"?."ФИО"?."@Фамилия" as String
+            String firstName = person?."$NODE_NAME_DAN_FL_POLUCH"?."ФИО"?."@Имя" as String
+            String middleName = person?."$NODE_NAME_DAN_FL_POLUCH"?."ФИО"?."@Отчество" ?: "" as String
+            String fioAndSNILS = "ФИО: " + lastName + " " + firstName + (middleName ? " " + middleName : "") + ", СНИЛС: $snils"
+
             // 1.6.5 Принадлежность дат сведений по ФЛ к отчетному периоду
             if (!(docPeriod == personPeriod && docYear == personYear)) {
-                logger.error(CHECK_PERSON_PERIOD, personPeriod, personYear, fileName)
+                String pathErrorPeriod = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.Период"
+                String pathErrorYear = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ОтчетГод"
+                logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Принадлежность дат сведений по ФЛ к отчетному периоду", fioAndSNILS, "$pathErrorPeriod, $pathErrorYear",
+                        "$pathErrorPeriod='${personPeriod ?: ""}', $pathErrorYear='${personYear ?: ""}' в транспортном файле '$fileName' не входит в отчетный период формы")
             }
 
             person?."$NODE_NAME_DAN_FL_POLUCH".each { data ->
-                def snils = data?."@СНИЛС" as String
                 def innFl = data?."@ИННФЛ" as String
                 def docTypeCode = data?."@КодВидДок" as String
                 def national = data?."@Гражд" as String
@@ -2953,27 +2970,37 @@ def checkFL(fileNode, fileName) {
 
                 // 1.6.1 Корректность ИНН ФЛ - получателя дохода
                 if (INN_IP_LENGTH != innFl?.length() || !ScriptUtils.checkControlSumInn(innFl)) {
-                    logger.error(CHECK_PERSON_INN, innFl, fileName)
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ"
+                    logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность ИНН ФЛ - получателя дохода", fioAndSNILS, pathError,
+                            "$pathError='${innFl ?: ""}' в транспортном файле '$fileName' некорректный")
                 }
 
                 // 1.6.2 Корректность СНИЛС ФЛ - получателя дохода
                 if (snils && !ScriptUtils.checkSnils(snils)) {
-                    logger.error(CHECK_PERSON_SNILS, snils, fileName)
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС"
+                    logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность СНИЛС ФЛ - получателя дохода", fioAndSNILS, pathError,
+                            "$pathError='${snils ?: ""}' в транспортном файле '$fileName' некорректный")
                 }
 
                 // 1.6.3 Поиск кода вида документа ФЛ - получателя дохода
                 if (docTypeCode && !isExistsDocType(docTypeCode)) {
-                    logger.error(CHECK_PERSON_DOCTYPE, docTypeCode, snils, fileName)
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок"
+                    logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Поиск кода вида документа ФЛ - получателя дохода в справочнике 'Коды документов, удостоверяющих личность'", fioAndSNILS, pathError,
+                            "$pathError='${docTypeCode ?: ""}' не найден в справочнике 'Коды документов, удостоверяющих личность'")
                 }
 
                 // 1.6.4 Поиск кода гражданства ФЛ - получателя дохода в справочнике
                 if (national && !isExistsOKSM(national)) {
-                    logger.error(CHECK_PERSON_OKSM, national, snils, fileName)
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд"
+                    logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Поиск кода гражданства ФЛ - получателя дохода в справочнике 'ОКСМ'", fioAndSNILS, pathError,
+                            "$pathError='${national ?: ""}' не найден в справочнике ОКСМ")
                 }
 
                 // 1.6.6 Корректность серии и номера ДУЛ
                 if (serNumDoc && !ScriptUtils.checkDul(serNumDoc)) {
-                    logger.error(CHECK_PERSON_DUL, serNumDoc)
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок"
+                    logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность серии и номера ДУЛ", fioAndSNILS, pathError,
+                            "$pathError='${serNumDoc ?: ""}' не соответствует порядку заполнения: знак 'N' не проставляется, серия и номер документа отделяются знаком ' ' ('пробел')")
                 }
             }
         }
@@ -4221,9 +4248,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
         inTime = System.currentTimeMillis();
         NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, SIMILARITY_THRESHOLD, logger);
-        if (msgCnt <= maxMsgCnt){
-            logger.info("Идентификация (" + calcTimeMillis(inTime));
-        }
 
         conformityMap.put(primaryPersonId, refBookPerson);
 
@@ -5010,11 +5034,11 @@ def checkDataDBPerson() {
 
     // ФЛ Map<person_id, RefBook>
     def personMap = getActualRefPersonsByDeclarationDataId()
-    logger.info("Получены записи таблицы \"%s\" в количестве (%d записей).", "Физические лица", personMap.size())
+    logger.info("Получены записи таблицы '%s' в количестве (%d записей).", "Физические лица", personMap.size())
 
     // ДУЛ Map<person_id, List<RefBook>>
     def dulMap = getActualRefDulByDeclarationDataId()
-    logger.info("Получены записи таблицы \"%s\" (%d записей).", "ДУЛ", dulMap.size())
+    logger.info("Получены записи таблицы '%s' (%d записей).", "ДУЛ", dulMap.size())
 
     // Коды видов документов
     def documentTypeActualList = getActualRefDocument()
@@ -5029,80 +5053,94 @@ def checkDataDBPerson() {
 
         ScriptUtils.checkInterrupted();
 
-        def fioBirthday = raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo + " " + raschsvPersSvStrahLic.dataRozd
+        String fioAndRecordId = "ФИО: " + raschsvPersSvStrahLic.familia + " " + raschsvPersSvStrahLic.imya + " " + raschsvPersSvStrahLic.otchestvo ?: "" + ", идентификатор ФЛ: '${raschsvPersSvStrahLic.recordId}'"
 
         // 3.1.1 Назначение ФЛ записи справочника "Физические лица"
         // Если personId не задан, то он принимает значение 0, а не null
         if (raschsvPersSvStrahLic.personId == null || raschsvPersSvStrahLic.personId == 0) {
-            logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" или запись неактуальна для ФЛ " + fioBirthday)
+            String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч"
+            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Назначение ФЛ записи справочника 'Физические лица'", fioAndRecordId, pathError,
+                    "Отсутствует ссылка на запись справочника 'Физические лица' или запись неактуальна")
         } else {
             def personRecord = personMap.get(raschsvPersSvStrahLic.recordId)
 
             if (!personRecord) {
-                logger.warn("Отсутствует ссылка на запись справочника \"Физические лица\" или запись неактуальна для ФЛ " + fioBirthday)
+                String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч"
+                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Назначение ФЛ записи справочника 'Физические лица'", fioAndRecordId, pathError,
+                        "Отсутствует ссылка на запись справочника 'Физические лица' или запись неактуальна")
             } else {
                 // 3.1.2 Соответствие фамилии ФЛ и справочника
                 if (raschsvPersSvStrahLic.familia != personRecord.get(RF_LAST_NAME).value) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.ФИО.Фамилия"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.familia}\" не равен фамилии = \"${personRecord.get(RF_LAST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Фамилия"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие фамилии ФЛ справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.familia}' не равен фамилии='${personRecord.get(RF_LAST_NAME).value}' справочника 'Физические лица'")
                 }
 
                 // 3.1.3 Соответствие имени ФЛ и справочника
                 if (raschsvPersSvStrahLic.imya != personRecord.get(RF_FIRST_NAME).value) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.ФИО.Имя"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.imya}\" не равен имени = \"${personRecord.get(RF_FIRST_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Имя"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие имени ФЛ справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.imya}' не равен имени='${personRecord.get(RF_FIRST_NAME).value}' справочника 'Физические лица'")
                 }
 
                 // 3.1.4 Соответствие отчества ФЛ и справочника
                 if (raschsvPersSvStrahLic.otchestvo != null && raschsvPersSvStrahLic.otchestvo != personRecord.get(RF_MIDDLE_NAME).value) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.ФИО.Отчество"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.otchestvo}\" не равен отчеству = \"${personRecord.get(RF_MIDDLE_NAME).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Отчество"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие отчества ФЛ справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.otchestvo}' не равен отчеству='${personRecord.get(RF_MIDDLE_NAME).value}' справочника 'Физические лица'")
                 }
 
                 // 3.1.5 Соответствие даты рождения ФЛ и справочника
                 if (raschsvPersSvStrahLic.dataRozd != personRecord.get(RF_BIRTH_DATE).value) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.ДатаРожд"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.dataRozd}\" не равен дате рождения = \"${personRecord.get(RF_BIRTH_DATE).value}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ДатаРожд"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие даты рождения ФЛ справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${ScriptUtils.formatDate(raschsvPersSvStrahLic.dataRozd, "dd.MM.yyyy")}' не равен дате рождения='${ScriptUtils.formatDate(personRecord.get(RF_BIRTH_DATE).value, "dd.MM.yyyy")}' справочника 'Физические лица'")
                 }
 
                 // 3.1.6 Соответствие пола ФЛ и справочника
                 if (raschsvPersSvStrahLic.pol != personRecord.get(RF_SEX)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.Пол"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.pol}\" не равен полу = \"${personRecord.get(RF_SEX)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Пол"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие пола ФЛ справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.pol ?: ""}' не равен полу='${personRecord.get(RF_SEX)?.value?.toString() ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.7 Соответствие признака ОПС ФЛ и справочника
                 if (raschsvPersSvStrahLic.prizOps != personRecord.get(RF_PENSION)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.ПризОПС"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOps}\" не равен признаку ОПС = \"${personRecord.get(RF_PENSION)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОПС"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие признака ОПС ФЛ справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.prizOps ?: ""}' не равен признаку ОПС='${personRecord.get(RF_PENSION)?.value?.toString() ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.8 Соответствие признака ОМС ФЛ и справочника
                 if (raschsvPersSvStrahLic.prizOms != personRecord.get(RF_MEDICAL)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.ПризОМС"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOms}\" не равен признаку ОМС = \"${personRecord.get(RF_MEDICAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОМС"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие признака ОМС ФЛ и справочника 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.prizOms ?: ""}' не равен признаку ОМС='${personRecord.get(RF_MEDICAL)?.value?.toString() ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.9 Соответствие признака ОСС
                 if (raschsvPersSvStrahLic.prizOss != personRecord.get(RF_SOCIAL)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.ПризОСС"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.prizOss}\" не равен признаку ОСС = \"${personRecord.get(RF_SOCIAL)?.value?.toString()}\" справочника \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ПризОСС"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие признака ОСС ФЛ справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.prizOss ?: ""}' не равен признаку ОСС='${personRecord.get(RF_SOCIAL)?.value?.toString() ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.10 Соответсвие ИНН ФЛ - получателя дохода
                 if (raschsvPersSvStrahLic.innfl != null && raschsvPersSvStrahLic.innfl != personRecord.get(RF_INN)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.ИННФЛ"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.innfl}\" не равен ИНН = \"${personRecord.get(RF_INN)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.ИННФЛ"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответсвие ИНН ФЛ - получателя дохода справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.innfl ?: ""}' не равен ИНН='${personRecord.get(RF_INN)?.value?.toString() ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.11 Соответствие СНИЛС ФЛ - получателя дохода
                 if (raschsvPersSvStrahLic.snils != personRecord.get(RF_SNILS)?.value?.toString()) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.СНИЛС"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.snils}\" не равен СНИЛС = \"${personRecord.get(RF_SNILS)?.value?.toString()}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СНИЛС"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответсвие СНИЛС ФЛ - получателя дохода справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.snils ?: ""}' не равен СНИЛС='${personRecord.get(RF_SNILS)?.value?.toString() ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.12 Соответствие кода вида документа ФЛ - получателя дохода
-                def allDocList = dulMap.get(personRecord.get("id")?.value)
+                def allDocList = dulMap.get(personRecord.get("id")?.value) ?: []
                 // Вид документа
                 def personDocTypeList = []
                 // Серия и номер документа
@@ -5112,34 +5150,41 @@ def checkDataDBPerson() {
                     personDocTypeList.add(personDocType?.CODE?.stringValue)
                     personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
                 }
-                if (!personDocTypeList.contains(raschsvPersSvStrahLic.kodVidDoc)) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.КодВидДок"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.kodVidDoc}\" не равен документу, удостоверяющему личность = \"${personDocTypeList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                if (!personDocTypeList?.contains(raschsvPersSvStrahLic.kodVidDoc)) {
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода вида документа ФЛ - получателя дохода справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.kodVidDoc ?: ""}' не равен документу, удостоверяющему личность='${personDocTypeList?.join("', '") ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.13 Актуальность кода вида документа ФЛ - получателя дохода
-                personDocTypeList.each { personDocType ->
+                personDocTypeList?.each { personDocType ->
                     if (!documentTypeActualList.contains(personDocType)) {
-                        logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указаны неактуальные коды документов для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                        String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.КодВидДок"
+                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Актуальность кода вида документа ФЛ - получателя дохода", fioAndRecordId, pathError,
+                                "В справочнике 'Физические лица' указаны неактуальные коды документов '${personDocType ?: ""}'")
                     }
                 }
 
                 // 3.1.14 Соответствие серии и номера документа
-                if (!personDocNumberList.contains(raschsvPersSvStrahLic.serNomDoc)) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.СерНомДок"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.serNomDoc}\" не равен серии и номеру ДУЛ = \"${personDocNumberList.join(", ")}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                if (!personDocNumberList?.contains(raschsvPersSvStrahLic.serNomDoc)) {
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.СерНомДок"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие серии и номера документа справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.serNomDoc ?: ""}' не равен серии и номеру ДУЛ='${personDocNumberList?.join("', '") ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.15 Соответсвие кода гражданства ФЛ - получателя дохода в справочнике
                 if (raschsvPersSvStrahLic.grazd != citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP)?.value)) {
-                    def pathValue = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц[${raschsvPersSvStrahLic.recordId}].ДанФЛПолуч.Гражд"
-                    logger.warn("$pathValue = \"${raschsvPersSvStrahLic.grazd}\" не равен гражданству = \"${citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP)?.value)}\" в справочнике \"Физические лица\" для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответсвие кода гражданства ФЛ - получателя дохода справочнику 'Физические лица'", fioAndRecordId, pathError,
+                            "$pathError='${raschsvPersSvStrahLic.grazd ?: ""}' не равен гражданству='${citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP)?.value) ?: ""}' справочника 'Физические лица'")
                 }
 
                 // 3.1.16 Актуальность кода гражданства ФЛ
                 citizenship = getRefBookByRecordIds(REF_BOOK_COUNTRY_ID, personRecord.get(RF_CITIZENSHIP)?.value)
                 if (!citizenshipCodeActualList.contains(citizenship?.CODE?.stringValue)) {
-                    logger.warn("В справочнике \"Физические лица.Документы, удостоверяющие личность\" указан неактуальный код гражданства для ФЛ с идентификатором ФЛ = \"${personRecord.get(RF_RECORD_ID).value}\"")
+                    String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч.Гражд"
+                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Актуальность кода гражданства ФЛ", fioAndRecordId, pathError,
+                            "В справочнике 'Физические лица' указан неактуальный код гражданства='${personRecord.get(RF_RECORD_ID)?.value ?: ""}'")
                 }
             }
         }
@@ -5257,19 +5302,21 @@ def checkDataDBSum() {
 
                     // Сведения о сумме выплат по доп.тарифам в пользу физ.лица по месяцам
                     Integer numberMonth = getNumberMonth(Integer.parseInt(raschsvVyplSvDopMt.mesyac), getReportPeriodEndDate())
-                    if (numberMonth == 1) {
-                        svVyplMkDopSum1 += nachislSvCurr
-                    } else if (numberMonth == 2) {
-                        svVyplMkDopSum2 += nachislSvCurr
-                    } else if (numberMonth == 3) {
-                        svVyplMkDopSum3 += nachislSvCurr
-                    }
+                    if (numberMonth != null) {
+                        if (numberMonth == 1) {
+                            svVyplMkDopSum1 += nachislSvCurr
+                        } else if (numberMonth == 2) {
+                            svVyplMkDopSum2 += nachislSvCurr
+                        } else if (numberMonth == 3) {
+                            svVyplMkDopSum3 += nachislSvCurr
+                        }
 
-                    // Сведения о сумме выплат по доп.тарифам в пользу физ.лица по месяцам в разрезе тарифов
-                    List<BigDecimal> vyplSvDopMtSumList = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: [3]
-                    vyplSvDopMtSumList[numberMonth - 1] = vyplSvDopMtSumList[numberMonth - 1] ?: 0
-                    vyplSvDopMtSumList[numberMonth - 1] += nachislSvCurr
-                    vyplSvDopMtMap.put(raschsvVyplSvDopMt.tarif, vyplSvDopMtSumList)
+                        // Сведения о сумме выплат по доп.тарифам в пользу физ.лица по месяцам в разрезе тарифов
+                        List<BigDecimal> vyplSvDopMtSumList = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: [3]
+                        vyplSvDopMtSumList[numberMonth - 1] = vyplSvDopMtSumList[numberMonth - 1] ?: 0
+                        vyplSvDopMtSumList[numberMonth - 1] += nachislSvCurr
+                        vyplSvDopMtMap.put(raschsvVyplSvDopMt.tarif, vyplSvDopMtSumList)
+                    }
                 }
             }
         }
@@ -6490,34 +6537,47 @@ def checkDataXml() {
                         } else if (raschetSvChildNode.name == NODE_NAME_PERS_SV_STRAH_LIC) {
                             // ПерсСвСтрахЛиц
 
+                            // Получим ФИО и СНИЛС
+                            String fioAndSNILS
+                            raschetSvChildNode.childNodes().each { danFlPolushNode ->
+                                String snils = danFlPolushNode.attributes()[DAN_FL_POLUCH_SNILS]
+                                danFlPolushNode.childNodes().each { fioNode ->
+                                    if (fioNode.name == NODE_NAME_FIO) {
+                                        // Разбор узла ФИО
+                                        String lastName = fioNode.attributes()[FIO_FAMILIA]
+                                        String firstName = fioNode.attributes()[FIO_IMYA]
+                                        String middleName = fioNode.attributes()[FIO_OTCHESTVO_NAME] ?: ""
+                                        fioAndSNILS = "ФИО: $lastName $firstName ${(middleName ? " " + middleName : "")}, СНИЛС: $snils"
+                                    }
+                                }
+                            }
+
                             // 2.3.1 Корректность номера корректировки
                             def nomKorrPersXml = raschetSvChildNode.attributes()[PERV_SV_STRAH_LIC_NOM_KORR]
                             if (nomKorrDocXml != nomKorrPersXml) {
-                                def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_PERS_SV_STRAH_LIC, PERV_SV_STRAH_LIC_NOM_KORR].join(".")
-                                logger.warn(pathAttr + " = \"" + nomKorrPersXml + "\" не соответствует номеру корректировки файла \"" + fileName + "\"")
+                                String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.НомКорр"
+                                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность номера корректировки", fioAndSNILS, pathError,
+                                        "$pathError='${nomKorrPersXml}' не соответствует номеру корректировки файла '$fileName'")
                             }
 
                             // 2.3.2 Корректность периода
                             def periodPersXml = raschetSvChildNode.attributes()[PERV_SV_STRAH_LIC_PERIOD]
                             if (periodDocXml != periodPersXml) {
-                                def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_PERS_SV_STRAH_LIC, PERV_SV_STRAH_LIC_PERIOD].join(".")
-                                logger.warn(pathAttr + " = \"" + periodPersXml + "\" не соответствует номеру корректировки файла \"" + fileName + "\"")
+                                String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.Период"
+                                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность периода", fioAndSNILS, pathError,
+                                        "$pathError='${periodPersXml}' не соответствует периоду файла '$fileName'")
                             }
 
                             // 2.3.3 Корректность отчетного года
                             def otchetGodPersXml = raschetSvChildNode.attributes()[PERV_SV_STRAH_LIC_OTCHET_GOD]
                             if (otchetGodDocXml != otchetGodPersXml) {
-                                def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_PERS_SV_STRAH_LIC, PERV_SV_STRAH_LIC_OTCHET_GOD].join(".")
-                                logger.warn(pathAttr + " = \"" + otchetGodPersXml + "\" не соответствует отчетному году файла \"" + fileName + "\"")
+                                String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ОтчетГод"
+                                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность отчетного года", fioAndSNILS, pathError,
+                                        "$pathError='${otchetGodPersXml}' не соответствует отчетному году файла '$fileName'")
                             }
 
                             raschetSvChildNode.childNodes().each { persSvStrahLicChildNode ->
-                                def snils = ""
-                                // ДанФЛПолуч
-                                if (persSvStrahLicChildNode.name == NODE_NAME_DAN_FL_POLUCH) {
-                                    // СНИЛС
-                                    snils = persSvStrahLicChildNode.attributes()[DAN_FL_POLUCH_SNILS]
-                                } else if (persSvStrahLicChildNode.name == NODE_NAME_SV_VYPL_SVOPS) {
+                                if (persSvStrahLicChildNode.name == NODE_NAME_SV_VYPL_SVOPS) {
                                     // СвВыплСВОПС
                                     persSvStrahLicChildNode.childNodes().each { svVyplSvopsChildNode ->
                                         // ВыплСВДоп
@@ -6529,8 +6589,9 @@ def checkDataXml() {
                                                     def tariffPayerCodeXml = vyplSvDopMtNode.attributes()[VYPL_SV_DOP_MT_TARIF]
                                                     actualTariffPayerCode = mapActualTariffPayerCode.get(tariffPayerCodeXml)
                                                     if (!actualTariffPayerCode && actualTariffPayerCode?.get(RF_FOR_OPS_DOP)?.value) {
-                                                        def pathAttr = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.СвВыплСВОПС.ВыплСВДоп.ВыплСВДопМТ.Тариф"
-                                                        logger.warn("$pathAttr = \"$tariffPayerCodeXml\" ФЛ с СНИЛС = \"$snils\"  не найден (не действует) в справочнике \"Коды тарифа плательщика\".")
+                                                        String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.СвВыплСВОПС.ВыплСВДоп.ВыплСВДопМТ.Тариф"
+                                                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие значения кода тарифа справочнику 'Коды тарифа плательщика'", fioAndSNILS, pathError,
+                                                                "$pathError='$tariffPayerCodeXml' не найден (не действует) в справочнике 'Коды тарифа плательщика'")
                                                     }
                                                 }
                                             }
@@ -6541,9 +6602,10 @@ def checkDataXml() {
                                                 if (svVyplMkNode.name == NODE_NAME_SV_VYPL_MK) {
                                                     // 2.3.5 Значение кода категории застрахованного лица
                                                     def kodKatLisCodeXml = svVyplMkNode.attributes()[SV_VYPL_MT_KOD_KAT_LIC]
-                                                    if (!listPersonCategory.contains(kodKatLisCodeXml)) {
-                                                        def pathAttr = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.СвВыплСВОПС.СвВыпл.СвВыплМК.КодКатЛиц"
-                                                        logger.warn("$pathAttr = \"$kodKatLisCodeXml\" ФЛ с СНИЛС = \"$snils\"  не найден (не действует) в справочнике \"Коды категорий застрахованных лиц\".")
+                                                    if (!listPersonCategory?.contains(kodKatLisCodeXml)) {
+                                                        String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.СвВыплСВОПС.СвВыпл.СвВыплМК.КодКатЛиц"
+                                                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие значения кода категории застрахованного лица справочнику 'Коды категорий застрахованных лиц'", fioAndSNILS, pathError,
+                                                                "$pathError='$kodKatLisCodeXml' не найден (не действует) в справочнике 'Коды категорий застрахованных лиц'")
                                                     }
                                                 }
                                             }
