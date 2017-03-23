@@ -447,7 +447,7 @@ def importAnswer1151111() {
             logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
             return
         }
-        declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
         if (logger.containsLevel(LogLevel.ERROR)) {
             return
         }
@@ -986,7 +986,7 @@ def importNdflResponse() {
             return
         }
 
-        declarationService.validateDeclaration(logger, dataFile, templateFile.blobDataId)
+        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             return

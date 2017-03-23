@@ -1389,10 +1389,9 @@ void importData() {
     logger.info("Начало загрузки данных первичной налоговой формы "+declarationData.id+". Дата начала отчетного периода: "+sdf.format(getReportPeriodStartDate())+", дата окончания: "+sdf.format(getReportPeriodEndDate()));
 
     //валидация по схеме
-    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile)
+    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')))
     if (logger.containsLevel(LogLevel.WARNING)) {
-        // todo https://jira.aplana.com/browse/SBRFNDFL-706
-//        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
+        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
     InputStream xmlInputStream = ImportInputStream;
