@@ -343,22 +343,27 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile) {
-        validateDeclaration(declarationData, userInfo, logger, dataFile, null);
+        validateDeclaration(declarationData, userInfo, logger, dataFile, null, null);
     }
 
     @Override
-    public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String xsdBlobDataId) {
-        declarationDataService.validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, xsdBlobDataId, new LockStateLogger() {
+    public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName) {
+        validateDeclaration(declarationData, userInfo, logger, dataFile, fileName, null);
+    }
+
+    @Override
+    public void validateDeclaration(TAUserInfo userInfo, Logger logger, File xmlFile, String fileName, String xsdBlobDataId) {
+        validateDeclaration(null, userInfo, logger, xmlFile, fileName, xsdBlobDataId);
+    }
+
+    @Override
+    public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName, String xsdBlobDataId) {
+        declarationDataService.validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, fileName, xsdBlobDataId, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 // ничего не делаем
             }
         });
-    }
-
-    @Override
-    public void validateDeclaration(Logger logger, File xmlFile, String xsdBlobDataId) {
-        validateXMLService.validate(logger, xmlFile, xsdBlobDataId, false);
     }
 
     @Override

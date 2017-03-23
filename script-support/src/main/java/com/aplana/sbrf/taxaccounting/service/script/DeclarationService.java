@@ -249,17 +249,28 @@ public interface DeclarationService {
      * @param userInfo
      * @param logger
      * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
-     * @param xsdBlobDataId
      */
-    void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String xsdBlobDataId);
+    void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName);
 
     /**
      * Метод передающий управление на проверку декларации сторонней утилите
+     * @param declarationData
+     * @param userInfo
      * @param logger
-     * @param xmlFile
+     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
      * @param xsdBlobDataId
      */
-    void validateDeclaration(Logger logger, File xmlFile, String xsdBlobDataId);
+    void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName, String xsdBlobDataId);
+
+    /**
+     * Метод передающий управление на проверку xml по xsd схеме сторонней утилите
+     * @param userInfo
+     * @param logger
+     * @param xmlFile
+     * @param fileName
+     * @param xsdBlobDataId
+     */
+    void validateDeclaration(TAUserInfo userInfo, Logger logger, File xmlFile, String fileName, String xsdBlobDataId);
 
     /**
      * Возвращает идентификатор действующего {@link DeclarationTemplate описания декларации} по виду декларации

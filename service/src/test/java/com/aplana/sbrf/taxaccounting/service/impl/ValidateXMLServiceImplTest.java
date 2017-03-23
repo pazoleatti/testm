@@ -48,8 +48,6 @@ public class ValidateXMLServiceImplTest implements Runnable {
     private ReportService reportService;
     @Autowired
     private ValidateXMLServiceImpl validateService;
-    @Autowired
-    private LockDataService lockDataService;
 
     private String uuidXsd1;
     @Before
@@ -109,7 +107,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
         data.setId(3l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null, null));
     }
 
     @Test
@@ -143,7 +141,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
-        Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null));
+        Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, null));
     }
 
     @Test
@@ -189,7 +187,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         data.setDeclarationTemplateId(3);
         data.setId(5l);
 		// при маленьком таймауте проверка не должна пройти
-		Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, 1000L));
+		Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, null, 1000L));
         Assert.assertEquals(2, logger.getEntries().size());
     }
 
@@ -205,7 +203,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
         data.setId(3l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, uuidXsd1));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null, null, uuidXsd1));
     }
 
     @Test

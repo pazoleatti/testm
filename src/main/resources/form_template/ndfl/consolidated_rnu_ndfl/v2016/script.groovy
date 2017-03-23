@@ -1386,15 +1386,16 @@ def getRefIncomeCode() {
  */
 def getRefIncomeType() {
     // Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
-    def mapResult = [:]
+    Map<String, List<Long>> mapResult = [:]
     def refBookList = getRefBook(REF_BOOK_INCOME_KIND_ID)
     refBookList.each { refBook ->
         String mark = refBook?.MARK?.stringValue
-        List<String> incomeTypeIdList = mapResult.get(mark)
+        List<Long> incomeTypeIdList = mapResult.get(mark)
         if (incomeTypeIdList == null) {
             incomeTypeIdList = []
         }
         incomeTypeIdList.add(refBook?.INCOME_TYPE_ID?.referenceValue)
+//        logger.info("getRefIncomeType $mark ${refBook?.INCOME_TYPE_ID?.referenceValue}")
         mapResult.put(mark, incomeTypeIdList)
     }
     return mapResult
@@ -1491,7 +1492,8 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
  */
 def getRefBook(def long refBookId) {
     // Передаем как аргумент только срок действия версии справочника
-    def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, null, null)
+    def refBookList = getProvider(refBookId).getRecords(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
+
     if (refBookList == null || refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
     }
@@ -1522,7 +1524,7 @@ def getRefBookByRecordVersionWhere(def long refBookId, def whereClause, def vers
  */
 List<Map<String, RefBookValue>> getRefBookByFilter(def long refBookId, def filter) {
     // Передаем как аргумент только срок действия версии справочника
-    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecords(getReportPeriodStartDate(), getReportPeriodEndDate(), null, filter)
     return refBookList
 }
 
@@ -1563,8 +1565,8 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String MESSAGE_ERROR_ABSENT = " Отсутсвуют строки:"
 
 
-@Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" размером %d."
-@Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" в колличестве %d."
+@Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" (%d записей)."
+@Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" (%d записей)."
 
 // Таблицы
 @Field final String T_PERSON = "Реквизиты"
@@ -2622,19 +2624,13 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // СведДох2 Сумма вычета (Графа 12)
             BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
-            if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
+            if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction) && comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                        "Сумма вычета (Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: ""}'")
+                        "Сумма вычета (Раздел 2 Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: ""}', Доход.Сумма.Начисление (Раздел 2 Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'" +
+                                ", сумма значений Применение вычета.Текущий период.Сумма (Раздел 3 Графа 16)='${sumNdflDeduction ?: ""}'")
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
                         "Значение не соответствует правилу: Графа 12 Раздел 2 = сумма значений граф 16 Раздел 3")
-            }
-            if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
-                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                        "Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'")
-                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
-                        "Значение не соответствует правилу: сумма значений граф 16 Раздела 3 ≤ графа 10 Раздел 2")
             }
 
             // СведДох4 НДФЛ.Процентная ставка (Графа 14)
@@ -2650,7 +2646,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             "Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий: \\n" +
                                     " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2\\n" +
                                     " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» = 1\\n" +
-                                    " «Графа 7 Раздел 1» ≠ 643 и («Графа 4 Раздел 2» = 2000 или 2001 или 2010 или 2002 или 2003) и («Графа 12 Раздел 1» ≥ 3)")
+                                    " «Графа 7 Раздел 1» ≠ 643 и («Графа 4 Раздел 2» = 2000 или 2001 или 2010 или 2002 или 2003) и («Графа 12 Раздел 1» >= 3)")
                 }
             } else if (ndflPersonIncome.taxRate == 15) {
                 if (!(ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1")) {
@@ -2677,7 +2673,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
                             "Для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:\\n" +
-                                    " «Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 2» ≠ 1010\\n" +
+                                    " «Графа 12 Раздел 1» >= 2 и «Графа 4 Раздел 2» ≠ 1010\\n" +
                                     " («Графа 4 Раздел 2» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2")
                 }
             } else if (ndflPersonIncome.taxRate == 9) {
@@ -2897,7 +2893,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                              "1545", "1546", "1547", "1548", "1549", "1551", "1552", "1554"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType != "02"))
                         && ndflPersonIncome.overholdingTax > 0
                 ) {
-                    // «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» ≤ ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%)
+                    // «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» <= ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%)
                     List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
                     NdflPersonIncome ndflPersonIncomePreview = null
                     if (!ndflPersonIncomeCurrentList.isEmpty()) {
@@ -2913,7 +2909,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "НДФЛ.Расчет.Сумма.Удержанный (Графа 17)='${ndflPersonIncome.withholdingTax ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 17", fioAndInp, pathError,
-                                "Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» ≤ ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%%)")
+                                "Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» <= ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%%)")
                     }
                 } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
                         || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1544", "1545",
@@ -2985,7 +2981,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             "сумма НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)='${refoundTaxSum ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 20", fioAndInp, pathError,
                             "Не выполнено условие: если «Графа 20 Раздел 2» > 0," +
-                                    " то «Сумма Граф 20 Раздел 2» ≤ «Сумма Граф 19 Раздел 2» для текущей пары «Графа 2 Раздел 2» и «Графа 3 Раздел 2»")
+                                    " то «Сумма Граф 20 Раздел 2» <= «Сумма Граф 19 Раздел 2» для текущей пары «Графа 2 Раздел 2» и «Графа 3 Раздел 2»")
                 }
             }
 
@@ -2999,11 +2995,11 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                                                                 "2710", "2760", "2762", "2770", "2900", "4800"], ["00"],
                         new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
 
-                // 3,4 "Графа 21" ≤ "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" ≤ "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
+                // 3,4 "Графа 21" <= "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" <= "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
                 dateConditionDataList << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
                                                                 "1541", "1542", "1543", "1544", "1545", "1546", "1547",
                                                                 "1548", "1549", "1551", "1552", "1553", "1554"], ["01", "02", "03", "04"],
-                        new Column21EqualsColumn7Plus30WorkingDays(), """«Графа 21 Раздел 2» ≤ «Графа 7 Раздел 2» + "30 календарных дней", если «Графа 7 Раздел 2» + "30 календарных дней" - выходной день, то «Графа 21 Раздел 2» ≤ "Следующий рабочий день" после «Графа 7 Раздел 2» + "30 календарных дней\"""")
+                        new Column21EqualsColumn7Plus30WorkingDays(), """«Графа 21 Раздел 2» <= «Графа 7 Раздел 2» + "30 календарных дней", если «Графа 7 Раздел 2» + "30 календарных дней" - выходной день, то «Графа 21 Раздел 2» <= "Следующий рабочий день" после «Графа 7 Раздел 2» + "30 календарных дней\"""")
 
                 // 6 "Графа 21" = "Графа 7" + "1 рабочий день"
                 dateConditionDataList << new DateConditionData(["2000"], ["05", "06", "07", "08", "09", "10", "11", "12"],
@@ -3046,8 +3042,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         "Графа 10" > "0"
                         "Графа 5" ≠ "02"
                         "Графа 5"≠ "14"
-                        "Графа 7" является минимальной из "Граф 7", удовлетворяющих условию: ("Графа 7" (следующей строки) ≥ "Графа 7" (текущей строки))
-                        "Графа 7" ≤ "31.12.20**" + "1 календарный день", где 31.12.20** - последний день текущего года
+                        "Графа 7" является минимальной из "Граф 7", удовлетворяющих условию: ("Графа 7" (следующей строки) >= "Графа 7" (текущей строки))
+                        "Графа 7" <= "31.12.20**" + "1 календарный день", где 31.12.20** - последний день текущего года
                          */
 
                         // Получим 1-ый рабочий день следующего года
@@ -3512,7 +3508,7 @@ class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
 }
 
 /**
- * Проверка: "Графа 21" ≤ "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" ≤ "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
+ * Проверка: "Графа 21" <= "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" <= "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
  */
 class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
     @Override
@@ -3657,7 +3653,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "",
                     "Применение вычета.Текущий период.Сумма (Графа 16)='${ndflPersonDeduction.periodCurrSumm ?: ""}', Документ о праве на налоговый вычет.Сумма (Графа 8)='${ndflPersonDeduction.notifSumm ?: ""}'")
             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 3 Графы 16", fioAndInp, pathError,
-                    "Значение не соответствует правилу: «Графа 16 Раздел 3» ≤ «Графа 8 Раздел 3»")
+                    "Значение не соответствует правилу: «Графа 16 Раздел 3» <= «Графа 8 Раздел 3»")
         }
     }
 }

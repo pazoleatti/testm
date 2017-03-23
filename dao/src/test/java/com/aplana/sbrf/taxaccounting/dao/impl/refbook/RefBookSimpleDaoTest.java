@@ -21,6 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -641,4 +643,30 @@ public class RefBookSimpleDaoTest {
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(createRefBook(), null, null, null, null, false);
         assertEquals(2, records.getTotalCount());
     }
+
+	private boolean checkRecord(PagingResult<Map<String, RefBookValue>> list, @NotNull String a, @NotNull String b) {
+		for (Map<String, RefBookValue> rec : list) {
+			if (a.equals(rec.get("a").getStringValue()) && b.equals(rec.get("b").getStringValue())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Test
+	public void getRecordsPeriod() {
+		RefBook refBook = refBookDao.get(10000L);
+		Calendar cal = GregorianCalendar.getInstance();
+		cal.set(2016, 5, 1); Date dateFrom = cal.getTime();
+		cal.set(2016, 8, 1); Date dateTo = cal.getTime();
+		PagingResult<Map<String, RefBookValue>> list = dao.getRecords(refBook, dateFrom, dateTo, null, null);
+		assertTrue(checkRecord(list, "1", "1"));
+		assertTrue(checkRecord(list, "2", "1"));
+		assertTrue(checkRecord(list, "3", "1"));
+		assertTrue(checkRecord(list, "3", "2"));
+
+		assertFalse(checkRecord(list, "28", "1"));
+	}
+
+
 }

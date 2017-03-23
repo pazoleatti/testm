@@ -5,12 +5,14 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormLink;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
@@ -110,17 +112,6 @@ public class RefBookServiceImpl implements RefBookService {
     @Override
     public void deleteRecordVersions(String tableName, List<Long> uniqueRecordIds) {
         refBookDao.deleteRecordVersions(tableName, uniqueRecordIds, false);
-    }
-
-    @Override
-    public List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod) {
-        RefBookDataProvider provider = factory.getDataProvider(refBookId);
-        return provider.isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
-    }
-
-    @Override
-    public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck) {
-        return refBookDao.isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod, excludeUseCheck);
     }
 
     @Override

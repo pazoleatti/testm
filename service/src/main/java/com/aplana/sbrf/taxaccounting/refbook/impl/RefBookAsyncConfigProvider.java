@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Service("refBookAsyncConfigProvider")
 @Transactional
-public class RefBookAsyncConfigProvider extends AbstractRefBookDataProvider {
+public class RefBookAsyncConfigProvider implements RefBookDataProvider {
 
     @Autowired
     RefBookAsyncConfigDao dao;
@@ -35,7 +35,12 @@ public class RefBookAsyncConfigProvider extends AbstractRefBookDataProvider {
         return dao.getRecords();
     }
 
-    @Override
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+		return getRecords(versionTo, pagingParams, filter, null);
+	}
+
+	@Override
     public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
         throw new UnsupportedOperationException();
     }

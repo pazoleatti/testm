@@ -56,6 +56,21 @@ public interface RefBookDataProvider {
     PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
                                                        String filter, RefBookAttribute sortAttribute);
 
+	/**
+	 * Возвращает версии записей справочника когда-либо бывших актуальными за указанный период времени.
+	 * Например, если какая-либо запись справочника имела в указанном интервале времени три версии, то все
+	 * три они вернуться, то есть ищутся пересечения версий записей с указанным интервалом времени.
+	 * <br>
+	 * Изначальное назначение метода - использование в логических проверках консолидированных за период данных.
+	 *
+	 * @param versionFrom начало интервала времени
+	 * @param versionTo окончание интервала времени
+	 * @params pagingParams параметры пейджинга
+	 * @param filter условие фильтрации
+	 * @return
+	 */
+	PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
+
     /**
      * Возвращает версии элементов справочника, удовлетворяющие указанному фильтру
      *
@@ -425,32 +440,5 @@ public interface RefBookDataProvider {
      */
     List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId);
 
-    /**
-     * Проверка использования записи в налоговых формах
-     *
-     * @param uniqueRecordIds список уникальных идентификаторов записей справочника
-     * @param versionFrom     дата начала периода
-     * @param versionTo       дата конца периода
-     * @param restrictPeriod  false - возвращает ссылки-использования, период которых НЕ пересекается с указанным периодом
-     *                        true - возвращает ссылки-использования, период которых пересекается с указанным периодом
-     *                        null - возвращает все ссылки-использования на указанную запись справочника, без учета периода
-     * @return результаты проверки. Сообщения об ошибках
-     */
-    List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod);
 
-    /**
-     * Получить список идентификаторов составных справочников, данные для которых грузяться из текущего справочника
-     * Например, для 603-го и 601-го справочников это будет 604-й справочник, т.к. данные для 604-го собираются из записей 603-го и 601-го
-     */
-    List<Long> usedInRefBookIds();
-
-    /**
-     * Преобразует идентификаторы записей для составных справочников (604, 542)
-     * Т.к. ссылки на записи составных справочников должны ссылатся на записи простых справочников, нужно понимать
-     * на какой именно из простых справочников указывает ссылка, поэтому в ссылку добавляется допольнительная информация.
-     *
-     * @param refBookId
-     * @param ids
-     */
-    List<Long> convertIds(Long refBookId, List<Long> ids);
 }

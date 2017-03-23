@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl.fixed;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -80,5 +81,10 @@ public class RefBookConfigurationParam extends AbstractPermanentRefBook {
     public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
         throw new UnsupportedOperationException();
     }
+
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+		throw new UnsupportedOperationException();
+	}
 
 }
