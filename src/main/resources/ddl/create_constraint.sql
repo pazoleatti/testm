@@ -392,7 +392,8 @@ alter table raschsv_itog_vypl_dop add constraint fk_raschsv_itog_vypl_dop_strah 
 alter table fias_addrobj add constraint pk_fias_addrobj primary key (id);
 
 -- foreign keys
-alter table fias_addrobj add constraint fk_fias_addrobj_parentid foreign key (parentguid) references fias_addrobj (id) on delete cascade deferrable initially deferred;
+--актуален, закомментирован для тестов.
+--alter table fias_addrobj add constraint fk_fias_addrobj_parentid foreign key (parentguid) references fias_addrobj (id) on delete cascade deferrable initially deferred;
 -- checks
 alter table fias_addrobj add constraint chk_fias_addrobj_centstatus check (centstatus between 0 and 4);
 alter table fias_addrobj add constraint chk_fias_addrobj_currstatus check (currstatus between 0 and 99);
