@@ -468,6 +468,10 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
 
     for (NdflPerson ndflPerson : ndflPersonList) {
 
+        if (ndflPerson.personId == null || ndflPerson.recordId == null){
+            throw new ServiceException("Ошибка при консолидации данных. Необходимо повторно выполнить расчет формы "+ndflPerson.declarationDataId);
+        }
+
         Long personRecordId = ndflPerson.recordId;
 
         NdflPerson consNdflPerson = result.get(personRecordId)
