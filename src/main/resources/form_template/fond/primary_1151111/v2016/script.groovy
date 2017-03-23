@@ -5587,17 +5587,17 @@ def checkDataDBSum() {
     if (!comparNumbEquals(nachislSvOpsSum1, uplPerOpsSum1)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум1Посл3М = \"$nachislSvOpsSum1\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл1М = \"$uplPerOpsSum1\""
-        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrComp не равна сумме исчисленных страховых взносов $pathAttrVal")
     }
     if (!comparNumbEquals(nachislSvOpsSum2, uplPerOpsSum2)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум2Посл3М = \"$nachislSvOpsSum2\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл2М = \"$uplPerOpsSum2\""
-        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrComp не равна сумме исчисленных страховых взносов $pathAttrVal")
     }
     if (!comparNumbEquals(nachislSvOpsSum3, uplPerOpsSum3)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум3Посл3М = \"$nachislSvOpsSum3\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл3М = \"$uplPerOpsSum3\""
-        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrComp не равна сумме исчисленных страховых взносов $pathAttrVal")
     }
 
     // 3.3.2.1 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу в целом (Проверки выполняются по всем РасчСВ_ОПС428)
