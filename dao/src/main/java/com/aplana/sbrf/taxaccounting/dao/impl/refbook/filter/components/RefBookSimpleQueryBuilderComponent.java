@@ -252,14 +252,14 @@ public class RefBookSimpleQueryBuilderComponent {
 			"r WHERE r.status >= 0 AND r.version <= ? " +  /* берем записи, которые действуют на дату окончания периода*/
 			"AND NOT exists (SELECT 1 FROM {0} " +  /* отсеиваем записи, которые перестали действовать на дату начала периода*/
 			"s WHERE s.record_id = r.record_id AND s.status IN (-1, 2) AND s.version < ?))";
-	//private static final String WITH_STATEMENT2 =
-	//		"with t as (select version, record_id from {0} r where status = 0 and version <= ?) ";
+	private static final String WITH_STATEMENT2 =
+			"with t as (select version, record_id from {0} r where status = 0 and version <= ?) ";
 	public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
 		PreparedStatementData ps = new PreparedStatementData();
-		ps.appendQuery(MessageFormat.format(WITH_STATEMENT_INTERVAL, refBook.getTableName()));
-		//ps.appendQuery(MessageFormat.format(WITH_STATEMENT2, refBook.getTableName()));
+		//ps.appendQuery(MessageFormat.format(WITH_STATEMENT_INTERVAL, refBook.getTableName()));
+		ps.appendQuery(MessageFormat.format(WITH_STATEMENT2, refBook.getTableName()));
 		ps.addParam(versionTo);
-		ps.addParam(versionFrom);
+		//ps.addParam(versionFrom);
 		return psGetRecordsQuery(refBook, ps, true, null, filter, pagingParams, false, false);
 	}
 
