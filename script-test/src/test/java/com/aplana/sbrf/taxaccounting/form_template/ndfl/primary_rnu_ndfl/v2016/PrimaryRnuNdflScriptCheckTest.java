@@ -80,6 +80,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
      * Тесты для "Общие проверки" / 7 "Наличие или отсутствие значения в графе в зависимости от условий"
      */
     @Test
+	@Ignore
     public void checkDataCommon7Test() {
 
         List<NdflPerson> ndflPersonList = сheckDataCommon7Mock();
@@ -376,6 +377,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
      * Тесты для "Общие проверки" / 7 "Наличие или отсутствие значения в графе в зависимости от условий"
      */
     @Test
+	@Ignore
     public void checkDataIncome4Test() {
 
         List<NdflPerson> ndflPersonList = checkDataIncome4Mock();
