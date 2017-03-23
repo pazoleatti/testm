@@ -1563,8 +1563,8 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String MESSAGE_ERROR_ABSENT = " Отсутсвуют строки:"
 
 
-@Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" размером %d."
-@Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" в колличестве %d."
+@Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" (%d записей)."
+@Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" (%d записей)."
 
 // Таблицы
 @Field final String T_PERSON = "Реквизиты"
