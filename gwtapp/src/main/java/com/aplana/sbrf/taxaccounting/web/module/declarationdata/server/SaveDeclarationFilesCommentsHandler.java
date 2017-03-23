@@ -44,6 +44,11 @@ public class SaveDeclarationFilesCommentsHandler extends AbstractActionHandler<S
     public GetDeclarationFilesCommentsResult execute(SaveDeclarationFilesCommentsAction action, ExecutionContext executionContext) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         GetDeclarationFilesCommentsResult result = new GetDeclarationFilesCommentsResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationData().getId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationData().getId());
+            return result;
+        }
         Logger logger = new Logger();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationData().getId(), DeclarationDataReportType.EDIT_FILE_COMMENT_DEC);
         LockData lockData = lockService.getLock(key);

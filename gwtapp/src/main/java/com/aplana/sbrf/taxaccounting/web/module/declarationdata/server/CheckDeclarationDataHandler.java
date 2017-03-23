@@ -61,6 +61,11 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
     public CheckDeclarationDataResult execute(final CheckDeclarationDataAction action, ExecutionContext context) throws ActionException {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
 		CheckDeclarationDataResult result = new CheckDeclarationDataResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), DeclarationDataReportType.ACCEPT_DEC));

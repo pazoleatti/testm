@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -22,8 +23,8 @@ import java.util.List;
 @Repository
 public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
-	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
-	private static final String FORM_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
+	private static final String DECLARATION_NOT_FOUND_MESSAGE = DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE;
+	private static final String FORM_NOT_FOUND_MESSAGE = "Налоговая форма с номером = %d не существует либо была удалена";
 
     private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override

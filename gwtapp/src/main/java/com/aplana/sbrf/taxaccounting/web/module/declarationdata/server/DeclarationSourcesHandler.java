@@ -38,6 +38,11 @@ public class DeclarationSourcesHandler extends AbstractActionHandler<SourcesActi
     @Override
     public SourcesResult execute(SourcesAction action, ExecutionContext executionContext) throws ActionException {
         SourcesResult result = new SourcesResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         DeclarationData declaration = declarationDataService.get(action.getDeclarationId(), userInfo);

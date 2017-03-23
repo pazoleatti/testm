@@ -35,6 +35,11 @@ public class UnlockDeclarationFilesCommentsHandler extends AbstractActionHandler
 	@Override
 	public UnlockDeclarationFilesCommentsResult execute(UnlockDeclarationFilesCommentsAction action, ExecutionContext executionContext) throws ActionException {
         UnlockDeclarationFilesCommentsResult result = new UnlockDeclarationFilesCommentsResult();
+		if (!declarationDataService.existDeclarationData(action.getDeclarationId())) {
+			result.setExistDeclarationData(false);
+			result.setDeclarationDataId(action.getDeclarationId());
+			return result;
+		}
         TAUserInfo userInfo = securityService.currentUserInfo();
 		try{
             String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), DeclarationDataReportType.EDIT_FILE_COMMENT_DEC);

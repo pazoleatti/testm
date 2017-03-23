@@ -50,6 +50,11 @@ public class GetPdfDeclarationHandler extends AbstractActionHandler<GetPdfAction
     @Override
     public GetPdfResult execute(GetPdfAction action, ExecutionContext executionContext) throws ActionException {
         GetPdfResult result = new GetPdfResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationDataId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationDataId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         if (reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.PDF_DEC) != null) {
             result.setPdf(generatePdfViewerModel(action.getDeclarationDataId(), userInfo));
