@@ -95,6 +95,10 @@ void consolidation() {
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
+    if (declarationDataIdList.isEmpty()){
+        throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
+    }
+
     logger.info("Номера первичных НФ включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + calcTimeMillis(time));
 
     List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
@@ -467,6 +471,10 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
     Map<Long, NdflPerson> result = new TreeMap<Long, NdflPerson>();
 
     for (NdflPerson ndflPerson : ndflPersonList) {
+
+        if (ndflPerson.personId == null || ndflPerson.recordId == null){
+            throw new ServiceException("Ошибка при консолидации данных. Необходимо повторно выполнить расчет формы "+ndflPerson.declarationDataId);
+        }
 
         Long personRecordId = ndflPerson.recordId;
 
