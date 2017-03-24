@@ -1143,6 +1143,7 @@ def importNdflResponse() {
             declarationService.setDocStateId(declarationData.id, docStateId)
         }
     }
+    declarationService.createPdfReport(logger, declarationData, userInfo)
 }
 
 @Deprecated
