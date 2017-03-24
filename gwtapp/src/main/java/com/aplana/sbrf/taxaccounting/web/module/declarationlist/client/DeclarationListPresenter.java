@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
@@ -18,9 +17,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.De
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.History;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -47,8 +43,7 @@ public class DeclarationListPresenter extends
      * Сетится в фильтр при открытии формы.
      * Используется при заполнении начальных значений фильтра поиска
      */
-    private Map<TaxType, DeclarationDataFilter> filterStates = new HashMap<TaxType, DeclarationDataFilter>();
-    private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
+    private Map<String, DeclarationDataFilter> filterStates = new HashMap<String, DeclarationDataFilter>();
     private List<Long> selectedItemIds;
     private TaxType taxType;
     private Boolean isReports;
@@ -95,13 +90,6 @@ public class DeclarationListPresenter extends
                              DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter, ChangeStatusEDPresenter changeStatusEDPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter, changeStatusEDPresenter);
 		getView().setUiHandlers(this);
-        History.addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                lstHistory.put(0, lstHistory.get(1));
-                lstHistory.put(1, event.getValue());
-            }
-        });
     }
 
 	@Override
@@ -114,19 +102,17 @@ public class DeclarationListPresenter extends
             Boolean isReportsOld = isReports;
 			taxType = TaxType.valueOf(request.getParameter(TYPE, ""));
             isReports = Boolean.parseBoolean(request.getParameter(REPORTS, "false"));
+            if (TaxType.PFR.equals(taxType)) {
+                isReports = false;
+            }
             getView().initTable(taxType, isReports);
             if (taxTypeOld == null || !taxType.equals(taxTypeOld) || isReportsOld == null || !isReportsOld.equals(isReports)) {
-                filterStates.clear();
                 getView().updateTitle(taxType);
                 selectedItemIds = null;
             }
-            String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
-            if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
-                    (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
-                filterStates.clear();
-                selectedItemIds = null;
-            }
-			filterPresenter.initFilter(taxType, isReports, filterStates.get(taxType));
+            //String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
+            filterPresenter.setDeclarationListPresenter(this);
+			filterPresenter.initFilter(taxType, isReports, filterStates.get(taxType.name() + "_" + isReports));
             filterPresenter.getView().updateFilter(taxType, isReports);
             getView().updatePageSize(taxType);
 
@@ -248,7 +234,7 @@ public class DeclarationListPresenter extends
         // Если мы захотим чтобы для каждого налога запоминались другие параметры поиска (сортировка...),
         // то вместо создания нового мы должны будем получать фильтр из мапки и обновлять.
 
-        filterStates.put(taxType, cloneFilter);
+        filterStates.put(taxType.name() + "_" + isReports, cloneFilter);
     }
 
     @Override
@@ -376,6 +362,10 @@ public class DeclarationListPresenter extends
         });
         LogCleanEvent.fire(DeclarationListPresenter.this);
         addToPopupSlot(changeStatusEDPresenter);
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
     }
 
     @Override

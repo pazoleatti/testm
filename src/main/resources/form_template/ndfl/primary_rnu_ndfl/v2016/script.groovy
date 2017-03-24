@@ -2631,9 +2631,8 @@ def checkDataReference(
 
         // Спр10 Наличие связи с "Физическое лицо"
         if (ndflPerson.personId == null || ndflPerson.personId == 0) {
-            //TODO turn_to_error
             String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
-            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Все строки НФ имеют ссылку на справочник ФЛ", fioAndInp, pathError,
+            logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Все строки НФ имеют ссылку на справочник ФЛ", fioAndInp, pathError,
                     "Не удалось установить связь со справочником '$R_PERSON'")
         } else {
             def personRecord = personMap.get(ndflPerson.recordId)
