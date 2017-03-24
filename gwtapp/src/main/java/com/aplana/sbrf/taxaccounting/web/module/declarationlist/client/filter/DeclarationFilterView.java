@@ -277,6 +277,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 		}
 	}
 
+    @UiHandler("reset")
+	void onResetButtonClicked(ClickEvent event) {
+		if (getUiHandlers() != null) {
+			getUiHandlers().onResetFilter();
+		}
+	}
+
     @Override
     public void updateFilter(TaxType taxType, boolean isReports) {
         panel.clear();

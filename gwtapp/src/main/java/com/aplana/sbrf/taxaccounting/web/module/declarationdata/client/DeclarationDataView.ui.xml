@@ -34,7 +34,7 @@
     .headerDepAttr {
         font-size: 12px;
         font-weight: bold;
-        max-height: 40px;
+        max-height: 17px;
         overflow: hidden;
     }
 
@@ -171,6 +171,15 @@
                                     <g:Label ui:field="declarationDataId" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                 </g:cell>
                             </g:HorizontalPanel>
+                            <g:HorizontalPanel spacing="2" addStyleNames="{style.declarationDataIdBlock}">
+                                <g:cell width="95px" horizontalAlignment="right" >
+                                    <g:Label text="Создал:" ui:field="createUserNameLabel" addStyleNames="{style.headerAttrName}"/>
+                                </g:cell>
+                                <g:cell horizontalAlignment="left">
+                                    <g:Label ui:field="createUserName" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
+                                </g:cell>
+                            </g:HorizontalPanel>
+
                         </g:VerticalPanel>
                     </g:cell>
                     <!--Инфо по форме. Середина-->
@@ -241,10 +250,10 @@
                         </style:LeftBar>
                         <g:HorizontalPanel>
                             <g:cell verticalAlignment="middle">
-                                <g:Label ui:field="dateBoxLabel" title="Дата формирования налоговой формы" wordWrap="false" text="Дата формирования налоговой формы:" />
+                                <g:Label ui:field="dateBoxLabel" title="Дата и время создания формы:" wordWrap="false" text="Дата формирования налоговой формы:" />
                             </g:cell>
                             <g:cell width="100%" verticalAlignment="middle">
-                                <d:DateMaskBoxPicker ui:field="dateBox" addStyleNames="{style.centerBlock}" />
+                                <g:Label ui:field="createDate" addStyleNames="{style.centerBlock}, {style.headerAttr}, {style.depAttr}" />
                             </g:cell>
                         </g:HorizontalPanel>
                 </g:HorizontalPanel>
