@@ -223,7 +223,7 @@ void consolidation() {
 
     }
 
-    logger.info("Консолидация завершена, новых записей создано: "+(ndflPersonNum - 1) + calcTimeMillis(time));
+    logger.info("Консолидация завершена, новых записей создано: "+(ndflPersonNum - 1) + ", " + calcTimeMillis(time));
 
 }
 
