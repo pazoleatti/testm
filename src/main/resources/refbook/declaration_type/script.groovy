@@ -252,14 +252,13 @@ def importPrimary1151111() {
         return
     }
 
-    // todo oshelepaev https://jira.aplana.com/browse/SBRFNDFL-722
-//    if (results.size() > 1) {
-//        def departmentIds = results*.DEPARTMENT_ID*.getReferenceValue()*.intValue()
-//        def departmentsMap = departmentService.getDepartments(departmentIds)
-//        def joinName = departmentsMap.values()*.getName().join(', ')
-//        logger.error("Файл «%s» не загружен: Найдено несколько подразделений, для которого указан КПП \"%s\": \"%s\"", UploadFileName, kpp, joinName)
-//        return
-//    }
+    if (results.size() > 1) {
+        def departmentIds = results*.DEPARTMENT_ID*.getReferenceValue()*.intValue()
+        def departmentsMap = departmentService.getDepartments(departmentIds)
+        def joinName = departmentsMap.values()*.getName().join(', ')
+        logger.error("Файл «%s» не загружен: Найдено несколько подразделений, для которого указан КПП \"%s\": \"%s\"", UploadFileName, kpp, joinName)
+        return
+    }
     def departmentId = results.get(0).DEPARTMENT_ID.getReferenceValue().intValue()
     def departmentName = departmentService.get(departmentId)
 
