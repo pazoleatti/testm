@@ -38,6 +38,10 @@ import java.util.regex.Pattern
  * Скрипт макета декларации РНУ-НДФЛ(первичная)
  */
 switch (formDataEvent) {
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
+        moveAcceptedToCreated();
+        break
+
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
         // Формирование pdf-отчета формы
@@ -78,6 +82,16 @@ switch (formDataEvent) {
  */
 @Field
 def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
+
+def moveAcceptedToCreated(){
+    List<Relation> destinationInfo = getDestinationInfo(false);
+    for (Relation relation : destinationInfo) {
+        if (relation.declarationState.equals(State.ACCEPTED)){
+            throw new ServiceException("Ошибка изменения состояния формы. Данная форма не может быть возвращена в состояние 'Создана', так как используется в КНФ с состоянием 'Принята', номер формы: "+relation.declarationDataId);
+        }
+    }
+}
+
 
 //------------------ Calculate ----------------------
 /**
@@ -1142,10 +1156,10 @@ def findCountryId(countryCode) {
 
 //------------------ GET_SOURCES ----------------------
 
-def getSourcesListForTemporarySolution() {
-    if (needSources) {
-        return
-    }
+List<Relation> getDestinationInfo(boolean isLight){
+
+    List<Relation> destinationInfo = new ArrayList<Relation>();
+
     //отчетный период в котором выполняется консолидация
     ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     //Идентификатор подразделения по которому формируется консолидированная форма
@@ -1154,7 +1168,21 @@ def getSourcesListForTemporarySolution() {
     List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
     for (DeclarationData declarationData : declarationDataList) {
         //Формируем связь источник-приемник
-        def relation = getRelation(declarationData, department, declarationDataReportPeriod)
+        def relation = getRelation(declarationData, department, declarationDataReportPeriod, isLight)
+        destinationInfo.add(relation)
+    }
+
+    return destinationInfo;
+
+}
+
+
+def getSourcesListForTemporarySolution() {
+    if (needSources) {
+        return
+    }
+
+    for (Relation relation : getDestinationInfo(ligth)) {
         sources.sourceList.add(relation)
     }
     sources.sourcesProcessedByScript = true
@@ -1168,7 +1196,7 @@ def getSourcesListForTemporarySolution() {
  * @param period период нф
  * @param monthOrder номер месяца (для ежемесячной формы)
  */
-def getRelation(DeclarationData declarationData, Department department, ReportPeriod period) {
+def getRelation(DeclarationData declarationData, Department department, ReportPeriod period, boolean isLight) {
 
     Relation relation = new Relation()
 
@@ -1181,7 +1209,7 @@ def getRelation(DeclarationData declarationData, Department department, ReportPe
     def isSource = (declarationTemplate.id == PRIMARY_RNU_NDFL_TEMPLATE_ID)
     ReportPeriod rp = departmentReportPeriod.getReportPeriod();
 
-    if (light) {
+    if (isLight) {
         //Идентификатор подразделения
         relation.departmentId = department.id
         //полное название подразделения
