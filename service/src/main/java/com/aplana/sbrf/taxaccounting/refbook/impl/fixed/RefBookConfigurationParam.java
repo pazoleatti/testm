@@ -83,7 +83,7 @@ public class RefBookConfigurationParam extends AbstractPermanentRefBook {
     }
 
 	@Override
-	public PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+	public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
 		throw new UnsupportedOperationException();
 	}
 

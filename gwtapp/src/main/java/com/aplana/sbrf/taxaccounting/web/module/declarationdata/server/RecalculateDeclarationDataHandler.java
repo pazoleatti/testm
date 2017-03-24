@@ -49,6 +49,11 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     public RecalculateDeclarationDataResult execute(final RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
         final RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         try {

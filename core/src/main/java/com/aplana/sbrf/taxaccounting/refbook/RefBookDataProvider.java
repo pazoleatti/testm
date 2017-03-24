@@ -69,7 +69,7 @@ public interface RefBookDataProvider {
 	 * @param filter условие фильтрации
 	 * @return
 	 */
-	PagingResult<Map<String, RefBookValue>> getRecords(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
+	PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter);
 
     /**
      * Возвращает версии элементов справочника, удовлетворяющие указанному фильтру

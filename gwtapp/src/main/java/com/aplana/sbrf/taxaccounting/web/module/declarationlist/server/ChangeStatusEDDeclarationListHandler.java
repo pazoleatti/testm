@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -36,15 +37,19 @@ public class ChangeStatusEDDeclarationListHandler extends AbstractActionHandler<
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         for (Long declarationId: action.getDeclarationIds()) {
-            Logger localLogger = new Logger();
-            String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC);
-            try {
-                declarationDataService.changeDocState(localLogger, userInfo, declarationId, action.getDocStateId());
-                logger.info("Успешно выполнено изменение состояния ЭД %s", declarationFullName);
-            } catch (Exception e) {
-                logger.error("При изменение состояния ЭД %s возникли ошибки:", declarationFullName);
-            } finally {
-                logger.getEntries().addAll(localLogger.getEntries());
+            if (declarationDataService.existDeclarationData(declarationId)) {
+                Logger localLogger = new Logger();
+                String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC);
+                try {
+                    declarationDataService.changeDocState(localLogger, userInfo, declarationId, action.getDocStateId());
+                    logger.info("Успешно выполнено изменение состояния ЭД %s", declarationFullName);
+                } catch (Exception e) {
+                    logger.error("При изменение состояния ЭД %s возникли ошибки:", declarationFullName);
+                } finally {
+                    logger.getEntries().addAll(localLogger.getEntries());
+                }
+            } else {
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationId);
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

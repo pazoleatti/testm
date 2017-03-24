@@ -47,6 +47,11 @@ public class PrepareSubreportDeclarationHandler extends AbstractActionHandler<Pr
     @Transactional
     public PrepareSubreportResult execute(PrepareSubreportAction action, ExecutionContext executionContext) throws ActionException {
         PrepareSubreportResult result = new PrepareSubreportResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationDataId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationDataId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         DeclarationData declarationData = declarationDataService.get(action.getDeclarationDataId(), userInfo);

@@ -59,6 +59,11 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
     @Transactional
     public TimerSubreportResult execute(TimerSubreportAction action, ExecutionContext executionContext) throws ActionException {
         TimerSubreportResult result = new TimerSubreportResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationDataId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationDataId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
 
         Map<String, TimerSubreportResult.Status> mapExistReport = new HashMap<String, TimerSubreportResult.Status>();

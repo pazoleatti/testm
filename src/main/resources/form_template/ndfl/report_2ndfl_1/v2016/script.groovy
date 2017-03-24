@@ -1435,9 +1435,11 @@ def createSpecificReport() {
     }
 
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
-
+    def xmlStr = declarationService.getXmlData(declarationData.id)
+    xmlStr = xmlStr.replace("windows-1251", "utf-8") // сведения о кодировке должны соответствовать содержимому
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-        buildXmlForSpecificReport(it)
+        it.write(xmlStr, 0, xmlStr.length())
+        it.flush()
     });
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());

@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.gwtplatform.dispatch.shared.Result;
-
-public class CreateReportResult implements Result {
+public class CreateReportResult extends DeclarationDataResult {
     private static final long serialVersionUID = 7832261980997033051L;
 
     private CreateAsyncTaskStatus status;

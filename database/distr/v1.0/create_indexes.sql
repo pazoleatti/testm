@@ -69,6 +69,7 @@ create index idx_log_entry_date on log_entry(creation_date);
 create index idx_ref_book_cal_work on ref_book_calendar(ctype);
 create index i_ref_book_oktmo_code on ref_book_oktmo (code);
 create index idx_ref_book_ndfl_detail_load on ref_book_ndfl_detail (ref_book_ndfl_id,tax_organ_code,kpp);
+create index idx_fias_socrbase_lev on fias_socrbase(lev);
 
 create index srch_ref_person_name_brthd on ref_book_person(replace(lower(last_name), ' ', ''),replace(lower(first_name), ' ', ''),replace(lower(middle_name), ' ', ''),birth_date);
 create index srch_ref_book_id_doc_tp_num on ref_book_id_doc(doc_id,replace(lower(doc_number), ' ', ''));
@@ -80,6 +81,7 @@ create index srch_full_ref_pers_duble on ref_book_person (replace(lower(nvl(last
 
 create index srch_fias_addrobj_postcode on fias_addrobj(replace(postalcode,' ',''));
 create index srch_fias_addrobj_regfnls on fias_addrobj(livestatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
+create index srch_fias_addrobj_csregfn on fias_addrobj(currstatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
 
 create index i_log_system_log_id on log_system(log_id);
 create index i_notification_log_id on notification(log_id);

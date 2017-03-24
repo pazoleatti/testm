@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -65,6 +67,9 @@ public class GetDeclarationDataHandler
 		TAUserInfo userInfo = securityService.currentUserInfo();
 
         GetDeclarationDataResult result = new GetDeclarationDataResult();
+        if (!declarationDataService.existDeclarationData(action.getId())) {
+            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, action.getId()), null);
+        }
         Set<FormDataEvent> permittedEvents = declarationAccessService.getPermittedEvents(userInfo, action.getId());
 
         DeclarationData declaration = declarationDataService.get(action.getId(), userInfo);

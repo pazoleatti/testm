@@ -2220,7 +2220,7 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
  */
 def getRefBook(def long refBookId) {
     // Передаем как аргумент только срок действия версии справочника
-    def refBookList = getProvider(refBookId).getRecords(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
+    def refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
 
     if (refBookList == null || refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
@@ -2236,7 +2236,7 @@ def getRefBook(def long refBookId) {
  */
 List<Map<String, RefBookValue>> getRefBookByFilter(def long refBookId, def filter) {
     // Передаем как аргумент только срок действия версии справочника
-    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecords(getReportPeriodStartDate(), getReportPeriodEndDate(), null, filter)
+    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, filter)
     return refBookList
 }
 

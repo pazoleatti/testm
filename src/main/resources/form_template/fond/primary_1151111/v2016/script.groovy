@@ -5304,15 +5304,18 @@ def checkDataDBSum() {
                     Integer numberMonth = getNumberMonth(Integer.parseInt(raschsvVyplSvDopMt.mesyac), getReportPeriodEndDate())
                     if (numberMonth != null) {
                         if (numberMonth == 1) {
+                            // 1-ый из 3-х последних месяцев
                             svVyplMkDopSum1 += nachislSvCurr
                         } else if (numberMonth == 2) {
+                            // 2-ый из 3-х последних месяцев
                             svVyplMkDopSum2 += nachislSvCurr
                         } else if (numberMonth == 3) {
+                            // 3-ий из 3-х последних месяцев
                             svVyplMkDopSum3 += nachislSvCurr
                         }
 
                         // Сведения о сумме выплат по доп.тарифам в пользу физ.лица по месяцам в разрезе тарифов
-                        List<BigDecimal> vyplSvDopMtSumList = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: [3]
+                        List<BigDecimal> vyplSvDopMtSumList = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: []
                         vyplSvDopMtSumList[numberMonth - 1] = vyplSvDopMtSumList[numberMonth - 1] ?: 0
                         vyplSvDopMtSumList[numberMonth - 1] += nachislSvCurr
                         vyplSvDopMtMap.put(raschsvVyplSvDopMt.tarif, vyplSvDopMtSumList)
@@ -5587,17 +5590,17 @@ def checkDataDBSum() {
     if (!comparNumbEquals(nachislSvOpsSum1, uplPerOpsSum1)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум1Посл3М = \"$nachislSvOpsSum1\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл1М = \"$uplPerOpsSum1\""
-        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrComp не равна сумме исчисленных страховых взносов $pathAttrVal")
     }
     if (!comparNumbEquals(nachislSvOpsSum2, uplPerOpsSum2)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум2Посл3М = \"$nachislSvOpsSum2\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл2М = \"$uplPerOpsSum2\""
-        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrComp не равна сумме исчисленных страховых взносов $pathAttrVal")
     }
     if (!comparNumbEquals(nachislSvOpsSum3, uplPerOpsSum3)) {
         def pathAttrVal = pathAttrOps + ".НачислСВ.Сум3Посл3М = \"$nachislSvOpsSum3\""
         def pathAttrComp = "Файл.Документ.РасчетСВ.ОбязПлатСВ.УплПерОПС.СумСВУпл3М = \"$uplPerOpsSum3\""
-        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrVal не равна сумме исчисленных страховых взносов $pathAttrComp")
+        logger.warn("Сумма страховых взносов, подлежащая уплате ОПС $pathAttrComp не равна сумме исчисленных страховых взносов $pathAttrVal")
     }
 
     // 3.3.2.1 Сумма исчисленных страховых взносов по доп. тарифу по всем ФЛ равна значению исчисленных страховых взносов по доп. тарифу в целом (Проверки выполняются по всем РасчСВ_ОПС428)
@@ -5752,17 +5755,17 @@ def checkDataDBSum() {
     // 3.3.4.1 Сумма подлежащая уплате равна исчислено + возмещено - произведено расходов
     if (!comparNumbEquals(uplSvPrevCurr1, ossNachislSvCurr1 + ossVosmRashSoCurr1)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл1Посл3М.Сумма = \"$uplSvPrevCurr1\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум1Посл3М = \"$ossNachislSvCurr1\", " + pathAttrOss + ".ВозмРасхСО.Сум1Посл3М = \"$ossVosmRashSoCurr1\"."
+        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум1Посл3М = \"$ossNachislSvCurr1\" + " + pathAttrOss + ".ВозмРасхСО.Сум1Посл3М = \"$ossVosmRashSoCurr1\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (!comparNumbEquals(uplSvPrevCurr2, ossNachislSvCurr2 + ossVosmRashSoCurr2)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл2Посл3М.Сумма = \"$uplSvPrevCurr2\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум2Посл3М = \"$ossNachislSvCurr2\", " + pathAttrOss + ".ВозмРасхСО.Сум2Посл3М = \"$ossVosmRashSoCurr2\"."
+        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум2Посл3М = \"$ossNachislSvCurr2\" + " + pathAttrOss + ".ВозмРасхСО.Сум2Посл3М = \"$ossVosmRashSoCurr2\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
     if (!comparNumbEquals(uplSvPrevCurr3, ossNachislSvCurr3 + ossVosmRashSoCurr3)) {
         def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл3Посл3М.Сумма = \"$uplSvPrevCurr3\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум3Посл3М = \"$ossNachislSvCurr3\", " + pathAttrOss + ".ВозмРасхСО.Сум3Посл3М = \"$ossVosmRashSoCurr3\"."
+        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум3Посл3М = \"$ossNachislSvCurr3\" + " + pathAttrOss + ".ВозмРасхСО.Сум3Посл3М = \"$ossVosmRashSoCurr3\"."
         logger.warn("$pathAttrVal не равен $pathAttrComp")
     }
 

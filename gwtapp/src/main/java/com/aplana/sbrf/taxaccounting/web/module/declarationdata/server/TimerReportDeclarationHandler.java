@@ -51,9 +51,15 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
     @Override
     public TimerReportResult execute(TimerReportAction action, ExecutionContext executionContext) throws ActionException {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
-        if (ddReportType.isSubreport())
+        if (ddReportType.isSubreport()) {
             throw new ActionException("Неправильный тип отчета");
+        }
         TimerReportResult result = new TimerReportResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationDataId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationDataId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         TimerReportResult.Status status = getStatus(userInfo, action.getDeclarationDataId(), ddReportType);
         result.setExistReport(status);

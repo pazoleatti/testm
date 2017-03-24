@@ -26,8 +26,14 @@ public class DeleteDeclarationDataHandler extends AbstractActionHandler<DeleteDe
 
     @Override
     public DeleteDeclarationDataResult execute(DeleteDeclarationDataAction action, ExecutionContext context) {
+        DeleteDeclarationDataResult result = new DeleteDeclarationDataResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationId());
+            return result;
+        }
 		declarationDataService.delete(action.getDeclarationId(), securityService.currentUserInfo());
-	    return new DeleteDeclarationDataResult();
+	    return result;
     }
 
     @Override
