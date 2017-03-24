@@ -5304,15 +5304,18 @@ def checkDataDBSum() {
                     Integer numberMonth = getNumberMonth(Integer.parseInt(raschsvVyplSvDopMt.mesyac), getReportPeriodEndDate())
                     if (numberMonth != null) {
                         if (numberMonth == 1) {
+                            // 1-ый из 3-х последних месяцев
                             svVyplMkDopSum1 += nachislSvCurr
                         } else if (numberMonth == 2) {
+                            // 2-ый из 3-х последних месяцев
                             svVyplMkDopSum2 += nachislSvCurr
                         } else if (numberMonth == 3) {
+                            // 3-ий из 3-х последних месяцев
                             svVyplMkDopSum3 += nachislSvCurr
                         }
 
                         // Сведения о сумме выплат по доп.тарифам в пользу физ.лица по месяцам в разрезе тарифов
-                        List<BigDecimal> vyplSvDopMtSumList = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: [3]
+                        List<BigDecimal> vyplSvDopMtSumList = vyplSvDopMtMap.get(raschsvVyplSvDopMt.tarif) ?: []
                         vyplSvDopMtSumList[numberMonth - 1] = vyplSvDopMtSumList[numberMonth - 1] ?: 0
                         vyplSvDopMtSumList[numberMonth - 1] += nachislSvCurr
                         vyplSvDopMtMap.put(raschsvVyplSvDopMt.tarif, vyplSvDopMtSumList)
