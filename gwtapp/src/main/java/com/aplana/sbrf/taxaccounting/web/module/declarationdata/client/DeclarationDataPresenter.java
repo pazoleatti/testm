@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -27,7 +26,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -93,8 +91,6 @@ public class DeclarationDataPresenter
 		void setBackButton(String link, String text);
 
 		void setPdf(Pdf pdf);
-
-		void setDocDate(Date date);
 
         void setKpp(String kpp);
 
@@ -203,7 +199,6 @@ public class DeclarationDataPresenter
                                     periodStr += ", корр. (" + DATE_TIME_FORMAT.format(result.getCorrectionDate()) + ")";
                                 }
 								getView().setReportPeriod(periodStr);
-								getView().setDocDate(result.getDocDate());
                                 getView().setDepartment(result.getDepartment());
                                 getView().setVisiblePDF(result.isVisiblePDF());
                                 subreports = result.getSubreports();

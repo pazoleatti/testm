@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
@@ -27,9 +25,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	interface Binder extends UiBinder<Widget, DeclarationDataView> { }
 
-    public static final String DATE_BOX_TITLE = "Дата формирования налоговой формы";
-    public static final String DATE_BOX_TITLE_D = "Дата формирования уведомления";
-    private static final int TABLE_TOP3 = 105;
+    public static final String DATE_BOX_TITLE = "Дата и время создания формы";
+    public static final String DATE_BOX_TITLE_D = "Дата и время создания формы";
+    private static final int TABLE_TOP3 = 107;
     private static final int TABLE_TOP4 = 124;
 
 	@UiField
@@ -80,8 +78,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiField
     Label stateED, stateEDLabel;
 
-    private Label kpp, oktmo, taxOrganCode,asnu, createUserName, createDate;
-    private Label kppLabel, oktmoLabel, taxOrganCodeLabel, asnuLabel, createUserNameLabel, createDateLabel;
+    @UiField
+    Label createUserName, createUserNameLabel;
+
+    private Label kpp, oktmo, taxOrganCode,asnu;
+    private Label kppLabel, oktmoLabel, taxOrganCodeLabel, asnuLabel;
 
 	@UiField
     PdfViewerWidget pdfViewer;
@@ -91,10 +92,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     HTML noPdfLabel;
 
     @UiField
-    Label dateBoxLabel;
+    Label dateBoxLabel, createDate;
 
-	@UiField
-    DateMaskBoxPicker dateBox;
     @UiField
     LinkButton sources;
     @UiField
@@ -247,18 +246,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         asnu = new Label("");
         asnu.addStyleName("headerAttr");
         asnu.addStyleName("depAttr");
-
-        createUserNameLabel = new Label("Создал:");
-        createUserNameLabel.addStyleName("headerAttrName");
-        createUserName = new Label("");
-        createUserName.addStyleName("headerAttr");
-        createUserName.addStyleName("depAttr");
-
-        createDateLabel = new Label("Дата и время создания формы:");
-        createDateLabel.addStyleName("headerAttrName");
-        createDate = new Label("");
-        createDate.addStyleName("headerAttr");
-        createDate.addStyleName("depAttr");
     }
 
     @Override
@@ -291,7 +278,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void showRecalculateButton(boolean show) {
 		recalculateButton.setVisible(show);
-		dateBox.setEnabled(show);
 	}
 
     @Override
@@ -415,15 +401,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             rightAttrPanel.add(asnu);
         }
 
-        leftAttrPanel.add(createUserNameLabel);
-        rightAttrPanel.add(createUserName);
-        leftAttrPanel.add(createDateLabel);
-        rightAttrPanel.add(createDate);
-
         stateEDLabel.setVisible(isVisibleStateED);
         stateED.setVisible(isVisibleStateED);
 
-        int propertyBlockSize = 2 + (isVisibleKpp?1:0) +
+        int propertyBlockSize = (isVisibleKpp?1:0) +
                 (isVisibleOktmo?1:0) +
                 (isVisibleTaxOrgan?1:0) +
                 (isVisibleAsnu?1:0);
@@ -472,19 +453,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		pdfViewer.setPages(pdf);
 	}
 
-	@Override
-	public void setDocDate(Date date) {
-		dateBox.setValue(date);
-	}
-
 	@UiHandler("recalculateButton")
 	public void onRecalculateButtonClicked(ClickEvent event){
-        if (dateBox.getValue() == null) {
-            Dialog.warningMessage("Введите дату.");
-        } else {
-            if (getUiHandlers() != null) {
-                getUiHandlers().onRecalculateClicked(dateBox.getValue(), false, false);
-            }
+        if (getUiHandlers() != null) {
+            getUiHandlers().onRecalculateClicked(new Date(), false, false);
         }
     }
 
