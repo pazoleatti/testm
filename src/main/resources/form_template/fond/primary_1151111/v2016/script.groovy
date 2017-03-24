@@ -6204,22 +6204,22 @@ def checkDataDBSum() {
 
     // 3.3.5.9 Всего пособий по уходу за вторым ребенком и последующими равно сумме этих пособий по различным категориям
     if (!comparNumbEquals(vsegoEzPosUhodReb2ChislPoluch, vsegoEzPosUhodReb2ChislPoluchSum)) {
-        def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.ЧислПолуч = \"$vsegoEzPosUhodReb2ChislPoluch\""
-        def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.ЧислПолуч", "ПОМаяк.ЕжПосУходРеб1.ЧислПолуч", "ПодрОсобРиск.ЕжПосУходРеб1.ЧислПолуч"].join(", ") + " = \"$vsegoEzPosUhodReb2ChislPoluchSum\""
+        def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб2.ЧислПолуч = \"$vsegoEzPosUhodReb2ChislPoluch\""
+        def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб2.ЧислПолуч", "ПОМаяк.ЕжПосУходРеб2.ЧислПолуч", "ПодрОсобРиск.ЕжПосУходРеб2.ЧислПолуч"].join(", ") + " = \"$vsegoEzPosUhodReb2ChislPoluchSum\""
         logger.warnExp("%s не равен сумме %s",
                 "Всего пособий по уходу за вторым ребенком и последующими равно сумме этих пособий по различным категориям",
                 null, pathAttrVal, pathAttrComp)
     }
     if (!comparNumbEquals(vsegoEzPosUhodReb2KolVypl, vsegoEzPosUhodReb2KolVyplSum)) {
-        def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.КолВыпл = \"$vsegoEzPosUhodReb2KolVypl\""
-        def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.КолВыпл", "ПОМаяк.ЕжПосУходРеб1.КолВыпл", "ПодрОсобРиск.ЕжПосУходРеб1.КолВыпл"].join(", ") + " = \"$vsegoEzPosUhodReb2KolVyplSum\""
+        def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб2.КолВыпл = \"$vsegoEzPosUhodReb2KolVypl\""
+        def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб2.КолВыпл", "ПОМаяк.ЕжПосУходРеб2.КолВыпл", "ПодрОсобРиск.ЕжПосУходРеб2.КолВыпл"].join(", ") + " = \"$vsegoEzPosUhodReb2KolVyplSum\""
         logger.warnExp("%s не равен сумме %s",
                 "Всего пособий по уходу за вторым ребенком и последующими равно сумме этих пособий по различным категориям",
                 null, pathAttrVal, pathAttrComp)
     }
     if (!comparNumbEquals(vsegoEzPosUhodReb2Rashod, vsegoEzPosUhodReb2RashodSum)) {
-        def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб1.Расход = \"$vsegoEzPosUhodReb2Rashod\""
-        def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб1.Расход", "ПОМаяк.ЕжПосУходРеб1.Расход", "ПодрОсобРиск.ЕжПосУходРеб1.Расход"].join(", ") + " = \"$vsegoEzPosUhodReb2RashodSum\""
+        def pathAttrVal = pathAttrVyplFinFB + ".Всего.ЕжПосУходРеб2.Расход = \"$vsegoEzPosUhodReb2Rashod\""
+        def pathAttrComp = ["ЧернобАЭС.ЕжПосУходРеб2.Расход", "ПОМаяк.ЕжПосУходРеб2.Расход", "ПодрОсобРиск.ЕжПосУходРеб2.Расход"].join(", ") + " = \"$vsegoEzPosUhodReb2RashodSum\""
         logger.warnExp("%s не равен сумме %s",
                 "Всего пособий по уходу за вторым ребенком и последующими равно сумме этих пособий по различным категориям",
                 null, pathAttrVal, pathAttrComp)
