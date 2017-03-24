@@ -5820,6 +5820,10 @@ def checkDataDBSum() {
     BigDecimal ossVosmRashSoCurr1 = 0
     BigDecimal ossVosmRashSoCurr2 = 0
     BigDecimal ossVosmRashSoCurr3 = 0
+    // РасчСВ_ОСС.ВНМ .ПроизвРасхСО
+    BigDecimal ossProizvRashSOCurr1 = 0
+    BigDecimal ossProizvRashSOCurr2 = 0
+    BigDecimal ossProizvRashSOCurr3 = 0
     for (RaschsvOssVnmSum raschsvOssVnmSum : raschsvOssVnmSumList) {
         RaschsvSvSum1Tip raschsvSvSum1Tip = raschsvOssVnmSum.raschsvSvSum1Tip
         // НачислСВ
@@ -5834,25 +5838,32 @@ def checkDataDBSum() {
             ossVosmRashSoCurr2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
             ossVosmRashSoCurr3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
         }
+        // ПроизвРасхСО
+        if (raschsvOssVnmSum.nodeName == NODE_NAME_PROIZV_RASCH_SO) {
+            ossProizvRashSOCurr1 = raschsvSvSum1Tip.sum1mPosl3m ?: 0
+            ossProizvRashSOCurr2 = raschsvSvSum1Tip.sum2mPosl3m ?: 0
+            ossProizvRashSOCurr3 = raschsvSvSum1Tip.sum3mPosl3m ?: 0
+        }
     }
+
     // 3.3.4.1 Сумма подлежащая уплате равна исчислено + возмещено - произведено расходов
-    if (!comparNumbEquals(uplSvPrevCurr1, ossNachislSvCurr1 + ossVosmRashSoCurr1)) {
-        def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл1Посл3М.Сумма = \"$uplSvPrevCurr1\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум1Посл3М = \"$ossNachislSvCurr1\" + " + pathAttrOss + ".ВозмРасхСО.Сум1Посл3М = \"$ossVosmRashSoCurr1\"."
+    if (!comparNumbEquals(uplSvPrevCurr1, ossNachislSvCurr1 + ossVosmRashSoCurr1 - ossProizvRashSOCurr1)) {
+        String pathAttrVal = "${pathAttrOss}.УплСВПрев.Упл1Посл3М.Сумма='$uplSvPrevCurr1'"
+        String pathAttrComp = "${pathAttrOss}.НачислСВ.Сум1Посл3М='$ossNachislSvCurr1' + ${pathAttrOss}.ВозмРасхСО.Сум1Посл3М='$ossVosmRashSoCurr1' - ${pathAttrOss}.ПроизвРасхСО.Сум1Посл3М='$ossProizvRashSOCurr1'"
         logger.warnExp("%s не равен %s",
                 "Сумма подлежащая уплате равна исчислено + возмещено - произведено расходов",
                 null, pathAttrVal, pathAttrComp)
     }
-    if (!comparNumbEquals(uplSvPrevCurr2, ossNachislSvCurr2 + ossVosmRashSoCurr2)) {
-        def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл2Посл3М.Сумма = \"$uplSvPrevCurr2\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум2Посл3М = \"$ossNachislSvCurr2\" + " + pathAttrOss + ".ВозмРасхСО.Сум2Посл3М = \"$ossVosmRashSoCurr2\"."
+    if (!comparNumbEquals(uplSvPrevCurr2, ossNachislSvCurr2 + ossVosmRashSoCurr2 - ossProizvRashSOCurr2)) {
+        String pathAttrVal = "${pathAttrOss}.УплСВПрев.Упл2Посл3М.Сумма='$uplSvPrevCurr2'"
+        String pathAttrComp = "${pathAttrOss}.НачислСВ.Сум2Посл3М='$ossNachislSvCurr2' + ${pathAttrOss}.ВозмРасхСО.Сум2Посл3М='$ossVosmRashSoCurr2' - ${pathAttrOss}.ПроизвРасхСО.Сум2Посл3М='$ossProizvRashSOCurr2'"
         logger.warnExp("%s не равен %s",
                 "Сумма подлежащая уплате равна исчислено + возмещено - произведено расходов",
                 null, pathAttrVal, pathAttrComp)
     }
-    if (!comparNumbEquals(uplSvPrevCurr3, ossNachislSvCurr3 + ossVosmRashSoCurr3)) {
-        def pathAttrVal = pathAttrOss + ".УплСВПрев.Упл3Посл3М.Сумма = \"$uplSvPrevCurr3\""
-        def pathAttrComp = pathAttrOss + ".НачислСВ.Сум3Посл3М = \"$ossNachislSvCurr3\" + " + pathAttrOss + ".ВозмРасхСО.Сум3Посл3М = \"$ossVosmRashSoCurr3\"."
+    if (!comparNumbEquals(uplSvPrevCurr3, ossNachislSvCurr3 + ossVosmRashSoCurr3 - ossProizvRashSOCurr3)) {
+        String pathAttrVal = "${pathAttrOss}.УплСВПрев.Упл3Посл3М.Сумма='$uplSvPrevCurr3'"
+        String pathAttrComp = "${pathAttrOss}.НачислСВ.Сум3Посл3М='$ossNachislSvCurr3' + ${pathAttrOss}.ВозмРасхСО.Сум3Посл3М='$ossVosmRashSoCurr3' - ${pathAttrOss}.ПроизвРасхСО.Сум3Посл3М='$ossProizvRashSOCurr3'"
         logger.warnExp("%s не равен %s",
                 "Сумма подлежащая уплате равна исчислено + возмещено - произведено расходов",
                 null, pathAttrVal, pathAttrComp)
