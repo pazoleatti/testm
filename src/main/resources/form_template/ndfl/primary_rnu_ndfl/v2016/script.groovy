@@ -1182,7 +1182,7 @@ def getSourcesListForTemporarySolution() {
         return
     }
 
-    for (Relation relation : getDestinationInfo(ligth)) {
+    for (Relation relation : getDestinationInfo(light)) {
         sources.sourceList.add(relation)
     }
     sources.sourcesProcessedByScript = true
