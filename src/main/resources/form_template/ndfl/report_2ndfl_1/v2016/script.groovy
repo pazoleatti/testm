@@ -1,9 +1,7 @@
 package form_template.ndfl.report_2ndfl_1.v2016
 
-import groovy.xml.XmlUtil
-
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
+import org.apache.commons.lang3.StringUtils
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
@@ -49,6 +47,10 @@ switch (formDataEvent) {
     case FormDataEvent.GET_SOURCES: //формирование списка источников
         println "!GET_SOURCES!"
         getSources()
+        break
+    case FormDataEvent.PREPARE_SPECIFIC_REPORT:
+        // Подготовка для последующего формирования спецотчета
+        prepareSpecificReport()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
         println "!CREATE_SPECIFIC_REPORT!"
@@ -1416,12 +1418,103 @@ class PairKppOktmo {
 
 /************************************* СПЕЦОТЧЕТ **********************************************************************/
 
+
 @Field final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
 
 @Field final String TRANSPORT_FILE_TEMPLATE = "ТФ"
 
 // Мапа где ключ идентификатор NdflPerson, значение NdflPerson соответствующий идентификатору
 @Field Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
+
+//------------------ PREPARE_SPECIFIC_REPORT ----------------------
+
+def prepareSpecificReport() {
+    def reportAlias = scriptSpecificReportHolder?.declarationSubreport?.alias;
+    if ('report_2ndfl' != reportAlias) {
+        throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
+    }
+    //Проверка, подготовка данных
+    def reportParameters = scriptSpecificReportHolder.getSubreportParamValues();
+    def resultReportParameters = [:]
+    reportParameters.each { key, value ->
+        if (value != null) {
+            resultReportParameters.put(key, value)
+        }
+    }
+    if (resultReportParameters.isEmpty()) {
+        throw new ServiceException("Для поиска справки необходимо задать критерий.");
+    }
+    // Ограничение числа выводимых записей
+    def docs = findSpavki(resultReportParameters)
+    if (docs.size() == 0) {
+        subreportParamsToString = { it.collect { (it.value != null ? (it.value + ";") : "") } join " " }
+        logger.warn("Номер справки по заданным параметрам: " + subreportParamsToString(reportParameters) + " не найден");
+    }
+    //todo доработать, добавить помимо справки еще и ФИО + ДР
+    def rowColumns = createTableColumns()
+    List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+    docs.each() { doc ->
+        DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
+        row.getCell("pNumSpravka").setStringValue(doc.@НомСпр.text())
+        row.getCell("last_name").setStringValue(doc?.ПолучДох?.ФИО?.@Фамилия?.text())
+        row.getCell("first_name").setStringValue(doc?.ПолучДох?.ФИО?.@Имя?.text())
+        row.getCell("middle_name").setStringValue(doc?.ПолучДох?.ФИО?.@Отчество?.text())
+        row.getCell("birthday").setStringValue(doc?.ПолучДох?.@ДатаРожд?.text())
+        dataRows.add(row)
+    }
+    PrepareSpecificReportResult result = new PrepareSpecificReportResult();
+    List<Column> tableColumns = createTableColumns();
+    result.setTableColumns(tableColumns);
+    result.setDataRows(dataRows);
+    scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
+    scriptSpecificReportHolder.setSubreportParamValues(scriptSpecificReportHolder.subreportParamValues)
+}
+
+def createTableColumns() {
+    List<Column> tableColumns = new ArrayList<Column>()
+    Column column1 = new StringColumn()
+    column1.setAlias("pNumSpravka")
+    column1.setName("Номер справки")
+    column1.setWidth(10)
+    tableColumns.add(column1)
+    Column column2 = new StringColumn()
+    column2.setAlias("last_name")
+    column2.setName("Фамилия")
+    column2.setWidth(10)
+    tableColumns.add(column2)
+    Column column3 = new StringColumn()
+    column3.setAlias("first_name")
+    column3.setName("Имя")
+    column3.setWidth(10)
+    tableColumns.add(column3)
+    Column column4 = new StringColumn()
+    column4.setAlias("middle_name")
+    column4.setName("Отчество")
+    column4.setWidth(10)
+    tableColumns.add(column4)
+    Column column5 = new StringColumn()
+    column5.setAlias("birthday")
+    column5.setName("Дата рождения")
+    column5.setWidth(10)
+    tableColumns.add(column5)
+    return tableColumns;
+}
+
+def findSpavki(def params) {
+    String searchText = params['pNumSpravka']
+    def xmlStr = declarationService.getXmlData(declarationData.id)
+    def Файл = new XmlSlurper().parseText(xmlStr)
+    def docs = Файл.Документ.find{doc ->
+        StringUtils.containsIgnoreCase(doc.@НомСпр.text(), searchText)
+    }
+    // ограничиваем размер выборки
+    def result = []
+    docs.each{
+        if (result.size() < 100)
+            result << it
+    }
+    result
+}
 
 /**
  * Создать спецотчет
@@ -1434,8 +1527,11 @@ def createSpecificReport() {
         return
     }
 
+    def row = scriptSpecificReportHolder.getSelectedRecord()
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
+    params['pNumSpravka'] = row.pNumSpravka
     def xmlStr = declarationService.getXmlData(declarationData.id)
+
     xmlStr = xmlStr.replace("windows-1251", "utf-8") // сведения о кодировке должны соответствовать содержимому
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
         it.write(xmlStr, 0, xmlStr.length())

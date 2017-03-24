@@ -38,6 +38,10 @@ import java.util.regex.Pattern
  * Скрипт макета декларации РНУ-НДФЛ(первичная)
  */
 switch (formDataEvent) {
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
+        moveAcceptedToCreated();
+        break
+
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
         // Формирование pdf-отчета формы
@@ -46,6 +50,9 @@ switch (formDataEvent) {
     case FormDataEvent.PREPARE_SPECIFIC_REPORT:
         // Подготовка для последующего формирования спецотчета
         prepareSpecificReport()
+        break
+    case FormDataEvent.GET_SOURCES: //формирование списка приемников
+        getSourcesListForTemporarySolution()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         // Формирование спецотчета
@@ -75,6 +82,16 @@ switch (formDataEvent) {
  */
 @Field
 def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
+
+def moveAcceptedToCreated(){
+    List<Relation> destinationInfo = getDestinationInfo(false);
+    for (Relation relation : destinationInfo) {
+        if (relation.declarationState.equals(State.ACCEPTED)){
+            throw new ServiceException("Ошибка изменения состояния формы. Данная форма не может быть возвращена в состояние 'Создана', так как используется в КНФ с состоянием 'Принята', номер формы: "+relation.declarationDataId);
+        }
+    }
+}
+
 
 //------------------ Calculate ----------------------
 /**
@@ -1136,6 +1153,106 @@ def findCountryId(countryCode) {
     }
     return result;
 }
+
+//------------------ GET_SOURCES ----------------------
+
+List<Relation> getDestinationInfo(boolean isLight){
+
+    List<Relation> destinationInfo = new ArrayList<Relation>();
+
+    //отчетный период в котором выполняется консолидация
+    ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    //Идентификатор подразделения по которому формируется консолидированная форма
+    def parentDepartmentId = declarationData.departmentId
+    Department department = departmentService.get(parentDepartmentId)
+    List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
+    for (DeclarationData declarationData : declarationDataList) {
+        //Формируем связь источник-приемник
+        def relation = getRelation(declarationData, department, declarationDataReportPeriod, isLight)
+        destinationInfo.add(relation)
+    }
+
+    return destinationInfo;
+
+}
+
+
+def getSourcesListForTemporarySolution() {
+    if (needSources) {
+        return
+    }
+
+    for (Relation relation : getDestinationInfo(ligth)) {
+        sources.sourceList.add(relation)
+    }
+    sources.sourcesProcessedByScript = true
+}
+
+/**
+ * Получить запись для источника-приемника.
+ *
+ * @param declarationData первичная форма
+ * @param department подразделение
+ * @param period период нф
+ * @param monthOrder номер месяца (для ежемесячной формы)
+ */
+def getRelation(DeclarationData declarationData, Department department, ReportPeriod period, boolean isLight) {
+
+    Relation relation = new Relation()
+
+    //Привязка отчетных периодов к подразделениям
+    DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod
+
+    //Макет НФ
+    DeclarationTemplate declarationTemplate = getDeclarationTemplateById(declarationData?.declarationTemplateId)
+
+    def isSource = (declarationTemplate.id == PRIMARY_RNU_NDFL_TEMPLATE_ID)
+    ReportPeriod rp = departmentReportPeriod.getReportPeriod();
+
+    if (isLight) {
+        //Идентификатор подразделения
+        relation.departmentId = department.id
+        //полное название подразделения
+        relation.fullDepartmentName = getDepartmentFullName(department.id)
+        //Дата корректировки
+        relation.correctionDate = departmentReportPeriod?.correctionDate
+        //Вид нф
+        relation.declarationTypeName = declarationTemplate?.name
+        //Год налогового периода
+        relation.year = period.taxPeriod.year
+        //Название периода
+        relation.periodName = period.name
+    }
+
+    //Общие параметры
+
+    //подразделение
+    relation.department = department
+    //Период
+    relation.departmentReportPeriod = departmentReportPeriod
+    //Статус ЖЦ
+    relation.declarationState = declarationData?.state
+    //форма/декларация создана/не создана
+    relation.created = (declarationData != null)
+    //является ли форма источников, в противном случае приемник
+    relation.source = isSource;
+    // Введена/выведена в/из действие(-ия)
+    relation.status = declarationTemplate.status == VersionedObjectStatus.NORMAL
+    // Налог
+    relation.taxType = TaxType.NDFL
+
+    //Параметры НФ
+
+    // Идентификатор созданной формы
+    relation.declarationDataId = declarationData?.id
+    // Вид НФ
+    relation.declarationTemplate = declarationTemplate
+    return relation
+
+}
+
+
+
 
 //------------------ PREPARE_SPECIFIC_REPORT ----------------------
 
@@ -2631,9 +2748,8 @@ def checkDataReference(
 
         // Спр10 Наличие связи с "Физическое лицо"
         if (ndflPerson.personId == null || ndflPerson.personId == 0) {
-            //TODO turn_to_error
             String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
-            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Все строки НФ имеют ссылку на справочник ФЛ", fioAndInp, pathError,
+            logger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Все строки НФ имеют ссылку на справочник ФЛ", fioAndInp, pathError,
                     "Не удалось установить связь со справочником '$R_PERSON'")
         } else {
             def personRecord = personMap.get(ndflPerson.recordId)
