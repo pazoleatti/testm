@@ -6323,7 +6323,7 @@ def checkDataDBSum() {
         def dohGrantPred = raschsvPravTarif71427.dohGrantPred ?: 0
         def dohEkDeyatPred = raschsvPravTarif71427.dohEkDeyatPred ?: 0
         if (comparNumbGreater(dohCelPostPred + dohGrantPred + dohEkDeyatPred, dohVsPred)) {
-            def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПред = \"$raschsvPravTarif51427.dohVsPred\""
+            def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПред = \"$raschsvPravTarif71427.dohVsPred\""
             def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПред = \"$dohCelPostPred\", "
             pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПред = \"$dohGrantPred\", "
             pathAttrComp += pathAttrPravTarif71427 + ".ДохЭкДеятПред = \"$dohEkDeyatPred\"."
