@@ -209,6 +209,7 @@ def buildXmlForSpecificReport(def writer) {
  * @return
  */
 def buildXml(def writer, boolean isForSpecificReport) {
+    def refPersonIds = []
     ScriptUtils.checkInterrupted();
     ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
     // Получим ИНН из справочника "Общие параметры"
@@ -484,7 +485,11 @@ def buildXml(def writer, boolean isForSpecificReport) {
                     }
                 }
             }
-            ndflReferencess << createRefBookAttributesForNdflReference(np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
+            if (!refPersonIds.contains(np.personId)) {
+                refPersonIds << np.personId
+                ndflReferencess << createRefBookAttributesForNdflReference(np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
+            }
+
         }
     }
     ScriptUtils.checkInterrupted();
@@ -1064,7 +1069,6 @@ def createForm() {
             }
         }
     }
-
     // Все подходящие КНФ
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
     /*declarationService.findDeclarationDataIdByTypeStatusReportPeriod(declarationData.reportPeriodId, departmentParam?.id.value,
@@ -1431,9 +1435,11 @@ def createSpecificReport() {
     }
 
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
-
+    def xmlStr = declarationService.getXmlData(declarationData.id)
+    xmlStr = xmlStr.replace("windows-1251", "utf-8") // сведения о кодировке должны соответствовать содержимому
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-        buildXmlForSpecificReport(it)
+        it.write(xmlStr, 0, xmlStr.length())
+        it.flush()
     });
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());

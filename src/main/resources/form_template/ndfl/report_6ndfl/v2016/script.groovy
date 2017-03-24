@@ -590,8 +590,15 @@ def checkXml() {
     def fileNode = new XmlSlurper().parse(ndfl6Stream);
 
     // ВнДок2 Расчет погрешности
+    def kolFl6
+    def obobshPokazNodes6 = fileNode.depthFirst().grep { it.name() == NODE_NAME_OBOBSH_POKAZ6 }
+    obobshPokazNodes6.each { obobshPokazNode6 ->
+        ScriptUtils.checkInterrupted()
+        neUderzNalIt6 = Long.valueOf(obobshPokazNode6.attributes()[ATTR_NE_UDERZ_NAL_IT6]) ?: 0
+        kolFl6 = Integer.valueOf(obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6]) ?: 0
+    }
     def sumDataNodes = fileNode.depthFirst().grep { it.name() == NODE_NAME_SUM_DATA6 }
-    def mathError = sumDataNodes.size()
+    def mathError = sumDataNodes.size() * kolFl6
 
     def sumStavkaNodes = fileNode.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
     sumStavkaNodes.each { sumStavkaNode ->
@@ -608,8 +615,8 @@ def checkXml() {
         }
 
         // ВнДок2 Исчисленный налог
-        if (((nachislDoh - vichetNal) / 100 * stavka > ischislNal + mathError) ||
-                ((nachislDoh - vichetNal) / 100 * stavka < ischislNal - mathError)) {
+        if ((Math.round((nachislDoh - vichetNal) / 100 * stavka) > ischislNal + mathError) ||
+                (Math.round((nachislDoh - vichetNal) / 100 * stavka) < ischislNal - mathError)) {
             logger.error(msgError + " неверно рассчитана сумма исчисленного налога.")
         }
 

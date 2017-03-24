@@ -994,7 +994,7 @@ def getDeductionType(def code) {
     def filter = "CODE = '$code'"
     def deductionTypeList = getProvider(REF_BOOK_DEDUCTION_TYPE_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, filter, null)
     if (deductionTypeList == null || deductionTypeList.size() == 0 || deductionTypeList.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+        throw new Exception("Ошибка при получении кодов вычета. Коды вычета заполнены не полностью")
     }
     return deductionTypeList.get(0).DEDUCTION_MARK?.value
 }
@@ -1435,9 +1435,11 @@ def createSpecificReport() {
     }
 
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
-
+    def xmlStr = declarationService.getXmlData(declarationData.id)
+    xmlStr = xmlStr.replace("windows-1251", "utf-8") // сведения о кодировке должны соответствовать содержимому
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-        buildXmlForSpecificReport(it)
+        it.write(xmlStr, 0, xmlStr.length())
+        it.flush()
     });
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
