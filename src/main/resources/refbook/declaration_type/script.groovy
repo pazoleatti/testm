@@ -246,20 +246,13 @@ def importPrimary1151111() {
 
     // 5. Определение подразделения
     def fondDetailProvider = refBookFactory.getDataProvider(RefBook.Id.FOND_DETAIL.getId())
-    def results = fondDetailProvider.getRecords(new Date(117, 1, 1), null, "kpp = '$kpp'", null)
-    if (results.size() == 0) {
+    def getDepartmentParamTable = fondDetailProvider.getRecords(new Date(), null, "kpp = '$kpp'", null)
+    if (getDepartmentParamTable.size() == 0) {
         logger.error("Файл «%s» не загружен: Не найдено Подразделение, для которого указан КПП \"%s\" в настройках подразделения", UploadFileName, kpp)
         return
     }
-
-    if (results.size() > 1) {
-        def departmentIds = results*.DEPARTMENT_ID*.getReferenceValue()*.intValue()
-        def departmentsMap = departmentService.getDepartments(departmentIds)
-        def joinName = departmentsMap.values()*.getName().join(', ')
-        logger.error("Файл «%s» не загружен: Найдено несколько подразделений, для которого указан КПП \"%s\": \"%s\"", UploadFileName, kpp, joinName)
-        return
-    }
-    def departmentId = results.get(0).DEPARTMENT_ID.getReferenceValue().intValue()
+    // Для одного подразделения может быть несколько настроек, каждая настройка на свой отчетный период
+    def departmentId = getDepartmentParamTable.get(0).DEPARTMENT_ID.getReferenceValue().intValue()
     def departmentName = departmentService.get(departmentId)
 
     // 4. Для <Подразделения>, <Период>, <Календаный год> открыт отчетный либо корректирующий период
