@@ -1478,7 +1478,7 @@ def createPrimaryRnuWithErrors() {
         ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)
     }
 
-    ndflPersonDeductionFromRNUConsolidatedList.each {
+    ndflPersonPrepaymentFromRNUConsolidatedList.each {
         ScriptUtils.checkInterrupted();
         NdflPersonPrepayment ndflPersonPrepaymentPrimary = ndflPersonService.getPrepayment(it.sourceId)
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)
