@@ -821,7 +821,7 @@
 					<font fontName="Arial" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<text><![CDATA[1. Данные о физическом лице - получателе дохода]]></text>
+				<text><![CDATA[2. Данные о физическом лице - получателе дохода]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="bf20ffff-fef6-43dd-9d3a-a40cdc1d3d95" mode="Transparent" x="0" y="131" width="166" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
