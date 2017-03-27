@@ -6318,15 +6318,28 @@ def checkDataDBSum() {
 
     if (raschsvPravTarif71427 != null && opsOmsIsExistTarifPlat_10 == true) {
         // 3.3.8.2 	Сумма доходов всего не менее суммы доходов по отдельным разделам
-        def dohVsPred = raschsvPravTarif71427.dohVsPred ?: 0
-        def dohCelPostPred = raschsvPravTarif71427.dohCelPostPred ?: 0
-        def dohGrantPred = raschsvPravTarif71427.dohGrantPred ?: 0
-        def dohEkDeyatPred = raschsvPravTarif71427.dohEkDeyatPred ?: 0
+        Long dohVsPred = raschsvPravTarif71427.dohVsPred ?: 0
+        Long dohCelPostPred = raschsvPravTarif71427.dohCelPostPred ?: 0
+        Long dohGrantPred = raschsvPravTarif71427.dohGrantPred ?: 0
+        Long dohEkDeyatPred = raschsvPravTarif71427.dohEkDeyatPred ?: 0
         if (comparNumbGreater(dohCelPostPred + dohGrantPred + dohEkDeyatPred, dohVsPred)) {
-            def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПред = \"$raschsvPravTarif71427.dohVsPred\""
-            def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПред = \"$dohCelPostPred\", "
-            pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПред = \"$dohGrantPred\", "
-            pathAttrComp += pathAttrPravTarif71427 + ".ДохЭкДеятПред = \"$dohEkDeyatPred\"."
+            def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПред='$raschsvPravTarif71427.dohVsPred'"
+            def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПред='$dohCelPostPred' + "
+            pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПред='$dohGrantPred' + "
+            pathAttrComp += pathAttrPravTarif71427 + ".ДохЭкДеятПред='$dohEkDeyatPred'."
+            logger.warnExp("%s не может быть меньше суммы %s",
+                    "Сумма доходов всего не менее суммы доходов по отдельным разделам",
+                    null, pathAttrVal, pathAttrComp)
+        }
+        Long dohVsPer = raschsvPravTarif71427.dohVsPer ?: 0
+        Long dohCelPostPer = raschsvPravTarif71427.dohCelPostPer ?: 0
+        Long dohGrantPer = raschsvPravTarif71427.dohGrantPer ?: 0
+        Long dohEkDeyatPer = raschsvPravTarif71427.dohEkDeyatPer ?: 0
+        if (comparNumbGreater(dohCelPostPer + dohGrantPer + dohEkDeyatPer, dohVsPer)) {
+            def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПер='$raschsvPravTarif71427.dohVsPer'"
+            def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПер='$dohCelPostPer' + "
+            pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПер='$dohGrantPer' + "
+            pathAttrComp += pathAttrPravTarif71427 + ".ДохЭкДеятПер='$dohEkDeyatPer'."
             logger.warnExp("%s не может быть меньше суммы %s",
                     "Сумма доходов всего не менее суммы доходов по отдельным разделам",
                     null, pathAttrVal, pathAttrComp)
