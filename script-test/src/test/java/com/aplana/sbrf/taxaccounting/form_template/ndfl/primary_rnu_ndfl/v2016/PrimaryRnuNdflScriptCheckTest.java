@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -14,11 +17,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -79,9 +82,10 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
     /**
      * Тесты для "Общие проверки" / 7 "Наличие или отсутствие значения в графе в зависимости от условий"
      */
+    @Ignore
     @Test
-	@Ignore
     public void checkDataCommon7Test() {
+        initRefBook();
 
         List<NdflPerson> ndflPersonList = сheckDataCommon7Mock();
         List<NdflPersonIncome> ndflPersonIncomeList = getNdflPersonIncomeListFromNdflPersonList(ndflPersonList);
@@ -153,12 +157,14 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
     private List<NdflPerson> сheckDataCommon7Mock() {
         List<NdflPerson> result = new ArrayList<NdflPerson>();
 
+        RefBookPersonTest refBookPersonTest1 = createRefBookPersonTest1();
         NdflPerson ndflPerson1 = new NdflPersonBuilder.Builder()
                 .id(1L)
+                .personId(refBookPersonTest1.getId())
                 .inp("12345")
-                .lastName("Иванов")
-                .firstName("Иван")
-                .middleName("Иванович")
+                .lastName(refBookPersonTest1.getLastName())
+                .firstName(refBookPersonTest1.getFirstName())
+                .middleName(refBookPersonTest1.getMiddleName())
                 .build();
 
         String column4Empty = null;
@@ -379,6 +385,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
     @Test
 	@Ignore
     public void checkDataIncome4Test() {
+        initRefBook();
 
         List<NdflPerson> ndflPersonList = checkDataIncome4Mock();
         List<NdflPersonIncome> ndflPersonIncomeList = getNdflPersonIncomeListFromNdflPersonList(ndflPersonList);
@@ -399,19 +406,21 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
      * @return
      */
     private List<NdflPerson> checkDataIncome4Mock() {
-        String lastName = "Иванов";
-        String firstName = "Иван";
-        String middleName = "Иванович";
-        String inp = "12345";
 
         // Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий: «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2
+        RefBookPersonTest refBookPersonTest1 = createRefBookPersonTest1();
         final NdflPerson ndflPerson1 = new NdflPersonBuilder.Builder()
                 .id(1L)
+                .personId(refBookPersonTest1.getId())
+                .lastName(refBookPersonTest1.getLastName())
+                .firstName(refBookPersonTest1.getFirstName())
+                .middleName(refBookPersonTest1.getMiddleName())
                 .citizenship("643")
                 .status("2")
                 .build();
         final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(1).ndflPersonId(ndflPerson1.getId())
+                .rowNum(1)
+                .ndflPersonId(ndflPerson1.getId())
                 .taxRate(13)
                 .incomeCode("1010")
                 .build();
@@ -420,12 +429,18 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         }});
 
         // Для «Графа 14 Раздел 2 = 15» не выполнено условие: «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1
+        RefBookPersonTest refBookPersonTest2 = createRefBookPersonTest2();
         final NdflPerson ndflPerson2 = new NdflPersonBuilder.Builder()
                 .id(2L)
+                .personId(refBookPersonTest2.getId())
+                .lastName(refBookPersonTest2.getLastName())
+                .firstName(refBookPersonTest2.getFirstName())
+                .middleName(refBookPersonTest2.getMiddleName())
                 .status("1")
                 .build();
         final NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(2).ndflPersonId(ndflPerson2.getId())
+                .rowNum(2)
+                .ndflPersonId(ndflPerson2.getId())
                 .taxRate(15)
                 .incomeCode("1010")
                 .build();
@@ -434,12 +449,18 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         }});
 
         // Для «Графа 14 Раздел 2 = 35» не выполнено условие: «Графа 4 Раздел 2» = (2740 или 3020 или 2610) и «Графа 12 Раздел 1» ≠ 2
+        RefBookPersonTest refBookPersonTest3 = createRefBookPersonTest3();
         final NdflPerson ndflPerson3 = new NdflPersonBuilder.Builder()
                 .id(3L)
+                .personId(refBookPersonTest3.getId())
+                .lastName(refBookPersonTest3.getLastName())
+                .firstName(refBookPersonTest3.getFirstName())
+                .middleName(refBookPersonTest3.getMiddleName())
                 .status("2")
                 .build();
         final NdflPersonIncome ndflPersonIncome3 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(3).ndflPersonId(ndflPerson3.getId())
+                .rowNum(3)
+                .ndflPersonId(ndflPerson3.getId())
                 .taxRate(35)
                 .incomeCode("2740")
                 .build();
@@ -459,11 +480,12 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
      * Данные о физическом лице - получателе дохода
      * @return
      */
-    public static class NdflPersonBuilder {
+    private static class NdflPersonBuilder {
         NdflPerson ndflPerson;
         public static class Builder {
             private Long id;
             private Integer rowNum;
+            private Long personId;
             private String inp;
             private String lastName;
             private String firstName;
@@ -472,6 +494,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private String status;
             public Builder id(Long id) {this.id = id; return this;}
             public Builder rowNum(Integer rowNum) {this.rowNum = rowNum; return this;}
+            public Builder personId(Long personId) {this.personId = personId; return this;}
             public Builder inp(String inp) {this.inp = inp; return this;}
             public Builder lastName(String lastName) {this.lastName = lastName; return this;}
             public Builder firstName(String firstName) {this.firstName = firstName; return this;}
@@ -486,6 +509,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             this.ndflPerson = new NdflPerson();
             this.ndflPerson.setId(b.id);
             this.ndflPerson.setRowNum(b.rowNum);
+            this.ndflPerson.setPersonId(b.personId);
             this.ndflPerson.setInp(b.inp);
             this.ndflPerson.setLastName(b.lastName);
             this.ndflPerson.setFirstName(b.firstName);
@@ -499,7 +523,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
      * Сведения о доходах и НДФЛ
      * @return
      */
-    public static class NdflPersonIncomeBuilder {
+    private static class NdflPersonIncomeBuilder {
         NdflPersonIncome ndflPersonIncome;
         public static class Builder {
             private Long id;
@@ -584,6 +608,196 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
     }
 
     /**
+     * Класс для записи справочника REF_BOOK_PERSON
+     */
+    private static class RefBookPersonTest {
+        private Long id;
+        private Long recordId;
+        private String lastName;
+        private String firstName;
+        private String middleName;
+        private Long address;
+        public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
+        public Long getRecordId() { return recordId; }
+        public void setRecordId(Long recordId) { this.recordId = recordId; }
+        public String getLastName() { return lastName; }
+        public void setLastName(String lastName) { this.lastName = lastName; }
+        public String getFirstName() { return firstName; }
+        public void setFirstName(String firstName) { this.firstName = firstName; }
+        public String getMiddleName() { return middleName; }
+        public void setMiddleName(String middleName) { this.middleName = middleName; }
+        public Long getAddress() { return address; }
+        public void setAddress(Long address) { this.address = address; }
+    }
+    private static class RefBookPersonTestBuilder {
+        private RefBookPersonTest refBookPersonTest;
+        public static class Builder {
+            private Long id;
+            private Long recordId;
+            private String lastName;
+            private String firstName;
+            private String middleName;
+            private Long address;
+            public Builder id(Long id) { this.id = id; return this; }
+            public Builder recordId(Long recordId) { this.recordId = recordId; return this; }
+            public Builder lastName(String lastName) { this.lastName = lastName; return this; }
+            public Builder firstName(String firstName) { this.firstName = firstName; return this; }
+            public Builder middleName(String middleName) { this.middleName = middleName; return this; }
+            public Builder address(Long address) { this.address = address; return this; }
+            public RefBookPersonTest build() { return new RefBookPersonTestBuilder(this).refBookPersonTest; }
+        }
+        private RefBookPersonTestBuilder(Builder b) {
+            this.refBookPersonTest = new RefBookPersonTest();
+            this.refBookPersonTest.setId(b.id);
+            this.refBookPersonTest.setRecordId(b.recordId);
+            this.refBookPersonTest.setLastName(b.lastName);
+            this.refBookPersonTest.setFirstName(b.firstName);
+            this.refBookPersonTest.setMiddleName(b.middleName);
+            this.refBookPersonTest.setAddress(b.address);
+        }
+    }
+
+    /**
+     * Создание записей для REF_BOOK_PERSON вынес в отдельные методы, чтоб можно было их использовать
+     * при mock REF_BOOK_PERSON и NDFL_PERSON
+     */
+    private RefBookPersonTest createRefBookPersonTest1() {
+        RefBookPersonTest refBookPersonTest = new RefBookPersonTestBuilder.Builder()
+                .id(1L)
+                .recordId(1L)
+                .lastName("Иванов")
+                .firstName("Иван")
+                .middleName("Иванович")
+                .address(createRefBookAddressTest1().getId())
+                .build();
+        return refBookPersonTest;
+    }
+    private RefBookPersonTest createRefBookPersonTest2() {
+        RefBookPersonTest refBookPersonTest = new RefBookPersonTestBuilder.Builder()
+                .id(2L)
+                .recordId(2L)
+                .lastName("Петров")
+                .firstName("Петр")
+                .middleName("Петрович")
+                .address(createRefBookAddressTest1().getId())
+                .build();
+        return refBookPersonTest;
+    }
+    private RefBookPersonTest createRefBookPersonTest3() {
+        RefBookPersonTest refBookPersonTest = new RefBookPersonTestBuilder.Builder()
+                .id(3L)
+                .recordId(3L)
+                .lastName("Сидоров")
+                .firstName("Сидр")
+                .middleName("Сидорович")
+                .address(createRefBookAddressTest1().getId())
+                .build();
+        return refBookPersonTest;
+    }
+
+    /**
+     * Класс для записи справочника REF_BOOK_ADDRESS
+     */
+    private static class RefBookAddressTest {
+        private Long id;
+        private String regionCode;
+        private String district;
+        private String city;
+        private String locality;
+        private String street;
+        private String house;
+        private String build;
+        private String appartment;
+        public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
+        public String getRegionCode() { return regionCode; }
+        public void setRegionCode(String regionCode) { this.regionCode = regionCode; }
+        public String getDistrict() { return district; }
+        public void setDistrict(String district) { this.district = district; }
+        public String getCity() { return city; }
+        public void setCity(String city) { this.city = city; }
+        public String getLocality() { return locality; }
+        public void setLocality(String locality) { this.locality = locality; }
+        public String getStreet() { return street; }
+        public void setStreet(String street) { this.street = street; }
+        public String getHouse() { return house; }
+        public void setHouse(String house) { this.house = house; }
+        public String getBuild() { return build; }
+        public void setBuild(String build) { this.build = build; }
+        public String getAppartment() { return appartment; }
+        public void setAppartment(String appartment) { this.appartment = appartment; }
+    }
+    private static class RefBookAddressTestBuilder {
+        private RefBookAddressTest refBookAddressTest;
+        public static class Builder {
+            private Long id;
+            private String regionCode;
+            private String district;
+            private String city;
+            private String locality;
+            private String street;
+            private String house;
+            private String build;
+            private String appartment;
+            public Builder id(Long id) { this.id = id; return this; }
+            public Builder regionCode(String regionCode) { this.regionCode = regionCode; return this; }
+            public Builder district(String district) { this.district = district; return this; }
+            public Builder city(String city) { this.city = city; return this; }
+            public Builder locality(String locality) { this.locality = locality; return this; }
+            public Builder street(String street) { this.street = street; return this; }
+            public Builder house(String house) { this.house = house; return this; }
+            public Builder build(String build) { this.build = build; return this; }
+            public Builder appartment(String appartment) { this.appartment = appartment; return this; }
+            public RefBookAddressTest build() {
+                return new RefBookAddressTestBuilder(this).refBookAddressTest;
+            }
+        }
+        private RefBookAddressTestBuilder(Builder b) {
+            this.refBookAddressTest = new RefBookAddressTest();
+            this.refBookAddressTest.setId(b.id);
+            this.refBookAddressTest.setRegionCode(b.regionCode);
+            this.refBookAddressTest.setDistrict(b.district);
+            this.refBookAddressTest.setCity(b.city);
+            this.refBookAddressTest.setLocality(b.locality);
+            this.refBookAddressTest.setStreet(b.street);
+            this.refBookAddressTest.setHouse(b.house);
+            this.refBookAddressTest.setBuild(b.build);
+            this.refBookAddressTest.setAppartment(b.appartment);
+        }
+    }
+
+    /**
+     * Создание записей для REF_BOOK_ADDRESS вынес в отдельные методы, чтоб можно было их использовать
+     * при mock REF_BOOK_ADDRESS и NDFL_PERSON
+     */
+    private RefBookAddressTest createRefBookAddressTest1() {
+        RefBookAddressTest refBookAddressTest = new RefBookAddressTestBuilder.Builder()
+                .id(1L)
+                .regionCode("77")
+                .district("Унческий район")
+                .city("Переплюйск")
+                .locality("Станица Васевская")
+                .street("Марата ул")
+                .house("1а")
+                .build("А")
+                .appartment("217")
+                .build();
+        return refBookAddressTest;
+    }
+    private RefBookAddressTest createRefBookAddressTest2() {
+        RefBookAddressTest refBookAddressTest = new RefBookAddressTestBuilder.Builder()
+                .id(2L)
+                .regionCode("12")
+                .district("Моркинский р-н")
+                .locality("Морки пгт")
+                .street("Максима Горького ул")
+                .house("22а")
+                .build();
+        return refBookAddressTest;
+    }
+
+    /**
      * Сведения о доходах и НДФЛ
      * @return
      */
@@ -619,5 +833,212 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         ndflPersonIncome.setPaymentNumber(column23);
         ndflPersonIncome.setTaxSumm(column24);
         return ndflPersonIncome;
+    }
+
+    /**
+     * Страны
+     */
+    private void initRefBookCountry() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 262254399L));
+        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "643"));
+        pagingResult.add(pagingResultItem);
+        mockRefBook(RefBook.Id.COUNTRY.getId(), pagingResult);
+    }
+
+    /**
+     * Коды документов
+     */
+    private void initRefBookDocType() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 266135799L));
+        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "21"));
+        pagingResult.add(pagingResultItem);
+        mockRefBook(RefBook.Id.DOCUMENT_CODES.getId(), pagingResult);
+    }
+
+    /**
+     * Статусы налогоплательщика
+     */
+    private void initRefBookTaxpayerStatus() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 268574899L));
+        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "1"));
+        pagingResult.add(pagingResultItem);
+        mockRefBook(RefBook.Id.TAXPAYER_STATUS.getId(), pagingResult);
+    }
+
+    /**
+     * Коды видов доходов
+     */
+    private void initRefBookIncomeCode() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 352164399L));
+        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "2000"));
+        pagingResult.add(pagingResultItem);
+        mockRefBook(RefBook.Id.INCOME_CODE.getId(), pagingResult);
+    }
+
+    /**
+     * Виды дохода
+     */
+    private void initRefBookIncomeKind() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 352196699L));
+        // Ссылка на таблицу "Коды видов доходов"
+        pagingResultItem.put("INCOME_TYPE_ID", new RefBookValue(RefBookAttributeType.NUMBER, 352164399L));
+        pagingResultItem.put("MARK", new RefBookValue(RefBookAttributeType.STRING, "05"));
+        pagingResult.add(pagingResultItem);
+        mockRefBook(RefBook.Id.INCOME_KIND.getId(), pagingResult);
+    }
+
+    /**
+     * Ставка НДФЛ
+     */
+    private void initRefBookNdflRate() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 268580599L));
+        pagingResultItem.put("RATE", new RefBookValue(RefBookAttributeType.STRING, "13"));
+        pagingResult.add(pagingResultItem);
+        mockRefBook(RefBook.Id.NDFL_RATE.getId(), pagingResult);
+    }
+
+    /**
+     * Коды видов вычетов
+     */
+    private void initRefBookDeductionType() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 266955499L));
+        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "104"));
+        pagingResult.add(pagingResultItem);
+        mockRefBook(RefBook.Id.DEDUCTION_TYPE.getId(), pagingResult);
+    }
+
+    /**
+     * Налоговые инспекции
+     */
+    private void initRefBookTaxInspection() {
+        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 268800599L));
+        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "0001"));
+        pagingResult.add(pagingResultItem);
+        mockRefBook(RefBook.Id.TAX_INSPECTION.getId(), pagingResult);
+    }
+
+    /**
+     * Физические лица
+     */
+    private void initRefBookPerson() {
+        Map<Long, Map<String, RefBookValue>> pagingResult = new HashMap<Long, Map<String, RefBookValue>>();
+
+        RefBookPersonTest refBookPersonTest1 = createRefBookPersonTest1();
+        Map<String, RefBookValue> pagingResultItem1 = new HashMap<String, RefBookValue>();
+        pagingResultItem1.put("id", new RefBookValue(RefBookAttributeType.NUMBER, refBookPersonTest1.getId()));
+        pagingResultItem1.put("RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, refBookPersonTest1.getRecordId()));
+        pagingResultItem1.put("LAST_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest1.getLastName()));
+        pagingResultItem1.put("FIRST_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest1.getFirstName()));
+        pagingResultItem1.put("MIDDLE_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest1.getMiddleName()));
+        pagingResultItem1.put("ADDRESS", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+        pagingResult.put(refBookPersonTest1.getId(), pagingResultItem1);
+
+        RefBookPersonTest refBookPersonTest2 = createRefBookPersonTest2();
+        Map<String, RefBookValue> pagingResultItem2 = new HashMap<String, RefBookValue>();
+        pagingResultItem2.put("id", new RefBookValue(RefBookAttributeType.NUMBER, refBookPersonTest2.getId()));
+        pagingResultItem2.put("RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, refBookPersonTest2.getRecordId()));
+        pagingResultItem2.put("LAST_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest2.getLastName()));
+        pagingResultItem2.put("FIRST_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest2.getFirstName()));
+        pagingResultItem2.put("MIDDLE_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest2.getMiddleName()));
+        pagingResultItem2.put("ADDRESS", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+        pagingResult.put(refBookPersonTest2.getId(), pagingResultItem2);
+
+        RefBookPersonTest refBookPersonTest3 = createRefBookPersonTest3();
+        Map<String, RefBookValue> pagingResultItem3 = new HashMap<String, RefBookValue>();
+        pagingResultItem3.put("id", new RefBookValue(RefBookAttributeType.NUMBER, refBookPersonTest3.getId()));
+        pagingResultItem3.put("RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, refBookPersonTest3.getRecordId()));
+        pagingResultItem3.put("LAST_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest3.getLastName()));
+        pagingResultItem3.put("FIRST_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest3.getFirstName()));
+        pagingResultItem3.put("MIDDLE_NAME", new RefBookValue(RefBookAttributeType.STRING, refBookPersonTest3.getMiddleName()));
+        pagingResultItem3.put("ADDRESS", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+        pagingResult.put(refBookPersonTest3.getId(), pagingResultItem3);
+
+        RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.PERSON.getId())).thenReturn(refBookDataProvider);
+        when(refBookDataProvider.getRecordDataVersionWhere(any(String.class), any(Date.class))).thenReturn(pagingResult);
+    }
+
+    /**
+     * Адреса
+     */
+    private void initRefBookAddress() {
+        Map<Long, Map<String, RefBookValue>> pagingResult = new HashMap<Long, Map<String, RefBookValue>>();
+
+        RefBookAddressTest refBookAddressTest1 = createRefBookAddressTest1();
+        Map<String, RefBookValue> pagingResultItem1 = new HashMap<String, RefBookValue>();
+        pagingResultItem1.put("id", new RefBookValue(RefBookAttributeType.NUMBER, refBookAddressTest1.getId()));
+        pagingResultItem1.put("REGION_CODE", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest1.getRegionCode()));
+        pagingResultItem1.put("DISTRICT", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest1.getDistrict()));
+        pagingResultItem1.put("CITY", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest1.getCity()));
+        pagingResultItem1.put("LOCALITY", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest1.getLocality()));
+        pagingResultItem1.put("STREET", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest1.getStreet()));
+        pagingResultItem1.put("HOUSE", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest1.getHouse()));
+        pagingResultItem1.put("BUILD", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest1.getBuild()));
+        pagingResultItem1.put("APPARTMENT", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest1.getAppartment()));
+        pagingResult.put(refBookAddressTest1.getId(), pagingResultItem1);
+
+        RefBookAddressTest refBookAddressTest2 = createRefBookAddressTest2();
+        Map<String, RefBookValue> pagingResultItem2 = new HashMap<String, RefBookValue>();
+        pagingResultItem2.put("id", new RefBookValue(RefBookAttributeType.NUMBER, refBookAddressTest2.getId()));
+        pagingResultItem2.put("REGION_CODE", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest2.getRegionCode()));
+        pagingResultItem2.put("DISTRICT", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest2.getDistrict()));
+        pagingResultItem2.put("CITY", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest2.getCity()));
+        pagingResultItem2.put("LOCALITY", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest2.getLocality()));
+        pagingResultItem2.put("STREET", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest2.getStreet()));
+        pagingResultItem2.put("HOUSE", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest2.getHouse()));
+        pagingResultItem2.put("BUILD", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest2.getBuild()));
+        pagingResultItem2.put("APPARTMENT", new RefBookValue(RefBookAttributeType.STRING, refBookAddressTest2.getAppartment()));
+        pagingResult.put(refBookAddressTest2.getId(), pagingResultItem2);
+
+        RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.PERSON_ADDRESS.getId())).thenReturn(refBookDataProvider);
+        when(refBookDataProvider.getRecordData(any(List.class))).thenReturn(pagingResult);
+    }
+
+    /**
+     * mock справочников
+     */
+    private void initRefBook() {
+        // Страны
+        initRefBookCountry();
+        // Коды документов
+        initRefBookDocType();
+        // Статусы налогоплательщика
+        initRefBookTaxpayerStatus();
+        // Коды видов доходов
+        initRefBookIncomeCode();
+        // Виды дохода
+        initRefBookIncomeKind();
+        // Ставка НДФЛ
+        initRefBookNdflRate();
+        // Коды видов вычетов
+        initRefBookDeductionType();
+        // Налоговые инспекции
+        initRefBookTaxInspection();
+        // Физические лица
+        initRefBookPerson();
+        // Адреса
+        initRefBookAddress();
+    }
+    private void mockRefBook(Long refBookId, PagingResult<Map<String, RefBookValue>> pagingResult) {
+        RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(refBookId)).thenReturn(refBookDataProvider);
+        when(refBookDataProvider.getRecordsVersion(any(Date.class), any(Date.class), any(PagingParams.class), anyString())).thenReturn(pagingResult);
     }
 }
