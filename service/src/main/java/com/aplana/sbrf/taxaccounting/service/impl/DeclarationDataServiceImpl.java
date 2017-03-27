@@ -1494,7 +1494,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static String getFileName(String filename){
+    private String getFileName(String filename){
         int dotPos = filename.lastIndexOf('.');
         if (dotPos < 0) {
             return filename;

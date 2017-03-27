@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -227,39 +228,60 @@ public abstract class AbstractLoadTransportDataService {
                                     Logger logger, LogData deleteErrorLogData, LogData successLogData, LogData moveErrorLogData, String lock) {
         boolean success = true;
         try {
+            boolean isArchive = getFileExtension(file.getName()).equalsIgnoreCase("zip") || getFileExtension(file.getName()).equalsIgnoreCase("rar");
             // Создание дерева каталогов
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
 
             FileWrapper folderDst = createPath(rootPath, calendar);
 
-            // Создание архива
-            String path = folderDst.getPath() + "/" + file.getName()
-                    + dateFormat.get().format(calendar.getTime()) + ".zip";
-            FileWrapper fileDst = ResourceUtils.getSharedResource(path, false);
-            ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(fileDst.getOutputStream());
-            zaos.setEncoding(ZIP_ENCODING);
-            zaos.putArchiveEntry(new ZipArchiveEntry(file.getName()));
-            InputStream inputStream = file.getInputStream();
-			try {
-            	IOUtils.copy(inputStream, zaos);
-            	zaos.closeArchiveEntry();
-			} finally {
-            	IOUtils.closeQuietly(inputStream);
-			}
-
-            // Файл с логами, если логи есть
-            if (errorList != null && !errorList.isEmpty()) {
-                zaos.putArchiveEntry(new ZipArchiveEntry(file.getName() + ".txt"));
-                StringBuilder sb = new StringBuilder();
-                sb.append(userInfo.getUser().getName() + " \r\n");
-                for (LogEntry logEntry : errorList) {
-                    sb.append(logEntry.getLevel().name() + "\t" + logEntry.getMessage() + "\r\n");
+            FileWrapper fileDst = null;
+            if (!isArchive || (errorList != null && !errorList.isEmpty())) {
+                // Создание архива
+                String path = folderDst.getPath() + "/" + file.getName() + "_"
+                        + dateFormat.get().format(calendar.getTime()) + ".zip";
+                fileDst = ResourceUtils.getSharedResource(path, false);
+                ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(fileDst.getOutputStream());
+                zaos.setEncoding(ZIP_ENCODING);
+                // Файл с логами, если логи есть
+                if (errorList != null && !errorList.isEmpty()) {
+                    zaos.putArchiveEntry(new ZipArchiveEntry(file.getName() + ".txt"));
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(userInfo.getUser().getName() + " \r\n");
+                    for (LogEntry logEntry : errorList) {
+                        sb.append(logEntry.getLevel().name() + "\t" + logEntry.getMessage() + "\r\n");
+                    }
+                    IOUtils.copy(new ByteArrayInputStream(sb.toString().getBytes()), zaos);
+                    zaos.closeArchiveEntry();
                 }
-                IOUtils.copy(new ByteArrayInputStream(sb.toString().getBytes()), zaos);
-                zaos.closeArchiveEntry();
+                // архивируем файл
+                if (!isArchive) {
+                    zaos.putArchiveEntry(new ZipArchiveEntry(file.getName()));
+                    InputStream inputStream = file.getInputStream();
+                    try {
+                        IOUtils.copy(inputStream, zaos);
+                        zaos.closeArchiveEntry();
+                    } finally {
+                        IOUtils.closeQuietly(inputStream);
+                    }
+                }
+                IOUtils.closeQuietly(zaos);
             }
-            IOUtils.closeQuietly(zaos);
+            // копируем файл
+            if (isArchive) {
+                String path = folderDst.getPath() + "/" + getFileName(file.getName())+"_"
+                        + dateFormat.get().format(calendar.getTime()) + "." + getFileExtension(file.getName());
+                fileDst = ResourceUtils.getSharedResource(path, false);
+
+                InputStream inputStream = file.getInputStream();
+                OutputStream outputStream = fileDst.getOutputStream();
+                try {
+                    IOUtils.copy(inputStream, outputStream);
+                } finally {
+                    IOUtils.closeQuietly(inputStream);
+                    IOUtils.closeQuietly(outputStream);
+                }
+            }
 
             // Удаление
             try {
@@ -277,5 +299,18 @@ public abstract class AbstractLoadTransportDataService {
 			LOG.error(e.getMessage(), e);
         }
         return success;
+    }
+
+    private String getFileName(String filename){
+        int dotPos = filename.lastIndexOf('.');
+        if (dotPos < 0) {
+            return filename;
+        }
+        return filename.substring(0, dotPos);
+    }
+
+    private String getFileExtension(String filename){
+        int dotPos = filename.lastIndexOf('.') + 1;
+        return filename.substring(dotPos);
     }
 }
