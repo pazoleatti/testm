@@ -5228,7 +5228,7 @@ def checkDataDBPerson() {
     // 3.2.1 Дубли физического лица рамках формы
     time = System.currentTimeMillis();
     def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonsByDeclarationDataId(declarationData.id)
-    if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
+    if (raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
         // Мапа для группировки дублей <recordId, RaschsvPersSvStrahLic>
         def raschsvPersSvStrahLicDuplMap = [:]
         raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDuplicate ->
