@@ -954,11 +954,11 @@ def createSpecificReport() {
             break;
         case 'report_kpp_oktmo':
             createSpecificReportDb();
-            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
+            scriptSpecificReportHolder.setFileName("Отчетность_по_КПП,ОКТМО" + ".xlsx")
             break;
         case 'rnu_ndfl_person_all_db':
             createSpecificReportDb();
-            scriptSpecificReportHolder.setFileName("Отчетность_по_КПП,ОКТМО" + ".xlsx")
+            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
             break;
         default:
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
