@@ -5588,24 +5588,24 @@ def checkDataDBSum() {
         }
 
         // 3.3.3.2 База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению (Проверки выполняются для каждого РасчСВ_ОМС)
-        if (!comparNumbEquals(bazNachislSvCurr1, vyplNachislFlCurr1 + neOblozenCurr1)) {
-            def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум1Посл3М = \"$bazNachislSvCurr1\""
-            def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум1Посл3М = \"$vyplNachislFlCurr1\", " + pathAttrOms + ".НеОбложенСВ.Сум1Посл3М = \"$neOblozenCurr1\"."
-            logger.warnExp("%s не равен сумме: %s",
+        if (!comparNumbEquals(bazNachislSvCurr1, vyplNachislFlCurr1 - neOblozenCurr1)) {
+            def pathAttrVal = "${pathAttrOms}.БазНачислСВ.Сум1Посл3М='$bazNachislSvCurr1'"
+            def pathAttrComp = "${pathAttrOms}.ВыплНачислФЛ.Сум1Посл3М='$vyplNachislFlCurr1' - ${pathAttrOms}.НеОбложенСВ.Сум1Посл3М='$neOblozenCurr1'."
+            logger.warnExp("%s не равен: %s",
                     "База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению",
                     null, pathAttrVal, pathAttrComp)
         }
-        if (!comparNumbEquals(bazNachislSvCurr2, vyplNachislFlCurr2 + neOblozenCurr2)) {
-            def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум2Посл3М = \"$bazNachislSvCurr2\""
-            def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум2Посл3М = \"$vyplNachislFlCurr2\", " + pathAttrOms + ".НеОбложенСВ.Сум2Посл3М = \"$neOblozenCurr2\"."
-            logger.warnExp("%s не равен сумме: %s",
+        if (!comparNumbEquals(bazNachislSvCurr2, vyplNachislFlCurr2 - neOblozenCurr2)) {
+            def pathAttrVal = "${pathAttrOms}.БазНачислСВ.Сум2Посл3М='$bazNachislSvCurr2'"
+            def pathAttrComp = "${pathAttrOms}.ВыплНачислФЛ.Сум2Посл3М='$vyplNachislFlCurr2' - ${pathAttrOms}.НеОбложенСВ.Сум2Посл3М='$neOblozenCurr2'."
+            logger.warnExp("%s не равен: %s",
                     "База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению",
                     null, pathAttrVal, pathAttrComp)
         }
-        if (!comparNumbEquals(bazNachislSvCurr3, vyplNachislFlCurr3 + neOblozenCurr3)) {
-            def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум3Посл3М = \"$bazNachislSvCurr3\""
-            def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум3Посл3М = \"$vyplNachislFlCurr3\", " + pathAttrOms + ".НеОбложенСВ.Сум3Посл3М = \"$neOblozenCurr3\"."
-            logger.warnExp("%s не равен сумме: %s",
+        if (!comparNumbEquals(bazNachislSvCurr3, vyplNachislFlCurr3 - neOblozenCurr3)) {
+            def pathAttrVal = "${pathAttrOms}.БазНачислСВ.Сум3Посл3М='$bazNachislSvCurr3'"
+            def pathAttrComp = "${pathAttrOms}.ВыплНачислФЛ.Сум3Посл3М='$vyplNachislFlCurr3' - ${pathAttrOms}.НеОбложенСВ.Сум3Посл3М='$neOblozenCurr3'."
+            logger.warnExp("%s не равен: %s",
                     "База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению",
                     null, pathAttrVal, pathAttrComp)
         }
