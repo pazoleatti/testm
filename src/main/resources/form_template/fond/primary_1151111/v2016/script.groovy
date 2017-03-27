@@ -5254,7 +5254,7 @@ def checkDataDBPerson() {
     // 3.2.2 Дубли физического лица в разных формах
     time = System.currentTimeMillis();
     raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonsByReportPeriodId(declarationData.id, declarationData.reportPeriodId)
-    if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
+    if (raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
         def recordIdDuplList = []
         def declarationDataIdDuplList = []
         raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDupl ->
@@ -6691,7 +6691,7 @@ def checkDataXml() {
                                 def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_OBYAZ_PLAT_SV, OBYAZ_PLAT_SV_OKTMO].join(".")
                                 logger.warnExp("%s='%s' не совпадает с ОКТМО='%s'",
                                         "Соответствие кода ОКТМО настройкам подразделения",
-                                        null, pathAttr, oktmoXml, oktmoParam?.CODE?.stringValue)
+                                        null, pathAttr, oktmoXml, oktmoParam?.CODE?.stringValue ?: "")
                             }
 
                             // 2.2.2 Актуальность ОКТМО (справочник ОКТМО очень большой, поэтому обращаться к нему будем по записи)
