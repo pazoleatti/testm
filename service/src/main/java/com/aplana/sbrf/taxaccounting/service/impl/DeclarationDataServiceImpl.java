@@ -150,6 +150,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" в статусе \"%s\"";
     private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
             "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" - экземпляр формы не создан";
+    private static final String EXIST_DESTINATION_DECLARATION_ERROR =
+            "Переход невозможен, т.к. уже подготовлена/принята вышестоящая налоговая форма.";
     private static final String FILE_NOT_DELETE = "Временный файл %s не удален";
 
     private static final Date MAX_DATE;
@@ -430,10 +432,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void cancel(Logger logger, long id, TAUserInfo userInfo) {
-        DeclarationData declarationData = declarationDataDao.get(id);
-        /*checkSources(declarationData, logger);*/
-
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+        DeclarationData declarationData = declarationDataDao.get(id);
+
+        //Проверка того, что консолидация вообще когда то выполнялась для всех источников
+        List<Relation> relations = sourceService.getDeclarationDestinationsInfo(declarationData, true, false, null, userInfo, logger);
+        for (Relation relation : relations){
+            if (relation.isCreated() && !State.CREATED.equals(relation.getDeclarationState())){
+                throw new ServiceException(EXIST_DESTINATION_DECLARATION_ERROR);
+            }
+        }
 
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
