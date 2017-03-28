@@ -1,6 +1,5 @@
 package refbook.person
 
-import com.aplana.sbrf.taxaccounting.model.PersonData
 import groovy.transform.Field
 
 /**
