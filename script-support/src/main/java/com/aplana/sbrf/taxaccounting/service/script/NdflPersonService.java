@@ -94,7 +94,7 @@ public interface NdflPersonService {
      * @param operationId ключ операции в БД, а не поле ид операции
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<Long> operationId);
+    List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<String> operationId);
 
     /**
      * Найти данный о вычетах
@@ -265,7 +265,7 @@ public interface NdflPersonService {
      * @param operationId
      * @return
      */
-    List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, long operationId);
+    List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, String operationId);
 
     /**
      * Найти авансы для определенной операции
@@ -274,7 +274,7 @@ public interface NdflPersonService {
      * @param operationId
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, long operationId);
+    List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, String operationId);
 
     /**
      * Найти доход по идентификатору

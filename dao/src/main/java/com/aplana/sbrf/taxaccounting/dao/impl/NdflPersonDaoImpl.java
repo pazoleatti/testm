@@ -582,7 +582,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, long operationId) {
+    public List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, String operationId) {
         String sql = "select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " " +
                 "from NDFL_PERSON_DEDUCTION npd where npd.NDFL_PERSON_ID = :ndflPersonId " +
                 "and npd.operation_id = :operationId";
@@ -597,7 +597,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, long operationId) {
+    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, String operationId) {
         String sql = "select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " " +
                 "from NDFL_PERSON_PREPAYMENT npp where npp.NDFL_PERSON_ID = :ndflPersonId " +
                 "and npp.operation_id = :operationId";
@@ -612,7 +612,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<Long> operationId) {
+    public List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<String> operationId) {
         String sql = "select distinct " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " " +
                 " from NDFL_PERSON_PREPAYMENT npp join NDFL_PERSON_INCOME npi ON npi.ndfl_person_id = npp.ndfl_person_id where npi.id in (:operationId)";
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -838,7 +838,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setRowNum(rs.getInt("row_num"));
             personIncome.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
 
-            personIncome.setOperationId(SqlUtils.getLong(rs, "operation_id"));
+            personIncome.setOperationId(rs.getString("operation_id"));
             personIncome.setOktmo(rs.getString("oktmo"));
             personIncome.setKpp(rs.getString("kpp"));
 
@@ -877,7 +877,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personDeduction.setId(SqlUtils.getLong(rs, "id"));
             personDeduction.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
             personDeduction.setRowNum(rs.getInt("row_num"));
-            personDeduction.setOperationId(SqlUtils.getLong(rs, "operation_id"));
+            personDeduction.setOperationId(rs.getString("operation_id"));
 
             personDeduction.setTypeCode(rs.getString("type_code"));
 
@@ -910,7 +910,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setId(SqlUtils.getLong(rs, "id"));
             personPrepayment.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
             personPrepayment.setRowNum(rs.getInt("row_num"));
-            personPrepayment.setOperationId(SqlUtils.getLong(rs, "operation_id"));
+            personPrepayment.setOperationId(rs.getString("operation_id"));
 
             personPrepayment.setSumm(rs.getLong("summ"));
             personPrepayment.setNotifNum(rs.getString("notif_num"));
