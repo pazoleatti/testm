@@ -2649,7 +2649,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (ndflPersonIncome.taxRate == 13) {
                 Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
                 Boolean conditionB = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status == "1"
-                Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
+                Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: '0') >= 3
                 if (!(conditionA || conditionB || conditionC)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
@@ -2677,8 +2677,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             "Для «Графа 14 Раздел 2 = 35» не выполнено условие: «Графа 4 Раздел 2» = (2740 или 3020 или 2610) и «Графа 12 Раздел 1» ≠ 2")
                 }
             } else if (ndflPersonIncome.taxRate == 30) {
-                def conditionA = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && ndflPersonIncome.incomeCode != "1010"
-                def conditionB = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
+                def conditionA = Integer.parseInt(ndflPerson.status ?: '0') >= 2 && ndflPersonIncome.incomeCode != "1010"
+                def conditionB = Integer.parseInt(ndflPerson.status ?: '0') >= 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
                 if (!(conditionA || conditionB)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
@@ -3366,7 +3366,7 @@ BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<Ndfl
     BigDecimal sumNdflDeduction = new BigDecimal(0)
     for (ndflPersonDeduction in ndflPersonDeductionList) {
         if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                && ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy") == ndflPersonDeduction.incomeAccrued.format("dd.MM.yyyy")
+                && ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy") == ndflPersonDeduction.incomeAccrued?.format("dd.MM.yyyy")
                 && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
             sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
         }
@@ -3422,7 +3422,7 @@ class MatchMask implements DateConditionChecker {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
-        String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
+        String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
         Pattern pattern = Pattern.compile(maskRegex)
         Matcher matcher = pattern.matcher(accrued)
         if (matcher.matches()) {
