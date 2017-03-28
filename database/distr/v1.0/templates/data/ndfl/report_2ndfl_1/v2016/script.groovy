@@ -1,5 +1,6 @@
 package form_template.ndfl.report_2ndfl_1.v2016
 
+import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
@@ -498,8 +499,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
     saveNdflRefences()
     ScriptUtils.checkInterrupted();
     saveFileInfo(currDate, fileName)
-
-    //println(writer)
 }
 // Сохранение информации о файле в комментариях
 def saveFileInfo(currDate, fileName) {
@@ -1444,15 +1443,15 @@ def prepareSpecificReport() {
     if (resultReportParameters.isEmpty()) {
         throw new ServiceException("Для поиска справки необходимо задать критерий.");
     }
-    // Ограничение числа выводимых записей
-    def docs = findSpavki(resultReportParameters)
+    // Поиск данных по фильтру
+    def docs = searchData(resultReportParameters)
     if (docs.size() == 0) {
         subreportParamsToString = { it.collect { (it.value != null ? (it.value + ";") : "") } join " " }
         logger.warn("Номер справки по заданным параметрам: " + subreportParamsToString(reportParameters) + " не найден");
     }
-    //todo доработать, добавить помимо справки еще и ФИО + ДР
+    // Формирование списка данных для вывода в таблицу
     def rowColumns = createTableColumns()
-    List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+    def dataRows = new ArrayList<DataRow<Cell>>();
     docs.each() { doc ->
         DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
         row.getCell("pNumSpravka").setStringValue(doc.@НомСпр.text())
@@ -1462,6 +1461,7 @@ def prepareSpecificReport() {
         row.getCell("birthday").setStringValue(doc?.ПолучДох?.@ДатаРожд?.text())
         dataRows.add(row)
     }
+    // Настройка таблицы
     PrepareSpecificReportResult result = new PrepareSpecificReportResult();
     List<Column> tableColumns = createTableColumns();
     result.setTableColumns(tableColumns);
@@ -1471,41 +1471,30 @@ def prepareSpecificReport() {
 }
 
 def createTableColumns() {
-    List<Column> tableColumns = new ArrayList<Column>()
-    Column column1 = new StringColumn()
-    column1.setAlias("pNumSpravka")
-    column1.setName("Номер справки")
-    column1.setWidth(10)
-    tableColumns.add(column1)
-    Column column2 = new StringColumn()
-    column2.setAlias("last_name")
-    column2.setName("Фамилия")
-    column2.setWidth(10)
-    tableColumns.add(column2)
-    Column column3 = new StringColumn()
-    column3.setAlias("first_name")
-    column3.setName("Имя")
-    column3.setWidth(10)
-    tableColumns.add(column3)
-    Column column4 = new StringColumn()
-    column4.setAlias("middle_name")
-    column4.setName("Отчество")
-    column4.setWidth(10)
-    tableColumns.add(column4)
-    Column column5 = new StringColumn()
-    column5.setAlias("birthday")
-    column5.setName("Дата рождения")
-    column5.setWidth(10)
-    tableColumns.add(column5)
+    def tableColumns = new ArrayList<Column>()
+    tableColumns.add(createColumn("pNumSpravka", "Номер справки", 5))
+    tableColumns.add(createColumn("last_name", "Фамилия", 10))
+    tableColumns.add(createColumn("first_name", "Имя", 10))
+    tableColumns.add(createColumn("middle_name", "Отчество", 10))
+    tableColumns.add(createColumn("birthday", "Дата рождения", 10))
     return tableColumns;
 }
 
-def findSpavki(def params) {
-    String searchText = params['pNumSpravka']
+def createColumn(def alias, def name, def width) {
+    def column = new StringColumn()
+    column.setAlias(alias)
+    column.setName(name)
+    column.setWidth(width)
+    return column
+}
+/**
+ * Поиск справок согласно фильтру
+ */
+def searchData(def params) {
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)
-    def docs = Файл.Документ.find{doc ->
-        StringUtils.containsIgnoreCase(doc.@НомСпр.text(), searchText)
+    def docs = Файл.Документ.findAll{doc ->
+        StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka'])
     }
     // ограничиваем размер выборки
     def result = []
@@ -1526,13 +1515,10 @@ def createSpecificReport() {
         createPrimaryRnuWithErrors()
         return
     }
-
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
     params['pNumSpravka'] = row.pNumSpravka
-    def xmlStr = declarationService.getXmlData(declarationData.id)
-
-    xmlStr = xmlStr.replace("windows-1251", "utf-8") // сведения о кодировке должны соответствовать содержимому
+    def xmlStr = filterData(row)
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
         it.write(xmlStr, 0, xmlStr.length())
         it.flush()
@@ -1540,6 +1526,20 @@ def createSpecificReport() {
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+/**
+ * Оставляем только необходимые данные для отчета
+ */
+def filterData(params) {
+    def xml = declarationService.getXmlData(declarationData.id)
+    def Файл = new XmlParser().parseText(xml)
+    Файл.Документ.each{ doc ->
+        if (doc.@НомСпр != params.pNumSpravka) {
+            doc.replaceNode{}
+        }
+    }
+    def result = XmlUtil.serialize(Файл)
+    result.replace("windows-1251", "utf-8") // сведения о кодировке должны соответствовать содержимому
 }
 
 /**

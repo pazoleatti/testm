@@ -383,24 +383,26 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                     }
 
                                     //Выполняем логику скрипта
-                                    refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
-                                            localLoggerList.get(i), additionalParameters);
-                                    IOUtils.closeQuietly(is);
                                     try {
-                                        if (archive != null) {
-                                            archive.close();
-                                        }
-                                    } catch (IOException ioe) {
-                                        // ignore
-                                    }
-                                    if (randomAccessFile != null) {
+                                        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
+                                                localLoggerList.get(i), additionalParameters);
+                                    } finally {
+                                        IOUtils.closeQuietly(is);
                                         try {
-                                            randomAccessFile.close();
-                                        } catch (IOException e) {
+                                            if (archive != null) {
+                                                archive.close();
+                                            }
+                                        } catch (IOException ioe) {
                                             // ignore
                                         }
+                                        if (randomAccessFile != null) {
+                                            try {
+                                                randomAccessFile.close();
+                                            } catch (IOException e) {
+                                                // ignore
+                                            }
+                                        }
                                     }
-
                                     // Обработка результата выполнения скрипта
                                     switch (scriptStatusHolder.getScriptStatus()) {
                                         case SUCCESS:
@@ -445,20 +447,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             // При ошибке второй раз не пытаемся загрузить
                             load = true;
                             IOUtils.closeQuietly(is);
-                            try {
-                                if (archive != null) {
-                                    archive.close();
-                                }
-                            } catch (IOException ioe) {
-                                // ignore
-                            }
-                            if (randomAccessFile != null) {
-                                try {
-                                    randomAccessFile.close();
-                                } catch (IOException ioe) {
-                                    // ignore
-                                }
-                            }
                             fail++;
                             // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                             log(userInfo, LogData.L21, logger, lockId, e.getMessage());

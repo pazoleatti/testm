@@ -61,7 +61,7 @@
 
     <dw:ModalWindow ui:field="modalWindow"
                     iconUrl="resources/img/source-target.png"
-                    height="400px" width="1000px" minWidth="520px"
+                    height="400px" width="1100px" minWidth="520px"
                     title="Источники и приёмники формы" resizable="true">
 
         <g:FlowPanel addStyleNames="{style.mainPanel}">

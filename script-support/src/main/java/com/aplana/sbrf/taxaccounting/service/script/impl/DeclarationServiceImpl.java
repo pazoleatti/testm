@@ -358,7 +358,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName, String xsdBlobDataId) {
-        declarationDataService.validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, fileName, xsdBlobDataId, new LockStateLogger() {
+        declarationDataService.validateDeclaration(userInfo, declarationData, logger, true, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, fileName, xsdBlobDataId, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 // ничего не делаем
