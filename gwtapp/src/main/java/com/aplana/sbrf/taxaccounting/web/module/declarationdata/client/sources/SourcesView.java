@@ -150,6 +150,29 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
+        Column<Relation, String> declarationDataIdColumn = new Column<Relation, String>(new ClickableTextCell()){
+            @Override
+            public void render(Cell.Context context, Relation object, SafeHtmlBuilder sb) {
+                String link = "";
+                if (object.isCreated()) {
+                    link = "<a href=\"#"
+                            + DeclarationDataTokens.declarationData + ";"
+                            + DeclarationDataTokens.declarationId + "="
+                            + object.getDeclarationDataId() + "\">"
+                            + object.getDeclarationDataId() + "</a>";
+                }
+                sb.appendHtmlConstant(link);
+            }
+
+            @Override
+            public String getValue(Relation relation) {
+                if (relation.isCreated()) {
+                    return relation.getDeclarationDataId().toString();
+                }
+                return "";
+            }
+        };
+
         TextColumn<Relation> correctionDateColumn = new TextColumn<Relation>() {
             @Override
             public String getValue(Relation object) {
@@ -195,40 +218,10 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        Column<Relation, String> formTypeColumn = new Column<Relation, String>(new ClickableTextCell()){
+        TextColumn<Relation> formTypeColumn = new TextColumn<Relation>() {
             @Override
-            public void render(Cell.Context context, Relation object, SafeHtmlBuilder sb) {
-                String link;
-                if (object.getFormTypeName() != null) {
-                    if (object.isCreated()) {
-                        link = "<a href=\"#"
-                                + FormDataPresenter.NAME_TOKEN + ";"
-                                + FormDataPresenter.FORM_DATA_ID + "="
-                                + object.getFormDataId() + "\">"
-                                + object.getFormTypeName() + "</a>";
-                    } else {
-                        link = object.getFormTypeName();
-                    }
-                } else {
-                    if (object.isCreated()) {
-                        link = "<a href=\"#"
-                                + DeclarationDataTokens.declarationData + ";"
-                                + DeclarationDataTokens.declarationId + "="
-                                + object.getDeclarationDataId() + "\">"
-                                + object.getDeclarationTypeName() + "</a>";
-                    } else {
-                        link = object.getDeclarationTypeName();
-                    }
-                }
-                sb.appendHtmlConstant(link);
-            }
-
-            @Override
-            public String getValue(Relation relation) {
-                if (relation.getFormTypeName() != null)
-                    return relation.getFormTypeName();
-                else
-                    return relation.getDeclarationTypeName();
+            public String getValue(Relation object) {
+                return object.getDeclarationTypeName();
             }
         };
 
@@ -240,6 +233,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.setColumnWidth(taxTypeColumn, 110, Style.Unit.PX);
         table.addColumn(sourceColumn, "Источник / Приёмник");
         table.setColumnWidth(sourceColumn, 85, Style.Unit.PX);
+        table.addColumn(declarationDataIdColumn, "Номер формы");
+        table.setColumnWidth(declarationDataIdColumn, 45, Style.Unit.PX);
         table.addColumn(departmentColumn, "Подразделение");
         table.addColumn(correctionDateColumn, "Дата сдачи корректировки");
         table.setColumnWidth(correctionDateColumn, 85, Style.Unit.PX);

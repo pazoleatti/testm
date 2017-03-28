@@ -1506,7 +1506,7 @@ void importData() {
 
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')))
-    if (logger.containsLevel(LogLevel.WARNING)) {
+    if (logger.containsLevel(LogLevel.ERROR)) {
         throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
