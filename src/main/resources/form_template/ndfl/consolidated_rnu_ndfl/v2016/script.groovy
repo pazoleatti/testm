@@ -77,6 +77,9 @@ def calcTimeMillis(long time) {
  */
 @Field final int CONSOLIDATED_RNU_NDFL_TEMPLATE_ID = 101
 @Field final int PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
+@Field final int NDFL_2_1_TEMPLATE_ID = 102
+@Field final int NDFL_2_2_TEMPLATE_ID = 104
+@Field final int NDFL_6_TEMPLATE_ID = 103
 
 //>------------------< CONSOLIDATION >----------------------<
 
@@ -559,10 +562,6 @@ def clearData() {
  */
 def getSourcesListForTemporarySolution() {
 
-    if (!needSources) {
-        return
-    }
-
     //отчетный период в котором выполняется консолидация
     ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
@@ -640,48 +639,56 @@ def getSourcesList() {
  * Система включает в КНФ множество ПНФ, относящихся к периоду с наиболее старшим периодом сдачи корректировки
  */
 List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodId) {
+    if (needSources) {
+        //Список отчетных периодов подразделения
+        List<DepartmentReportPeriod> departmentReportPeriodList = new ArrayList<DepartmentReportPeriod>();
+        List<DeclarationData> allDeclarationDataList = declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, departmentId, reportPeriodId);
 
-    //Список отчетных периодов подразделения
-    List<DepartmentReportPeriod> departmentReportPeriodList = new ArrayList<DepartmentReportPeriod>();
-    List<DeclarationData> allDeclarationDataList = declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, departmentId, reportPeriodId);
+        //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
+        Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
+        for (DeclarationData declarationData : allDeclarationDataList) {
+            Long asnuId = declarationData.getAsnuId();
+            DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod;
+            Integer departmentReportPeriodId = departmentReportPeriod.getId();
+            departmentReportPeriodList.add(departmentReportPeriod);
+            if (asnuId != null) {
+                Map<Integer, List<DeclarationData>> asnuMap = asnuDataMap.get(asnuId);
+                if (asnuMap == null) {
+                    asnuMap = new HashMap<Long, DeclarationData>();
+                    asnuDataMap.put(asnuId, asnuMap);
+                }
+                List<DeclarationData> declarationDataList = asnuMap.get(departmentReportPeriodId);
+                if (declarationDataList == null) {
+                    declarationDataList = new ArrayList<DeclarationData>();
+                    asnuMap.put(departmentReportPeriodId, declarationDataList);
+                }
 
-    //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
-    Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
-    for (DeclarationData declarationData : allDeclarationDataList) {
-        Long asnuId = declarationData.getAsnuId();
-        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod;
-        Integer departmentReportPeriodId = departmentReportPeriod.getId();
-        departmentReportPeriodList.add(departmentReportPeriod);
-        if (asnuId != null) {
-            Map<Integer, List<DeclarationData>> asnuMap = asnuDataMap.get(asnuId);
-            if (asnuMap == null) {
-                asnuMap = new HashMap<Long, DeclarationData>();
-                asnuDataMap.put(asnuId, asnuMap);
+                declarationDataList.add(declarationData);
+            } else {
+                logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(departmentId) + ", отчетный период: " + reportPeriodId + ", id: " + declarationData.id);
             }
-            List<DeclarationData> declarationDataList = asnuMap.get(departmentReportPeriodId);
-            if (declarationDataList == null) {
-                declarationDataList = new ArrayList<DeclarationData>();
-                asnuMap.put(departmentReportPeriodId, declarationDataList);
-            }
-
-            declarationDataList.add(declarationData);
-        } else {
-            logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(departmentId) + ", отчетный период: " + reportPeriodId + ", id: " + declarationData.id);
         }
+
+        //Сортировка "Отчетных периодов" в порядке: Кор.период 1, Кор.период 2, некорректирующий период (не задана дата корректировки)
+        departmentReportPeriodList.sort { a, b -> departmentReportPeriodComp(a, b) }
+
+        //Включение в результат НФ с наиболее старшим периодом сдачи корректировки
+        List<DeclarationData> result = new ArrayList<DeclarationData>();
+        for (Map.Entry<Long, Map<Integer, List<DeclarationData>>> entry : asnuDataMap.entrySet()) {
+            //Long asnuId = entry.getKey();
+            Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
+            List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
+            result.addAll(declarationDataList);
+        }
+        return result;
+    } else {
+        List<DeclarationData> toReturn = []
+        toReturn.addAll(declarationService.find(NDFL_2_1_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        toReturn.addAll(declarationService.find(NDFL_2_2_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        toReturn.addAll(declarationService.find(NDFL_6_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        return toReturn
     }
 
-    //Сортировка "Отчетных периодов" в порядке: Кор.период 1, Кор.период 2, некорректирующий период (не задана дата корректировки)
-    departmentReportPeriodList.sort { a, b -> departmentReportPeriodComp(a, b) }
-
-    //Включение в результат НФ с наиболее старшим периодом сдачи корректировки
-    List<DeclarationData> result = new ArrayList<DeclarationData>();
-    for (Map.Entry<Long, Map<Integer, List<DeclarationData>>> entry : asnuDataMap.entrySet()) {
-        //Long asnuId = entry.getKey();
-        Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
-        List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
-        result.addAll(declarationDataList);
-    }
-    return result;
 }
 
 /**
@@ -741,7 +748,7 @@ def getRelation(DeclarationData declarationData, Department department, ReportPe
     //Макет НФ
     DeclarationTemplate declarationTemplate = getDeclarationTemplateById(declarationData?.declarationTemplateId)
 
-    def isSource = (declarationTemplate.id == PRIMARY_RNU_NDFL_TEMPLATE_ID)
+    def isSource = declarationTemplate.id == PRIMARY_RNU_NDFL_TEMPLATE_ID ? true : false
     ReportPeriod rp = departmentReportPeriod.getReportPeriod();
 
     if (light) {
