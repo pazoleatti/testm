@@ -1423,9 +1423,12 @@ def createRowColumns() {
 
 def createSpecificReport() {
     switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
-        case 'rnu_ndfl_person_db': createSpecificReportPersonDb();
+        case 'rnu_ndfl_person_db':
+            createSpecificReportPersonDb();
             break;
-        case 'rnu_ndfl_person_all_db': createSpecificReportDb();
+        case 'rnu_ndfl_person_all_db':
+            createSpecificReportDb();
+            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
             break;
         default:
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
@@ -1453,7 +1456,6 @@ def createSpecificReportDb() {
     def params = [declarationId : declarationData.id]
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name + ".xlsx")
 }
 
 /**
