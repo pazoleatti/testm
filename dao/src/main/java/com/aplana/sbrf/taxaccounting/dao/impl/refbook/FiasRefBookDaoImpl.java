@@ -84,7 +84,7 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
             checkAddressResult.setArea(createAddressElement(rs, "area_type", "area_fname", "chk_area", null));
             checkAddressResult.setCity(createAddressElement(rs, "city_type", "city_fname", "chk_city", null));
             checkAddressResult.setLocation(createAddressElement(rs, "loc_type", "loc_fname", "chk_loc", null));
-            checkAddressResult.setLocation(createAddressElement(rs, "street_type", "street_fname", "chk_street", null));
+            checkAddressResult.setStreet(createAddressElement(rs, "street_type", "street_fname", "chk_street", null));
 
             checkAddressResult.setPostalCodeValid(SqlUtils.getInteger(rs, "chk_index") != 0);
             checkAddressResult.setRegionValid(SqlUtils.getInteger(rs, "chk_region") != 0);
