@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.FiasRefBookDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Id;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook.Table;
 import org.junit.Assert;
@@ -58,12 +57,6 @@ public class FiasRefBookDaoTest {
         fiasRefBookDao.clearAll();
 
         Assert.assertEquals(0, refBookDao.getRecordsCount(Id.FIAS_ADDR_OBJECT.getId(), Table.FIAS_ADDR_OBJECT.getTable(), null));
-    }
-
-    @Test
-    public void findRegionByCodeTest() {
-        AddressObject result = fiasRefBookDao.findRegionByCode("01");
-        Assert.assertEquals(Long.valueOf(1), result.getId());
     }
 
     @Test

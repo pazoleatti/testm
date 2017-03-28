@@ -3,11 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
-import org.springframework.dao.EmptyResultDataAccessException;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckAddressResult;
 import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +27,6 @@ import java.util.Map;
 @Repository
 @Transactional
 public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
-
 
     @Override
     public void insertRecordsBatch(String tableName, List<Map<String, Object>> records) {
@@ -50,121 +47,86 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
         getJdbcTemplate().update("delete from fias_addrobj");
     }
 
-    class AddressObjectRowMapper implements RowMapper<AddressObject> {
+    @Override
+    public Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationId) {
+        Map<Long, CheckAddressResult> result = new HashMap<Long, CheckAddressResult>();
+        SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("fias_pkg").withFunctionName("CheckExistsAddrByFias");
+        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, new CheckExistAddressByFiasRowHandler(result)), new SqlParameter("p_declaration", Types.NUMERIC));
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("p_declaration", declarationId);
+        call.execute(params);
+        return result;
+    }
+
+
+    /**
+     * [ID, POST_INDEX, REGION_CODE, AREA, CITY, LOCALITY, STREET, NDFL_FULL_ADDR, AREA_TYPE, AREA_FNAME, CITY_TYPE, CITY_FNAME, LOC_TYPE, LOC_FNAME, STREET_TYPE, STREET_FNAME, CHK_INDEX, CHK_REGION, CHK_AREA, CHK_CITY, CHK_LOC, CHK_STREET]
+     */
+    class CheckExistAddressByFiasRowHandler implements RowCallbackHandler {
+
+        Map<Long, CheckAddressResult> result;
+
+        public CheckExistAddressByFiasRowHandler(Map<Long, CheckAddressResult> result) {
+            this.result = result;
+        }
+
         @Override
-        public AddressObject mapRow(ResultSet rs, int i) throws SQLException {
+        public void processRow(ResultSet rs) throws SQLException {
+
+            CheckAddressResult checkAddressResult = new CheckAddressResult();
+
+            Long ndflPersonId = SqlUtils.getLong(rs, "id");
+
+            //NdflPerson
+            checkAddressResult.setNdflPerson(createNdflPersonAddress(ndflPersonId, rs));
+            checkAddressResult.setPrimaryAddressPath(rs.getString("ndfl_full_addr"));
+
+            checkAddressResult.setArea(createAddressElement(rs, "area_type", "area_fname", "chk_area", null));
+            checkAddressResult.setCity(createAddressElement(rs, "city_type", "city_fname", "chk_city", null));
+            checkAddressResult.setLocation(createAddressElement(rs, "loc_type", "loc_fname", "chk_loc", null));
+            checkAddressResult.setLocation(createAddressElement(rs, "street_type", "street_fname", "chk_street", null));
+
+            checkAddressResult.setPostalCodeValid(SqlUtils.getInteger(rs, "chk_index") != 0);
+            checkAddressResult.setRegionValid(SqlUtils.getInteger(rs, "chk_region") != 0);
+
+            //Long fiasId = SqlUtils.getLong(rs, "fias_id");
+            this.result.put(ndflPersonId, checkAddressResult);
+        }
+
+        private NdflPerson createNdflPersonAddress(Long ndflPersonId, ResultSet rs) throws SQLException {
+            NdflPerson ndflPerson = new NdflPerson(null, null, null);
+            ndflPerson.setId(ndflPersonId);
+            ndflPerson.setPostIndex(rs.getString("post_index"));
+            ndflPerson.setRegionCode(rs.getString("region_code"));
+            ndflPerson.setArea(rs.getString("area"));
+            ndflPerson.setCity(rs.getString("city"));
+            ndflPerson.setLocality(rs.getString("locality"));
+            ndflPerson.setStreet(rs.getString("street"));
+            return ndflPerson;
+        }
+
+        private AddressObject createAddressElement(ResultSet rs, String typeColumnLabel, String nameColumnLabel, String chkColumnLabel, String leafColumnLabel) throws SQLException {
+
             AddressObject addressObject = new AddressObject();
-            addressObject.setId(SqlUtils.getLong(rs, "id"));
-            addressObject.setParentId(SqlUtils.getLong(rs, "pid"));
-            addressObject.setRegionCode(rs.getString("regioncode"));
-            addressObject.setRegionName(rs.getString("ancestor"));
-            addressObject.setFormalName(rs.getString("fname"));
-            addressObject.setLevel(SqlUtils.getInteger(rs, "aolevel"));
-            addressObject.setLeaaf(SqlUtils.getInteger(rs, "isleaf") != 0);
-            addressObject.setAddressPath(rs.getString("aopath"));
+            addressObject.setFormalName(rs.getString(nameColumnLabel));
+            addressObject.setShortName(rs.getString(typeColumnLabel));
+
+            if (chkColumnLabel != null) {
+                //Результат проверки элемента адреса 1-существует, 0- не существует
+                Integer checkAddressElement = SqlUtils.getInteger(rs, chkColumnLabel);
+                addressObject.setValid(checkAddressElement != 0);
+            }
+
+            if (leafColumnLabel != null) {
+                Integer leafAddressElement = SqlUtils.getInteger(rs, leafColumnLabel);
+                addressObject.setLeaf(leafAddressElement != 0);
+            }
+
             return addressObject;
         }
-    }
-
-    public static String FIND_ADDRESS_SQL = buidFindAddress();
-
-    private static String buidFindAddress() {
-        StringBuilder SQL = new StringBuilder();
-        SQL.append("WITH parent_to_child AS \n");
-        SQL.append("  (SELECT DISTINCT fa.id, fa.parentguid AS pid, fa.regioncode, fa.formalname AS fname, level AS aolevel, connect_by_isleaf AS isleaf, fa.currstatus AS status, connect_by_root fa.formalname AS ancestor, sys_connect_by_path(fa.formalname, '#') AS aopath \n");
-        SQL.append("  FROM fias_addrobj fa \n");
-        SQL.append("  WHERE REPLACE(lower(fa.formalname), ' ', '') = REPLACE(lower(:formalName), ' ', '') \n");
-        SQL.append("    START WITH fa.parentguid                  IS NULL \n");
-        SQL.append("  AND fa.regioncode                            = :regionCode \n");
-        SQL.append("    CONNECT BY prior fa.id                     = fa.parentguid \n");
-        SQL.append("  ) \n");
-        SQL.append("SELECT ptc.id, ptc.pid, ptc.regioncode, ptc.fname, ptc.aolevel, ptc.isleaf, ptc.aopath, ptc.ancestor \n");
-        SQL.append("FROM parent_to_child ptc \n");
-        SQL.append("WHERE REPLACE(lower(ptc.aopath), ' ', '') = REPLACE(lower(concat(concat('#', ptc.ancestor), :formalPath)), ' ', '') \n");
-        SQL.append("AND ptc.status                            = 0");
-        return SQL.toString();
-    }
-
-    @Override
-    public List<AddressObject> findAddress(String regionCode, String area, String city, String locality, String street) {
-
-        if (regionCode == null || regionCode.isEmpty()) {
-            throw new IllegalArgumentException("Не задан обязательный параметр код региона!");
-        }
-        String formalName = getLeaf(area, city, locality, street);
-        String formalPath = createPath(area, city, locality, street);
-        if (formalName != null && formalPath != null) {
-            MapSqlParameterSource param = new MapSqlParameterSource();
-            param.addValue("regionCode", regionCode);
-            param.addValue("formalName", formalName.replaceAll("\\s", "").toLowerCase());
-            param.addValue("formalPath", formalPath.replaceAll("\\s", "").toLowerCase());
-            return getNamedParameterJdbcTemplate().query(FIND_ADDRESS_SQL, param, new AddressObjectRowMapper());
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    public static String FIND_ALL_ADDRESS_SQL = buildFindAllAddressSql();
-
-    private static String buildFindAllAddressSql() {
-        StringBuilder SQL = new StringBuilder();
-        SQL.append("WITH parent_to_child AS \n");
-        SQL.append("  (SELECT DISTINCT fa.id, fa.parentguid AS pid, fa.regioncode, fa.formalname AS fname, level AS aolevel, connect_by_isleaf AS isleaf, fa.currstatus AS status, connect_by_root fa.formalname AS ancestor, sys_connect_by_path(fa.formalname, '#') AS aopath \n");
-        SQL.append("  FROM fias_addrobj fa \n");
-        SQL.append("  WHERE REPLACE(lower(fa.formalname), ' ', '') = REPLACE(lower(:formalName), ' ', '') \n");
-        SQL.append("    START WITH fa.parentguid                  IS NULL \n");
-        SQL.append("  AND fa.regioncode                            = :regionCode \n");
-        SQL.append("    CONNECT BY prior fa.id                     = fa.parentguid \n");
-        SQL.append("  ) \n");
-        SQL.append("SELECT ptc.id, ptc.pid, ptc.regioncode, ptc.fname, ptc.aolevel, ptc.isleaf, ptc.aopath, ptc.ancestor \n");
-        SQL.append("FROM parent_to_child ptc \n");
-        SQL.append("WHERE ptc.status = 0");
-        return SQL.toString();
-    }
-
-    @Override
-    public List<AddressObject> findAllAddress(String regionCode, String descendantName) {
-
-        if (regionCode == null || regionCode.isEmpty()) {
-            throw new IllegalArgumentException("Не задан обязательный параметр код региона!");
-        }
-
-        MapSqlParameterSource param = new MapSqlParameterSource();
-        param.addValue("regionCode", regionCode);
-        param.addValue("formalName", descendantName.replaceAll("\\s", "").toLowerCase());
-        return getNamedParameterJdbcTemplate().query(FIND_ALL_ADDRESS_SQL, param, new AddressObjectRowMapper());
 
     }
 
-
-    public static String FIND_REGION_BY_CODE_SQL = "SELECT fa.id, fa.regioncode, fa.formalname AS fname FROM fias_addrobj fa WHERE fa.parentguid IS NULL AND fa.regioncode = :regionCode AND fa.currstatus = 0";
-
-    @Override
-    public AddressObject findRegionByCode(String regionCode) {
-
-        if (regionCode == null || regionCode.isEmpty()) {
-            throw new IllegalArgumentException("Не задан обязательный параметр код региона!");
-        }
-
-        try {
-            MapSqlParameterSource param = new MapSqlParameterSource();
-            param.addValue("regionCode", regionCode);
-            return getNamedParameterJdbcTemplate().queryForObject(FIND_REGION_BY_CODE_SQL, param, new RowMapper<AddressObject>() {
-                @Override
-                public AddressObject mapRow(ResultSet rs, int i) throws SQLException {
-                    AddressObject addressObject = new AddressObject();
-                    addressObject.setId(SqlUtils.getLong(rs, "id"));
-                    addressObject.setRegionCode(rs.getString("regioncode"));
-                    addressObject.setFormalName(rs.getString("fname"));
-                    addressObject.setLevel(1);
-                    addressObject.setLeaaf(false);
-                    return addressObject;
-                }
-            });
-        } catch (EmptyResultDataAccessException e) {
-            throw new ServiceException("В БД не найден регион с кодом " + regionCode + "!");
-        }
-    }
 
     @Override
     public Map<Long, Long> checkAddressByFias(Long declarationId) {
@@ -176,6 +138,7 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
         call.execute(params);
         return result;
     }
+
 
     /**
      * [ID, POST_INDEX, REGION_CODE, AREA, CITY, LOCALITY, STREET, NDFL_FULL_ADDR, AREA_TYPE, AREA_FNAME, CITY_TYPE, CITY_FNAME, LOC_TYPE, LOC_FNAME, STREET_TYPE, STREET_FNAME, FIAS_ID, FIAS_INDEX, FIAS_STREET, FIAS_STREET_TYPE, FIAS_CITY_ID, FIAS_CITY_NAME]
@@ -195,6 +158,7 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
             this.result.put(ndflPersonId, fiasId);
         }
     }
+
 
     /**
      * Получить листовой объект в иерархии адреса
@@ -216,7 +180,7 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
     }
 
     /**
-     * Сформировать строку адресса в виде пути до листового объекта
+     * Сформировать строку адреса в виде пути до листового объекта
      *
      * @param names наименование адресных объектов в порядке 'район -> город -> нас.пункт -> улица'
      * @return адрес в виде 'район\\город\\нас.пункт\\улица'
