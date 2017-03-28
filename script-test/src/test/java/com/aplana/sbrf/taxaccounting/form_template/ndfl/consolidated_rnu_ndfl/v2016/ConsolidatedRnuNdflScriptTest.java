@@ -250,15 +250,15 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
 
         List<NdflPersonIncome> ndflPersonIncomes = new ArrayList<NdflPersonIncome>();
-        ndflPersonIncomes.add(createNdflPersonIncomes(1, 11L));
-        ndflPersonIncomes.add(createNdflPersonIncomes(2, 11L));
-        ndflPersonIncomes.add(createNdflPersonIncomes(3, 11L));
-        ndflPersonIncomes.add(createNdflPersonIncomes(6, 22L));
-        ndflPersonIncomes.add(createNdflPersonIncomes(5, 22L));
-        ndflPersonIncomes.add(createNdflPersonIncomes(4, 33L));
-        ndflPersonIncomes.add(createNdflPersonIncomes(7, 22L));
-        ndflPersonIncomes.add(createNdflPersonIncomes(9, 22L));
-        ndflPersonIncomes.add(createNdflPersonIncomes(8, 22L));
+        ndflPersonIncomes.add(createNdflPersonIncomes(1, "11"));
+        ndflPersonIncomes.add(createNdflPersonIncomes(2, "11"));
+        ndflPersonIncomes.add(createNdflPersonIncomes(3, "11"));
+        ndflPersonIncomes.add(createNdflPersonIncomes(6, "22"));
+        ndflPersonIncomes.add(createNdflPersonIncomes(5, "22"));
+        ndflPersonIncomes.add(createNdflPersonIncomes(4, "33"));
+        ndflPersonIncomes.add(createNdflPersonIncomes(7, "22"));
+        ndflPersonIncomes.add(createNdflPersonIncomes(9, "22"));
+        ndflPersonIncomes.add(createNdflPersonIncomes(8, "22"));
 
 
         person.setIncomes(ndflPersonIncomes);
@@ -284,10 +284,10 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         return createGoodNdflPerson(null);
     }
 
-    private NdflPersonIncome createNdflPersonIncomes(int row, long operationId) {
+    private NdflPersonIncome createNdflPersonIncomes(int row, String operationId) {
         NdflPersonIncome personIncome = new NdflPersonIncome();
         personIncome.setRowNum(row);
-        personIncome.setOperationId(11111L);
+        personIncome.setOperationId("11111");
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
         personIncome.setIncomeAccruedDate(parseDate("01.01.2017"));
@@ -300,7 +300,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
     private NdflPersonDeduction createNdflPersonDeduction(int row) {
         NdflPersonDeduction personDeduction = new NdflPersonDeduction();
         personDeduction.setRowNum(row);
-        personDeduction.setOperationId(11111L);
+        personDeduction.setOperationId("11111");
         personDeduction.setTypeCode("001");
 
         personDeduction.setNotifType("11");
@@ -325,7 +325,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
     private NdflPersonPrepayment createNdflPersonPrepayment(int row) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
         personPrepayment.setRowNum(row);
-        personPrepayment.setOperationId(11111L);
+        personPrepayment.setOperationId("11111");
         personPrepayment.setSumm(1999999L); //по xsd это поле xs:integer
         personPrepayment.setNotifNum("123-456-000");
         personPrepayment.setNotifDate(toDate("01.01.2016"));

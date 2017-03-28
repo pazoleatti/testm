@@ -325,7 +325,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPersonIncome1.setTaxRate(13);
             ndflPersonIncome1.setIncomeAccruedSumm(BigDecimal.valueOf(100000L));
             ndflPersonIncome1.setNotHoldingTax(50000L);
-            ndflPersonIncome1.setOperationId(1L);
+            ndflPersonIncome1.setOperationId("1");
             ndflPersonIncome1.setTaxBase(BigDecimal.valueOf(5000L));
             ndflPersonIncome1.setCalculatedTax(6000L);
             ndflPersonIncome1.setWithholdingTax(7000L);
@@ -346,7 +346,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPersonIncome2.setTaxRate(taxrate);
             ndflPersonIncome2.setIncomeAccruedSumm(BigDecimal.valueOf(100000L));
             ndflPersonIncome2.setNotHoldingTax(50000L);
-            ndflPersonIncome2.setOperationId(1L);
+            ndflPersonIncome2.setOperationId("1");
             ndflPersonIncome2.setTaxBase(BigDecimal.valueOf(5000L));
             ndflPersonIncome2.setCalculatedTax(6000L);
             ndflPersonIncome2.setWithholdingTax(7000L);
@@ -368,7 +368,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
 
             NdflPersonDeduction ndflPersonDeduction1 = new NdflPersonDeduction();
-            ndflPersonDeduction1.setOperationId(1L);
+            ndflPersonDeduction1.setOperationId("1");
             ndflPersonDeduction1.setIncomeAccrued(calAccrued.getTime());
             ndflPersonDeduction1.setTypeCode("501");
             ndflPersonDeduction1.setPeriodCurrDate(ndflPersonIncome1.getTaxDate());
@@ -378,7 +378,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPerson.getDeductions().add(ndflPersonDeduction1);
 
             NdflPersonDeduction ndflPersonDeduction2 = new NdflPersonDeduction();
-            ndflPersonDeduction2.setOperationId(1L);
+            ndflPersonDeduction2.setOperationId("1");
             ndflPersonDeduction2.setIncomeAccrued(calAccrued.getTime());
             ndflPersonDeduction2.setTypeCode("101");
             ndflPersonDeduction2.setPeriodCurrDate(ndflPersonIncome1.getTaxDate());
@@ -394,7 +394,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPersonPrepayment.setNotifDate(ndflPersonIncome1.getTaxDate());
             ndflPersonPrepayment.setNotifSource("1684");
             ndflPersonPrepayment.setSumm(1000L);
-            ndflPersonPrepayment.setOperationId(1L);
+            ndflPersonPrepayment.setOperationId("1");
 
             ndflPerson.getPrepayments().add(ndflPersonPrepayment);
 
