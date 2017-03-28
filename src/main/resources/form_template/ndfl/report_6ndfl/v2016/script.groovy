@@ -422,9 +422,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
 class PairPersonOperationId {
     Long ndflPersonId
-    Long operationId
+    String operationId
 
-    PairPersonOperationId(Long ndflPersonId, Long operationId) {
+    PairPersonOperationId(Long ndflPersonId, String operationId) {
         this.ndflPersonId = ndflPersonId
         this.operationId = operationId
     }
