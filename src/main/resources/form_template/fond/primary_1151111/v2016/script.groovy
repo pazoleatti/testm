@@ -5381,6 +5381,7 @@ def checkDataDBSum() {
     BigDecimal nachislSvOpsSum2 = 0
     BigDecimal nachislSvOpsSum3 = 0
 
+    // РасчСВ_ОМС.НачислСВ
     BigDecimal nachislSvOmsSum1 = 0
     BigDecimal nachislSvOmsSum2 = 0
     BigDecimal nachislSvOmsSum3 = 0
@@ -5769,22 +5770,22 @@ def checkDataDBSum() {
 
     // 3.3.3.1 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОМС428)
     if (!comparNumbEquals(uplPerOmsSum1, nachislSvOmsSum1)) {
-        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум1Посл3М = \"$uplPerOmsSum1\""
-        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум1Посл3М = \"$nachislSvNePrevSum1\""
+        def pathAttrVal = "${pathAttrOms}.УплПерОМС.Сум1Посл3М='$uplPerOmsSum1'"
+        def pathAttrComp = "${pathAttrOms}.РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум1Посл3М='$nachislSvOmsSum1'"
         logger.warnExp("Сумма страховых взносов, подлежащая уплате ОМС %s не равна сумме исчисленных страховых взносов %s",
                 "Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов",
                 null, pathAttrVal, pathAttrComp)
     }
     if (!comparNumbEquals(uplPerOmsSum2, nachislSvOmsSum2)) {
-        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум2Посл3М = \"$uplPerOmsSum2\""
-        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум2Посл3М = \"$nachislSvNePrevSum2\""
+        def pathAttrVal = "${pathAttrOms}.УплПерОМС.Сум2Посл3М='$uplPerOmsSum2'"
+        def pathAttrComp = "${pathAttrOms}.РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум2Посл3М='$nachislSvOmsSum2'"
         logger.warnExp("Сумма страховых взносов, подлежащая уплате ОМС %s не равна сумме исчисленных страховых взносов %s",
                 "Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов",
                 null, pathAttrVal, pathAttrComp)
     }
     if (!comparNumbEquals(uplPerOmsSum3, nachislSvOmsSum3)) {
-        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум3Посл3М = \"$uplPerOmsSum3\""
-        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум3Посл3М = \"$nachislSvNePrevSum3\""
+        def pathAttrVal = "${pathAttrOms}.УплПерОМС.Сум3Посл3М='$uplPerOmsSum3'"
+        def pathAttrComp = "${pathAttrOms}.РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум3Посл3М='$nachislSvOmsSum3'"
         logger.warnExp("Сумма страховых взносов, подлежащая уплате ОМС %s не равна сумме исчисленных страховых взносов %s",
                 "Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов",
                 null, pathAttrVal, pathAttrComp)
