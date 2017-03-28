@@ -1035,9 +1035,9 @@ def createReports() {
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
     scriptParams.put("fileName", "reports.zip")
     try {
-        Department department = departmentService.get(declarationData.departmentId);
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
+        Department department = departmentService.get(departmentReportPeriod.departmentId);
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
@@ -1045,7 +1045,9 @@ def createReports() {
         String path = String.format("Отчетность %s, %s, %s, %s%s",
                 declarationTemplate.getName(),
                 department.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod);
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod)
+                .replaceAll('[~!@/\\#\$%^&*=|`]', "_").replaceAll('"', "'");
+        scriptParams.put("fileName", path + ".zip")
         def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
         declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
             ScriptUtils.checkInterrupted()
