@@ -1216,10 +1216,10 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="60" uuid="19f30e93-4d2a-419b-a70e-5f14b7d38391">
+					<jr:column width="104" uuid="19f30e93-4d2a-419b-a70e-5f14b7d38391">
 						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
 							<staticText>
-								<reportElement uuid="b064116c-1090-4b19-970b-1013cdbf1656" x="0" y="0" width="60" height="11">
+								<reportElement uuid="b064116c-1090-4b19-970b-1013cdbf1656" x="0" y="0" width="104" height="11">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -1230,7 +1230,7 @@
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
-								<reportElement uuid="1cc348cb-fe32-4a66-bff1-83186600cc94" mode="Transparent" x="0" y="0" width="60" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="1cc348cb-fe32-4a66-bff1-83186600cc94" mode="Transparent" x="0" y="0" width="104" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1241,7 +1241,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="style1" height="10" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement uuid="0663ea68-69f3-4305-8e2f-74e7fa5aecb1" mode="Transparent" x="0" y="0" width="60" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="0663ea68-69f3-4305-8e2f-74e7fa5aecb1" mode="Transparent" x="0" y="0" width="104" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
