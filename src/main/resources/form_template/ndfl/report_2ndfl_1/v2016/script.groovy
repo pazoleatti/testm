@@ -1292,7 +1292,7 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
         return null
     }
     Relation relation = new Relation()
-    def isSource = sourceTypeId != 101
+    def isSource = sourceTypeId == 101
 
     DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(tmpDeclarationData?.departmentReportPeriodId)
     DeclarationTemplate declarationTemplate = declarationService.getTemplate(sourceTypeId)
