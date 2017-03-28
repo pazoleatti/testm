@@ -3340,8 +3340,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 //        println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", pathError, MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent))
     }
 
-    println "Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)");
+    println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
