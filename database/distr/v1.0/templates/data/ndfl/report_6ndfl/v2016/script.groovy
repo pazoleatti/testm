@@ -1035,9 +1035,9 @@ def createReports() {
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
     scriptParams.put("fileName", "reports.zip")
     try {
-        Department department = departmentService.get(declarationData.departmentId);
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
+        Department department = departmentService.get(departmentReportPeriod.departmentId);
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
@@ -1045,7 +1045,9 @@ def createReports() {
         String path = String.format("Отчетность %s, %s, %s, %s%s",
                 declarationTemplate.getName(),
                 department.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod);
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod)
+                .replaceAll('[~!@/\\#\$%^&*=|`]', "_").replaceAll('"', "'");
+        scriptParams.put("fileName", path + ".zip")
         def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
         declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
             ScriptUtils.checkInterrupted()
@@ -1093,7 +1095,15 @@ void getSources() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
     // Найти подразделения в РНУ которых имеются операции из декларации
-    def tmpDeclarationDataList = getDeclarationDataList(sourceTypeId, allDepartmentReportPeriodIds)
+    def tmpDeclarationDataList = []
+    allDepartmentReportPeriodIds.each {
+        ScriptUtils.checkInterrupted();
+        def tmpDepartmentReportPeriod = departmentReportPeriodService.get(it)
+        def tmpDeclaration = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, it, tmpDepartmentReportPeriod.departmentId, tmpDepartmentReportPeriod.reportPeriod.id, declarationData.kpp, declarationData.oktmo)
+        if (tmpDeclaration != null) {
+            tmpDeclarationDataList << tmpDeclaration
+        }
+    }
     def declarationsForRemove = []
     tmpDeclarationDataList.each { declaration ->
         if (declaration.state != State.ACCEPTED) {
@@ -1131,7 +1141,7 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
         return null
     }
     Relation relation = new Relation()
-    def isSource = sourceTypeId != 101
+    def isSource = sourceTypeId == 101
 
     DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpDeclarationData?.departmentReportPeriodId) as DepartmentReportPeriod
     DeclarationTemplate declarationTemplate = declarationService.getTemplate(sourceTypeId)
@@ -1176,29 +1186,6 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
     //relation.formDataKind = tmpDeclarationData.kind
 
     return relation
-}
-// Найти подразделения в РНУ которых имеются операции из декларации
-def getDeclarationDataList(def sourceTypeId, def allDepartmentReportPeriodIds) {
-    // Найти все доходы по декларации
-    def toReturn = []
-    def incomes = ndflPersonService.findNdflPersonIncome(declarationData.id)
-    def kppOktmoSet = [].toSet()
-    incomes.each { income ->
-        kppOktmoSet << new PairKppOktmo(income.kpp, income.oktmo, null)
-    }
-    for (departmentReportPeriodId in allDepartmentReportPeriodIds) {
-        ScriptUtils.checkInterrupted()
-        def tmpDepartmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId)
-        for (kppOktmo in kppOktmoSet) {
-            ScriptUtils.checkInterrupted()
-            def declarationData = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, departmentReportPeriodId, tmpDepartmentReportPeriod.departmentId, tmpDepartmentReportPeriod.reportPeriod.id, kppOktmo.kpp, kppOktmo.oktmo)
-            if (declarationData != null) {
-                toReturn << declarationData
-                break
-            }
-        }
-    }
-    return toReturn
 }
 
 def getDepartmentReportPeriodById(def id) {

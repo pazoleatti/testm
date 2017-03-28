@@ -32,7 +32,7 @@ def BATCH_SIZE_MAX = 1000
 
 def calcTimeMillis(long time) {
     long currTime = System.currentTimeMillis();
-    return " (" + (currTime - time) + " ms)";
+    return " (" + (currTime - time) + " мс)";
 }
 
 void importData() {
@@ -43,11 +43,20 @@ void importData() {
     //Очистка данных перед импортом
     importFiasDataService.clearAll()
 
+    logger.info("Предварительная очистка таблиц справочника " + calcTimeMillis(time));
+
     def itemsMap = createItemsMap(archive);
 
     //Строим карту Guid адресных объектов, заранее так как будет нужна иерархия
     def addressObjectGuidsMap = buidGuidsMap(getInputStream(archive, itemsMap, "AS_ADDROBJ_"), QName.valueOf('Object'), QName.valueOf('AOGUID'));
 
+    def FIAS_SOCRBASE_TABLE_NAME = "FIAS_SOCRBASE"; //RefBook.Table.FIAS_SOCRBASE.getTable()
+    startImport(getInputStream(archive, itemsMap, "AS_SOCRBASE_"),
+            QName.valueOf('AddressObjectType'),
+            FIAS_SOCRBASE_TABLE_NAME,
+            { generatedId, attr ->
+                addressObjectTypeRowMapper(generatedId, attr)
+            })
 
     //Начинаем заливать данные из таблиц справочника
     startImport(getInputStream(archive, itemsMap, "AS_ADDROBJ_"),
@@ -215,10 +224,19 @@ Map operationStatusRowMapper(generatedId, attrMap) {
 
 Map addressObjectTypeRowMapper(generatedId, attrMap) {
     def Map recordsMap = new HashMap<String, Object>()
-    recordsMap.put('ID', generatedId) //добавляем ID для использования в справочниках
+    //recordsMap.put('ID', generatedId) //добавляем ID для использования в справочниках
     recordsMap.put('SCNAME', attrMap.get(QName.valueOf('SCNAME')))
-    recordsMap.put('SOCRNAME', attrMap.get(QName.valueOf('SOCRNAME')))
+
+    String socrName = attrMap.get(QName.valueOf('SOCRNAME'));
+
+    if (socrName != null && !socrName.isEmpty()){
+        recordsMap.put('SOCRNAME', socrName);
+    } else {
+        recordsMap.put('SOCRNAME', " ");
+    }
+
     recordsMap.put('KOD_T_ST', attrMap.get(QName.valueOf('KOD_T_ST')))
+    recordsMap.put('LEV', Integer.parseInt(attrMap.get(QName.valueOf('LEVEL'))))
     return recordsMap;
 }
 

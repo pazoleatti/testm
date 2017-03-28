@@ -2329,7 +2329,7 @@ void importData() {
 
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')))
-    if (logger.containsLevel(LogLevel.WARNING)) {
+    if (logger.containsLevel(LogLevel.ERROR)) {
         throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
@@ -5228,7 +5228,7 @@ def checkDataDBPerson() {
     // 3.2.1 Дубли физического лица рамках формы
     time = System.currentTimeMillis();
     def raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonsByDeclarationDataId(declarationData.id)
-    if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
+    if (raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
         // Мапа для группировки дублей <recordId, RaschsvPersSvStrahLic>
         def raschsvPersSvStrahLicDuplMap = [:]
         raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDuplicate ->
@@ -5254,7 +5254,7 @@ def checkDataDBPerson() {
     // 3.2.2 Дубли физического лица в разных формах
     time = System.currentTimeMillis();
     raschsvPersSvStrahLicDuplList = raschsvPersSvStrahLicService.findDublicatePersonsByReportPeriodId(declarationData.id, declarationData.reportPeriodId)
-    if (!raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
+    if (raschsvPersSvStrahLicDuplList && !raschsvPersSvStrahLicDuplList.isEmpty()) {
         def recordIdDuplList = []
         def declarationDataIdDuplList = []
         raschsvPersSvStrahLicDuplList.each { raschsvPersSvStrahLicDupl ->
@@ -5381,6 +5381,7 @@ def checkDataDBSum() {
     BigDecimal nachislSvOpsSum2 = 0
     BigDecimal nachislSvOpsSum3 = 0
 
+    // РасчСВ_ОМС.НачислСВ
     BigDecimal nachislSvOmsSum1 = 0
     BigDecimal nachislSvOmsSum2 = 0
     BigDecimal nachislSvOmsSum3 = 0
@@ -5588,24 +5589,24 @@ def checkDataDBSum() {
         }
 
         // 3.3.3.2 База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению (Проверки выполняются для каждого РасчСВ_ОМС)
-        if (!comparNumbEquals(bazNachislSvCurr1, vyplNachislFlCurr1 + neOblozenCurr1)) {
-            def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум1Посл3М = \"$bazNachislSvCurr1\""
-            def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум1Посл3М = \"$vyplNachislFlCurr1\", " + pathAttrOms + ".НеОбложенСВ.Сум1Посл3М = \"$neOblozenCurr1\"."
-            logger.warnExp("%s не равен сумме: %s",
+        if (!comparNumbEquals(bazNachislSvCurr1, vyplNachislFlCurr1 - neOblozenCurr1)) {
+            def pathAttrVal = "${pathAttrOms}.БазНачислСВ.Сум1Посл3М='$bazNachislSvCurr1'"
+            def pathAttrComp = "${pathAttrOms}.ВыплНачислФЛ.Сум1Посл3М='$vyplNachislFlCurr1' - ${pathAttrOms}.НеОбложенСВ.Сум1Посл3М='$neOblozenCurr1'."
+            logger.warnExp("%s не равен: %s",
                     "База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению",
                     null, pathAttrVal, pathAttrComp)
         }
-        if (!comparNumbEquals(bazNachislSvCurr2, vyplNachislFlCurr2 + neOblozenCurr2)) {
-            def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум2Посл3М = \"$bazNachislSvCurr2\""
-            def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум2Посл3М = \"$vyplNachislFlCurr2\", " + pathAttrOms + ".НеОбложенСВ.Сум2Посл3М = \"$neOblozenCurr2\"."
-            logger.warnExp("%s не равен сумме: %s",
+        if (!comparNumbEquals(bazNachislSvCurr2, vyplNachislFlCurr2 - neOblozenCurr2)) {
+            def pathAttrVal = "${pathAttrOms}.БазНачислСВ.Сум2Посл3М='$bazNachislSvCurr2'"
+            def pathAttrComp = "${pathAttrOms}.ВыплНачислФЛ.Сум2Посл3М='$vyplNachislFlCurr2' - ${pathAttrOms}.НеОбложенСВ.Сум2Посл3М='$neOblozenCurr2'."
+            logger.warnExp("%s не равен: %s",
                     "База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению",
                     null, pathAttrVal, pathAttrComp)
         }
-        if (!comparNumbEquals(bazNachislSvCurr3, vyplNachislFlCurr3 + neOblozenCurr3)) {
-            def pathAttrVal = pathAttrOms + ".БазНачислСВ.Сум3Посл3М = \"$bazNachislSvCurr3\""
-            def pathAttrComp = pathAttrOms + ".ВыплНачислФЛ.Сум3Посл3М = \"$vyplNachislFlCurr3\", " + pathAttrOms + ".НеОбложенСВ.Сум3Посл3М = \"$neOblozenCurr3\"."
-            logger.warnExp("%s не равен сумме: %s",
+        if (!comparNumbEquals(bazNachislSvCurr3, vyplNachislFlCurr3 - neOblozenCurr3)) {
+            def pathAttrVal = "${pathAttrOms}.БазНачислСВ.Сум3Посл3М='$bazNachislSvCurr3'"
+            def pathAttrComp = "${pathAttrOms}.ВыплНачислФЛ.Сум3Посл3М='$vyplNachislFlCurr3' - ${pathAttrOms}.НеОбложенСВ.Сум3Посл3М='$neOblozenCurr3'."
+            logger.warnExp("%s не равен: %s",
                     "База для начисления равна разности сумм выплат и сумм, не подлежащих налогообложению",
                     null, pathAttrVal, pathAttrComp)
         }
@@ -5769,22 +5770,22 @@ def checkDataDBSum() {
 
     // 3.3.3.1 Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов (Проверки выполняются по всем РасчСВ_ОМС428)
     if (!comparNumbEquals(uplPerOmsSum1, nachislSvOmsSum1)) {
-        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум1Посл3М = \"$uplPerOmsSum1\""
-        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум1Посл3М = \"$nachislSvNePrevSum1\""
+        def pathAttrVal = "${pathAttrOms}.УплПерОМС.Сум1Посл3М='$uplPerOmsSum1'"
+        def pathAttrComp = "${pathAttrOms}.РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум1Посл3М='$nachislSvOmsSum1'"
         logger.warnExp("Сумма страховых взносов, подлежащая уплате ОМС %s не равна сумме исчисленных страховых взносов %s",
                 "Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов",
                 null, pathAttrVal, pathAttrComp)
     }
     if (!comparNumbEquals(uplPerOmsSum2, nachislSvOmsSum2)) {
-        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум2Посл3М = \"$uplPerOmsSum2\""
-        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум2Посл3М = \"$nachislSvNePrevSum2\""
+        def pathAttrVal = "${pathAttrOms}.УплПерОМС.Сум2Посл3М='$uplPerOmsSum2'"
+        def pathAttrComp = "${pathAttrOms}.РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум2Посл3М='$nachislSvOmsSum2'"
         logger.warnExp("Сумма страховых взносов, подлежащая уплате ОМС %s не равна сумме исчисленных страховых взносов %s",
                 "Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов",
                 null, pathAttrVal, pathAttrComp)
     }
     if (!comparNumbEquals(uplPerOmsSum3, nachislSvOmsSum3)) {
-        def pathAttrVal = pathAttrOms + ".УплПерОПС.Сум3Посл3М = \"$uplPerOmsSum3\""
-        def pathAttrComp = pathAttrOms + ".РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум3Посл3М = \"$nachislSvNePrevSum3\""
+        def pathAttrVal = "${pathAttrOms}.УплПерОМС.Сум3Посл3М='$uplPerOmsSum3'"
+        def pathAttrComp = "${pathAttrOms}.РасчСВ_ОПС_ОМС.РасчСВ_ОМС.НачислСВ.Сум3Посл3М='$nachislSvOmsSum3'"
         logger.warnExp("Сумма страховых взносов, подлежащая уплате ОМС %s не равна сумме исчисленных страховых взносов %s",
                 "Сумма страховых взносов подлежащая уплате равна сумме исчисленных страховых взносов",
                 null, pathAttrVal, pathAttrComp)
@@ -6318,15 +6319,28 @@ def checkDataDBSum() {
 
     if (raschsvPravTarif71427 != null && opsOmsIsExistTarifPlat_10 == true) {
         // 3.3.8.2 	Сумма доходов всего не менее суммы доходов по отдельным разделам
-        def dohVsPred = raschsvPravTarif71427.dohVsPred ?: 0
-        def dohCelPostPred = raschsvPravTarif71427.dohCelPostPred ?: 0
-        def dohGrantPred = raschsvPravTarif71427.dohGrantPred ?: 0
-        def dohEkDeyatPred = raschsvPravTarif71427.dohEkDeyatPred ?: 0
+        Long dohVsPred = raschsvPravTarif71427.dohVsPred ?: 0
+        Long dohCelPostPred = raschsvPravTarif71427.dohCelPostPred ?: 0
+        Long dohGrantPred = raschsvPravTarif71427.dohGrantPred ?: 0
+        Long dohEkDeyatPred = raschsvPravTarif71427.dohEkDeyatPred ?: 0
         if (comparNumbGreater(dohCelPostPred + dohGrantPred + dohEkDeyatPred, dohVsPred)) {
-            def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПред = \"$raschsvPravTarif71427.dohVsPred\""
-            def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПред = \"$dohCelPostPred\", "
-            pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПред = \"$dohGrantPred\", "
-            pathAttrComp += pathAttrPravTarif71427 + ".ДохЭкДеятПред = \"$dohEkDeyatPred\"."
+            def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПред='$raschsvPravTarif71427.dohVsPred'"
+            def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПред='$dohCelPostPred' + "
+            pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПред='$dohGrantPred' + "
+            pathAttrComp += pathAttrPravTarif71427 + ".ДохЭкДеятПред='$dohEkDeyatPred'."
+            logger.warnExp("%s не может быть меньше суммы %s",
+                    "Сумма доходов всего не менее суммы доходов по отдельным разделам",
+                    null, pathAttrVal, pathAttrComp)
+        }
+        Long dohVsPer = raschsvPravTarif71427.dohVsPer ?: 0
+        Long dohCelPostPer = raschsvPravTarif71427.dohCelPostPer ?: 0
+        Long dohGrantPer = raschsvPravTarif71427.dohGrantPer ?: 0
+        Long dohEkDeyatPer = raschsvPravTarif71427.dohEkDeyatPer ?: 0
+        if (comparNumbGreater(dohCelPostPer + dohGrantPer + dohEkDeyatPer, dohVsPer)) {
+            def pathAttrVal = pathAttrPravTarif71427 + ".ДохВсПер='$raschsvPravTarif71427.dohVsPer'"
+            def pathAttrComp = pathAttrPravTarif71427 + ".ДохЦелПостПер='$dohCelPostPer' + "
+            pathAttrComp += pathAttrPravTarif71427 + ".ДохГрантПер='$dohGrantPer' + "
+            pathAttrComp += pathAttrPravTarif71427 + ".ДохЭкДеятПер='$dohEkDeyatPer'."
             logger.warnExp("%s не может быть меньше суммы %s",
                     "Сумма доходов всего не менее суммы доходов по отдельным разделам",
                     null, pathAttrVal, pathAttrComp)
@@ -6465,7 +6479,7 @@ def getNumberMonth(def currMonth, def endDate) {
 def checkDataXml() {
     // Валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, null)
-    if (logger.containsLevel(LogLevel.WARNING)) {
+    if (logger.containsLevel(LogLevel.ERROR)) {
         throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
     }
 
@@ -6678,7 +6692,7 @@ def checkDataXml() {
                                 def pathAttr = [NODE_NAME_FILE, NODE_NAME_DOCUMENT, NODE_NAME_RASCHET_SV, NODE_NAME_OBYAZ_PLAT_SV, OBYAZ_PLAT_SV_OKTMO].join(".")
                                 logger.warnExp("%s='%s' не совпадает с ОКТМО='%s'",
                                         "Соответствие кода ОКТМО настройкам подразделения",
-                                        null, pathAttr, oktmoXml, oktmoParam?.CODE?.stringValue)
+                                        null, pathAttr, oktmoXml, oktmoParam?.CODE?.stringValue ?: "")
                             }
 
                             // 2.2.2 Актуальность ОКТМО (справочник ОКТМО очень большой, поэтому обращаться к нему будем по записи)
