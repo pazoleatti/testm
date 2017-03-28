@@ -38,6 +38,10 @@ import java.util.regex.Pattern
  * Скрипт макета декларации РНУ-НДФЛ(первичная)
  */
 switch (formDataEvent) {
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
+        moveAcceptedToCreated();
+        break
+
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
         // Формирование pdf-отчета формы
@@ -78,6 +82,16 @@ switch (formDataEvent) {
  */
 @Field
 def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
+
+def moveAcceptedToCreated(){
+    List<Relation> destinationInfo = getDestinationInfo(false);
+    for (Relation relation : destinationInfo) {
+        if (relation.declarationState.equals(State.ACCEPTED)){
+            throw new ServiceException("Ошибка изменения состояния формы. Данная форма не может быть возвращена в состояние 'Создана', так как используется в КНФ с состоянием 'Принята', номер формы: "+relation.declarationDataId);
+        }
+    }
+}
+
 
 //------------------ Calculate ----------------------
 /**
@@ -1142,10 +1156,10 @@ def findCountryId(countryCode) {
 
 //------------------ GET_SOURCES ----------------------
 
-def getSourcesListForTemporarySolution() {
-    if (needSources) {
-        return
-    }
+List<Relation> getDestinationInfo(boolean isLight){
+
+    List<Relation> destinationInfo = new ArrayList<Relation>();
+
     //отчетный период в котором выполняется консолидация
     ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     //Идентификатор подразделения по которому формируется консолидированная форма
@@ -1154,7 +1168,21 @@ def getSourcesListForTemporarySolution() {
     List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
     for (DeclarationData declarationData : declarationDataList) {
         //Формируем связь источник-приемник
-        def relation = getRelation(declarationData, department, declarationDataReportPeriod)
+        def relation = getRelation(declarationData, department, declarationDataReportPeriod, isLight)
+        destinationInfo.add(relation)
+    }
+
+    return destinationInfo;
+
+}
+
+
+def getSourcesListForTemporarySolution() {
+    if (needSources) {
+        return
+    }
+
+    for (Relation relation : getDestinationInfo(light)) {
         sources.sourceList.add(relation)
     }
     sources.sourcesProcessedByScript = true
@@ -1168,7 +1196,7 @@ def getSourcesListForTemporarySolution() {
  * @param period период нф
  * @param monthOrder номер месяца (для ежемесячной формы)
  */
-def getRelation(DeclarationData declarationData, Department department, ReportPeriod period) {
+def getRelation(DeclarationData declarationData, Department department, ReportPeriod period, boolean isLight) {
 
     Relation relation = new Relation()
 
@@ -1181,7 +1209,7 @@ def getRelation(DeclarationData declarationData, Department department, ReportPe
     def isSource = (declarationTemplate.id == PRIMARY_RNU_NDFL_TEMPLATE_ID)
     ReportPeriod rp = departmentReportPeriod.getReportPeriod();
 
-    if (light) {
+    if (isLight) {
         //Идентификатор подразделения
         relation.departmentId = department.id
         //полное название подразделения
@@ -1395,9 +1423,12 @@ def createRowColumns() {
 
 def createSpecificReport() {
     switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
-        case 'rnu_ndfl_person_db': createSpecificReportPersonDb();
+        case 'rnu_ndfl_person_db':
+            createSpecificReportPersonDb();
             break;
-        case 'rnu_ndfl_person_all_db': createSpecificReportDb();
+        case 'rnu_ndfl_person_all_db':
+            createSpecificReportDb();
+            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
             break;
         default:
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
@@ -1425,7 +1456,6 @@ def createSpecificReportDb() {
     def params = [declarationId : declarationData.id]
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.declarationSubreport.name + ".xlsx")
 }
 
 /**
@@ -2519,6 +2549,7 @@ def checkData() {
     // ФЛ Map<person_id, RefBook>
     Map<Long, Map<String, RefBookValue>> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
     logger.info(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
+    println(String.format(SUCCESS_GET_TABLE, R_PERSON, personMap.size()))
     println "Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)";
     logger.info("Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)");
 
@@ -2567,26 +2598,32 @@ def checkDataReference(
 
     // Статус налогоплательщика
     def taxpayerStatusMap = getRefTaxpayerStatusCode()
+    println "Получен справочник '$R_STATUS' (${taxpayerStatusMap.size()} записей).";
     logger.info(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
 
     // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE.CODE>
     def incomeCodeMap = getRefIncomeCode()
+    println "Получен справочник '$R_INCOME_CODE' (${incomeCodeMap.size()} записей).";
     logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
 
     // Виды доходов Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
     def incomeTypeMap = getRefIncomeType()
+    println "Получен справочник '$R_INCOME_TYPE' (${incomeTypeMap.size()} записей).";
     logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_TYPE, incomeTypeMap.size())
 
     // Ставки
     def rateList = getRefRate()
+    println "Получен справочник '$R_RATE' (${rateList.size()} записей).";
     logger.info(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
 
     // Коды видов вычетов
     def deductionTypeList = getRefDeductionType()
+    println "Получен справочник '$R_TYPE_CODE' (${deductionTypeList.size()} записей).";
     logger.info(SUCCESS_GET_REF_BOOK, R_TYPE_CODE, deductionTypeList.size())
 
     // Коды налоговых органов
     def taxInspectionList = getRefNotifSource()
+    println "Получен справочник '$R_NOTIF_SOURCE' (${taxInspectionList.size()} записей).";
     logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
     println "Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)";
@@ -2739,6 +2776,8 @@ def checkDataReference(
                             "Налогоплательщик.Фамилия (Графа 3)='${ndflPerson.lastName ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
                             "'Налогоплательщик.Фамилия (Графа 3)' не соответствует справочнику '$R_PERSON'")
+                    println("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp,
+                            "'Налогоплательщик.Фамилия (Графа 3)' не соответствует справочнику '$R_PERSON'")
                 }
 
                 // Спр11 Имя (Обязательное поле)
@@ -2811,7 +2850,6 @@ def checkDataReference(
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ИНН в стране гражданства справочнику", fioAndInp, pathError,
                             "'ИНН.В стране гражданства (Графа 9)' не соответствует справочнику '$R_PERSON'")
                 }
-
 
                 if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                     // Спр17 Документ удостоверяющий личность (Первичная) (Обязательное поле)

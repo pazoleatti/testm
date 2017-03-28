@@ -1,9 +1,8 @@
 package form_template.ndfl.report_2ndfl_1.v2016
 
 import groovy.xml.XmlUtil
-
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
+import org.apache.commons.lang3.StringUtils
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
@@ -49,6 +48,10 @@ switch (formDataEvent) {
     case FormDataEvent.GET_SOURCES: //формирование списка источников
         println "!GET_SOURCES!"
         getSources()
+        break
+    case FormDataEvent.PREPARE_SPECIFIC_REPORT:
+        // Подготовка для последующего формирования спецотчета
+        prepareSpecificReport()
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT: //создание спецефичного отчета
         println "!CREATE_SPECIFIC_REPORT!"
@@ -496,8 +499,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
     saveNdflRefences()
     ScriptUtils.checkInterrupted();
     saveFileInfo(currDate, fileName)
-
-    //println(writer)
 }
 // Сохранение информации о файле в комментариях
 def saveFileInfo(currDate, fileName) {
@@ -994,7 +995,7 @@ def getDeductionType(def code) {
     def filter = "CODE = '$code'"
     def deductionTypeList = getProvider(REF_BOOK_DEDUCTION_TYPE_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, filter, null)
     if (deductionTypeList == null || deductionTypeList.size() == 0 || deductionTypeList.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+        throw new Exception("Ошибка при получении кодов вычета. Коды вычета заполнены не полностью")
     }
     return deductionTypeList.get(0).DEDUCTION_MARK?.value
 }
@@ -1416,12 +1417,93 @@ class PairKppOktmo {
 
 /************************************* СПЕЦОТЧЕТ **********************************************************************/
 
+
 @Field final String ALIAS_PRIMARY_RNU_W_ERRORS = "primary_rnu_w_errors"
 
 @Field final String TRANSPORT_FILE_TEMPLATE = "ТФ"
 
 // Мапа где ключ идентификатор NdflPerson, значение NdflPerson соответствующий идентификатору
 @Field Map<Long, NdflPerson> ndflpersonFromRNUPrimary = [:]
+
+//------------------ PREPARE_SPECIFIC_REPORT ----------------------
+
+def prepareSpecificReport() {
+    def reportAlias = scriptSpecificReportHolder?.declarationSubreport?.alias;
+    if ('report_2ndfl' != reportAlias) {
+        throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
+    }
+    //Проверка, подготовка данных
+    def reportParameters = scriptSpecificReportHolder.getSubreportParamValues();
+    def resultReportParameters = [:]
+    reportParameters.each { key, value ->
+        if (value != null) {
+            resultReportParameters.put(key, value)
+        }
+    }
+    if (resultReportParameters.isEmpty()) {
+        throw new ServiceException("Для поиска справки необходимо задать критерий.");
+    }
+    // Поиск данных по фильтру
+    def docs = searchData(resultReportParameters)
+    if (docs.size() == 0) {
+        subreportParamsToString = { it.collect { (it.value != null ? (it.value + ";") : "") } join " " }
+        logger.warn("Номер справки по заданным параметрам: " + subreportParamsToString(reportParameters) + " не найден");
+    }
+    // Формирование списка данных для вывода в таблицу
+    def rowColumns = createTableColumns()
+    def dataRows = new ArrayList<DataRow<Cell>>();
+    docs.each() { doc ->
+        DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
+        row.getCell("pNumSpravka").setStringValue(doc.@НомСпр.text())
+        row.getCell("last_name").setStringValue(doc?.ПолучДох?.ФИО?.@Фамилия?.text())
+        row.getCell("first_name").setStringValue(doc?.ПолучДох?.ФИО?.@Имя?.text())
+        row.getCell("middle_name").setStringValue(doc?.ПолучДох?.ФИО?.@Отчество?.text())
+        row.getCell("birthday").setStringValue(doc?.ПолучДох?.@ДатаРожд?.text())
+        dataRows.add(row)
+    }
+    // Настройка таблицы
+    PrepareSpecificReportResult result = new PrepareSpecificReportResult();
+    List<Column> tableColumns = createTableColumns();
+    result.setTableColumns(tableColumns);
+    result.setDataRows(dataRows);
+    scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
+    scriptSpecificReportHolder.setSubreportParamValues(scriptSpecificReportHolder.subreportParamValues)
+}
+
+def createTableColumns() {
+    def tableColumns = new ArrayList<Column>()
+    tableColumns.add(createColumn("pNumSpravka", "Номер справки", 5))
+    tableColumns.add(createColumn("last_name", "Фамилия", 10))
+    tableColumns.add(createColumn("first_name", "Имя", 10))
+    tableColumns.add(createColumn("middle_name", "Отчество", 10))
+    tableColumns.add(createColumn("birthday", "Дата рождения", 10))
+    return tableColumns;
+}
+
+def createColumn(def alias, def name, def width) {
+    def column = new StringColumn()
+    column.setAlias(alias)
+    column.setName(name)
+    column.setWidth(width)
+    return column
+}
+/**
+ * Поиск справок согласно фильтру
+ */
+def searchData(def params) {
+    def xmlStr = declarationService.getXmlData(declarationData.id)
+    def Файл = new XmlSlurper().parseText(xmlStr)
+    def docs = Файл.Документ.findAll{doc ->
+        StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka'])
+    }
+    // ограничиваем размер выборки
+    def result = []
+    docs.each{
+        if (result.size() < 100)
+            result << it
+    }
+    result
+}
 
 /**
  * Создать спецотчет
@@ -1433,10 +1515,10 @@ def createSpecificReport() {
         createPrimaryRnuWithErrors()
         return
     }
-
+    def row = scriptSpecificReportHolder.getSelectedRecord()
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
-    def xmlStr = declarationService.getXmlData(declarationData.id)
-    xmlStr = xmlStr.replace("windows-1251", "utf-8") // сведения о кодировке должны соответствовать содержимому
+    params['pNumSpravka'] = row.pNumSpravka
+    def xmlStr = filterData(row)
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
         it.write(xmlStr, 0, xmlStr.length())
         it.flush()
@@ -1444,6 +1526,20 @@ def createSpecificReport() {
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+/**
+ * Оставляем только необходимые данные для отчета
+ */
+def filterData(params) {
+    def xml = declarationService.getXmlData(declarationData.id)
+    def Файл = new XmlParser().parseText(xml)
+    Файл.Документ.each{ doc ->
+        if (doc.@НомСпр != params.pNumSpravka) {
+            doc.replaceNode{}
+        }
+    }
+    def result = XmlUtil.serialize(Файл)
+    result.replace("windows-1251", "utf-8") // сведения о кодировке должны соответствовать содержимому
 }
 
 /**
@@ -1478,7 +1574,7 @@ def createPrimaryRnuWithErrors() {
         ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)
     }
 
-    ndflPersonDeductionFromRNUConsolidatedList.each {
+    ndflPersonPrepaymentFromRNUConsolidatedList.each {
         ScriptUtils.checkInterrupted();
         NdflPersonPrepayment ndflPersonPrepaymentPrimary = ndflPersonService.getPrepayment(it.sourceId)
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)

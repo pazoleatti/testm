@@ -4,8 +4,8 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="false"/>
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="89"/>
-	<property name="ireport.y" value="1296"/>
+	<property name="ireport.x" value="143"/>
+	<property name="ireport.y" value="1920"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -1828,7 +1828,7 @@
 				<textFieldExpression><![CDATA[$V{НаимОргТекст}.charAt(11)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="636f6699-f98a-429f-8d25-8a8741945092" x="196" y="144" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="636f6699-f98a-429f-8d25-8a8741945092" x="195" y="144" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
 					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -13576,9 +13576,9 @@
 	<summary>
 		<band height="69">
 			<staticText>
-				<reportElement uuid="f99b9faf-6349-4527-b07e-034461bf29ef" mode="Transparent" x="151" y="6" width="429" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				<reportElement uuid="f99b9faf-6349-4527-b07e-034461bf29ef" mode="Transparent" x="190" y="6" width="408" height="20" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single" rightIndent="10"/>
 				</textElement>
 				<text><![CDATA[Достоверность и полноту сведений, указанных на этой странице, подтверждаю:]]></text>
@@ -13596,7 +13596,7 @@
 			<staticText>
 				<reportElement uuid="77dd5e84-b175-4e50-a792-b2778d688b50" mode="Transparent" x="328" y="26" width="89" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[(подпись)]]></text>
@@ -13604,7 +13604,7 @@
 			<staticText>
 				<reportElement uuid="6a07c710-c7f0-4865-9260-c807bd961f45" mode="Transparent" x="513" y="26" width="67" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[(дата)]]></text>

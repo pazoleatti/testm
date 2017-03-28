@@ -139,11 +139,11 @@ public class DeclarationDataPresenter
     private final SubreportParamsPresenter subreportParamsPresenter;
     private final DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter;
     private final ChangeStatusEDPresenter changeStatusEDPresenter;
+    private final SourcesPresenter sourcesPresenter;
 	private long declarationId;
     private DeclarationData declarationData;
     private String taxName;
     private TaxType taxType;
-    private final SourcesPresenter sourcesPresenter;
     private List<DeclarationSubreport> subreports = new ArrayList<DeclarationSubreport>();
 
 	@Inject
@@ -710,5 +710,15 @@ public class DeclarationDataPresenter
             });
         }
         return result.isExistDeclarationData();
+    }
+
+    @Override
+    public void onReset(){
+        // при каждом открытии страницы скрываем модальные окна, на случай если они были открыты а адрес страницы поменяли
+        this.historyPresenter.getView().hide();
+        this.subreportParamsPresenter.getView().hide();
+        this.declarationFilesCommentsPresenter.getView().hide();
+        this.changeStatusEDPresenter.getView().hide();
+        this.sourcesPresenter.getView().hide();
     }
 }
