@@ -617,7 +617,7 @@ def checkXml() {
         // ВнДок2 Исчисленный налог
         if ((Math.round((nachislDoh - vichetNal) / 100 * stavka) > ischislNal + mathError) ||
                 (Math.round((nachislDoh - vichetNal) / 100 * stavka) < ischislNal - mathError)) {
-            logger.error(msgError + " неверно рассчитана сумма исчисленного налога.")
+            logger.warn(msgError + " неверно рассчитана сумма исчисленного налога.")
         }
 
         // ВнДок3 Авансовый платеж
