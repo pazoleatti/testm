@@ -167,7 +167,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
 
     @Override
     public List<NdflPersonIncome> findNdflPersonIncomeConsolidatedRNU6Ndfl(long declarationDataId, String kpp, String oktmo) {
-        return ndflPersonDao.findNdflPersonIncomeConsolidatedRNU2Ndfl(declarationDataId, kpp, oktmo);
+        return ndflPersonDao.findNdflPersonIncomeConsolidatedRNU6Ndfl(declarationDataId, kpp, oktmo);
     }
 
     @Override
