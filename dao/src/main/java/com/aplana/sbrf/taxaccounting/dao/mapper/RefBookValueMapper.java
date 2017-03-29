@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,13 +51,17 @@ public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> 
 		};
 		// Начало периода действия записи
 		if (columnNames.contains(RefBook.RECORD_VERSION_FROM_ALIAS.toLowerCase())) {
-			result.put(RefBook.RECORD_VERSION_FROM_ALIAS, new RefBookValue(RefBookAttributeType.DATE,
-					new Date(rs.getTimestamp(RefBook.RECORD_VERSION_FROM_ALIAS).getTime())));
+			Timestamp value = rs.getTimestamp(RefBook.RECORD_VERSION_FROM_ALIAS);
+			if (value != null) {
+				result.put(RefBook.RECORD_VERSION_FROM_ALIAS, new RefBookValue(RefBookAttributeType.DATE, new Date(value.getTime())));
+			}
 		};
 		// Конец периода действия записи
 		if (columnNames.contains(RefBook.RECORD_VERSION_TO_ALIAS.toLowerCase())) {
-			result.put(RefBook.RECORD_VERSION_TO_ALIAS, new RefBookValue(RefBookAttributeType.DATE,
-					new Date(rs.getTimestamp(RefBook.RECORD_VERSION_TO_ALIAS).getTime())));
+			Timestamp value = rs.getTimestamp(RefBook.RECORD_VERSION_TO_ALIAS);
+			if (value != null) {
+				result.put(RefBook.RECORD_VERSION_TO_ALIAS, new RefBookValue(RefBookAttributeType.DATE, new Date(value.getTime())));
+			}
 		};
 
         for (RefBookAttribute attribute: refBook.getAttributes()) {
