@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_2ndfl" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="575" leftMargin="20" rightMargin="0" topMargin="10" bottomMargin="10" uuid="969dd503-187a-4dd0-a41d-4c67eb3cc794">
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="103"/>
-	<property name="ireport.y" value="716"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="678"/>
 	<property name="ireport.callouts" value="##Tue Jan 10 08:55:51 VET 2017"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="TestXML"/>
 	<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="true"/>
@@ -1369,7 +1369,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="eac5ba57-1599-4d25-907b-d68a62bfe79b" mode="Transparent" x="0" y="0" width="39" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1395,7 +1395,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="7b83d94c-9091-4382-8061-71abd90b6a8d" mode="Transparent" x="0" y="0" width="38" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1420,7 +1420,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="349733b5-6f6c-4ef3-9726-64fb4c5b24cb" mode="Transparent" x="0" y="0" width="65" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1445,7 +1445,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="dd2b6448-bb45-4be6-aacc-df63f5b2e837" mode="Transparent" x="0" y="0" width="50" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1470,7 +1470,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField>
+								<textField isBlankWhenNull="true">
 									<reportElement uuid="cf518599-c470-4eb1-9329-792e30f61ae0" mode="Transparent" x="0" y="0" width="70" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1508,7 +1508,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="ee8aa8ac-3e79-449a-8ee4-6588f2cb6059" mode="Transparent" x="0" y="0" width="43" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1534,7 +1534,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="4f810359-7269-4aa2-bff1-c3749012ceaa" mode="Transparent" x="0" y="0" width="47" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1559,7 +1559,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="78b5bfa9-7970-4bac-89b1-dd9c7eeb7cb2" mode="Transparent" x="0" y="0" width="67" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1584,7 +1584,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField pattern="" isBlankWhenNull="false">
+								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="103641d0-08bd-4b6e-a865-6e6ee412a611" mode="Transparent" x="0" y="0" width="51" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
@@ -1609,7 +1609,7 @@
 							</jr:groupHeader>
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
-								<textField>
+								<textField isBlankWhenNull="true">
 									<reportElement uuid="b40c4a82-0a90-4699-8d4d-387ff8ebe122" mode="Transparent" x="0" y="0" width="80" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>

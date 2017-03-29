@@ -693,15 +693,15 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     if (!personDocumentList.isEmpty()) {
 
-        //сортировка по приоритету
-        personDocumentList.sort { a, b -> (a.getDocType()?.getPriority() <=> b.getDocType()?.getPriority()) ?: (a.id <=> b.id) }
+        //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
+        int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
 
         for (int i = 0; i < personDocumentList.size(); i++) {
 
             PersonDocument personDocument = personDocumentList.get(i);
-
             String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
-            if (i == 0) {
+
+            if (i == incRepIndex) {
                 if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
 
                     AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", INCLUDE_TO_REPORT);
@@ -2034,6 +2034,18 @@ class NdflPersonFL {
 @Field def refBookCache = [:]
 
 /**
+ * Карта
+ */
+@Field Map<Long, CheckAddressResult> fiasAddressCheckCache = [:];
+
+Map<Long, CheckAddressResult> getFiasAddressCheckResultMap() {
+    if (fiasAddressCheckCache.isEmpty()) {
+        fiasAddressCheckCache = fiasRefBookService.checkExistsAddressByFias(declarationData.id);
+    }
+    return fiasAddressCheckCache;
+}
+
+/**
  * Получить "АСНУ"
  * @return
  */
@@ -2663,7 +2675,13 @@ def checkDataReference(
 
     //поиск всех адресов формы в справочнике ФИАС
     time = System.currentTimeMillis();
-    Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
+
+    //первый запрос, проверяет что адрес присутствует в фиас
+    Map<Long, Long> checkFiasExistAddressMap = getFiasAddressIdsMap();
+
+    //второй запрос проверяет какие элементы адреса не найдены в справочнике
+    //TODO Проверить возможность реализации проверки только по второму запросу
+    Map<Long, CheckAddressResult> checkFiasAddressMap = getFiasAddressCheckResultMap();
     logger.info(SUCCESS_GET_TABLE, R_FIAS, checkFiasAddressMap.size());
     println "Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)";
     logger.info("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
@@ -2693,40 +2711,45 @@ def checkDataReference(
 
         // Спр1 ФИАС
         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
+        CheckAddressResult checkAddressResult = checkFiasAddressMap.get(ndflPerson.id);
         long tIsExistsAddress = System.currentTimeMillis();
         if (!isExistsAddress(ndflPerson.id)) {
+
+            //<Параметр алгоритма> - <Значение параметра> - не найден в справочнике.
+
             List<String> address = []
-            if (!ScriptUtils.isEmpty(ndflPerson.regionCode)) {
-                address.add("Код субъекта='${ndflPerson.regionCode}'")
+
+            //Условие вывода сообщения: элемент адреса определен и не прошел проверку по справочнику
+            if (!ScriptUtils.isEmpty(ndflPerson.regionCode) && !checkAddressResult.isRegionValid()) {
+                address.add("Код субъекта - '${ndflPerson.regionCode}' - не найден в справочнике");
+            } else if (!ScriptUtils.isEmpty(ndflPerson.area) && !checkAddressResult.getArea()?.isValid()) {
+                address.add("Район - '${ndflPerson.area}' - не найден в справочнике");
+            } else if (!ScriptUtils.isEmpty(ndflPerson.city) && !checkAddressResult.getCity()?.isValid()) {
+                address.add("Город - '${ndflPerson.city}' - не найден в справочнике");
+            } else if (!ScriptUtils.isEmpty(ndflPerson.locality) && !checkAddressResult.getLocation()?.isValid()) {
+                address.add("Населенный пункт - '${ndflPerson.locality }' - не найден в справочнике");
+            } else if (!ScriptUtils.isEmpty(ndflPerson.street) && !checkAddressResult.getStreet()?.isValid()) {
+                address.add("Улица - '${ndflPerson.street}' - не найден в справочнике");
             }
-            if (!ScriptUtils.isEmpty(ndflPerson.area)) {
-                address.add("Район='${ndflPerson.area}'")
+
+            //Индекс Индекс соответствует следующему формату: [0-9]{6}
+            if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))){
+                address.add("Индекс - '${ndflPerson.postIndex }' - не соответствует формату");
             }
-            if (!ScriptUtils.isEmpty(ndflPerson.city)) {
-                address.add("Город='${ndflPerson.city}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.locality)) {
-                address.add("Населенный пункт='${ndflPerson.locality}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.street)) {
-                address.add(ndflPerson.street)
-                address.add("Улица='${ndflPerson.street}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.house)) {
-                address.add("Дом='${ndflPerson.house}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.building)) {
-                address.add("Корпус='${ndflPerson.building}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.flat)) {
-                address.add("Квартира='${ndflPerson.flat}'")
-            }
+
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                     "Графы ${address.join(", ")}")
+
             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
                     "'Адрес регистрации в Российской Федерации' не соответствует справочнику '$R_FIAS'")
         }
         timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
+
+
+
+
+
+
 
         // Спр2 Гражданство (Обязательное поле)
         if (!citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
@@ -3340,8 +3363,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 //        println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", pathError, MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent))
     }
 
-    println "Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)");
+    println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -3670,13 +3693,19 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // СведДох2 Сумма вычета (Графа 12)
             BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
-            if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction) && comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
+            if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                        "Сумма вычета (Раздел 2 Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: ""}', Доход.Сумма.Начисление (Раздел 2 Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'" +
-                                ", сумма значений Применение вычета.Текущий период.Сумма (Раздел 3 Графа 16)='${sumNdflDeduction ?: ""}'")
+                        "Сумма вычета (Раздел 2 Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: 0}', сумма значений (Графа 16 Раздел 3)='${sumNdflDeduction ?: 0}'")
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
-                        "Значение не соответствует правилу: Графа 12 Раздел 2 = сумма значений граф 16 Раздел 3")
+                        "Значение не соответствует правилу: «Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»")
+            }
+            if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
+                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
+                        "Сумма значений (Графа 16 Раздел 3)='${sumNdflDeduction ?: 0}', Доход.Сумма.Начисление (Графа 10 Раздел 2)='${ndflPersonIncome.incomeAccruedSumm ?: 0}'")
+                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
+                        "Значение не соответствует правилу: сумма значений «Граф 16 Раздела 3» <= «Графа 10 Раздел 2»")
             }
 
             // СведДох4 НДФЛ.Процентная ставка (Графа 14)

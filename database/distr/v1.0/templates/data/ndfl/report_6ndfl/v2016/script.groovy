@@ -422,9 +422,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
 class PairPersonOperationId {
     Long ndflPersonId
-    Long operationId
+    String operationId
 
-    PairPersonOperationId(Long ndflPersonId, Long operationId) {
+    PairPersonOperationId(Long ndflPersonId, String operationId) {
         this.ndflPersonId = ndflPersonId
         this.operationId = operationId
     }
@@ -617,7 +617,7 @@ def checkXml() {
         // ВнДок2 Исчисленный налог
         if ((Math.round((nachislDoh - vichetNal) / 100 * stavka) > ischislNal + mathError) ||
                 (Math.round((nachislDoh - vichetNal) / 100 * stavka) < ischislNal - mathError)) {
-            logger.error(msgError + " неверно рассчитана сумма исчисленного налога.")
+            logger.warn(msgError + " неверно рассчитана сумма исчисленного налога.")
         }
 
         // ВнДок3 Авансовый платеж
@@ -1543,7 +1543,7 @@ def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, ndflPerson, ope
     // Подразделение
     String departmentName = department.shortName
     // АСНУ
-    String asnu = getProvider(REF_BOOK_ASNU_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
+    String asnu = getProvider(RefBook.Id.ASNU.getId()).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
     // Имя ТФ
     String transportFileName = primaryRnuDeclarationDataFile.fileName
     // Загрузил ТФ

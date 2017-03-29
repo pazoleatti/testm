@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_kpp_oktmo" language="groovy" pageWidth="842" pageHeight="2000000" orientation="Landscape" columnWidth="822" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" uuid="56bdcffd-a01b-40c5-8a52-c2a9a0a76469">
-	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="29"/>
 	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.collapse.row.span" value="false"/>
@@ -98,13 +98,13 @@
 	<title>
 		<band height="52" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="5a8ba7ce-deb4-4d9b-8fd4-b8c11d66d996" x="0" y="32" width="172" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Отчетность по КПП, ОКТМО"/>
+				<reportElement uuid="5a8ba7ce-deb4-4d9b-8fd4-b8c11d66d996" x="0" y="32" width="704" height="20">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Реестр сформированной отчетности"/>
 				</reportElement>
 				<textElement>
 					<font fontName="Arial" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Отчетность по КПП, ОКТМО]]></text>
+				<text><![CDATA[Реестр сформированной отчетности]]></text>
 			</staticText>
 		</band>
 	</title>
