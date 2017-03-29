@@ -313,4 +313,7 @@ INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (63, dat
 INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (63, date '2016-08-01', 0, '4', seq_ref_book_record.nextval);
 INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (63, date '2016-10-01', 0, '5', seq_ref_book_record.nextval);
 
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (64, date '2016-06-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (65, date '2016-09-01', 0, '1', seq_ref_book_record.nextval);
+
 UPDATE get_records_test SET a = record_id;

@@ -713,5 +713,8 @@ public class RefBookSimpleDaoTest {
 		assertEquals(45L, rec.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue());
 		assertEquals(getDate(2016, 7, 1), rec.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue());
 		assertEquals(getDate(2016, 9, 1), rec.get(RefBook.RECORD_VERSION_TO_ALIAS).getDateValue());
+
+		assertNotNull(findRecord(list, "64", "1"));
+		assertNotNull(findRecord(list, "64", "1"));
 	}
 }
