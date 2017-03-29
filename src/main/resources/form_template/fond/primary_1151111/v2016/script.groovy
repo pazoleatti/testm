@@ -459,10 +459,11 @@ def createRowColumns() {
  * @return
  */
 def fillGeneralList(final XSSFWorkbook workbook) {
+    def departmentParam = getDepartmentParam(declarationData.departmentId)
+    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam?.id.value)
     // Получчить титульный лист из шаблона
     def sheet = workbook.getSheet(COMMON_SHEET)
-    // Дата формирования формы
-    println declarationData.id
+
     def declarationDataFile = declarationService.findFilesWithSpecificType(declarationData.id, TRANSPORT_FILE_TEMPLATE).get(0)
     // Номер корректироки
     def nomCorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
@@ -471,14 +472,10 @@ def fillGeneralList(final XSSFWorkbook workbook) {
     def period = getProvider(REPORT_PERIOD_TYPE_ID).getRecordData(reportPeriod.dictTaxPeriodId)?.CODE?.value
     def reportYear = reportPeriod.taxPeriod.year
     // Код налогового органа
-    def taxOrganCode = declarationData.taxOrganCode
+    def taxOrganCode = departmentParamIncomeRow?.TAX_ORGAN_CODE?.value
     // Подписант
     def raschsvSvnpPodpisant = raschsvSvnpPodpisantService.findRaschsvSvnpPodpisant(declarationData.id)
 
-    def departmentParam = getDepartmentParam(declarationData.departmentId)
-    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam?.id.value)
-    println departmentParamIncomeRow
-    //def presentPlaceReference = departmentParamIncomeRow?.PRESENT_PLACE?.value
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
 
     // Место предоставления
@@ -4517,15 +4514,15 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     if (!personDocumentList.isEmpty()) {
 
-        //сортировка по приоритету
-        personDocumentList.sort { a, b -> (a.getDocType()?.getPriority() <=> b.getDocType()?.getPriority()) ?: (a.id <=> b.id) }
+        //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
+        int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
 
         for (int i = 0; i < personDocumentList.size(); i++) {
 
             PersonDocument personDocument = personDocumentList.get(i);
-
             String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
-            if (i == 0) {
+
+            if (i == incRepIndex) {
                 if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
 
                     AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", INCLUDE_TO_REPORT);
