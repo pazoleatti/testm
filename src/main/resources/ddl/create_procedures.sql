@@ -1504,7 +1504,7 @@ as
                     c_area_type varchar2,c_city_type varchar2,c_locality_type varchar2,c_street_type varchar2,
                     c_index varchar2) is
     /*поиск по всем параметрам*/
-    select c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
+    select distinct c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
            substr(sys_connect_by_path(formalname,','),2) full_addr
       from fias_addrobj c
      where c.currstatus=0 --c.livestatus=1
@@ -1521,7 +1521,7 @@ as
              trim(lower(c.shortname))=nvl(replace(lower(c_area_type),' ',''),replace(lower(c_city_type),' ','')))
     union
     /*поиск без учета почтового индекса*/
-    select c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
+    select distinct c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
            substr(sys_connect_by_path(formalname,','),2) full_addr
       from fias_addrobj c
      where c.currstatus=0 --c.livestatus=1
@@ -1537,7 +1537,7 @@ as
              trim(lower(c.shortname))=nvl(replace(lower(c_area_type),' ',''),replace(lower(c_city_type),' ','')))
     union
     /*поиск без учета типов объектов*/
-    select c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
+    select distinct c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
            substr(sys_connect_by_path(formalname,','),2) full_addr
       from fias_addrobj c
      where c.currstatus=0 --c.livestatus=1
@@ -1546,7 +1546,9 @@ as
     connect by prior c.aoid=c.parentguid
       start with c.currstatus=0 --c.livestatus=1
         and c.regioncode=c_region
-        and replace(lower(c.formalname),' ','')=nvl(replace(lower(c_area),' ',''),replace(lower(c_city),' ',''));
+        and replace(lower(c.formalname),' ','')=nvl(replace(lower(c_area),' ',''),replace(lower(c_city),' ',''))
+        and (nvl(replace(lower(c_area_type),' ',''),replace(lower(c_city_type),' ','')) is null or 
+             trim(lower(c.shortname))=nvl(replace(lower(c_area_type),' ',''),replace(lower(c_city_type),' ','')));
   
   type ref_cursor is ref cursor;
   
@@ -1849,6 +1851,7 @@ begin
                              fias_pkg.GetParseName(6,n.locality) loc_fname
                         from ndfl_person n
                        where n.declaration_data_id=p_declaration
+                         --and n.id between p_start_id and p_start_id+999
                       ) tab
                 ) n left join fias_addrobj f on (f.id=n.fa_id) left join fias_addrobj fc on (fc.id=f.parentguid);
     

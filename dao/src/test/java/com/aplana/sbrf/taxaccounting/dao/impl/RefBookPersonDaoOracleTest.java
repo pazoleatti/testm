@@ -10,9 +10,10 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,10 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrey Drunk
@@ -36,7 +34,6 @@ import java.util.Map;
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RefBookPersonDaoOracleTest {
-
 
 
     @Autowired
@@ -60,10 +57,28 @@ public class RefBookPersonDaoOracleTest {
     }
 
     //14873
-    //Для ФЛ Номер: 0765540960: Петров Матвей Юрьевич код: 21, 80 04 505050 сходных записей найдено: 2 [ИНП: 0765540960: Борисова Марфа Юрьевна 88 08 010203 (0,42)][ИНП: 0765540960: Петров Матвей Юрьевич 80 04 505050 (1,00)]. Выбрана запись: [ИНП: 0765540960: Петров Матвей Юрьевич 80 04 505050 (1,00)]
     //private static final Long decl_data_id = 148731L; //вставка
     //private static final Long decl_data_id = 14873L; //обновление
     private static final Long decl_data_id = 15491L; //дубликаты
+
+
+    @Test
+    public void testGetActualRefDulByDeclarationDataId() {
+        //[19261, 18985]
+        long refBookId = RefBook.Id.ID_DOC.getId();
+        String whereClause = "JOIN ref_book_person p ON (frb.person_id = p.id) JOIN ndfl_person np ON (np.declaration_data_id = 18985 AND p.id = np.person_id)";
+        Map<Long, Map<String, RefBookValue>> result = getRefBookByRecordVersionWhere(refBookId, whereClause, new Date());
+    }
+
+    private Map<Long, Map<String, RefBookValue>> getRefBookByRecordVersionWhere(long refBookId, String whereClause, Date version) {
+        RefBook refBook = refBookDao.get(refBookId);
+        Map<Long, Map<String, RefBookValue>> refBookMap = refBookSimpleDao.getRecordDataVersionWhere(refBook, whereClause, version);
+        if (refBookMap == null || refBookMap.size() == 0) {
+            return Collections.emptyMap();
+        }
+        return refBookMap;
+    }
+
 
     @Test
     public void testFindNaturalPersonPrimaryDataFromNdfl() {
@@ -72,13 +87,10 @@ public class RefBookPersonDaoOracleTest {
         printResult(time, result.size());
     }
 
-
     @Test
     public void testFindNdflPersonFunc() {
 
         List<NaturalPerson> result = refBookPersonDao.findNaturalPersonPrimaryDataFromNdfl(decl_data_id, new NaturalPersonPrimaryRnuRowMapper());
-
-        System.out.println("Всего записей в ПНФ: decl_data_id=" + decl_data_id + ", size=" + result.size());
 
         long time = System.currentTimeMillis();
 
@@ -94,30 +106,19 @@ public class RefBookPersonDaoOracleTest {
 
         System.out.println("   insertRecords=" + insertRecords);
 
-        //PersonDocument doc = insertRecords.get(0).getPersonDocument();
-
-        //System.out.println("   insertRecords=" + doc);
-
         Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
 
         size += updateRecords.size();
 
         System.out.println("   updateRecords=" + updateRecords);
 
-
         Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
-
-
-
-
 
         size += checkRecords.size();
 
         System.out.println("   checkRecords=" + checkRecords);
 
         List<NaturalPerson> result2 = refBookPersonDao.findNaturalPersonPrimaryDataFromNdfl(decl_data_id, new NaturalPersonPrimaryRnuRowMapper());
-
-        //System.out.println("Всего записей в ПНФ: decl_data_id=" + decl_data_id + ", size=" + result2.size());
 
         printResult(time, size);
 
