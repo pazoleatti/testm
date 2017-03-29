@@ -1543,7 +1543,7 @@ def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, ndflPerson, ope
     // Подразделение
     String departmentName = department.shortName
     // АСНУ
-    String asnu = getProvider(REF_BOOK_ASNU_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
+    String asnu = getProvider(RefBook.Id.ASNU.getId()).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
     // Имя ТФ
     String transportFileName = primaryRnuDeclarationDataFile.fileName
     // Загрузил ТФ
