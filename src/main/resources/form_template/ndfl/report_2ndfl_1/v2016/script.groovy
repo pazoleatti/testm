@@ -32,6 +32,9 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверки
         println "!CHECK!"
@@ -1434,61 +1437,138 @@ def prepareSpecificReport() {
     if ('report_2ndfl' != reportAlias) {
         throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
     }
+    PrepareSpecificReportResult result = new PrepareSpecificReportResult();
+    List<Column> tableColumns = createTableColumns();
+    List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+    def rowColumns = createRowColumns()
+
     //Проверка, подготовка данных
+    def params = scriptSpecificReportHolder.subreportParamValues
     def reportParameters = scriptSpecificReportHolder.getSubreportParamValues();
+
+    if (reportParameters.isEmpty()) {
+        throw new ServiceException("Для поиска физического лица необходимо задать один из критериев.");
+    }
+
     def resultReportParameters = [:]
     reportParameters.each { key, value ->
         if (value != null) {
-            resultReportParameters.put(key, value)
+            if (key == "birthDay") {
+                resultReportParameters.put(key, ScriptUtils.formatDate(value, "dd.MM.yyyy"))
+            } else {
+                resultReportParameters.put(key, value)
+            }
         }
     }
-    if (resultReportParameters.isEmpty()) {
-        throw new ServiceException("Для поиска справки необходимо задать критерий.");
-    }
+
     // Поиск данных по фильтру
     def docs = searchData(resultReportParameters)
     if (docs.size() == 0) {
         subreportParamsToString = { it.collect { (it.value != null ? (it.value + ";") : "") } join " " }
-        logger.warn("Номер справки по заданным параметрам: " + subreportParamsToString(reportParameters) + " не найден");
+        logger.warn("Физическое лицо по заданным параметрам параметрам: " + subreportParamsToString(resultReportParameters) + " не найдено");
     }
     // Формирование списка данных для вывода в таблицу
-    def rowColumns = createTableColumns()
-    def dataRows = new ArrayList<DataRow<Cell>>();
     docs.each() { doc ->
         DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
-        row.getCell("pNumSpravka").setStringValue(doc.@НомСпр.text())
-        row.getCell("last_name").setStringValue(doc?.ПолучДох?.ФИО?.@Фамилия?.text())
-        row.getCell("first_name").setStringValue(doc?.ПолучДох?.ФИО?.@Имя?.text())
-        row.getCell("middle_name").setStringValue(doc?.ПолучДох?.ФИО?.@Отчество?.text())
-        row.getCell("birthday").setStringValue(doc?.ПолучДох?.@ДатаРожд?.text())
+        row.pNumSpravka = doc.@НомСпр.text()
+        row.lastName = doc?.ПолучДох?.ФИО?.@Фамилия?.text()
+        row.firstName = doc?.ПолучДох?.ФИО?.@Имя?.text()
+        row.middleName = doc?.ПолучДох?.ФИО?.@Отчество?.text()
+        row.birthDay = doc?.ПолучДох?.@ДатаРожд?.text()
+        row.idDocNumber = doc?.ПолучДох?.УдЛичнФЛ?.@СерНомДок?.text()
         dataRows.add(row)
     }
-    // Настройка таблицы
-    PrepareSpecificReportResult result = new PrepareSpecificReportResult();
-    List<Column> tableColumns = createTableColumns();
+
     result.setTableColumns(tableColumns);
     result.setDataRows(dataRows);
     scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
-    scriptSpecificReportHolder.setSubreportParamValues(scriptSpecificReportHolder.subreportParamValues)
+    scriptSpecificReportHolder.setSubreportParamValues(params)
 }
 
 def createTableColumns() {
-    def tableColumns = new ArrayList<Column>()
-    tableColumns.add(createColumn("pNumSpravka", "Номер справки", 5))
-    tableColumns.add(createColumn("last_name", "Фамилия", 10))
-    tableColumns.add(createColumn("first_name", "Имя", 10))
-    tableColumns.add(createColumn("middle_name", "Отчество", 10))
-    tableColumns.add(createColumn("birthday", "Дата рождения", 10))
+    List<Column> tableColumns = new ArrayList<Column>()
+
+    Column pNumSpravka = new StringColumn()
+    pNumSpravka.setAlias("pNumSpravka")
+    pNumSpravka.setName("Номер справки")
+    pNumSpravka.setWidth(5)
+    tableColumns.add(pNumSpravka)
+
+    Column column1 = new StringColumn()
+    column1.setAlias("lastName")
+    column1.setName("Фамилия")
+    column1.setWidth(10)
+    tableColumns.add(column1)
+
+    Column column2 = new StringColumn()
+    column2.setAlias("firstName")
+    column2.setName("Имя")
+    column2.setWidth(10)
+    tableColumns.add(column2)
+
+    Column column3 = new StringColumn()
+    column3.setAlias("middleName")
+    column3.setName("Отчество")
+    column3.setWidth(10)
+    tableColumns.add(column3)
+
+    Column column4 = new StringColumn()
+    column4.setAlias("birthDay")
+    column4.setName("Дата рождения")
+    column4.setWidth(10)
+    tableColumns.add(column4)
+
+    Column column5 = new StringColumn()
+    column5.setAlias("idDocNumber")
+    column5.setName("№ ДУЛ")
+    column5.setWidth(10)
+    tableColumns.add(column5)
+
     return tableColumns;
 }
 
-def createColumn(def alias, def name, def width) {
-    def column = new StringColumn()
-    column.setAlias(alias)
-    column.setName(name)
-    column.setWidth(width)
-    return column
+def createRowColumns() {
+    List<Column> tableColumns = new ArrayList<Column>();
+
+    Column pNumSpravka = new StringColumn()
+    pNumSpravka.setAlias("pNumSpravka")
+    pNumSpravka.setName("pNumSpravka")
+    pNumSpravka.setWidth(10)
+    tableColumns.add(pNumSpravka)
+
+    Column column1 = new StringColumn()
+    column1.setAlias("lastName")
+    column1.setName("Фамилия")
+    column1.setWidth(10)
+    tableColumns.add(column1)
+
+    Column column2 = new StringColumn()
+    column2.setAlias("firstName")
+    column2.setName("Имя")
+    column2.setWidth(10)
+    tableColumns.add(column2)
+
+    Column column3 = new StringColumn()
+    column3.setAlias("middleName")
+    column3.setName("Отчество")
+    column3.setWidth(10)
+    tableColumns.add(column3)
+
+    Column column4 = new StringColumn()
+    column4.setAlias("birthDay")
+    column4.setName("Дата рождения")
+    column4.setWidth(10)
+    tableColumns.add(column4)
+
+    Column column5 = new StringColumn()
+    column5.setAlias("idDocNumber")
+    column5.setName("№ ДУЛ")
+    column5.setWidth(10)
+    tableColumns.add(column5)
+
+    return tableColumns;
 }
+
 /**
  * Поиск справок согласно фильтру
  */
@@ -1496,7 +1576,12 @@ def searchData(def params) {
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)
     def docs = Файл.Документ.findAll{doc ->
-        StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka'])
+        (params['pNumSpravka'] ? StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka']) : true) &&
+        (params['lastName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params['lastName']) : true) &&
+        (params['firstName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName']) : true) &&
+        (params['middleName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName']) : true) &&
+        (params['birthDay'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.@ДатаРожд.text(), params['birthDay']) : true) &&
+        (params['idDocNumber'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) : true)
     }
     // ограничиваем размер выборки
     def result = []
@@ -1529,6 +1614,7 @@ def createSpecificReport() {
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
 }
+
 /**
  * Оставляем только необходимые данные для отчета
  */

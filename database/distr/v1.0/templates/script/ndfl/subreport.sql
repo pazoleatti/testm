@@ -58,9 +58,30 @@ INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 	(10019,1011,'Фамилия','lastName',1,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
-  (10201,1021,'Номер справки','pNumSpravka',0,'S',null,null,1);
+	(10201,1021,'Номер справки','pNumSpravka',0,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
-  (10401,1041,'Номер справки','pNumSpravka',0,'S',null,null,1);
+	(10202,1021,'Фамилия','lastName',1,'S',null,null,0);  
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10203,1021,'Имя','firstName',2,'S',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10204,1021,'Отчество','middleName',3,'S',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10205,1021,'Дата рождения','birthDay',4,'D',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10206,1021,'№ ДУЛ','idDocNumber',5,'S',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10401,1041,'Номер справки','pNumSpravka',0,'S',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10402,1041,'Фамилия','lastName',1,'S',null,null,0);  
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10403,1041,'Имя','firstName',2,'S',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10404,1041,'Отчество','middleName',3,'S',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10405,1041,'Дата рождения','birthDay',4,'D',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10406,1041,'№ ДУЛ','idDocNumber',5,'S',null,null,0);
+	
 	
 COMMIT;
 EXIT;
