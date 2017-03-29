@@ -21,6 +21,16 @@ public class AddressObject extends IdentityObject<Long> {
     private String formalName;
 
     /**
+     * Сокращенное наименование типа
+     */
+    private String shortName;
+
+    /**
+     * Почтовый индекс
+     */
+    private String postalCode;
+
+    /**
      * Уровень в текущей иерархии
      */
     private int level;
@@ -28,12 +38,7 @@ public class AddressObject extends IdentityObject<Long> {
     /**
      * Признак листового узла, true - листовой, false-нет
      */
-    private boolean isLeaaf;
-
-    /**
-     * Аддрес в виде строки с разделителями \\регион\\район\\город\\улица
-     */
-    private String addressPath;
+    private boolean leaf;
 
     /**
      * Код Региона
@@ -44,6 +49,19 @@ public class AddressObject extends IdentityObject<Long> {
      * Наименование региона
      */
     private String regionName;
+
+    /**
+     * Признак того что элемент адреса прошел проверку по справочнику фиас
+     */
+    private boolean valid;
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
 
     public Long getParentId() {
         return parentId;
@@ -69,20 +87,28 @@ public class AddressObject extends IdentityObject<Long> {
         this.level = level;
     }
 
-    public boolean isLeaaf() {
-        return isLeaaf;
+    public String getPostalCode() {
+        return postalCode;
     }
 
-    public void setLeaaf(boolean leaaf) {
-        isLeaaf = leaaf;
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
     }
 
-    public String getAddressPath() {
-        return addressPath;
+    public boolean isLeaf() {
+        return leaf;
     }
 
-    public void setAddressPath(String addressPath) {
-        this.addressPath = addressPath;
+    public void setLeaf(boolean leaf) {
+        this.leaf = leaf;
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 
     public String getRegionCode() {
@@ -104,14 +130,11 @@ public class AddressObject extends IdentityObject<Long> {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("parentId", parentId)
-                .append("formalName", formalName)
-                .append("level", level)
-                .append("isLeaaf", isLeaaf)
-                .append("addressPath", addressPath)
                 .append("regionCode", regionCode)
-                .append("regionName", regionName)
-                .append("leaaf", isLeaaf())
+                .append("shortName", shortName)
+                .append("formalName", formalName)
+                .append("valid", valid)
+                .append("leaf", leaf)
                 .toString();
     }
 }
