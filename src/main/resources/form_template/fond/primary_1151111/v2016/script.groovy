@@ -4517,15 +4517,15 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     if (!personDocumentList.isEmpty()) {
 
-        //сортировка по приоритету
-        personDocumentList.sort { a, b -> (a.getDocType()?.getPriority() <=> b.getDocType()?.getPriority()) ?: (a.id <=> b.id) }
+        //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
+        int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
 
         for (int i = 0; i < personDocumentList.size(); i++) {
 
             PersonDocument personDocument = personDocumentList.get(i);
-
             String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
-            if (i == 0) {
+
+            if (i == incRepIndex) {
                 if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
 
                     AttributeChangeEvent changeEvent = new AttributeChangeEvent("INC_REP", INCLUDE_TO_REPORT);
