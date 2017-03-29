@@ -5945,7 +5945,7 @@ def checkDataDBSum() {
     }
     if (!comparNumbEquals(ezPosRashFinFb, ezPos1RashFinFb + ezPos2RashFinFb)) {
         def pathAttrVal = pathAttrOssZak + ".ЕжПосУходРеб.РасхФинФБ = \"$ezPosRashVsego\""
-        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.РасхФинФБ = \"$ezPos1RashVsego\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.РасхФинФБ = \"$ezPos2RashVsego\"."
+        def pathAttrComp = pathAttrOssZak + ".ЕжПосУходРеб1.РасхФинФБ = \"$ezPos1RashFinFb\" + " + pathAttrOssZak + ".ЕжПосУходРеб2.РасхФинФБ = \"$ezPos2RashFinFb\"."
         logger.warnExp("%s не равен %s",
                 "Сумма ежемесячных пособий по уходу за ребенком равна сумме пособий за первого ребенка и второго и последующих детей",
                 null, pathAttrVal, pathAttrComp)
