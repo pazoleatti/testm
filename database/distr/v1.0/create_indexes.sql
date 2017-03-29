@@ -78,7 +78,6 @@ create index srch_refb_tax_payer_inp_asnu on ref_book_id_tax_payer(as_nu,lower(i
 create index srch_ref_book_person_inn on ref_book_person(replace(inn, ' ', ''));
 create index srch_ref_book_person_inn_f on ref_book_person(replace(inn_foreign, ' ', ''));
 create index srch_full_ref_pers_duble on ref_book_person (replace(lower(nvl(last_name,'empty')),' ',''), replace(lower(nvl(first_name,'empty')),' ',''), replace(lower(nvl(middle_name,'empty')),' ',''), birth_date, replace(replace(nvl(snils,'empty'),' ',''),'-',''), replace(nvl(inn,'empty'),' ',''), replace(nvl(inn_foreign,'empty'),' ',''));
-
 create index srch_fias_addrobj_postcode on fias_addrobj(replace(postalcode,' ',''));
 create index srch_fias_addrobj_regfnls on fias_addrobj(livestatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
 create index srch_fias_addrobj_csregfn on fias_addrobj(currstatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
@@ -87,6 +86,11 @@ create index i_log_system_log_id on log_system(log_id);
 create index i_notification_log_id on notification(log_id);
 create index fk_log_entry_log on log_entry(log_id);
 
-prompt create indexes for all cascade forein keys
+create index idx_rb_ndfl_det_ndfl_id on ref_book_ndfl_detail(ref_book_ndfl_id);
+create index idx_refbook_ndfl_depart on ref_book_ndfl(department_id);
+create index idx_decl_templ_form_kind on declaration_template(form_kind);
+
+-- create indexes for all cascade forein keys
 @@create_indexes_for_fk;
+
 exit;

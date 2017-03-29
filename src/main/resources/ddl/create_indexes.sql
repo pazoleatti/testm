@@ -86,5 +86,9 @@ create index i_log_system_log_id on log_system(log_id);
 create index i_notification_log_id on notification(log_id);
 create index fk_log_entry_log on log_entry(log_id);
 
+create index idx_rb_ndfl_det_ndfl_id on ref_book_ndfl_detail(ref_book_ndfl_id);
+create index idx_refbook_ndfl_depart on ref_book_ndfl(department_id);
+create index idx_decl_templ_form_kind on declaration_template(form_kind);
+
 -- create indexes for all cascade forein keys
 --@@create_indexes_for_fk;
