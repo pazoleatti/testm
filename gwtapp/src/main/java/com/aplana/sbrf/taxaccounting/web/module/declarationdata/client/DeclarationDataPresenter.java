@@ -278,6 +278,7 @@ public class DeclarationDataPresenter
                         } else if (result.getExistReport().getStatusReport().equals(TimerReportResult.StatusReport.EXIST)) {
                             if (isTimer && DeclarationDataReportType.XML_DEC.equals(type)) {
                                 revealPlaceRequest();
+                                return;
                             }
                             getView().updatePrintReportButtonName(type, true, result.getExistReport().getCreateDate());
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {

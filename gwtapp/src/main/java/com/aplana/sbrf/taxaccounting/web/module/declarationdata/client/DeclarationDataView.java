@@ -521,7 +521,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 printToXml.setVisible(true);
                 printAnchor.setEnabled(true);
                 timerXML.cancel();
-                timerSpecific.scheduleRepeating(10000);
+                timerSpecific.scheduleRepeating(4000);
                 timerSpecific.run();
             } else {
                 viewPdf.setVisible(false);
@@ -553,21 +553,21 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public void startTimerReport(DeclarationDataReportType type) {
         if (DeclarationDataReportType.EXCEL_DEC.equals(type)) {
-            timerExcel.scheduleRepeating(10000);
+            timerExcel.scheduleRepeating(4000);
             timerExcel.run();
         } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
-            timerXML.scheduleRepeating(10000);
+            timerXML.scheduleRepeating(4000);
             timerXML.run();
         } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
             if (isVisiblePDF) {
-                timerPDF.scheduleRepeating(10000);
+                timerPDF.scheduleRepeating(4000);
                 timerPDF.run();
             }
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
-            timerAccept.scheduleRepeating(10000);
+            timerAccept.scheduleRepeating(4000);
             timerAccept.run();
         } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
-            timerCheck.scheduleRepeating(10000);
+            timerCheck.scheduleRepeating(4000);
             timerCheck.run();
         }
     }
