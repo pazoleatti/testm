@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -644,29 +644,74 @@ public class RefBookSimpleDaoTest {
         assertEquals(2, records.getTotalCount());
     }
 
-	private boolean checkRecord(PagingResult<Map<String, RefBookValue>> list, @NotNull String a, @NotNull String b) {
+	private Map<String, RefBookValue> findRecord(PagingResult<Map<String, RefBookValue>> list, @NotNull String a, @NotNull String b) {
 		for (Map<String, RefBookValue> rec : list) {
 			if (a.equals(rec.get("a").getStringValue()) && b.equals(rec.get("b").getStringValue())) {
-				return true;
+				return rec;
 			}
 		}
-		return false;
+		return null;
 	}
 
+	public static Date getDate(int year, int month, int day) {
+		Calendar date = Calendar.getInstance();
+		date.clear();
+		date.set(year, month, day);
+		return date.getTime();
+	}
+
+	// Тестируем все случаи отрезков
 	@Test
 	public void getRecordsPeriod() {
 		RefBook refBook = refBookDao.get(10000L);
 		Calendar cal = GregorianCalendar.getInstance();
 		cal.set(2016, 5, 1); Date dateFrom = cal.getTime();
 		cal.set(2016, 8, 1); Date dateTo = cal.getTime();
-		PagingResult<Map<String, RefBookValue>> list = dao.getRecords(refBook, dateFrom, dateTo, null, null);
-		assertTrue(checkRecord(list, "1", "1"));
-		assertTrue(checkRecord(list, "2", "1"));
-		assertTrue(checkRecord(list, "3", "1"));
-		assertTrue(checkRecord(list, "3", "2"));
+		PagingResult<Map<String, RefBookValue>> list = dao.getVersionsInPeriod(refBook, dateFrom, dateTo, null);
 
-		assertFalse(checkRecord(list, "28", "1"));
+		int[][] trueList =
+				{{2,1},{3,2},{4,1},{5,2},{6,1},{7,2},{8,1},{9,2},{10,1},{10,2},
+				{11,2},{11,3},{12,1},{13,2},{14,1},{14,2},{15,2},{15,3},{16,1},{16,2},
+				{17,2},{17,3},{18,1},{18,2},{18,3},{19,2},{19,3},{19,4},{20,1},{21,2},
+				{22,1},{22,2},{23,2},{23,3},{24,1},{24,2},{25,2},{25,3},{26,1},{26,2},
+				{26,3},{27,2},{27,3},{27,4},{30,1},{31,2},{32,1},{33,2},{34,1},{35,2},
+				{36,1},{36,2},{37,2},{37,3},{38,1},{39,2},{40,1},{40,2},{41,2},{41,3},
+				{42,1},{42,2},{43,2},{43,3},{44,1},{44,2},{44,3},{45,2},{45,3},{45,4},
+				{48,1},{49,2},{50,1},{51,2},{52,1},{53,2},{54,1},{54,2},{55,2},{55,3},
+				{56,1},{57,2},{58,1},{58,2},{59,2},{59,3},{60,1},{60,2},{61,2},{61,3},
+				{62,1},{62,2},{62,3},{63,2},{63,3},{63,4}};
+
+		int[][] falseList =
+				{{1, 1},{1, 9},{2, 9},{3, 1},{3, 9},{4, 9},{5, 1},{5, 9},{7, 1},{8, 9},
+				{9, 1},{9, 9},{9, 9},{10, 9},{11, 1},{11, 9},{12, 9},{13, 1},{13, 9},{13, 9},
+				{14, 9},{14, 9},{15, 1},{15, 9},{15, 9},{16, 9},{17, 1},{17, 9},{17, 9},{18, 9},
+				{19, 1},{19, 9},{21, 1},{21, 9},{22, 9},{23, 1},{23, 9},{25, 1},{25, 9},{27, 1},
+				{28, 1},{28, 9},{29, 1},{29, 9},{29, 1},{29, 9},{30, 9},{30, 2},{30, 9},{31, 1},
+				{31, 9},{31, 3},{31, 9},{32, 2},{32, 9},{33, 1},{33, 3},{33, 9},{34, 9},{34, 2},
+				{34, 9},{35, 1},{35, 9},{35, 9},{35, 3},{35, 9},{36, 9},{36, 3},{36, 9},{37, 1},
+				{37, 9},{37, 4},{37, 9},{38, 2},{38, 9},{39, 1},{39, 9},{39, 3},{39, 9},{40, 9},
+				{40, 3},{40, 9},{41, 1},{41, 9},{41, 4},{41, 9},{42, 3},{42, 9},{43, 1},{43, 9},
+				{43, 4},{43, 9},{44, 4},{44, 9},{45, 1},{45, 5},{46, 1},{46, 9},{46, 2},{47, 1},
+				{47, 9},{47, 1},{48, 9},{48, 2},{49, 1},{49, 9},{49, 3},{50, 2},{51, 1},{51, 3},
+				{52, 9},{52, 2},{53, 1},{53, 9},{53, 9},{53, 3},{54, 9},{54, 3},{55, 1},{55, 9},
+				{55, 4},{56, 2},{57, 1},{57, 9},{57, 3},{58, 9},{58, 3},{59, 1},{59, 9},{59, 4},
+				{60, 3},{61, 1},{61, 9},{61, 4},{62, 4},{63, 1}, {63, 5}};
+
+		for (int[] a : trueList) {
+			assertNotNull(findRecord(list, String.valueOf(a[0]), String.valueOf(a[1])));
+		}
+		for (int[] a : falseList) {
+			assertNull(findRecord(list, String.valueOf(a[0]), String.valueOf(a[1])));
+		}
+
+		Map<String, RefBookValue> rec = findRecord(list, "26", "1");
+		assertEquals(26L, rec.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue());
+		assertEquals(getDate(2016, 4, 1), rec.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue());
+		assertEquals(getDate(2016, 6, 1), rec.get(RefBook.RECORD_VERSION_TO_ALIAS).getDateValue());
+
+		rec = findRecord(list, "45", "4");
+		assertEquals(45L, rec.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue());
+		assertEquals(getDate(2016, 7, 1), rec.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue());
+		assertEquals(getDate(2016, 9, 1), rec.get(RefBook.RECORD_VERSION_TO_ALIAS).getDateValue());
 	}
-
-
 }

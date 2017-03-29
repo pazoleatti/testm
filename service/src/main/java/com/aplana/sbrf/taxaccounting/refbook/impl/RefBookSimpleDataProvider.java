@@ -66,7 +66,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
 	@Override
 	public PagingResult<Map<String, RefBookValue>> getRecordsVersion(Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
-		return dao.getRecords(getRefBook(), versionFrom, versionTo, pagingParams, filter);
+		return dao.getVersionsInPeriod(getRefBook(), versionFrom, versionTo, filter);
 	}
 
     @Override
