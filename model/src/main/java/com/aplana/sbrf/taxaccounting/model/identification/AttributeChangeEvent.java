@@ -19,7 +19,7 @@ public class AttributeChangeEvent {
     }
 
     /**
-     * Тип мобытия при изменения значния атрибута
+     * Тип события при изменения значния атрибута
      */
     public AttributeChangeEventType type = AttributeChangeEventType.IGNORED;
 

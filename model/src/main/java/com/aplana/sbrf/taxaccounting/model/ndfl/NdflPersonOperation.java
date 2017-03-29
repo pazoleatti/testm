@@ -20,7 +20,7 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
     /**
      * Идентификатор операции
      */
-    protected Long operationId;
+    protected String operationId;
 
     /**
      * Ссылка на физлицо
@@ -43,11 +43,11 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
         this.rowNum = rowNum;
     }
 
-    public Long getOperationId() {
+    public String getOperationId() {
         return operationId;
     }
 
-    public void setOperationId(Long operationId) {
+    public void setOperationId(String operationId) {
         this.operationId = operationId;
     }
 

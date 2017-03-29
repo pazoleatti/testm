@@ -1,13 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.identification;
 
+import com.aplana.sbrf.taxaccounting.model.identification.Country;
 import com.aplana.sbrf.taxaccounting.model.identification.DocType;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Andrey Drunk
@@ -108,6 +111,23 @@ public class IdentificationUtils {
 
     private static String emptyIfNull(String string) {
         return StringUtils.defaultString(string);
+    }
+
+    /**
+     * Находит и возвращает индекс документа который необходимо сделать главным
+     * @param naturalPerson
+     * @param personDocumentList
+     * @return
+     */
+    public static int selectIncludeReportDocumentIndex(NaturalPerson naturalPerson, List<PersonDocument> personDocumentList) {
+
+        PersonDocument personDocument = SelectPersonDocumentCalc.selectIncludeReportDocument(naturalPerson, personDocumentList);
+
+        if (personDocument != null){
+            return personDocumentList.indexOf(personDocument);
+        } else {
+            return -1;
+        }
     }
 
 }

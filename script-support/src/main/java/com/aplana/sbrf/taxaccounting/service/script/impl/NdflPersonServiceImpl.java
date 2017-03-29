@@ -125,7 +125,7 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<Long> operationId) {
+    public List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<String> operationId) {
         return ndflPersonDao.findPrepaymentsByOperationList(operationId);
     }
 
@@ -171,12 +171,12 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, long operationId) {
+    public List<NdflPersonDeduction> findDeductionsByNdflPersonAndOperation(long ndflPersonId, String operationId) {
         return ndflPersonDao.findDeductionsByNdflPersonAndOperation(ndflPersonId, operationId);
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, long operationId) {
+    public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonAndOperation(long ndflPersonId, String operationId) {
         return ndflPersonDao.findPrepaymentsByNdflPersonAndOperation(ndflPersonId, operationId);
     }
 
