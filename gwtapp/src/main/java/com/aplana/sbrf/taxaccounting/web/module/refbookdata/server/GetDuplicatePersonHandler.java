@@ -63,8 +63,15 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
         // Получаем оригиал, если запись не является оригиналом
         if (oldId != null) {
             rows = new ArrayList<RefBookDataRow>();
-            Long originalId = personService.getOriginal(recordId);
-            Map<String, RefBookValue> originalRecord = refBookDataProvider.getRecordData(originalId);
+            Map<String, RefBookValue> originalRecord;
+            PagingResult<Map<String, RefBookValue>> originalRecords = refBookDataProvider.getRecords(action.getRelevanceDate(), null, RefBook.BUSINESS_ID_ALIAS + "=" + recordId, null);
+            if (!originalRecords.isEmpty()) {
+                originalRecord = originalRecords.get(0);
+            } else {
+                //ищем без учета даты
+                Map<Long, Map<String, RefBookValue>> originalMapRecords = refBookDataProvider.getRecordDataWhere(RefBook.BUSINESS_ID_ALIAS + "=" + recordId);
+                originalRecord = (Map<String, RefBookValue>)originalMapRecords.values().toArray()[0];
+            }
             GetRefBookDataRowHandler.dereference(refBook, Arrays.asList(originalRecord), rows, refBookHelper, columnMap);
             result.setOriginalRow(rows.get(0));
         }
