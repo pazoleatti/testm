@@ -42,20 +42,29 @@ public class PersonDaoImpl extends AbstractDao implements PersonDao {
     public void setOriginal(List<Long> recordIds) {
         getJdbcTemplate().update(String.format("update ref_book_person set record_id = old_id, old_id = null, status = old_status, old_status = null " +
                 "where %s", SqlUtils.transformToSqlInStatement("old_id", recordIds)));
+        getJdbcTemplate().update(String.format("delete from ref_book_id_doc " +
+                "where %s", SqlUtils.transformToSqlInStatement("duplicate_record_id", recordIds)));
+
     }
 
     @Override
     public Long getOriginal(Long recordId) {
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("recordId", recordId);
-        return getNamedParameterJdbcTemplate().queryForObject("select id from ref_book_person where record_id = :recordId and old_id is null", valueMap, Long.class);
+        return getNamedParameterJdbcTemplate().queryForObject("select id from ref_book_person where record_id = :recordId and old_id is null and status = 0", valueMap, Long.class);
     }
 
     @Override
     public List<Long> getDuplicate(Long recordId) {
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("recordId", recordId);
-        return getNamedParameterJdbcTemplate().query("select id from ref_book_person where record_id = :recordId and old_id is not null and old_status = 0", valueMap, new RowMapper<Long>() {
+        return getNamedParameterJdbcTemplate().query(
+                "with version as (select old_id, max(version) version from ref_book_person \n" +
+                "where record_id = :recordId and old_id is not null and old_status = 0 \n" +
+                "group by old_id) \n" +
+                "select id \n" +
+                "from ref_book_person rbp \n" +
+                "join version on version.version = rbp.version and version.old_id = rbp.old_id and old_status = 0", valueMap, new RowMapper<Long>() {
             @Override
             public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
                 return rs.getLong("id");
