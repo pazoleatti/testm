@@ -1216,10 +1216,10 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="60" uuid="19f30e93-4d2a-419b-a70e-5f14b7d38391">
+					<jr:column width="104" uuid="19f30e93-4d2a-419b-a70e-5f14b7d38391">
 						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
 							<staticText>
-								<reportElement uuid="b064116c-1090-4b19-970b-1013cdbf1656" x="0" y="0" width="60" height="11">
+								<reportElement uuid="b064116c-1090-4b19-970b-1013cdbf1656" x="0" y="0" width="115" height="11">
 									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
 								</reportElement>
 								<textElement textAlignment="Center">
@@ -1230,7 +1230,7 @@
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="36" rowSpan="1">
 							<staticText>
-								<reportElement uuid="1cc348cb-fe32-4a66-bff1-83186600cc94" mode="Transparent" x="0" y="0" width="60" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="1cc348cb-fe32-4a66-bff1-83186600cc94" mode="Transparent" x="0" y="0" width="115" height="36" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -1241,7 +1241,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="style1" height="10" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement uuid="0663ea68-69f3-4305-8e2f-74e7fa5aecb1" mode="Transparent" x="0" y="0" width="60" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="0663ea68-69f3-4305-8e2f-74e7fa5aecb1" mode="Transparent" x="0" y="0" width="115" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
@@ -2190,6 +2190,78 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
+					<jr:column width="106" uuid="cfb2a973-8ec0-4d30-99fc-3327247857dd">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="41b4c505-d727-469f-9473-8e188144dde3" mode="Transparent" x="0" y="0" width="106" height="10" forecolor="#000000" backcolor="#FFFFFF">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+									<paragraph lineSpacing="Single"/>
+								</textElement>
+								<text><![CDATA[7]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="2b54b79d-8fe8-4438-9159-3e971cdad055" mode="Transparent" x="0" y="0" width="106" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<paragraph lineSpacing="Single"/>
+								</textElement>
+								<text><![CDATA[Документ о праве
+на налоговый вычет.
+Код источника]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
+							<textField pattern="" isBlankWhenNull="true">
+								<reportElement uuid="e0fee998-7769-49a8-81c7-b8842d92e7a1" mode="Transparent" x="0" y="0" width="106" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<paragraph lineSpacing="Single"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{NOTIF_SOURCE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="c1eb28ab-045b-4d5f-95ea-7510d6872f09">
+						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
+							<staticText>
+								<reportElement uuid="56e7c3ca-5cb9-40c1-a122-fae1de3e12f4" mode="Transparent" x="0" y="0" width="100" height="10" forecolor="#000000" backcolor="#FFFFFF">
+									<property name="net.sf.jasperreports.export.xls.sheet.name" value="1.Реквизиты"/>
+								</reportElement>
+								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+									<paragraph lineSpacing="Single"/>
+								</textElement>
+								<text><![CDATA[8]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="2ceef423-72bf-44f0-8b8e-f1ef0f6bbc44" mode="Transparent" x="0" y="0" width="100" height="38" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
+									<font fontName="Times New Roman" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<paragraph lineSpacing="Single"/>
+								</textElement>
+								<text><![CDATA[Документ о праве
+на налоговый вычет.
+Сумма]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
+							<textField pattern="###0.00" isBlankWhenNull="true">
+								<reportElement uuid="d8d36c41-2c91-4e5b-be27-0cbe00cff1cf" mode="Transparent" x="0" y="0" width="100" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+								<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<paragraph lineSpacing="Single" rightIndent="5"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{NOTIF_SUMM}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
 					<jr:column width="98" uuid="92b3b863-8919-4f80-83bd-0c727613107b">
 						<jr:tableHeader style="table_TH" height="10" rowSpan="1">
 							<staticText>
@@ -2199,7 +2271,7 @@
 								<textElement textAlignment="Center">
 									<font fontName="Times New Roman" size="8" isBold="true"/>
 								</textElement>
-								<text><![CDATA[7]]></text>
+								<text><![CDATA[9]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
@@ -2233,7 +2305,7 @@ ID операции]]></text>
 								<textElement textAlignment="Center">
 									<font fontName="Times New Roman" size="8" isBold="true"/>
 								</textElement>
-								<text><![CDATA[8]]></text>
+								<text><![CDATA[10]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
@@ -2267,7 +2339,7 @@ ID операции]]></text>
 								<textElement textAlignment="Center">
 									<font fontName="Times New Roman" size="8" isBold="true"/>
 								</textElement>
-								<text><![CDATA[9]]></text>
+								<text><![CDATA[11]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
@@ -2301,7 +2373,7 @@ ID операции]]></text>
 								<textElement textAlignment="Center">
 									<font fontName="Times New Roman" size="8" isBold="true"/>
 								</textElement>
-								<text><![CDATA[10]]></text>
+								<text><![CDATA[12]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
@@ -2335,7 +2407,7 @@ ID операции]]></text>
 								<textElement textAlignment="Center">
 									<font fontName="Times New Roman" size="8" isBold="true"/>
 								</textElement>
-								<text><![CDATA[11]]></text>
+								<text><![CDATA[13]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
@@ -2370,7 +2442,7 @@ ID операции]]></text>
 								<textElement textAlignment="Center">
 									<font fontName="Times New Roman" size="8" isBold="true"/>
 								</textElement>
-								<text><![CDATA[12]]></text>
+								<text><![CDATA[14]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
@@ -2405,7 +2477,7 @@ ID операции]]></text>
 								<textElement textAlignment="Center">
 									<font fontName="Times New Roman" size="8" isBold="true"/>
 								</textElement>
-								<text><![CDATA[13]]></text>
+								<text><![CDATA[15]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">
@@ -2440,7 +2512,7 @@ ID операции]]></text>
 								<textElement textAlignment="Center">
 									<font fontName="Times New Roman" size="8" isBold="true"/>
 								</textElement>
-								<text><![CDATA[14]]></text>
+								<text><![CDATA[16]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:columnHeader style="table_TH" height="38" rowSpan="1">

@@ -1216,7 +1216,7 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="115" uuid="19f30e93-4d2a-419b-a70e-5f14b7d38391">
+					<jr:column width="104" uuid="19f30e93-4d2a-419b-a70e-5f14b7d38391">
 						<jr:tableHeader style="table_TH" height="11" rowSpan="1">
 							<staticText>
 								<reportElement uuid="b064116c-1090-4b19-970b-1013cdbf1656" x="0" y="0" width="115" height="11">

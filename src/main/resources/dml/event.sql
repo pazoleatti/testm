@@ -67,3 +67,4 @@ INSERT INTO event (id,name) VALUES (902,'Модификация подразде
 INSERT INTO event (id,name) VALUES (903,'Удаление подразделения');
 INSERT INTO event (id,name) VALUES (904,'Импорт скриптов');
 INSERT INTO event (id,name) VALUES (951,'Редактирование конфигурационного параметра');
+INSERT INTO event (id,name) VALUES (960,'Удаление блокировки');

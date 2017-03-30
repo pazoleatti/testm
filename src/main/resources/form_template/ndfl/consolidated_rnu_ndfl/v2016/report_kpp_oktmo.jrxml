@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_kpp_oktmo" language="groovy" pageWidth="842" pageHeight="2000000" orientation="Landscape" columnWidth="822" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" uuid="56bdcffd-a01b-40c5-8a52-c2a9a0a76469">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_kpp_oktmo" language="groovy" pageWidth="842" pageHeight="1000000" orientation="Landscape" columnWidth="822" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" uuid="56bdcffd-a01b-40c5-8a52-c2a9a0a76469">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -11,76 +11,49 @@
 	</parameter>
 	<queryString>
 		<![CDATA[select row_number() over(partition by datas.declaration_data_id order by datas.kpp,datas.oktmo) rn,
-       datas.kpp,datas.oktmo,
-       datas.terbank,
-       datas.reptype,
-       datas.pers_cnt,datas.inc_accured,datas.tax_calc,
-       datas.declaration_data_id,datas.rep_decl_id
-  from (select distinct
-                tab.kpp,tab.oktmo,
-                nvl(d.dep_name,'Не найдено') terbank,
-                nvl(sdd.name,'Не найдено') reptype,
-                tab.pers_cnt,
-                tab.inc_accured,
-                tab.tax_calc,
-                tab.declaration_data_id,
-                sdd.id rep_decl_id
-           from (select det.declaration_data_id,det.kpp,det.oktmo,
-                        drr.report_period_id,drr.department_id,
-                        count(distinct det.ndfl_person_id) pers_cnt,
-                        sum(nvl(det.income_accrued_summ,0)) inc_accured,
-                        sum(nvl(det.calculated_tax,0)) tax_calc
-                   from (select nvl(p.declaration_data_id,dd.id) declaration_data_id,
-                                nvl(inc.kpp,dd.kpp) kpp,nvl(inc.oktmo,dd.oktmo) oktmo,
-                                inc.ndfl_person_id,
-                                inc.income_accrued_summ,inc.calculated_tax
-                           from declaration_data dd
-                           left join ndfl_person p on (p.declaration_data_id=dd.id)
-                           left join ndfl_person_income inc on (inc.ndfl_person_id=p.id)
-                          where dd.id=$P{declarationId}) det
-                   join declaration_data dd on (dd.id=det.declaration_data_id)
-                   join department_report_period drr on (drr.id=dd.department_report_period_id)
-                  group by det.declaration_data_id,det.kpp,det.oktmo,drr.report_period_id,drr.department_id) tab
-           left join (select distinct d.id dep_id,d.name dep_name,sd.kpp,o.code oktmo
-                        from ref_book_ndfl s join ref_book_ndfl_detail sd on (sd.ref_book_ndfl_id=s.id)
-                                             join department d on (d.id=sd.department_id)
-                                             left join ref_book_oktmo o on (o.id=sd.oktmo)) d on (d.kpp=tab.kpp and d.oktmo=tab.oktmo)
-           left join ndfl_person_income sinc on (sinc.kpp=tab.kpp and sinc.oktmo=tab.oktmo)
-           left join ndfl_person sp on (sp.id=sinc.ndfl_person_id)
-           left join (select distinct dd.id,dt.name,dt.form_kind,inc.kpp,inc.oktmo,dd.department_report_period_id
-                        from declaration_data dd join ndfl_person pers on (pers.declaration_data_id=dd.id)
-                                                 join ndfl_person_income inc on (inc.ndfl_person_id=pers.id)
-                                                 join declaration_template dt on (dt.id=dd.declaration_template_id)
-                      union
-                      select distinct dd.id,dt.name,dt.form_kind,dd.kpp,dd.oktmo,dd.department_report_period_id
-                        from declaration_data dd join declaration_template dt on (dt.id=dd.declaration_template_id)
-                       where dt.declaration_type_id=103) sdd on (sdd.kpp=tab.kpp and sdd.oktmo=tab.oktmo and sdd.form_kind=7)
-           left join department_report_period sdrr on (sdrr.id=sdd.department_report_period_id and
-                                                       sdrr.report_period_id=tab.report_period_id)
-       ) datas
- where not exists(select 1 from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
-                   where decl.id=datas.rep_decl_id
-                     and templ.form_kind=3)
-   and ((datas.rep_decl_id is null)
-         or
-         (datas.rep_decl_id=datas.declaration_data_id
-          and not exists(select 1
-                           from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
-                                                      left join ndfl_person sp on (sp.declaration_data_id=decl.id)
-                                                      left join ndfl_person_income sinc on (sinc.ndfl_person_id=sp.id)
-                          where templ.form_kind=7
-                            and datas.kpp in (sinc.kpp,decl.kpp)
-                            and datas.oktmo in (sinc.oktmo,decl.oktmo)))
-         or
-         (datas.rep_decl_id<>datas.declaration_data_id
-          and exists(select 1
-                       from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
-                                                  left join ndfl_person sp on(sp.declaration_data_id=decl.id)
-                                                  left join ndfl_person_income sinc on (sinc.ndfl_person_id=sp.id)
-                      where templ.form_kind=7
-                        and datas.kpp in (sinc.kpp,decl.kpp)
-                        and datas.oktmo in (sinc.oktmo,decl.oktmo)))
-        )]]>
+           datas.kpp,datas.oktmo,datas.terbank,datas.reptype,
+           datas.pers_cnt,datas.inc_accured,datas.tax_calc,
+           datas.declaration_data_id,datas.rep_decl_id
+      from (
+            select distinct
+                   tab.kpp,tab.oktmo,
+                   nvl(d.dep_name,'Не найдено') terbank,
+                   nvl(sdt.name,'Не найдено') reptype,
+                   tab.pers_cnt,
+                   tab.inc_accured,
+                   tab.tax_calc,
+                   tab.declaration_data_id,
+                   sdd.id rep_decl_id
+              from (select p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id,
+                           count(distinct inc.ndfl_person_id) pers_cnt,
+                           sum(nvl(inc.income_accrued_summ,0)) inc_accured,
+                           sum(nvl(inc.calculated_tax,0)) tax_calc
+                      from declaration_data dd join department_report_period drr on (drr.id=dd.department_report_period_id)
+                                               join ndfl_person p on (p.declaration_data_id=dd.id)
+                                               join ndfl_person_income inc on (inc.ndfl_person_id=p.id)
+                    where dd.id=$P{declarationId}
+                     group by p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id) tab
+                   left join vw_depart_kpp_oktmo d on (d.kpp=tab.kpp and d.oktmo=tab.oktmo and d.dep_id=tab.department_id)
+                   left join ndfl_person_income sinc on (sinc.kpp=tab.kpp and sinc.oktmo=tab.oktmo)
+                   left join ndfl_person sp on (sp.id=sinc.ndfl_person_id)
+                   left join declaration_data sdd on (sdd.id=sp.declaration_data_id)
+                   left join department_report_period sdrr on (sdrr.id=sdd.department_report_period_id and sdrr.report_period_id=tab.report_period_id)
+                   left join declaration_template sdt on (sdt.id=sdd.declaration_template_id and sdt.form_kind=7)
+              ) datas
+      where not exists(select 1 from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
+                        where decl.id=datas.rep_decl_id
+                          and templ.form_kind=3)
+        and (
+             (datas.rep_decl_id=datas.declaration_data_id  and not exists(select 1
+                      from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
+                     where templ.form_kind=7
+                     and decl.kpp=datas.kpp
+                     and decl.oktmo=datas.oktmo)) or
+             (datas.rep_decl_id<>datas.declaration_data_id and exists(select 1
+                      from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
+                     where templ.form_kind=7
+                     and decl.kpp=datas.kpp
+                     and decl.oktmo=datas.oktmo)))]]>
 	</queryString>
 	<field name="RN" class="java.math.BigDecimal"/>
 	<field name="KPP" class="java.lang.String"/>
@@ -98,13 +71,13 @@
 	<title>
 		<band height="52" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="5a8ba7ce-deb4-4d9b-8fd4-b8c11d66d996" x="0" y="32" width="172" height="20">
+				<reportElement uuid="5a8ba7ce-deb4-4d9b-8fd4-b8c11d66d996" x="0" y="32" width="343" height="20">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Отчетность по КПП, ОКТМО"/>
 				</reportElement>
 				<textElement>
 					<font fontName="Arial" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Отчетность по КПП, ОКТМО]]></text>
+				<text><![CDATA[Реестр сформированной отчетности]]></text>
 			</staticText>
 		</band>
 	</title>
