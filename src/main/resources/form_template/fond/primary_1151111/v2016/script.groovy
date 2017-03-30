@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
 import com.aplana.sbrf.taxaccounting.dao.identification.*
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
 import com.aplana.sbrf.taxaccounting.dao.identification.*
 

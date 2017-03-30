@@ -3525,6 +3525,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
     List<DateConditionData> dateConditionDataList = []
 
+    DateConditionWorkDay dateConditionWorkDay = new DateConditionWorkDay(calendarService)
+
     // "Графа 6" = "Графе 7"
     dateConditionDataList << new DateConditionData(["1010", "3020", "1110", "1400", "2001", "2010", "2012",
                                                                  "2300", "2710", "2760", "2762", "2770", "2900", "4800"],
@@ -3560,7 +3562,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     dateConditionDataList << new DateConditionData(["2520", "2720", "2740", "2750", "2790"], ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
     // Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
-    dateConditionDataList << new DateConditionData(["2610"], ["00"], new LastMonthCalendarDayButNotFree(), """Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день""")
+    dateConditionDataList << new DateConditionData(["2610"], ["00"], new LastMonthWorkDayIncomeAccruedDate(), """Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день""")
 
     // "Графа 6" = "Графе 7"
     dateConditionDataList << new DateConditionData(["2640", "2641"], ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
@@ -3590,7 +3592,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (dateConditionDataList != null) {
                 dateConditionDataList.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
-                        if (!dateConditionData.checker.check(ndflPersonIncome)) {
+                        if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                     "Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}'")
@@ -4013,7 +4015,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 dateConditionDataList.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         // Все подпункты, кроме 11-го
-                        if (!dateConditionData.checker.check(ndflPersonIncome)) {
+                        if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                     "НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}' и Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}'")
@@ -4092,6 +4094,56 @@ BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<Ndfl
 }
 
 /**
+ * Класс для получения рабочих дней
+ */
+class DateConditionWorkDay {
+
+    // Мапа рабочих дней со сдвигом
+    private Map<Date, Date> workDayWithOffset0Cache
+    private Map<Date, Date> workDayWithOffset1Cache
+    private Map<Date, Date> workDayWithOffset30Cache
+    def calendarService
+
+    DateConditionWorkDay(def calendarService) {
+        workDayWithOffset0Cache = [:]
+        workDayWithOffset1Cache = [:]
+        workDayWithOffset30Cache = [:]
+        this.calendarService = calendarService
+    }
+
+    /**
+     * Возвращает дату рабочего дня, смещенного относительно даты startDate.
+     *
+     * @param startDate начальная дата, может быть и рабочим днем и выходным
+     * @param offset на сколько рабочих дней необходимо сдвинуть начальную дату. Может быть меньше 0, тогда сдвигается в обратную сторону
+     * @return смещенная на offset рабочих дней дата
+     */
+    Date getWorkDay(Date startDate, int offset) {
+        Date resultDate
+        if (offset == 0) {
+            resultDate = workDayWithOffset0Cache.get(startDate)
+            if (resultDate == null) {
+                resultDate = calendarService.getWorkDay(startDate, offset)
+                workDayWithOffset0Cache.put(startDate, resultDate)
+            }
+        } else if (offset == 1) {
+            resultDate = workDayWithOffset1Cache.get(startDate)
+            if (resultDate == null) {
+                resultDate = calendarService.getWorkDay(startDate, offset)
+                workDayWithOffset1Cache.put(startDate, resultDate)
+            }
+        } else if (offset == 30) {
+            resultDate = workDayWithOffset30Cache.get(startDate)
+            if (resultDate == null) {
+                resultDate = calendarService.getWorkDay(startDate, offset)
+                workDayWithOffset30Cache.put(startDate, resultDate)
+            }
+        }
+        return resultDate
+    }
+}
+
+/**
  * Класс для соотнесения вида проверки в зависимости от значений "Код вида дохода" и "Признак вида дохода"
  */
 class DateConditionData {
@@ -4109,7 +4161,7 @@ class DateConditionData {
 }
 
 interface DateConditionChecker {
-    boolean check(NdflPersonIncome ndflPersonIncome)
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay)
 }
 
 /**
@@ -4117,7 +4169,7 @@ interface DateConditionChecker {
  */
 class Column6EqualsColumn7 implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
         String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
         return accrued == payout
@@ -4135,7 +4187,7 @@ class MatchMask implements DateConditionChecker {
     }
 
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
@@ -4154,7 +4206,7 @@ class MatchMask implements DateConditionChecker {
  */
 class LastMonthCalendarDay implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
@@ -4172,7 +4224,7 @@ class LastMonthCalendarDay implements DateConditionChecker {
  */
 class Column7LastDayOfYear implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.incomePayoutDate == null) {
             return false
         }
@@ -4189,24 +4241,23 @@ class Column7LastDayOfYear implements DateConditionChecker {
 }
 
 /**
- * Проверка: Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
+ * Проверка: Доход.Дата.Начисление (Графа 6) последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
  */
-class LastMonthCalendarDayButNotFree implements DateConditionChecker {
+class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
-        boolean lastMonthDay = new LastMonthCalendarDay().check(ndflPersonIncome)
         Calendar calendar = Calendar.getInstance()
         calendar.setTime(ndflPersonIncome.incomeAccruedDate)
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-        if (lastMonthDay && dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY) {
-            return true
-        } else if (!lastMonthDay && dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
-            return true
-        }
-        return false
+        // находим последний день месяца
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        Date workDay = calendar.getTime()
+        // если последний день месяца приходится на выходной, то следующий первый рабочий день
+        int offset = 0
+        workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
+        return workDay == ndflPersonIncome.incomeAccruedDate
     }
 }
 
@@ -4215,22 +4266,18 @@ class LastMonthCalendarDayButNotFree implements DateConditionChecker {
  */
 class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
         calendar21.setTime(ndflPersonIncome.taxTransferDate);
-        Calendar calendar7 = Calendar.getInstance();
-        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
-        calendar7.add(Calendar.DATE, 1);
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            calendar7.add(Calendar.DATE, 2);
-        }
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendar7.add(Calendar.DATE, 1);
-        }
+        // "Графа 7" + "1 рабочий день"
+        int offset = 1
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+        Calendar calendar7 = Calendar.getInstance();
+        calendar7.setTime(workDay);
 
         return calendar21.equals(calendar7);
     }
@@ -4241,22 +4288,18 @@ class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
  */
 class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
         calendar21.setTime(ndflPersonIncome.taxTransferDate);
-        Calendar calendar7 = Calendar.getInstance();
-        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
-        calendar7.add(Calendar.DATE, 30);
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            calendar7.add(Calendar.DATE, 2);
-        }
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendar7.add(Calendar.DATE, 1);
-        }
+        // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
+        int offset = 30
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+        Calendar calendar7 = Calendar.getInstance();
+        calendar7.setTime(workDay);
 
         return calendar21.before(calendar7) || calendar21.equals(calendar7);
     }
@@ -4267,22 +4310,23 @@ class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
  */
 class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
         calendar21.setTime(ndflPersonIncome.taxTransferDate);
+
         Calendar calendar7 = Calendar.getInstance();
         calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
-        calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH));
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            calendar7.add(Calendar.DATE, 2);
-        }
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendar7.add(Calendar.DATE, 1);
-        }
+        // находим последний день месяца
+        calendar7.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        Date workDay = calendar7.getTime()
+        // если последний день месяца приходится на выходной, то следующий первый рабочий день
+        int offset = 0
+        workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
+        calendar7.setTime(workDay);
 
         return calendar21.equals(calendar7);
     }
