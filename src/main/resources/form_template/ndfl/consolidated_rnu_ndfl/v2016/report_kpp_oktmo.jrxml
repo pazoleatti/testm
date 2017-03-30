@@ -77,7 +77,7 @@
 				<textElement>
 					<font fontName="Arial" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Отчетность по КПП, ОКТМО]]></text>
+				<text><![CDATA[Реестр сформированной отчетности]]></text>
 			</staticText>
 		</band>
 	</title>
