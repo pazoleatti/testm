@@ -379,24 +379,35 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                                 Страница: i < ndflPersonIncomesGroupedByIncomeCode.size() / 2 ? 1 : 2
                                         ) {
                                             def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey).get(0), deductionsSelectedForDeductionsInfo)
-                                            deductionsFilteredForCurrIncome.each {
-                                                if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
-                                                    СвСумВыч(КодВычет: it.typeCode,
-                                                            СумВычет: ScriptUtils.round(it.periodCurrSumm, 2)) {}
+                                            if (deductionsFilteredForCurrIncome) {
+                                                deductionsFilteredForCurrIncome.each {
+                                                    if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
+                                                        СвСумВыч(КодВычет: it.typeCode,
+                                                                СумВычет: ScriptUtils.round(it.periodCurrSumm, 2)) {}
+                                                    }
                                                 }
+                                            } else {
+                                                // Для нужд формирования отчета необходимо всегда добавлять узел СвСумВыч, даже если он пустой
+                                                СвСумВыч(КодВычет: "", СумВычет: "") {}
                                             }
                                         }
                                     } else {
                                         СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
                                                 КодДоход: incomeKey,
-                                                СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2)
+                                                СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2),
+                                                Страница: i < ndflPersonIncomesGroupedByIncomeCode.size() / 2 ? 1 : 2
                                         ) {
                                             def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey).get(0), deductionsSelectedForDeductionsInfo)
-                                            deductionsFilteredForCurrIncome.each {
-                                                if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
-                                                    СвСумВыч(КодВычет: it.typeCode,
-                                                            СумВычет: ScriptUtils.round(it.periodCurrSumm, 2)) {}
+                                            if (deductionsFilteredForCurrIncome) {
+                                                deductionsFilteredForCurrIncome.each {
+                                                    if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
+                                                        СвСумВыч(КодВычет: it.typeCode,
+                                                                СумВычет: ScriptUtils.round(it.periodCurrSumm, 2)) {}
+                                                    }
                                                 }
+                                            } else {
+                                                // Для нужд формирования отчета необходимо всегда добавлять узел СвСумВыч, даже если он пустой
+                                                СвСумВыч(КодВычет: "", СумВычет: "") {}
                                             }
                                         }
                                     }
