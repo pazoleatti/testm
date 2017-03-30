@@ -44,6 +44,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button checkButton;
 	@UiField
 	Button changeStatusEDButton;
+    @UiField
+    Button addErrorButton;
 	@UiField
 	Anchor returnAnchor;
 	@UiField
@@ -485,6 +487,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         getUiHandlers().check(false);
     }
 
+	@UiHandler("addErrorButton")
+	public void onAddErrorButton(ClickEvent event) {
+        getUiHandlers().addError();
+    }
+
     @UiHandler("viewPdf")
     public void onViewPdfButton(ClickEvent event){
         if (isVisiblePDF) {
@@ -665,5 +672,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiHandler("filesComments")
     public void onFilesCommentsClicked(ClickEvent event){
         getUiHandlers().onFilesCommentsDialog();
+    }
+
+    @Override
+    public Button getAddErrorButton() {
+        return addErrorButton;
     }
 }

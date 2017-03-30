@@ -247,6 +247,7 @@
                             <g:Button text="Вернуть в Создана" ui:field="cancelButton" />
                             <g:Button text="Изменить Состояние ЭД" ui:field="changeStatusEDButton" />
                             <g:Button text="Показать" ui:field="viewPdf" visible="false"/>
+                            <g:Button text="Добавить ошибку от ФНС" ui:field="addErrorButton" />
                         </style:LeftBar>
                         <g:HorizontalPanel>
                             <g:cell verticalAlignment="middle">

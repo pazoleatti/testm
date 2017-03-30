@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.comments.DeclarationDeclarationFilesCommentsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.NdflReferencesEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams.SubreportParamsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
@@ -27,6 +28,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -131,6 +133,8 @@ public class DeclarationDataPresenter
         void setVisiblePDF(boolean isVisiblePDF);
 
         boolean isVisiblePDF();
+
+        Button getAddErrorButton();
     }
 
 	private final DispatchAsync dispatcher;
@@ -140,6 +144,7 @@ public class DeclarationDataPresenter
     private final DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter;
     private final ChangeStatusEDPresenter changeStatusEDPresenter;
     private final SourcesPresenter sourcesPresenter;
+    private final NdflReferencesEditPresenter ndflReferencesEditPresenter;
 	private long declarationId;
     private DeclarationData declarationData;
     private String taxName;
@@ -152,7 +157,7 @@ public class DeclarationDataPresenter
 									PlaceManager placeManager,
 									HistoryPresenter historyPresenter, SubreportParamsPresenter subreportParamsPresenter,
                                     SourcesPresenter sourcesPresenter, DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter,
-                                    ChangeStatusEDPresenter changeStatusEDPresenter) {
+                                    ChangeStatusEDPresenter changeStatusEDPresenter, NdflReferencesEditPresenter ndflReferencesEditPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.historyPresenter = historyPresenter;
@@ -161,6 +166,7 @@ public class DeclarationDataPresenter
         this.subreportParamsPresenter = subreportParamsPresenter;
         this.declarationFilesCommentsPresenter = declarationFilesCommentsPresenter;
         this.changeStatusEDPresenter = changeStatusEDPresenter;
+        this.ndflReferencesEditPresenter = ndflReferencesEditPresenter;
 		getView().setUiHandlers(this);
 	}
 
@@ -245,7 +251,11 @@ public class DeclarationDataPresenter
 								getView().showDelete(result.isCanDelete());
 								getView().showRecalculateButton(result.isCanRecalculate() && !isReports);
 								getView().showChangeStatusEDButton(result.isCanChangeStatusED());
-
+                                if(declarationData.getDeclarationTemplateId() == 102 || declarationData.getDeclarationTemplateId() == 104) {
+                                    getView().getAddErrorButton().setVisible(true);
+                                } else {
+                                    getView().getAddErrorButton().setVisible(false);
+                                }
                                 onTimerReport(DeclarationDataReportType.XML_DEC, false);
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);
 							}
@@ -551,7 +561,13 @@ public class DeclarationDataPresenter
 				}, this));
 	}
 
-	@Override
+    @Override
+    public void addError() {
+	    ndflReferencesEditPresenter.setDeclarationDataId(declarationId);
+        addToPopupSlot(ndflReferencesEditPresenter);
+    }
+
+    @Override
 	public void downloadXml() {
 		Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xml/"
 				+ declarationId, null, null);
