@@ -691,7 +691,7 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     List personDocumentList = naturalPerson.getPersonDocumentList();
 
-    if (!personDocumentList.isEmpty()) {
+    if (!personDocumentList && !personDocumentList.isEmpty()) {
 
         //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
         int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
@@ -1010,17 +1010,6 @@ def getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
 }
 
 /**
- * Получить "Физические лица"
- * NDFL_PERSON.PERSON_ID будет ссылаться на актуальную записи справочника ФЛ только после проведения расчета
- * @return
- */
-Map<Long, Map<String, RefBookValue>> getRefPersonsByDeclarationDataId() {
-    Long declarationDataId = declarationData.id;
-    String whereClause = String.format("id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
-    return getRefBookByRecordWhere(REF_BOOK_PERSON_ID, whereClause)
-}
-
-/**
  * Получить актуальные на отчетную дату записи справочника "Физические лица"
  * @return Map < person_id , Map < имя_поля , значение_поля > >
  */
@@ -1049,27 +1038,6 @@ def getRefDocumentPriority() {
         }
     }
     return documentPriorityCache;
-}
-
-/**
- * Получить "ИНП"
- */
-def getRefInpMapByDeclarationDataId() {
-    if (inpCache.isEmpty()) {
-        Long declarationDataId = declarationData.id;
-        String whereClause = String.format("person_id in(select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_TAX_PAYER.id, whereClause)
-
-        refBookMap.each { personId, refBook ->
-            def inpList = inpCache.get(refBook?.PERSON_ID?.referenceValue);
-            if (inpList == null) {
-                inpList = [];
-            }
-            inpList.add(refBook?.INP?.stringValue)
-            inpCache.put(refBook?.PERSON_ID?.referenceValue, inpList)
-        }
-    }
-    return inpCache;
 }
 
 /**
@@ -2124,21 +2092,6 @@ Date getReportPeriodEndDate() {
 }
 
 /**
- * Выгрузка из справочников по условию
- * @param refBookId
- * @param whereClause
- * @return
- */
-def getRefBookByRecordWhere(def long refBookId, def whereClause) {
-    Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataWhere(whereClause)
-    if (refBookMap == null || refBookMap.size() == 0) {
-        //throw new ScriptException("Не найдены записи справочника " + refBookId)
-        return Collections.emptyMap();
-    }
-    return refBookMap
-}
-
-/**
  * Выгрузка из справочников по условию и версии
  * @param refBookId
  * @param whereClause
@@ -2300,29 +2253,6 @@ def getRefAddress(def addressIds) {
 /**
  * Получить "Документ, удостоверяющий личность (ДУЛ)"
  */
-def getRefDulByDeclarationDataId() {
-
-    if (dulCache.isEmpty()) {
-        Long declarationDataId = declarationData.id;
-        String whereClause = String.format("person_id in (select person_id from ndfl_person where declaration_data_id = %s)", declarationDataId)
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
-
-        refBookMap.each { personId, refBookValues ->
-            Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
-            def dulList = dulCache.get(refBookPersonId);
-            if (dulList == null) {
-                dulList = [];
-                dulCache.put(refBookPersonId, dulList)
-            }
-            dulList.add(refBookValues);
-        }
-    }
-    return dulCache;
-}
-
-/**
- * Получить "Документ, удостоверяющий личность (ДУЛ)"
- */
 Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
     if (dulActualCache.isEmpty()) {
         String whereClause = """
@@ -2352,22 +2282,9 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
 def getRefBook(def long refBookId) {
     // Передаем как аргумент только срок действия версии справочника
     def refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
-
     if (refBookList == null || refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
     }
-    return refBookList
-}
-
-/**
- * Получить все записи справочника по его идентификатору и фильтру (отсутствие значений не является ошибкой)
- * @param refBookId - идентификатор справочника
- * @param filter - фильтр
- * @return - возвращает лист
- */
-List<Map<String, RefBookValue>> getRefBookByFilter(def long refBookId, def filter) {
-    // Передаем как аргумент только срок действия версии справочника
-    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, filter)
     return refBookList
 }
 
@@ -2395,13 +2312,6 @@ RefBookDataProvider getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
-}
-
-/**
- * Разыменование записи справочника
- */
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 //>------------------< UTILS >----------------------<
