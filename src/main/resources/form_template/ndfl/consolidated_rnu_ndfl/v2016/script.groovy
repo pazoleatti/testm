@@ -1505,7 +1505,6 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
 def getRefBook(def long refBookId) {
     // Передаем как аргумент только срок действия версии справочника
     def refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
-
     if (refBookList == null || refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
     }
@@ -1526,18 +1525,6 @@ def getRefBookByRecordVersionWhere(def long refBookId, def whereClause, def vers
         return Collections.emptyMap();
     }
     return refBookMap
-}
-
-/**
- * Получить все записи справочника по его идентификатору и фильтру (отсутствие значений не является ошибкой)
- * @param refBookId - идентификатор справочника
- * @param filter - фильтр
- * @return - возвращает лист
- */
-List<Map<String, RefBookValue>> getRefBookByFilter(def long refBookId, def filter) {
-    // Передаем как аргумент только срок действия версии справочника
-    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, filter)
-    return refBookList
 }
 
 /**
