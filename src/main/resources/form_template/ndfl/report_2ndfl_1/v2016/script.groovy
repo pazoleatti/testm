@@ -223,8 +223,6 @@ def buildXml(def writer, boolean isForSpecificReport) {
     // Получим код НО пром из справочника "Общие параметры"
     def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
 
-
-
     //Текущая страница представляющая порядковый номер файла
     def currentPageNumber = partNumber
 
@@ -387,15 +385,30 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                             }
                                         }
                                     } else {
-                                        СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
-                                                КодДоход: incomeKey,
-                                                СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2)
-                                        ) {
-                                            def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey).get(0), deductionsSelectedForDeductionsInfo)
-                                            deductionsFilteredForCurrIncome.each {
-                                                if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
-                                                    СвСумВыч(КодВычет: it.typeCode,
-                                                            СумВычет: ScriptUtils.round(it.periodCurrSumm, 2)) {}
+                                        def ndflPersonIncomesFromGroup = ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)
+                                        def ndflPersonIncomesWhereIncomeAccruedSumGreaterZero = []
+                                        ndflPersonIncomesFromGroup.each {
+                                            if (it.incomeAccruedSumm != null && it.incomeAccruedSumm > new BigDecimal(0)) {
+                                                ndflPersonIncomesWhereIncomeAccruedSumGreaterZero << it
+                                            }
+                                        }
+                                        if (ndflPersonIncomesWhereIncomeAccruedSumGreaterZero.size() > 0) {
+                                            СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
+                                                    КодДоход: incomeKey,
+                                                    СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2)
+                                            ) {
+                                                def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey).get(0), deductionsSelectedForDeductionsInfo)
+                                                deductionsFilteredForCurrIncome.each { group ->
+                                                    def deductionsForSum = []
+                                                    group.each {
+                                                        if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
+                                                            deductionsForSum << it
+                                                        }
+                                                    }
+                                                    if (!deductionsForSum.isEmpty()) {
+                                                        СвСумВыч(КодВычет: deductionsForSum[0].typeCode,
+                                                                СумВычет: ScriptUtils.round(getSumVichOfPeriodCurrSumm(deductionsForSum), 2)) {}
+                                                    }
                                                 }
                                             }
                                         }
@@ -468,16 +481,16 @@ def buildXml(def writer, boolean isForSpecificReport) {
                             }
                         }
                         // Доходы отобранные по датам для поля tax_date(Дата НДФЛ)
-                        def incomesByTaxDate =  ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, startDate, endDate)
-
+                        def incomesByTaxDate = ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, startDate, endDate)
+                        Date firstDateOfMarchOfNextPeriod = getFirstMarchOfNextPeriod(endDate)
                         СумИтНалПер(СумДохОбщ: ScriptUtils.round(getSumDohod(ndflPersonIncomesAll), 2),
                                 НалБаза: ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2),
                                 НалИсчисл: getNalIschisl(ndflPersonIncomesAll),
                                 АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
-                                НалУдерж: getNalUderzh(priznakF, incomesByTaxDate),
-                                НалПеречисл: getNalPerechisl(priznakF, incomesByTaxDate),
-                                НалУдержЛиш: getNalUderzhLish(priznakF, incomesByTaxDate),
-                                НалНеУдерж: getNalNeUderzh(priznakF, incomesByTaxDate)) {
+                                НалУдерж: getNalUderzh(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
+                                НалПеречисл: getNalPerechisl(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
+                                НалУдержЛиш: getNalUderzhLish(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
+                                НалНеУдерж: getNalNeUderzh(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod)) {
 
                             if (np.status == "6") {
                                 ndflPersonPrepayments.each { prepayment ->
@@ -621,17 +634,19 @@ def findAllIncomes(def ndflPersonId, def startDate, def endDate, priznakF) {
  * @param ndflPersonDeductions
  * @return
  */
-def filterDeductionsByIncomeCode(ndflPersonIncome, def ndflPersonDeductions) {
+def filterDeductionsByIncomeCode(ndflPersonIncomes, def ndflPersonDeductions) {
     def toReturn = []
-    Calendar taxDateCalIncome = new GregorianCalendar();
-    taxDateCalIncome.setTime(ndflPersonIncome.incomeAccruedDate)
+    ndflPersonIncomes.each { ndflPersonIncome ->
+        Calendar taxDateCalIncome = new GregorianCalendar();
+        taxDateCalIncome.setTime(ndflPersonIncome.incomeAccruedDate)
 
-    for (d in ndflPersonDeductions) {
-        Calendar taxDateCalDeduction = new GregorianCalendar();
-        taxDateCalDeduction.setTime(d.incomeAccrued)
-        if (d.incomeCode == ndflPersonIncome.incomeCode && d.operationId == ndflPersonIncome.operationId &&
-                taxDateCalIncome.get(Calendar.MONTH) == taxDateCalDeduction.get(Calendar.MONTH)) toReturn << d
+        for (d in ndflPersonDeductions) {
+            Calendar taxDateCalDeduction = new GregorianCalendar();
+            taxDateCalDeduction.setTime(d.incomeAccrued)
+            if (d.incomeCode == ndflPersonIncome.incomeCode && d.operationId == ndflPersonIncome.operationId &&
+                    taxDateCalIncome.get(Calendar.MONTH) == taxDateCalDeduction.get(Calendar.MONTH) && !toReturn.contains(d)) toReturn << d
 
+        }
     }
     return toReturn
 }
@@ -639,11 +654,11 @@ def filterDeductionsByIncomeCode(ndflPersonIncome, def ndflPersonDeductions) {
 /**
  * Получить авансы для ФЛ за период для доходов с одинаковым номером операции
  * @param ndflPersonId
-* @param startDate
-* @param endDate
-*
-* @return
-*/
+ * @param startDate
+ * @param endDate
+ *
+ * @return
+ */
 def findPrepayments(def ndflPersonId, def startDate, def endDate, priznakF) {
     def toReturn = []
     if (priznakF == "1") {
@@ -755,7 +770,7 @@ def notifPresent(deduction, deductions) {
 def getSumDohod(def rows) {
     def toReturn = new BigDecimal(0)
     rows.each {
-        if (it.incomeAccruedSumm != null) {
+        if (it.incomeAccruedSumm != null && it.incomeAccruedSumm > 0) {
             toReturn = toReturn.add(it.incomeAccruedSumm)
         }
     }
@@ -815,11 +830,11 @@ def getDeductionCurrPeriodSum(def deductions) {
 }
 
 //Вычислить сумму для НалУдерж
-def getNalUderzh(def priznakF, def incomes) {
+def getNalUderzh(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
         incomes.each {
-            if (it.withholdingTax != null) {
+            if (it.withholdingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
                 toReturn += it.withholdingTax
             }
         }
@@ -830,11 +845,11 @@ def getNalUderzh(def priznakF, def incomes) {
 }
 
 //Вычислить сумму для НалПеречисл
-def getNalPerechisl(def priznakF, def incomes) {
+def getNalPerechisl(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
         incomes.each {
-            if (it.taxSumm != null) {
+            if (it.taxSumm != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
                 toReturn += it.taxSumm
             }
         }
@@ -845,11 +860,11 @@ def getNalPerechisl(def priznakF, def incomes) {
 }
 
 //Вычислить сумму для НалУдержЛиш
-def getNalUderzhLish(def priznakF, def incomes) {
+def getNalUderzhLish(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
         incomes.each {
-            if (it.overholdingTax != null) {
+            if (it.overholdingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
                 toReturn += it.overholdingTax
             }
         }
@@ -860,17 +875,17 @@ def getNalUderzhLish(def priznakF, def incomes) {
 }
 
 //Вычислить сумму для НалНеУдерж
-def getNalNeUderzh(priznakF, incomes) {
+def getNalNeUderzh(priznakF, incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
         incomes.each {
-            if (it.notHoldingTax != null) {
+            if (it.notHoldingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
                 toReturn += it.notHoldingTax
             }
         }
     } else if (priznakF == "2") {
         incomes.each {
-            if (it.notHoldingTax != null && it.calculatedTax > 0) {
+            if (it.notHoldingTax != null && it.calculatedTax > 0 && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
                 toReturn += it.notHoldingTax
             }
         }
@@ -878,6 +893,25 @@ def getNalNeUderzh(priznakF, incomes) {
 
     return toReturn
 }
+
+Date getFirstMarchOfNextPeriod(def periodEndDate) {
+    Calendar calendar = new GregorianCalendar()
+    calendar.setTime(periodEndDate)
+    int currYear = calendar.get(Calendar.YEAR)
+    Calendar returnCalendar = new GregorianCalendar();
+    returnCalendar.set(currYear + 1, 02, 01)
+    return returnCalendar.getTime()
+}
+
+def getSumVichOfPeriodCurrSumm(deductions) {
+    def toReturn = []
+    deductions.each {
+        toReturn = toReturn.add(it.periodCurrSumm)
+    }
+    return toReturn
+}
+
+
 
 def getOktmoById(id) {
     def oktmo = OKTMO_CACHE.get(id)
@@ -1080,25 +1114,29 @@ def createForm() {
     Boolean.TRUE, State.ACCEPTED.getId())*/
     // Мапа где значение физлица для каждой пары КПП и ОКТМО
     def ndflPersonsIdGroupedByKppOktmo = [:]
-    pairKppOktmoList.each { pair ->
-        ScriptUtils.checkInterrupted();
-        // Поиск физлиц по КПП и ОКТМО операций относящихся к ФЛ
-        def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString())
-        if (ndflPersons != null && ndflPersons.size() != 0) {
-            if (departmentReportPeriod.correctionDate != null) {
-                def ndflPersonsPicked = []
-                ndflReferencesWithError.each { reference ->
-                    ndflPersons.each { person ->
-                        if (reference.PERSON_ID?.value == person.personId) {
-                            ndflPersonsPicked << person
+    if (!allDeclarationData.isEmpty()) {
+        pairKppOktmoList.each { pair ->
+            ScriptUtils.checkInterrupted();
+            // Поиск физлиц по КПП и ОКТМО операций относящихся к ФЛ
+
+            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString())
+            if (ndflPersons != null && ndflPersons.size() != 0) {
+                if (departmentReportPeriod.correctionDate != null) {
+                    def ndflPersonsPicked = []
+                    ndflReferencesWithError.each { reference ->
+                        ndflPersons.each { person ->
+                            if (reference.PERSON_ID?.value == person.personId) {
+                                ndflPersonsPicked << person
+                            }
                         }
                     }
+                    ndflPersons = ndflPersonsPicked
                 }
-                ndflPersons = ndflPersonsPicked
+                addNdflPersons(ndflPersonsIdGroupedByKppOktmo, pair, ndflPersons)
             }
-            addNdflPersons(ndflPersonsIdGroupedByKppOktmo, pair, ndflPersons)
         }
     }
+
 
     //initNdflPersons(ndflPersonsIdGroupedByKppOktmo)
 
@@ -1575,7 +1613,7 @@ def createRowColumns() {
 def searchData(def params) {
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)
-    def docs = Файл.Документ.findAll{doc ->
+    def docs = Файл.Документ.findAll { doc ->
         (params['pNumSpravka'] ? StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka']) : true) &&
         (params['lastName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params['lastName']) : true) &&
         (params['firstName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName']) : true) &&
@@ -1585,7 +1623,7 @@ def searchData(def params) {
     }
     // ограничиваем размер выборки
     def result = []
-    docs.each{
+    docs.each {
         if (result.size() < 100)
             result << it
     }
@@ -1621,9 +1659,9 @@ def createSpecificReport() {
 def filterData(params) {
     def xml = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlParser().parseText(xml)
-    Файл.Документ.each{ doc ->
+    Файл.Документ.each { doc ->
         if (doc.@НомСпр != params.pNumSpravka) {
-            doc.replaceNode{}
+            doc.replaceNode {}
         }
     }
     def result = XmlUtil.serialize(Файл)
