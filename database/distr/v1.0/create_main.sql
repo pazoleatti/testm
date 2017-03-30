@@ -2121,16 +2121,17 @@ comment on column ref_book_person.old_status is 'Старый статус за�
 
 create table ref_book_id_doc
 (
-  id number(18) not null,
-  record_id     number(18)          not null,
-  version       date                not null,
-  status        number(1) default 0 not null,
-  person_id     number(18),
-  doc_id        number(18),
-  doc_number    varchar2(25 char),
-  issued_by     varchar2(255 char),
-  issued_date   date,
-  inc_rep       number(1)
+  id                  number(18) not null,
+  record_id           number(18)          not null,
+  version             date                not null,
+  status              number(1) default 0 not null,
+  person_id           number(18),
+  doc_id              number(18),
+  doc_number          varchar2(25 char),
+  issued_by           varchar2(255 char),
+  issued_date         date,
+  inc_rep             number(1),
+  duplicate_record_id number(18)
 );
 
 comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';
@@ -2144,6 +2145,7 @@ comment on column ref_book_id_doc.doc_number is 'Серия и номер док
 comment on column ref_book_id_doc.issued_by is 'Кем выдан документ';
 comment on column ref_book_id_doc.issued_date is 'Дата выдачи';
 comment on column ref_book_id_doc.inc_rep is 'Включается в отчетность';
+comment on column ref_book_id_doc.duplicate_record_id is 'Идентификатор ФЛ - дубля, у которого был скопирован ДУЛ при назначении дубля';
 
 create table ref_book_address
 (
