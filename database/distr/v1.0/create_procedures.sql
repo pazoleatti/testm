@@ -1505,7 +1505,8 @@ as
                     c_index varchar2) is
     /*поиск по всем параметрам*/
     select distinct c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
-           substr(sys_connect_by_path(formalname,','),2) full_addr
+           substr(sys_connect_by_path(formalname,','),2) full_addr,
+           connect_by_isleaf isleaf
       from fias_addrobj c
      where c.currstatus=0 --c.livestatus=1
        and c.regioncode=c_region
@@ -1522,7 +1523,8 @@ as
     union
     /*поиск без учета почтового индекса*/
     select distinct c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
-           substr(sys_connect_by_path(formalname,','),2) full_addr
+           substr(sys_connect_by_path(formalname,','),2) full_addr,
+           connect_by_isleaf isleaf
       from fias_addrobj c
      where c.currstatus=0 --c.livestatus=1
        and c.regioncode=c_region
@@ -1538,7 +1540,8 @@ as
     union
     /*поиск без учета типов объектов*/
     select distinct c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
-           substr(sys_connect_by_path(formalname,','),2) full_addr
+           substr(sys_connect_by_path(formalname,','),2) full_addr,
+           connect_by_isleaf isleaf
       from fias_addrobj c
      where c.currstatus=0 --c.livestatus=1
        and c.regioncode=c_region
@@ -1625,7 +1628,7 @@ as
                         p_post_index varchar2) return TTblFiasAddr pipelined;
   
   -- Проверить существование элемента адреса с учетом родительского элемента
-  function CheckAddrElement(p_region varchar2,p_check_element varchar2,p_parent_element varchar2,p_check_type varchar2 default '') return number;
+  function CheckAddrElement(p_region varchar2,p_check_element varchar2,p_parent_element varchar2,p_check_type varchar2 default '',p_leaf number default 1) return number;
   
   -- Выполнить проверку на полное совпадение с ФИАС адресов, указанных в декларации
   -- возвращается курсор на таблицу типа TTblCheckAddrByFias
@@ -1638,6 +1641,7 @@ as
 end fias_pkg;
 /
 show errors;
+
 create or replace package body fias_pkg as
   
   cursor ndfl_rec(c_ndfl number) is
@@ -1780,14 +1784,16 @@ begin
   -------------------------------------------------------------------------------------------------------------
   -- Проверить существование элемента адреса с учетом родительского элемента
   -------------------------------------------------------------------------------------------------------------
-  function CheckAddrElement(p_region varchar2,p_check_element varchar2,p_parent_element varchar2,p_check_type varchar2 default '') return number
+  function CheckAddrElement(p_region varchar2,p_check_element varchar2,p_parent_element varchar2,
+                            p_check_type varchar2 default '',p_leaf number default 1) return number
   is
     v_result number;
   begin
     select decode(count(*),0,0,1) into v_result
       from (
             select c.id,c.regioncode,c.formalname,c.shortname,c.aolevel,c.currstatus,c.postalcode,
-                   substr(sys_connect_by_path(formalname,';'),2) full_addr
+                   substr(sys_connect_by_path(formalname,';'),2) full_addr,
+                   connect_by_isleaf isleaf
               from (select * from fias_addrobj t
                     where t.regioncode=p_region
                       and t.livestatus=1
@@ -1796,7 +1802,8 @@ begin
            connect by prior c.aoid=c.parentguid
            ) f 
      where replace(lower(f.formalname),' ','')=replace(lower(p_check_element),' ','')
-       and instr(full_addr,p_parent_element)>0;
+       and instr(lower(full_addr),lower(p_parent_element))>0
+       and isleaf=p_leaf;
     
     return v_result;
   end;
@@ -1827,6 +1834,7 @@ begin
                                                          trim(lower(tab.area_type)),trim(lower(tab.city_type)),trim(lower(tab.loc_type)),trim(lower(tab.street_type)),tab.post_index)) f
                        where lower(f.full_addr||',')=lower(nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||nvl2(tab.loc_fname,tab.loc_fname||',','')||
                                                            nvl2(tab.street_fname,tab.street_fname||',',''))
+                         and f.isleaf=1
                          ) fa_id
                 from (
                       select n.id,
@@ -1877,26 +1885,10 @@ begin
              (select decode(count(*),0,0,1) 
                 from fias_addrobj f 
                where f.regioncode=tab.region_code) chk_region,
-             fias_pkg.CheckAddrElement(tab.region_code,tab.area_fname,',') chk_area,
-             fias_pkg.CheckAddrElement(tab.region_code,tab.city_fname,nvl2(tab.area_fname,tab.area_fname||';',';')) chk_city,
-             fias_pkg.CheckAddrElement(tab.region_code,tab.loc_fname,nvl2(tab.area_fname,tab.area_fname||';',';')) chk_loc,
-             fias_pkg.CheckAddrElement(tab.region_code,tab.street_fname,nvl2(tab.area_fname,tab.area_fname||';','')||nvl2(tab.city_fname,tab.city_fname||';','')||nvl2(tab.loc_fname,tab.loc_fname||';','')) chk_street
-             /*(select decode(count(*),0,0,1) 
-                from fias_addrobj f 
-               where f.regioncode=tab.region_code 
-                 and replace(lower(f.formalname),' ','')=replace(lower(tab.area_fname),' ','')) chk_area,
-             (select decode(count(*),0,0,1) 
-                from fias_addrobj f 
-               where f.regioncode=tab.region_code 
-                 and replace(lower(f.formalname),' ','')=replace(lower(tab.city_fname),' ','')) chk_city,
-             (select decode(count(*),0,0,1) 
-                from fias_addrobj f 
-               where f.regioncode=tab.region_code 
-                 and replace(lower(f.formalname),' ','')=replace(lower(tab.loc_fname),' ','')) chk_loc,
-             (select decode(count(*),0,0,1) 
-                from fias_addrobj f 
-               where f.regioncode=tab.region_code 
-                 and replace(lower(f.formalname),' ','')=replace(lower(tab.street_fname),' ','')) chk_street*/
+             fias_pkg.CheckAddrElement(tab.region_code,tab.area_fname,',','',0) chk_area,
+             fias_pkg.CheckAddrElement(tab.region_code,tab.city_fname,nvl2(tab.area_fname,tab.area_fname||';',';'),'',tab.city_leaf) chk_city,
+             fias_pkg.CheckAddrElement(tab.region_code,tab.loc_fname,nvl2(tab.area_fname,tab.area_fname||';',';'),'',tab.loc_leaf) chk_loc,
+             fias_pkg.CheckAddrElement(tab.region_code,tab.street_fname,nvl2(tab.area_fname,tab.area_fname||';','')||nvl2(tab.city_fname,tab.city_fname||';','')||nvl2(tab.loc_fname,tab.loc_fname||';',''),'',1) chk_street
         from (select n.id,
                      n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
                      fias_pkg.GetParseType(3,n.area) area_type,
@@ -1916,7 +1908,13 @@ begin
                      fias_pkg.GetParseType(7,n.street) street_type,
                      fias_pkg.GetParseName(7,n.street) street_fname,
                      fias_pkg.GetParseType(6,n.locality) loc_type,
-                     fias_pkg.GetParseName(6,n.locality) loc_fname
+                     fias_pkg.GetParseName(6,n.locality) loc_fname,
+                     case when n.street is null and n.city is not null then 1
+                          else 0
+                     end city_leaf,
+                     case when n.street is null and n.locality is not null then 1
+                          else 0
+                     end loc_leaf
                 from ndfl_person n
                where n.declaration_data_id=p_declaration) tab;
 
