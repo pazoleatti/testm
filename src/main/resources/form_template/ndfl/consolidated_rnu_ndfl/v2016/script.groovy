@@ -1383,11 +1383,11 @@ def getRefTaxpayerStatusCode() {
  * @return
  */
 def getRefIncomeCode() {
-    // Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE.CODE>
+    // Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
     def mapResult = [:]
     def refBookMap = getRefBook(REF_BOOK_INCOME_CODE_ID)
     refBookMap.each { refBook ->
-        mapResult.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+        mapResult.put(refBook?.id?.numberValue, refBook)
     }
     return mapResult;
 }
@@ -1407,7 +1407,6 @@ def getRefIncomeType() {
             incomeTypeIdList = []
         }
         incomeTypeIdList.add(refBook?.INCOME_TYPE_ID?.referenceValue)
-//        logger.info("getRefIncomeType $mark ${refBook?.INCOME_TYPE_ID?.referenceValue}")
         mapResult.put(mark, incomeTypeIdList)
     }
     return mapResult
@@ -1759,7 +1758,7 @@ def checkDataReference(
     def taxpayerStatusMap = getRefTaxpayerStatusCode()
     logger.info(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
 
-    // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE.CODE>
+    // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
     def incomeCodeMap = getRefIncomeCode()
     logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
 
@@ -2164,7 +2163,11 @@ def checkDataReference(
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
         // Спр5 Код вида дохода (Необязательное поле)
-        if (ndflPersonIncome.incomeCode != null && !incomeCodeMap.find { key, value -> value == ndflPersonIncome.incomeCode }) {
+        if (ndflPersonIncome.incomeCode != null && !incomeCodeMap.find { key, value ->
+            value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
+                    ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
+                    ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
+        }) {
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                     "Доход.Вид.Код (Графа 4)='${ndflPersonIncome.incomeCode ?: ""}'")
             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода дохода справочнику", fioAndInp, pathError,
@@ -2173,13 +2176,14 @@ def checkDataReference(
 
         /*
         Спр6
+        При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
+
         Доход.Вид.Признак (Графа 5) - (Необязательное поле)
         incomeTypeMap <REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
 
         Доход.Вид.Код (Графа 4) - (Необязательное поле)
-        incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE.CODE>
+        incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
          */
-        // При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
         if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeType)) {
             List<Long> incomeTypeIdList = incomeTypeMap.get(ndflPersonIncome.incomeType)
             if (incomeTypeIdList == null || incomeTypeIdList.isEmpty()) {
@@ -2189,13 +2193,17 @@ def checkDataReference(
                         "'Доход.Вид.Признак (Графа 5)' не соответствует справочнику '$R_INCOME_TYPE'")
             } else {
                 if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode)) {
-                    List<String> incomeCodeList = []
+                    def incomeCodeRefList = []
                     incomeTypeIdList.each { incomeTypeId ->
-                        String incomeCode = incomeCodeMap.get(incomeTypeId)
-                        incomeCodeList.add(incomeCode)
-//                        logger.info("Доход.Вид.Признак incomeTypeId=$incomeTypeId incomeCode=$incomeCode ndflPersonIncome.incomeCode=${ndflPersonIncome.incomeCode}")
+                        def incomeCodeRef = incomeCodeMap.get(incomeTypeId)
+                        incomeCodeRefList.add(incomeCodeRef)
                     }
-                    if (!incomeCodeList.contains(ndflPersonIncome.incomeCode)) {
+                    def incomeCodeRef = incomeCodeRefList.find {
+                        it.CODE?.stringValue == ndflPersonIncome.incomeCode &&
+                                ndflPersonIncome.incomeAccruedDate >= it.record_version_from?.dateValue &&
+                                ndflPersonIncome.incomeAccruedDate <= it.record_version_to?.dateValue
+                    }
+                    if (!incomeCodeRef) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "Доход.Вид.Код (Графа 4)='${ndflPersonIncome.incomeCode}', Доход.Вид.Признак (Графа 5)='${ndflPersonIncome.incomeType ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода и признака дохода справочнику", fioAndInp, pathError,
