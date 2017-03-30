@@ -15,7 +15,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -43,9 +45,11 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         }
         NotificationsFilterData filter = action.getFilter();
         filter.setUserId(user.getId());
-        //filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
+		Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
+		receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null));
+		receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(user, TaxType.PFR, null, null));
+        filter.setReceiverDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         filter.setUserRoleIds(userRoles);
-
 
 		List<NotificationTableRow> rows = new ArrayList<NotificationTableRow>();
 		PagingResult<Notification> result = notificationService.getByFilter(filter);
