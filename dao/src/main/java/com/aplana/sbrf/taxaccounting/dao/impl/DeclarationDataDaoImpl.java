@@ -713,7 +713,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
                     "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
                 "where " +
-                    "bd.name = :fileName " +
+                    "lower(bd.name) = lower(:fileName) " +
                     (fileTypeId == null ? "" : "and ddf.file_type_id = :fileTypeId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource();
