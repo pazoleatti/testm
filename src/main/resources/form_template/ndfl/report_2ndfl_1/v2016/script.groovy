@@ -397,8 +397,8 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                                     КодДоход: incomeKey,
                                                     СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2)
                                             ) {
-                                                def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey).get(0), deductionsSelectedForDeductionsInfo)
-                                                deductionsFilteredForCurrIncome.each { group ->
+                                                def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesWhereIncomeAccruedSumGreaterZero, deductionsSelectedForDeductionsInfo)
+                                                 deductionsFilteredForCurrIncome.each { group ->
                                                     def deductionsForSum = []
                                                     group.each {
                                                         if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
@@ -904,14 +904,12 @@ Date getFirstMarchOfNextPeriod(def periodEndDate) {
 }
 
 def getSumVichOfPeriodCurrSumm(deductions) {
-    def toReturn = []
+    def toReturn = new BigDecimal(0)
     deductions.each {
         toReturn = toReturn.add(it.periodCurrSumm)
     }
     return toReturn
 }
-
-
 
 def getOktmoById(id) {
     def oktmo = OKTMO_CACHE.get(id)
