@@ -3605,7 +3605,7 @@ class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
         calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
         // находим последний день месяца
-        calendar7.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))
         Date workDay = calendar7.getTime()
         // если последний день месяца приходится на выходной, то следующий первый рабочий день
         int offset = 0
