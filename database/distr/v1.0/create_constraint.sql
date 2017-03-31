@@ -428,6 +428,7 @@ alter table ndfl_references add constraint pk_ndfl_references primary key(id);
 --foreign keys
 alter table ndfl_references add constraint fk_ndfl_refers_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
 alter table ndfl_references add constraint fk_ndfl_refers_person foreign key(person_id) references ref_book_person(id);
+alter table ndfl_references add constraint fk_ndfl_person_id foreign key (ndfl_person_id) references ndfl_person(id) on delete set null;
 
 --------------------------------------------------------------------------------------------------------------------------
 -- Журналирование действий пользователей
