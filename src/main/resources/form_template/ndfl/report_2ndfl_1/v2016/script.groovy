@@ -326,15 +326,19 @@ def buildXml(def writer, boolean isForSpecificReport) {
                             Отчество: np.middleName)
                     УдЛичнФЛ(КодУдЛичн: np.idDocType,
                             СерНомДок: np.idDocNumber)
-                    АдрМЖРФ(Индекс: np.postIndex,
-                            КодРегион: np.regionCode,
-                            Район: np.area,
-                            Город: np.city,
-                            НаселПункт: np.locality,
-                            Улица: np.street,
-                            Дом: np.house,
-                            Корпус: np.building,
-                            Кварт: np.flat)
+                    if (np.postIndex != null || np.regionCode != null || np.area != null || np.city != null ||
+                            np.locality != null || np.street != null || np.house != null || np.building != null ||
+                            np.flat != null) {
+                        АдрМЖРФ(Индекс: np.postIndex,
+                                КодРегион: np.regionCode,
+                                Район: np.area,
+                                Город: np.city,
+                                НаселПункт: np.locality,
+                                Улица: np.street,
+                                Дом: np.house,
+                                Корпус: np.building,
+                                Кварт: np.flat)
+                    }
                     if (np.countryCode != null) {
                         АдрИНО(КодСтр: np.countryCode,
                                 АдрТекст: np.address)
