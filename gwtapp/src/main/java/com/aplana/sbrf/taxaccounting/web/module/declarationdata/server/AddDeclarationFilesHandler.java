@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AddDeclarationFileAction;
@@ -38,15 +39,14 @@ public class AddDeclarationFilesHandler extends AbstractActionHandler<AddDeclara
 
 	@Autowired
 	private BlobDataService blobDataService;
-
 	@Autowired
 	private SecurityService securityService;
-
     @Autowired
     private DepartmentService departmentService;
-
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private DeclarationDataService declarationDataService;
 
 	public AddDeclarationFilesHandler() {
 		super(AddDeclarationFileAction.class);
@@ -54,11 +54,17 @@ public class AddDeclarationFilesHandler extends AbstractActionHandler<AddDeclara
 
 	@Override
 	public AddDeclarationFileResult execute(AddDeclarationFileAction action, ExecutionContext context) throws ActionException {
+        AddDeclarationFileResult result = new AddDeclarationFileResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationData().getId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationData().getId());
+            return result;
+        }
+
         RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
         Long defaultFileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + DEFAULT_FILE_TYPE_CODE + "").get(0);
         Map<String, RefBookValue> recordData = provider.getRecordData(defaultFileTypeId);
 
-        AddDeclarationFileResult result = new AddDeclarationFileResult();
         TAUser user = securityService.currentUserInfo().getUser();
         String userName = user.getName();
         String userDepartmentName = departmentService.getParentsHierarchyShortNames(user.getDepartmentId());

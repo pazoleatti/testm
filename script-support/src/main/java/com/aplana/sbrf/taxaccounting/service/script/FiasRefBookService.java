@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckAddressResult;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,31 +13,19 @@ import java.util.Map;
 public interface FiasRefBookService {
 
     /**
-     * Найти адресообразующий объект
-     *
-     * @param regionCode код региона (обязательный параметр)
-     * @param area       район
-     * @param city       город
-     * @param locality   населенный пункт
-     * @param street     улица
-     * @return адресообразующий объект справочника
-     */
-    List<AddressObject> findAddress(String regionCode, String area, String city, String locality, String street);
-
-    /**
-     * Найти регион по коду
-     *
-     * @param regionCode код региона
-     * @return адресообразующий объект справочника
-     */
-    AddressObject findRegionByCode(String regionCode);
-
-    /**
      * Возвращает все найденные в справочнике адреса по записям НФ
      *
      * @param declarationDataId
      * @return
      */
     Map<Long, Long> checkAddressByFias(Long declarationDataId);
+
+    /**
+     * Возврашает найденые елементы адреса, используется для определения какой элемент не найден в справочнике
+     *
+     * @param declarationDataId
+     * @return
+     */
+    Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationDataId);
 
 }

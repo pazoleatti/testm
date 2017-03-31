@@ -441,7 +441,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                 ")\n" +
                 "select us.id, us.name, us.login, us.email, us.is_active as active, roless.role_concat as role_names, asnu.asnu_concat as asnu_names, us.department_id as dep_id, deps.path\n" +
                 "from sec_user us \n" +
-                "join arg_rls roless on roless.user_id=us.id \n" +
+                "left join arg_rls roless on roless.user_id=us.id \n" +
                 "left join arg_asnu asnu on asnu.user_id=us.id \n" +
                 "join deps deps on us.department_id=deps.dep_id";
     }

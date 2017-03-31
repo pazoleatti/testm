@@ -35,7 +35,6 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
 
     private static final Log LOG = LogFactory.getLog(DeclarationDataDaoImpl.class);
-    private static final String DECLARATION_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
     private final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -714,7 +713,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
                     "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
                 "where " +
-                    "bd.name = :fileName " +
+                    "lower(bd.name) = lower(:fileName) " +
                     (fileTypeId == null ? "" : "and ddf.file_type_id = :fileTypeId ");
 
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -761,6 +760,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Integer>();
+        }
+    }
+
+    @Override
+    public boolean existDeclarationData(long declarationDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("declarationDataId", declarationDataId);
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject("SELECT id FROM declaration_data WHERE id = :declarationDataId", values, Long.class) > 0;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
         }
     }
 }

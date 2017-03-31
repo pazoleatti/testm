@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.gwtplatform.dispatch.shared.Result;
-
-public class ChangeStatusEDDeclarationDataResult implements Result {
+public class ChangeStatusEDDeclarationDataResult extends DeclarationDataResult {
     private String uuid;
 
     public String getUuid() {

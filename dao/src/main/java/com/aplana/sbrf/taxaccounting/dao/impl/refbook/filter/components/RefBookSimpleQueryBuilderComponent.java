@@ -18,8 +18,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
-import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -247,20 +247,71 @@ public class RefBookSimpleQueryBuilderComponent {
 		}
 	}
 
-	private static final String WITH_STATEMENT_INTERVAL =
-			"WITH t AS (SELECT r.record_id, r.version, r.status FROM {0} " +
-			"r WHERE r.status >= 0 AND r.version <= ? " +  /* берем записи, которые действуют на дату окончания периода*/
-			"AND NOT exists (SELECT 1 FROM {0} " +  /* отсеиваем записи, которые перестали действовать на дату начала периода*/
-			"s WHERE s.record_id = r.record_id AND s.status IN (-1, 2) AND s.version < ?))";
-	private static final String WITH_STATEMENT2 =
-			"with t as (select version, record_id from {0} r where status = 0 and version <= ?) ";
-	public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
+	/*
+     Пример запроса:
+
+     SELECT * FROM (SELECT r.id, r.record_id, r.version, COALESCE(
+                  (SELECT MIN(VERSION) FROM get_records_test w
+                   WHERE w.version > r.version AND w.record_id = r.record_id
+                   AND w.status IN (0, 2)), to_date('31.12.2099', 'dd.mm.yyyy')) end_version,
+                   r.a, r.b
+     FROM get_records_test r
+     WHERE r.status = 0 AND r.version <= TO_DATE('01.09.2016', 'dd.mm.yyyy'))
+     WHERE end_version > TO_DATE('01.06.2016', 'dd.mm.yyyy')
+	 */
+
+	/**
+	 * Формирует запрос для выборки версии записей справочника за интервал времени
+	 * @param refBook справочник, для которого формируется запрос
+	 * @param versionFrom начала периода
+	 * @param versionTo конец периода
+	 * @param filter условия фильтрации (<strong>пока не реализовано</strong>)
+	 * @return
+	 */
+	public PreparedStatementData psGetRecordsQuery(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
 		PreparedStatementData ps = new PreparedStatementData();
-		//ps.appendQuery(MessageFormat.format(WITH_STATEMENT_INTERVAL, refBook.getTableName()));
-		ps.appendQuery(MessageFormat.format(WITH_STATEMENT2, refBook.getTableName()));
-		ps.addParam(versionTo);
-		//ps.addParam(versionFrom);
-		return psGetRecordsQuery(refBook, ps, true, null, filter, pagingParams, false, false);
+		ps.appendQuery("SELECT * FROM (SELECT r.id ");
+		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+		ps.appendQuery(", r.record_id ");
+		ps.appendQuery(RefBook.BUSINESS_ID_ALIAS);
+		ps.appendQuery(", r.version ");
+		ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
+		ps.appendQuery(", COALESCE( ");
+		ps.appendQuery("(SELECT MIN(version) FROM ");
+		ps.appendQuery(refBook.getTableName());
+		ps.appendQuery(" w WHERE w.version > r.version AND w.record_id = r.record_id ");
+		ps.appendQuery("AND w.status IN (0, 2)), :maxDate) ");
+		ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+		// добавляем атрибуты
+		for (RefBookAttribute attribute : refBook.getAttributes()) {
+			if (!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS) &&
+					!attribute.getAlias().equalsIgnoreCase(RefBook.BUSINESS_ID_ALIAS) &&
+					!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_VERSION_FROM_ALIAS) &&
+					!attribute.getAlias().equalsIgnoreCase(RefBook.RECORD_VERSION_TO_ALIAS)) {
+				ps.appendQuery(", r.");
+				ps.appendQuery(attribute.getAlias());
+			}
+		}
+		ps.appendQuery(" FROM ");
+		ps.appendQuery(refBook.getTableName());
+		ps.appendQuery(" r WHERE r.status = 0 AND r.version <= :versionTo) ");
+		ps.appendQuery("WHERE ");
+		ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+		ps.appendQuery(" > :versionFrom");
+
+		ps.addNamedParam("versionFrom", versionFrom);
+		ps.addNamedParam("versionTo", versionTo);
+		Calendar maxDate = Calendar.getInstance();
+		maxDate.set(2099, 11, 31);
+		ps.addNamedParam("maxDate", maxDate.getTime());
+
+		/*PreparedStatementData filterPS = new PreparedStatementData();
+		SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+		simpleFilterTreeListener.setRefBook(refBook);
+		simpleFilterTreeListener.setPs(filterPS);
+
+		Filter.getFilterQuery(filter, simpleFilterTreeListener);*/
+		return ps;
 	}
 
 	public PreparedStatementData psGetRecordsQuery(RefBook refBook, PreparedStatementData ps, boolean checkVersion, RefBookAttribute sortAttribute,

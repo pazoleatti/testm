@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult;
-import com.gwtplatform.dispatch.shared.Result;
 
-public class PrepareSubreportResult implements Result {
+public class PrepareSubreportResult extends DeclarationDataResult {
     private static final long serialVersionUID = 1913464641303440641L;
 
     private PrepareSpecificReportResult prepareSpecificReportResult;

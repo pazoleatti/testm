@@ -47,17 +47,15 @@ public class DeclarationListView extends
 		DeclarationListPresenter.MyView {
 
     public static final String DECLARATION_HEADER = "Список налоговых форм";
-    public static final String DECLARATION_HEADER_D = "Список уведомлений";
+    public static final String DECLARATION_HEADER_R = "Отчетность";
     public static final String DECLARATION_CREATE = "Создать налоговую форму...";
     public static final String DECLARATION_CREATE_D = "Создать уведомление...";
     public static final String DECLARATION_CREATE_TITLE = "Создание налоговой формы";
-    public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
     public static final String DECLARATION_KIND_TITLE = "Тип налоговой формы";
     public static final String DECLARATION_DATA_ID_TITLE = "Номер формы";
     public static final String DECLARATION_DATA_CREATION_DATE_TITLE = "Дата и время создания формы";
     public static final String DECLARATION_DATA_IMPORT_TF_TITLE = "Создал";
     public static final String DECLARATION_TYPE_TITLE = "Вид налоговой формы";
-    public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
     public static final String DEPARTMENT_TITLE = "Подразделение";
     public static final String TAX_ORGAN_CODE_TITLE = "Код НО";
     public static final String TAX_ORGAN_CODE_KPP_TITLE = "КПП";
@@ -573,24 +571,18 @@ public class DeclarationListView extends
 	@Override
 	public void updateTitle(TaxType taxType){
 		titleDesc.setText(taxType.getName());
-        if (!taxType.equals(TaxType.DEAL)) {
-            declarationHeader.setText(DECLARATION_HEADER);
-            declarationTable.clearColumnWidth(declarationTypeColumn);
-            declarationTable.clearColumnWidth(reportPeriodColumn);
-            create.setText(DECLARATION_CREATE);
-            create.setTitle(DECLARATION_CREATE_TITLE);
-            declarationTypeHeader.setTitle(DECLARATION_TYPE_TITLE);
-            reportPeriodHeader.setTitle(PERIOD_TITLE);
+		if (!getUiHandlers().getIsReports()) {
             declarationHeader.setText(DECLARATION_HEADER);
         } else {
-            create.setText(DECLARATION_CREATE_D);
-            create.setTitle(DECLARATION_CREATE_TITLE_D);
-            declarationTypeHeader.setTitle(DECLARATION_TYPE_TITLE_D);
-            reportPeriodHeader.setTitle("");
-            declarationHeader.setText(DECLARATION_HEADER_D);
-            reportPeriodHeader.setTitle(PERIOD_TITLE);
-            declarationTable.clearColumnWidth(reportPeriodColumn);
+            declarationHeader.setText(DECLARATION_HEADER_R);
         }
+        declarationTable.clearColumnWidth(declarationTypeColumn);
+        declarationTable.clearColumnWidth(reportPeriodColumn);
+        create.setText(DECLARATION_CREATE);
+        create.setTitle(DECLARATION_CREATE_TITLE);
+        declarationTypeHeader.setTitle(DECLARATION_TYPE_TITLE);
+        reportPeriodHeader.setTitle(PERIOD_TITLE);
+
         declarationTable.redrawHeaders();
 	}
 

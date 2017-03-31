@@ -41,8 +41,6 @@ public class LockDataServiceImpl implements LockDataService {
 	@Autowired
 	private TAUserDao userDao;
     @Autowired
-    AsyncInterruptionManager asyncInterruptionManager;
-    @Autowired
     private NotificationService notificationService;
     @Autowired
     private TransactionHelper tx;

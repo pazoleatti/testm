@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
@@ -27,9 +25,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	interface Binder extends UiBinder<Widget, DeclarationDataView> { }
 
-    public static final String DATE_BOX_TITLE = "Дата формирования налоговой формы";
-    public static final String DATE_BOX_TITLE_D = "Дата формирования уведомления";
-    private static final int TABLE_TOP3 = 105;
+    public static final String DATE_BOX_TITLE = "Дата и время создания формы";
+    public static final String DATE_BOX_TITLE_D = "Дата и время создания формы";
+    private static final int TABLE_TOP3 = 107;
     private static final int TABLE_TOP4 = 124;
 
 	@UiField
@@ -46,6 +44,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	Button checkButton;
 	@UiField
 	Button changeStatusEDButton;
+    @UiField
+    Button addErrorButton;
 	@UiField
 	Anchor returnAnchor;
 	@UiField
@@ -80,8 +80,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiField
     Label stateED, stateEDLabel;
 
-    private Label kpp, oktmo, taxOrganCode,asnu, createUserName, createDate;
-    private Label kppLabel, oktmoLabel, taxOrganCodeLabel, asnuLabel, createUserNameLabel, createDateLabel;
+    @UiField
+    Label createUserName, createUserNameLabel;
+
+    private Label kpp, oktmo, taxOrganCode,asnu;
+    private Label kppLabel, oktmoLabel, taxOrganCodeLabel, asnuLabel;
 
 	@UiField
     PdfViewerWidget pdfViewer;
@@ -91,10 +94,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     HTML noPdfLabel;
 
     @UiField
-    Label dateBoxLabel;
+    Label dateBoxLabel, createDate;
 
-	@UiField
-    DateMaskBoxPicker dateBox;
     @UiField
     LinkButton sources;
     @UiField
@@ -247,18 +248,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         asnu = new Label("");
         asnu.addStyleName("headerAttr");
         asnu.addStyleName("depAttr");
-
-        createUserNameLabel = new Label("Создал:");
-        createUserNameLabel.addStyleName("headerAttrName");
-        createUserName = new Label("");
-        createUserName.addStyleName("headerAttr");
-        createUserName.addStyleName("depAttr");
-
-        createDateLabel = new Label("Дата и время создания формы:");
-        createDateLabel.addStyleName("headerAttrName");
-        createDate = new Label("");
-        createDate.addStyleName("headerAttr");
-        createDate.addStyleName("depAttr");
     }
 
     @Override
@@ -291,7 +280,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void showRecalculateButton(boolean show) {
 		recalculateButton.setVisible(show);
-		dateBox.setEnabled(show);
 	}
 
     @Override
@@ -415,15 +403,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             rightAttrPanel.add(asnu);
         }
 
-        leftAttrPanel.add(createUserNameLabel);
-        rightAttrPanel.add(createUserName);
-        leftAttrPanel.add(createDateLabel);
-        rightAttrPanel.add(createDate);
-
         stateEDLabel.setVisible(isVisibleStateED);
         stateED.setVisible(isVisibleStateED);
 
-        int propertyBlockSize = 2 + (isVisibleKpp?1:0) +
+        int propertyBlockSize = (isVisibleKpp?1:0) +
                 (isVisibleOktmo?1:0) +
                 (isVisibleTaxOrgan?1:0) +
                 (isVisibleAsnu?1:0);
@@ -472,19 +455,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		pdfViewer.setPages(pdf);
 	}
 
-	@Override
-	public void setDocDate(Date date) {
-		dateBox.setValue(date);
-	}
-
 	@UiHandler("recalculateButton")
 	public void onRecalculateButtonClicked(ClickEvent event){
-        if (dateBox.getValue() == null) {
-            Dialog.warningMessage("Введите дату.");
-        } else {
-            if (getUiHandlers() != null) {
-                getUiHandlers().onRecalculateClicked(dateBox.getValue(), false, false);
-            }
+        if (getUiHandlers() != null) {
+            getUiHandlers().onRecalculateClicked(new Date(), false, false);
         }
     }
 
@@ -511,6 +485,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiHandler("checkButton")
     public void onCheck(ClickEvent event){
         getUiHandlers().check(false);
+    }
+
+	@UiHandler("addErrorButton")
+	public void onAddErrorButton(ClickEvent event) {
+        getUiHandlers().addError();
     }
 
     @UiHandler("viewPdf")
@@ -549,7 +528,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 printToXml.setVisible(true);
                 printAnchor.setEnabled(true);
                 timerXML.cancel();
-                timerSpecific.scheduleRepeating(10000);
+                timerSpecific.scheduleRepeating(4000);
                 timerSpecific.run();
             } else {
                 viewPdf.setVisible(false);
@@ -581,21 +560,21 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public void startTimerReport(DeclarationDataReportType type) {
         if (DeclarationDataReportType.EXCEL_DEC.equals(type)) {
-            timerExcel.scheduleRepeating(10000);
+            timerExcel.scheduleRepeating(4000);
             timerExcel.run();
         } else if (DeclarationDataReportType.XML_DEC.equals(type)) {
-            timerXML.scheduleRepeating(10000);
+            timerXML.scheduleRepeating(4000);
             timerXML.run();
         } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
             if (isVisiblePDF) {
-                timerPDF.scheduleRepeating(10000);
+                timerPDF.scheduleRepeating(4000);
                 timerPDF.run();
             }
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
-            timerAccept.scheduleRepeating(10000);
+            timerAccept.scheduleRepeating(4000);
             timerAccept.run();
         } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
-            timerCheck.scheduleRepeating(10000);
+            timerCheck.scheduleRepeating(4000);
             timerCheck.run();
         }
     }
@@ -693,5 +672,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiHandler("filesComments")
     public void onFilesCommentsClicked(ClickEvent event){
         getUiHandlers().onFilesCommentsDialog();
+    }
+
+    @Override
+    public Button getAddErrorButton() {
+        return addErrorButton;
     }
 }

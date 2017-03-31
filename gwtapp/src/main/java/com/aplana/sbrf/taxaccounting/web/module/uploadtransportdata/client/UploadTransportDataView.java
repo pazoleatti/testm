@@ -11,10 +11,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -33,6 +30,9 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
     private static final String ERROR_STRING_1 = "error";
     private static final String ERROR_STRING_2 = "<pre>error";
     private static final String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
+
+    @UiField
+    HorizontalPanel uploadPanel, loadPanel;
 
     @UiField
     FileUpload uploader;
@@ -93,5 +93,15 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
     @UiHandler("loadButton")
     void onLoadClick(ClickEvent event) {
         getUiHandlers().onLoadAll(false);
+    }
+
+    @Override
+    public void showUpload(boolean show) {
+        uploadPanel.setVisible(show);
+    }
+
+    @Override
+    public void showLoad(boolean show) {
+        loadPanel.setVisible(show);
     }
 }

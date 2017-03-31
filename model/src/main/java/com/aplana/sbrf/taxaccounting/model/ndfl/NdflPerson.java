@@ -4,7 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Данные о физическом лице - получателе дохода
@@ -106,6 +109,13 @@ public class NdflPerson extends IdentityObject<Long> {
     // Cведения о доходах в виде авансовых платежей
     private List<NdflPersonPrepayment> prepayments;
 
+    public NdflPerson(List<NdflPersonIncome> incomes, List<NdflPersonDeduction> deductions, List<NdflPersonPrepayment> prepayments) {
+        super();
+        this.incomes = incomes;
+        this.deductions = deductions;
+        this.prepayments = prepayments;
+    }
+
     public NdflPerson() {
         super();
         incomes = new ArrayList<NdflPersonIncome>();
@@ -115,7 +125,6 @@ public class NdflPerson extends IdentityObject<Long> {
 
     public static final String TABLE_NAME = "ndfl_person";
     public static final String SEQ = "seq_ndfl_person";
-
 
 
     public static final String[] COLUMNS = {"id", "declaration_data_id", "person_id", "row_num", "inp", "snils", "last_name", "first_name", "middle_name", "birth_day", "citizenship", "inn_np", "inn_foreign", "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city", "locality", "street", "house", "building", "flat", "country_code", "address", "additional_data"};
@@ -128,6 +137,7 @@ public class NdflPerson extends IdentityObject<Long> {
     public Long getDeclarationDataId() {
         return declarationDataId;
     }
+
     public void setDeclarationDataId(Long declarationDataId) {
         this.declarationDataId = declarationDataId;
     }
@@ -135,6 +145,7 @@ public class NdflPerson extends IdentityObject<Long> {
     public Integer getRowNum() {
         return rowNum;
     }
+
     public void setRowNum(Integer rowNum) {
         this.rowNum = rowNum;
     }
@@ -142,6 +153,7 @@ public class NdflPerson extends IdentityObject<Long> {
     public Long getPersonId() {
         return personId;
     }
+
     public void setPersonId(Long personId) {
         this.personId = personId;
     }
@@ -357,6 +369,7 @@ public class NdflPerson extends IdentityObject<Long> {
     public List<NdflPersonPrepayment> getPrepayments() {
         return prepayments != null ? prepayments : Collections.<NdflPersonPrepayment>emptyList();
     }
+
     public void setPrepayments(List<NdflPersonPrepayment> prepayments) {
         this.prepayments = prepayments;
     }
@@ -364,6 +377,7 @@ public class NdflPerson extends IdentityObject<Long> {
     public Long getRecordId() {
         return recordId;
     }
+
     public void setRecordId(Long recordId) {
         this.recordId = recordId;
     }

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CompositeCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
@@ -60,6 +61,7 @@ public class DeclarationDeclarationFilesCommentsPresenter extends PresenterWidge
     private static final String ERROR_MSG = "Операция не выполнена";
 
     private final DispatchAsync dispatcher;
+    private DeclarationDataPresenter declarationDataPresenter;
     private HandlerRegistration closeFormDataHandlerRegistration;
     private DeclarationData declarationData;
 
@@ -87,6 +89,7 @@ public class DeclarationDeclarationFilesCommentsPresenter extends PresenterWidge
                 .defaultCallback(new AbstractCallback<GetDeclarationFilesCommentsResult>() {
                     @Override
                     public void onSuccess(GetDeclarationFilesCommentsResult result) {
+                        if (!declarationDataPresenter.checkExistDeclarationData(result)) return;
                         LogCleanEvent.fire(DeclarationDeclarationFilesCommentsPresenter.this);
                         LogAddEvent.fire(DeclarationDeclarationFilesCommentsPresenter.this, result.getUuid());
                         if (exit) {
@@ -152,6 +155,7 @@ public class DeclarationDeclarationFilesCommentsPresenter extends PresenterWidge
                         .defaultCallback(new AbstractCallback<AddDeclarationFileResult>() {
                             @Override
                             public void onSuccess(AddDeclarationFileResult result) {
+                                if (!declarationDataPresenter.checkExistDeclarationData(result)) return;
                                 getView().addFile(toDataRow(result.getFiles()));
                             }
                         }, DeclarationDeclarationFilesCommentsPresenter.this));
@@ -279,6 +283,10 @@ public class DeclarationDeclarationFilesCommentsPresenter extends PresenterWidge
             to.add(clonedFile);
         }
         return to;
+    }
+
+    public void setDeclarationDataPresenter(DeclarationDataPresenter declarationDataPresenter) {
+        this.declarationDataPresenter = declarationDataPresenter;
     }
 }
 

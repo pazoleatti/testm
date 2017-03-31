@@ -56,6 +56,11 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     public CreateReportResult execute(final CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
         CreateReportResult result = new CreateReportResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationDataId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationDataId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         if (ddReportType.isSubreport()) {
             DeclarationData declaration = declarationDataService.get(action.getDeclarationDataId(), userInfo);

@@ -52,6 +52,10 @@ ECHO ## ddl: create indexes
 ECHO ## ddl: create triggers
 "%ORA_BIN%\sqlplus" %AUTH% @"create_triggers.sql" > "%LOG_DIR%/create_triggers.txt"
 
+ECHO ## ddl: create views
+"%ORA_BIN%\sqlplus" %AUTH% @"create_views.sql" > "%LOG_DIR%/create_views.txt"
+
+
 ECHO ## ddl: create sources
 "%ORA_BIN%\sqlplus" %AUTH% @"create_procedures.sql" > "%LOG_DIR%/create_procedures.txt"
 

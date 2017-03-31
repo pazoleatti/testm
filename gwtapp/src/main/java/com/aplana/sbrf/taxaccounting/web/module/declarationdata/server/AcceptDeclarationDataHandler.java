@@ -50,6 +50,11 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
     public AcceptDeclarationDataResult execute(final AcceptDeclarationDataAction action, ExecutionContext context) throws ActionException {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
         final AcceptDeclarationDataResult result = new AcceptDeclarationDataResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationId());
+            return result;
+        }
         Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
         if (action.isAccepted()) {

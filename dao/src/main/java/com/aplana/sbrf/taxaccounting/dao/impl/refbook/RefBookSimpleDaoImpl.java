@@ -94,18 +94,14 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     }
 
 	@Override
-	public PagingResult<Map<String, RefBookValue>> getRecords(RefBook refBook, Date versionFrom, Date versionTo, PagingParams pagingParams, String filter) {
-		PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, pagingParams, filter);
+	public PagingResult<Map<String, RefBookValue>> getVersionsInPeriod(RefBook refBook, Date versionFrom, Date versionTo, String filter) {
+		PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, filter);
 		LOG.debug(ps.getQuery().toString());
-		List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
+		List<Map<String, RefBookValue>> records =
+			getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), ps.getNamedParams(), new RefBookValueMapper(refBook));
 
 		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-		if (pagingParams != null) {
-			ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, null, filter);
-			result.setTotalCount(refBookDao.getRecordsCount(ps));
-		} else {
-			result.setTotalCount(records.size());
-		}
+		result.setTotalCount(records.size());
 		return result;
 	}
 

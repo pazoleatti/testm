@@ -126,7 +126,194 @@ INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (27, dat
 INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (27, date '2016-07-01', 0, '3', seq_ref_book_record.nextval);
 INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (27, date '2016-08-01', 0, '4', seq_ref_book_record.nextval);
 
-INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (28, date '2016-10-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (28, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (28, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (28, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
 INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (28, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (29, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (29, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (29, date '2016-10-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (29, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (30, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (30, date '2016-07-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (30, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (30, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (31, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (31, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (31, date '2016-07-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (31, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (31, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (32, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (32, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (32, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (33, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (33, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (33, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (33, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (34, date '2016-07-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (34, date '2016-08-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (34, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (34, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (35, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (35, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (35, date '2016-07-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (35, date '2016-08-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (35, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (35, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (36, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (36, date '2016-07-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (36, date '2016-08-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (36, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (36, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (37, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (37, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (37, date '2016-07-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (37, date '2016-08-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (37, date '2016-10-01', 0, '4', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (37, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (38, date '2016-08-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (38, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (38, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (39, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (39, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (39, date '2016-08-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (39, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (39, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (40, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (40, date '2016-07-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (40, date '2016-08-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (40, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (40, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (41, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (41, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (41, date '2016-07-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (41, date '2016-08-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (41, date '2016-10-01', 0, '4', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (41, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (42, date '2016-07-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (42, date '2016-08-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (42, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (42, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (43, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (43, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (43, date '2016-07-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (43, date '2016-08-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (43, date '2016-10-01', 0, '4', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (43, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (44, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (44, date '2016-07-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (44, date '2016-08-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (44, date '2016-10-01', 0, '4', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (44, date '2016-11-01', 2, '9', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (45, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (45, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (45, date '2016-07-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (45, date '2016-08-01', 0, '4', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (45, date '2016-10-01', 0, '5', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (46, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (46, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (46, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (47, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (47, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (47, date '2016-10-01', 0, '1', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (48, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (48, date '2016-07-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (48, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (49, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (49, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (49, date '2016-07-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (49, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (50, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (50, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (51, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (51, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (51, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (52, date '2016-07-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (52, date '2016-08-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (52, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (53, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (53, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (53, date '2016-07-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (53, date '2016-08-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (53, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (54, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (54, date '2016-07-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (54, date '2016-08-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (54, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (55, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (55, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (55, date '2016-07-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (55, date '2016-08-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (55, date '2016-10-01', 0, '4', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (56, date '2016-08-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (56, date '2016-10-01', 0, '2', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (57, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (57, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (57, date '2016-08-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (57, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (58, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (58, date '2016-07-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (58, date '2016-08-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (58, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (59, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (59, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (59, date '2016-07-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (59, date '2016-08-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (59, date '2016-10-01', 0, '4', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (60, date '2016-07-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (60, date '2016-08-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (60, date '2016-10-01', 0, '3', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (61, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (61, date '2016-05-01', 2, '9', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (61, date '2016-07-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (61, date '2016-08-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (61, date '2016-10-01', 0, '4', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (62, date '2016-05-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (62, date '2016-07-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (62, date '2016-08-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (62, date '2016-10-01', 0, '4', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (63, date '2016-01-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (63, date '2016-05-01', 0, '2', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (63, date '2016-07-01', 0, '3', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (63, date '2016-08-01', 0, '4', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (63, date '2016-10-01', 0, '5', seq_ref_book_record.nextval);
+
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (64, date '2016-06-01', 0, '1', seq_ref_book_record.nextval);
+INSERT INTO get_records_test (record_id, version, status, b, id) VALUES (65, date '2016-09-01', 0, '1', seq_ref_book_record.nextval);
 
 UPDATE get_records_test SET a = record_id;

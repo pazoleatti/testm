@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckAddressResult;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,9 +29,26 @@ public class FiasRefBookDaoOracleTest {
 
     @Test
     public void testCheckAddressByFias() {
-        Map<Long, Long> result = fiasRefBookDao.checkAddressByFias(14844L);
+        Map<Long, Long> result = fiasRefBookDao.checkAddressByFias(15563L);
+
+        int i = 0;
+        for (Long key : result.keySet()) {
+
+            Long v = result.get(key);
+            if (v == null) {
+                System.out.print(key + ", ");
+                i++;
+            }
+        }
+
+        System.out.println("Address not found: " + i + " of " + result.size());
         System.out.println(result);
     }
 
+    @Test
+    public void testExistAddressByFias() {
+        Map<Long, CheckAddressResult> result = fiasRefBookDao.checkExistsAddressByFias(15563L);
+        System.out.println(result);
+    }
 
 }

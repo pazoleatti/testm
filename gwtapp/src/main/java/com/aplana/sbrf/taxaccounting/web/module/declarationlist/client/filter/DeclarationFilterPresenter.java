@@ -3,8 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUserRoleAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DetectUserRoleResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterDataResult;
 import com.google.inject.Inject;
@@ -26,7 +25,14 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
         DeclarationFilterApplyEvent.fire(this);
     }
 
-    public interface MyView extends View, HasUiHandlers<DeclarationFilterUIHandlers> {
+	@Override
+	public void onResetFilter() {
+		DeclarationDataFilter dataFilter = new DeclarationDataFilter();
+		dataFilter.setTaxType(declarationListPresenter.getTaxType());
+		getView().setDataFilter(dataFilter);
+	}
+
+	public interface MyView extends View, HasUiHandlers<DeclarationFilterUIHandlers> {
 		void setDataFilter(DeclarationDataFilter formDataFilter);
 
         DeclarationDataFilter getFilterData();
@@ -53,6 +59,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
     }
 
 	private final DispatchAsync dispatchAsync;
+	private DeclarationListPresenter declarationListPresenter;
 
     @Inject
 	public DeclarationFilterPresenter(EventBus eventBus, MyView view,
@@ -113,5 +120,9 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 			declarationTypeMap.put(declarationType.getId(), declarationType.getName());
 		}
 		return declarationTypeMap;
+	}
+
+	public void setDeclarationListPresenter(DeclarationListPresenter declarationListPresenter) {
+		this.declarationListPresenter = declarationListPresenter;
 	}
 }

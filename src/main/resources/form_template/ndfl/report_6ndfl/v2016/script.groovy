@@ -422,9 +422,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
 class PairPersonOperationId {
     Long ndflPersonId
-    Long operationId
+    String operationId
 
-    PairPersonOperationId(Long ndflPersonId, Long operationId) {
+    PairPersonOperationId(Long ndflPersonId, String operationId) {
         this.ndflPersonId = ndflPersonId
         this.operationId = operationId
     }
@@ -590,8 +590,15 @@ def checkXml() {
     def fileNode = new XmlSlurper().parse(ndfl6Stream);
 
     // ВнДок2 Расчет погрешности
+    def kolFl6
+    def obobshPokazNodes6 = fileNode.depthFirst().grep { it.name() == NODE_NAME_OBOBSH_POKAZ6 }
+    obobshPokazNodes6.each { obobshPokazNode6 ->
+        ScriptUtils.checkInterrupted()
+        neUderzNalIt6 = Long.valueOf(obobshPokazNode6.attributes()[ATTR_NE_UDERZ_NAL_IT6]) ?: 0
+        kolFl6 = Integer.valueOf(obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6]) ?: 0
+    }
     def sumDataNodes = fileNode.depthFirst().grep { it.name() == NODE_NAME_SUM_DATA6 }
-    def mathError = sumDataNodes.size()
+    def mathError = sumDataNodes.size() * kolFl6
 
     def sumStavkaNodes = fileNode.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
     sumStavkaNodes.each { sumStavkaNode ->
@@ -608,9 +615,9 @@ def checkXml() {
         }
 
         // ВнДок2 Исчисленный налог
-        if (((nachislDoh - vichetNal) / 100 * stavka > ischislNal + mathError) ||
-                ((nachislDoh - vichetNal) / 100 * stavka < ischislNal - mathError)) {
-            logger.error(msgError + " неверно рассчитана сумма исчисленного налога.")
+        if ((Math.round((nachislDoh - vichetNal) / 100 * stavka) > ischislNal + mathError) ||
+                (Math.round((nachislDoh - vichetNal) / 100 * stavka) < ischislNal - mathError)) {
+            logger.warn(msgError + " неверно рассчитана сумма исчисленного налога.")
         }
 
         // ВнДок3 Авансовый платеж
@@ -1028,9 +1035,9 @@ def createReports() {
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
     scriptParams.put("fileName", "reports.zip")
     try {
-        Department department = departmentService.get(declarationData.departmentId);
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
+        Department department = departmentService.get(departmentReportPeriod.departmentId);
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
@@ -1038,7 +1045,9 @@ def createReports() {
         String path = String.format("Отчетность %s, %s, %s, %s%s",
                 declarationTemplate.getName(),
                 department.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod);
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod)
+                .replaceAll('[~!@/\\#\$%^&*=|`]', "_").replaceAll('"', "'");
+        scriptParams.put("fileName", path + ".zip")
         def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
         declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
             ScriptUtils.checkInterrupted()
@@ -1086,7 +1095,15 @@ void getSources() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
     // Найти подразделения в РНУ которых имеются операции из декларации
-    def tmpDeclarationDataList = getDeclarationDataList(sourceTypeId, allDepartmentReportPeriodIds)
+    def tmpDeclarationDataList = []
+    allDepartmentReportPeriodIds.each {
+        ScriptUtils.checkInterrupted();
+        def tmpDepartmentReportPeriod = departmentReportPeriodService.get(it)
+        def tmpDeclaration = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, it, tmpDepartmentReportPeriod.departmentId, tmpDepartmentReportPeriod.reportPeriod.id, declarationData.kpp, declarationData.oktmo)
+        if (tmpDeclaration != null) {
+            tmpDeclarationDataList << tmpDeclaration
+        }
+    }
     def declarationsForRemove = []
     tmpDeclarationDataList.each { declaration ->
         if (declaration.state != State.ACCEPTED) {
@@ -1124,7 +1141,7 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
         return null
     }
     Relation relation = new Relation()
-    def isSource = sourceTypeId != 101
+    def isSource = sourceTypeId == 101
 
     DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpDeclarationData?.departmentReportPeriodId) as DepartmentReportPeriod
     DeclarationTemplate declarationTemplate = declarationService.getTemplate(sourceTypeId)
@@ -1169,29 +1186,6 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
     //relation.formDataKind = tmpDeclarationData.kind
 
     return relation
-}
-// Найти подразделения в РНУ которых имеются операции из декларации
-def getDeclarationDataList(def sourceTypeId, def allDepartmentReportPeriodIds) {
-    // Найти все доходы по декларации
-    def toReturn = []
-    def incomes = ndflPersonService.findNdflPersonIncome(declarationData.id)
-    def kppOktmoSet = [].toSet()
-    incomes.each { income ->
-        kppOktmoSet << new PairKppOktmo(income.kpp, income.oktmo, null)
-    }
-    for (departmentReportPeriodId in allDepartmentReportPeriodIds) {
-        ScriptUtils.checkInterrupted()
-        def tmpDepartmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId)
-        for (kppOktmo in kppOktmoSet) {
-            ScriptUtils.checkInterrupted()
-            def declarationData = declarationService.findDeclarationDataByKppOktmoOfNdflPersonIncomes(sourceTypeId, departmentReportPeriodId, tmpDepartmentReportPeriod.departmentId, tmpDepartmentReportPeriod.reportPeriod.id, kppOktmo.kpp, kppOktmo.oktmo)
-            if (declarationData != null) {
-                toReturn << declarationData
-                break
-            }
-        }
-    }
-    return toReturn
 }
 
 def getDepartmentReportPeriodById(def id) {
@@ -1410,7 +1404,7 @@ def createPrimaryRnuWithErrors() {
         ndflPersonPrimary.deductions.add(ndflPersonDeductionPrimary)
     }
 
-    ndflPersonDeductionFromRNUConsolidatedList.each {
+    ndflPersonPrepaymentFromRNUConsolidatedList.each {
         ScriptUtils.checkInterrupted()
         NdflPersonPrepayment ndflPersonPrepaymentPrimary = ndflPersonService.getPrepayment(it.sourceId)
         NdflPerson ndflPersonPrimary = initNdflPersonPrimary(ndflPersonPrepaymentPrimary.ndflPersonId)
@@ -1549,7 +1543,7 @@ def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, ndflPerson, ope
     // Подразделение
     String departmentName = department.shortName
     // АСНУ
-    String asnu = getProvider(REF_BOOK_ASNU_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
+    String asnu = getProvider(RefBook.Id.ASNU.getId()).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${primaryRnuDeclarationData.asnuId}", null).get(0).NAME.value
     // Имя ТФ
     String transportFileName = primaryRnuDeclarationDataFile.fileName
     // Загрузил ТФ

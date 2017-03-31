@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.gwtplatform.dispatch.shared.Result;
-
 import java.util.Date;
 import java.util.Map;
 
-public class GetSubreportResult implements Result {
+public class GetSubreportResult extends DeclarationDataResult {
     private static final long serialVersionUID = 7859961980147513071L;
 
     private Map<Long, RefBookParamInfo> refBookParamInfoMap;

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -22,4 +21,5 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
     void onTimerSubsreport(boolean isTimer);
     void onFilesCommentsDialog();
     void changeStatusED();
+    void addError();
 }

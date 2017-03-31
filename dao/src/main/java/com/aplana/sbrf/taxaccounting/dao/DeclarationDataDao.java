@@ -10,6 +10,8 @@ import java.util.List;
  * @author dsultanbekov
  */
 public interface DeclarationDataDao {
+	String DECLARATION_NOT_FOUND_MESSAGE = "Налоговая форма с номером = %d не существует либо была удалена";
+
 	/**
 	 * Получить декларацию
 	 * @param declarationDataId идентификатор декларации
@@ -189,4 +191,10 @@ public interface DeclarationDataDao {
 																Integer declarationTypeId, Integer departmentType,
 																Boolean departmentReportPeriodStatus, Integer declarationState);
 
+	/**
+	 * Проверка существования формы
+	 * @param declarationDataId
+	 * @return
+	 */
+	boolean existDeclarationData(long declarationDataId);
 }

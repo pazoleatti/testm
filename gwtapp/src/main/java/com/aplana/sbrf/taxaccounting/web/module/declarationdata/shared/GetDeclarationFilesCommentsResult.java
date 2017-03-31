@@ -2,11 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
-import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
-public class GetDeclarationFilesCommentsResult implements Result {
+public class GetDeclarationFilesCommentsResult extends DeclarationDataResult {
 
     private boolean readOnlyMode;
     private String uuid;

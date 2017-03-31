@@ -30,14 +30,8 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_ADMIN')")
 public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAllResult> {
-
-    @Autowired
-    LoadRefBookDataService loadRefBookDataService;
-
-    @Autowired
-    LoadFormDataService loadFormDataService;
 
     @Autowired
     private SecurityService securityService;
@@ -50,11 +44,6 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
 
     @Autowired
     private AsyncManager asyncManager;
-
-    @Autowired
-    private AsyncTaskTypeDao asyncTaskTypeDao;
-
-    static final private ReportType reportType = ReportType.LOAD_ALL_TF;
 
     public LoadAllHandler() {
         super(LoadAllAction.class);

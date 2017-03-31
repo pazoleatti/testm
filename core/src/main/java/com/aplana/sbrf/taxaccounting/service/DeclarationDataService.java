@@ -404,4 +404,11 @@ public interface DeclarationDataService {
      * @param docStateId
      */
     void changeDocState(Logger logger, TAUserInfo userInfo, long declarationDataId, Long docStateId);
+
+	/**
+	 * Проверка существования формы
+	 * @param declarationDataId
+	 * @return
+	 */
+	boolean existDeclarationData(long declarationDataId);
 }

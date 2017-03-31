@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -51,55 +52,59 @@ public class RecalculateDeclarationListHandler extends AbstractActionHandler<Rec
         final Logger logger = new Logger();
         final String taskName = declarationDataService.getTaskName(ddReportType, action.getTaxType());
         for (Long id: action.getDeclarationIds()) {
-            final Long declarationId = id;
-            logger.info("Постановка операции \"%s\" в очередь на исполнение для %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
-            try {
+            if (declarationDataService.existDeclarationData(id)) {
+                final Long declarationId = id;
+                logger.info("Постановка операции \"%s\" в очередь на исполнение для %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
                 try {
-                    declarationDataService.preCalculationCheck(logger, declarationId, userInfo);
+                    try {
+                        declarationDataService.preCalculationCheck(logger, declarationId, userInfo);
+                    } catch (Exception e) {
+                        logger.error("Налоговая форма не может быть рассчитана");
+                    }
+                    String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
+                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
+                    if (restartStatus != null && restartStatus.getFirst()) {
+                        logger.warn("Данная операция уже запущена");
+                    } else if (restartStatus != null && !restartStatus.getFirst()) {
+                        // задача уже была создана, добавляем пользователя в получатели
+                    } else {
+                        Map<String, Object> params = new HashMap<String, Object>();
+                        params.put("declarationDataId", declarationId);
+                        params.put("docDate", action.getDocDate());
+                        asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                            @Override
+                            public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                                return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                        declarationDataService.getDeclarationFullName(declarationId, ddReportType),
+                                        LockData.State.IN_QUEUE.getText());
+                            }
+
+                            @Override
+                            public void executePostCheck() {
+                                logger.error("Найдены запущенные задач, которые блокирует выполнение операции.");
+                            }
+
+                            @Override
+                            public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                                return declarationDataService.checkExistTask(declarationId, reportType, logger);
+                            }
+
+                            @Override
+                            public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                                declarationDataService.interruptTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
+                            }
+
+                            @Override
+                            public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                                return declarationDataService.getTaskName(ddReportType, action.getTaxType());
+                            }
+                        });
+                    }
                 } catch (Exception e) {
-                    logger.error("Налоговая форма не может быть рассчитана");
+                    logger.error(e);
                 }
-                String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
-                if (restartStatus != null && restartStatus.getFirst()) {
-                    logger.warn("Данная операция уже запущена");
-                } else if (restartStatus != null && !restartStatus.getFirst()) {
-                    // задача уже была создана, добавляем пользователя в получатели
-                } else {
-                    Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("declarationDataId", declarationId);
-                    params.put("docDate", action.getDocDate());
-                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
-                        @Override
-                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    declarationDataService.getDeclarationFullName(declarationId, ddReportType),
-                                    LockData.State.IN_QUEUE.getText());
-                        }
-
-                        @Override
-                        public void executePostCheck() {
-                            logger.error("Найдены запущенные задач, которые блокирует выполнение операции.");
-                        }
-
-                        @Override
-                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                            return declarationDataService.checkExistTask(declarationId, reportType, logger);
-                        }
-
-                        @Override
-                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                            declarationDataService.interruptTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
-                        }
-
-                        @Override
-                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return declarationDataService.getTaskName(ddReportType, action.getTaxType());
-                        }
-                    });
-                }
-            } catch (Exception e) {
-                logger.error(e);
+            } else {
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id);
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

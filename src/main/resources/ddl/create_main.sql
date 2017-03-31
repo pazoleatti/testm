@@ -1287,7 +1287,8 @@ create table ndfl_references
   name varchar2(60 char) not null,
   lastname varchar2(60 char),
   birthday  date not null,
-  errtext varchar2(4000 char)
+  errtext varchar2(4000 char),
+  ndfl_person_id number(18)
 );
 
 comment on table ndfl_references is 'Реестр справок';
@@ -1979,6 +1980,20 @@ comment on column declaration_subreport_params.required is 'Признак об�
 ------------------------------------------------------------------------------------------------------------------------------
 -- Таблицы для справочника ФИАС
 --------------------------------------------------------------------------------------------------------------------------
+--Типы адресных объектов
+create table fias_socrbase
+(
+  scname    varchar2(10 char),
+  socrname  varchar2(50 char) not null,
+  kod_t_st  varchar2(4 char) not null,
+  lev       number
+);
+comment on table fias_socrbase  is 'Справочник "Типы адресных объектов"';
+comment on column fias_socrbase.scname  is 'Краткое наименование типа объекта';
+comment on column fias_socrbase.socrname  is 'Полное наименование типа объекта';
+comment on column fias_socrbase.kod_t_st  is 'Ключевое поле';
+comment on column fias_socrbase.lev  is 'Уровень адресного объекта';
+
 -- Сведения
 create table fias_addrobj
 (
@@ -2007,6 +2022,7 @@ create table fias_addrobj
     parentguid number(18)
 );
 
+comment on table fias_socrbase  is 'Сведения об адресообразующих элементов';
 comment on column fias_addrobj.id is 'Суррогатный ключ';
 comment on column fias_addrobj.aoid is 'Глобальный уникальный идентификатор адресного объекта';
 comment on column fias_addrobj.formalname is 'Формализованное наименование';
@@ -2107,16 +2123,17 @@ comment on column ref_book_person.old_status is 'Старый статус за�
 
 create table ref_book_id_doc
 (
-  id number(18) not null,
-  record_id     number(18)          not null,
-  version       date                not null,
-  status        number(1) default 0 not null,
-  person_id     number(18),
-  doc_id        number(18),
-  doc_number    varchar2(25 char),
-  issued_by     varchar2(255 char),
-  issued_date   date,
-  inc_rep       number(1)
+  id                  number(18) not null,
+  record_id           number(18)          not null,
+  version             date                not null,
+  status              number(1) default 0 not null,
+  person_id           number(18),
+  doc_id              number(18),
+  doc_number          varchar2(25 char),
+  issued_by           varchar2(255 char),
+  issued_date         date,
+  inc_rep             number(1),
+  duplicate_record_id number(18)
 );
 
 comment on table ref_book_id_doc is 'Документ, удостоверяющий личность';
@@ -2130,6 +2147,7 @@ comment on column ref_book_id_doc.doc_number is 'Серия и номер док
 comment on column ref_book_id_doc.issued_by is 'Кем выдан документ';
 comment on column ref_book_id_doc.issued_date is 'Дата выдачи';
 comment on column ref_book_id_doc.inc_rep is 'Включается в отчетность';
+comment on column ref_book_id_doc.duplicate_record_id is 'Идентификатор ФЛ - дубля, у которого был скопирован ДУЛ при назначении дубля';
 
 create table ref_book_address
 (

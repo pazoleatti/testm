@@ -30,6 +30,11 @@ public class ChangeStatusEDDeclarationDataHandler extends AbstractActionHandler<
     @Override
     public ChangeStatusEDDeclarationDataResult execute(ChangeStatusEDDeclarationDataAction action, ExecutionContext context) {
         ChangeStatusEDDeclarationDataResult result = new ChangeStatusEDDeclarationDataResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationId());
+            return result;
+        }
         Logger logger = new Logger();
 		declarationDataService.changeDocState(logger, securityService.currentUserInfo(), action.getDeclarationId(), action.getDocStateId());
         logger.info("Успешно выполнено изменение состояния ЭД");

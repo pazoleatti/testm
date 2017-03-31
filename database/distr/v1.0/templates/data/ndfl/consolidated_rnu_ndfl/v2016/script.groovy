@@ -77,6 +77,9 @@ def calcTimeMillis(long time) {
  */
 @Field final int CONSOLIDATED_RNU_NDFL_TEMPLATE_ID = 101
 @Field final int PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
+@Field final int NDFL_2_1_TEMPLATE_ID = 102
+@Field final int NDFL_2_2_TEMPLATE_ID = 104
+@Field final int NDFL_6_TEMPLATE_ID = 103
 
 //>------------------< CONSOLIDATION >----------------------<
 
@@ -94,6 +97,10 @@ void consolidation() {
     //декларация-приемник, true - заполнятся только текстовые данные для GUI и сообщений,true - исключить несозданные источники,ограничение по состоянию для созданных экземпляров список нф-источников
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
+
+    if (declarationDataIdList.isEmpty()){
+        throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
+    }
 
     logger.info("Номера первичных НФ включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + calcTimeMillis(time));
 
@@ -219,7 +226,7 @@ void consolidation() {
 
     }
 
-    logger.info("Консолидация завершена, новых записей создано: "+(ndflPersonNum - 1) + calcTimeMillis(time));
+    logger.info("Консолидация завершена, новых записей создано: "+(ndflPersonNum - 1) + ", " + calcTimeMillis(time));
 
 }
 
@@ -468,6 +475,10 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
 
     for (NdflPerson ndflPerson : ndflPersonList) {
 
+        if (ndflPerson.personId == null || ndflPerson.recordId == null){
+            throw new ServiceException("Ошибка при консолидации данных. Необходимо повторно выполнить расчет формы "+ndflPerson.declarationDataId);
+        }
+
         Long personRecordId = ndflPerson.recordId;
 
         NdflPerson consNdflPerson = result.get(personRecordId)
@@ -551,10 +562,6 @@ def clearData() {
  */
 def getSourcesListForTemporarySolution() {
 
-    if (!needSources) {
-        return
-    }
-
     //отчетный период в котором выполняется консолидация
     ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
@@ -632,48 +639,56 @@ def getSourcesList() {
  * Система включает в КНФ множество ПНФ, относящихся к периоду с наиболее старшим периодом сдачи корректировки
  */
 List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodId) {
+    if (needSources) {
+        //Список отчетных периодов подразделения
+        List<DepartmentReportPeriod> departmentReportPeriodList = new ArrayList<DepartmentReportPeriod>();
+        List<DeclarationData> allDeclarationDataList = declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, departmentId, reportPeriodId);
 
-    //Список отчетных периодов подразделения
-    List<DepartmentReportPeriod> departmentReportPeriodList = new ArrayList<DepartmentReportPeriod>();
-    List<DeclarationData> allDeclarationDataList = declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, departmentId, reportPeriodId);
+        //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
+        Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
+        for (DeclarationData declarationData : allDeclarationDataList) {
+            Long asnuId = declarationData.getAsnuId();
+            DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod;
+            Integer departmentReportPeriodId = departmentReportPeriod.getId();
+            departmentReportPeriodList.add(departmentReportPeriod);
+            if (asnuId != null) {
+                Map<Integer, List<DeclarationData>> asnuMap = asnuDataMap.get(asnuId);
+                if (asnuMap == null) {
+                    asnuMap = new HashMap<Long, DeclarationData>();
+                    asnuDataMap.put(asnuId, asnuMap);
+                }
+                List<DeclarationData> declarationDataList = asnuMap.get(departmentReportPeriodId);
+                if (declarationDataList == null) {
+                    declarationDataList = new ArrayList<DeclarationData>();
+                    asnuMap.put(departmentReportPeriodId, declarationDataList);
+                }
 
-    //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
-    Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
-    for (DeclarationData declarationData : allDeclarationDataList) {
-        Long asnuId = declarationData.getAsnuId();
-        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod;
-        Integer departmentReportPeriodId = departmentReportPeriod.getId();
-        departmentReportPeriodList.add(departmentReportPeriod);
-        if (asnuId != null) {
-            Map<Integer, List<DeclarationData>> asnuMap = asnuDataMap.get(asnuId);
-            if (asnuMap == null) {
-                asnuMap = new HashMap<Long, DeclarationData>();
-                asnuDataMap.put(asnuId, asnuMap);
+                declarationDataList.add(declarationData);
+            } else {
+                logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(departmentId) + ", отчетный период: " + reportPeriodId + ", id: " + declarationData.id);
             }
-            List<DeclarationData> declarationDataList = asnuMap.get(departmentReportPeriodId);
-            if (declarationDataList == null) {
-                declarationDataList = new ArrayList<DeclarationData>();
-                asnuMap.put(departmentReportPeriodId, declarationDataList);
-            }
-
-            declarationDataList.add(declarationData);
-        } else {
-            logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(departmentId) + ", отчетный период: " + reportPeriodId + ", id: " + declarationData.id);
         }
+
+        //Сортировка "Отчетных периодов" в порядке: Кор.период 1, Кор.период 2, некорректирующий период (не задана дата корректировки)
+        departmentReportPeriodList.sort { a, b -> departmentReportPeriodComp(a, b) }
+
+        //Включение в результат НФ с наиболее старшим периодом сдачи корректировки
+        List<DeclarationData> result = new ArrayList<DeclarationData>();
+        for (Map.Entry<Long, Map<Integer, List<DeclarationData>>> entry : asnuDataMap.entrySet()) {
+            //Long asnuId = entry.getKey();
+            Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
+            List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
+            result.addAll(declarationDataList);
+        }
+        return result;
+    } else {
+        List<DeclarationData> toReturn = []
+        toReturn.addAll(declarationService.find(NDFL_2_1_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        toReturn.addAll(declarationService.find(NDFL_2_2_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        toReturn.addAll(declarationService.find(NDFL_6_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        return toReturn
     }
 
-    //Сортировка "Отчетных периодов" в порядке: Кор.период 1, Кор.период 2, некорректирующий период (не задана дата корректировки)
-    departmentReportPeriodList.sort { a, b -> departmentReportPeriodComp(a, b) }
-
-    //Включение в результат НФ с наиболее старшим периодом сдачи корректировки
-    List<DeclarationData> result = new ArrayList<DeclarationData>();
-    for (Map.Entry<Long, Map<Integer, List<DeclarationData>>> entry : asnuDataMap.entrySet()) {
-        //Long asnuId = entry.getKey();
-        Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
-        List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
-        result.addAll(declarationDataList);
-    }
-    return result;
 }
 
 /**
@@ -733,7 +748,7 @@ def getRelation(DeclarationData declarationData, Department department, ReportPe
     //Макет НФ
     DeclarationTemplate declarationTemplate = getDeclarationTemplateById(declarationData?.declarationTemplateId)
 
-    def isSource = (declarationTemplate.id == PRIMARY_RNU_NDFL_TEMPLATE_ID)
+    def isSource = declarationTemplate.id == PRIMARY_RNU_NDFL_TEMPLATE_ID ? true : false
     ReportPeriod rp = departmentReportPeriod.getReportPeriod();
 
     if (light) {
@@ -941,10 +956,16 @@ def createRowColumns() {
 
 def createSpecificReport() {
     switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
-        case 'rnu_ndfl_person_db': createSpecificReportPersonDb();
+        case 'rnu_ndfl_person_db':
+            createSpecificReportPersonDb();
             break;
         case 'report_kpp_oktmo':
-        case 'rnu_ndfl_person_all_db': createSpecificReportDb();
+            createSpecificReportDb();
+            scriptSpecificReportHolder.setFileName("Отчетность_по_КПП,ОКТМО" + ".xlsx")
+            break;
+        case 'rnu_ndfl_person_all_db':
+            createSpecificReportDb();
+            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
             break;
         default:
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
@@ -972,15 +993,6 @@ def createSpecificReportDb() {
     def params = [declarationId : declarationData.id]
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-    setNameOfSpecificReport()
-}
-
-/**
- * Задание имени файла спецотчета
- * @return
- */
-def setNameOfSpecificReport() {
-    scriptSpecificReportHolder.setFileName("Отчетность_по_КПП,ОКТМО" + ".xlsx")
 }
 
 /**
@@ -1371,11 +1383,11 @@ def getRefTaxpayerStatusCode() {
  * @return
  */
 def getRefIncomeCode() {
-    // Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE.CODE>
+    // Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
     def mapResult = [:]
     def refBookMap = getRefBook(REF_BOOK_INCOME_CODE_ID)
     refBookMap.each { refBook ->
-        mapResult.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+        mapResult.put(refBook?.id?.numberValue, refBook)
     }
     return mapResult;
 }
@@ -1386,11 +1398,11 @@ def getRefIncomeCode() {
  */
 def getRefIncomeType() {
     // Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
-    def mapResult = [:]
+    Map<String, List<Long>> mapResult = [:]
     def refBookList = getRefBook(REF_BOOK_INCOME_KIND_ID)
     refBookList.each { refBook ->
         String mark = refBook?.MARK?.stringValue
-        List<String> incomeTypeIdList = mapResult.get(mark)
+        List<Long> incomeTypeIdList = mapResult.get(mark)
         if (incomeTypeIdList == null) {
             incomeTypeIdList = []
         }
@@ -1491,7 +1503,7 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
  */
 def getRefBook(def long refBookId) {
     // Передаем как аргумент только срок действия версии справочника
-    def refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, null, null)
+    def refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
     if (refBookList == null || refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
     }
@@ -1512,18 +1524,6 @@ def getRefBookByRecordVersionWhere(def long refBookId, def whereClause, def vers
         return Collections.emptyMap();
     }
     return refBookMap
-}
-
-/**
- * Получить все записи справочника по его идентификатору и фильтру (отсутствие значений не является ошибкой)
- * @param refBookId - идентификатор справочника
- * @param filter - фильтр
- * @return - возвращает лист
- */
-List<Map<String, RefBookValue>> getRefBookByFilter(def long refBookId, def filter) {
-    // Передаем как аргумент только срок действия версии справочника
-    List<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
-    return refBookList
 }
 
 /**
@@ -1758,7 +1758,7 @@ def checkDataReference(
     def taxpayerStatusMap = getRefTaxpayerStatusCode()
     logger.info(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
 
-    // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE.CODE>
+    // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
     def incomeCodeMap = getRefIncomeCode()
     logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
 
@@ -2163,7 +2163,11 @@ def checkDataReference(
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
         // Спр5 Код вида дохода (Необязательное поле)
-        if (ndflPersonIncome.incomeCode != null && !incomeCodeMap.find { key, value -> value == ndflPersonIncome.incomeCode }) {
+        if (ndflPersonIncome.incomeCode != null && !incomeCodeMap.find { key, value ->
+            value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
+                    ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
+                    ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
+        }) {
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                     "Доход.Вид.Код (Графа 4)='${ndflPersonIncome.incomeCode ?: ""}'")
             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода дохода справочнику", fioAndInp, pathError,
@@ -2172,13 +2176,14 @@ def checkDataReference(
 
         /*
         Спр6
+        При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
+
         Доход.Вид.Признак (Графа 5) - (Необязательное поле)
         incomeTypeMap <REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
 
         Доход.Вид.Код (Графа 4) - (Необязательное поле)
-        incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE.CODE>
+        incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
          */
-        // При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
         if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeType)) {
             List<Long> incomeTypeIdList = incomeTypeMap.get(ndflPersonIncome.incomeType)
             if (incomeTypeIdList == null || incomeTypeIdList.isEmpty()) {
@@ -2188,13 +2193,17 @@ def checkDataReference(
                         "'Доход.Вид.Признак (Графа 5)' не соответствует справочнику '$R_INCOME_TYPE'")
             } else {
                 if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode)) {
-                    List<String> incomeCodeList = []
+                    def incomeCodeRefList = []
                     incomeTypeIdList.each { incomeTypeId ->
-                        String incomeCode = incomeCodeMap.get(incomeTypeId)
-                        incomeCodeList.add(incomeCode)
-//                        logger.info("Доход.Вид.Признак incomeTypeId=$incomeTypeId incomeCode=$incomeCode ndflPersonIncome.incomeCode=${ndflPersonIncome.incomeCode}")
+                        def incomeCodeRef = incomeCodeMap.get(incomeTypeId)
+                        incomeCodeRefList.add(incomeCodeRef)
                     }
-                    if (!incomeCodeList.contains(ndflPersonIncome.incomeCode)) {
+                    def incomeCodeRef = incomeCodeRefList.find {
+                        it?.CODE?.stringValue == ndflPersonIncome.incomeCode &&
+                                ndflPersonIncome.incomeAccruedDate >= it.record_version_from?.dateValue &&
+                                ndflPersonIncome.incomeAccruedDate <= it.record_version_to?.dateValue
+                    }
+                    if (!incomeCodeRef) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "Доход.Вид.Код (Графа 4)='${ndflPersonIncome.incomeCode}', Доход.Вид.Признак (Графа 5)='${ndflPersonIncome.incomeType ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода и признака дохода справочнику", fioAndInp, pathError,
@@ -2491,8 +2500,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent)
     }
 
-    println "Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Общие проверки / Проверки на отсутсвие повторений (" + (System.currentTimeMillis() - time) + " мс)");
+    println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 // Кэш для справочников
@@ -2544,6 +2553,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
     List<DateConditionData> dateConditionDataList = []
 
+    DateConditionWorkDay dateConditionWorkDay = new DateConditionWorkDay(calendarService)
+
     // "Графа 6" = "Графе 7"
     dateConditionDataList << new DateConditionData(["1010", "3020", "1110", "1400", "2001", "2010", "2012",
                                                     "2300", "2710", "2760", "2762", "2770", "2900", "4800"],
@@ -2578,8 +2589,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     // "Графа 6" = "Графе 7"
     dateConditionDataList << new DateConditionData(["2520", "2720", "2740", "2750", "2790"], ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
-    // Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
-    dateConditionDataList << new DateConditionData(["2610"], ["00"], new LastMonthCalendarDayButNotFree(), """Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день""")
+    // Доход.Дата.Начисление (Графа 6) последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
+    dateConditionDataList << new DateConditionData(["2610"], ["00"], new LastMonthWorkDayIncomeAccruedDate(), """Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день""")
 
     // "Графа 6" = "Графе 7"
     dateConditionDataList << new DateConditionData(["2640", "2641"], ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
@@ -2609,7 +2620,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (dateConditionDataList != null) {
                 dateConditionDataList.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
-                        if (!dateConditionData.checker.check(ndflPersonIncome)) {
+                        if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                     "Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ?: ""}'")
@@ -2622,20 +2633,26 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // СведДох2 Сумма вычета (Графа 12)
             BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
-            if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction) && comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
+            if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                        "Сумма вычета (Раздел 2 Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: ""}', Доход.Сумма.Начисление (Раздел 2 Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'" +
-                                ", сумма значений Применение вычета.Текущий период.Сумма (Раздел 3 Графа 16)='${sumNdflDeduction ?: ""}'")
+                        "Сумма вычета (Раздел 2 Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: 0}', сумма значений (Графа 16 Раздел 3)='${sumNdflDeduction ?: 0}'")
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
-                        "Значение не соответствует правилу: Графа 12 Раздел 2 = сумма значений граф 16 Раздел 3")
+                        "Значение не соответствует правилу: «Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»")
+            }
+            if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
+                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
+                        "Сумма значений (Графа 16 Раздел 3)='${sumNdflDeduction ?: 0}', Доход.Сумма.Начисление (Графа 10 Раздел 2)='${ndflPersonIncome.incomeAccruedSumm ?: 0}'")
+                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
+                        "Значение не соответствует правилу: сумма значений «Граф 16 Раздела 3» <= «Графа 10 Раздел 2»")
             }
 
             // СведДох4 НДФЛ.Процентная ставка (Графа 14)
             if (ndflPersonIncome.taxRate == 13) {
                 Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
                 Boolean conditionB = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status == "1"
-                Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
+                Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: '0') >= 3
                 if (!(conditionA || conditionB || conditionC)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
@@ -2663,8 +2680,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             "Для «Графа 14 Раздел 2 = 35» не выполнено условие: «Графа 4 Раздел 2» = (2740 или 3020 или 2610) и «Графа 12 Раздел 1» ≠ 2")
                 }
             } else if (ndflPersonIncome.taxRate == 30) {
-                def conditionA = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && ndflPersonIncome.incomeCode != "1010"
-                def conditionB = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
+                def conditionA = Integer.parseInt(ndflPerson.status ?: '0') >= 2 && ndflPersonIncome.incomeCode != "1010"
+                def conditionB = Integer.parseInt(ndflPerson.status ?: '0') >= 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
                 if (!(conditionA || conditionB)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
@@ -3026,7 +3043,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 dateConditionDataList.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         // Все подпункты, кроме 11-го
-                        if (!dateConditionData.checker.check(ndflPersonIncome)) {
+                        if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                     "НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}' и Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}'")
@@ -3352,12 +3369,62 @@ BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<Ndfl
     BigDecimal sumNdflDeduction = new BigDecimal(0)
     for (ndflPersonDeduction in ndflPersonDeductionList) {
         if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                && ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy") == ndflPersonDeduction.incomeAccrued.format("dd.MM.yyyy")
+                && ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy") == ndflPersonDeduction.incomeAccrued?.format("dd.MM.yyyy")
                 && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
             sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
         }
     }
     return sumNdflDeduction
+}
+
+/**
+ * Класс для получения рабочих дней
+ */
+class DateConditionWorkDay {
+
+    // Мапа рабочих дней со сдвигом
+    private Map<Date, Date> workDayWithOffset0Cache
+    private Map<Date, Date> workDayWithOffset1Cache
+    private Map<Date, Date> workDayWithOffset30Cache
+    def calendarService
+
+    DateConditionWorkDay(def calendarService) {
+        workDayWithOffset0Cache = [:]
+        workDayWithOffset1Cache = [:]
+        workDayWithOffset30Cache = [:]
+        this.calendarService = calendarService
+    }
+
+    /**
+     * Возвращает дату рабочего дня, смещенного относительно даты startDate.
+     *
+     * @param startDate начальная дата, может быть и рабочим днем и выходным
+     * @param offset на сколько рабочих дней необходимо сдвинуть начальную дату. Может быть меньше 0, тогда сдвигается в обратную сторону
+     * @return смещенная на offset рабочих дней дата
+     */
+    Date getWorkDay(Date startDate, int offset) {
+        Date resultDate
+        if (offset == 0) {
+            resultDate = workDayWithOffset0Cache.get(startDate)
+            if (resultDate == null) {
+                resultDate = calendarService.getWorkDay(startDate, offset)
+                workDayWithOffset0Cache.put(startDate, resultDate)
+            }
+        } else if (offset == 1) {
+            resultDate = workDayWithOffset1Cache.get(startDate)
+            if (resultDate == null) {
+                resultDate = calendarService.getWorkDay(startDate, offset)
+                workDayWithOffset1Cache.put(startDate, resultDate)
+            }
+        } else if (offset == 30) {
+            resultDate = workDayWithOffset30Cache.get(startDate)
+            if (resultDate == null) {
+                resultDate = calendarService.getWorkDay(startDate, offset)
+                workDayWithOffset30Cache.put(startDate, resultDate)
+            }
+        }
+        return resultDate
+    }
 }
 
 /**
@@ -3378,7 +3445,7 @@ class DateConditionData {
 }
 
 interface DateConditionChecker {
-    boolean check(NdflPersonIncome ndflPersonIncome)
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay)
 }
 
 /**
@@ -3386,7 +3453,7 @@ interface DateConditionChecker {
  */
 class Column6EqualsColumn7 implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
         String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
         return accrued == payout
@@ -3404,7 +3471,7 @@ class MatchMask implements DateConditionChecker {
     }
 
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
@@ -3423,7 +3490,7 @@ class MatchMask implements DateConditionChecker {
  */
 class LastMonthCalendarDay implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
@@ -3441,7 +3508,7 @@ class LastMonthCalendarDay implements DateConditionChecker {
  */
 class Column7LastDayOfYear implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.incomePayoutDate == null) {
             return false
         }
@@ -3458,24 +3525,23 @@ class Column7LastDayOfYear implements DateConditionChecker {
 }
 
 /**
- * Проверка: Последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
+ * Проверка: Доход.Дата.Начисление (Графа 6) последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
  */
-class LastMonthCalendarDayButNotFree implements DateConditionChecker {
+class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
-        boolean lastMonthDay = new LastMonthCalendarDay().check(ndflPersonIncome)
         Calendar calendar = Calendar.getInstance()
         calendar.setTime(ndflPersonIncome.incomeAccruedDate)
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-        if (lastMonthDay && dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY) {
-            return true
-        } else if (!lastMonthDay && dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
-            return true
-        }
-        return false
+        // находим последний день месяца
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        Date workDay = calendar.getTime()
+        // если последний день месяца приходится на выходной, то следующий первый рабочий день
+        int offset = 0
+        workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
+        return workDay == ndflPersonIncome.incomeAccruedDate
     }
 }
 
@@ -3484,22 +3550,18 @@ class LastMonthCalendarDayButNotFree implements DateConditionChecker {
  */
 class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
         calendar21.setTime(ndflPersonIncome.taxTransferDate);
-        Calendar calendar7 = Calendar.getInstance();
-        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
-        calendar7.add(Calendar.DATE, 1);
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            calendar7.add(Calendar.DATE, 2);
-        }
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendar7.add(Calendar.DATE, 1);
-        }
+        // "Графа 7" + "1 рабочий день"
+        int offset = 1
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+        Calendar calendar7 = Calendar.getInstance();
+        calendar7.setTime(workDay);
 
         return calendar21.equals(calendar7);
     }
@@ -3510,22 +3572,18 @@ class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
  */
 class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
         calendar21.setTime(ndflPersonIncome.taxTransferDate);
-        Calendar calendar7 = Calendar.getInstance();
-        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
-        calendar7.add(Calendar.DATE, 30);
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            calendar7.add(Calendar.DATE, 2);
-        }
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendar7.add(Calendar.DATE, 1);
-        }
+        // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
+        int offset = 30
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+        Calendar calendar7 = Calendar.getInstance();
+        calendar7.setTime(workDay);
 
         return calendar21.before(calendar7) || calendar21.equals(calendar7);
     }
@@ -3536,22 +3594,23 @@ class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
  */
 class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
     @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
+    boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
         if (ndflPersonIncome.taxTransferDate == null || ndflPersonIncome.incomePayoutDate == null) {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
         calendar21.setTime(ndflPersonIncome.taxTransferDate);
+
         Calendar calendar7 = Calendar.getInstance();
         calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
-        calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH));
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-            calendar7.add(Calendar.DATE, 2);
-        }
-        if (calendar7.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            calendar7.add(Calendar.DATE, 1);
-        }
+        // находим последний день месяца
+        calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))
+        Date workDay = calendar7.getTime()
+        // если последний день месяца приходится на выходной, то следующий первый рабочий день
+        int offset = 0
+        workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
+        calendar7.setTime(workDay);
 
         return calendar21.equals(calendar7);
     }

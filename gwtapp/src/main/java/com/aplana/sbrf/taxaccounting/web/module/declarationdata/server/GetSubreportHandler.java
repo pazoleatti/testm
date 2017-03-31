@@ -47,6 +47,11 @@ public class GetSubreportHandler extends AbstractActionHandler<GetSubreportActio
     @Override
     public GetSubreportResult execute(GetSubreportAction action, ExecutionContext executionContext) throws ActionException {
         GetSubreportResult result = new GetSubreportResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationId());
+            return result;
+        }
         TAUserInfo userInfo = securityService.currentUserInfo();
         DeclarationData declarationData = declarationDataService.get(action.getDeclarationId(), userInfo);
         Map<Long, RefBookParamInfo> refBookParamInfoMap = new HashMap<Long, RefBookParamInfo>();

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -56,69 +57,73 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
         TAUserInfo userInfo = securityService.currentUserInfo();
         final String taskName = declarationDataService.getTaskName(ddReportType, action.getTaxType());
         for (Long id: action.getDeclarationIds()) {
-            final Long declarationId = id;
-            if (action.isAccepted()) {
-                logger.info("Постановка операции \"%s\" в очередь на исполнение для %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
-                try {
-                    String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
-                    if (uuidXml != null) {
-                        DeclarationData declarationData = declarationDataService.get(declarationId, userInfo);
-                        if (!declarationData.getState().equals(State.ACCEPTED)) {
-                            String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
-                            Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
-                            if (restartStatus != null && restartStatus.getFirst()) {
-                                logger.warn("Данная операция уже запущена");
-                            } else if (restartStatus != null && !restartStatus.getFirst()) {
-                                // задача уже была создана, добавляем пользователя в получатели
+            if (declarationDataService.existDeclarationData(id)) {
+                final Long declarationId = id;
+                if (action.isAccepted()) {
+                    logger.info("Постановка операции \"%s\" в очередь на исполнение для %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
+                    try {
+                        String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
+                        if (uuidXml != null) {
+                            DeclarationData declarationData = declarationDataService.get(declarationId, userInfo);
+                            if (!declarationData.getState().equals(State.ACCEPTED)) {
+                                String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
+                                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
+                                if (restartStatus != null && restartStatus.getFirst()) {
+                                    logger.warn("Данная операция уже запущена");
+                                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                                    // задача уже была создана, добавляем пользователя в получатели
+                                } else {
+                                    Map<String, Object> params = new HashMap<String, Object>();
+                                    params.put("declarationDataId", declarationId);
+                                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                                        @Override
+                                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                                    declarationDataService.getDeclarationFullName(declarationId, ddReportType),
+                                                    LockData.State.IN_QUEUE.getText());
+                                        }
+
+                                        @Override
+                                        public void executePostCheck() {
+                                            logger.error("Найдены запущенные задач, которые блокирует выполнение операции.");
+                                        }
+
+                                        @Override
+                                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                                            return declarationDataService.checkExistTask(declarationId, reportType, logger);
+                                        }
+
+                                        @Override
+                                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                                            declarationDataService.interruptTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
+                                        }
+
+                                        @Override
+                                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                                            return declarationDataService.getTaskName(ddReportType, action.getTaxType());
+                                        }
+                                    });
+                                }
                             } else {
-                                Map<String, Object> params = new HashMap<String, Object>();
-                                params.put("declarationDataId", declarationId);
-                                asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
-                                    @Override
-                                    public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                                declarationDataService.getDeclarationFullName(declarationId, ddReportType),
-                                                LockData.State.IN_QUEUE.getText());
-                                    }
-
-                                    @Override
-                                    public void executePostCheck() {
-                                        logger.error("Найдены запущенные задач, которые блокирует выполнение операции.");
-                                    }
-
-                                    @Override
-                                    public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                                        return declarationDataService.checkExistTask(declarationId, reportType, logger);
-                                    }
-
-                                    @Override
-                                    public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                                        declarationDataService.interruptTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
-                                    }
-
-                                    @Override
-                                    public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                                        return declarationDataService.getTaskName(ddReportType, action.getTaxType());
-                                    }
-                                });
+                                logger.error("Налоговая форма уже находиться в статусе \"%s\".", State.ACCEPTED.getTitle());
                             }
                         } else {
-                            logger.error("Налоговая форма уже находиться в статусе \"%s\".", State.ACCEPTED.getTitle());
+                            logger.error("Экземпляр налоговой формы не заполнен данными.");
                         }
-                    } else {
-                        logger.error("Экземпляр налоговой формы не заполнен данными.");
+                    } catch (Exception e) {
+                        logger.error(e);
                     }
-                } catch (Exception e) {
-                    logger.error(e);
+                } else {
+                    logger.info("Выполяется операция \"%s\" для %s:", "Отмена принятия", declarationDataService.getDeclarationFullName(declarationId, null));
+                    try {
+                        declarationDataService.cancel(logger, declarationId, securityService.currentUserInfo());
+                        logger.info("Налоговая форма успешно переведена в статус \"%s\".", State.CREATED.getTitle());
+                    } catch (Exception e) {
+                        logger.error(e);
+                    }
                 }
             } else {
-                logger.info("Выполяется операция \"%s\" для %s:", "Отмена принятия", declarationDataService.getDeclarationFullName(declarationId, null));
-                try {
-                    declarationDataService.cancel(logger, declarationId, securityService.currentUserInfo());
-                    logger.info("Налоговая форма успешно переведена в статус \"%s\".", State.CREATED.getTitle());
-                } catch (Exception e) {
-                    logger.error(e);
-                }
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id);
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

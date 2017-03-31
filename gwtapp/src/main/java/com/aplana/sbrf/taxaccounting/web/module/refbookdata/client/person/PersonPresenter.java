@@ -53,6 +53,10 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
     @Override
     protected void onReveal() {
         super.onReveal();
+        updatePanel();
+    }
+
+    private void updatePanel() {
         setOriginalRow(null);
         deleteDuplicateRows.clear();
         GetDuplicatePersonAction action = new GetDuplicatePersonAction();
@@ -106,7 +110,7 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
                             @Override
                             public void onSuccess(SaveDuplicatePersonResult result) {
                                 LogAddEvent.fire(PersonPresenter.this, result.getUuid());
-                                onReveal();
+                                updatePanel();
                             }
                         }, PersonPresenter.this));
 

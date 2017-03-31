@@ -1,16 +1,4 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
-
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookHierPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
-import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import org.jukito.JukitoRunner;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import static org.mockito.Mockito.*;
 /*
 @RunWith(JukitoRunner.class)
 public class RefBookHierPresenterTest {

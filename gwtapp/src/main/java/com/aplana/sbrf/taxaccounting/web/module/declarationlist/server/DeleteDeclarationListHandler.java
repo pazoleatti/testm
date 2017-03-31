@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -36,17 +37,21 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
         TAUserInfo taUserInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         for(Long declarationId: action.getDeclarationIds()) {
-            try {
-                String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
-                declarationDataService.delete(declarationId, taUserInfo);
-                logger.info("Успешно удалена %s.", declarationFullName);
-            } catch (Exception e) {
-                logger.error("При удалении %s возникли ошибки:", declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));
-                if (e instanceof ServiceLoggerException) {
-                    logger.getEntries().addAll(logEntryService.getAll(((ServiceLoggerException) e).getUuid()));
-                } else {
-                    logger.error(e);
+            if (declarationDataService.existDeclarationData(declarationId)) {
+                try {
+                        String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
+                        declarationDataService.delete(declarationId, taUserInfo);
+                        logger.info("Успешно удалена %s.", declarationFullName);
+                } catch (Exception e) {
+                    logger.error("При удалении %s возникли ошибки:", declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));
+                    if (e instanceof ServiceLoggerException) {
+                        logger.getEntries().addAll(logEntryService.getAll(((ServiceLoggerException) e).getUuid()));
+                    } else {
+                        logger.error(e);
+                    }
                 }
+            } else {
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationId);
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

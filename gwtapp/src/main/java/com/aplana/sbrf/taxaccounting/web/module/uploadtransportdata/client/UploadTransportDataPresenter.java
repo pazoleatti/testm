@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.GetUserRoleUploadTransportDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.GetUserRoleUploadTransportDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.LoadAllAction;
 import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.LoadAllResult;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
@@ -38,6 +40,8 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
     }
 
     public interface MyView extends View, HasUiHandlers<UploadTransportDataUiHandlers> {
+        void showUpload(boolean show);
+        void showLoad(boolean show);
     }
 
     @Inject
@@ -91,6 +95,14 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         super.prepareFromRequest(request);
+        GetUserRoleUploadTransportDataAction action = new GetUserRoleUploadTransportDataAction();
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetUserRoleUploadTransportDataResult>() {
+            @Override
+            public void onSuccess(GetUserRoleUploadTransportDataResult result) {
+                getView().showLoad(result.isCanLoad());
+                getView().showUpload(result.isCanUpload());
+            }
+        }, UploadTransportDataPresenter.this));
     }
 
     @Override

@@ -27,9 +27,6 @@ public class GetDeclarationFilesCommentsHandler extends AbstractActionHandler<Ge
     private DeclarationDataAccessService accessService;
 
     @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
     private LockDataService lockService;
 
     @Autowired
@@ -50,6 +47,11 @@ public class GetDeclarationFilesCommentsHandler extends AbstractActionHandler<Ge
     public GetDeclarationFilesCommentsResult execute(GetDeclarationFilesCommentsAction action, ExecutionContext executionContext) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         GetDeclarationFilesCommentsResult result = new GetDeclarationFilesCommentsResult();
+        if (!declarationDataService.existDeclarationData(action.getDeclarationData().getId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationData().getId());
+            return result;
+        }
         Logger logger = new Logger();
         boolean canEdit = true;
         try {

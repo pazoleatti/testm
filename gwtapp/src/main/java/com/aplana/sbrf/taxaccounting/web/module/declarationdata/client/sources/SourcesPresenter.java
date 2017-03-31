@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.SourcesAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.SourcesResult;
 import com.google.inject.Inject;
@@ -28,6 +29,7 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
     }
 
     private final DispatchAsync dispatcher;
+    private DeclarationDataPresenter declarationDataPresenter;
     private Long declarationId;
 
     @Inject
@@ -44,6 +46,7 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SourcesResult>() {
             @Override
             public void onSuccess(SourcesResult result) {
+                if (!declarationDataPresenter.checkExistDeclarationData(result)) return;
                 getView().setTableData(result.getData());
             }
         }, this));
@@ -52,6 +55,10 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
     public void setDeclarationId(long declarationId) {
         this.declarationId = declarationId;
         reloadData();
+    }
+
+    public void setDeclarationDataPresenter(DeclarationDataPresenter declarationDataPresenter) {
+        this.declarationDataPresenter = declarationDataPresenter;
     }
 }
 

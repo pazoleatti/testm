@@ -85,5 +85,8 @@ prompt ref_book_income_kind
 prompt fill references in ref_book_region
 @@fill_regions_refs;
 
+prompt fias_socrbase
+@@fias_socrbase;
+
 commit;
 exit;

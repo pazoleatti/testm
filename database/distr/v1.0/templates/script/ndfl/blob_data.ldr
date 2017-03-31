@@ -27,7 +27,7 @@ begindata
  005699a0-07ed-11e7-93ae-92361f002671|report_person_all_consolidated.jrxml|primary_rnu_ndfl/v2016/report_person_all_db.jrxml|01.01.2016|
  9a7a519a-83ea-4ddf-bee0-b7af67ba5f78|primary_rnu_w_errors-2-1.xlsx|report_2ndfl_1/v2016/primary_rnu_w_errors.xlsx|01.01.2016|
  93d1fa12-6e72-4933-ba61-d4128a1103d8|primary_rnu_w_errors-2-2.xlsx|report_2ndfl_1/v2016/primary_rnu_w_errors.xlsx|01.01.2016|
- 00fb3c21-09d8-477b-b8c7-80cb84e664ca|primary_rnu_w_errors-6.xlsx|report_2ndfl_1/v2016/report_6ndfl.jrxml|01.01.2016|
+ 00fb3c21-09d8-477b-b8c7-80cb84e664ca|primary_rnu_w_errors-6.xlsx|report_6ndfl/v2016/primary_rnu_w_errors.xlsx|01.01.2016|
  047f207c-113e-488d-8390-9afc248a3bc8|report_ndfl_ref_1.jrxml|report_2ndfl_1/v2016/report_2ndfl.jrxml|01.01.2016|
  04d9b114-1782-4d09-ad88-729e5605c6ff|report_ndfl_ref_2.jrxml|report_2ndfl_1/v2016/report_2ndfl.jrxml|01.01.2016|
  d11ebeb4-07f2-11e7-93ae-92361f002671|report_kpp_oktmo.jrxml|consolidated_rnu_ndfl/v2016/report_kpp_oktmo.jrxml|01.01.2016|

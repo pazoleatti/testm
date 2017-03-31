@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.gwtplatform.dispatch.shared.Result;
-
-public class RecalculateDeclarationDataResult implements Result {
+public class RecalculateDeclarationDataResult extends DeclarationDataResult {
 
     private String uuid;
     private CreateAsyncTaskStatus status;
