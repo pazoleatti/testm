@@ -1287,7 +1287,8 @@ create table ndfl_references
   name varchar2(60 char) not null,
   lastname varchar2(60 char),
   birthday  date not null,
-  errtext varchar2(4000 char)
+  errtext varchar2(4000 char),
+  ndfl_person_id number(18)
 );
 
 comment on table ndfl_references is 'Реестр справок';
