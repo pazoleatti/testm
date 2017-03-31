@@ -2199,7 +2199,7 @@ def checkDataReference(
                         incomeCodeRefList.add(incomeCodeRef)
                     }
                     def incomeCodeRef = incomeCodeRefList.find {
-                        it.CODE?.stringValue == ndflPersonIncome.incomeCode &&
+                        it?.CODE?.stringValue == ndflPersonIncome.incomeCode &&
                                 ndflPersonIncome.incomeAccruedDate >= it.record_version_from?.dateValue &&
                                 ndflPersonIncome.incomeAccruedDate <= it.record_version_to?.dateValue
                     }
