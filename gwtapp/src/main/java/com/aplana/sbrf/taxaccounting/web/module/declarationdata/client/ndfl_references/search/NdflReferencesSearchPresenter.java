@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.search;
 
-import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
@@ -108,13 +106,7 @@ public class NdflReferencesSearchPresenter extends PresenterWidget<NdflReference
 
     @Override
     public void onCloseClicked() {
-        Dialog.confirmMessageYesNo("Отмена", "Отменить изменения?", new DialogHandler() {
-            @Override
-            public void yes() {
-                super.yes();
-                getView().hide();
-            }
-        });
+        getView().hide();
     }
 
     @Override
@@ -127,13 +119,10 @@ public class NdflReferencesSearchPresenter extends PresenterWidget<NdflReference
     @Override
     protected void onHide() {
         super.onHide();
-        getView().getSearchTable().setRowCount(0);
-        getView().getSearchTable().setRowData(0, new ArrayList<DataRow<Cell>>());
         if (dataProviderInitialized) {
             dataProvider.removeDataDisplay(getView().getSearchTable());
         }
         dataProviderInitialized = false;
-        onClearClicked();
     }
 
     public void setDeclarationDataId(long declarationDataId) {
