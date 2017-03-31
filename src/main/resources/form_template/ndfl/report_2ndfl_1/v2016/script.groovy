@@ -174,6 +174,9 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 def ndflReferencess = []
 
 @Field
+final NDFL_PERSON_ID = "NDFL_PERSON_ID"
+
+@Field
 final NDFL_REFERENCES_DECLARATION_DATA_ID = "DECLARATION_DATA_ID"
 
 @Field
@@ -201,11 +204,11 @@ final NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
 final OKTMO_CACHE = [:]
 
 def buildXml(def writer) {
-    buildXml(writer, false)
+    buildXml(writer, false, null, null)
 }
 
-def buildXmlForSpecificReport(def writer) {
-    buildXml(writer, true)
+def buildXmlForSpecificReport(def writer, Long xmlPartNumber, Long pNumSpravka) {
+    buildXml(writer, true, xmlPartNumber, pNumSpravka)
 }
 
 /**
@@ -214,7 +217,7 @@ def buildXmlForSpecificReport(def writer) {
  * @param isForSpecificReport
  * @return
  */
-def buildXml(def writer, boolean isForSpecificReport) {
+def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long pNumSpravka) {
     def refPersonIds = []
     ScriptUtils.checkInterrupted();
     ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
@@ -224,7 +227,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
     def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
 
     //Текущая страница представляющая порядковый номер файла
-    def currentPageNumber = partNumber
+    def currentPageNumber = xmlPartNumber?:partNumber
 
     // инициализация данных о подразделении
     departmentParam = getDepartmentParam(declarationData.departmentId, declarationData.reportPeriodId)
@@ -262,8 +265,17 @@ def buildXml(def writer, boolean isForSpecificReport) {
     def naimOrg = departmentParamRow?.NAME?.value
 
     // 	Данные для Файл.Документ.ПолучДох-(Данные о физическом лице - получателе дохода)
-    def ndflPersonsList = getNdflPersons()
-
+    def ndflPersonsList
+    if (pNumSpravka == null) {
+        ndflPersonsList = getNdflPersons()
+    } else {
+        def ndflPersonId = getProvider(NDFL_REFERENCES).getRecords(null, null, "DECLARATION_DATA_ID = ${declarationData.id} and NUM = ${pNumSpravka}", null).get(0).NDFL_PERSON_ID.value
+        if (ndflPersonId != null) {
+            ndflPersonsList = getNdflPersons(ndflPersonId.longValue())
+        } else {
+            ndflPersonsList = []
+        }
+    }
     // Порядковый номер физического лица
     def nomSpr = (currentPageNumber - 1) * NUMBER_OF_PERSONS
 
@@ -289,10 +301,14 @@ def buildXml(def writer, boolean isForSpecificReport) {
         ndflPersonsList.each { np ->
             ScriptUtils.checkInterrupted();
             // Порядковый номер физического лица
-            if (nomKorr != 0) {
-                nomSpr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "PERSON_ID = ${np.personId}", null).get(0).NUM.value
+            if (pNumSpravka == null) {
+                if (nomKorr != 0) {
+                    nomSpr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "PERSON_ID = ${np.personId}", null).get(0).NUM.value
+                } else {
+                    nomSpr++
+                }
             } else {
-                nomSpr++
+                nomSpr = pNumSpravka;
             }
             Документ(КНД: KND,
                     ДатаДок: dateDoc,
@@ -369,22 +385,64 @@ def buildXml(def writer, boolean isForSpecificReport) {
                         // Сведения о доходах сгруппированные по коду дохода
                         def ndflPersonIncomesGroupedByMonthAndIncomeCode = groupIncomesByMonth(ndflpersonIncomesForTaxRate)
                         ДохВыч() {
+                            int index = 1, countIncome = 0
+                            if (isForSpecificReport) {
+                                ndflPersonIncomesGroupedByMonthAndIncomeCode.keySet().each { monthKey ->
+                                    ScriptUtils.checkInterrupted();
+                                    def ndflPersonIncomesGroupedByIncomeCode = ndflPersonIncomesGroupedByMonthAndIncomeCode.get(monthKey)
+                                    ndflPersonIncomesGroupedByIncomeCode.keySet().eachWithIndex { incomeKey, int i ->
+                                        ScriptUtils.checkInterrupted();
+                                        def ndflPersonIncomesFromGroup = ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)
+                                        def ndflPersonIncomesWhereIncomeAccruedSumGreaterZero = []
+                                        ndflPersonIncomesFromGroup.each {
+                                            if (it.incomeAccruedSumm != null && it.incomeAccruedSumm > new BigDecimal(0)) {
+                                                ndflPersonIncomesWhereIncomeAccruedSumGreaterZero << it
+                                            }
+                                        }
+                                        countIncome += ndflPersonIncomesWhereIncomeAccruedSumGreaterZero.size()
+                                    }
+                                }
+                            }
+                            index = 1
                             ndflPersonIncomesGroupedByMonthAndIncomeCode.keySet().each { monthKey ->
                                 ScriptUtils.checkInterrupted();
                                 def ndflPersonIncomesGroupedByIncomeCode = ndflPersonIncomesGroupedByMonthAndIncomeCode.get(monthKey)
                                 ndflPersonIncomesGroupedByIncomeCode.keySet().eachWithIndex { incomeKey, int i ->
                                     ScriptUtils.checkInterrupted();
                                     if (isForSpecificReport) {
-                                        СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
-                                                КодДоход: incomeKey,
-                                                СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2),
-                                                Страница: i < ndflPersonIncomesGroupedByIncomeCode.size() / 2 ? 1 : 2
-                                        ) {
-                                            def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey).get(0), deductionsSelectedForDeductionsInfo)
-                                            deductionsFilteredForCurrIncome.each {
-                                                if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
-                                                    СвСумВыч(КодВычет: it.typeCode,
-                                                            СумВычет: ScriptUtils.round(it.periodCurrSumm, 2)) {}
+                                        def ndflPersonIncomesFromGroup = ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)
+                                        def ndflPersonIncomesWhereIncomeAccruedSumGreaterZero = []
+                                        ndflPersonIncomesFromGroup.each {
+                                            if (it.incomeAccruedSumm != null && it.incomeAccruedSumm > new BigDecimal(0)) {
+                                                ndflPersonIncomesWhereIncomeAccruedSumGreaterZero << it
+                                            }
+                                        }
+                                        if (ndflPersonIncomesWhereIncomeAccruedSumGreaterZero.size() > 0) {
+                                            СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
+                                                    КодДоход: incomeKey,
+                                                    СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2),
+                                                    Страница: index <= ((countIncome+1) / 2) ? 1 : 2
+                                            ) {
+                                                boolean exist = false
+                                                def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesWhereIncomeAccruedSumGreaterZero, deductionsSelectedForDeductionsInfo)
+                                                deductionsFilteredForCurrIncome.each { group ->
+                                                    def deductionsForSum = []
+                                                    group.each {
+                                                        if (it.periodCurrSumm != null && it.periodCurrSumm != 0) {
+                                                            deductionsForSum << it
+                                                        }
+                                                    }
+                                                    if (!deductionsForSum.isEmpty()) {
+                                                        СвСумВыч(КодВычет: deductionsForSum[0].typeCode,
+                                                                СумВычет: ScriptUtils.round(getSumVichOfPeriodCurrSumm(deductionsForSum), 2)) {}
+                                                        exist = true
+                                                        index++
+                                                    }
+                                                }
+                                                if (!exist) {
+                                                    СвСумВыч(КодВычет: "",
+                                                            СумВычет: "") {}
+                                                    index++
                                                 }
                                             }
                                         }
@@ -507,18 +565,25 @@ def buildXml(def writer, boolean isForSpecificReport) {
                         }
                     }
                 }
+
+                if (isForSpecificReport && ndflPersonIncomesGroupedByTaxRate.keySet().isEmpty()) {
+                    СведДох() {
+                    }
+                }
             }
             if (!refPersonIds.contains(np.personId)) {
                 refPersonIds << np.personId
-                ndflReferencess << createRefBookAttributesForNdflReference(np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
+                ndflReferencess << createRefBookAttributesForNdflReference(np.id, np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
             }
 
         }
     }
     ScriptUtils.checkInterrupted();
-    saveNdflRefences()
-    ScriptUtils.checkInterrupted();
-    saveFileInfo(currDate, fileName)
+    if (!isForSpecificReport) {
+        saveNdflRefences()
+        ScriptUtils.checkInterrupted();
+        saveFileInfo(currDate, fileName)
+    }
 }
 // Сохранение информации о файле в комментариях
 def saveFileInfo(currDate, fileName) {
@@ -554,8 +619,9 @@ def saveNdflRefences() {
  * @return
  */
 def createRefBookAttributesForNdflReference(
-        def personId, def nomSpr, def lastName, def firstName, def middleName, def birthDay) {
+        def ndflPersonId, def personId, def nomSpr, def lastName, def firstName, def middleName, def birthDay) {
     Map<String, RefBookValue> row = new HashMap<String, RefBookValue>();
+    row.put(NDFL_PERSON_ID, new RefBookValue(RefBookAttributeType.NUMBER, ndflPersonId))
     row.put(NDFL_REFERENCES_DECLARATION_DATA_ID, new RefBookValue(RefBookAttributeType.NUMBER, declarationData.id))
     row.put(NDFL_REFERENCES_PERSON_ID, new RefBookValue(RefBookAttributeType.REFERENCE, personId))
     row.put(NDFL_REFERENCES_NUM, new RefBookValue(RefBookAttributeType.NUMBER, nomSpr))
@@ -600,6 +666,13 @@ def getNdflPersons() {
     }
     return toReturn
     //ndflPersonService.findNdflPersonByParameters(declarationData.id, null, pageNumber * 3000 - 2999, NUMBER_OF_PERSONS)
+}
+
+// Получение данных
+def getNdflPersons(Long personId) {
+    def toReturn = []
+    toReturn.addAll(ndflPersonService.findByIdList([personId]))
+    return toReturn
 }
 
 /**
@@ -1645,9 +1718,13 @@ def createSpecificReport() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
     params['pNumSpravka'] = row.pNumSpravka
-    def xmlStr = filterData(row)
+
+    def xmlStr = declarationService.getXmlData(declarationData.id)
+    def Файл = new XmlSlurper().parseText(xmlStr)
+    def xmlPartNumber = 1 + (long)((new Long(Файл.Документ.find{doc -> true }.@НомСпр.text()))/NUMBER_OF_PERSONS)
+
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
-        it.write(xmlStr, 0, xmlStr.length())
+        buildXmlForSpecificReport(it, xmlPartNumber, new Long(row.pNumSpravka))
         it.flush()
     });
 
