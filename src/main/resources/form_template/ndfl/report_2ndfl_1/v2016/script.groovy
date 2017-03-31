@@ -303,7 +303,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
             // Порядковый номер физического лица
             if (pNumSpravka == null) {
                 if (nomKorr != 0) {
-                    nomSpr = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "PERSON_ID = ${np.personId}", null).get(0).NUM.value
+                    nomSpr = getProvider(NDFL_REFERENCES).getRecords(new Date(), null, "PERSON_ID = ${np.personId}", null).get(0).NUM.value
                 } else {
                     nomSpr++
                 }
@@ -1146,6 +1146,7 @@ def createForm() {
         def declarationsForRemove = []
         declarations.each { declaration ->
             ScriptUtils.checkInterrupted();
+
             def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id.value
             def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id.value
             def stateDocError = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Ошибка'", null).get(0).id.value
@@ -1156,9 +1157,8 @@ def createForm() {
             }
         }
         declarations.removeAll(declarationsForRemove)
-
         declarations.each { declaration ->
-            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, null)
+            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
         }
         declarations.each {
             ScriptUtils.checkInterrupted();
@@ -1211,7 +1211,6 @@ def createForm() {
             }
         }
     }
-
 
     //initNdflPersons(ndflPersonsIdGroupedByKppOktmo)
 
@@ -1321,7 +1320,7 @@ def createReports() {
         Department department = departmentService.get(departmentReportPeriod.departmentId);
         String strCorrPeriod = ""
         if (departmentReportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
+            strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
         }
         String path = String.format("Отчетность %s, %s, %s, %s%s",
                 declarationTemplate.getName(),
@@ -1483,7 +1482,7 @@ def getDepartmentParamDetailsList(def departmentParamId, def reportPeriodId) {
 // Получить список из реестра справок с ошибкой ФНС
 def getNdflReferencesWithError(declarationDataId, reportPeriodId) {
     def filter = "DECLARATION_DATA_ID = ${declarationDataId}"
-    def allNdflReferences = getProvider(NDFL_REFERENCES).getRecords(getReportPeriodEndDate(reportPeriodId), null, filter, null)
+    def allNdflReferences = getProvider(NDFL_REFERENCES).getRecords(new Date(), null, filter, null)
     def ndflReferencesForRemove = []
     allNdflReferences.each {
         if (it.ERRTEXT?.value == null) {
