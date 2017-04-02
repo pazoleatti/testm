@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -78,13 +79,17 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
         logger.setTaUserInfo(securityService.currentUserInfo());
-        // По фактц сохраняем по одной записи
+        // По факту сохраняем по одной записи
         result.setNewIds(refBookDataProvider.createRecordVersion(logger, action.getVersionFrom(), action.getVersionTo(), Arrays.asList(record)));
 
-        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), result.getNewIds().get(0), action.getRecordId(), action.getSourceUniqueRecordId(), Arrays.asList(values), action.getVersionFrom(),
-                action.getVersionTo(), true, securityService.currentUserInfo(), logger);
+        Map<String, RefBookValue> updateValues = refBookDataProvider.getRecordData(result.getNewIds().get(0));
 
-        refBookDataProvider.updateRecordVersion(logger, result.getNewIds().get(0), action.getVersionFrom(), action.getVersionTo(), values);
+        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), result.getNewIds().get(0), action.getRecordId(), action.getSourceUniqueRecordId(), Arrays.asList(updateValues), action.getVersionFrom(),
+                action.getVersionTo(), true, securityService.currentUserInfo(), logger);
+        if (RefBook.Id.PERSON.getId() == action.getRefBookId()) {
+            updateValues.remove("record_id");
+        }
+        refBookDataProvider.updateRecordVersion(logger, result.getNewIds().get(0), action.getVersionFrom(), action.getVersionTo(), updateValues);
 
         result.setUuid(logEntryService.save(logger.getEntries()));
         result.setCheckRegion(true);
