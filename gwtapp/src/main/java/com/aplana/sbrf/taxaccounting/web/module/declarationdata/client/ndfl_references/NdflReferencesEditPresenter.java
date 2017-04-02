@@ -117,7 +117,7 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
 
     @Override
     public void onCancellClicked() {
-        Dialog.confirmMessageYesNo("Отмена", "Отменить изменения?", new DialogHandler() {
+        Dialog.confirmMessageYesNo("Закрытие", "Закрыть окно?", new DialogHandler() {
             @Override
             public void yes() {
                 super.yes();
@@ -129,8 +129,8 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
     @Override
     public void onHide() {
         super.onHide();
-        getView().getTable().setRowData(new ArrayList<DataRow<Cell>>());
-        getView().setNote(null);
+        /*getView().getTable().setRowData(new ArrayList<DataRow<Cell>>());
+        getView().setNote(null);*/
     }
 
     private DataRow<Cell> createDataRow() {
