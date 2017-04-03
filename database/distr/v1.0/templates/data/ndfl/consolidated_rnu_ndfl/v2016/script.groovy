@@ -96,6 +96,17 @@ void consolidation() {
 
     //декларация-приемник, true - заполнятся только текстовые данные для GUI и сообщений,true - исключить несозданные источники,ограничение по состоянию для созданных экземпляров список нф-источников
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
+
+    // Реализация временного решения https://conf.aplana.com/pages/viewpage.action?pageId=28541629
+    //********************************************************************************************
+    DepartmentReportPeriod currDrp = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    if (currDrp.correctionDate != null) {
+        DepartmentReportPeriod firstDrp = departmentReportPeriodService.getFirst(currDrp.departmentId, currDrp.reportPeriod.id)
+        DeclarationData firstDd = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, firstDrp.id).get(0)
+        sourcesInfo.addAll(declarationService.getDeclarationSourcesInfo(firstDd, true, false, null, userInfo, logger))
+    }
+    //***********************************************************************************************
+
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
     if (declarationDataIdList.isEmpty()){
@@ -432,13 +443,59 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
  */
 List<Long> collectDeclarationDataIdList(List<Relation> sourcesInfo) {
     def result = []
-    for (Relation relation : sourcesInfo) {
+    List<Relation> filteredRelations = filterRelations(sourcesInfo)
+    for (Relation relation : filteredRelations) {
         if (!result.contains(relation.declarationDataId)) {
             result.add(relation.declarationDataId)
         }
     }
     return result
 }
+
+/**
+ * Если в некорректирующем и корректирующем (корректирующих) периодах, относящихся к одному отчетному периоду, найдены группы (множества, наборы) ПНФ с совпадающими параметрами "Подразделение" и "АСНУ":
+ Система включает в КНФ множество ПНФ, относящихся к периоду с наиболее старшим периодом сдачи корректировки.
+ * @param sourcesInfo
+ * @return
+ */
+List<Relation> filterRelations(List<Relation> sourcesInfo) {
+    List<Relation> toReturn = []
+    Map<Integer, List<Relation>> mapDepartmentRelation = [:]
+    sourcesInfo.each {
+        if (mapDepartmentRelation.get(it.departmentId) == null) {
+            mapDepartmentRelation[it.departmentId] = [it]
+        } else {
+            mapDepartmentRelation.get(it.departmentId) << it
+        }
+    }
+    mapDepartmentRelation.entrySet().each { entry ->
+        boolean sameAsnu = false
+        if (entry.value.size() > 2) {
+            def asnu = null
+            for (rel in entry) {
+                if (asnu == null) {
+                    asnu = rel.asnuId
+                } else if (rel.asnuId == asnu) {
+                    sameAsnu = true
+                    break
+                }
+            }
+        }
+
+        if (sameAsnu) {
+            Date oldestDate = entry.value.correctionDate.min()
+            Relation oldestRel = entry.value.find {
+                it.correctionDate = oldestDate
+            }
+            toReturn.add(oldestRel)
+        } else {
+            toReturn.addAll(entry.value)
+        }
+    }
+    return toReturn
+}
+
+
 
 /**
  * Найти все NdflPerson привязанные к НФ вместе с данными о доходах
@@ -682,10 +739,24 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         }
         return result;
     } else {
+        ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+
+        Department department = departmentService.get(declarationData.departmentId)
+
         List<DeclarationData> toReturn = []
-        toReturn.addAll(declarationService.find(NDFL_2_1_TEMPLATE_ID, declarationData.departmentReportPeriodId))
-        toReturn.addAll(declarationService.find(NDFL_2_2_TEMPLATE_ID, declarationData.departmentReportPeriodId))
-        toReturn.addAll(declarationService.find(NDFL_6_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(NDFL_2_1_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
+        declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_2_2_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
+        declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_6_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
+        for (DeclarationData declarationDataDestination : declarationDataList) {
+            if (departmentReportPeriod.correctionDate != null) {
+                DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
+                if (departmentReportPeriodDestination.correctionDate == null || departmentReportPeriod.correctionDate > departmentReportPeriodDestination.correctionDate) {
+                    continue
+                }
+            }
+            toReturn.add(declarationDataDestination)
+        }
         return toReturn
     }
 
@@ -961,7 +1032,10 @@ def createSpecificReport() {
             break;
         case 'report_kpp_oktmo':
             createSpecificReportDb();
-            scriptSpecificReportHolder.setFileName("Отчетность_по_КПП,ОКТМО" + ".xlsx")
+            ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+            def reportPeriodName = reportPeriod.getTaxPeriod().year + '_' + reportPeriod.name
+            Department department = departmentService.get(declarationData.departmentId)
+            scriptSpecificReportHolder.setFileName("Реестр_сформированной_отчетности_${declarationData.id}_${reportPeriodName}_${department.shortName}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
             break;
         case 'rnu_ndfl_person_all_db':
             createSpecificReportDb();
