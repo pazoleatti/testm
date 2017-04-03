@@ -70,7 +70,7 @@
 		<band height="52" splitType="Stretch">
 			<staticText>
 				<reportElement uuid="5a8ba7ce-deb4-4d9b-8fd4-b8c11d66d996" x="0" y="32" width="343" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Отчетность по КПП, ОКТМО"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Реестр сформированной отчетности"/>
 				</reportElement>
 				<textElement>
 					<font fontName="Arial" isBold="true"/>
