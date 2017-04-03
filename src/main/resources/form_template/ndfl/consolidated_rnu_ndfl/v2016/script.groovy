@@ -1032,7 +1032,10 @@ def createSpecificReport() {
             break;
         case 'report_kpp_oktmo':
             createSpecificReportDb();
-            scriptSpecificReportHolder.setFileName("Отчетность_по_КПП,ОКТМО" + ".xlsx")
+            ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+            def reportPeriodName = reportPeriod.getTaxPeriod().year + '_' + reportPeriod.name
+            Department department = departmentService.get(declarationData.departmentId)
+            scriptSpecificReportHolder.setFileName("Реестр_сформированной_отчетности_${declarationData.id}_${reportPeriodName}_${department.shortName}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
             break;
         case 'rnu_ndfl_person_all_db':
             createSpecificReportDb();
