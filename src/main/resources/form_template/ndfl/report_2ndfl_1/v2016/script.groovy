@@ -662,7 +662,9 @@ def getNdflPersons() {
     def toReturn = []
     def queryParameterList = ndflPersonKnfId.collate(1000)
     queryParameterList.each {
-        toReturn.addAll(ndflPersonService.findByIdList(it))
+        if (!it.isEmpty()) {
+            toReturn.addAll(ndflPersonService.findByIdList(it))
+        }
     }
     return toReturn
     //ndflPersonService.findNdflPersonByParameters(declarationData.id, null, pageNumber * 3000 - 2999, NUMBER_OF_PERSONS)
@@ -1231,6 +1233,12 @@ def createForm() {
         npGroupValue.eachWithIndex { part, index ->
             ScriptUtils.checkInterrupted();
             def npGropSourcesIdList = part.id
+            if (npGropSourcesIdList == null || npGropSourcesIdList.isEmpty()) {
+                if (departmentReportPeriod.correctionDate != null) {
+                    logger.info("Для пары КПП ($kpp) - ОКТМО ($oktmo) не найдены ошибки от ФНС, по ней в корректирующем периоде не будут созданы экземпляры форм")
+                }
+                return;
+            }
             Map<String, Object> params
             Long ddId
             def indexFrom1 = ++index
