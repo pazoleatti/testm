@@ -682,10 +682,24 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         }
         return result;
     } else {
+        ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+
+        Department department = departmentService.get(declarationData.departmentId)
+
         List<DeclarationData> toReturn = []
-        toReturn.addAll(declarationService.find(NDFL_2_1_TEMPLATE_ID, declarationData.departmentReportPeriodId))
-        toReturn.addAll(declarationService.find(NDFL_2_2_TEMPLATE_ID, declarationData.departmentReportPeriodId))
-        toReturn.addAll(declarationService.find(NDFL_6_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(NDFL_2_1_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
+        declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_2_2_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
+        declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_6_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
+        for (DeclarationData declarationDataDestination : declarationDataList) {
+            if (departmentReportPeriod.correctionDate != null) {
+                DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
+                if (departmentReportPeriodDestination.correctionDate == null || departmentReportPeriod.correctionDate > departmentReportPeriodDestination.correctionDate) {
+                    continue
+                }
+            }
+            toReturn.add(declarationDataDestination)
+        }
         return toReturn
     }
 
