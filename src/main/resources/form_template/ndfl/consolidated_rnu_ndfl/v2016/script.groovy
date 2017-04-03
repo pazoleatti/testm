@@ -472,7 +472,7 @@ List<Relation> filterRelations(List<Relation> sourcesInfo) {
         boolean sameAsnu = false
         if (entry.value.size() > 2) {
             def asnu = null
-            for (rel in entry) {
+            for (rel in entry.value) {
                 if (asnu == null) {
                     asnu = rel.asnuId
                 } else if (rel.asnuId == asnu) {
@@ -485,7 +485,7 @@ List<Relation> filterRelations(List<Relation> sourcesInfo) {
         if (sameAsnu) {
             Date oldestDate = entry.value.correctionDate.min()
             Relation oldestRel = entry.value.find {
-                it.correctionDate = oldestDate
+                it.correctionDate == oldestDate
             }
             toReturn.add(oldestRel)
         } else {
