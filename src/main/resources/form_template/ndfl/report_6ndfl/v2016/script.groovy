@@ -917,7 +917,7 @@ def createForm() {
         }
         declarations.removeAll(declarationsForRemove)
         declarations.each { declaration ->
-            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, null)
+            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
         }
         // Поиск КПП и ОКТМО для некорр периода
     } else {
@@ -944,11 +944,13 @@ def createForm() {
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
 
-    pairKppOktmoList.each { pair ->
-        ScriptUtils.checkInterrupted()
-        def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString())
-        if (ndflPersons != null && ndflPersons.size() != 0) {
-            addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
+    if (!allDeclarationData.isEmpty()) {
+        pairKppOktmoList.each { pair ->
+            ScriptUtils.checkInterrupted()
+            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString())
+            if (ndflPersons != null && ndflPersons.size() != 0) {
+                addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
+            }
         }
     }
     //logger.info(ndflPersonsGroupedByKppOktmo.toString())
