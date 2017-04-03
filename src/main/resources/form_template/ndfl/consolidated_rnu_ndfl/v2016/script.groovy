@@ -96,6 +96,17 @@ void consolidation() {
 
     //декларация-приемник, true - заполнятся только текстовые данные для GUI и сообщений,true - исключить несозданные источники,ограничение по состоянию для созданных экземпляров список нф-источников
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
+
+    // Реализация временного решения https://conf.aplana.com/pages/viewpage.action?pageId=28541629
+    //********************************************************************************************
+    DepartmentReportPeriod currDrp = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    if (currDrp.correctionDate != null) {
+        DepartmentReportPeriod firstDrp = departmentReportPeriodService.getFirst(currDrp.departmentId, currDrp.reportPeriod.id)
+        DeclarationData firstDd = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, firstDrp.id).get(0)
+        sourcesInfo.addAll(declarationService.getDeclarationSourcesInfo(firstDd, true, false, null, userInfo, logger))
+    }
+    //***********************************************************************************************
+
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
     if (declarationDataIdList.isEmpty()){
@@ -432,13 +443,59 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
  */
 List<Long> collectDeclarationDataIdList(List<Relation> sourcesInfo) {
     def result = []
-    for (Relation relation : sourcesInfo) {
+    List<Relation> filteredRelations = filterRelations(sourcesInfo)
+    for (Relation relation : filteredRelations) {
         if (!result.contains(relation.declarationDataId)) {
             result.add(relation.declarationDataId)
         }
     }
     return result
 }
+
+/**
+ * Если в некорректирующем и корректирующем (корректирующих) периодах, относящихся к одному отчетному периоду, найдены группы (множества, наборы) ПНФ с совпадающими параметрами "Подразделение" и "АСНУ":
+ Система включает в КНФ множество ПНФ, относящихся к периоду с наиболее старшим периодом сдачи корректировки.
+ * @param sourcesInfo
+ * @return
+ */
+List<Relation> filterRelations(List<Relation> sourcesInfo) {
+    List<Relation> toReturn = []
+    Map<Integer, List<Relation>> mapDepartmentRelation = [:]
+    sourcesInfo.each {
+        if (mapDepartmentRelation.get(it.departmentId) == null) {
+            mapDepartmentRelation[it.departmentId] = [it]
+        } else {
+            mapDepartmentRelation.get(it.departmentId) << it
+        }
+    }
+    mapDepartmentRelation.entrySet().each { entry ->
+        boolean sameAsnu = false
+        if (entry.value.size() > 2) {
+            def asnu = null
+            for (rel in entry) {
+                if (asnu == null) {
+                    asnu = rel.asnuId
+                } else if (rel.asnuId == asnu) {
+                    sameAsnu = true
+                    break
+                }
+            }
+        }
+
+        if (sameAsnu) {
+            Date oldestDate = entry.value.correctionDate.min()
+            Relation oldestRel = entry.value.find {
+                it.correctionDate = oldestDate
+            }
+            toReturn.add(oldestRel)
+        } else {
+            toReturn.addAll(entry.value)
+        }
+    }
+    return toReturn
+}
+
+
 
 /**
  * Найти все NdflPerson привязанные к НФ вместе с данными о доходах
