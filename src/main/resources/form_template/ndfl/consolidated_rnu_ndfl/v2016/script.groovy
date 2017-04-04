@@ -3369,21 +3369,21 @@ boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePay
     // НДФЛ.Расчет.Дата
     boolean taxDateOk = dateRelateToCurrentPeriod(taxDate)
     if (!incomeAccruedDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач\" недопустимое значение: \"${incomeAccruedDate ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач\" недопустимое значение: \"${incomeAccruedDate ? incomeAccruedDate.format("dd.MM.yyyy"): ""}\":дата операции не входит в отчетный период ТФ.\n" +
                 "КПП = $kpp.\n" +
                 "ОКТМО = $oktmo\n" +
                 "ФЛ ИНП = $inp\n" +
                 "ФИО = $fio")
     }
     if (!incomePayoutDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл\" недопустимое значение: \"${incomePayoutDate ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл\" недопустимое значение: \"${incomePayoutDate ? incomePayoutDate.format("dd.MM.yyyy"): ""}\":дата операции не входит в отчетный период ТФ.\n" +
                 "КПП = $kpp.\n" +
                 "ОКТМО = $oktmo\n" +
                 "ФЛ ИНП = $inp\n" +
                 "ФИО = $fio")
     }
     if (!taxDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог\" недопустимое значение: \"${taxDateOk ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
+        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог\" недопустимое значение: \"${taxDateOk ? taxDateOk.format("dd.MM.yyyy"): ""}\":дата операции не входит в отчетный период ТФ.\n" +
                 "КПП = $kpp.\n" +
                 "ОКТМО = $oktmo\n" +
                 "ФЛ ИНП = $inp\n" +
