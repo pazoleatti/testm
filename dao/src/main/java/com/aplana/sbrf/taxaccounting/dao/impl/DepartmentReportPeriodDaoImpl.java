@@ -490,13 +490,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId) {
-        String query = "select drp.id from DEPARTMENT_REPORT_PERIOD drp " +
-                "where drp.DEPARTMENT_ID in (select id from department where type = :departmentType) " +
-                "and drp.REPORT_PERIOD_ID = :reportPeriodId and drp.IS_ACTIVE = 1";
+    public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId) {
+        String query = "select drp.id from department_report_period drp \n" +
+                "join department_report_period drp2 on drp2.id = :departmentReportPeriodId\n" +
+                "where drp.department_id in (select id from department where type = :departmentType) \n" +
+                "and drp.report_period_id = drp2.report_period_id and (drp.correction_date is null and drp2.correction_date is null or drp.correction_date = drp2.correction_date)";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("departmentType", departmentTypeCode);
-        params.addValue("reportPeriodId", reportPeriodId);
+        params.addValue("departmentReportPeriodId", departmentReportPeriodId);
         try {
             return getNamedParameterJdbcTemplate().queryForList(query, params, Integer.class);
         } catch (EmptyResultDataAccessException ex){

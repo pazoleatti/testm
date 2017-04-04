@@ -644,12 +644,16 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         //Список отчетных периодов подразделения
         List<DepartmentReportPeriod> departmentReportPeriodList = new ArrayList<DepartmentReportPeriod>();
         List<DeclarationData> allDeclarationDataList = declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, departmentId, reportPeriodId);
+        DepartmentReportPeriod depReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
 
         //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
         Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
         for (DeclarationData declarationData : allDeclarationDataList) {
-            Long asnuId = declarationData.getAsnuId();
             DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod;
+            if (depReportPeriod.correctionDate != departmentReportPeriod.correctionDate) {
+                continue
+            }
+            Long asnuId = declarationData.getAsnuId();
             Integer departmentReportPeriodId = departmentReportPeriod.getId();
             departmentReportPeriodList.add(departmentReportPeriod);
             if (asnuId != null) {
@@ -680,7 +684,9 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
             Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
             List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
             result.addAll(declarationDataList);
-            result.addAll(getUncorrectedPeriodDeclarationData(asnuDeclarationDataMap, departmentReportPeriodList))
+            if (depReportPeriod.correctionDate != null) {
+                result.addAll(getUncorrectedPeriodDeclarationData(asnuDeclarationDataMap, departmentReportPeriodList))
+            }
         }
         return result;
     } else {
@@ -694,11 +700,9 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_2_2_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
         declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_6_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
         for (DeclarationData declarationDataDestination : declarationDataList) {
-            if (departmentReportPeriod.correctionDate != null) {
-                DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
-                if (departmentReportPeriodDestination.correctionDate == null || departmentReportPeriod.correctionDate > departmentReportPeriodDestination.correctionDate) {
-                    continue
-                }
+            DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
+            if (departmentReportPeriod.correctionDate != departmentReportPeriodDestination.correctionDate) {
+                continue
             }
             toReturn.add(declarationDataDestination)
         }
