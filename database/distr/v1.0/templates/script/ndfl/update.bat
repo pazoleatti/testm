@@ -13,5 +13,7 @@ ECHO -- blob
 ECHO -- template
 "%ORA_BIN%\sqlldr" userid=%AUTH% control="%BASE_DIR%/template.ldr" log="%LOG_DIR_REL%/%PREFIX%_4_template.txt" bad="%BAD_DIR_REL%/%PREFIX%_template.txt"
 CD %BASE_DIR%
+ECHO -- template_file
+"%ORA_BIN%\sqlplus" %AUTH% @"template_file.sql" > "%LOG_DIR_REL%/%PREFIX%_5_template_file.txt"
 ECHO -- subreport
-"%ORA_BIN%\sqlplus" %AUTH% @"subreport.sql" > "%LOG_DIR_REL%/%PREFIX%_5_subreport.txt"
+"%ORA_BIN%\sqlplus" %AUTH% @"subreport.sql" > "%LOG_DIR_REL%/%PREFIX%_6_subreport.txt"

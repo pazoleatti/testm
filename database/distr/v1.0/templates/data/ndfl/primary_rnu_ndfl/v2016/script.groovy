@@ -1130,13 +1130,21 @@ List<Relation> getDestinationInfo(boolean isLight){
 
     //отчетный период в котором выполняется консолидация
     ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+
     //Идентификатор подразделения по которому формируется консолидированная форма
     def parentDepartmentId = declarationData.departmentId
     Department department = departmentService.get(parentDepartmentId)
     List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
-    for (DeclarationData declarationData : declarationDataList) {
+    for (DeclarationData declarationDataDestination : declarationDataList) {
+        if (departmentReportPeriod.correctionDate != null) {
+            DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
+            if (departmentReportPeriodDestination.correctionDate == null || departmentReportPeriod.correctionDate > departmentReportPeriodDestination.correctionDate) {
+                continue
+            }
+        }
         //Формируем связь источник-приемник
-        def relation = getRelation(declarationData, department, declarationDataReportPeriod, isLight)
+        def relation = getRelation(declarationDataDestination, department, declarationDataReportPeriod, isLight)
         destinationInfo.add(relation)
     }
 

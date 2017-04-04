@@ -10,7 +10,7 @@ ALTER TABLE declaration_template_file DISABLE CONSTRAINT fk_decl_templ_file_temp
 
 --declaration_subreport
 ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_decl_subreport;
---ALTER TABLE declaration_subreport_params DISABLE CONSTRAINT fk_decl_subrep_pars_subrep_id;
+--ALTER TABLE declaration_subreport_params DISABLE CONSTRAINT fk_decl_subrep_pars_subrep_id; -- пусть удал€ютс€ каскадно
 
 --blob_data
 ALTER TABLE ref_book DISABLE CONSTRAINT ref_book_fk_script_id;
@@ -23,6 +23,7 @@ ALTER TABLE log_system_report DISABLE CONSTRAINT log_system_report_fk_blob_data;
 ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_blob_data;
 ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_blob_data;
 ALTER TABLE declaration_data_file DISABLE CONSTRAINT decl_data_file_pk;
+ALTER TABLE declaration_template_file DISABLE CONSTRAINT fk_decl_templ_file_blob;
 
 COMMIT;
 EXIT;
