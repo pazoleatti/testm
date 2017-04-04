@@ -96,6 +96,7 @@ void consolidation() {
 
     //декларация-приемник, true - заполнятся только текстовые данные для GUI и сообщений,true - исключить несозданные источники,ограничение по состоянию для созданных экземпляров список нф-источников
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
+
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
     if (declarationDataIdList.isEmpty()){
@@ -679,13 +680,28 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
             Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
             List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
             result.addAll(declarationDataList);
+            result.addAll(getUncorrectedPeriodDeclarationData(asnuDeclarationDataMap, departmentReportPeriodList))
         }
         return result;
     } else {
+        ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+
+        Department department = departmentService.get(declarationData.departmentId)
+
         List<DeclarationData> toReturn = []
-        toReturn.addAll(declarationService.find(NDFL_2_1_TEMPLATE_ID, declarationData.departmentReportPeriodId))
-        toReturn.addAll(declarationService.find(NDFL_2_2_TEMPLATE_ID, declarationData.departmentReportPeriodId))
-        toReturn.addAll(declarationService.find(NDFL_6_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(NDFL_2_1_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
+        declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_2_2_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
+        declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_6_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
+        for (DeclarationData declarationDataDestination : declarationDataList) {
+            if (departmentReportPeriod.correctionDate != null) {
+                DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
+                if (departmentReportPeriodDestination.correctionDate == null || departmentReportPeriod.correctionDate > departmentReportPeriodDestination.correctionDate) {
+                    continue
+                }
+            }
+            toReturn.add(declarationDataDestination)
+        }
         return toReturn
     }
 
@@ -705,6 +721,28 @@ List<DeclarationData> getLast(Map<Integer, List<DeclarationData>> declarationDat
         }
     }
     return Collections.emptyList();
+}
+
+/**
+ * Реализует условие из временного решения: "Если период является корректирующим, в КНФ дополнительно надо включить ПНФ основного периода, соответствующего корректирующему."
+ * @param declarationDataMap
+ * @param departmentReportPeriodList
+ * @return
+ */
+List<DeclarationData> getUncorrectedPeriodDeclarationData(Map<Integer, List<DeclarationData>> declarationDataMap, List<DepartmentReportPeriod> departmentReportPeriodList) {
+    List<DeclarationData> toReturn = []
+
+    List<DepartmentReportPeriod> uncorrectedPeriodDrpList = departmentReportPeriodList.findAll {
+        it.correctionDate == null
+    }
+
+    for (DepartmentReportPeriod departmentReportPeriod : uncorrectedPeriodDrpList) {
+        Integer departmentReportPeriodId = departmentReportPeriod.getId()
+        if (declarationDataMap.containsKey(departmentReportPeriodId)) {
+            toReturn.addAll(declarationDataMap.get(departmentReportPeriodId))
+        }
+    }
+    return toReturn
 }
 
 def departmentReportPeriodComp(DepartmentReportPeriod a, DepartmentReportPeriod b) {
