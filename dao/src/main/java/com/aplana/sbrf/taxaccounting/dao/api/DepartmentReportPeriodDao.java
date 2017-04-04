@@ -115,8 +115,8 @@ public interface DepartmentReportPeriodDao {
     /**
      * Найти id отчетных периодов подразделений для определенного типа подразделения и активного отчетного периода
      * @param departmentTypeCode
-     * @param reportPeriodId
+     * @param departmentReportPeriodId
      * @return
      */
-    List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId);
+    List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId);
 }

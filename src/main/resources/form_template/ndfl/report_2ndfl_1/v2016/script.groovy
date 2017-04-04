@@ -1314,7 +1314,7 @@ def getPrevDepartmentReportPeriod(departmentReportPeriod) {
  * @return
  */
 def findAllTerBankDeclarationData(def departmentReportPeriod) {
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.id)
     def allDeclarationData = []
     allDepartmentReportPeriodIds.each {
         ScriptUtils.checkInterrupted();
@@ -1389,7 +1389,7 @@ void getSources() {
     def reportPeriod = getReportPeriod()
     def sourceTypeId = 101
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.id)
     def tmpDeclarationDataList = []
     allDepartmentReportPeriodIds.each {
         ScriptUtils.checkInterrupted();
@@ -1408,6 +1408,10 @@ void getSources() {
     tmpDeclarationDataList.removeAll(declarationsForRemove)
     tmpDeclarationDataList.each { tmpDeclarationData ->
         ScriptUtils.checkInterrupted();
+        DepartmentReportPeriod tmpDepartmentReportPeriod = departmentReportPeriodService.get(tmpDeclarationData.departmentReportPeriodId)
+        if (tmpDepartmentReportPeriod.correctionDate != departmentReportPeriod.correctionDate) {
+            return
+        }
         def department = departmentService.get(tmpDeclarationData.departmentId)
         def relation = getRelation(tmpDeclarationData, department, reportPeriod, sourceTypeId)
         if (relation) {

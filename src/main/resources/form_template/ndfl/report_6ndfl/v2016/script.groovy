@@ -988,7 +988,7 @@ def getOktmoByIdList(idList) {
  * @return
  */
 def findAllTerBankDeclarationData(def departmentReportPeriod) {
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.id)
     def allDeclarationData = []
     allDepartmentReportPeriodIds.each {
         ScriptUtils.checkInterrupted()
@@ -1095,7 +1095,7 @@ void getSources() {
     def reportPeriod = getReportPeriod()
     def sourceTypeId = 101
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.id)
     // Найти подразделения в РНУ которых имеются операции из декларации
     def tmpDeclarationDataList = []
     allDepartmentReportPeriodIds.each {
@@ -1156,7 +1156,7 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
         /** полное название подразделения */
         relation.fullDepartmentName = getDepartmentFullName(department.id)
         /** Дата корректировки */
-        relation.correctionDate = new Date()
+        relation.correctionDate = departmentReportPeriod?.correctionDate
         /** Вид нф */
         relation.declarationTypeName = declarationTemplate?.name
         /** Год налогового периода */

@@ -105,7 +105,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
     }
 
     @Test
-	@Ignore
+    @Ignore
     public void calculateTest() throws Exception {
 
         when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());

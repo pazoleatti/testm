@@ -1149,7 +1149,6 @@ List<Relation> getDestinationInfo(boolean isLight){
     }
 
     return destinationInfo;
-
 }
 
 

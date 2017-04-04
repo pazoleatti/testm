@@ -380,6 +380,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
                                                                         RefBookRecord record) {
 
         List<RefBookAttribute> attributes = refBook.getAttributes();
+		// [группа уникальности : [атрибут-значение, ...]]
         Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> recordsGroupsUniqueAttributesValues =
                 aggregateUniqueAttributesAndValues(attributes, record);
 
