@@ -105,7 +105,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
     }
 
     @Test
-	@Ignore
+    @Ignore
     public void calculateTest() throws Exception {
 
         when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
@@ -157,7 +157,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
         FormSources sources = testHelper.getSources();
 
-        Assert.assertEquals(sources.getSourceList().size(), 6);
+        Assert.assertEquals(sources.getSourceList().size(), 22);
         Assert.assertTrue(sources.isSourcesProcessedByScript());
 
         checkLogger();
