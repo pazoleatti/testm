@@ -242,5 +242,12 @@ public class RefBookHelperImplTest {
 		String s = refBookHelper.refBookRecordToString(refBookFactory.get(2L), record);
 		LOG.info(s);
 		assertEquals("[id:9; recordId:5; Ставка:\"4.3\"; Страна:\"Россия\"; Дата:\"\"]", s);
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2013, Calendar.JANUARY, 1);
+		values.put("date", new RefBookValue(RefBookAttributeType.DATE, calendar.getTime()));
+		s = refBookHelper.refBookRecordToString(refBookFactory.get(2L), record);
+		LOG.info(s);
+		assertEquals("[id:9; recordId:5; Ставка:\"4.3\"; Страна:\"Россия\"; Дата:\"01.01.2013\"]", s);
 	}
 }
