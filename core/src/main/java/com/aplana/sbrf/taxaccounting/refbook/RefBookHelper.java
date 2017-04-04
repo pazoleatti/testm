@@ -133,4 +133,15 @@ public interface RefBookHelper {
      * @return
      */
     String dereferenceValue(long recordId, Long attributeId);
+
+	/**
+	 * Преобразует запись справочника в строку для вывода на экран. При этом ссылочные атрибуты
+	 * разыменовываются, даты форматируются и т.д.
+	 *
+	 * @param refBook справочник
+	 * @param record запись справочника
+	 * @return текстовое представление строки справочника
+	 */
+	String refBookRecordToString(RefBook refBook, RefBookRecord record);
+
 }

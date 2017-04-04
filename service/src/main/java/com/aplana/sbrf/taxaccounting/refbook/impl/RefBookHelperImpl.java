@@ -681,12 +681,39 @@ public class RefBookHelperImpl implements RefBookHelper {
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
         Map<String, RefBookValue> refBookValueMap = refBookDataProvider.getRecordData(recordId);
+		// [attrId : [refId : strValue]]
         Map<Long, Map<Long, String>> dereferenceValues = null;
         if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
             dereferenceValues = dereferenceValues(refBook, Arrays.asList(refBookValueMap), true);
         }
         return dereferenceValue(refBookValueMap, dereferenceValues, attribute);
     }
+
+	@Override
+	public String refBookRecordToString(RefBook refBook, RefBookRecord record) {
+		Map<String, RefBookValue> refBookValueMap = record.getValues();
+		// [attrId : [refId : strValue]]
+		Map<Long, Map<Long, String>> dereferenceValues = dereferenceValues(refBook, Arrays.asList(refBookValueMap), true);
+		Map<String, String> strValues = new HashMap<String, String>();
+		for (RefBookAttribute attribute : refBook.getAttributes()) {
+			strValues.put(attribute.getAlias(), dereferenceValue(refBookValueMap, dereferenceValues, attribute));
+		}
+		StringBuilder sb = new StringBuilder("[id:");
+			sb
+				.append(record.getUniqueRecordId())
+				.append("; ")
+				.append("recordId:")
+				.append(record.getRecordId());
+		for (RefBookAttribute attribute : refBook.getAttributes()) {
+			sb
+				.append("; ")
+				.append(attribute.getName())
+				.append(":\"")
+				.append(strValues.get(attribute.getAlias()))
+				.append('"');
+		}
+		return sb.append(']').toString();
+	}
 
     private String dereferenceValue(Map<String, RefBookValue> record, Map<Long, Map<Long, String>> dereferenceValues, RefBookAttribute attribute) {
         RefBookValue value = record.get(attribute.getAlias());
