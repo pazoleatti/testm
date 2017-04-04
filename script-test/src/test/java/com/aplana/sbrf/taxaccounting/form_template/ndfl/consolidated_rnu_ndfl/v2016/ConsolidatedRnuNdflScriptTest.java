@@ -142,7 +142,6 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getDepartmentService().getAllChildren(anyInt())).thenReturn(createDepartmentList());
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(createDepartmentList().get(0));
 
-
         when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(Date.class), any(Date.class))).thenReturn(createReportPeriodList());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(1))).thenReturn(createFirstQuarterDeclarationData());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(2))).thenReturn(createHalfYearDeclarationData());
@@ -157,7 +156,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
         FormSources sources = testHelper.getSources();
 
-        Assert.assertEquals(sources.getSourceList().size(), 22);
+        Assert.assertEquals(sources.getSourceList().size(), 5);
         Assert.assertTrue(sources.isSourcesProcessedByScript());
 
         checkLogger();
