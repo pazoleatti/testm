@@ -2378,7 +2378,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
         operationNotRelateToCurrentPeriod(ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.taxDate,
-                ndflPersonIncome.kpp, ndflPersonIncome.oktmo, ndflPersonFL.inp, ndflPersonFL.fio)
+                ndflPersonIncome.kpp, ndflPersonIncome.oktmo, ndflPersonFL.inp, ndflPersonFL.fio, ndflPersonIncome)
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         List<ColumnFillConditionData> columnFillConditionDataList = []
@@ -3361,46 +3361,32 @@ class ColumnTrueFillOrNotFill implements ColumnFillConditionChecker {
 
 // Проверка на принадлежность операций периоду при загрузке ТФ
 boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
-                                          String kpp, String oktmo, String inp, String fio) {
+                                          String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     // Доход.Дата.Начисление
-    boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
+    boolean incomeAccruedDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач", incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
     // Доход.Дата.Выплата
-    boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
+    boolean incomePayoutDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл", incomePayoutDate, kpp, oktmo, inp, fio, ndflPersonIncome)
     // НДФЛ.Расчет.Дата
-    boolean taxDateOk = dateRelateToCurrentPeriod(taxDate)
-    if (!incomeAccruedDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач\" недопустимое значение: \"${incomeAccruedDate ? incomeAccruedDate.format("dd.MM.yyyy"): ""}\":дата операции не входит в отчетный период ТФ.\n" +
-                "КПП = $kpp.\n" +
-                "ОКТМО = $oktmo\n" +
-                "ФЛ ИНП = $inp\n" +
-                "ФИО = $fio")
-    }
-    if (!incomePayoutDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл\" недопустимое значение: \"${incomePayoutDate ? incomePayoutDate.format("dd.MM.yyyy"): ""}\":дата операции не входит в отчетный период ТФ.\n" +
-                "КПП = $kpp.\n" +
-                "ОКТМО = $oktmo\n" +
-                "ФЛ ИНП = $inp\n" +
-                "ФИО = $fio")
-    }
-    if (!taxDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог\" недопустимое значение: \"${taxDateOk ? taxDateOk.format("dd.MM.yyyy"): ""}\":дата операции не входит в отчетный период ТФ.\n" +
-                "КПП = $kpp.\n" +
-                "ОКТМО = $oktmo\n" +
-                "ФЛ ИНП = $inp\n" +
-                "ФИО = $fio")
-    }
+    boolean taxDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог", taxDate, kpp, oktmo, inp, fio, ndflPersonIncome)
     if (incomeAccruedDateOk && incomePayoutDateOk && taxDateOk) {
         return false
     }
     return true
 }
 
-boolean dateRelateToCurrentPeriod(Date date) {
-
+boolean dateRelateToCurrentPeriod(def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
-    if (date==null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
+    if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
         return true
     }
+    logger.warn("""
+У параметра ТФ "$paramName" недопустимое значение: "${date ? date.format("dd.MM.yyyy"): ""}":дата операции не входит в отчетный период ТФ.
+КПП = $kpp.
+ОКТМО = $oktmo
+ФЛ ИНП = $inp
+ФИО = $fio
+ИдОперации = ${ndflPersonIncome.operationId}
+Номер строки = ${ndflPersonIncome.rowNum}""")
     return false
 }
 
