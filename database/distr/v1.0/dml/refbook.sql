@@ -313,8 +313,6 @@ insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,refer
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9533,951,23,'Наименование документа, подтверждающего полномочия представителя','APPROVE_DOC_NAME',1,1,null,null,20,0,0,120,null);
 insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,reference_id,attribute_id,width,required,is_unique,max_length,precision) values (9534,951,24,'Наименование организации-представителя налогоплательщика','APPROVE_ORG_NAME',1,1,null,null,20,0,0,1000,null);
 
-update ref_book_attribute set required = 1 where id in (9501, 9513, 9601, 9613);
-
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (960,'Параметры подразделения по сборам, взносам',0,0,0,null,'REF_BOOK_FOND');
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (961,'Параметры подразделения по сборам, взносам (таблица)',0,0,0,null,'REF_BOOK_FOND_DETAIL');
 
@@ -358,6 +356,8 @@ insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,refer
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9649, 964, 'Идентификатор физического лица НДФЛ', 'NDFL_PERSON_ID', 2, 9, null, null, 0, 0, 15, 0, 0, null, null, 0, 18);
 
 ---------------------------------
+update ref_book_attribute set required = 1 where id in (9501, 9513, 9601, 9613);
+
 update ref_book_attribute set reference_id=923,attribute_id=9231 where reference_id=4;
 ---------------------------------
 /*
