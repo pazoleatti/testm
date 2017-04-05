@@ -144,6 +144,12 @@ int REF_BOOK_ASNU_ID = 900
 int REF_BOOK_SIGNATORY_MARK_ID = 35
 
 @Field
+int NDFL_2_1_DECLARATION_TYPE = 102
+
+@Field
+int NDFL_2_2_DECLARATION_TYPE = 104
+
+@Field
 final String NDFL_2_S_PRIZNAKOM_1 = "2 НДФЛ (1)"
 
 @Field
@@ -228,7 +234,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
     def kodNoProm = configurationParamModel?.get(ConfigurationParam.NO_CODE)?.get(0)?.get(0)
 
     //Текущая страница представляющая порядковый номер файла
-    def currentPageNumber = xmlPartNumber?:partNumber
+    def currentPageNumber = xmlPartNumber ?: partNumber
 
     // инициализация данных о подразделении
     departmentParam = getDepartmentParam(declarationData.departmentId, declarationData.reportPeriodId)
@@ -319,7 +325,15 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                 // Порядковый номер физического лица
                 if (pNumSpravka == null) {
                     if (nomKorr != 0) {
-                        nomSpr = getProvider(NDFL_REFERENCES).getRecords(new Date(), null, "PERSON_ID = ${np.personId}", null).get(0).NUM.value
+                        def uncorrectPeriodDrp = departmentReportPeriodService.getFirst(declarationData.departmentId, declarationData.reportPeriodId)
+                        int ddType
+                        if (priznakF == "1") {
+                            ddType = NDFL_2_1_DECLARATION_TYPE
+                        } else {
+                            ddType = NDFL_2_2_DECLARATION_TYPE
+                        }
+                        def uncorretctedPeriodDd = declarationService.find(ddType, uncorrectPeriodDrp.id, declarationData.kpp, declarationData.oktmo, null, null, null)
+                        nomSpr = getProvider(NDFL_REFERENCES).getRecords(new Date(), null, "PERSON_ID = ${np.personId} AND DECLARATION_DATA_ID = ${uncorretctedPeriodDd.id}", null).get(0).NUM.value
                     } else {
                         nomSpr++
                     }
@@ -434,7 +448,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                                                 СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
                                                         КодДоход: incomeKey,
                                                         СумДоход: ScriptUtils.round(getSumDohod(ndflPersonIncomesGroupedByIncomeCode.get(incomeKey)), 2),
-                                                        Страница: index <= ((countIncome+1) / 2) ? 1 : 2
+                                                        Страница: index <= ((countIncome + 1) / 2) ? 1 : 2
                                                 ) {
                                                     boolean exist = false
                                                     def deductionsFilteredForCurrIncome = filterDeductionsByIncomeCode(ndflPersonIncomesWhereIncomeAccruedSumGreaterZero, deductionsSelectedForDeductionsInfo)
@@ -447,7 +461,8 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                                                         }
                                                         if (!deductionsForSum.isEmpty()) {
                                                             СвСумВыч(КодВычет: deductionsForSum[0].typeCode,
-                                                                    СумВычет: ScriptUtils.round(getSumVichOfPeriodCurrSumm(deductionsForSum), 2)) {}
+                                                                    СумВычет: ScriptUtils.round(getSumVichOfPeriodCurrSumm(deductionsForSum), 2)) {
+                                                            }
                                                             exist = true
                                                             index++
                                                         }
@@ -482,7 +497,8 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                                                         }
                                                         if (!deductionsForSum.isEmpty()) {
                                                             СвСумВыч(КодВычет: deductionsForSum[0].typeCode,
-                                                                    СумВычет: ScriptUtils.round(getSumVichOfPeriodCurrSumm(deductionsForSum), 2)) {}
+                                                                    СумВычет: ScriptUtils.round(getSumVichOfPeriodCurrSumm(deductionsForSum), 2)) {
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -591,7 +607,9 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
             }
         }
         if (!presentNotHoldingTax && priznakF == "2") {
-            logger.warn("\"Для подразделения: $depName, КПП: $kpp, ОКТМО: $oktmo за период $otchetGod $reportPeriod.name отсутствуют сведения о не удержанном налоге.\"")
+            logger.info("\"Для подразделения: $depName, КПП: $kpp, ОКТМО: $oktmo за период $otchetGod $reportPeriod.name отсутствуют сведения о не удержанном налоге.\"")
+            calculateParams.put("notReplaceXml", true)
+            calculateParams.put("createForm", false)
         }
     }
     ScriptUtils.checkInterrupted();
@@ -603,6 +621,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
         saveFileInfo(currDate, fileName)
     }
 }
+
 // Сохранение информации о файле в комментариях
 def saveFileInfo(currDate, fileName) {
     def fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".xml", new Date())
@@ -1215,6 +1234,7 @@ def createForm() {
             // Поиск физлиц по КПП и ОКТМО операций относящихся к ФЛ
 
             def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString())
+
             if (ndflPersons != null && ndflPersons.size() != 0) {
                 if (departmentReportPeriod.correctionDate != null) {
                     def ndflPersonsPicked = []
@@ -1231,8 +1251,6 @@ def createForm() {
             }
         }
     }
-
-    //initNdflPersons(ndflPersonsIdGroupedByKppOktmo)
 
     // Удаление ранее созданных отчетных форм
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {

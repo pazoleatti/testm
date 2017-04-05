@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_2ndfl" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="575" leftMargin="20" rightMargin="0" topMargin="10" bottomMargin="10" uuid="969dd503-187a-4dd0-a41d-4c67eb3cc794">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="678"/>
+	<property name="ireport.y" value="550"/>
 	<property name="ireport.callouts" value="##Tue Jan 10 08:55:51 VET 2017"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="TestXML"/>
 	<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="true"/>
@@ -2276,10 +2276,10 @@
 			</staticText>
 		</band>
 	</detail>
-	<pageFooter>
-		<band height="86" splitType="Stretch">
+	<summary>
+		<band height="86">
 			<staticText>
-				<reportElement uuid="eadead55-9792-43ef-8fde-f834f893b4fb" mode="Transparent" x="0" y="11" width="419" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="eadead55-9792-43ef-8fde-f834f893b4fb" mode="Transparent" x="0" y="0" width="419" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
 					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -2287,7 +2287,7 @@
 				<text><![CDATA[Налоговый агент (1 - налоговый агент, 2 - уполномоченный представитель):]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="2d7f21a6-6d7a-47d9-99f0-bb4c11f8c699" mode="Transparent" x="419" y="11" width="21" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="2d7f21a6-6d7a-47d9-99f0-bb4c11f8c699" mode="Transparent" x="419" y="0" width="21" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -2298,7 +2298,7 @@
 				<textFieldExpression><![CDATA[$F{ПрПодп}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="86a00648-ffd0-4334-b2f9-f8f15b216b69" mode="Transparent" x="0" y="26" width="417" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="86a00648-ffd0-4334-b2f9-f8f15b216b69" mode="Transparent" x="0" y="15" width="417" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -2309,7 +2309,7 @@
 				<textFieldExpression><![CDATA[$V{vSignerFIO}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="0553aa0a-f72c-48f5-b32e-2db1074ac3bd" mode="Transparent" x="0" y="38" width="418" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="0553aa0a-f72c-48f5-b32e-2db1074ac3bd" mode="Transparent" x="0" y="27" width="418" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -2317,7 +2317,7 @@
 				<text><![CDATA[(ФИО).*]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="b4f48e24-4a09-4134-b615-d0caf1956977" mode="Transparent" x="433" y="38" width="118" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="b4f48e24-4a09-4134-b615-d0caf1956977" mode="Transparent" x="433" y="27" width="118" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<topPen lineWidth="0.5"/>
 				</box>
@@ -2328,7 +2328,7 @@
 				<text><![CDATA[подпись]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="057f818d-74a4-4669-b50e-0ec88a34ffff" mode="Transparent" x="0" y="53" width="373" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="057f818d-74a4-4669-b50e-0ec88a34ffff" mode="Transparent" x="0" y="42" width="373" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
 					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -2336,7 +2336,7 @@
 				<text><![CDATA[Наименование документа, подтверждающего полномочия представителя]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="false">
-				<reportElement uuid="36f72f40-6949-4597-8716-7342e8520789" mode="Transparent" x="373" y="53" width="202" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="36f72f40-6949-4597-8716-7342e8520789" mode="Transparent" x="373" y="42" width="202" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -2347,7 +2347,7 @@
 				<textFieldExpression><![CDATA[($F{НаимДок}==null) ? "" : $F{НаимДок}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="2efb3a8b-9ae3-4d7f-ac11-7d577f1af2ff" mode="Transparent" x="0" y="68" width="418" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="2efb3a8b-9ae3-4d7f-ac11-7d577f1af2ff" mode="Transparent" x="0" y="57" width="418" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement verticalAlignment="Bottom" rotation="None" markup="none">
 					<font fontName="Arial" size="6" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -2355,5 +2355,5 @@
 				<text><![CDATA[* Отчество указывается при наличии]]></text>
 			</staticText>
 		</band>
-	</pageFooter>
+	</summary>
 </jasperReport>
