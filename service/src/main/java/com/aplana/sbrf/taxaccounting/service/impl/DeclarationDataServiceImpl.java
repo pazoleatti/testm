@@ -286,8 +286,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
-        declarationDataDao.setStatus(id, State.CREATED);
+        boolean createForm = calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
+        if (createForm) {
+            declarationDataDao.setStatus(id, State.CREATED);
+        }
     }
 
     private boolean calculateDeclaration(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
@@ -298,6 +300,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         boolean createForm = setDeclarationBlobs(logger, declarationData, docDate, userInfo, exchangeParams, stateLogger);
 
         if (!createForm) {
+            declarationDataDao.delete(id);
             return createForm;
         }
 
@@ -1660,8 +1663,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         List<String> oktmoKppList = new ArrayList<String>();
         for (Map.Entry<Long, Map<String, Object>> entry: formMap.entrySet()) {
             Logger scriptLogger = new Logger();
+            boolean createForm = true;
             try {
-                if (!calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger)) {
+                createForm = calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
+                if (!createForm) {
                     if (!scriptLogger.containsLevel(LogLevel.ERROR)) {
                         fail++;
                         success--;
@@ -1679,7 +1684,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
-                    logger.info("Успешно выполнена расчет для " + getDeclarationFullName(entry.getKey(), null));
+                    if (createForm) {
+                        logger.info("Успешно выполнена расчет для " + getDeclarationFullName(entry.getKey(), null));
+                    }
                     logger.getEntries().addAll(scriptLogger.getEntries());
                 }
             }
