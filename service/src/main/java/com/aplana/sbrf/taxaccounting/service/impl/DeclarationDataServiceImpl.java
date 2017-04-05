@@ -32,7 +32,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -1369,17 +1368,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     return null;
                 }
             case XML_DEC:
-                long cellCountSource = 0;
-                DeclarationData declarationData = get(declarationDataId, userInfo);
-                for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, new Logger())){
-                    if (relation.isCreated() && relation.getState() == WorkflowState.ACCEPTED) {
-                        FormData formData = formDataDao.getWithoutRows(relation.getFormDataId());
-                        int rowCountSource = dataRowDao.getRowCount(formData);
-                        int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
-                        cellCountSource += rowCountSource * columnCountSource;
-                    }
+                String uuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+                if (uuid != null) {
+                    return (long)Math.ceil(blobDataService.getLength(uuid) / 1024.);
+                } else {
+                    return 0L;
                 }
-                return cellCountSource;
             case SPECIFIC_REPORT_DEC:
                 Map<String, Object> exchangeParams = new HashMap<String, Object>();
                 ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
