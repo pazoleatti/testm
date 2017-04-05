@@ -70,15 +70,15 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
         String lastNamePattern = action.getLastNamePattern();
         String firstNamePattern = action.getFirstNamePattern();
         String searchPattern = action.getSearchPattern();
+        boolean isPerson = action.getRefBookId() == RefBook.Id.PERSON.getId();
 
-
-        if (searchPattern != null && !searchPattern.isEmpty() && firstNamePattern == null && lastNamePattern == null) {
+        if (searchPattern != null && !searchPattern.isEmpty() && (!isPerson || (firstNamePattern == null && lastNamePattern == null))) {
             if (filter != null && !filter.isEmpty()) {
                 filter += " and (" + refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch()) + ")";
             } else {
                 filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
             }
-        } else if (firstNamePattern != null && lastNamePattern != null) {
+        } else if (isPerson && (firstNamePattern != null || lastNamePattern != null)) {
             Map<String, String> params = new HashMap<String, String>();
             if (lastNamePattern != null && !lastNamePattern.isEmpty()) {
                 params.put("LAST_NAME", lastNamePattern);
@@ -86,8 +86,11 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             if (firstNamePattern != null && !firstNamePattern.isEmpty()) {
                 params.put("FIRST_NAME", firstNamePattern);
             }
-            filter = refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
-
+            if (filter != null && !filter.isEmpty()) {
+                filter = " and (" + refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch()) + ")";
+            } else {
+                filter = refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
+            }
         }
 
         if (action.getRecordId() != null) {
