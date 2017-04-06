@@ -133,7 +133,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
     @Override
     public void setVersionMode(boolean versionMode) {
         super.setVersionMode(versionMode);
-        allVersion.setVisible(!versionMode && getUiHandlers().isVersioned());
+        allVersion.setVisible(false);//!versionMode && getUiHandlers().isVersioned());
     }
 
     @Override

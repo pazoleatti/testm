@@ -310,6 +310,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         filterText.setEnabled(!isVersion);
         filterText.setVisible(!isVersion);
         backAnchor.setVisible(!isVersion);
+        separator2.setVisible(!isVersion&&isVersioned);
         backToRefBookAnchor.setVisible(isVersion);
         backToRefBookAnchor.setText(titleDesc.getText());
         relevanceDate.setVisible(!isVersion&&isVersioned);
