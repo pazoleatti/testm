@@ -158,15 +158,12 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         @Override
         public void run() {
             try {
-                while (true) {
-                    if (Thread.currentThread().isInterrupted()) {
-                        return;
-                    }
+                while (!Thread.currentThread().isInterrupted()) {
                     checkLockHandler.checkLock();
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
-                        return;
+						Thread.currentThread().interrupt();
                     }
                 }
             } catch (Exception e) {
