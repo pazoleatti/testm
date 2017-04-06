@@ -83,7 +83,32 @@ public class TAUserDaoTest {
 		Assert.assertEquals(user.getLogin(), userDao.getUser(userId).getLogin());
 		Assert.assertEquals(user.getRoles().get(0).getAlias(), userDao.getUser(userId).getRoles().get(0).getAlias());
 	}
-	
+
+	@Test
+	public void testCreateUser2() {
+		TARole role = new TARole();
+		role.setId(1);
+		role.setAlias("N_ROLE_OPER");
+		role.setName("Контролёр");
+		role.setTaxType(TaxType.NDFL);
+		List<TARole> roles = new ArrayList<TARole>();
+		TAUser user = new TAUser();
+		user.setActive(true);
+		user.setDepartmentId(1);
+		user.setEmail("controlBank@bank.ru");
+		user.setName("");
+		user.setLogin(LOGIN_TEST_BANK.toLowerCase());
+		user.setRoles(roles);
+		user.setAsnuIds(null);
+
+		userDao.createUser(user);
+		int userId = userDao.getUserIdByLogin(LOGIN_TEST_BANK.toLowerCase());
+		user.setId(userId);
+		Assert.assertEquals(user.getDepartmentId(), userDao.getUser(userId).getDepartmentId());
+		Assert.assertEquals(user.getLogin(), userDao.getUser(userId).getLogin());
+		Assert.assertEquals(user.getRoles().size(), userDao.getUser(userId).getRoles().size());
+	}
+
 	@Test
 	public void testSetUserIsActive() {
 		TAUser user = new TAUser();
