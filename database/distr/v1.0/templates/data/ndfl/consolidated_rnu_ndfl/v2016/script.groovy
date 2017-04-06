@@ -565,16 +565,11 @@ def clearData() {
  * @return
  */
 def getSourcesListForTemporarySolution() {
-
     //отчетный период в котором выполняется консолидация
     ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-
     //Идентификатор подразделения по которому формируется консолидированная форма
     def parentDepartmentId = declarationData.departmentId
-
     Department department = departmentService.get(parentDepartmentId)
-
-    println "department="+department
 
     List<DeclarationData> declarationDataList = findConsolidateDeclarationData(parentDepartmentId, declarationDataReportPeriod.id)
 
@@ -652,6 +647,7 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
         Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
         for (DeclarationData declarationData : allDeclarationDataList) {
+            ScriptUtils.checkInterrupted();
             DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod;
             if (depReportPeriod.correctionDate != departmentReportPeriod.correctionDate) {
                 continue
@@ -683,6 +679,7 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         //Включение в результат НФ с наиболее старшим периодом сдачи корректировки
         List<DeclarationData> result = new ArrayList<DeclarationData>();
         for (Map.Entry<Long, Map<Integer, List<DeclarationData>>> entry : asnuDataMap.entrySet()) {
+            ScriptUtils.checkInterrupted();
             //Long asnuId = entry.getKey();
             Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
             List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
@@ -703,6 +700,7 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_2_2_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
         declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_6_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
         for (DeclarationData declarationDataDestination : declarationDataList) {
+            ScriptUtils.checkInterrupted();
             DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
             if (departmentReportPeriod.correctionDate != departmentReportPeriodDestination.correctionDate) {
                 continue
