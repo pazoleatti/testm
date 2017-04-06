@@ -40,6 +40,9 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_CALCULATE: // Формирование pdf-отчета формы
         declarationService.createPdfReport(logger, declarationData, userInfo)
         break
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
+        checkAccept()
+        break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesListForTemporarySolution()
         break
@@ -180,12 +183,12 @@ void consolidation() {
 
         //List<Long> documentsIds = documentProvider.getUniqueRecordIds(null, "PERSON_ID = " + personId + " AND INC_REP = 1");
         if (personDocumentRecord == null || personDocumentRecord.isEmpty()) {
-            logger.error("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1");
+            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1");
             continue;
         }
 
         if (addressId != null && addressRecord == null) {
-            logger.error("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Адреса физических лиц'");
+            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Адреса физических лиц'");
             continue;
         }
 
@@ -1778,6 +1781,18 @@ def checkData() {
 
     println "Все проверки (" + (System.currentTimeMillis() - time) + " мс)";
     logger.info("Все проверки (" + (System.currentTimeMillis() - time) + " мс)");
+}
+
+/**
+ * Проверки наличия данных при принятии
+ * @return
+ */
+def checkAccept() {
+    List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    if (ndflPersonList.isEmpty()) {
+        logger.setMessageDecorator(null)
+        logger.error("Консолидированная форма не содержит данных, принятие формы невозможно")
+    }
 }
 
 /**
