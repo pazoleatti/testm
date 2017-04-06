@@ -481,44 +481,6 @@ public class DeclarationDataServiceImplTest {
         when(blobDataService.getLength("uuid1")).thenReturn(1200L);
         ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
 
-        FormType formType = new FormType();
-        formType.setId(1);
-        formType.setName("Type1");
-
-        FormTemplate formTemplate1 = new FormTemplate();
-        formTemplate1.setId(10);
-        formTemplate1.setType(formType);
-        formTemplate1.addColumn(new RefBookColumn());
-        formTemplate1.addColumn(new NumericColumn());
-        formTemplate1.addColumn(new NumericColumn());
-        formTemplate1.addColumn(new StringColumn());
-        formTemplate1.addColumn(new NumericColumn());
-
-        FormData formData1 = new FormData();
-        formData1.setId(11L);
-        formData1.setFormTemplateId(formTemplate1.getId());
-        FormDataDao formDataDao = mock(FormDataDao.class);
-        when(formDataDao.getWithoutRows(11)).thenReturn(formData1);
-        ReflectionTestUtils.setField(declarationDataService, "formDataDao", formDataDao);
-
-        DataRowDao dataRowDao = mock(DataRowDao.class);
-        when(dataRowDao.getRowCount(formData1)).thenReturn(10);
-        ReflectionTestUtils.setField(declarationDataService, "dataRowDao", dataRowDao);
-
-        when(formTemplateService.get(formData1.getFormTemplateId())).thenReturn(formTemplate1);
-
-        ArrayList<Relation> sources = new ArrayList<Relation>();
-        Relation r1 = new Relation();
-        r1.setCreated(true);
-        r1.setFormDataId(formData1.getId());
-        r1.setState(WorkflowState.ACCEPTED);
-
-        Relation r2 = new Relation();
-        r2.setCreated(false);
-        sources.add(r1);
-        sources.add(r2);
-        when(sourceService.getDeclarationSourcesInfo(eq(declarationData), anyBoolean(), anyBoolean(), any(State.class), eq(userInfo), any(Logger.class))).thenReturn(sources);
-
         DeclarationDataScriptingService declarationDataScriptingService = mock(DeclarationDataScriptingService.class);
         when(declarationDataScriptingService.executeScript(
                 eq(userInfo), eq(declarationData), eq(FormDataEvent.CALCULATE_TASK_COMPLEXITY), any(Logger.class), any(Map.class))).thenAnswer(new Answer<Object>() {
@@ -535,7 +497,7 @@ public class DeclarationDataServiceImplTest {
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.EXCEL_DEC));
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.ACCEPT_DEC));
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.CHECK_DEC));
-        assertEquals(new Long(50L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC));
+        assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC));
         assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, new DeclarationSubreport(){{setAlias("alias1");}})));
     }
 }
