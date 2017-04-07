@@ -937,7 +937,6 @@ def createForm() {
             }
         }
     }
-
     // список форм рну-ндфл для отчетного периода всех ТБ
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
     // Список физлиц для каждой пары КПП и ОКТМО
@@ -952,7 +951,6 @@ def createForm() {
             }
         }
     }
-    //logger.info(ndflPersonsGroupedByKppOktmo.toString())
 
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
         declarationService.delete(it.id, userInfo)
@@ -987,7 +985,7 @@ def getOktmoByIdList(idList) {
  * @return
  */
 def findAllTerBankDeclarationData(def departmentReportPeriod) {
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.id)
     def allDeclarationData = []
     allDepartmentReportPeriodIds.each {
         ScriptUtils.checkInterrupted()
@@ -1094,7 +1092,7 @@ void getSources() {
     def reportPeriod = getReportPeriod()
     def sourceTypeId = 101
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.id)
     // Найти подразделения в РНУ которых имеются операции из декларации
     def tmpDeclarationDataList = []
     allDepartmentReportPeriodIds.each {
