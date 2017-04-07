@@ -158,16 +158,13 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         @Override
         public void run() {
             try {
-                while (true) {
-                    if (Thread.interrupted()) {
-                        return;
-                    }
-                    checkLockHandler.checkLock();
+                while (!Thread.currentThread().isInterrupted()) {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
-                        return;
+						Thread.currentThread().interrupt();
                     }
+                    checkLockHandler.checkLock();
                 }
             } catch (Exception e) {
                 if (thread.isAlive()) {
@@ -225,6 +222,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             Thread threadRunner = new Thread(Thread.currentThread().getThreadGroup(), runner);
                             threadRunner.start();
                             TaskStatus taskStatus = executeBusinessLogic(params, logger);
+							LOG.debug("business logic execution is complete");
                             if (threadRunner.isAlive()) {
                                 threadRunner.interrupt();
                                 threadRunner.join();

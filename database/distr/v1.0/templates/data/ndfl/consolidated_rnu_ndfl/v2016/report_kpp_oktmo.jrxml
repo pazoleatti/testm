@@ -24,7 +24,7 @@
                tab.tax_calc,
                tab.declaration_data_id,
                sdd.id rep_decl_id
-          from (select p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id,
+          from (select p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id,drr.correction_date,
                        count(distinct inc.ndfl_person_id) pers_cnt,
                        sum(nvl(inc.income_accrued_summ,0)) inc_accured,
                        sum(nvl(inc.calculated_tax,0)) tax_calc
@@ -32,9 +32,10 @@
                                            join ndfl_person p on (p.declaration_data_id=dd.id)
                                            join ndfl_person_income inc on (inc.ndfl_person_id=p.id)
                 where dd.id=$P{declarationId}
-                 group by p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id) tab
+                 group by p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id,drr.correction_date) tab
                left join vw_depart_kpp_oktmo d on (d.kpp=tab.kpp and d.oktmo=tab.oktmo and d.dep_id=tab.department_id)
-               left join vw_decl_kpp_oktmo_form7 sdd on (sdd.kpp=tab.kpp and sdd.oktmo=tab.oktmo and sdd.report_period_id=tab.report_period_id)
+               left join vw_decl_kpp_oktmo_form7 sdd on (sdd.kpp=tab.kpp and sdd.oktmo=tab.oktmo and
+					      sdd.report_period_id=tab.report_period_id and nvl(sdd.correction_date,to_date('01.01.1900','dd.mm.yyyy'))=nvl(tab.correction_date,to_date('01.01.1900','dd.mm.yyyy')))
           ) datas
   where not exists(select 1 from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
                     where decl.id=datas.rep_decl_id
@@ -70,7 +71,7 @@
 		<band height="52" splitType="Stretch">
 			<staticText>
 				<reportElement uuid="5a8ba7ce-deb4-4d9b-8fd4-b8c11d66d996" x="0" y="32" width="343" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Реестр сформированной отчетности"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Реестр"/>
 				</reportElement>
 				<textElement>
 					<font fontName="Arial" isBold="true"/>

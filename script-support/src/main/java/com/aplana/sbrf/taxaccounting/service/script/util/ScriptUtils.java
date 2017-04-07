@@ -2683,7 +2683,7 @@ public final class ScriptUtils {
     }
 
     public static void checkInterrupted() {
-        if (Thread.interrupted()) {
+        if (Thread.currentThread().isInterrupted()) {
             throw new TAInterruptedException();
         }
     }
