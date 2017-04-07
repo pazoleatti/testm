@@ -7,6 +7,7 @@ import org.springframework.cache.support.SimpleValueWrapper;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class MapCache implements Cache {
 
@@ -112,5 +113,9 @@ public class MapCache implements Cache {
 	private static class NullHolder implements Serializable {
 		private static final long serialVersionUID = 5124311109167803547L;
 	}
-	
+
+	@Override
+	public <T> T get(Object key, Callable<T> callable) {
+		return (T) fromStoreValue(store.get(key));
+	}
 }
