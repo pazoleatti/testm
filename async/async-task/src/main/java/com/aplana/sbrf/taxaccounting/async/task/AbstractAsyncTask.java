@@ -38,6 +38,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
             "Сформирован %s отчет:";
     protected static final String ERROR_FORM =
             "Произошла непредвиденная ошибка при формировании %s отчета:";
+    private static final long MAX_WAIT_TIMEOUT = 2000;
 
     @Autowired
     private LockDataService lockService;
@@ -149,20 +150,25 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private final class ProcessRunner implements Runnable {
         private Thread thread;
         private CheckLockHandler checkLockHandler;
+        private boolean canceled = false;
 
         private ProcessRunner(Thread thread, CheckLockHandler checkLockHandler) {
             this.thread = thread;
             this.checkLockHandler = checkLockHandler;
         }
 
+        public void cancel() {
+            this.canceled = true;
+        }
+
         @Override
         public void run() {
             try {
-                while (!Thread.currentThread().isInterrupted()) {
+                while (!canceled) {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
+                        canceled = true;
                     }
                     checkLockHandler.checkLock();
                 }
@@ -224,8 +230,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             TaskStatus taskStatus = executeBusinessLogic(params, logger);
 							LOG.debug("business logic execution is complete");
                             if (threadRunner.isAlive()) {
-                                threadRunner.interrupt();
-                                threadRunner.join();
+                                runner.cancel();
+                                threadRunner.join(MAX_WAIT_TIMEOUT);
                             }
                             Date endDate = new Date();
                             logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
