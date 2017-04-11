@@ -39,9 +39,7 @@ import java.util.regex.Pattern
  */
 switch (formDataEvent) {
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
-        moveAcceptedToCreated();
         break
-
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
         // Формирование pdf-отчета формы
@@ -82,16 +80,6 @@ switch (formDataEvent) {
  */
 @Field
 def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
-
-def moveAcceptedToCreated(){
-    List<Relation> destinationInfo = getDestinationInfo(false);
-    for (Relation relation : destinationInfo) {
-        if (relation.declarationState.equals(State.ACCEPTED)){
-            throw new ServiceException("Ошибка изменения состояния формы. Данная форма не может быть возвращена в состояние 'Создана', так как используется в КНФ с состоянием 'Принята', номер формы: "+relation.declarationDataId);
-        }
-    }
-}
-
 
 //------------------ Calculate ----------------------
 /**
