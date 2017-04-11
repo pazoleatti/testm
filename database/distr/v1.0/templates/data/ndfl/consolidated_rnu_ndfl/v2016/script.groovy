@@ -4,9 +4,11 @@ import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.ndfl.*
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.refbook.*
 import groovy.transform.Field
 import groovy.transform.Memoized
+import groovy.transform.TypeChecked
 import groovy.util.slurpersupport.NodeChild
 
 import javax.script.ScriptException
@@ -28,6 +30,9 @@ import java.util.regex.Pattern
  * Скрипт макета декларации РНУ-НДФЛ(консолидированная)
  */
 switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreate()
+        break
     case FormDataEvent.CHECK: //Проверить
         checkData()
         checkDataConsolidated()
@@ -54,6 +59,23 @@ switch (formDataEvent) {
         // Формирование спецотчета
         createSpecificReport()
         break
+}
+
+@Field
+final Logger logger = getProperty("logger")
+@Field
+final DeclarationData declarationData = getProperty("declarationData")
+@Field
+final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
+@Field
+final DeclarationService declarationService = getProperty("declarationService")
+
+def getProperty(String name) {
+    try{
+        return super.getProperty(name)
+    } catch (MissingPropertyException e) {
+        return null
+    }
 }
 
 /**
@@ -3898,4 +3920,24 @@ def getErrorMsgAbsent(def inputList, def tableName) {
         resultMsg = " Раздел \"" + tableName + "\" № " + absentList.sort().join(", ") + "."
     }
     return resultMsg
+}
+
+@TypeChecked
+void checkCreate() {
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
+    if (departmentReportPeriod.correctionDate != null) {
+        def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
+        if (prevDepartmentReportPeriod == null) {
+            prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
+        }
+        def declarationList = declarationService.find(102, prevDepartmentReportPeriod.getId())
+        declarationList.addAll(declarationService.find(103, prevDepartmentReportPeriod.getId()))
+        declarationList.addAll(declarationService.find(104, prevDepartmentReportPeriod.getId()))
+        def delaration = declarationList.find{
+            State.ACCEPTED.equals(it.state)
+        }
+        if (delaration == null) {
+            logger.warn("Отсутствуют принятые отчетные налоговые формы в некорректировочном/предыдущем корректировочном периоде. Отчетные налоговые формы не будут сформированы в текущем периоде")
+        }
+    }
 }
