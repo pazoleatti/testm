@@ -24,6 +24,7 @@ ALTER TABLE log_system_report ENABLE CONSTRAINT log_system_report_fk_blob_data;
 ALTER TABLE declaration_subreport ENABLE CONSTRAINT decl_subrep_fk_blob_data;
 ALTER TABLE declaration_report ENABLE CONSTRAINT decl_report_fk_blob_data;
 ALTER TABLE declaration_data_file ENABLE CONSTRAINT decl_data_file_pk;
+ALTER TABLE declaration_template_file ENABLE CONSTRAINT fk_decl_templ_file_blob;
 
 COMMIT;
 EXIT;

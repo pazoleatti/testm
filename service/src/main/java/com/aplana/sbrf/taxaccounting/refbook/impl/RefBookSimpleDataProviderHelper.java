@@ -40,7 +40,7 @@ import java.util.Map;
 @Component
 @Transactional
 public class RefBookSimpleDataProviderHelper {
-    private static final String UNIQ_ERROR_MSG = "Нарушено требование к уникальности, уже существуют записи %s в указанном периоде!";
+    private static final String UNIQ_ERROR_MSG = "Нарушено требование к уникальности, уже существуют записи %s в указанном периоде действия записи! Проверяемая запись справочника: %s";
     private static final String CROSS_ERROR_MSG = "Обнаружено пересечение указанного срока актуальности с существующей версией!";
 
     private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>() {
@@ -94,13 +94,13 @@ public class RefBookSimpleDataProviderHelper {
             }
 			// Проверяем каждую запись по-отдельности на уникальность значений
             for (RefBookRecord record : records) {
-				// Cписок пар "идентификатор записи"-"имя атрибута"
+				// Найденные совпадения [uniqRecordId-атрибут(ы), ...]
                 List<Pair<Long, String>> matchedRecords = dao.getMatchedRecordsByUniqueAttributes(refBook, uniqueRecordId, record);
                 if (matchedRecords != null && !matchedRecords.isEmpty()) {
                     List<Long> conflictedIds = dao.checkConflictValuesVersions(refBook, matchedRecords, versionFrom, record.getVersionTo());
-
+					// Если значения совпадают и перересекаются сроки действия записей, то выбрасываем ошибку
                     if (!conflictedIds.isEmpty()) {
-                        throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, conflictedIds)));
+                        throw new ServiceException(makeAttrNames(refBook, record, matchedRecords, conflictedIds));
                     }
                 }
             }
@@ -143,8 +143,16 @@ public class RefBookSimpleDataProviderHelper {
         throw new ServiceException("Не найдена запись с заданным родительским элементом");
     }
 
-    private String makeAttrNames(List<Pair<Long, String>> matchedRecords, List<Long> conflictedIds) {
-        StringBuilder attrNames = new StringBuilder();
+	/**
+	 * Формирует строку с информацией о конфликтующих значениях
+	 * @param refBook
+	 * @param record
+	 * @param matchedRecords
+	 * @param conflictedIds
+	 * @return
+	 */
+    private String makeAttrNames(RefBook refBook, RefBookRecord record, List<Pair<Long, String>> matchedRecords, List<Long> conflictedIds) {
+		// [алиас атрибута : количество дублей] дублей может быть > 1, так как текущая запись может пересекать несколько интервалов времени
         Map<String, Integer> map = new HashMap<String, Integer>();
         if (conflictedIds != null) {
             //Если было ограничение по периоду, то отбираем нужные
@@ -168,20 +176,24 @@ public class RefBookSimpleDataProviderHelper {
             }
         }
 
+		StringBuilder attrNames = new StringBuilder();
         Iterator<Map.Entry<String, Integer>> iterator = map.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, Integer> pair = iterator.next();
             attrNames
                     .append("(")
                     .append(pair.getValue())
-                    .append(" шт.) с такими значениями атрибута \"")
+                    .append(" шт.) со значениями атрибута(ов) \"")
                     .append(pair.getKey())
                     .append("\"");
             if (iterator.hasNext()) {
                 attrNames.append(", ");
             }
         }
-        return attrNames.toString();
+
+		// Строка с информацией о проверяемой строке - значения атрибутов в виде строки
+		String strRecord =  refBookHelper.refBookRecordToString(refBook, record);
+		return String.format(UNIQ_ERROR_MSG, attrNames.toString(), strRecord);
     }
 
     private void checkReferences(RefBook refBook, List<RefBookAttribute> attributes, List<RefBookRecord> records, Date versionFrom, Logger logger) {

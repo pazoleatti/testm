@@ -315,15 +315,15 @@ def buildXml(def writer, boolean isForSpecificReport) {
                         }
                     }
                 }
-                /* Мапа используется для заполнения раздела ДохНал. Ключом выступает объект Пара физлицо-ИдОперации,
-                а значением спиок доходов которые соответствуют этой паре*/
-                def pairPersonOperationIdMap = [:]
+                /* Мапа используется для заполнения раздела ДохНал. Ключом выступает ИдОперации,
+                а значением спиок доходов которые соответствуют этой операции*/
+                def pairOperationIdMap = [:]
                 // Находим все возможные значения
                 ndflPersonIncomeList.each {
-                    PairPersonOperationId pair = new PairPersonOperationId(it.ndflPersonId, it.operationId)
-                    def incomesGroup = pairPersonOperationIdMap.get(pair)
+                    def operationId = it.operationId
+                    def incomesGroup = pairOperationIdMap.get(operationId)
                     if (incomesGroup == null) {
-                        pairPersonOperationIdMap.put(pair, [it])
+                        pairOperationIdMap.put(operationId, [it])
                     } else {
                         incomesGroup << it
                     }
@@ -332,7 +332,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 def pairOperationsForRemove = []
 
                 // заполняем pairOperationsForRemove
-                pairPersonOperationIdMap.each { k, v ->
+                pairOperationIdMap.each { k, v ->
                     ScriptUtils.checkInterrupted()
                     def absentAccruedDate = true
                     def absentTaxDate = true
@@ -364,12 +364,12 @@ def buildXml(def writer, boolean isForSpecificReport) {
                     }
                 }
                 pairOperationsForRemove.each {
-                    pairPersonOperationIdMap.remove(it)
+                    pairOperationIdMap.remove(it)
                 }
-                if (pairPersonOperationIdMap.size() != 0) {
+                if (pairOperationIdMap.size() != 0) {
 
                     ДохНал() {
-                        pairPersonOperationIdMap.values().each { listIncomes ->
+                        pairOperationIdMap.values().each { listIncomes ->
                             ScriptUtils.checkInterrupted()
                             def incomeAccruedDate
                             def taxDate
@@ -937,10 +937,8 @@ def createForm() {
             }
         }
     }
-
     // список форм рну-ндфл для отчетного периода всех ТБ
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
-
     // Список физлиц для каждой пары КПП и ОКТМО
     def ndflPersonsGroupedByKppOktmo = [:]
 
@@ -953,7 +951,6 @@ def createForm() {
             }
         }
     }
-    //logger.info(ndflPersonsGroupedByKppOktmo.toString())
 
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
         declarationService.delete(it.id, userInfo)
@@ -988,7 +985,7 @@ def getOktmoByIdList(idList) {
  * @return
  */
 def findAllTerBankDeclarationData(def departmentReportPeriod) {
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.id)
     def allDeclarationData = []
     allDepartmentReportPeriodIds.each {
         ScriptUtils.checkInterrupted()
@@ -1095,7 +1092,7 @@ void getSources() {
     def reportPeriod = getReportPeriod()
     def sourceTypeId = 101
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.reportPeriod.id)
+    def allDepartmentReportPeriodIds = departmentReportPeriodService.getIdsByDepartmentTypeAndReportPeriod(DepartmentType.TERR_BANK.getCode(), departmentReportPeriod.id)
     // Найти подразделения в РНУ которых имеются операции из декларации
     def tmpDeclarationDataList = []
     allDepartmentReportPeriodIds.each {

@@ -286,16 +286,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
-        declarationDataDao.setStatus(id, State.CREATED);
+        boolean createForm = calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
+        if (createForm) {
+            declarationDataDao.setStatus(id, State.CREATED);
+        }
     }
 
-    private void calculateDeclaration(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+    private boolean calculateDeclaration(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
 
         //2. проверяет состояние XML отчета экземпляра декларации
-        setDeclarationBlobs(logger, declarationData, docDate, userInfo, exchangeParams, stateLogger);
+        boolean createForm = setDeclarationBlobs(logger, declarationData, docDate, userInfo, exchangeParams, stateLogger);
+
+        if (!createForm) {
+            declarationDataDao.delete(id);
+            return createForm;
+        }
 
         //3. обновляет записи о консолидации
         ArrayList<Long> declarationDataIds = new ArrayList<Long>();
@@ -309,7 +316,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Налоговая форма обновлена", null);
-
+        return createForm;
     }
 
     @Override
@@ -760,7 +767,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     // расчет декларации
-    private void setDeclarationBlobs(Logger logger,
+    private boolean setDeclarationBlobs(Logger logger,
                                      DeclarationData declarationData, Date docDate, TAUserInfo userInfo, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         if (exchangeParams == null) {
             exchangeParams = new HashMap<String, Object>();
@@ -865,6 +872,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (xmlFile != null && !xmlFile.delete())
                 LOG.warn(String.format(FILE_NOT_DELETE, xmlFile.getName()));
         }
+        if (params.get(DeclarationDataScriptParams.CREATE_FORM) != null) {
+            return (Boolean) params.get(DeclarationDataScriptParams.CREATE_FORM);
+        }
+        return true;
     }
 
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
@@ -1647,8 +1658,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         List<String> oktmoKppList = new ArrayList<String>();
         for (Map.Entry<Long, Map<String, Object>> entry: formMap.entrySet()) {
             Logger scriptLogger = new Logger();
+            boolean createForm = true;
             try {
-                calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
+                createForm = calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
+                if (!createForm) {
+                    if (!scriptLogger.containsLevel(LogLevel.ERROR)) {
+                        fail++;
+                        success--;
+                    }
+                }
             } catch (Exception e) {
                 scriptLogger.error(e);
             } finally {
@@ -1661,7 +1679,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
-                    logger.info("Успешно выполнена расчет для " + getDeclarationFullName(entry.getKey(), null));
+                    if (createForm) {
+                        logger.info("Успешно выполнена расчет для " + getDeclarationFullName(entry.getKey(), null));
+                    }
                     logger.getEntries().addAll(scriptLogger.getEntries());
                 }
             }

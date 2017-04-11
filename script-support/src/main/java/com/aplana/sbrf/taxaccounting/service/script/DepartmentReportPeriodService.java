@@ -35,8 +35,8 @@ public interface DepartmentReportPeriodService {
     /**
      * Найти id отчетных периодов подразделений для определенного типа подразделения и отчетного периода
      * @param departmentTypeCode
-     * @param reportPeriodId
+     * @param departmentReportPeriodId
      * @return
      */
-    List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId);
+    List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId);
 }

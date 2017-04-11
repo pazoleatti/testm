@@ -5,4 +5,5 @@ public interface DeclarationDataScriptParams {
 	String XML = "xml";
     String NOT_REPLACE_XML = "notReplaceXml";
     String XML_FILE = "xmlFile";
+    String CREATE_FORM = "createForm";
 }

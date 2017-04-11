@@ -144,22 +144,21 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         String value = request.getParameter("nType", "");
         final TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
         getView().setTaxType(nType);
-        dispatcher.execute(new GetUserDepartmentAction(),
-                CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetUserDepartmentResult>() {
-                            @Override
-                            public void onSuccess(GetUserDepartmentResult result) {
-                                if (result == null) {
-                                    getProxy().manualRevealFailed();
-                                    return;
-                                }
-                                // Текущее подразделение пользователя
-                                userDepartment = result.getDepartment();
-                                reloadDepartments(nType, null);
-                            }
-                        }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
         getView().setEditMode(false);
         getView().addResizeHandler();
+        GetFormAttributesAction action = new GetFormAttributesAction();
+        action.setRefBookId(getCurrentRefBookId());
+        action.setTableRefBookId(getCurrentTableRefBookId());
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetFormAttributesResult>() {
+                    @Override
+                    public void onSuccess(GetFormAttributesResult result) {
+                        DepartmentConfigPropertyPresenter.this.columns = result.getTableColumns();
+                        getView().setTableColumns(result.getTableColumns());
+                        getView().setTextFieldsParams(result.getAttributes());
+                        getUserDepartment();
+                    }
+                }, this));
     }
 
     private List<Map<String, TableCell>> convert(List<DataRow<Cell>> rows) {
@@ -342,23 +341,22 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                 }, this));
     }
 
-    @Override
-    public void createTableColumns() {
-        GetFormAttributesAction action = new GetFormAttributesAction();
-        action.setRefBookId(getCurrentRefBookId());
-        action.setTableRefBookId(getCurrentTableRefBookId());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetFormAttributesResult>() {
-                    @Override
-                    public void onSuccess(GetFormAttributesResult result) {
-                        DepartmentConfigPropertyPresenter.this.columns = result.getTableColumns();
-                        getView().setTableColumns(result.getTableColumns());
-                        getView().setTextFieldsParams(result.getAttributes());
-                    }
-                }, this));
-
-
-
+    private void getUserDepartment() {
+        dispatcher.execute(new GetUserDepartmentAction(),
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetUserDepartmentResult>() {
+                            @Override
+                            public void onSuccess(GetUserDepartmentResult result) {
+                                if (result == null) {
+                                    getProxy().manualRevealFailed();
+                                    return;
+                                }
+                                // Текущее подразделение пользователя
+                                userDepartment = result.getDepartment();
+                                reloadDepartments(getView().getTaxType(), null);
+                            }
+                        }, DepartmentConfigPropertyPresenter.this)
+                        .addCallback(new ManualRevealCallback<GetUserDepartmentAction>(DepartmentConfigPropertyPresenter.this)));
     }
 
     @Override
