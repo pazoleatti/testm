@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -129,6 +130,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    public ConfigurationParamModel get(String code) {
+        return configurationDao.get(code);
+    }
+
+    @Override
     public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger) {
         if (model == null) {
             return;
@@ -152,8 +158,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 }
                 for (String value : valueList) {
                     // Проверка значения параметра "Проверять ЭП"
-                    if (parameter.equals(parameter.SIGN_CHECK)) {
+                    if (parameter.equals(ConfigurationParam.SIGN_CHECK)) {
                         signCheck(value, logger);
+                    }
+                    if (parameter.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
+                        checkCron(value, logger);
                     }
                     if (value != null && value.length() > maxLength) {
                         logger.error(MAX_LENGTH_ERROR, parameter.getCaption(), maxLength);
@@ -287,8 +296,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             value = value + "/";
                         }
                         // Проверка значения параметра "Проверять ЭП"
-                        if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
+                        if (configurationParam.equals(ConfigurationParam.SIGN_CHECK)) {
                             signCheck(value, logger);
+                        }
+                        // Проверка значения параметра "Расписание очистки каталога временных файлов"
+                        if (configurationParam.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
+                            checkCron(value, logger);
                         }
                         if (configurationParam.hasReadCheck() && (isFolder
                                 && !FileWrapper.canReadFolder(value) || !isFolder
@@ -481,6 +494,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
+    // Проверка значения параметра "Расписание очистки каталога временных файлов"
+    private void checkCron(String value, Logger logger) {
+        try{
+            new CronTrigger(value);
+        } catch (IllegalArgumentException e) {
+            logger.error("Параметр \"" + ConfigurationParam.CLEAR_TEMP_DIR_CRON.getCaption() + "\" должен соответствовать формату CRON!");
+        }
+    }
     /**
      * Изменился ли путь настроики
      *

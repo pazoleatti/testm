@@ -10,7 +10,5 @@ public interface DepartmentConfigPropertyUiHandlers extends AplanaUiHandlers {
     void onCancel();
     void reloadPeriods(TaxType taxType);
     void reloadDepartments(TaxType taxType, Integer currentDepartmentId);
-    void createTableColumns();
-
     void getRefBookPeriod(Integer currentReportPeriodId, Integer currentDepartmentId);
 }

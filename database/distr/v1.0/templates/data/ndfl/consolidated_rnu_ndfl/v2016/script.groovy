@@ -40,6 +40,9 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_CALCULATE: // Формирование pdf-отчета формы
         declarationService.createPdfReport(logger, declarationData, userInfo)
         break
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
+        checkAccept()
+        break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesListForTemporarySolution()
         break
@@ -96,6 +99,7 @@ void consolidation() {
 
     //декларация-приемник, true - заполнятся только текстовые данные для GUI и сообщений,true - исключить несозданные источники,ограничение по состоянию для созданных экземпляров список нф-источников
     List<Relation> sourcesInfo = declarationService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
+
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
     if (declarationDataIdList.isEmpty()){
@@ -179,12 +183,12 @@ void consolidation() {
 
         //List<Long> documentsIds = documentProvider.getUniqueRecordIds(null, "PERSON_ID = " + personId + " AND INC_REP = 1");
         if (personDocumentRecord == null || personDocumentRecord.isEmpty()) {
-            logger.error("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1");
+            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1");
             continue;
         }
 
         if (addressId != null && addressRecord == null) {
-            logger.error("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Адреса физических лиц'");
+            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Адреса физических лиц'");
             continue;
         }
 
@@ -561,16 +565,11 @@ def clearData() {
  * @return
  */
 def getSourcesListForTemporarySolution() {
-
     //отчетный период в котором выполняется консолидация
     ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-
     //Идентификатор подразделения по которому формируется консолидированная форма
     def parentDepartmentId = declarationData.departmentId
-
     Department department = departmentService.get(parentDepartmentId)
-
-    println "department="+department
 
     List<DeclarationData> declarationDataList = findConsolidateDeclarationData(parentDepartmentId, declarationDataReportPeriod.id)
 
@@ -643,12 +642,17 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         //Список отчетных периодов подразделения
         List<DepartmentReportPeriod> departmentReportPeriodList = new ArrayList<DepartmentReportPeriod>();
         List<DeclarationData> allDeclarationDataList = declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, departmentId, reportPeriodId);
+        DepartmentReportPeriod depReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
 
         //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
         Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
         for (DeclarationData declarationData : allDeclarationDataList) {
-            Long asnuId = declarationData.getAsnuId();
+            ScriptUtils.checkInterrupted();
             DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod;
+            if (depReportPeriod.correctionDate != departmentReportPeriod.correctionDate) {
+                continue
+            }
+            Long asnuId = declarationData.getAsnuId();
             Integer departmentReportPeriodId = departmentReportPeriod.getId();
             departmentReportPeriodList.add(departmentReportPeriod);
             if (asnuId != null) {
@@ -675,17 +679,34 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
         //Включение в результат НФ с наиболее старшим периодом сдачи корректировки
         List<DeclarationData> result = new ArrayList<DeclarationData>();
         for (Map.Entry<Long, Map<Integer, List<DeclarationData>>> entry : asnuDataMap.entrySet()) {
+            ScriptUtils.checkInterrupted();
             //Long asnuId = entry.getKey();
             Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
             List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
             result.addAll(declarationDataList);
+            if (depReportPeriod.correctionDate != null) {
+                result.addAll(getUncorrectedPeriodDeclarationData(asnuDeclarationDataMap, departmentReportPeriodList))
+            }
         }
         return result;
     } else {
+        ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+
+        Department department = departmentService.get(declarationData.departmentId)
+
         List<DeclarationData> toReturn = []
-        toReturn.addAll(declarationService.find(NDFL_2_1_TEMPLATE_ID, declarationData.departmentReportPeriodId))
-        toReturn.addAll(declarationService.find(NDFL_2_2_TEMPLATE_ID, declarationData.departmentReportPeriodId))
-        toReturn.addAll(declarationService.find(NDFL_6_TEMPLATE_ID, declarationData.departmentReportPeriodId))
+        List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(NDFL_2_1_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
+        declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_2_2_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
+        declarationDataList.addAll(declarationService.findAllDeclarationData(NDFL_6_TEMPLATE_ID, department.id, declarationDataReportPeriod.id))
+        for (DeclarationData declarationDataDestination : declarationDataList) {
+            ScriptUtils.checkInterrupted();
+            DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
+            if (departmentReportPeriod.correctionDate != departmentReportPeriodDestination.correctionDate) {
+                continue
+            }
+            toReturn.add(declarationDataDestination)
+        }
         return toReturn
     }
 
@@ -705,6 +726,28 @@ List<DeclarationData> getLast(Map<Integer, List<DeclarationData>> declarationDat
         }
     }
     return Collections.emptyList();
+}
+
+/**
+ * Реализует условие из временного решения: "Если период является корректирующим, в КНФ дополнительно надо включить ПНФ основного периода, соответствующего корректирующему."
+ * @param declarationDataMap
+ * @param departmentReportPeriodList
+ * @return
+ */
+List<DeclarationData> getUncorrectedPeriodDeclarationData(Map<Integer, List<DeclarationData>> declarationDataMap, List<DepartmentReportPeriod> departmentReportPeriodList) {
+    List<DeclarationData> toReturn = []
+
+    List<DepartmentReportPeriod> uncorrectedPeriodDrpList = departmentReportPeriodList.findAll {
+        it.correctionDate == null
+    }
+
+    for (DepartmentReportPeriod departmentReportPeriod : uncorrectedPeriodDrpList) {
+        Integer departmentReportPeriodId = departmentReportPeriod.getId()
+        if (declarationDataMap.containsKey(departmentReportPeriodId)) {
+            toReturn.addAll(declarationDataMap.get(departmentReportPeriodId))
+        }
+    }
+    return toReturn
 }
 
 def departmentReportPeriodComp(DepartmentReportPeriod a, DepartmentReportPeriod b) {
@@ -961,7 +1004,10 @@ def createSpecificReport() {
             break;
         case 'report_kpp_oktmo':
             createSpecificReportDb();
-            scriptSpecificReportHolder.setFileName("Отчетность_по_КПП,ОКТМО" + ".xlsx")
+            ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+            def reportPeriodName = reportPeriod.getTaxPeriod().year + '_' + reportPeriod.name
+            Department department = departmentService.get(declarationData.departmentId)
+            scriptSpecificReportHolder.setFileName("Реестр_сформированной_отчетности_${declarationData.id}_${reportPeriodName}_${department.shortName}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
             break;
         case 'rnu_ndfl_person_all_db':
             createSpecificReportDb();
@@ -1736,6 +1782,18 @@ def checkData() {
 }
 
 /**
+ * Проверки наличия данных при принятии
+ * @return
+ */
+def checkAccept() {
+    List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    if (ndflPersonList.isEmpty()) {
+        logger.setMessageDecorator(null)
+        logger.error("Консолидированная форма не содержит данных, принятие формы невозможно")
+    }
+}
+
+/**
  * Проверки на соответствие справочникам
  * @return
  */
@@ -2333,7 +2391,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
         operationNotRelateToCurrentPeriod(ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.taxDate,
-                ndflPersonIncome.kpp, ndflPersonIncome.oktmo, ndflPersonFL.inp, ndflPersonFL.fio)
+                ndflPersonIncome.kpp, ndflPersonIncome.oktmo, ndflPersonFL.inp, ndflPersonFL.fio, ndflPersonIncome)
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         List<ColumnFillConditionData> columnFillConditionDataList = []
@@ -2556,7 +2614,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     DateConditionWorkDay dateConditionWorkDay = new DateConditionWorkDay(calendarService)
 
     // "Графа 6" = "Графе 7"
-    dateConditionDataList << new DateConditionData(["1010", "3020", "1110", "1400", "2001", "2010", "2012",
+    dateConditionDataList << new DateConditionData(["1010", "1011", "3020", "1110", "1400", "2001", "2010", "2012",
                                                     "2300", "2710", "2760", "2762", "2770", "2900", "4800"],
             ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
@@ -2651,7 +2709,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             // СведДох4 НДФЛ.Процентная ставка (Графа 14)
             if (ndflPersonIncome.taxRate == 13) {
                 Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
-                Boolean conditionB = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status == "1"
+                Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status == "1"
                 Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: '0') >= 3
                 if (!(conditionA || conditionB || conditionC)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
@@ -2660,7 +2718,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
                             "Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий: \\n" +
                                     " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2\\n" +
-                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» = 1\\n" +
+                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 или 1011 и «Графа 12 Раздел 1» = 1\\n" +
                                     " «Графа 7 Раздел 1» ≠ 643 и («Графа 4 Раздел 2» = 2000 или 2001 или 2010 или 2002 или 2003) и («Графа 12 Раздел 1» >= 3)")
                 }
             } else if (ndflPersonIncome.taxRate == 15) {
@@ -3006,7 +3064,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 dateConditionDataList = []
 
                 // 1,2 "Графа 21" = "Графа 7" + "1 рабочий день"
-                dateConditionDataList << new DateConditionData(["1010", "3020", "1110", "1400", "2001", "2010",
+                dateConditionDataList << new DateConditionData(["1010", "1011", "3020", "1110", "1400", "2001", "2010",
                                                                 "2710", "2760", "2762", "2770", "2900", "4800"], ["00"],
                         new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
 
@@ -3316,46 +3374,32 @@ class ColumnTrueFillOrNotFill implements ColumnFillConditionChecker {
 
 // Проверка на принадлежность операций периоду при загрузке ТФ
 boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
-                                          String kpp, String oktmo, String inp, String fio) {
+                                          String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     // Доход.Дата.Начисление
-    boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
+    boolean incomeAccruedDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач", incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
     // Доход.Дата.Выплата
-    boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
+    boolean incomePayoutDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл", incomePayoutDate, kpp, oktmo, inp, fio, ndflPersonIncome)
     // НДФЛ.Расчет.Дата
-    boolean taxDateOk = dateRelateToCurrentPeriod(taxDate)
-    if (!incomeAccruedDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач\" недопустимое значение: \"${incomeAccruedDate ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
-                "КПП = $kpp.\n" +
-                "ОКТМО = $oktmo\n" +
-                "ФЛ ИНП = $inp\n" +
-                "ФИО = $fio")
-    }
-    if (!incomePayoutDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл\" недопустимое значение: \"${incomePayoutDate ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
-                "КПП = $kpp.\n" +
-                "ОКТМО = $oktmo\n" +
-                "ФЛ ИНП = $inp\n" +
-                "ФИО = $fio")
-    }
-    if (!taxDateOk) {
-        logger.warn("У параметра ТФ \"Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог\" недопустимое значение: \"${taxDateOk ?: ""}\":дата операции не входит в отчетный период ТФ.\n" +
-                "КПП = $kpp.\n" +
-                "ОКТМО = $oktmo\n" +
-                "ФЛ ИНП = $inp\n" +
-                "ФИО = $fio")
-    }
+    boolean taxDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог", taxDate, kpp, oktmo, inp, fio, ndflPersonIncome)
     if (incomeAccruedDateOk && incomePayoutDateOk && taxDateOk) {
         return false
     }
     return true
 }
 
-boolean dateRelateToCurrentPeriod(Date date) {
-
+boolean dateRelateToCurrentPeriod(def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
-    if (date==null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
+    if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
         return true
     }
+    logger.warn("""
+У параметра ТФ "$paramName" недопустимое значение: "${date ? date.format("dd.MM.yyyy"): ""}":дата операции не входит в отчетный период ТФ.
+КПП = $kpp.
+ОКТМО = $oktmo
+ФЛ ИНП = $inp
+ФИО = $fio
+ИдОперации = ${ndflPersonIncome.operationId}
+Номер строки = ${ndflPersonIncome.rowNum}""")
     return false
 }
 

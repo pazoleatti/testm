@@ -2323,14 +2323,6 @@ void importData() {
 
     ScriptUtils.checkInterrupted();
 
-    // Валидация по схеме
-    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')))
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
-    }
-
-    ScriptUtils.checkInterrupted();
-
     def fileNode = new XmlSlurper().parse(new ByteArrayInputStream(content));
     if (fileNode == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')

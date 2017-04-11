@@ -802,7 +802,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void setRefBookPeriod(Date startDate, Date endDate) {
         factory.setDateRange(startDate, endDate);
-        getUiHandlers().createTableColumns();
     }
 
     /**

@@ -14,6 +14,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -46,7 +47,6 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
         ConfigurationParamGroup group = action.getGroup();
 
         if (group.equals(ConfigurationParamGroup.COMMON) || group.equals(ConfigurationParamGroup.FORM)) {
-            checkWebServiceParams(model, logger);
             configurationService.checkReadWriteAccess(securityService.currentUserInfo(), model, logger);
         } else if (group.equals(ConfigurationParamGroup.EMAIL)) {
             boolean success = emailService.testAuth(logger);
@@ -104,19 +104,6 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
-    }
-
-    private void checkWebServiceParams(ConfigurationParamModel model, Logger logger) {
-        List<String> valuesList = model.get(ConfigurationParam.TIMEOUT_SUNR, 0);
-        if (valuesList != null) {
-            for (String value : valuesList) {
-                try{
-                    int timeout = Integer.parseInt(value);
-                } catch (NumberFormatException e) {
-                    logger.error("Параметр \"" + ConfigurationParam.TIMEOUT_SUNR.getCaption() + "\" должен содержать целочисленное значение");
-                }
-            }
-        }
     }
 
     @Override

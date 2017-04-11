@@ -188,7 +188,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         data.setId(5l);
 		// при маленьком таймауте проверка не должна пройти
 		Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, null, 1000L));
-        Assert.assertEquals(2, logger.getEntries().size());
+        Assert.assertEquals(4, logger.getEntries().size());
     }
 
     @Override

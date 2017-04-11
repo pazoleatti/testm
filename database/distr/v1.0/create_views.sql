@@ -8,12 +8,12 @@ select d.id dep_id,d.name dep_name,
 /
 create or replace view vw_decl_kpp_oktmo_form7
 as
-select decl.id,decl.kpp,decl.oktmo,templ.name,templ.form_kind,per.report_period_id
+select decl.id,decl.kpp,decl.oktmo,templ.name,templ.form_kind,per.report_period_id,per.correction_date
 from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
                            join department_report_period per on (per.id=decl.department_report_period_id)
 where templ.form_kind=7
 union
-select decl.id,inc.kpp,inc.oktmo,templ.name,templ.form_kind,per.report_period_id
+select decl.id,inc.kpp,inc.oktmo,templ.name,templ.form_kind,per.report_period_id,per.correction_date
 from declaration_data decl join declaration_template templ on (templ.id=decl.declaration_template_id)
                            join department_report_period per on (per.id=decl.department_report_period_id)
                            join ndfl_person pers on (pers.declaration_data_id=decl.id)

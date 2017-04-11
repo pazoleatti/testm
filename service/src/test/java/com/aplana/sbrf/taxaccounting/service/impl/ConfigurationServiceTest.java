@@ -163,7 +163,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON) && !param.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
                 if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
@@ -220,7 +220,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON) && !param.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
                 if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
@@ -269,7 +269,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON) && !param.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
                 if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0, asList("file://" + path + "/"));
                 } else {
@@ -291,6 +291,8 @@ public class ConfigurationServiceTest {
         commonFolder.delete();
         uploadFolder.delete();
         archiveFolder.delete();
+
+        System.out.println(""+logger.getEntries());
 
         Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_ERROR_DIRECTORY.getCaption()));
@@ -338,7 +340,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON) && !param.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
                 if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
@@ -390,7 +392,7 @@ public class ConfigurationServiceTest {
 
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
-            if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
+            if (param.getGroup().equals(ConfigurationParamGroup.COMMON) && !param.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
                 if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));

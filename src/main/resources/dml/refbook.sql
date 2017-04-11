@@ -349,6 +349,8 @@ insert into ref_book_attribute (id,ref_book_id,ord,name,alias,visible,type,refer
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9649, 964, 'Идентификатор физического лица НДФЛ', 'NDFL_PERSON_ID', 2, 9, null, null, 0, 0, 15, 0, 0, null, null, 0, 18);
 
 ---------------------------------
+update ref_book_attribute set required = 1 where id in (9501, 9513, 9601, 9613);
+
 update ref_book_attribute set reference_id=923,attribute_id=9231 where reference_id=4;
 ---------------------------------
 

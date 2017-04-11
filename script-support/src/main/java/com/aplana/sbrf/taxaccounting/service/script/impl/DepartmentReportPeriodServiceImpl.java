@@ -54,7 +54,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int reportPeriodId) {
-        return departmentReportPeriodDao.getIdsByDepartmentTypeAndReportPeriod(departmentTypeCode, reportPeriodId);
+    public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId) {
+        return departmentReportPeriodDao.getIdsByDepartmentTypeAndReportPeriod(departmentTypeCode, departmentReportPeriodId);
     }
 }

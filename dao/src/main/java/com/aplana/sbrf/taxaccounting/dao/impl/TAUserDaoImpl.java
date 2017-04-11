@@ -170,22 +170,8 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			}; 
 			getJdbcTemplate().update(psc, keyHolder);
 
-			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
-					"select ?, id from sec_role where alias = ?",new BatchPreparedStatementSetter() {
-				
-				@Override
-				public void setValues(PreparedStatement ps, int i) throws SQLException {
-					TARole role = user.getRoles().get(i);
-					ps.setInt(1, keyHolder.getKey().intValue());
-					ps.setString(2, role.getAlias());
-				}
-				
-				@Override
-				public int getBatchSize() {
-					return user.getRoles().size();
-				}
-			});
             user.setId(keyHolder.getKey().intValue());
+			updateUserRoles(user);
             updateUserAsnu(user);
             return keyHolder.getKey().intValue();
 		} catch (DataAccessException e) {
@@ -241,22 +227,24 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
             getJdbcTemplate().update("delete from sec_user_role where user_id=" +
                     "(select id from sec_user where lower(login)=?)",user.getLogin().toLowerCase());
 
-			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
-					"select ?, id from sec_role where alias = ?",
-					new BatchPreparedStatementSetter() {
-				
-				@Override
-				public void setValues(PreparedStatement ps, int i) throws SQLException {
-					TARole role = user.getRoles().get(i);
-					ps.setInt(1, user.getId());
-					ps.setString(2, role.getAlias());
-				}
-				
-				@Override
-				public int getBatchSize() {
-					return user.getRoles().size();
-				}
-			});
+            if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+				getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
+								"select ?, id from sec_role where alias = ?",
+						new BatchPreparedStatementSetter() {
+
+							@Override
+							public void setValues(PreparedStatement ps, int i) throws SQLException {
+								TARole role = user.getRoles().get(i);
+								ps.setInt(1, user.getId());
+								ps.setString(2, role.getAlias());
+							}
+
+							@Override
+							public int getBatchSize() {
+								return user.getRoles().size();
+							}
+						});
+			}
 			LOG.debug("User update roles success " + user);
 		} catch (DataAccessException e) {
 			throw new DaoException("Не удалось обновить роли для пользователя с login = " + user.getLogin() + "." + e.getLocalizedMessage());
@@ -267,7 +255,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
         try {
             getJdbcTemplate().update("delete from sec_user_asnu where user_id=?", user.getId());
 
-            if (!user.getAsnuIds().isEmpty()) {
+            if (user.getAsnuIds() != null && !user.getAsnuIds().isEmpty()) {
                 getJdbcTemplate().batchUpdate("insert into sec_user_asnu (user_id, asnu_id, id) values " +
                                 "(?, ?, seq_sec_user_asnu_id.nextval)",
                         new BatchPreparedStatementSetter() {

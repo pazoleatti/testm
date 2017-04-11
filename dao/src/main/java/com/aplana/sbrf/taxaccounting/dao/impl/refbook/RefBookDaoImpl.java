@@ -2640,8 +2640,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(filterPS.getJoinPartsOfQuery());
         }
 
+        ps.appendQuery(" WHERE frb.id != -1 ");
         if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" WHERE ");
+            ps.appendQuery("and ");
             if (parentId == null) {
                 ps.appendQuery("frb.PARENT_ID is null or (");
             }

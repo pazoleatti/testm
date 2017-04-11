@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import groovy.transform.Field
 
 import javax.script.ScriptException
+import java.text.SimpleDateFormat
 import java.util.*;
 import java.io.*;
 
@@ -308,6 +309,7 @@ def importPrimary1151111() {
     msgBuilder.append("Выполнено создание налоговой формы: ")
             .append("№: \"").append(declarationDataId).append("\"")
             .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+            .append(getCorrectionDateString(departmentReportPeriod))
             .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
             .append(", Вид: \"").append(declarationType.getName()).append("\"")
 }
@@ -1346,6 +1348,7 @@ def _importTF() {
     msgBuilder.append("Выполнено создание налоговой формы: ")
             .append("№: \"").append(declarationDataId).append("\"")
             .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+            .append(getCorrectionDateString(departmentReportPeriod))
             .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
             .append(", Вид: \"").append(declarationType.getName()).append("\"")
             .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
@@ -1384,4 +1387,9 @@ def readXml1151111() {
     }
 
     return [reportPeriodCode, year]
+}
+
+String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
+    def dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", dateFormat.format(reportPeriod.getCorrectionDate())) : "";
 }

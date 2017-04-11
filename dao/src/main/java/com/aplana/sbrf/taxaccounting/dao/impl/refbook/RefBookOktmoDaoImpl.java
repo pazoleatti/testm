@@ -38,9 +38,9 @@ import java.util.*;
  *
  * @author dloshkarev
  */
-@Deprecated
+@Deprecated // пометил класс как абстрактный, чтобы избежать создания его экземпляров
 @Repository
-public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao {
+public abstract class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao {
 
     @Autowired
     private RefBookDao refBookDao;

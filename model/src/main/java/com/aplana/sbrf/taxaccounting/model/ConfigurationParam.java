@@ -23,6 +23,7 @@ public enum ConfigurationParam {
     FIAS_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника ФИАС", ConfigurationParamGroup.COMMON, true, true, 1),
     REF_BOOK_ARCHIVE_DIRECTORY("Путь к каталогу архива справочников", ConfigurationParamGroup.COMMON, true, true, 2),
     REF_BOOK_ERROR_DIRECTORY("Путь к каталогу ошибок справочников", ConfigurationParamGroup.COMMON, true, true, 2),
+    CLEAR_TEMP_DIR_CRON("Расписание очистки каталога временных файлов", ConfigurationParamGroup.COMMON, true, false, 0),
 
     /**
      * Путь к библиотеке подписи
@@ -35,12 +36,6 @@ public enum ConfigurationParam {
     FORM_UPLOAD_DIRECTORY("Путь к каталогу загрузки", ConfigurationParamGroup.FORM, true, true, 2),
     FORM_ARCHIVE_DIRECTORY("Путь к каталогу архива", ConfigurationParamGroup.FORM, true, true, 2),
     FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", ConfigurationParamGroup.FORM, true, true, 2),
-
-    /**
-     * СУНР
-     */
-    WSDL_ADDRESS_DEPARTMENT_WS_SUNR("Адрес wsdl веб-сервиса по передаче изменений справочника \"Подразделения\" в АС СУНР", ConfigurationParamGroup.COMMON, true, false, 0),
-    TIMEOUT_SUNR("Время ожидания ответа от АС СУНР, сек", ConfigurationParamGroup.COMMON, true, false, 0),
 
     /**
      * Общие параметры

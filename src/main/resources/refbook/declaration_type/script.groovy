@@ -3,6 +3,8 @@ package refbook.declaration_type
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.service.impl.*
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
@@ -11,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import groovy.transform.Field
 
 import javax.script.ScriptException
+import java.text.SimpleDateFormat
 import java.util.*;
 import java.io.*;
 
@@ -205,6 +208,17 @@ def importNDFL() {
  * Импорт ТФ 1151111
  */
 def importPrimary1151111() {
+    ScriptUtils.checkInterrupted();
+
+    def declarationTemplate = declarationService.getTemplate(DECLARATION_TYPE_RASCHSV_NDFL_ID.intValue())
+    declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')), declarationTemplate.xsdId)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        logger.error("Файл «%s» не загружен: ТФ не соответствует xsd-схеме.", UploadFileName);
+        return
+    }
+
+    ScriptUtils.checkInterrupted();
+
     // 2. Разбор имени файла
     String tranNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$1")
     String endNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$2")
@@ -308,6 +322,7 @@ def importPrimary1151111() {
     msgBuilder.append("Выполнено создание налоговой формы: ")
             .append("№: \"").append(declarationDataId).append("\"")
             .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+            .append(getCorrectionDateString(departmentReportPeriod))
             .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
             .append(", Вид: \"").append(declarationType.getName()).append("\"")
 }
@@ -350,6 +365,39 @@ def importAnswer1151111() {
         fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UU_PATTERN, "\$5").substring(0,8));
         nodeNameFind = "ОбщСвУвед"
         attrNameFind = "ИмяОбрабФайла"
+    }
+
+    // 2. Выполним проверку структуры файла ответа на соответствие XSD
+    def declarationTemplate = declarationService.getTemplate(DECLARATION_TYPE_RASCHSV_NDFL_ID.intValue())
+    def templateFile = null
+    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+            it.fileName.startsWith(ANSWER_PATTERN_1)
+        }
+    }
+    if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+            it.fileName.startsWith(ANSWER_PATTERN_2)
+        }
+    }
+    if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+            it.fileName.startsWith(ANSWER_PATTERN_3)
+        }
+    }
+    if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+            it.fileName.startsWith(ANSWER_PATTERN_4)
+        }
+    }
+    if (!templateFile) {
+        logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
+        return
+    }
+    declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        logger.error("Файл «%s» не загружен: ТФ не соответствует xsd-схеме.", UploadFileName);
+        return
     }
 
     // 3. Выполним чтение Имени отчетного файла из элемента файла ответа
@@ -412,38 +460,6 @@ def importAnswer1151111() {
             throw new IllegalArgumentException(String.format(msgError, msgErrorList.join(", ")));
         }
         def declarationData = declarationDataList.get(0)
-
-        // 2. Выполним проверку структуры файла ответа на соответствие XSD
-        def declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-        def templateFile = null
-        if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_1)
-            }
-        }
-        if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_2)
-            }
-        }
-        if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_3)
-            }
-        }
-        if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_4)
-            }
-        }
-        if (!templateFile) {
-            logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
-            return
-        }
-        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            return
-        }
 
         // 5. Проверка того, что файл ответа не был загружен ранее
         def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
@@ -1346,12 +1362,14 @@ def _importTF() {
     msgBuilder.append("Выполнено создание налоговой формы: ")
             .append("№: \"").append(declarationDataId).append("\"")
             .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
+            .append(getCorrectionDateString(departmentReportPeriod))
             .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
             .append(", Вид: \"").append(declarationType.getName()).append("\"")
             .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
 }
 
 def readXml1151111() {
+
     def sett = [:]
     sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR])
 
@@ -1384,4 +1402,9 @@ def readXml1151111() {
     }
 
     return [reportPeriodCode, year]
+}
+
+String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
+    def dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    return reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", dateFormat.format(reportPeriod.getCorrectionDate())) : "";
 }
