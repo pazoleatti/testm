@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.HandleStringLength;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationList;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -17,9 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-
-import static java.util.Arrays.asList;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
@@ -42,6 +43,7 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
     private RefBookFactory rbFactory;
 
 	@Override
+    @HandleStringLength(fieldNames = {"declarationDataIdStr"})
 	public GetDeclarationListResult execute(GetDeclarationList action, ExecutionContext executionContext) throws ActionException {
 		if (action == null || action.getDeclarationFilter() == null){
 			return null;

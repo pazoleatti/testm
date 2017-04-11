@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.HandleStringLength;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.CreateTaskResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -41,6 +42,7 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
     }
 
     @Override
+    @HandleStringLength(fieldNames = {"taskName"})
     public CreateTaskResult execute(CreateTaskAction action, ExecutionContext executionContext) throws ActionException {
         CreateTaskResult result = new CreateTaskResult();
         try {

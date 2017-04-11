@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.HandleStringLength;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTypeTemplate;
@@ -39,6 +40,7 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 	}
 
 	@Override
+    @HandleStringLength(fieldNames = {"searchText"})
 	public DeclarationListResult execute(DeclarationListAction action, ExecutionContext executionContext) throws ActionException {
 		DeclarationListResult result = new DeclarationListResult();
         TAUser user = securityService.currentUserInfo().getUser();

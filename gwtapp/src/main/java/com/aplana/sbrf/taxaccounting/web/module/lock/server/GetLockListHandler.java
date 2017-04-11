@@ -4,17 +4,18 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.HandleStringLength;
 import com.aplana.sbrf.taxaccounting.web.module.lock.shared.GetLockListAction;
 import com.aplana.sbrf.taxaccounting.web.module.lock.shared.GetLockListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Получение списка блокировок
@@ -39,6 +40,7 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
     }
 
     @Override
+    @HandleStringLength(fieldNames = {"filter"})
     public GetLockListResult execute(GetLockListAction action, ExecutionContext executionContext) throws ActionException {
         SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
         GetLockListResult result = new GetLockListResult();
