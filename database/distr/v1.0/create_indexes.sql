@@ -72,6 +72,8 @@ create index idx_ref_book_ndfl_detail_load on ref_book_ndfl_detail (ref_book_ndf
 create index idx_fias_socrbase_lev on fias_socrbase(lev);
 create index idx_ndfl_references_person on ndfl_references(ndfl_person_id);
 
+create index srch_fsocrbase_lev_scname on fias_socrbase(lev, trim(lower(scname)));
+create index srch_fsocrbase_lev_scname_n on fias_socrbase(lev, trim(lower(scname||'.')));
 create index srch_ref_person_name_brthd on ref_book_person(replace(lower(last_name), ' ', ''),replace(lower(first_name), ' ', ''),replace(lower(middle_name), ' ', ''),birth_date);
 create index srch_ref_book_id_doc_tp_num on ref_book_id_doc(doc_id,replace(lower(doc_number), ' ', ''));
 create index srch_ref_book_person_snils on ref_book_person(replace(replace(snils, ' ', ''), '-', ''));

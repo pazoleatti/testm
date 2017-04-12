@@ -56,6 +56,8 @@ ECHO ## ddl: create triggers
 ECHO ## ddl: create views
 "%ORA_BIN%\sqlplus" %AUTH% @"create_views.sql" > "%LOG_DIR%/create_views.txt"
 
+ECHO ## ddl: create materiazed views
+"%ORA_BIN%\sqlplus" %AUTH% @"create_mat_views.sql" > "%LOG_DIR%/create_mat_views.txt"
 
 ECHO ## ddl: create sources
 "%ORA_BIN%\sqlplus" %AUTH% @"create_procedures.sql" > "%LOG_DIR%/create_procedures.txt"
