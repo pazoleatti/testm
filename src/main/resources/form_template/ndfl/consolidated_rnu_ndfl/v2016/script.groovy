@@ -3926,15 +3926,12 @@ def getErrorMsgAbsent(def inputList, def tableName) {
 void checkCreate() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
     if (departmentReportPeriod.correctionDate != null) {
-        def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
-        if (prevDepartmentReportPeriod == null) {
-            prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
-        }
+        def prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
         def declarationList = declarationService.find(102, prevDepartmentReportPeriod.getId())
         declarationList.addAll(declarationService.find(103, prevDepartmentReportPeriod.getId()))
         declarationList.addAll(declarationService.find(104, prevDepartmentReportPeriod.getId()))
         if (declarationList.isEmpty()) {
-            logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном/предыдущем корректировочном периоде. Отчетные налоговые формы не будут сформированы в текущем периоде")
+            logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде, Отчетные налоговые формы не будут сформированы текущем периоде")
         }
     }
 }
