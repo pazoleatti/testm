@@ -31,12 +31,12 @@ public interface FiasRefBookDao {
      * @param declarationId идентификатор декларации
      * @return карта идентификатор записи РНУ-НДФЛ - идентификатор адреса в справочнике ФИАС
      */
-    Map<Long, Long> checkAddressByFias(Long declarationId);
+    Map<Long, Long> checkAddressByFias(Long declarationId, int p_check_type);
 
     /**
      * Выполнить проверку на наличие/отсутствие в ФИАС элементов адресов, указанных в декларации
      */
-    Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationId);
+    Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationId, int p_check_type);
 
 
 }
