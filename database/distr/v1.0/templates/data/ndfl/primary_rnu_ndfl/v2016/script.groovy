@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
+import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
@@ -17,8 +18,10 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.script.*
 import groovy.transform.Field
 import groovy.transform.Memoized
+import groovy.transform.TypeChecked
 import groovy.util.slurpersupport.NodeChild
 import groovy.xml.MarkupBuilder
 import org.springframework.jdbc.core.RowMapper
@@ -38,6 +41,9 @@ import java.util.regex.Pattern
  * Скрипт макета декларации РНУ-НДФЛ(первичная)
  */
 switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreate()
+        break
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
         moveAcceptedToCreated();
         break
@@ -67,6 +73,23 @@ switch (formDataEvent) {
         // Формирование pdf-отчета формы
         declarationService.createPdfReport(logger, declarationData, userInfo)
         break
+}
+
+@Field
+final Logger logger = getProperty("logger")
+@Field
+final DeclarationData declarationData = getProperty("declarationData")
+@Field
+final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
+@Field
+final DeclarationService declarationService = getProperty("declarationService")
+
+def getProperty(String name) {
+    try{
+        return super.getProperty(name)
+    } catch (MissingPropertyException e) {
+        return null
+    }
 }
 
 @Field final FormDataKind FORM_DATA_KIND = FormDataKind.PRIMARY;
@@ -4827,6 +4850,24 @@ public class NaturalPersonRefbookScriptHandler extends NaturalPersonRefbookHandl
             return null;
         }
     }
+}
 
-
+@TypeChecked
+void checkCreate() {
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
+    if (departmentReportPeriod.correctionDate != null) {
+        def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
+        if (prevDepartmentReportPeriod == null) {
+            prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
+        }
+        def declarationList = declarationService.find(102, prevDepartmentReportPeriod.getId())
+        declarationList.addAll(declarationService.find(103, prevDepartmentReportPeriod.getId()))
+        declarationList.addAll(declarationService.find(104, prevDepartmentReportPeriod.getId()))
+        def delaration = declarationList.find{
+            State.ACCEPTED.equals(it.state)
+        }
+        if (delaration == null) {
+            logger.warn("Отсутствуют принятые отчетные налоговые формы в некорректировочном/предыдущем корректировочном периоде. Отчетные налоговые формы не будут сформированы в текущем периоде")
+        }
+    }
 }
