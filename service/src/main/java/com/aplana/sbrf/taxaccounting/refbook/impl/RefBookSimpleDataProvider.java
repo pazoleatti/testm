@@ -248,14 +248,20 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             helper.checkCorrectness(logger, getRefBook(), null, versionFrom, records);
 
             if (getRefBook().isVersioned()) {
-                for (RefBookRecord record : records) {
-                    //Проверка пересечения версий
-                    if (record.getRecordId() != null) {
-                        boolean needToCreateFakeVersion = helper.crossVersionsProcessing(dao.checkCrossVersions(getRefBook(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
-                                getRefBook(), versionFrom, record.getVersionTo(), logger);
-                        if (!needToCreateFakeVersion) {
-                            //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
-                            excludedVersionEndRecords.add(record.getRecordId());
+                if (!getRefBook().getId().equals(RefBook.WithTable.NDFL.getRefBookId()) &&
+                        !getRefBook().getId().equals(RefBook.WithTable.NDFL.getTableRefBookId()) &&
+                        !getRefBook().getId().equals(RefBook.WithTable.FOND.getRefBookId()) &&
+                        !getRefBook().getId().equals(RefBook.WithTable.FOND.getTableRefBookId())) {
+
+                    for (RefBookRecord record : records) {
+                        //Проверка пересечения версий
+                        if (record.getRecordId() != null) {
+                            boolean needToCreateFakeVersion = helper.crossVersionsProcessing(dao.checkCrossVersions(getRefBook(), record.getRecordId(), versionFrom, record.getVersionTo(), null),
+                                    getRefBook(), versionFrom, record.getVersionTo(), logger);
+                            if (!needToCreateFakeVersion) {
+                                //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
+                                excludedVersionEndRecords.add(record.getRecordId());
+                            }
                         }
                     }
                 }
