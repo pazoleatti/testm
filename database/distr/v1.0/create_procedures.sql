@@ -1765,7 +1765,7 @@ begin
           else
             v_srch:=v_str;
           end if;
-          select trim(lower(v_str)) into v_type from fias_socrbase scr where scr.lev in (p_lev,p_add_lev) and trim(lower(scr.scname))=trim(lower(v_srch));
+          select trim(lower(v_str)) into v_type from fias_socrbase scr where scr.lev in (p_lev,p_add_lev) and trim(lower(scr.scname))=trim(lower(v_srch)) and rownum=1;
           if (instr(lower(v_name_src),' '||lower(v_type))>0) then
             v_name:=trim(substr(v_name_src,1,instr(lower(v_name_src),' '||lower(v_type))-1));
           elsif (instr(lower(v_name_src),lower(v_type)||' ')>0) then
