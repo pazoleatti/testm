@@ -3933,11 +3933,8 @@ void checkCreate() {
         def declarationList = declarationService.find(102, prevDepartmentReportPeriod.getId())
         declarationList.addAll(declarationService.find(103, prevDepartmentReportPeriod.getId()))
         declarationList.addAll(declarationService.find(104, prevDepartmentReportPeriod.getId()))
-        def delaration = declarationList.find{
-            State.ACCEPTED.equals(it.state)
-        }
-        if (delaration == null) {
-            logger.warn("Отсутствуют принятые отчетные налоговые формы в некорректировочном/предыдущем корректировочном периоде. Отчетные налоговые формы не будут сформированы в текущем периоде")
+        if (declarationList.isEmpty()) {
+            logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном/предыдущем корректировочном периоде. Отчетные налоговые формы не будут сформированы в текущем периоде")
         }
     }
 }
