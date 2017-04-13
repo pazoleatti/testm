@@ -48,12 +48,13 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
     }
 
     @Override
-    public Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationId) {
+    public Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationId, int p_check_type) {
         Map<Long, CheckAddressResult> result = new HashMap<Long, CheckAddressResult>();
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("fias_pkg").withFunctionName("CheckExistsAddrByFias");
-        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, new CheckExistAddressByFiasRowHandler(result)), new SqlParameter("p_declaration", Types.NUMERIC));
+        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, new CheckExistAddressByFiasRowHandler(result)), new SqlParameter("p_declaration", Types.NUMERIC), new SqlParameter("p_check_type", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationId);
+        params.addValue("p_check_type", p_check_type);
         call.execute(params);
         return result;
     }
@@ -129,12 +130,13 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
 
 
     @Override
-    public Map<Long, Long> checkAddressByFias(Long declarationId) {
+    public Map<Long, Long> checkAddressByFias(Long declarationId, int p_check_type) {
         Map<Long, Long> result = new HashMap<Long, Long>();
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("fias_pkg").withFunctionName("CheckAddrByFias");
-        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, new CheckAddressByFiasRowHandler(result)), new SqlParameter("p_declaration", Types.NUMERIC));
+        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, new CheckAddressByFiasRowHandler(result)), new SqlParameter("p_declaration", Types.NUMERIC), new SqlParameter("p_check_type", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationId);
+        params.addValue("p_check_type", p_check_type);
         call.execute(params);
         return result;
     }

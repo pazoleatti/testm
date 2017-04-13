@@ -415,9 +415,9 @@ alter table ndfl_person add constraint ndfl_person_fk_person_id foreign key (per
 alter table ndfl_person_income add constraint ndfl_person_i_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
 alter table ndfl_person_income add constraint ndfl_person_i_fk_s foreign key (source_id) references ndfl_person_income(id) on delete set null;
 alter table ndfl_person_deduction add constraint ndfl_pd_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
-alter table ndfl_person_deduction add constraint ndfl_pd_fk_s foreign key (source_id) references ndfl_person_deduction(id);
+alter table ndfl_person_deduction add constraint ndfl_pd_fk_s foreign key (source_id) references ndfl_person_deduction(id) on delete set null;
 alter table ndfl_person_prepayment add constraint ndfl_pp_fk_np foreign key (ndfl_person_id) references ndfl_person(id) on delete cascade;
-alter table ndfl_person_prepayment add constraint ndfl_pp_fk_s foreign key (source_id) references ndfl_person_prepayment(id);
+alter table ndfl_person_prepayment add constraint ndfl_pp_fk_s foreign key (source_id) references ndfl_person_prepayment(id) on delete set null;
 
 --------------------------------------------------------------------------------------------------------------------------
 -- НДФЛ Реестр справок
