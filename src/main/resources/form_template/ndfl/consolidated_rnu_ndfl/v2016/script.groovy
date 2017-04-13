@@ -1113,33 +1113,33 @@ def checkDataConsolidated(){
     if (FORM_DATA_KIND.equals(FormDataKind.CONSOLIDATED)) {
         // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
         def mapDepartmentNotExistRnu = [
-                4  : 'Байкальский банк',
-                8  : 'Волго-Вятский банк',
-                20 : 'Дальневосточный банк',
-                27 : 'Западно-Сибирский банк',
-                32 : 'Западно-Уральский банк',
-                37 : 'Московский банк',
-                44 : 'Поволжский банк',
-                52 : 'Северный банк',
-                64 : 'Северо-Западный банк',
-                82 : 'Сибирский банк',
-                88 : 'Среднерусский банк',
-                97 : 'Уральский банк',
-                113: 'Центральный аппарат ПАО Сбербанк',
-                102: 'Центрально-Чернозёмный банк',
-                109: 'Юго-Западный банк'
+                4L  : 'Байкальский банк',
+                8L  : 'Волго-Вятский банк',
+                20L : 'Дальневосточный банк',
+                27L : 'Западно-Сибирский банк',
+                32L : 'Западно-Уральский банк',
+                37L : 'Московский банк',
+                44L : 'Поволжский банк',
+                52L : 'Северный банк',
+                64L : 'Северо-Западный банк',
+                82L : 'Сибирский банк',
+                88L : 'Среднерусский банк',
+                97L : 'Уральский банк',
+                113L : 'Центральный аппарат ПАО Сбербанк',
+                102L : 'Центрально-Чернозёмный банк',
+                109L : 'Юго-Западный банк'
         ]
         def listDepartmentNotAcceptedRnu = []
         List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
         for (DeclarationData dd : declarationDataList) {
             // Подразделение
             Long departmentCode = departmentService.get(dd.departmentId)?.code
-            mapDepartmentNotExistRnu.remove(departmentCode)
 
             // Если налоговая форма не принята
             if (!dd.state.equals(State.ACCEPTED)) {
-                listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
+                listDepartmentNotAcceptedRnu << mapDepartmentNotExistRnu[departmentCode]
             }
+            mapDepartmentNotExistRnu.remove(departmentCode)
         }
 
         // Период
