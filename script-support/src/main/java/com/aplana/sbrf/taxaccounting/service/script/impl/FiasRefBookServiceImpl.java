@@ -18,7 +18,7 @@ public class FiasRefBookServiceImpl implements FiasRefBookService {
     FiasRefBookDao fiasRefBookDao;
 
     @Override
-    public Map<Long, Long> checkAddressByFias(Long declarationDataId) {
+    public Map<Long, Long> checkAddressByFias(Long declarationDataId, Integer checkType) {
         return fiasRefBookDao.checkAddressByFias(declarationDataId, 0);
     }
 

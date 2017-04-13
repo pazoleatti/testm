@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckAddressResult;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
@@ -18,7 +17,7 @@ public interface FiasRefBookService {
      * @param declarationDataId
      * @return
      */
-    Map<Long, Long> checkAddressByFias(Long declarationDataId);
+    Map<Long, Long> checkAddressByFias(Long declarationDataId, Integer checkType);
 
     /**
      * Возвращает все найденные в справочнике адреса по записям НФ
