@@ -17,7 +17,7 @@ public interface FiasRefBookService {
      * @param declarationDataId
      * @return
      */
-    Map<Long, Long> checkAddressByFias(Long declarationDataId, Integer checkType);
+    Map<Long, Long> checkAddressByFias(Long declarationDataId);
 
     /**
      * Возвращает все найденные в справочнике адреса по записям НФ
