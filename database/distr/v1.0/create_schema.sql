@@ -16,3 +16,4 @@ grant advisor to NDFL;
 grant create any view to NDFL;
 grant select any sequence to NDFL;
 grant select any table to NDFL;
+grant create materialized view to NDFL;
