@@ -12,7 +12,9 @@ select distinct f.*,
        nvl2(c.id,1,0) has_child
   from fias_addrobj f left join fias_addrobj c on (c.parentguid=f.aoid and c.currstatus=0)
  where f.currstatus=0
-   and f.aolevel=3;
+   and (f.aolevel=3 or
+        f.aolevel=1 and replace(lower(f.formalname),' ','') not in ('москва','санкт-петербург','севастополь','байконур')
+        );
    
 comment on materialized view mv_fias_area_act is 'Актуальные районы из справочника ФИАС';
    
@@ -50,7 +52,7 @@ select distinct f.*,
        nvl2(c.id,1,0) has_child
   from fias_addrobj f left join fias_addrobj c on (c.parentguid=f.aoid and c.currstatus=0)
  where f.currstatus=0
-   and f.aolevel=6;
+   and f.aolevel in (6,90);
 
 comment on materialized view mv_fias_locality_act is 'Актуальные населенные пункты из справочника ФИАС';
    
@@ -68,7 +70,7 @@ select distinct f.*,
        nvl2(c.id,1,0) has_child
   from fias_addrobj f left join fias_addrobj c on (c.parentguid=f.aoid and c.currstatus=0)
  where f.currstatus=0
-   and f.aolevel=7;
+   and f.aolevel in (7,91);
 
 comment on materialized view mv_fias_street_act is 'Актуальные улицы из справочника ФИАС';
    
