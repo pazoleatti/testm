@@ -42,7 +42,8 @@ public class CreateTaskHandler extends AbstractActionHandler<CreateTaskAction, C
     }
 
     @Override
-    @HandleStringLength(fieldNames = {"taskName"})
+    @HandleStringLength(fieldNames = {"taskName"}, stringLength = 32)
+    //TODO Подобрать размер stringLength. При 1000 выбрасывает ошибку. Локально протестировать не получается потому что используется заглушка для TaskManager.
     public CreateTaskResult execute(CreateTaskAction action, ExecutionContext executionContext) throws ActionException {
         CreateTaskResult result = new CreateTaskResult();
         try {
