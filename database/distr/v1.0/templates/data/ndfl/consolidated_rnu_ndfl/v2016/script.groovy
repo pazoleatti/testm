@@ -1143,24 +1143,25 @@ def checkDataConsolidated(){
         }
 
         // Период
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        def reportPeriod = departmentReportPeriod.reportPeriod
         def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
         def periodCode = period?.CODE?.stringValue
         def periodName = period?.NAME?.stringValue
         def calendarStartDate = reportPeriod?.calendarStartDate
-
+        String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
         if (!mapDepartmentNotExistRnu.isEmpty()) {
             def listDepartmentNotExistRnu = []
             mapDepartmentNotExistRnu.each {
                 listDepartmentNotExistRnu.add(it.value)
             }
             logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                    " года не созданы экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotExistRnu.join("\", \"")}'." +
+                    " года" + correctionDateExpression + " не созданы экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotExistRnu.join("\", \"")}'." +
                     " Данные этих форм не включены в отчетность!")
         }
         if (!listDepartmentNotAcceptedRnu.isEmpty()) {
             logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                    " года имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.join("\", \"")}'," +
+                    " года" + correctionDateExpression + " имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.join("\", \"")}'," +
                     " для которых в системе существуют КНФ в текущем периоде, состояние которых <> 'Принята'. Данные этих форм не включены в отчетность!")
         }
     }
