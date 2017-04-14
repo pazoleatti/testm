@@ -10,12 +10,6 @@
         </web>
     </module>
     <module>
-        <ejb>scheduler-task.jar</ejb>
-    </module>
-    <module>
-        <ejb>scheduler-core.jar</ejb>
-    </module>
-    <module>
         <ejb>async-core.jar</ejb>
     </module>
     <module>

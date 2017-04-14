@@ -44,27 +44,6 @@
             <dependencies>
                 <dependency>
                     <groupId>com.aplana.taxaccounting</groupId>
-                    <artifactId>scheduler-task</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                    <classifier>jar-with-dependencies</classifier>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>service</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>dao</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>core</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-                <dependency>
-                    <groupId>com.aplana.taxaccounting</groupId>
                     <artifactId>async-task</artifactId>
                     <version>${project.version}</version>
                     <type>ejb</type>
@@ -118,17 +97,6 @@
                                 </webModule>
                                 <ejbModule>
                                     <groupId>${project.groupId}</groupId>
-                                    <artifactId>scheduler-task</artifactId>
-                                    <bundleFileName>scheduler-task.jar</bundleFileName>
-                                    <classifier>jar-with-dependencies</classifier>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>scheduler-core</artifactId>
-                                    <bundleFileName>scheduler-core.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
                                     <artifactId>async-core</artifactId>
                                     <bundleFileName>async-core.jar</bundleFileName>
                                 </ejbModule>
@@ -151,18 +119,6 @@
             <artifactId>gwtapp</artifactId>
             <version>${project.version}</version>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>com.aplana.taxaccounting</groupId>
-            <artifactId>scheduler-core</artifactId>
-            <version>${project.version}</version>
-            <type>ejb</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.ibm.ws</groupId>
-                    <artifactId>ws-runtime</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
