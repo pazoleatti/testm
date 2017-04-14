@@ -79,14 +79,14 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public ConfigurationParamModel getCommonConfig() {
+    public ConfigurationParamModel getConfigByGroup(final ConfigurationParamGroup group) {
         final ConfigurationParamModel model = new ConfigurationParamModel();
         getJdbcTemplate().query("select code, value, department_id from configuration", new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 try {
                     ConfigurationParam configurationParam = ConfigurationParam.valueOf(rs.getString("code"));
-                    if (configurationParam.getGroup().equals(ConfigurationParamGroup.COMMON_PARAM)) {
+                    if (configurationParam.getGroup().equals(group)) {
                         Clob clobValue = rs.getClob("value");
                         String value = null;
                         if (clobValue != null) {
@@ -107,6 +107,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         });
         return model;
     }
+
 
     @Override
     public ConfigurationParamModel getByDepartment(Integer departmentId) {

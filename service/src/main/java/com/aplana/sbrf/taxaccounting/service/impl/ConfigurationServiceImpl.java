@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.SchedulerTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -10,6 +11,9 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -50,18 +54,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Autowired
     private ConfigurationDao configurationDao;
-
     @Autowired
     private DepartmentDao departmentDao;
-
     @Autowired
     private RefBookFactory refBookFactory;
-
     @Autowired
     private AuditService auditService;
-
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private SchedulerTaskDao schedulerTaskDao;
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
@@ -78,7 +80,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
-        return configurationDao.getCommonConfig();
+        return configurationDao.getConfigByGroup(ConfigurationParamGroup.COMMON_PARAM);
     }
 
     @Override
@@ -160,9 +162,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     // Проверка значения параметра "Проверять ЭП"
                     if (parameter.equals(ConfigurationParam.SIGN_CHECK)) {
                         signCheck(value, logger);
-                    }
-                    if (parameter.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
-                        checkCron(value, logger);
                     }
                     if (value != null && value.length() > maxLength) {
                         logger.error(MAX_LENGTH_ERROR, parameter.getCaption(), maxLength);
@@ -298,10 +297,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                         // Проверка значения параметра "Проверять ЭП"
                         if (configurationParam.equals(ConfigurationParam.SIGN_CHECK)) {
                             signCheck(value, logger);
-                        }
-                        // Проверка значения параметра "Расписание очистки каталога временных файлов"
-                        if (configurationParam.equals(ConfigurationParam.CLEAR_TEMP_DIR_CRON)) {
-                            checkCron(value, logger);
                         }
                         if (configurationParam.hasReadCheck() && (isFolder
                                 && !FileWrapper.canReadFolder(value) || !isFolder
@@ -494,14 +489,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
-    // Проверка значения параметра "Расписание очистки каталога временных файлов"
-    private void checkCron(String value, Logger logger) {
+    public boolean validateSchedule(String schedule) {
         try{
-            new CronTrigger(value);
+            new CronTrigger(schedule);
         } catch (IllegalArgumentException e) {
-            logger.error("Параметр \"" + ConfigurationParam.CLEAR_TEMP_DIR_CRON.getCaption() + "\" должен соответствовать формату CRON!");
+            return false;
         }
+        return true;
     }
+
     /**
      * Изменился ли путь настроики
      *
@@ -525,5 +521,30 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         } else {
             return "\"\" -> \"" + newModelFullStringValue + "\"";
         }
+    }
+
+    @Override
+    public SchedulerTaskData getSchedulerTask(SchedulerTask task) {
+        return schedulerTaskDao.get(task.getSchedulerTaskId());
+    }
+
+    @Override
+    public List<SchedulerTaskData> getAllSchedulerTask() {
+        return schedulerTaskDao.getAll();
+    }
+
+    @Override
+    public void setActiveSchedulerTask(boolean active, List<Long> ids) {
+        schedulerTaskDao.setActiveSchedulerTask(active, ids);
+    }
+
+    @Override
+    public void updateTaskStartDate(SchedulerTask task) {
+        schedulerTaskDao.updateTaskStartDate(task.getSchedulerTaskId());
+    }
+
+    @Override
+    public void updateTask(SchedulerTaskData taskData) {
+        schedulerTaskDao.updateTask(taskData);
     }
 }

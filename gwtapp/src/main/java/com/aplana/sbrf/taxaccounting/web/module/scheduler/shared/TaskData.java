@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.Result;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
@@ -24,11 +25,8 @@ public abstract class TaskData<T extends Result> extends UnsecuredActionImpl<T> 
      * */
     private String schedule;
 
-    /** JNDI класса-обработчика задачи */
-    private String userTaskJndi;
-
     /** Пользовательские параметры задачи */
-    private List<TaskParamModel> params;
+    private List<SchedulerTaskParam> params;
 
     @Override
     public String getName() {
@@ -51,19 +49,11 @@ public abstract class TaskData<T extends Result> extends UnsecuredActionImpl<T> 
         this.schedule = schedule;
     }
 
-    public String getUserTaskJndi() {
-        return userTaskJndi;
-    }
-
-    public void setUserTaskJndi(String userTaskJndi) {
-        this.userTaskJndi = userTaskJndi;
-    }
-
-    public List<TaskParamModel> getParams() {
+    public List<SchedulerTaskParam> getParams() {
         return params;
     }
 
-    public void setParams(List<TaskParamModel> params) {
+    public void setParams(List<SchedulerTaskParam> params) {
         this.params = params;
     }
 

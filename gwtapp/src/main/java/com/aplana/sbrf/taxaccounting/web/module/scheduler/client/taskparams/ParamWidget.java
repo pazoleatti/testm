@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -15,6 +16,12 @@ import com.google.gwt.user.client.ui.Widget;
  * @author auldanov
  */
 abstract class ParamWidget{
+
+    /**
+     * Идентификатор параметра
+     */
+    private long id;
+
     /**
      * Является ли поле обязательным для заполнения
      */
@@ -28,7 +35,7 @@ abstract class ParamWidget{
     /**
      * Тип параметра, используется при валидации данных
      */
-    private TaskParamType type;
+    private SchedulerTaskParamType type;
 
     /**
      * Метод получения виджета для отображения
@@ -60,6 +67,14 @@ abstract class ParamWidget{
      */
     public abstract void setValue(String value);
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -76,11 +91,11 @@ abstract class ParamWidget{
         return name;
     }
 
-    public TaskParamType getType() {
+    public SchedulerTaskParamType getType() {
         return type;
     }
 
-    public void setType(TaskParamType type) {
+    public void setType(SchedulerTaskParamType type) {
         this.type = type;
     }
 

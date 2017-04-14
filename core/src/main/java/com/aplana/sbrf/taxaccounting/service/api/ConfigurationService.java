@@ -5,6 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +18,6 @@ public interface ConfigurationService {
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */
     ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
-
 
     /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
@@ -69,4 +71,42 @@ public interface ConfigurationService {
      * Сохранение общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
      */
     void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo);
+
+    /**
+     * Валидация расписания
+     * @param schedule
+     * @return
+     */
+    boolean validateSchedule(String schedule);
+
+    /**
+     * Получение параметров задачи планировщика
+     * @param task
+     * @return
+     */
+    SchedulerTaskData getSchedulerTask(SchedulerTask task);
+
+    /**
+     * Получение параметров всех задач планировщика
+     * @return
+     */
+    List<SchedulerTaskData> getAllSchedulerTask();
+
+    /**
+     * Изменение признака активности задач
+     * @param active
+     * @param ids
+     */
+    void setActiveSchedulerTask(boolean active, List<Long> ids);
+
+    /**
+     * Обновить дату последнего запуска задачи
+     * @param task
+     */
+    void updateTaskStartDate(SchedulerTask task);
+
+    /**
+     * Обновление параметров задачи планировщика
+     */
+    void updateTask(SchedulerTaskData taskData);
 }

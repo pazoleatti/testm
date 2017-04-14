@@ -21,8 +21,14 @@ public class TaskSearchResultItem implements Serializable {
     /** Состояние задачи */
     private String state;
 
+    /** Расписание задачи */
+    private String schedule;
+
     /** Дата создания задачи */
     private String modificationDate;
+
+    /** Дата последнего запуска задачи */
+    private String lastFireTime;
 
     /** Дата следующего запуска задачи */
     private String nextFireTime;
@@ -51,12 +57,28 @@ public class TaskSearchResultItem implements Serializable {
         this.state = state;
     }
 
+    public String getSchedule() {
+        return schedule;
+    }
+
+    public void setSchedule(String schedule) {
+        this.schedule = schedule;
+    }
+
     public String getModificationDate() {
         return modificationDate;
     }
 
     public void setModificationDate(String modificationDate) {
         this.modificationDate = modificationDate;
+    }
+
+    public String getLastFireTime() {
+        return lastFireTime;
+    }
+
+    public void setLastFireTime(String lastFireTime) {
+        this.lastFireTime = lastFireTime;
     }
 
     public String getNextFireTime() {

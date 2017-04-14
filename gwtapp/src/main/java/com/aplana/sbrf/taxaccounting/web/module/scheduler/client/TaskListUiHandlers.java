@@ -9,11 +9,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface TaskListUiHandlers extends UiHandlers {
 
     /**
-     * Выю пытается открыть форму для создания задачи
-     */
-    void onShowCreateTaskForm();
-
-    /**
      * Выю пытается остановить задачу
      */
     void onStopTask();
@@ -24,12 +19,7 @@ public interface TaskListUiHandlers extends UiHandlers {
     void onResumeTask();
 
     /**
-     * Выю пытается запустить задачу
+     * Обновление списка задач
      */
-    void onStartTask();
-
-    /**
-     * Выю пытается удалить задачу
-     */
-    void onDeleteTask();
+    void onUpdateTask();
 }

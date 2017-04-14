@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
-import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
-import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
+import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -25,7 +25,7 @@ import java.util.List;
 public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction, GetTaskInfoResult> {
 
     @Autowired
-    TaskManager taskManager;
+    private ConfigurationService configurationService;
 
     public GetTaskInfoHandler() {
         super(GetTaskInfoAction.class);
@@ -34,32 +34,15 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
     @Override
     public GetTaskInfoResult execute(GetTaskInfoAction action, ExecutionContext executionContext) throws ActionException {
         GetTaskInfoResult result = new GetTaskInfoResult();
-        try {
-            TaskData taskData = taskManager.getTaskData(action.getTaskId());
-            result.setTaskId(taskData.getTaskId());
-            result.setTaskName(taskData.getTaskName());
-            result.setTaskState(taskData.getTaskState().getId());
-            result.setSchedule(taskData.getSchedule());
-            result.setUserTaskJndi(taskData.getUserTaskJndi());
-            result.setTimeCreated(taskData.getTimeCreated());
-            result.setNextFireTime(taskData.getNextFireTime());
-            result.setRepeatsLeft(taskData.getRepeatsLeft());
-            result.setContextId(taskData.getContextId());
-
-            List<TaskParamModel> params = new ArrayList<TaskParamModel>();
-            if (taskData.getParams() != null){
-                for (TaskParam param : taskData.getParams().values()) {
-                    TaskParamModel model = new TaskParamModel();
-                    model.setTaskParamName(param.getName());
-                    model.setTaskParamType(param.getType().getId());
-                    model.setTaskParamValue(param.getValue());
-                    params.add(model);
-                }
-            }
-            result.setParams(params);
-        } catch (TaskSchedulingException e) {
-            throw new ActionException("Ошибка получения информации о задаче планировщика", e);
-        }
+        SchedulerTaskData taskData = configurationService.getSchedulerTask(SchedulerTask.getByTaskId(action.getTaskId()));
+        result.setTaskId(taskData.getTask().getSchedulerTaskId());
+        result.setTaskName(taskData.getTaskName());
+        result.setTaskState(taskData.isActive()?0:1);
+        result.setSchedule(taskData.getSchedule());
+        result.setTimeCreated(taskData.getModificationDate());
+        result.setNextFireTime(taskData.getStartDate());
+        result.setContextId(taskData.getTask().getSchedulerTaskId());
+        result.setParams(taskData.getParams());
         return result;
     }
 

@@ -55,24 +55,15 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
     }
 
     @Override
-    public void onShowCreateTaskForm() {
-        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.task).build());
-    }
-
-    @Override
     public void onStopTask() {
         if (isSelectedTaskExist()) {
-            StopTaskAction action = new StopTaskAction();
+            SetActiveTaskAction action = new SetActiveTaskAction();
             action.setTasksIds(getView().getSelectedItem());
+            action.setActive(false);
             dispatcher.execute(action, CallbackUtils
-                    .defaultCallback(new AbstractCallback<StopTaskResult>() {
+                    .defaultCallback(new AbstractCallback<SetActiveTaskResult>() {
                         @Override
-                        public void onSuccess(StopTaskResult result) {
-                            // проверка ошибок
-                            LogAddEvent.fire(TaskListPresenter.this, result.getUuid());
-                            if (result.getUuid() != null){
-                                Dialog.errorMessage("Остановка задачи", "Остановка не выполнена");
-                            }
+                        public void onSuccess(SetActiveTaskResult result) {
                             updateTableData();
                         }
                     }, TaskListPresenter.this));
@@ -82,12 +73,13 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
     @Override
     public void onResumeTask() {
         if (isSelectedTaskExist()) {
-            ResumeTaskAction action = new ResumeTaskAction();
+            SetActiveTaskAction action = new SetActiveTaskAction();
             action.setTasksIds(getView().getSelectedItem());
+            action.setActive(true);
             dispatcher.execute(action, CallbackUtils
-                    .defaultCallback(new AbstractCallback<ResumeTaskResult>() {
+                    .defaultCallback(new AbstractCallback<SetActiveTaskResult>() {
                         @Override
-                        public void onSuccess(ResumeTaskResult result) {
+                        public void onSuccess(SetActiveTaskResult result) {
                             updateTableData();
                         }
                     }, TaskListPresenter.this));
@@ -95,39 +87,8 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
     }
 
     @Override
-    public void onStartTask() {
-        if (isSelectedTaskExist()) {
-            StartTaskAction action = new StartTaskAction();
-            action.setTasksIds(getView().getSelectedItem());
-            dispatcher.execute(action, CallbackUtils
-                    .defaultCallback(new AbstractCallback<StartTaskResult>() {
-                        @Override
-                        public void onSuccess(StartTaskResult result) {
-                            updateTableData();
-                        }
-                    }, TaskListPresenter.this));
-
-        }
-    }
-
-    @Override
-    public void onDeleteTask() {
-        if (isSelectedTaskExist()) {
-            DeleteTaskAction action = new DeleteTaskAction();
-            action.setTasksIds(getView().getSelectedItem());
-            dispatcher.execute(action, CallbackUtils
-                    .defaultCallback(new AbstractCallback<DeleteTaskResult>() {
-                        @Override
-                        public void onSuccess(DeleteTaskResult result) {
-                            // проверка ошибок
-                            LogAddEvent.fire(TaskListPresenter.this, result.getUuid());
-                            if (result.getUuid() != null){
-                                Dialog.errorMessage("Удаление задачи", "Удаление не выполнено");
-                            }
-                            updateTableData();
-                        }
-                    }, TaskListPresenter.this));
-        }
+    public void onUpdateTask() {
+        updateTableData();
     }
 
     @Override

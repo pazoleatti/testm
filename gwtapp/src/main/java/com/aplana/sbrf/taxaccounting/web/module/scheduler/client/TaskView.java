@@ -1,19 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
-import com.aplana.gwt.client.ValueListBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams.TaskParamsWidget;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Tooltip;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -48,9 +45,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     @UiField
     Image helpImage;
 
-    @UiField(provided = true)
-    ValueListBox<TaskJndiInfo> jndi;
-
     @UiField LinkStyle css;
 
     @UiField
@@ -63,8 +57,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     AllStyles styles;
 
     private TaskParamsWidget paramsWidget;
-
-    private List<TaskJndiInfo> jndiList;
 
     private static final String CRON_HELP = "Расписание задается в в формате IBM CRON: <br>" +
             "секунда минута час число месяц день недели <br>" +
@@ -97,32 +89,6 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     @UiConstructor
     public TaskView(final Binder uiBinder) {
         paramsWidget = new TaskParamsWidget();
-
-        jndi = new ValueListBox<TaskJndiInfo>(new AbstractRenderer<TaskJndiInfo>() {
-            @Override
-            public String render(TaskJndiInfo info) {
-                if (info != null) {
-                    return info.getName();
-                }
-                return "";
-            }
-        });
-
-        /**
-         * При изменении типа задачи нужно перестроить часть формы
-         * которая отвечает за параметры задачи
-         */
-        jndi.addValueChangeHandler(new ValueChangeHandler<TaskJndiInfo>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<TaskJndiInfo> taskInfoItemValueChangeEvent) {
-                if (jndi.getValue() != null) {
-                    paramsWidget.setParams(jndi.getValue().getParams());
-                    paramsWidget.setVisible(true);
-                } else {
-                    paramsWidget.setVisible(false);
-                }
-            }
-        });
 
         initWidget(uiBinder.createAndBindUi(this));
         paramsWidget.setWrapper(formPanel);
@@ -169,34 +135,19 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     }
 
     @Override
-    public String getJndi() {
-        return jndi.getValue() != null ? jndi.getValue().getJndi() : "";
-    }
-
-    @Override
-    public void setJndiList(List<TaskJndiInfo> jndiList) {
-        this.jndiList = jndiList;
-        jndi.setValue(null);
-        jndi.setAcceptableValues(jndiList);
-    }
-
-    @Override
     public void clearForm() {
         createButton.setVisible(true);
         taskName.setValue("");
         taskSchedule.setValue("");
         paramsWidget.clear();
 
-        taskName.setEnabled(true);
         taskSchedule.setEnabled(true);
-        jndi.setEnabled(true);
     }
 
     @Override
     public void setTaskData(GetTaskInfoResult taskData) {
         taskName.setValue(taskData.getTaskName());
         taskSchedule.setValue(taskData.getSchedule());
-        jndi.setValue(findJndiInfo(taskData.getUserTaskJndi()), true);
         paramsWidget.setParamsValues(taskData.getParams());
     }
 
@@ -216,21 +167,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
     }
 
     @Override
-    public boolean isTaskTypeSelected() {
-        return jndi.getValue() != null;
-    }
-
-    @Override
-    public List<TaskParamModel> getTaskParams() {
+    public List<SchedulerTaskParam> getTaskParams() {
         return paramsWidget.getParamsValues();
-    }
-
-    private TaskJndiInfo findJndiInfo(String jndi) {
-        for (TaskJndiInfo info : jndiList) {
-            if (info != null && info.getJndi()!= null && info.getJndi().equals(jndi)) {
-                return info;
-            }
-        }
-        return null;
     }
 }

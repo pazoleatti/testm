@@ -3,11 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskState;
-import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
-import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,12 +29,14 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('N_ROLE_ADMIN')")
 public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction, GetTaskListResult> {
 
-    private static final String DATE_FORMAT = "dd-MM-yyyy, HH:mm";
+    private static final String DATE_FORMAT = "dd-MM-yyyy, HH:mm:ss";
 
     @Autowired
-    TaskManager taskManager;
-    @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private ConfigurationService configurationService;
+    @Autowired
+    private SchedulerService schedulerService;
 
     public GetTaskListHandler() {
         super(GetTaskListAction.class);
@@ -42,39 +44,30 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
 
     @Override
     public GetTaskListResult execute(GetTaskListAction getTaskListAction, ExecutionContext executionContext) throws ActionException {
-        try {
-            SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
-            GetTaskListResult result = new GetTaskListResult();
-            List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
-            Logger logger = new Logger();
+        SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
+        GetTaskListResult result = new GetTaskListResult();
+        List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
+        Logger logger = new Logger();
 
-            List<TaskData> tasks = taskManager.getAllTasksData();
-            for (TaskData task : tasks) {
-                if (task.isOldAndDeleted()) {
-                    logger.error("Задача \"%s\"%s устарела и была удалена. В случае необходимости вы можете создать ее снова.",
-                            task.getTaskName(),
-                            task.getSchedule() != null ? " с расписанием \"" + task.getSchedule() + "\"" : ""
-                    );
-                    continue;
-                }
-                TaskSearchResultItem item = new TaskSearchResultItem();
-                item.setId(task.getTaskId());
-                item.setName(task.getTaskName());
-                item.setState(task.getTaskState().getName());
-                item.setModificationDate(df.format(task.getModificationDate()));
-                item.setNextFireTime(task.getTaskState() != TaskState.SUSPENDED ? df.format(task.getNextFireTime()) : "");
-                item.setContextId(task.getContextId());
-
-                records.add(item);
-            }
-            result.setTasks(records);
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                result.setUuid(logEntryService.save(logger.getEntries()));
-            }
-            return result;
-        } catch (TaskSchedulingException e) {
-            throw new ActionException("Ошибка получения списка задач планировщика", e);
+        List<SchedulerTaskData> tasks = configurationService.getAllSchedulerTask();
+        for (SchedulerTaskData task : tasks) {
+            TaskSearchResultItem item = new TaskSearchResultItem();
+            item.setId(task.getTask().getSchedulerTaskId());
+            item.setName(task.getTaskName());
+            item.setSchedule(task.getSchedule());
+            item.setState(task.getSchedule() != null?(task.isActive()?"Активна":"Остановлена"):"Не задано расписание");
+            item.setModificationDate(df.format(task.getModificationDate()));
+            item.setLastFireTime(task.getStartDate() != null?df.format(task.getStartDate()):"");
+            Date nextFireTime = schedulerService.nextExecutionTime(task.getTask().name());
+            item.setNextFireTime(nextFireTime != null?df.format(nextFireTime):"");
+            item.setContextId(task.getTask().getSchedulerTaskId());
+            records.add(item);
         }
+        result.setTasks(records);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+        return result;
     }
 
     @Override

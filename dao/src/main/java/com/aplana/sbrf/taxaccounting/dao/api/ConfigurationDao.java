@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 
 import java.util.Map;
@@ -23,10 +24,7 @@ public interface ConfigurationDao {
      */
     ConfigurationParamModel get(String code);
 
-    /**
-     * Читает из БД значения всех параметров.
-     */
-    ConfigurationParamModel getCommonConfig();
+    ConfigurationParamModel getConfigByGroup(ConfigurationParamGroup group);
 
     ConfigurationParamModel getByDepartment(Integer departmentId);
 

@@ -38,11 +38,10 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     public static final String NUMBER = "№";
     public static final String NAME_TITLE = "Название";
     public static final String STATE_TITLE = "Статус";
+    public static final String SCHEDULE_TITLE = "Расписание";
     public static final String TIME_CHANGED_TITLE = "Дата редактирования";
+    public static final String LAST_FIRE_TIME_TITLE = "Дата последнего запуска";
     public static final String NEXT_FIRE_TIME_TITLE = "Дата следующего запуска";
-
-    @UiField
-    Button createButton;
 
     @UiField
     Button stopButton;
@@ -51,7 +50,7 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     Button resumeButton;
 
     @UiField
-    Button deleteButton;
+    Button updateButton;
 
     @UiField
     GenericDataGrid<TaskSearchResultItem> taskDataTable;
@@ -113,10 +112,24 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
             }
         };
 
+        TextColumn<TaskSearchResultItem> scheduleColumn = new TextColumn<TaskSearchResultItem>() {
+            @Override
+            public String getValue(TaskSearchResultItem taskItem) {
+                return taskItem.getSchedule();
+            }
+        };
+
         TextColumn<TaskSearchResultItem> modificationDateColumn = new TextColumn<TaskSearchResultItem>() {
             @Override
             public String getValue(TaskSearchResultItem taskItem) {
                 return taskItem.getModificationDate();
+            }
+        };
+
+        TextColumn<TaskSearchResultItem> lastFireTimeColumn = new TextColumn<TaskSearchResultItem>() {
+            @Override
+            public String getValue(TaskSearchResultItem taskItem) {
+                return taskItem.getLastFireTime();
             }
         };
 
@@ -133,7 +146,9 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
         taskDataTable.setColumnWidth(numberColumn, 30, Style.Unit.PX);
         taskDataTable.addResizableColumn(nameColumn, NAME_TITLE);
         taskDataTable.addResizableColumn(stateColumn, STATE_TITLE);
+        taskDataTable.addResizableColumn(scheduleColumn, SCHEDULE_TITLE);
         taskDataTable.addResizableColumn(modificationDateColumn, TIME_CHANGED_TITLE);
+        taskDataTable.addResizableColumn(lastFireTimeColumn, LAST_FIRE_TIME_TITLE);
         taskDataTable.addResizableColumn(nextFireTimeColumn, NEXT_FIRE_TIME_TITLE);
 
         taskDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
@@ -155,7 +170,6 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
      */
     private void updateButtonsStatuses(){
         boolean status = !selectionModel.getSelectedSet().isEmpty();
-        deleteButton.setEnabled(status);
         stopButton.setEnabled(status);
         resumeButton.setEnabled(status);
     }
@@ -165,13 +179,6 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
         taskDataTable.setRowData(tasks);
         selectionModel.clear();
         updateButtonsStatuses();
-    }
-
-    @UiHandler("createButton")
-    public void onCreate(ClickEvent event){
-        if(getUiHandlers() != null){
-            getUiHandlers().onShowCreateTaskForm();
-        }
     }
 
     @UiHandler("stopButton")
@@ -188,17 +195,13 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
         }
     }
 
-    @UiHandler("deleteButton")
-    public void onDelete(ClickEvent event){
-        Dialog.confirmMessage("Удаление задачи", "Удалить задачу?", new DialogHandler() {
-            @Override
-            public void yes() {
-                if(getUiHandlers() != null){
-                    getUiHandlers().onDeleteTask();
-                }
-            }
-        });
+    @UiHandler("updateButton")
+    public void onUpdate(ClickEvent event){
+        if(getUiHandlers() != null){
+            getUiHandlers().onUpdateTask();
+        }
     }
+
 
     @Override
     public List<Long> getSelectedItem() {

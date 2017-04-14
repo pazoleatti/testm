@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -53,10 +54,6 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         String getTaskSchedule();
 
-        String getJndi();
-
-        void setJndiList(List<TaskJndiInfo> jndiList);
-
         void clearForm();
 
         void setTaskData(GetTaskInfoResult taskData);
@@ -67,9 +64,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         String getErrorsOnValidateTaskParams();
 
-        boolean isTaskTypeSelected();
-
-        List<TaskParamModel> getTaskParams();
+        List<SchedulerTaskParam> getTaskParams();
     }
 
     @Inject
@@ -89,71 +84,46 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
         editMode = !request.getParameterNames().isEmpty();
         getView().setMode(editMode);
 
-        GetAvailableTasksAction initAction = new GetAvailableTasksAction();
-        dispatcher.execute(initAction, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetAvailableTasksResult>() {
-                    @Override
-                    public void onSuccess(GetAvailableTasksResult result) {
-                        //Инициализация формы
-                        getView().setJndiList(result.getJndiList());
-                        getView().clearForm();
+        //Инициализация формы
+        getView().clearForm();
 
-                        //Загрузка информации по задаче, если она была выбрана
-                        if (request.getParameter(SchedulerTokens.taskId, null) != null) {
-                            currentTaskId = ParamUtils.getLong(request, SchedulerTokens.taskId);
+        //Загрузка информации по задаче, если она была выбрана
+        if (request.getParameter(SchedulerTokens.taskId, null) != null) {
+            currentTaskId = ParamUtils.getLong(request, SchedulerTokens.taskId);
 
-                            //Получаем данные задачи
-                            GetTaskInfoAction action = new GetTaskInfoAction();
-                            action.setTaskId(currentTaskId);
-                            dispatcher.execute(action, CallbackUtils
-                                    .defaultCallback(new AbstractCallback<GetTaskInfoResult>() {
-                                        @Override
-                                        public void onSuccess(GetTaskInfoResult result) {
-                                            getView().setTaskData(result);
-                                            contextId = result.getContextId();
-                                        }
-                                    }, TaskPresenter.this));
+            //Получаем данные задачи
+            GetTaskInfoAction action = new GetTaskInfoAction();
+            action.setTaskId(currentTaskId);
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<GetTaskInfoResult>() {
+                        @Override
+                        public void onSuccess(GetTaskInfoResult result) {
+                            getView().setTaskData(result);
+                            contextId = result.getContextId();
                         }
-                    }
-                }, TaskPresenter.this));
+                    }, TaskPresenter.this));
+        }
     }
 
     @Override
     public void onCreateTask() {
         if (validateForm()) {
-            if (editMode) {
-                UpdateTaskAction action = new UpdateTaskAction();
-                action.setTaskId(currentTaskId);
-                action.setContextId(contextId);
-                fillTaskData(action);
+            UpdateTaskAction action = new UpdateTaskAction();
+            action.setTaskId(currentTaskId);
+            action.setContextId(contextId);
+            fillTaskData(action);
 
-                dispatcher.execute(action, CallbackUtils
-                        .defaultCallback(new AbstractCallback<UpdateTaskResult>() {
-                            @Override
-                            public void onSuccess(UpdateTaskResult result) {
-                                if (result.isHasErrors()){
-                                    Dialog.errorMessage(result.getErrorMessage());
-                                } else {
-                                    placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
-                                }
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<UpdateTaskResult>() {
+                        @Override
+                        public void onSuccess(UpdateTaskResult result) {
+                            if (result.isHasErrors()){
+                                Dialog.errorMessage(result.getErrorMessage());
+                            } else {
+                                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
                             }
-                        }, TaskPresenter.this));
-            } else {
-                CreateTaskAction action = new CreateTaskAction();
-                fillTaskData(action);
-
-                dispatcher.execute(action, CallbackUtils
-                        .defaultCallback(new AbstractCallback<CreateTaskResult>() {
-                            @Override
-                            public void onSuccess(CreateTaskResult result) {
-                                if (result.isHasErrors()){
-                                    Dialog.errorMessage(result.getErrorMessage());
-                                } else {
-                                    placeManager.revealPlace(new PlaceRequest.Builder().nameToken(SchedulerTokens.taskList).build());
-                                }
-                            }
-                        }, TaskPresenter.this));
-            }
+                        }
+                    }, TaskPresenter.this));
         }
     }
 
@@ -166,9 +136,8 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
     private <T extends Result> void fillTaskData(TaskData<T> action) {
         action.setTaskName(getView().getTaskName());
         action.setSchedule(getView().getTaskSchedule());
-        action.setUserTaskJndi(getView().getJndi());
 
-        List<TaskParamModel> params = getView().getTaskParams();
+        List<SchedulerTaskParam> params = getView().getTaskParams();
         action.setParams(params);
     }
 
@@ -188,9 +157,6 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
         if (getView().getTaskSchedule().isEmpty()) {
             validateMsg.append("«Расписание», ");
         }
-        if (getView().getJndi().isEmpty()) {
-            validateMsg.append("«Тип задачи», ");
-        }
         if (validateMsg.length() > 0) {
             validateMsg.delete(validateMsg.length() - 2, validateMsg.length());
             validateMsg.append(". ");
@@ -200,7 +166,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
          * если часть формы с полями воода значений для задачи
          * видима, и на ней есть ошибки то добавим их в основной список ошибок
          */
-        if (getView().isTaskTypeSelected() && !getView().validateTaskParams()){
+        if (!getView().validateTaskParams()){
             validateMsg.append(" Дополнительные параметры задачи: "+getView().getErrorsOnValidateTaskParams());
         }
 

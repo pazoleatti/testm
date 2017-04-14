@@ -102,6 +102,17 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, Map<Inte
         return map.get(key).get(departmentId);
     }
 
+    public String getSingleValue(Object key, int departmentId) {
+        if (map.get(key) == null) {
+            return null;
+        }
+        List<String> values = map.get(key).get(departmentId);
+        if (values != null && !values.isEmpty()) {
+            return values.get(0);
+        }
+        return null;
+    }
+
     @Override
     public Map<Integer, List<String>> put(ConfigurationParam key, Map<Integer, List<String>> value) {
         return map.put(key, value);

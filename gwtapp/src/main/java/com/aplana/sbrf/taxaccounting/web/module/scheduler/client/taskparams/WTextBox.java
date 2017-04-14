@@ -36,25 +36,11 @@ public class WTextBox extends ParamWidget {
         } else {
             if (value != null && !value.isEmpty()){
                 switch (getType()){
-                    case INT:
-                        try {
-                            Integer.parseInt(value);
-                        } catch (NumberFormatException e){
-                            errorMessage += "Параметр «" + getName() + "» должен иметь целочисленное значение";
-                        }
-                        break;
                     case LONG:
                         try {
                             Long.parseLong(value);
                         } catch (NumberFormatException e){
                             errorMessage += "Параметр «" + getName() + "» должен содержать целочисленное значение";
-                        }
-                        break;
-                    case FLOAT:
-                        try {
-                            Float.parseFloat(value);
-                        } catch (NumberFormatException e){
-                            errorMessage += "Параметр «" + getName() + "» должен содержать вещественное значение";
                         }
                         break;
                     case DOUBLE:
@@ -69,7 +55,6 @@ public class WTextBox extends ParamWidget {
                     default:
                         errorMessage += "Ошибка при определении типа значения, для поля «" + getName() + "»";
                 }
-
                 return errorMessage.isEmpty();
             } else{
                 return true;

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.Date;
@@ -44,7 +45,7 @@ public class GetTaskInfoResult implements Result {
     private Date nextFireTime;
 
     /** Пользовательские параметры задачи */
-    private List<TaskParamModel> params;
+    private List<SchedulerTaskParam> params;
 
     public Long getTaskId() {
         return taskId;
@@ -110,11 +111,11 @@ public class GetTaskInfoResult implements Result {
         this.nextFireTime = nextFireTime;
     }
 
-    public List<TaskParamModel> getParams() {
+    public List<SchedulerTaskParam> getParams() {
         return params;
     }
 
-    public void setParams(List<TaskParamModel> params) {
+    public void setParams(List<SchedulerTaskParam> params) {
         this.params = params;
     }
 

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
+import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.CheckBox;
 import com.google.gwt.user.client.ui.*;
@@ -39,7 +41,7 @@ public class TaskParamsWidget extends HTMLPanel {
      *
      * @param params
      */
-    public void setParams(List<FormElement> params){
+    private void setParams(List<SchedulerTaskParam> params){
         buildWidgets(params);
         appendAllWidgets();
     }
@@ -91,34 +93,16 @@ public class TaskParamsWidget extends HTMLPanel {
      *
      * @param params
      */
-    private void buildWidgets(List<FormElement> params) {
+    private void buildWidgets(List<SchedulerTaskParam> params) {
         widgets.clear();
 
         if (params != null){
-            for (FormElement param : params) {
+            for (SchedulerTaskParam param : params) {
                 ParamWidget widget;
-                if (param instanceof SelectBox){
-                    List<SelectBoxItem> values = ((SelectBox) param).getValues();
-                    WSelectBox wSelectBox = new WSelectBox(values);
-                    wSelectBox.setWidth("475px");
-                    widget = wSelectBox;
-                    setParamWidgetConfig(widget, param);
-                } else if (param instanceof CheckBox){
-                    WCheckBox wCheckBox = new WCheckBox();
-                    widget = wCheckBox;
-                    setParamWidgetConfig(widget, param);
-                } else if (param instanceof DateBox){
-                    WDateBox wDateBox = new WDateBox();
-                    wDateBox.setWidth("475px");
-                    widget = wDateBox;
-                    setParamWidgetConfig(widget, param);
-                } else{
-                    WTextBox wTextBox = new WTextBox();
-                    wTextBox.setWidth("475px");
-                    widget = wTextBox;
-                    setParamWidgetConfig(widget, param);
-                }
-
+                WTextBox wTextBox = new WTextBox();
+                wTextBox.setWidth("475px");
+                widget = wTextBox;
+                setParamWidgetConfig(widget, param);
                 widgets.add(widget);
             }
         }
@@ -133,10 +117,12 @@ public class TaskParamsWidget extends HTMLPanel {
      * @param widget
      * @param param
      */
-    private void setParamWidgetConfig(ParamWidget widget, FormElement param){
-        widget.setRequired(param.isRequired());
-        widget.setName(param.getName());
-        widget.setType(param.getType());
+    private void setParamWidgetConfig(ParamWidget widget, SchedulerTaskParam param){
+        widget.setId(param.getId());
+        widget.setRequired(true);
+        widget.setName(param.getParamName());
+        widget.setType(param.getParamType());
+        //widget.setType(param.getType());
     }
 
     /**
@@ -146,13 +132,12 @@ public class TaskParamsWidget extends HTMLPanel {
      *
      * @return
      */
-    public List<TaskParamModel> getParamsValues(){
-        List<TaskParamModel> result = new ArrayList<TaskParamModel>();
+    public List<SchedulerTaskParam> getParamsValues(){
+        List<SchedulerTaskParam> result = new ArrayList<SchedulerTaskParam>();
         for (ParamWidget widget : widgets) {
-            TaskParamModel model = new TaskParamModel();
-            model.setTaskParamName(widget.getName());
-            model.setTaskParamType(widget.getType().getId());
-            model.setTaskParamValue(widget.getValue());
+            SchedulerTaskParam model = new SchedulerTaskParam();
+            model.setId(widget.getId());
+            model.setValue(widget.getValue());
             result.add(model);
         }
 
@@ -181,18 +166,18 @@ public class TaskParamsWidget extends HTMLPanel {
      *
      * @param params
      */
-    public void setParamsValues(List<TaskParamModel> params) {
+    public void setParamsValues(List<SchedulerTaskParam> params) {
+        setParams(params);
         // преобразуем данные к виду "название параметра" -> "строковое значение параметра"
-        Map<String, String> widgetValues = new HashMap<String, String>();
-        for (TaskParamModel param : params) {
-            widgetValues.put(param.getTaskParamName(), param.getTaskParamValue());
+        Map<Long, String> widgetValues = new HashMap<Long, String>();
+        for (SchedulerTaskParam param : params) {
+            widgetValues.put(param.getId(), param.getValue());
         }
 
         // установим значения в виджеты
         for (ParamWidget widget : widgets) {
-            String widgetName = widget.getName();
-            if (widgetValues.containsKey(widgetName)){
-                String value = widgetValues.get(widgetName);
+            if (widgetValues.containsKey(widget.getId())){
+                String value = widgetValues.get(widget.getId());
                 widget.setValue(value);
             }
         }
@@ -207,6 +192,5 @@ public class TaskParamsWidget extends HTMLPanel {
         for (ParamWidget widget : widgets) {
             widget.setEnable(enable);
         }
-
     }
 }
