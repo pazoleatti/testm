@@ -1271,7 +1271,7 @@ def createForm() {
             def npGropSourcesIdList = part.id
             if (npGropSourcesIdList == null || npGropSourcesIdList.isEmpty()) {
                 if (departmentReportPeriod.correctionDate != null) {
-                    logger.info("Для пары КПП ($kpp) - ОКТМО ($oktmo) не найдены ошибки от ФНС, по ней в корректирующем периоде не будут созданы экземпляры форм")
+                    logger.info("Для КПП $kpp - ОКТМО $oktmo отсутствуют данные физических лиц, содержащих ошибки от ФНС в справке 2НДФЛ. Создание формы 2НДФЛ невозможно.")
                 }
                 return;
             }
