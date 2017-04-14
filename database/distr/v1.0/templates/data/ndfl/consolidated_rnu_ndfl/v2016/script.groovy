@@ -85,7 +85,7 @@ def getProperty(String name) {
 
 Map<Long, Long> getFiasAddressIdsMap() {
     if (fiasAddressIdsCache.isEmpty()) {
-        fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id);
+        fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id, 1);
     }
     return fiasAddressIdsCache;
 }
@@ -319,7 +319,7 @@ Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdLis
             JOIN ndfl_person np ON (np.declaration_data_id = ${it} AND p.id = np.person_id)
         """
 
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate())
 
         refBookMap.each { personId, refBookValues ->
             Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
@@ -543,7 +543,7 @@ Map<Long, List<NdflPersonOperation>> mapToPesonId(List<NdflPersonOperation> oper
  * @return
  */
 Long getActualPersonId(Long recordId) {
-    Date version = getReportPeriodEndDate() - 1;
+    Date version = getReportPeriodEndDate();
     List<Long> personIds = getProvider(RefBook.Id.PERSON.getId()).getUniqueRecordIds(version, "RECORD_ID = " + recordId);
     if (personIds.isEmpty()) {
         logger.error("Ошибка при получении записи из справочника 'Физические лица' с recordId=" + recordId);
@@ -1113,33 +1113,33 @@ def checkDataConsolidated(){
     if (FORM_DATA_KIND.equals(FormDataKind.CONSOLIDATED)) {
         // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
         def mapDepartmentNotExistRnu = [
-                4  : 'Байкальский банк',
-                8  : 'Волго-Вятский банк',
-                20 : 'Дальневосточный банк',
-                27 : 'Западно-Сибирский банк',
-                32 : 'Западно-Уральский банк',
-                37 : 'Московский банк',
-                44 : 'Поволжский банк',
-                52 : 'Северный банк',
-                64 : 'Северо-Западный банк',
-                82 : 'Сибирский банк',
-                88 : 'Среднерусский банк',
-                97 : 'Уральский банк',
-                113: 'Центральный аппарат ПАО Сбербанк',
-                102: 'Центрально-Чернозёмный банк',
-                109: 'Юго-Западный банк'
+                4L  : 'Байкальский банк',
+                8L  : 'Волго-Вятский банк',
+                20L : 'Дальневосточный банк',
+                27L : 'Западно-Сибирский банк',
+                32L : 'Западно-Уральский банк',
+                37L : 'Московский банк',
+                44L : 'Поволжский банк',
+                52L : 'Северный банк',
+                64L : 'Северо-Западный банк',
+                82L : 'Сибирский банк',
+                88L : 'Среднерусский банк',
+                97L : 'Уральский банк',
+                113L : 'Центральный аппарат ПАО Сбербанк',
+                102L : 'Центрально-Чернозёмный банк',
+                109L : 'Юго-Западный банк'
         ]
         def listDepartmentNotAcceptedRnu = []
         List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
         for (DeclarationData dd : declarationDataList) {
             // Подразделение
             Long departmentCode = departmentService.get(dd.departmentId)?.code
-            mapDepartmentNotExistRnu.remove(departmentCode)
 
             // Если налоговая форма не принята
             if (!dd.state.equals(State.ACCEPTED)) {
-                listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
+                listDepartmentNotAcceptedRnu << mapDepartmentNotExistRnu[departmentCode]
             }
+            mapDepartmentNotExistRnu.remove(departmentCode)
         }
 
         // Период
@@ -1363,7 +1363,7 @@ Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId(decl
             JOIN ref_book_person p ON (frb.record_id = p.record_id)
             JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
         """
-    def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
+    def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate())
     def refBookMapResult = new HashMap<Long, Map<String, RefBookValue>>();
     refBookMap.each { personId, refBookValue ->
         Long refBookRecordId = refBookValue.get(RF_RECORD_ID).value
@@ -2404,6 +2404,9 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     logger.info("Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
+
+    Department department = departmentService.get(declarationData.departmentId)
+
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
 
         ScriptUtils.checkInterrupted();
@@ -2528,7 +2531,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         if (ndflPersonIncome.oktmo != null) {
             def kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
             if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-                Department department = departmentService.get(declarationData.departmentId)
+
                 if (kppList == null) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                             "Доход.Источник выплаты.ОКТМО (Графа 8)='${ndflPersonIncome.oktmo ?: ""}'")
@@ -3799,7 +3802,7 @@ boolean comparNumbGreater(double d1, double d2) {
  */
 def getRefBookNdfl() {
     def departmentId = declarationData.departmentId
-    def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+    def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate(), null, "DEPARTMENT_ID = $departmentId", null)
     if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
@@ -3814,7 +3817,7 @@ def getRefBookNdfl() {
 def getRefBookNdflDetail(def departmentParamId) {
     def mapNdflDetail = [:]
     def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
-    def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+    def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
@@ -3843,9 +3846,13 @@ def getRefBookNdflDetail(def departmentParamId) {
 def getRefOktmoByDepartmentId() {
     String whereClause = """
         JOIN REF_BOOK_NDFL_DETAIL nd ON (frb.id = nd.OKTMO)
-        JOIN REF_BOOK_NDFL n ON (n.DEPARTMENT_ID = ${declarationData.departmentId} AND nd.REF_BOOK_NDFL_ID = n.ID)
-    """
-    return getRefBookByRecordVersionWhere(RefBook.Id.OKTMO.id, whereClause, getReportPeriodEndDate() - 1)
+        JOIN REF_BOOK_NDFL n ON (n.ID = nd.ref_book_ndfl_id)
+            where n.department_id = ${declarationData.departmentId}
+                   and nd.ref_book_ndfl_id = n.ID
+                   and exists(select 1 from t where t.record_id = frb.record_id and t.version = frb.version)
+                   and frb.status = 0
+"""
+    return getRefBookByRecordVersionWhere(RefBook.Id.OKTMO.id, whereClause, getReportPeriodEndDate())
 }
 
 /**
@@ -3926,18 +3933,12 @@ def getErrorMsgAbsent(def inputList, def tableName) {
 void checkCreate() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
     if (departmentReportPeriod.correctionDate != null) {
-        def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
-        if (prevDepartmentReportPeriod == null) {
-            prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
-        }
+        def prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(declarationData.getDepartmentId(), declarationData.getReportPeriodId())
         def declarationList = declarationService.find(102, prevDepartmentReportPeriod.getId())
         declarationList.addAll(declarationService.find(103, prevDepartmentReportPeriod.getId()))
         declarationList.addAll(declarationService.find(104, prevDepartmentReportPeriod.getId()))
-        def delaration = declarationList.find{
-            State.ACCEPTED.equals(it.state)
-        }
-        if (delaration == null) {
-            logger.warn("Отсутствуют принятые отчетные налоговые формы в некорректировочном/предыдущем корректировочном периоде. Отчетные налоговые формы не будут сформированы в текущем периоде")
+        if (declarationList.isEmpty()) {
+            logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде, Отчетные налоговые формы не будут сформированы текущем периоде")
         }
     }
 }
