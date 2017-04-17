@@ -901,8 +901,33 @@ def createForm() {
     def declarationTypeId = currDeclarationTemplate.type.id
 
     if (departmentReportPeriod.correctionDate != null) {
-        def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
-        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
+
+        def declarations = []
+
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList([departmentReportPeriod.departmentId])
+        departmentReportPeriodFilter.setReportPeriodIdList([departmentReportPeriod.reportPeriod.id])
+        departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
+
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
+        departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
+            @Override
+            int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+                if (o1.correctionDate == null) {
+                    return 1;
+                } else {
+                    return o2.correctionDate.compareTo(o1.correctionDate);
+                }
+            }
+        })
+
+        for (DepartmentReportPeriod drp in departmentReportPeriodList) {
+            declarations = declarationService.find(declarationTypeId, drp.id)
+            if (!declarations.isEmpty() || drp.correctionDate == null) {
+                break
+            }
+        }
+
         def declarationsForRemove = []
         declarations.each { declaration ->
             ScriptUtils.checkInterrupted()
