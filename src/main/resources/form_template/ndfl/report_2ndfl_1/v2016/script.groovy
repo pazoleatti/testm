@@ -2,10 +2,13 @@ package form_template.ndfl.report_2ndfl_1.v2016
 
 import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
+import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import groovy.transform.Field
+import groovy.transform.TypeChecked
 import groovy.xml.MarkupBuilder
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
@@ -31,6 +34,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -1106,7 +1110,7 @@ def getDepartmentParamDetails(def departmentParamId, def reportPeriodId) {
  * @return
  */
 
-def getProvider(def long providerId) {
+RefBookDataProvider getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
         def provider = refBookFactory.getDataProvider(providerId)
         providerCache.put(providerId, provider)
@@ -1191,11 +1195,44 @@ def createForm() {
     def departmentParam
     // Поиск КПП и ОКТМО для корр периода
     if (departmentReportPeriod.correctionDate != null) {
-        def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
-        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
+        def declarations = []
+
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList([departmentReportPeriod.departmentId])
+        departmentReportPeriodFilter.setReportPeriodIdList([departmentReportPeriod.reportPeriod.id])
+        departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
+
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
+        Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
+        while (it.hasNext()) {
+            DepartmentReportPeriod depReportPeriod = it.next();
+            if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+                it.remove();
+            }
+        }
+        departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
+            @Override
+            int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+                if (o1.correctionDate == null) {
+                    return 1;
+                } else if (o2.correctionDate == null) {
+                    return -1;
+                } else {
+                    return o2.correctionDate.compareTo(o1.correctionDate);
+                }
+            }
+        })
+
+        for (DepartmentReportPeriod drp in departmentReportPeriodList) {
+            declarations = declarationService.find(declarationTypeId, drp.id)
+            if (!declarations.isEmpty() || drp.correctionDate == null) {
+                break
+            }
+        }
+
         def declarationsForRemove = []
         declarations.each { declaration ->
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id.value
             def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id.value

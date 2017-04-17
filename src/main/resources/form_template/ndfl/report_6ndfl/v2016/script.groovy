@@ -901,7 +901,6 @@ def createForm() {
     def declarationTypeId = currDeclarationTemplate.type.id
 
     if (departmentReportPeriod.correctionDate != null) {
-
         def declarations = []
 
         DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter();
@@ -910,11 +909,20 @@ def createForm() {
         departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
 
         List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
+        Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
+        while (it.hasNext()) {
+            DepartmentReportPeriod depReportPeriod = it.next();
+            if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+                it.remove();
+            }
+        }
         departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
             @Override
             int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
                 if (o1.correctionDate == null) {
                     return 1;
+                } else if (o2.correctionDate == null) {
+                    return -1;
                 } else {
                     return o2.correctionDate.compareTo(o1.correctionDate);
                 }
