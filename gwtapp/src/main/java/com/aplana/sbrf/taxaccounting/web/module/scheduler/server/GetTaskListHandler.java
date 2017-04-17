@@ -57,7 +57,7 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
             item.setSchedule(task.getSchedule());
             item.setState(task.getSchedule() != null?(task.isActive()?"Активна":"Остановлена"):"Не задано расписание");
             item.setModificationDate(df.format(task.getModificationDate()));
-            item.setLastFireTime(task.getStartDate() != null?df.format(task.getStartDate()):"");
+            item.setLastFireTime(task.getLast_fire_date() != null?df.format(task.getLast_fire_date()):"");
             Date nextFireTime = schedulerService.nextExecutionTime(task.getTask().name());
             item.setNextFireTime(nextFireTime != null?df.format(nextFireTime):"");
             item.setContextId(task.getTask().getSchedulerTaskId());

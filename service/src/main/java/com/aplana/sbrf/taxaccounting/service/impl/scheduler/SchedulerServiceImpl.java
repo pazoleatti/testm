@@ -21,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
@@ -84,8 +83,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
                 updateAllTask();
             }
         }, 60000);
-
         tasks.put("updateAllTask", taskRegistrar.scheduleFixedDelayTask(intervalTask));
+
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {

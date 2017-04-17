@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
-import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
@@ -13,8 +11,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Остановка задачи планировщика
@@ -40,7 +36,7 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
         result.setTaskState(taskData.isActive()?0:1);
         result.setSchedule(taskData.getSchedule());
         result.setTimeCreated(taskData.getModificationDate());
-        result.setNextFireTime(taskData.getStartDate());
+        result.setNextFireTime(taskData.getLast_fire_date());
         result.setContextId(taskData.getTask().getSchedulerTaskId());
         result.setParams(taskData.getParams());
         return result;

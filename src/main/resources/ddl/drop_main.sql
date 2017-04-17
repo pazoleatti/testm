@@ -134,3 +134,9 @@ drop sequence seq_ndfl_person_deduction;
 
 drop table ndfl_person_prepayment;
 drop sequence seq_ndfl_person_prepayment;
+--------------------------------------------------------------------------------------------------------------------------
+-- Планировщик задач
+--------------------------------------------------------------------------------------------------------------------------
+
+drop table configuration_scheduler cascade constraints;
+drop table configuration_scheduler_param cascade constraints;

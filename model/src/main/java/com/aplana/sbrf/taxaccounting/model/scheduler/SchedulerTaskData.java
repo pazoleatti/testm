@@ -27,7 +27,7 @@ public class SchedulerTaskData implements Serializable {
     private Date modificationDate;
 
     /** Дата последнего запуска задачи */
-    private Date startDate;
+    private Date last_fire_date;
 
     /**
      * Признак активности задачи
@@ -60,12 +60,12 @@ public class SchedulerTaskData implements Serializable {
         this.schedule = schedule;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public Date getLast_fire_date() {
+        return last_fire_date;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setLast_fire_date(Date last_fire_date) {
+        this.last_fire_date = last_fire_date;
     }
 
     public void setModificationDate(Date modificationDate) {
@@ -99,7 +99,7 @@ public class SchedulerTaskData implements Serializable {
                 ", taskName='" + taskName + '\'' +
                 ", schedule='" + schedule + '\'' +
                 ", modificationDate=" + modificationDate +
-                ", startDate=" + startDate +
+                ", last_fire_date=" + last_fire_date +
                 ", active=" + active +
                 '}';
     }
