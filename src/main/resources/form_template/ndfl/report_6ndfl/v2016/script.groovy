@@ -1246,7 +1246,18 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
-        departmentParam = departmentParamList?.get(0)
+        def referencesOktmoList = departmentParamTableList.OKTMO?.value
+        referencesOktmoList.removeAll([null])
+        def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
+        departmentParamRow = departmentParamTableList.find{ dep->
+            def oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
+            if (oktmo != null) {
+                declarationData.kpp.equals(dep.KPP?.value) && declarationData.oktmo.equals(oktmo.CODE.value)
+            }
+        }
+        if (departmentParamRow == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+        }
     }
     return departmentParam
 }
