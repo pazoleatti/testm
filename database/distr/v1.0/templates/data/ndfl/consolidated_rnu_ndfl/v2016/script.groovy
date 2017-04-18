@@ -3172,7 +3172,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         }
                         if (ndflPersonIncomeFind != null) {
                             Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
-                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind)) {
+                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind, dateConditionWorkDay)) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                         "НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncomeFind.taxTransferDate ?: ""}' и Доход.Дата.Выплата (Графа 7)='${ndflPersonIncomeFind.incomePayoutDate ?: ""}'")
@@ -3618,6 +3618,7 @@ class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
 /**
  * Проверка: "Графа 21" = "Графа 7" + "1 рабочий день"
  */
+@TypeChecked
 class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
