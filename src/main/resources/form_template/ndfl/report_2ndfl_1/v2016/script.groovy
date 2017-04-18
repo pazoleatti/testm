@@ -330,13 +330,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                 if (pNumSpravka == null) {
                     if (nomKorr != 0) {
                         def uncorrectPeriodDrp = departmentReportPeriodService.getFirst(declarationData.departmentId, declarationData.reportPeriodId)
-                        int ddType
-                        if (priznakF == "1") {
-                            ddType = NDFL_2_1_DECLARATION_TYPE
-                        } else {
-                            ddType = NDFL_2_2_DECLARATION_TYPE
-                        }
-                        def uncorretctedPeriodDd = declarationService.find(ddType, uncorrectPeriodDrp.id, declarationData.kpp, declarationData.oktmo, null, null, null)
+                        def uncorretctedPeriodDd = declarationService.find(NDFL_2_1_DECLARATION_TYPE, uncorrectPeriodDrp.id, declarationData.kpp, declarationData.oktmo, null, null, null)
                         nomSpr = getProvider(NDFL_REFERENCES).getRecords(new Date(), null, "PERSON_ID = ${np.personId} AND DECLARATION_DATA_ID = ${uncorretctedPeriodDd.id}", null).get(0).NUM.value
                     } else {
                         nomSpr++
@@ -1224,7 +1218,8 @@ def createForm() {
         })
 
         for (DepartmentReportPeriod drp in departmentReportPeriodList) {
-            declarations = declarationService.find(declarationTypeId, drp.id)
+            // https://jira.aplana.com/browse/SBRFNDFL-858 2НДФЛ (2) в корректировочном периоде должна формироваться для справок, уточненных в форме 2НДФЛ (1)
+            declarations = declarationService.find(NDFL_2_1_DECLARATION_TYPE, drp.id)
             if (!declarations.isEmpty() || drp.correctionDate == null) {
                 break
             }
