@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.scheduler;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class SchedulerTaskData implements Serializable {
      */
     private boolean active;
 
-    private List<SchedulerTaskParam> params;
+    private List<SchedulerTaskParam> params = new ArrayList<SchedulerTaskParam>();
 
     public SchedulerTask getTask() {
         return task;
