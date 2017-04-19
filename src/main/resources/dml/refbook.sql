@@ -352,6 +352,9 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 update ref_book_attribute set required = 1 where id in (9501, 9513, 9601, 9613);
 
 update ref_book_attribute set reference_id=923,attribute_id=9231 where reference_id=4;
+
+update ref_book_attribute set required = 1 where id = 9529;
+
 ---------------------------------
 
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;

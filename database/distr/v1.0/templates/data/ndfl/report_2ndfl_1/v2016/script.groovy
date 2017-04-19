@@ -2,10 +2,13 @@ package form_template.ndfl.report_2ndfl_1.v2016
 
 import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
+import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import groovy.transform.Field
+import groovy.transform.TypeChecked
 import groovy.xml.MarkupBuilder
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
@@ -31,6 +34,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -326,13 +330,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                 if (pNumSpravka == null) {
                     if (nomKorr != 0) {
                         def uncorrectPeriodDrp = departmentReportPeriodService.getFirst(declarationData.departmentId, declarationData.reportPeriodId)
-                        int ddType
-                        if (priznakF == "1") {
-                            ddType = NDFL_2_1_DECLARATION_TYPE
-                        } else {
-                            ddType = NDFL_2_2_DECLARATION_TYPE
-                        }
-                        def uncorretctedPeriodDd = declarationService.find(ddType, uncorrectPeriodDrp.id, declarationData.kpp, declarationData.oktmo, null, null, null)
+                        def uncorretctedPeriodDd = declarationService.find(NDFL_2_1_DECLARATION_TYPE, uncorrectPeriodDrp.id, declarationData.kpp, declarationData.oktmo, null, null, null)
                         nomSpr = getProvider(NDFL_REFERENCES).getRecords(new Date(), null, "PERSON_ID = ${np.personId} AND DECLARATION_DATA_ID = ${uncorretctedPeriodDd.id}", null).get(0).NUM.value
                     } else {
                         nomSpr++
@@ -1084,7 +1082,18 @@ def getDepartmentParamDetails(def departmentParamId, def reportPeriodId) {
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
-        departmentParamRow = departmentParamTableList.get(0)
+        def referencesOktmoList = departmentParamTableList.OKTMO?.value
+        referencesOktmoList.removeAll([null])
+        def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
+        departmentParamRow = departmentParamTableList.find{ dep->
+            def oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
+            if (oktmo != null) {
+                declarationData.kpp.equals(dep.KPP?.value) && declarationData.oktmo.equals(oktmo.CODE.value)
+            }
+        }
+        if (departmentParamRow == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+        }
     }
     return departmentParamRow
 }
@@ -1095,7 +1104,7 @@ def getDepartmentParamDetails(def departmentParamId, def reportPeriodId) {
  * @return
  */
 
-def getProvider(def long providerId) {
+RefBookDataProvider getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
         def provider = refBookFactory.getDataProvider(providerId)
         providerCache.put(providerId, provider)
@@ -1180,11 +1189,45 @@ def createForm() {
     def departmentParam
     // Поиск КПП и ОКТМО для корр периода
     if (departmentReportPeriod.correctionDate != null) {
-        def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
-        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
+        def declarations = []
+
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList([departmentReportPeriod.departmentId])
+        departmentReportPeriodFilter.setReportPeriodIdList([departmentReportPeriod.reportPeriod.id])
+        departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
+
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
+        Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
+        while (it.hasNext()) {
+            DepartmentReportPeriod depReportPeriod = it.next();
+            if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+                it.remove();
+            }
+        }
+        departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
+            @Override
+            int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+                if (o1.correctionDate == null) {
+                    return 1;
+                } else if (o2.correctionDate == null) {
+                    return -1;
+                } else {
+                    return o2.correctionDate.compareTo(o1.correctionDate);
+                }
+            }
+        })
+
+        for (DepartmentReportPeriod drp in departmentReportPeriodList) {
+            // https://jira.aplana.com/browse/SBRFNDFL-858 2НДФЛ (2) в корректировочном периоде должна формироваться для справок, уточненных в форме 2НДФЛ (1)
+            declarations = declarationService.find(NDFL_2_1_DECLARATION_TYPE, drp.id)
+            if (!declarations.isEmpty() || drp.correctionDate == null) {
+                break
+            }
+        }
+
         def declarationsForRemove = []
         declarations.each { declaration ->
-            ScriptUtils.checkInterrupted();
+            ScriptUtils.checkInterrupted()
 
             def stateDocReject = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Отклонен'", null).get(0).id.value
             def stateDocNeedClarify = getProvider(REF_BOOK_DOC_STATE).getRecords(null, null, "NAME = 'Требует уточнения'", null).get(0).id.value
@@ -1271,7 +1314,7 @@ def createForm() {
             def npGropSourcesIdList = part.id
             if (npGropSourcesIdList == null || npGropSourcesIdList.isEmpty()) {
                 if (departmentReportPeriod.correctionDate != null) {
-                    logger.info("Для пары КПП ($kpp) - ОКТМО ($oktmo) не найдены ошибки от ФНС, по ней в корректирующем периоде не будут созданы экземпляры форм")
+                    logger.info("Для КПП $kpp - ОКТМО $oktmo отсутствуют данные физических лиц, содержащих ошибки от ФНС в справке 2НДФЛ. Создание формы 2НДФЛ невозможно.")
                 }
                 return;
             }

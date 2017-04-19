@@ -1,6 +1,7 @@
 insert into DEPARTMENT_TYPE(id) values(-1);
 insert into DEPARTMENT(id,code,name,type,parent_id,is_active) values(-1,0,' ',-1,0,0);
 
+insert into ref_book_signatory_mark (id, record_id, status, version, code, name) values (-1, -1, -1, to_date('01.01.2012','dd.mm.yyyy'),-1, ' ');
 insert into ref_book_doc_type (id,record_id,version,status,code,name,priority) values (-1,-1,to_date('01.01.2016','dd.mm.yyyy'),2,' ',' ',1);
 insert into REF_BOOK_TAXPAYER_STATE(id,code,name) values(-1,' ',' ');
 insert into REF_BOOK_ASNU(id,code,name,type) values(-1,'0000',' ',' ');
