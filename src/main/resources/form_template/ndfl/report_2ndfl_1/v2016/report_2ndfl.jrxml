@@ -2432,7 +2432,7 @@
 					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($F{НалИсчисл}==null) ? "" : $F{НалИсчисл}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{НалУдерж}==null) ? "" : $F{НалУдерж}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="258c2f38-38da-4d28-8a5b-d67b6e7368ac" mode="Transparent" x="300" y="45" width="180" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
