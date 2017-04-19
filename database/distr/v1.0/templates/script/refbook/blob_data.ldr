@@ -18,3 +18,5 @@ begindata
  352adf59-372b-4020-98fe-8960dd5bc972|refbook_declaration_type.groovy|declaration_type/script.groovy|01.01.2016|
  4e387483-0330-4e05-ad46-e9b03a3b025d|refbook_department.groovy|department/script.groovy|01.01.2016|
  39327388-9684-4fd5-a522-c40a21680156|refbook_fias.groovy|fias/script.groovy|01.01.2016|
+ 375ba56a-2509-11e7-93ae-92361f002671|refbook_department.groovy|id_doc/script.groovy|01.01.2016|
+ 884b9f2e-1678-4d69-9652-b036bba2f728|refbook_department.groovy|person/script.groovy|01.01.2016|
