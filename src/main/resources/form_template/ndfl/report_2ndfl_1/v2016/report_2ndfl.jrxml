@@ -1416,12 +1416,28 @@
 				<textFieldExpression><![CDATA[($F{ДатаДок}==null) ? "" : $F{ДатаДок}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="44b4c338-5fe9-4801-8541-2fcb668a707f" x="476" y="0" width="75" height="20"/>
-				<textElement textAlignment="Right">
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+				<reportElement uuid="44b4c338-5fe9-4801-8541-2fcb668a707f" mode="Transparent" x="552" y="20" width="47" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Страница "+$V{PAGE_NUMBER}+" из"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement uuid="855d4c06-d3ce-47ab-96ba-1876f311bc91" mode="Transparent" x="506" y="20" width="46" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[страница]]></text>
+			</staticText>
 		</band>
 	</pageHeader>
 	<detail>
@@ -2525,8 +2541,16 @@
 			</componentElement>
 		</band>
 	</detail>
-	<summary>
-		<band height="75">
+	<pageFooter>
+		<band height="80">
+			<staticText>
+				<reportElement uuid="2efb3a8b-9ae3-4d7f-ac11-7d577f1af2ff" mode="Transparent" x="0" y="57" width="418" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="6" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[* Отчество указывается при наличии]]></text>
+			</staticText>
 			<staticText>
 				<reportElement uuid="eadead55-9792-43ef-8fde-f834f893b4fb" mode="Transparent" x="0" y="0" width="419" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
@@ -2535,6 +2559,25 @@
 				</textElement>
 				<text><![CDATA[Налоговый агент (1 - налоговый агент, 2 - уполномоченный представитель):]]></text>
 			</staticText>
+			<staticText>
+				<reportElement uuid="057f818d-74a4-4669-b50e-0ec88a34ffff" mode="Transparent" x="0" y="42" width="373" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Наименование документа, подтверждающего полномочия представителя]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement uuid="36f72f40-6949-4597-8716-7342e8520789" mode="Transparent" x="373" y="42" width="202" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{НаимДок}==null) ? "" : $F{НаимДок}]]></textFieldExpression>
+			</textField>
 			<textField>
 				<reportElement uuid="2d7f21a6-6d7a-47d9-99f0-bb4c11f8c699" mode="Transparent" x="419" y="0" width="21" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
@@ -2576,33 +2619,6 @@
 				</textElement>
 				<text><![CDATA[подпись]]></text>
 			</staticText>
-			<staticText>
-				<reportElement uuid="057f818d-74a4-4669-b50e-0ec88a34ffff" mode="Transparent" x="0" y="42" width="373" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
-				</textElement>
-				<text><![CDATA[Наименование документа, подтверждающего полномочия представителя]]></text>
-			</staticText>
-			<textField pattern="" isBlankWhenNull="false">
-				<reportElement uuid="36f72f40-6949-4597-8716-7342e8520789" mode="Transparent" x="373" y="42" width="202" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<box>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{НаимДок}==null) ? "" : $F{НаимДок}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="2efb3a8b-9ae3-4d7f-ac11-7d577f1af2ff" mode="Transparent" x="0" y="57" width="418" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="6" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
-				</textElement>
-				<text><![CDATA[* Отчество указывается при наличии]]></text>
-			</staticText>
 		</band>
-	</summary>
+	</pageFooter>
 </jasperReport>
