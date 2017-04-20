@@ -38,11 +38,6 @@ CD deppar
 call fill.bat
 CD ../..
 
-ECHO ## dml: templates
-CD templates/script
-CALL templates.bat
-CD ..
-
 ECHO ## ddl: create all constraint
 "%ORA_BIN%\sqlplus" %AUTH% @"create_all_constraints.sql" > "%LOG_DIR%/create_all_constraints.txt"
 
@@ -61,6 +56,11 @@ ECHO ## ddl: create materiazed views
 
 ECHO ## ddl: create sources
 "%ORA_BIN%\sqlplus" %AUTH% @"create_procedures.sql" > "%LOG_DIR%/create_procedures.txt"
+
+ECHO ## dml: templates
+CD templates/script
+CALL templates.bat
+CD ../..
 
 rem добавить скрипт обновления последовательностей
 PAUSE
