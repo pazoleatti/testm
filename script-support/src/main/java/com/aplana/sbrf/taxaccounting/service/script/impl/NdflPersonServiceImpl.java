@@ -47,8 +47,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate) {
-        return ndflPersonDao.findDeductionsWithDeductionsMarkNotOstalnie(ndflPersonId, startDate, endDate);
+    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+        return ndflPersonDao.findDeductionsWithDeductionsMarkNotOstalnie(ndflPersonId, startDate, endDate, prFequals1);
     }
 
     @Override

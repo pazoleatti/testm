@@ -261,13 +261,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate) {
-        String sql = "SELECT DISTINCT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " FROM ndfl_person_deduction npd, (SELECT operation_id" +
-                " FROM NDFL_PERSON_INCOME WHERE ndfl_person_id = :ndflPersonId) i_data  WHERE npd.ndfl_person_id = :ndflPersonId" +
-                " AND npd.OPERATION_ID in i_data.operation_id" +
+    public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+        String priznakFClause = "";
+        if (!prFequals1) {
+            priznakFClause = " AND npi.not_holding_tax > 0";
+        }
+        String sql = "SELECT DISTINCT " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " FROM ndfl_person_deduction npd" +
+                " INNER JOIN ndfl_person_income npi ON npi.ndfl_person_id = npd.ndfl_person_id AND npi.operation_id = npd.operation_id" +
+                " WHERE npd.ndfl_person_id = :ndflPersonId" +
                 " AND npd.TYPE_CODE in (SELECT CODE FROM REF_BOOK_DEDUCTION_TYPE WHERE DEDUCTION_MARK in " +
                 "(SELECT ID FROM REF_BOOK_DEDUCTION_MARK WHERE NAME in ('Стандартный', 'Социальный', 'Инвестиционный', 'Имущественный')))" +
-                " AND npd.PERIOD_CURR_DATE between :startDate AND :endDate";
+                " AND npd.PERIOD_CURR_DATE between :startDate AND :endDate " + priznakFClause;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
                 .addValue("startDate", startDate)
