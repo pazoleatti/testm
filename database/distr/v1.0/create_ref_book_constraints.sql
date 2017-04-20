@@ -86,11 +86,8 @@ alter table ref_book_oktmo add constraint ref_book_oktmo_chk_status check (statu
 alter table ref_book_income_type add constraint chk_ref_book_income_type_st check (status in (-1,0,1,2));
 alter table ref_book_deduction_type add constraint chk_ref_book_deduc_type_status check (status in (-1,0,1,2));
 alter table ref_book_region add constraint chk_ref_book_region_status check (status in (-1,0,1,2));
---alter table ref_book_region add constraint chk_ref_book_region_okato_def check (decode(translate('#'||okato_definition,'#1234567890','#'),'#','ЦИФРЫ','Буквы')='ЦИФРЫ') disable;
---alter table ref_book_region add constraint chk_ref_book_region_oktmo_def check (decode(translate('#'||oktmo_definition,'#1234567890','#'),'#','ЦИФРЫ','Буквы')='ЦИФРЫ') disable;
 alter table ref_book_present_place add constraint chk_ref_book_pres_place_st check (status in (-1,0,1,2));
---alter table ref_book_asnu add constraint chk_ref_book_asnu_code check (code between '0000' and '9999');
---alter table ref_book_form_type add constraint chk_ref_book_form_type_taxkind check (tax_kind in ('F','N')) disable;
+alter table ref_book_form_type add constraint chk_ref_book_form_type_taxkind check (tax_kind in ('F','N'));
 alter table ref_book_okved add constraint chk_ref_book_okved_status check (status between -1 and 2);
 alter table ref_book_deduction_mark add constraint chk_ref_book_ded_mark_status check (status between -1 and 2);
 alter table ref_book_reorganization add constraint chk_ref_book_reorg_status check(status between -1 and 2);
@@ -104,12 +101,4 @@ alter table ref_book_tax_place_type add constraint chk_ref_tax_place_type_status
 alter table ref_book_signatory_mark add constraint chk_ref_signatory_mark check(status between -1 and 2);
 alter table ref_book_detach_tax_pay add constraint chk_rbook_detach_tax_pay_st check(status between -1 and 2);
 alter table ref_book_make_calc add constraint chk_rbook_make_calc_st check(status between -1 and 2);
-alter table ref_book_calendar add constraint chk_ref_book_cal_work check (ctype in (0,1));
-
---unique
-create unique index unq_ref_book_oktmo_code_vers on ref_book_oktmo(code,version);
-create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
---------------------------------------------------------------------------------------------------------------------------
---indexes
-create index i_ref_book_oktmo_code on ref_book_oktmo (code);
-create index idx_ref_book_ndfl_detail_load on ref_book_ndfl_detail (ref_book_ndfl_id,tax_organ_code,kpp);
+alter table ref_book_calendar add constraint chk_ref_book_cal_ctype check (ctype in (0,1));

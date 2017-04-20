@@ -36,12 +36,8 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, t
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (401, 'Настройки асинхронных задач', 0, 0, 0, null, 'ASYNC_TASK_TYPE');
 
 -- Фиас
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1010,'ФИАС Статус действия',0,0,1,null, 'fias_operstat');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1020,'ФИАС Типы адресных объектов',0,0,1,null, 'fias_socrbase');
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1030,'ФИАС Реестр адресообразующих объектов',0,0,1,null, 'fias_addrobj');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1040,'ФИАС Реестр объектов адресации',0,0,1,null, 'fias_house');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1050,'ФИАС Интервалы домов',0,0,1,null, 'fias_houseint');
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (1060,'ФИАС Сведения по помещениям',0,0,1,null, 'fias_room');
 
 UPDATE ref_book SET is_versioned = 0 WHERE id IN (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 204, 205, 400, 401, 510, 511, 106);
 
@@ -282,6 +278,11 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name,is_versioned) values (942,'Ограничение доступа по АСНУ',1,0,0,null,'SEC_USER_ASNU',0);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9421, 942,'Пользователь','USER_ID',4,1,74,651,1,null,15,1,0,null,null,0,null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9422, 942,'	АС НУ','ASNU_ID',4,2,900,9002,1,null,15,1,0,null,null,0,null);
+
+insert into ref_book(id,name,visible,type,read_only,table_name,is_versioned) values(945,'Календарь',1,0,1,'REF_BOOK_CALENDAR',0);
+
+insert into ref_book_attribute(id,ref_book_id,name,alias,type,ord,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values(9451,945,'Дата','CDATE',3,1,1,null,10,1,1,null,1,0,null);
+insert into ref_book_attribute(id,ref_book_id,name,alias,type,ord,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values(9452,945,'Рабочий/Выходной','WORK',2,2,1,0,6,1,0,null,null,0,1);
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (950,'Параметры подразделения по НДФЛ',0,0,0,null,'REF_BOOK_NDFL');
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (951,'Параметры подразделения по НДФЛ (таблица)',0,0,0,null,'REF_BOOK_NDFL_DETAIL');
