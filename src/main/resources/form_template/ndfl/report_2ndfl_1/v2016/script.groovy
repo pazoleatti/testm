@@ -1255,6 +1255,8 @@ def createForm() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def pairKppOktmoList = []
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    formType = getFormType(currDeclarationTemplate.declarationFormTypeId)
+    def priznakF = definePriznakF()
     def declarationTypeId = currDeclarationTemplate.type.id
     def ndflReferencesWithError = []
     def departmentParam
@@ -1289,8 +1291,10 @@ def createForm() {
         })
 
         for (DepartmentReportPeriod drp in departmentReportPeriodList) {
-            // https://jira.aplana.com/browse/SBRFNDFL-858 2НДФЛ (2) в корректировочном периоде должна формироваться для справок, уточненных в форме 2НДФЛ (1)
-            declarations = declarationService.find(NDFL_2_1_DECLARATION_TYPE, drp.id)
+            declarations = declarationService.find(declarationTypeId, drp.id)
+            if (priznakF == "2") {
+                declarations.addAll(declarationService.find(NDFL_2_1_DECLARATION_TYPE, drp.id))
+            }
             if (!declarations.isEmpty() || drp.correctionDate == null) {
                 break
             }
@@ -1311,7 +1315,10 @@ def createForm() {
         }
         declarations.removeAll(declarationsForRemove)
         declarations.each { declaration ->
-            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
+            def pairKppOktmo = new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
+            if (!pairKppOktmoList.contains(pairKppOktmo)) {
+                pairKppOktmoList << pairKppOktmo
+            }
         }
         declarations.each {
             ScriptUtils.checkInterrupted();
@@ -1355,7 +1362,9 @@ def createForm() {
                     ndflReferencesWithError.each { reference ->
                         ndflPersons.each { person ->
                             if (reference.PERSON_ID?.value == person.personId) {
-                                ndflPersonsPicked << person
+                                if (!ndflPersonsPicked.contains(person)) {
+                                    ndflPersonsPicked << person
+                                }
                             }
                         }
                     }
