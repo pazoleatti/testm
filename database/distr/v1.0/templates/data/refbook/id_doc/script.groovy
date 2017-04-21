@@ -67,6 +67,7 @@ void save() {
                         Integer documentIncRepValue = documentsAttrValues.get("INC_REP")?.getNumberValue()?.intValue();
                         if (documentIncRepValue == null || documentIncRepValue == 1) {
                             documentsAttrValues.put("INC_REP", new RefBookValue(RefBookAttributeType.NUMBER, 0));
+                            documentsAttrValues.remove(RefBook.RECORD_VERSION_FROM_ALIAS);
                             getProvider(RefBook.Id.ID_DOC.getId()).updateRecordVersionWithoutLock(logger, documentUniqueRecordId, validDateFrom, null, documentsAttrValues);
                         }
                     }
