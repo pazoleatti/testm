@@ -585,7 +585,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                             def incomesByTaxDate = ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, startDate, endDate)
                             Date firstDateOfMarchOfNextPeriod = getFirstMarchOfNextPeriod(endDate)
                             СумИтНалПер(СумДохОбщ: priznakF == "1"?ScriptUtils.round(getSumDohod(priznakF, ndflPersonIncomesAll), 2):ScriptUtils.round(sumDohodAll, 2),
-                                    НалБаза: priznakF == "1"?ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2):ScriptUtils.round(sumVichAll, 2),
+                                    НалБаза: priznakF == "1"?ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2):ScriptUtils.round(sumDohodAll - sumVichAll, 2),
                                     НалИсчисл: getNalIschisl(priznakF, ndflPersonIncomesAll),
                                     АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
                                     НалУдерж: getNalUderzh(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
