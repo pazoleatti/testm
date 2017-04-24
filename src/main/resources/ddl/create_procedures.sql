@@ -1496,7 +1496,6 @@ create or replace package body person_pkg as
 end person_pkg;
 /
 show errors;
-
 create or replace package fias_pkg
 -- Пакет для поиска адресов в справочнике ФИАС
 as
@@ -1571,7 +1570,7 @@ as
                                    left join mv_fias_city_act city on (city.aoid=nvl2(c_locality,locality.parentguid,street.parentguid) 
                                                                        and city.regioncode=c_region 
                                                                        and city.fname=c_city
-                                                                       and city.ftype=c_city_type
+                                                                       and city.ftype=nvl(c_city_type,'г')
                                                                       )
                                    left join mv_fias_area_act area on (area.aoid=nvl(nvl(locality.parentguid,city.parentguid),street.parentguid) 
                                                                        and area.regioncode=c_region 
@@ -1690,9 +1689,13 @@ as
   -- возвращается курсор на таблицу типа TTblCheckExistsAddrByFias
   function CheckExistsAddrByFias(p_declaration number,p_check_type number default 0) return ref_cursor;
   
+  -- Обновление мат. представлений
+  procedure RefreshViews;
+  
 end fias_pkg;
 /
 show errors;
+
 create or replace package body fias_pkg as
   
   cursor ndfl_rec(c_ndfl number) is
@@ -1737,7 +1740,7 @@ create or replace package body fias_pkg as
       from ndfl_person n
      where n.id=c_ndfl;
 
-    v_check_path boolean:=true;
+    v_check_path boolean:=false;
   --------------------------------------------------------------------------------------------------------------
   -- внутренние функции
   --------------------------------------------------------------------------------------------------------------
@@ -1896,10 +1899,11 @@ begin
            and a.has_child=decode(p_leaf,1,0,1);
       elsif (p_check_type='CITY') then
         select decode(count(*),0,0,1) into v_result
-          from mv_fias_city_act c join mv_fias_area_act a on (a.parentguid=c.aoid)
+          from mv_fias_city_act c left join mv_fias_area_act a on (a.parentguid=c.aoid)
          where c.regioncode=p_region
            and c.fname=nvl(replace(lower(p_check_element),' ',''),'-')
-           and a.fname=nvl(replace(lower(p_parent_element),' ',''),'-')
+           and (nvl(replace(lower(p_parent_element),' ',''),'-')='-' or 
+                a.fname=nvl(replace(lower(p_parent_element),' ',''),'-'))
            and c.has_child=decode(p_leaf,1,0,1);
       elsif (p_check_type='LOCALITY') then
         select decode(sum(cnt),0,0,1) into v_result
@@ -2188,6 +2192,19 @@ begin
     return v_ref;
   end;
 
+  -------------------------------------------------------------------------------------------------------------
+  -- Обновление мат. представлений
+  -------------------------------------------------------------------------------------------------------------
+  procedure RefreshViews
+  is
+  begin
+    dbms_mview.refresh('MV_FIAS_AREA_ACT', 'C');
+    dbms_mview.refresh('MV_FIAS_CITY_ACT', 'C');
+    dbms_mview.refresh('MV_FIAS_LOCALITY_ACT', 'C');
+    dbms_mview.refresh('MV_FIAS_STREET_ACT', 'C');
+  end;
+
 end fias_pkg;
 /
 show errors;
+exit;
