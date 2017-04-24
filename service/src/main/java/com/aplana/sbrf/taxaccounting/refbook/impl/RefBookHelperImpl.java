@@ -41,6 +41,8 @@ public class RefBookHelperImpl implements RefBookHelper {
     @Autowired
     private ApplicationContext applicationContext;
 
+    private static final String UNIQ_ERROR_MSG = "Строка %d: Нарушено требование к уникальности, уже существуют записи (%d шт.) со значениями атрибута(ов) \"Код НО конечного\": \"%s\", \"КПП\": \"%s\"!";
+
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -485,6 +487,22 @@ public class RefBookHelperImpl implements RefBookHelper {
         }
         String filterSlave = linkAlias + " = " + uniqueRecordId;
         RefBookAttribute sortAttr = slaveRefBook.getAttribute("ROW_ORD");
+
+        for (int i = 0; i<tablePart.size(); i++) {
+            Map<String, RefBookValue> rowFromClient = tablePart.get(i);
+            int count = 0;
+            for (Map<String, RefBookValue> rowFromClient2: tablePart) {
+                if (rowFromClient != rowFromClient2) {
+                    if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromClient2.get("TAX_ORGAN_CODE").getStringValue())
+                            && rowFromClient.get("KPP").getStringValue().equals(rowFromClient2.get("KPP").getStringValue())) {
+                        count++;
+                    }
+                }
+            }
+            if (count > 0) {
+                throw new ServiceException(String.format(UNIQ_ERROR_MSG, i+1, count, rowFromClient.get("TAX_ORGAN_CODE").getStringValue(), rowFromClient.get("KPP").getStringValue()));
+            }
+        }
 
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(rp.getCalendarStartDate(), null, filterSlave, sortAttr);
 

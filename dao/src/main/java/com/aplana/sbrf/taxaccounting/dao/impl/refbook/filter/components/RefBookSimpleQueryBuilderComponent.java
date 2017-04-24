@@ -441,7 +441,7 @@ public class RefBookSimpleQueryBuilderComponent {
             sql.addNamedParam(attribute.getAlias(), record.getValues().get(attribute.getAlias()).getValue());
 
             sql.append("r.").append(attribute.getAlias()).append(" = :").append(attribute.getAlias()).append("\n");
-            appendIfAttributeIsNotLast(sql, uniqueAttributesValues, j, "OR ");
+            appendIfAttributeIsNotLast(sql, uniqueAttributesValues, j, "AND ");
         }
     }
 
