@@ -1,17 +1,25 @@
 package refbook.declaration_type
 
+import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.refbook.*
+import com.aplana.sbrf.taxaccounting.service.impl.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import groovy.transform.Field
-import org.apache.commons.io.IOUtils
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
+import org.apache.commons.io.IOUtils;
+import groovy.transform.Field
+
+import javax.script.ScriptException
+import java.text.SimpleDateFormat
+import java.util.*;
+import java.io.*;
 
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
-import java.text.SimpleDateFormat
 import java.util.regex.Pattern
+
 /**
  * Created by lhaziev on 09.02.2017.
  */
@@ -164,8 +172,8 @@ def importTF() {
     Pattern patternUuOtch = Pattern.compile(UU_PATTERN)
 
     if (UploadFileName != null
-        && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
-        && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
+            && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
+            && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
     ) {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
@@ -175,10 +183,10 @@ def importTF() {
     } else if (isNdfl2Response(UploadFileName)) {
         importNdflResponse()
     } else if (
-        patternKvOtch.matcher(UploadFileName).matches() ||
-        patternUoOtch.matcher(UploadFileName).matches() ||
-        patternIvOtch.matcher(UploadFileName).matches() ||
-        patternUuOtch.matcher(UploadFileName).matches()
+    patternKvOtch.matcher(UploadFileName).matches() ||
+            patternUoOtch.matcher(UploadFileName).matches() ||
+            patternIvOtch.matcher(UploadFileName).matches() ||
+            patternUuOtch.matcher(UploadFileName).matches()
     ) {
         importAnswer1151111()
     } else {
