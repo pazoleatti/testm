@@ -290,6 +290,7 @@ alter table ref_book_id_tax_payer add constraint fk_ref_book_id_tax_payer_pers f
 alter table ref_book_person add constraint chk_ref_book_person_status check (status between -1 and 2);
 alter table ref_book_person add constraint chk_ref_book_person_old_st check (old_status is null or old_status between -1 and 2);
 alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
+alter table ref_book_address add constraint chk_ref_book_address_type check (address_type in (0,1));
 alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_tax_payer add constraint rb_tax_payer_chk_status check (status in (-1, 0, 1, 2));
 
