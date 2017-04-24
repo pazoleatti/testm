@@ -439,8 +439,12 @@ public class RefBookSimpleQueryBuilderComponent {
         for (int j = 0; j < uniqueAttributesValues.size(); j++) {
             RefBookAttribute attribute = uniqueAttributesValues.get(j).getFirst();
             sql.addNamedParam(attribute.getAlias(), record.getValues().get(attribute.getAlias()).getValue());
-
-            sql.append("r.").append(attribute.getAlias()).append(" = :").append(attribute.getAlias()).append("\n");
+            sql.append("(r.").append(attribute.getAlias()).append(" = :").append(attribute.getAlias());
+            if (!attribute.isRequired()) {
+                sql.append(" OR (r.").append(attribute.getAlias()).append(" is NULL AND :")
+                        .append(attribute.getAlias()).append(" is NULL)");
+            }
+            sql.append(") ");
             appendIfAttributeIsNotLast(sql, uniqueAttributesValues, j, "AND ");
         }
     }
