@@ -188,9 +188,10 @@ public interface NdflPersonService {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
+     * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
-    List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
 
     /**
      * Найти данные о авансах ФЛ по идентификатору ФЛ

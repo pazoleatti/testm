@@ -602,10 +602,11 @@ create or replace package body person_pkg as
           and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.last_name),' ','')
                                                            and replace(lower(p.first_name),' ','') = replace(lower(n.first_name),' ','')
                                                            and replace(lower(p.middle_name),' ','') = replace(lower(n.middle_name),' ','')
-                                                           and p.birth_date=n.birth_day)
-          and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', ''))
-          and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ',''))
-          and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ',''));
+                                                           and p.birth_date=n.birth_day
+                                                           and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', '') and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ','') and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ','') and p.status=0);
   
     return v_ref;
   end;
@@ -1135,9 +1136,10 @@ create or replace package body person_pkg as
           and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.familia),' ','')
                                                            and replace(lower(p.first_name),' ','') = replace(lower(n.imya),' ','')
                                                            and replace(lower(p.middle_name),' ','') = replace(lower(n.otchestvo),' ','')
-                                                           and p.birth_date=n.data_rozd)
-          and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', ''))
-          and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.innfl,' ',''));
+                                                           and p.birth_date=n.data_rozd
+                                                           and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', '') and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.innfl,' ','') and p.status=0);
   
     return v_ref;
   end;

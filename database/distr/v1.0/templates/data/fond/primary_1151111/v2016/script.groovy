@@ -2323,14 +2323,6 @@ void importData() {
 
     ScriptUtils.checkInterrupted();
 
-    // Валидация по схеме
-    declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')))
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        throw new ServiceException("ТФ не соответствует XSD-схеме. Загрузка невозможна.");
-    }
-
-    ScriptUtils.checkInterrupted();
-
     def fileNode = new XmlSlurper().parse(new ByteArrayInputStream(content));
     if (fileNode == null) {
         throw new ServiceException('Отсутствие значения после обработки потока данных')
@@ -5052,7 +5044,7 @@ def checkDataDBPerson() {
 
         // 3.1.1 Назначение ФЛ записи справочника "Физические лица"
         // Если personId не задан, то он принимает значение 0, а не null
-        if (raschsvPersSvStrahLic.personId == null || raschsvPersSvStrahLic.personId == 0) {
+        if (ScriptUtils.isEmpty(raschsvPersSvStrahLic.personId)) {
             String pathError = "Файл.Документ.РасчетСВ.ПерсСвСтрахЛиц.ДанФЛПолуч"
             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Назначение ФЛ записи справочника 'Физические лица'", fioAndRecordId, pathError,
                     "Отсутствует ссылка на запись справочника 'Физические лица' или запись неактуальна")

@@ -192,7 +192,7 @@ public class RefBookSimpleDataProviderHelper {
         }
 
 		// Строка с информацией о проверяемой строке - значения атрибутов в виде строки
-		String strRecord =  refBookHelper.refBookRecordToString(refBook, record);
+		String strRecord = refBookHelper.refBookRecordToString(refBook, record);
 		return String.format(UNIQ_ERROR_MSG, attrNames.toString(), strRecord);
     }
 
