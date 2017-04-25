@@ -59,15 +59,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Autowired
     private TransactionHelper tx;
     @Autowired
-    private FormDataService formDataService;
-    @Autowired
     private LockDataService lockDataService;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     PeriodService periodService;
-    @Autowired
-    private FormDataScriptingService scriptingService;
     @Autowired
     private LogEntryService logEntryService;
 	@Autowired
@@ -113,9 +109,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         checkScript(formTemplate, log);
         if (formTemplate.getId() != null) {
             int formTemplateId = formTemplateDao.save(formTemplate);
-            List<Long> formDataIds = formDataService.getFormDataListInActualPeriodByTemplate(formTemplateId, formTemplate.getVersion());
-            for (Long formDataId : formDataIds)
-                formDataService.deleteReport(formDataId, null, systemUserInfo, TaskInterruptCause.FORM_TEMPLATE_UPDATE);
             return formTemplateId;
         } else
             return formTemplateDao.saveNew(formTemplate);
@@ -402,8 +395,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 					}
 				}
 				logger.error(CLOSE_PERIOD, MessageGenerator.mesSpeckPluralD(formTemplate.getType().getTaxType()), stringBuilder.toString());
-			} else if (oldSerial && newCross) { // 9А.1.1
-				formDataService.batchUpdatePreviousNumberRow(formTemplate, user);
 			}
         }
     }
@@ -460,7 +451,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             formData.setDepartmentReportPeriodId(1);
             formData.setReportPeriodId(1);
 
-            scriptingService.executeScriptInNewReadOnlyTransaction(userInfo, formTemplate.getScript(), formData, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
         } catch (Exception ex) {
             tempLogger.error(ex);
             logger.getEntries().addAll(tempLogger.getEntries());

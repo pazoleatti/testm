@@ -17,8 +17,6 @@ import java.util.Map;
  * @author Levykin
  */
 public interface ScriptTestMockHelper {
-    FormDataService mockFormDataService();
-
     ReportPeriodService mockReportPeriodService();
 
     DepartmentService mockDepartmentService();
@@ -36,8 +34,6 @@ public interface ScriptTestMockHelper {
     RefBookFactory mockRefBookFactory();
 
     DepartmentReportPeriodService mockDepartmentReportPeriodService();
-
-    FormTypeService mockFormTypeService();
 
     DeclarationService mockDeclarationService();
 

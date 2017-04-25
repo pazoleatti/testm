@@ -41,8 +41,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private FormDataService formDataService;
-    @Autowired
     private AuditService auditService;
 
     @Override
@@ -86,7 +84,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             }
             versionOperatingService.checkDestinationsSources(formTemplate.getType().getId(), beginRange, endRange, logger);
             checkError(logger, SAVE_MESSAGE);
-            formDataService.findFormDataIdsByRangeInReportPeriod(formTemplate.getId(), formTemplate.getVersion(), templateActualEndDate, logger);
             checkError(logger, FORM_EXIST);
         }
 

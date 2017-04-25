@@ -46,7 +46,6 @@ public class DeclarationTestScriptHelper {
     // Сервис работы со скриптами
     private static ScriptingService scriptingService = new ScriptingService();
     // Mock-сервисы
-    private FormDataService formDataService;
     private DepartmentFormTypeService departmentFormTypeService;
     private ReportPeriodService reportPeriodService;
     private DepartmentService departmentService;
@@ -232,7 +231,6 @@ public class DeclarationTestScriptHelper {
      * Моск сервисов
      */
     private void initMock() {
-        formDataService = mockHelper.mockFormDataService();
         departmentFormTypeService = mockHelper.mockDepartmentFormTypeService();
         reportPeriodService = mockHelper.mockReportPeriodService();
         departmentService = mockHelper.mockDepartmentService();
@@ -281,7 +279,6 @@ public class DeclarationTestScriptHelper {
     public void execute(FormDataEvent formDataEvent) {
         Bindings bindings = scriptingService.getEngine().createBindings();
         bindings.put("formDataEvent", formDataEvent);
-        bindings.put("formDataService", formDataService);
         bindings.put("reportPeriodService", reportPeriodService);
         bindings.put("departmentService", departmentService);
         bindings.put("refBookService", refBookService);
@@ -462,13 +459,6 @@ public class DeclarationTestScriptHelper {
      */
     public DepartmentFormTypeService getDepartmentFormTypeService() {
         return departmentFormTypeService;
-    }
-
-    /**
-     * Mock FormDataService для реализации mock-логики внутри теста
-     */
-    public FormDataService getFormDataService() {
-        return formDataService;
     }
 
     /**

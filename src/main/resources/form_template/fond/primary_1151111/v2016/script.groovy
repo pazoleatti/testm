@@ -4950,7 +4950,7 @@ PersonData createPersonData(RaschsvPersSvStrahLic person) {
 @Field def citizenshipActualCache = []
 
 // Кэш для справочников
-@Field def refBookCache = [:]
+@Field Map<String, Map<String, RefBookValue>> refBookCache = [:]
 
 // Поля справочников
 @Field final String RF_CODE = "CODE"
@@ -6909,7 +6909,7 @@ def getProvider(def long providerId) {
  * Разыменование записи справочника
  */
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 Date getDate(String val) {

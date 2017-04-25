@@ -31,7 +31,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -118,8 +117,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private LogEntryService logEntryService;
     @Autowired
     private PeriodService periodService;
-    @Autowired
-    private FormDataService formDataService;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
@@ -727,36 +724,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     public boolean checkDestinations(long formDataId, TAUserInfo userInfo, Logger logger) {
         // Признак наличия назначения-приемника в другом подразделении
         boolean retVal = false;
-        // НФ
-        FormData formData = formDataDao.getWithoutRows(formDataId);
-
-        List<Relation> destinations = sourceService.getDestinationsInfo(formData, true, true, null, userInfo, logger);
-        for (Relation form : destinations) {
-            // Если форма существует и ее статус отличен от «Создана»
-            if (form.isCreated() && form.getState() != WorkflowState.CREATED) {
-                throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
-            }
-            if (formData.getDepartmentId() != form.getDepartmentId()) {
-                retVal = true;
-            }
-        }
-
-        // Назначения деклараций-приемников в периоде отчетного периода
-        destinations = sourceService.getDeclarationDestinationsInfo(formData, true, true, null, userInfo, logger);
-        for (Relation declaration : destinations) {
-            // Если декларация существует и статус "Принята"
-            if (declaration.isCreated() && declaration.getState() == WorkflowState.ACCEPTED) {
-                throw new ServiceException("Переход невозможен, т.к. уже %s.",
-                        "принята налоговая форма"
-                );
-            }
-            if (!retVal) {
-                if (formData.getDepartmentId() != declaration.getDepartmentId()) {
-                    retVal = true;
-                }
-            }
-        }
-
         return retVal;
     }
 }

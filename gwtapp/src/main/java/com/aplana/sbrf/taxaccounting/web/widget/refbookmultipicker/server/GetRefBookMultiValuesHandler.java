@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
-import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -9,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookCache;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
@@ -48,8 +46,6 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
     SecurityService securityService;
     @Autowired
     DepartmentService departmentService;
-    @Autowired
-    FormDataService formDataService;
     @Autowired
     RefBookPickerFilterBuilder buildFilter;
 

@@ -8,8 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FieldsNamesService;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.FieldsNamesService;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;

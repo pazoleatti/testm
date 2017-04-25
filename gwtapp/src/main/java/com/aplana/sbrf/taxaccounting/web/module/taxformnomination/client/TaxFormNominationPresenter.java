@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.inject.Inject;
@@ -99,18 +98,15 @@ public class TaxFormNominationPresenter
 
     private TaxType taxType;
 
-    protected final FormDestinationsPresenter formDestinationsPresenter;
     protected final DeclarationDestinationsPresenter declarationDestinationsPresenter;
     private final DispatchAsync dispatcher;
 
     @Inject
     public TaxFormNominationPresenter(final EventBus eventBus, final MyView view,
                                       final MyProxy proxy, DispatchAsync dispatcher,
-                                      FormDestinationsPresenter formDestinationsPresenter,
                                       DeclarationDestinationsPresenter declarationDestinationsPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
-        this.formDestinationsPresenter = formDestinationsPresenter;
         this.declarationDestinationsPresenter = declarationDestinationsPresenter;
         getView().setUiHandlers(this);
     }
@@ -172,11 +168,6 @@ public class TaxFormNominationPresenter
      }
 
     @Override
-    public void onClickOpenFormDestinations() {
-        formDestinationsPresenter.initAndShowDialog(this, taxType);
-    }
-
-    @Override
     public void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds) {
         declarationDestinationsPresenter.initAndShowEditDialog(this, formTypeKinds, taxType);
     }
@@ -222,32 +213,6 @@ public class TaxFormNominationPresenter
             getView().reloadDeclarationTableData();
         }
 	}
-
-    @Override
-    public void onClickFormCancelAnchor(){
-        DeleteFormsSourseAction action = new DeleteFormsSourseAction();
-        action.setKind(getView().getSelectedItemsOnFormGrid());
-        LogCleanEvent.fire(this);
-        dispatcher.execute(action,
-                CallbackUtils.defaultCallback(
-                        new AbstractCallback<DeleteFormsSourceResult>() {
-                            @Override
-                            public void onSuccess(DeleteFormsSourceResult result) {
-                                LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
-                                if (result.getUuid() != null){
-                                    if (result.isExistFormData()) {
-                                        Dialog.errorMessage(
-                                                "Ошибка",
-                                                "Невозможно отменить назначение, т. к. созданы экземпляры " + mesPart());
-                                    } else {
-                                        Dialog.errorMessage("Ошибка", "Невозможно снять назначение " + mesPart() + ", т. к. назначение является приемником данных / назначение является источником данных");
-                                        // TODO удаление источников-приемников
-                                    }
-                                }
-                                getView().reloadFormTableData();
-                            }
-                        }, this));
-    }
 
     @Override
     protected void onReveal() {

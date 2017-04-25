@@ -47,12 +47,8 @@ public class PeriodServiceImpl implements PeriodService {
 
 	@Autowired
 	private RefBookFactory rbFactory;
-
 	@Autowired
 	private DepartmentService departmentService;
-
-	@Autowired
-	private FormDataService formDataService;
     @Autowired
     private FormDataSearchService formDataSearchService;
     @Autowired
@@ -187,47 +183,27 @@ public class PeriodServiceImpl implements PeriodService {
 		List<Integer> departments = departmentService.getAllChildrenIds(drp.getDepartmentId());
 
         int reportPeriodId = drp.getReportPeriod().getId();
-        if (checkBeforeClose(departments, reportPeriodId, logs, user.getUser())) {
-            DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-            filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
-            filter.setDepartmentIdList(getAvailableDepartments(taxType, user.getUser(), Operation.CLOSE, drp.getDepartmentId()));
-            if (drp.getCorrectionDate() == null)
-                filter.setIsCorrection(false);
-            else
-                filter.setCorrectionDate(drp.getCorrectionDate());
-            departmentReportPeriodService.updateActive(departmentReportPeriodService.getListIdsByFilter(filter), reportPeriodId, false);
-            List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
-            for (DepartmentReportPeriod item : drpList){
-                if (item.isActive())
-                    continue;
-                int year = item.getReportPeriod().getTaxPeriod().getYear();
-                logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + item.getReportPeriod().getName() + "\" " +
-                        year + " " +
-                        "закрыт для \"" +
-                        departmentService.getDepartment(item.getDepartmentId()).getName() +
-                        "\""));
-
-            }
-		}
-	}
-
-	private boolean checkBeforeClose(List<Integer> departments, int reportPeriodId, List<LogEntry> logs, TAUser user) {
-		boolean allGood = true;
-        List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
-        for (FormData fd : formDataList) {
-            Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(fd.getId());
-            if (lockType != null) {
-                logs.add(new LogEntry(LogLevel.ERROR,
-                        "Форма " + fd.getFormType().getName() +
-                                " " + fd.getKind().getTitle() +
-                                " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
-                                " заблокирована пользователем " + userService.getUser(lockType.getSecond().getUserId()).getName() +
-                                " (запущена операция \"" + formDataService.getTaskName(lockType.getFirst(), fd.getId(), userService.getSystemUserInfo()) +"\")")
-                );
-                allGood = false;
-            }
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
+        filter.setDepartmentIdList(getAvailableDepartments(taxType, user.getUser(), Operation.CLOSE, drp.getDepartmentId()));
+        if (drp.getCorrectionDate() == null) {
+            filter.setIsCorrection(false);
+        } else {
+            filter.setCorrectionDate(drp.getCorrectionDate());
         }
-		return allGood;
+        departmentReportPeriodService.updateActive(departmentReportPeriodService.getListIdsByFilter(filter), reportPeriodId, false);
+        List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
+        for (DepartmentReportPeriod item : drpList){
+            if (item.isActive())
+                continue;
+            int year = item.getReportPeriod().getTaxPeriod().getYear();
+            logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + item.getReportPeriod().getName() + "\" " +
+                    year + " " +
+                    "закрыт для \"" +
+                    departmentService.getDepartment(item.getDepartmentId()).getName() +
+                    "\""));
+
+        }
 	}
 
 	@Override

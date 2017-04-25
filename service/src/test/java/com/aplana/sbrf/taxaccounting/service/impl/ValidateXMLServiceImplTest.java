@@ -154,7 +154,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         }
     }
 
-    @Test
+    //@Test
     public void validateLargeXml() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;

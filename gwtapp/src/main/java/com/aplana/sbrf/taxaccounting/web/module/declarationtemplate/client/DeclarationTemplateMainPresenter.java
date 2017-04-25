@@ -38,8 +38,8 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.Unloc
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.UpdateDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.UpdateDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.InitTypeAction;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.InitTypeResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.InitTypeAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.InitTypeResult;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;

@@ -6,22 +6,12 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormDataReport;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodSpecificName;
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserView;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -37,12 +27,9 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
-import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataCSVReportBuilder;
-import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataStreamingXlsmReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemCsvBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemXlsxReportBuilder;
@@ -95,108 +82,12 @@ public class PrintingServiceImpl implements PrintingService {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
-    private FormDataService formDataService;
-    @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private LogEntryService logEntryService;
 
     private static final long REF_BOOK_ID = RefBook.Id.PERIOD_CODE.getId();
     private static final String REF_BOOK_VALUE_NAME = "CODE";
-
-	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, boolean deleteHiddenColumns, LockStateLogger stateLogger) {
-        String filePath = null;
-        Logger log = new Logger();
-        try {
-            formDataAccessService.canRead(userInfo, formDataId);
-            FormDataReport data = new FormDataReport();
-            FormData formData = formDataDao.get(formDataId, manual);
-            FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-            ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
-            // http://jira.aplana.com/browse/SBRFACCTAX-6399
-            if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
-                    && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
-                RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
-                Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
-                Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
-                reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
-            }
-            formData.setHeaders(formDataService.getHeaders(formData, userInfo, log));
-            data.setData(formData);
-            data.setFormTemplate(formTemplate);
-            data.setReportPeriod(reportPeriod);
-            data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
-            data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            data.setRpCompare(formData.getComparativePeriodId() != null ? departmentReportPeriodService.get(formData.getComparativePeriodId()).getReportPeriod() : null);
-            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getRows(formData, null) : dataRowDao.getTempRows(formData, null));
-            refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
-
-            RefBookValue periodCode = refBookFactory.getDataProvider(REF_BOOK_ID).
-                getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
-
-            if (stateLogger != null) {
-                stateLogger.updateState("Формирование XLSM-файла");
-            }
-            FormDataStreamingXlsmReportBuilder builder = new FormDataStreamingXlsmReportBuilder(data, isShowChecked, dataRows, periodCode, deleteHiddenColumns);
-            filePath = builder.createReport();
-            if (stateLogger != null) {
-                stateLogger.updateState("Сохранение XLSM-файла в базе данных");
-            }
-            return blobDataService.create(filePath, FILE_NAME + POSTFIX);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при создании печатной формы.");
-        } catch (DaoException ex) {
-			LOG.error(ex.getMessage(), ex);
-            throw new ServiceException(ex.getMessage());
-        } finally {
-            cleanTmp(filePath);
-        }
-	}
-
-    @Override
-    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
-        String reportPath = null;
-        try {
-            formDataAccessService.canRead(userInfo, formDataId);
-            FormDataReport data = new FormDataReport();
-            FormData formData = formDataDao.get(formDataId, manual);
-            FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-            ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
-            // http://jira.aplana.com/browse/SBRFACCTAX-6399
-            if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
-                    && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
-                RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
-                Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
-                Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
-                reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
-            }
-            data.setData(formData);
-            data.setFormTemplate(formTemplate);
-            data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
-            data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getRows(formData, null) : dataRowDao.getTempRows(formData, null));
-            Logger log = new Logger();
-            refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
-
-            RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
-                    getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
-            stateLogger.updateState("Формирование CSV-файла");
-            FormDataCSVReportBuilder builder = new FormDataCSVReportBuilder(data, isShowChecked, dataRows, refBookValue);
-            reportPath = builder.createReport();
-            stateLogger.updateState("Сохранение CSV-файла в базе данных");
-            return blobDataService.create(reportPath, FILE_NAME + ".csv");
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при создании печатной формы.");
-        } catch (DaoException ex) {
-			LOG.error(ex.getMessage(), ex);
-            throw new ServiceException(ex.getMessage());
-        } finally {
-            cleanTmp(reportPath);
-        }
-    }
 
     @Override
 	public String generateExcelLogEntry(List<LogEntry> listLogEntries) {

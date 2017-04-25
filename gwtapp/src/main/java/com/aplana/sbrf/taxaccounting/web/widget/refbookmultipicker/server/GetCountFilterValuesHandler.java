@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetCountFilterValuesAction;
@@ -40,9 +39,6 @@ public class GetCountFilterValuesHandler extends AbstractActionHandler<GetCountF
 
     @Autowired
     DepartmentService departmentService;
-
-    @Autowired
-    FormDataService formDataService;
 
     @Autowired
     RefBookPickerFilterBuilder buildFilter;

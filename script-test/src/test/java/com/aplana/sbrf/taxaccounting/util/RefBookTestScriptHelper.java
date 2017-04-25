@@ -50,12 +50,10 @@ public class RefBookTestScriptHelper {
     // Сервис работы со скриптами
     private static ScriptingService scriptingService = new ScriptingService();
     // Mock-сервисы
-    private FormDataService formDataService;
     private ReportPeriodService reportPeriodService;
     private RefBookService refBookService;
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
-    private FormTypeService formTypeService;
     private DeclarationService declarationService;
     private ImportFiasDataService importFiasDataService;
     private BlobDataService blobDataService;
@@ -106,12 +104,10 @@ public class RefBookTestScriptHelper {
      * Моск сервисов
      */
     private void initMock() {
-        formDataService = mockHelper.mockFormDataService();
         reportPeriodService = mockHelper.mockReportPeriodService();
         refBookService = mockHelper.mockRefBookService();
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
-        formTypeService = mockHelper.mockFormTypeService();
         declarationService = mockHelper.mockDeclarationService();
         importFiasDataService = mockHelper.mockImportFiasDataService();
         blobDataService = mockHelper.mockBlobDataService();
@@ -132,9 +128,7 @@ public class RefBookTestScriptHelper {
         bindings.put("formDataEvent", formDataEvent);
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("refBookService", refBookService);
-        bindings.put("formDataService", formDataService);
         bindings.put("declarationService", declarationService);
-        bindings.put("formTypeService", formTypeService);
         bindings.put("departmentService", departmentService);
         bindings.put("departmentReportPeriodService", departmentReportPeriodService);
         bindings.put("blobDataServiceDaoImpl", blobDataService);
@@ -259,20 +253,6 @@ public class RefBookTestScriptHelper {
      */
     public ReportPeriodService getReportPeriodService() {
         return reportPeriodService;
-    }
-
-    /**
-     * Mock FormDataService для реализации mock-логики внутри теста
-     */
-    public FormDataService getFormDataService() {
-        return formDataService;
-    }
-
-    /**
-     * Mock FormTypeService для реализации mock-логики внутри теста
-     */
-    public FormTypeService getFormTypeService() {
-        return formTypeService;
     }
 
     /**
