@@ -74,6 +74,20 @@ switch (formDataEvent) {
         createReports()
         break
 }
+
+@Field
+final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
+@Field
+final DepartmentService departmentService = getProperty("departmentService")
+
+def getProperty(String name) {
+    try{
+        return super.getProperty(name)
+    } catch (MissingPropertyException e) {
+        return null
+    }
+}
+
 /************************************* ДАННЫЕ ДЛЯ ОБЩИХ СОБЫТИЙ *******************************************************/
 
 /************************************* СОЗДАНИЕ XML *****************************************************************/
@@ -243,7 +257,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
 
     // инициализация данных о подразделении
     departmentParam = getDepartmentParam(declarationData.departmentId, declarationData.reportPeriodId)
-    departmentParamRow = getDepartmentParamDetails(departmentParam?.id, declarationData.reportPeriodId)
+    departmentParamRow = getDepartmentParamDetails(departmentParam?.id, declarationData.departmentId, declarationData.reportPeriodId)
     String depName = departmentService.get(departmentParam.DEPARTMENT_ID.value.toInteger()).name
     // Имя файла
     def fileName = generateXmlFileId(sberbankInnParam, kodNoProm)
@@ -687,7 +701,7 @@ def createRefBookAttributesForNdflReference(
  * @return
  */
 def generateXmlFileId(inn, kodNoProm) {
-    def departmentParamRow = departmentParam ? getDepartmentParamDetails(departmentParam?.record_id?.value, declarationData.reportPeriodId) : null
+    def departmentParamRow = departmentParam ? getDepartmentParamDetails(departmentParam?.record_id?.value, declarationData.departmentId ,declarationData.reportPeriodId) : null
     def r_t = "NO_NDFL2"
     def a = kodNoProm
     def k = departmentParamRow?.TAX_ORGAN_CODE?.value
@@ -1134,7 +1148,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
         def provider = getProvider(REF_BOOK_NDFL_ID)
         def departmentParamList = provider.getRecords(rpe, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
         departmentCache.put(departmentId, departmentParamList?.get(0))
     }
@@ -1147,11 +1161,11 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
  * @param reportPeriodId
  * @return
  */
-def getDepartmentParamDetails(def departmentParamId, def reportPeriodId) {
+def getDepartmentParamDetails(def departmentParamId, def departmentId, def reportPeriodId) {
     if (departmentParamRow == null) {
         def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "REF_BOOK_NDFL_ID = $departmentParamId", null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
         def referencesOktmoList = departmentParamTableList.OKTMO?.value
         referencesOktmoList.removeAll([null])
@@ -1163,7 +1177,7 @@ def getDepartmentParamDetails(def departmentParamId, def reportPeriodId) {
             }
         }
         if (departmentParamRow == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
     }
     return departmentParamRow
@@ -1327,7 +1341,7 @@ def createForm() {
         // Поиск КПП и ОКТМО для некорр периода
     } else {
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
-        def departmentParamTableList = getDepartmentParamDetailsList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
+        def departmentParamTableList = getDepartmentParamDetailsList(departmentParam?.id, departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         def referencesOktmoList = departmentParamTableList.OKTMO?.value
         referencesOktmoList.removeAll([null])
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
@@ -1636,14 +1650,14 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
  * @param reportPeriodId
  * @return
  */
-def getDepartmentParamDetailsList(def departmentParamId, def reportPeriodId) {
+def getDepartmentParamDetailsList(def departmentParamId, def departmentId, def reportPeriodId) {
     if (!departmentParamTableListCache.containsKey(departmentParamId)) {
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
         def rpe = getReportPeriodEndDate(reportPeriodId)
         def provider = getProvider(REF_BOOK_NDFL_DETAIL_ID)
         def departmentParamTableList = provider.getRecords(rpe, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
         departmentParamTableListCache.put(departmentParamId, departmentParamTableList)
     }
@@ -2187,4 +2201,13 @@ def thinBorderStyle(final style) {
     style.setBorderLeft(CellStyle.BORDER_THIN)
     style.setBorderRight(CellStyle.BORDER_THIN)
     return style
+}
+
+@TypeChecked
+void departmentParamException(int departmentId, int reportPeriodId) {
+    ReportPeriod reportPeriod = reportPeriodService.get(reportPeriodId)
+    throw new ServiceException("Отсутствуют настройки подразделения \"%s\" периода \"%s\". Необходимо выполнить настройку в разделе меню \"Налоги->НДФЛ->Настройки подразделений\"",
+            departmentService.get(departmentId).getName(),
+            reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
+    ) as Throwable
 }

@@ -83,6 +83,10 @@
     final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
     @Field
     final DeclarationService declarationService = getProperty("declarationService")
+    @Field
+    final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
+    @Field
+    final DepartmentService departmentService = getProperty("departmentService")
 
     def getProperty(String name) {
         try{
@@ -4475,7 +4479,7 @@
         def departmentId = declarationData.departmentId
         def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            departmentParamException(departmentId, declarationData.reportPeriodId)
         }
         return departmentParamList?.get(0)
     }
@@ -4490,7 +4494,7 @@
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
         def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            departmentParamException(departmentId, declarationData.reportPeriodId)
         }
         def kppList = []
         def mapOktmo = getRefOktmoByDepartmentId()
@@ -4869,4 +4873,13 @@
                 logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде, Отчетные налоговые формы не будут сформированы текущем периоде")
             }
         }
+    }
+
+    @TypeChecked
+    void departmentParamException(int departmentId, int reportPeriodId) {
+        ReportPeriod reportPeriod = reportPeriodService.get(reportPeriodId)
+        throw new ServiceException("Отсутствуют настройки подразделения \"%s\" периода \"%s\". Необходимо выполнить настройку в разделе меню \"Налоги->НДФЛ->Настройки подразделений\"",
+                departmentService.get(departmentId).getName(),
+                reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
+        ) as Throwable
     }
