@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.editf
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.editform.EditFormView;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplatePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplateView;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.UiModule;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.ui.UiModule;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 public class DeclarationTemplateModule extends AbstractPresenterModule {

@@ -16,17 +16,11 @@ public interface TaxFormNominationUiHandlers extends UiHandlers {
 //    void reloadFormTableData();
 //    void reloadDeclarationTableData();
 
-    void onClickOpenFormDestinations();
     void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds);
 
     void onClickOpenDeclarationDestinations();
 
 	void onClickDeclarationCancelAnchor();
-
-    /**
-     * Удалить назначенные формы
-     */
-	void onClickFormCancelAnchor();
 
     void onFormRangeChange(int start, int length, TaxNominationColumnEnum sort, boolean asc);
 

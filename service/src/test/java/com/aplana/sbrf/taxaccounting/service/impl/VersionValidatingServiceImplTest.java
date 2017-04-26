@@ -47,8 +47,6 @@ public class VersionValidatingServiceImplTest {
     DepartmentService departmentService;
     @Autowired
     FormDataDao formDataDao;
-    @Autowired
-    FormDataService formDataService;
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -256,9 +254,6 @@ public class VersionValidatingServiceImplTest {
 
         when(departmentService.getDepartment(1)).thenReturn(department);
 
-        when(formDataService.getFormDataListInActualPeriodByTemplate(formTemplate.getId(), SIMPLE_DATE_FORMAT.parse("01.01.2014")))
-        .thenReturn(list);
-
         versionFTOperatingService.isUsedVersion(
                 formTemplate.getId(),
                 1,
@@ -266,15 +261,6 @@ public class VersionValidatingServiceImplTest {
                 SIMPLE_DATE_FORMAT.parse("01.01.2014"),
                 SIMPLE_DATE_FORMAT.parse("01.01.2014"),
                 logger);
-
-        Assert.assertEquals(
-                "Существует экземпляр налоговые формы:  Тип: \"Сводная\", Вид: \"Тестовый тип НФ\", Подразделение: \"Тестовое подразделение\", Период: \"Тестовый период 2014\", Период сравнения: \"Тестовый период 2014\", Версия: \"Автоматическая\"",
-                logger.getEntries().get(0).getMessage()
-        );
-        Assert.assertEquals(
-                "Существует экземпляр налоговые формы:  Тип: \"Сводная\", Вид: \"Тестовый тип НФ\", Подразделение: \"Тестовое подразделение\", Период: \"Второй тестовый период 2014\", Период сравнения: \"Второй тестовый период 2014\", Дата сдачи корректировки: 01.01.2014, Версия: \"Абсолютные значения\"",
-                logger.getEntries().get(1).getMessage()
-        );
     }
 
 }

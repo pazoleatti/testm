@@ -170,4 +170,16 @@ public interface RefBookService {
      * @param records список значений атрибутов
      */
     void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records);
+
+
+    /**
+     * Получение значения справочника по Id через кэш
+     * @param refBookId
+     * @param recordId
+     * @param refBookCache
+     * @return
+     */
+    @SuppressWarnings("unused")
+    Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
+                                              Map<String, Map<String, RefBookValue>> refBookCache);
 }

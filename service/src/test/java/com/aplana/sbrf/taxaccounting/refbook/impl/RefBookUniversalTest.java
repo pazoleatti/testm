@@ -14,9 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.junit.Before;
@@ -71,8 +69,6 @@ public class RefBookUniversalTest {
 
         lockService = mock(LockDataService.class);
         ReflectionTestUtils.setField(provider, "lockService", lockService);
-
-        FormDataService formDataService = mock(FormDataService.class);
 
         RefBookHelper refBookHelper = mock(RefBookHelper.class);
         ReflectionTestUtils.setField(provider, "refBookHelper", refBookHelper);

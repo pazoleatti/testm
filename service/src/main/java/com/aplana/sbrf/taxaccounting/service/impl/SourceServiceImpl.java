@@ -73,8 +73,6 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
-    private FormDataScriptingService formDataScriptingService;
-    @Autowired
     private DeclarationDataScriptingService declarationDataScriptingService;
 
 	/**
@@ -971,30 +969,6 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void addFormDataConsolidationInfo(Long tgtFormDataId, Collection<Long> srcFormDataIds) {
-        if (srcFormDataIds.isEmpty()){
-            return;
-        }
-        sourceDao.addFormDataConsolidationInfo(tgtFormDataId, srcFormDataIds);
-    }
-
-    @Override
-    public void deleteFDConsolidationInfo(Collection<Long> tgtFormDataIds) {
-        sourceDao.deleteFormDataConsolidationInfo(tgtFormDataIds);
-    }
-
-    @Override
-    public boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId) {
-        return sourceDao.isFDSourceConsolidated(formDataId, sourceFormDataId);
-    }
-
-    @Override
-    public void updateFDDDConsolidation(long sourceFormId) {
-        sourceDao.updateDDConsolidationInfo(sourceFormId);
-        sourceDao.updateFDConsolidationInfo(sourceFormId);
-    }
-
-    @Override
     public void updateDDConsolidation(long sourceFormId) {
         sourceDao.updateDDConsolidationInfo(sourceFormId);
     }
@@ -1215,72 +1189,6 @@ public class SourceServiceImpl implements SourceService {
         queryParams.setSearchOrdering(SourcesSearchOrdering.TYPE);
         queryParams.setAscending(true);
         return queryParams;
-    }
-
-    @Override
-    public List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
-        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
-        Map<String, Object> params = new HashMap<String, Object>();
-        FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<Relation>());
-        sources.setSourcesProcessedByScript(false);
-        params.put("sources", sources);
-        params.put("light", light);
-        params.put("excludeIfNotExist", excludeIfNotExist);
-        params.put("stateRestriction", stateRestriction);
-        params.put("needSources", true);
-        params.put("form", true);
-
-        formDataScriptingService.executeScript(userInfo, destinationFormData, FormDataEvent.GET_SOURCES, logger, params);
-        if (sources.isSourcesProcessedByScript()) {
-            return sources.getSourceList();
-        } else {
-            return sourceDao.getSourcesInfo(destinationFormData, light, excludeIfNotExist, stateRestriction);
-        }
-    }
-
-    @Override
-    public List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
-        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
-        Map<String, Object> params = new HashMap<String, Object>();
-        FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<Relation>());
-        sources.setSourcesProcessedByScript(false);
-        params.put("sources", sources);
-        params.put("light", light);
-        params.put("excludeIfNotExist", excludeIfNotExist);
-        params.put("stateRestriction", stateRestriction);
-        params.put("needSources", false);
-        params.put("form", true);
-
-        formDataScriptingService.executeScript(userInfo, sourceFormData, FormDataEvent.GET_SOURCES, logger, params);
-        if (sources.isSourcesProcessedByScript()) {
-            return sources.getSourceList();
-        } else {
-            return sourceDao.getDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction);
-        }
-    }
-
-    @Override
-    public List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
-        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
-        Map<String, Object> params = new HashMap<String, Object>();
-        FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<Relation>());
-        sources.setSourcesProcessedByScript(false);
-        params.put("sources", sources);
-        params.put("light", light);
-        params.put("excludeIfNotExist", excludeIfNotExist);
-        params.put("stateRestriction", stateRestriction);
-        params.put("needSources", false);
-        params.put("form", false);
-
-        formDataScriptingService.executeScript(userInfo, sourceFormData, FormDataEvent.GET_SOURCES, logger, params);
-        if (sources.isSourcesProcessedByScript()) {
-            return sources.getSourceList();
-        } else {
-            return sourceDao.getDeclarationDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction);
-        }
     }
 
     @Override

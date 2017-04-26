@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataReportType;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.io.IOUtils;
@@ -31,9 +30,6 @@ public class ReportController {
 
     @Autowired
     private ReportService reportService;
-
-    @Autowired
-    private IfrsDataService ifrsDataService;
 
     @Autowired
     private SecurityService securityService;
@@ -111,23 +107,6 @@ public class ReportController {
             createResponse(request, response, blobData);
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }
-    }
-
-    /**
-     * Обработка запроса выгрузки отчетности для МСФО
-     * @param reportPeriodId
-     * @param request
-     * @param response
-     * @throws IOException
-     */
-    @RequestMapping(value = "IFRS/{reportPeriodId}",method = RequestMethod.GET)
-    public void processCSVFormDataDownload(@PathVariable int reportPeriodId, HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        String uuid = ifrsDataService.get(reportPeriodId).getBlobDataId();
-        if (uuid != null) {
-            BlobData blobData = blobDataService.get(uuid);
-            createResponse(request, response, blobData);
         }
     }
 

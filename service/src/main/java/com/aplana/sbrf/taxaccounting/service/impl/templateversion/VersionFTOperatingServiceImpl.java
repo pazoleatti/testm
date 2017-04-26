@@ -41,8 +41,6 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     @Autowired
     private FormTemplateService formTemplateService;
     @Autowired
-    private FormDataService formDataService;
-    @Autowired
     private DepartmentService departmentService;
     @Autowired
     private SourceService sourceService;
@@ -53,25 +51,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
     @Override
     public boolean isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        List<Long> fdIds = formDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
-
-        boolean result = false;
-        for (long formDataId : fdIds) {
-            FormData formData = formDataDao.getWithoutRows(formDataId);
-            DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-            DepartmentReportPeriod drpCompare = formData.getComparativePeriodId() != null ?
-                    departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
-
-            logger.error(MessageGenerator.getFDMsg(
-                    String.format(MSG_IS_USED_VERSION, MessageGenerator.mesSpeckPlural(formData.getFormType().getTaxType())),
-                    formData,
-                    departmentService.getDepartment(formData.getDepartmentId()).getName(),
-                    formData.isManual(),
-                    drp,
-                    drpCompare));
-            result = true;
-        }
-        return result;
+        return false;
     }
 
     @Override

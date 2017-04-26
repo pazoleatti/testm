@@ -95,11 +95,6 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 2"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_ID));
         when(attachFileType.getUniqueRecordIds(any(Date.class), eq("CODE = 3"))).thenReturn(Arrays.asList(ATTACH_FILE_TYPE_SAVE_ID));
 
-        FormType formType = new FormType();
-        formType.setId(DECLARATION_FORM_TYPE_ID.intValue());
-        formType.setCode(NDFL2_1);
-        when(testHelper.getFormTypeService().get(DECLARATION_FORM_TYPE_ID.intValue())).thenReturn(formType);
-
         RefBookDataProvider declarationDataTypeRefProvider = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(eq(RefBook.Id.DECLARATION_DATA_TYPE_REF_BOOK.getId()))).thenReturn(declarationDataTypeRefProvider);
         RefBookValue codeTypeRefBookValue = new RefBookValue(RefBookAttributeType.STRING, "2 НДФЛ (2)");

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentChangeOperationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
@@ -18,7 +17,6 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
@@ -46,8 +44,6 @@ import java.util.Map;
 @Transactional
 public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction, UnitEditingResult> {
 
-    @Autowired
-	private FormDataService formDataService;
     @Autowired
 	private SecurityService securityService;
     @Autowired
@@ -118,17 +114,6 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                         String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
                                 departmentService.getParentsHierarchy(action.getDepId()),
                                 assembleMessage(valueToSave)), null);
-                if (action.getVersionFrom()!= null){
-                    if (!action.isChangeType()){
-                        //Обновляем имена подразделений в печатных формах
-                        formDataService.
-                                updateFDDepartmentNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), securityService.currentUserInfo());
-                    }else {
-                        //Обновляем имена ТБ в печатных формах
-                        formDataService.
-                                updateFDTBNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), action.isChangeType(), securityService.currentUserInfo());
-                    }
-                }
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);

@@ -9,11 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server.Decla
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server.DeclarationVersionListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentConfigServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server.DepartmentConfigPropertyServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.server.FormDataServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.server.FormDataListServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.server.AdminServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server.TemplateVersionListServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.ifrs.server.IfrsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.lock.server.LockServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.members.server.MembersServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModule;
@@ -39,17 +34,16 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(value = {MainHandlerModule.class, FormDataListServerModule.class,
-        FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
-        AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
+@Import(value = {MainHandlerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
+        DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
-        HistoryServerModule.class, TemplateVersionListServerModule.class, MembersServerModule.class,
+        HistoryServerModule.class, MembersServerModule.class,
         ConfigurationServerModule.class, AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class,
         SourcesServerModule.class, DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, SchedulerServerModule.class,
         TestPageServerModule.class, DeclarationVersionListServerModule.class, VersionHistoryServerModule.class,
         RefBookMultiPickerServerModule.class, ScriptExecutionServerModule.class, ScriptsImportServerModule.class,
-        UploadTransportDataServerModule.class, IfrsServerModule.class, LockServerModule.class, CommonParameterServerModule.class})
+        UploadTransportDataServerModule.class, LockServerModule.class, CommonParameterServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

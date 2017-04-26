@@ -44,33 +44,18 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
 
     @Autowired
     private TAUserService userService;
-
-    @Autowired
-    private FormDataSearchService formDataSearchService;
-
-    @Autowired
-    private FormDataService formDataService;
-
     @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
-
-    @Autowired
-    private DataRowService dataRowService;
-
     @Autowired
     private PeriodService reportService;
-
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
     private SecurityService securityService;
-
     @Autowired
     private RefBookFactory rbFactory;
-
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
 

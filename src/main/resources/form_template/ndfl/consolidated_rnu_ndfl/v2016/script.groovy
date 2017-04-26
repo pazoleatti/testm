@@ -69,6 +69,8 @@ final DeclarationData declarationData = getProperty("declarationData")
 final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
 @Field
 final DeclarationService declarationService = getProperty("declarationService")
+@Field
+final RefBookService refBookService = getProperty("refBookService")
 
 def getProperty(String name) {
     try{
@@ -2589,13 +2591,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 }
 
 // Кэш для справочников
-@Field def refBookCache = [:]
+@Field Map<String, Map<String, RefBookValue>> refBookCache = [:]
 
 /**
  * Разыменование записи справочника
  */
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+@TypeChecked
+Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
+    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /**

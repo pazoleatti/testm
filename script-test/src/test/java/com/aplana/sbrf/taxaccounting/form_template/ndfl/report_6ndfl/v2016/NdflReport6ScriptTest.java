@@ -175,7 +175,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                 });*/
 
         // Период
-        when(testHelper.getFormDataService().getRefBookValue(eq(8L), anyLong(), anyMap())).thenAnswer(
+        when(testHelper.getRefBookService().getRefBookValue(eq(8L), anyLong(), anyMap())).thenAnswer(
                 new Answer<Map<String, RefBookValue>>() {
                     @Override
                     public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
@@ -187,7 +187,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         );
 
         // ПоМесту
-        when(testHelper.getFormDataService().getRefBookValue(eq(2L), anyLong(), anyMap())).thenAnswer(
+        when(testHelper.getRefBookService().getRefBookValue(eq(2L), anyLong(), anyMap())).thenAnswer(
                 new Answer<Map<String, RefBookValue>>() {
                     @Override
                     public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
@@ -199,7 +199,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
         );
 
         // ПрПодп
-        when(testHelper.getFormDataService().getRefBookValue(eq(35L), anyLong(), anyMap())).thenAnswer(
+        when(testHelper.getRefBookService().getRefBookValue(eq(35L), anyLong(), anyMap())).thenAnswer(
                 new Answer<Map<String, RefBookValue>>() {
                     @Override
                     public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
