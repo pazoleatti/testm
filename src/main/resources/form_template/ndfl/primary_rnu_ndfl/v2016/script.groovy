@@ -2957,7 +2957,7 @@
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // Спр5 Код вида дохода (Необязательное поле)
-            if (ndflPersonIncome.incomeCode != null && !incomeCodeMap.find { key, value ->
+            if (ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
                 value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
                         ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
                         ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
@@ -2986,7 +2986,7 @@
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода и признака дохода справочнику", fioAndInp, pathError,
                             "'Доход.Вид.Признак (Графа 5)' не соответствует справочнику '$R_INCOME_TYPE'")
                 } else {
-                    if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode)) {
+                    if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeAccruedDate != null) {
                         def incomeCodeRefList = []
                         incomeTypeIdList.each { incomeTypeId ->
                             def incomeCodeRef = incomeCodeMap.get(incomeTypeId)
