@@ -1022,16 +1022,6 @@ def createForm() {
         }
         declarations.removeAll(declarationsForRemove)
 
-
-        if (declarations.isEmpty()) {
-            DepartmentReportPeriod prevDrp = departmentReportPeriodList.get(1)
-            def reportPeriod = prevDrp.reportPeriod
-            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-            def periodCode = period?.CODE?.stringValue
-            def periodName = period?.NAME?.stringValue
-            String correctionDateExpression = prevDrp.correctionDate == null ? "" : ", с датой сдачи корректировки ${prevDrp?.correctionDate?.format("dd.MM.yyyy")},"
-            logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
-        }
         declarations.each { declaration ->
             pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
         }
@@ -1107,16 +1097,6 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         allDeclarationData.addAll(declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, it))
     }
 
-    def reportPeriod = departmentReportPeriod.reportPeriod
-    def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-    def periodCode = period?.CODE?.stringValue
-    def periodName = period?.NAME?.stringValue
-    Department department = departmentService.get(departmentReportPeriod.departmentId)
-    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
-    if (allDeclarationData.isEmpty()) {
-        logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
-        return allDeclarationData
-    }
     // удаление форм не со статусом Принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
@@ -1125,9 +1105,6 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         }
     }
     allDeclarationData.removeAll(declarationsForRemove)
-    if (allDeclarationData.isEmpty()) {
-        logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
-    }
     return allDeclarationData
 }
 
@@ -1139,7 +1116,7 @@ def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndf
     } else {
         def kppOktmoNdflPersonsEntrySet = ndflPersonsGroupedByKppOktmo.entrySet()
         kppOktmoNdflPersonsEntrySet.each {
-            if (it.getKey().equals().pairKppOktmoBeingComparing) {
+            if (it.getKey().equals(pairKppOktmoBeingComparing)) {
                 if (it.getKey().taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
                     logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
                 }

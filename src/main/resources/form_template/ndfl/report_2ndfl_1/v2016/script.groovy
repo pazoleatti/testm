@@ -1495,7 +1495,7 @@ def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndf
     } else {
         def kppOktmoNdflPersonsEntrySet = ndflPersonsGroupedByKppOktmo.entrySet()
         kppOktmoNdflPersonsEntrySet.each {
-            if (it.getKey().equals().pairKppOktmoBeingComparing) {
+            if (it.getKey().equals(pairKppOktmoBeingComparing)) {
                 if (it.getKey().taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
                     logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
                 }
