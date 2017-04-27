@@ -2,6 +2,7 @@ package form_template.ndfl.report_6ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
+import groovy.transform.TypeChecked
 import groovy.xml.MarkupBuilder
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
@@ -22,6 +23,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*
+import com.aplana.sbrf.taxaccounting.service.script.*
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверки
@@ -53,6 +55,17 @@ switch (formDataEvent) {
         println "!CREATE_REPORTS!"
         createReports()
         break
+}
+
+@Field
+final RefBookService refBookService = getProperty("refBookService")
+
+def getProperty(String name) {
+    try{
+        return super.getProperty(name)
+    } catch (MissingPropertyException e) {
+        return null
+    }
 }
 
 // Альяс для списка идентифокаторов физлиц из КНФ
@@ -129,7 +142,7 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field def reportPeriodEndDate = null
 
 // Кэш для справочников
-@Field def refBookCache = [:]
+@Field Map<String, Map<String, RefBookValue>> refBookCache = [:]
 
 // Коды мест предоставления документа
 @Field def presentPlaceCodeCache = [:]
@@ -881,8 +894,9 @@ def getProvider(def long providerId) {
 /**
  * Разыменование записи справочника
  */
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+@TypeChecked
+Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
+    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
