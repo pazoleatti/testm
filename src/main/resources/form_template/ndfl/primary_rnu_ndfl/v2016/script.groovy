@@ -4494,7 +4494,7 @@
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
         def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            departmentParamException(departmentId, declarationData.reportPeriodId)
+            departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
         }
         def kppList = []
         def mapOktmo = getRefOktmoByDepartmentId()
