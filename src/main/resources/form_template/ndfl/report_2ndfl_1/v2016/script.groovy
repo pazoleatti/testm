@@ -168,6 +168,8 @@ int NDFL_2_1_DECLARATION_TYPE = 102
 @Field
 int NDFL_2_2_DECLARATION_TYPE = 104
 
+@Field final int DECLARATION_TYPE_NDFL6_ID = 103
+
 @Field
 final String NDFL_2_S_PRIZNAKOM_1 = "2 НДФЛ (1)"
 
@@ -312,7 +314,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
     def dateDoc = currDate.format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
 
     // Номер корректировки
-    def nomKorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
+    def nomKorr = findCorrectionNumber()
     def kodNo = departmentParamRow?.TAX_ORGAN_CODE?.value
     def builder = new MarkupBuilder(writer)
     builder.setDoubleQuotes(true)
@@ -662,6 +664,55 @@ def saveFileInfo(currDate, fileName) {
     declarationDataFile.setFileTypeId(fileTypeId)
     declarationDataFile.setDate(currDate)
     declarationService.saveFile(declarationDataFile)
+}
+
+int findCorrectionNumber() {
+    int toReturn = 0
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    if (departmentReportPeriod.correctionDate == null) {
+        return toReturn
+    }
+    DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter();
+    departmentReportPeriodFilter.setDepartmentIdList([declarationData.departmentId])
+    departmentReportPeriodFilter.setReportPeriodIdList([declarationData.reportPeriodId])
+    departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
+
+    List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
+    Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
+    while (it.hasNext()) {
+        DepartmentReportPeriod depReportPeriod = it.next();
+        if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+            it.remove();
+        }
+    }
+    departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
+        @Override
+        int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+            if (o1.correctionDate == null) {
+                return 1;
+            } else if (o2.correctionDate == null) {
+                return -1;
+            } else {
+                return o2.correctionDate.compareTo(o1.correctionDate);
+            }
+        }
+    })
+
+    for (DepartmentReportPeriod drp in departmentReportPeriodList) {
+        def declarations = []
+        declarations.addAll(declarationService.find(DECLARATION_TYPE_NDFL6_ID, drp.id))
+        declarations.addAll(declarationService.find(NDFL_2_1_DECLARATION_TYPE, drp.id))
+        declarations.addAll(declarationService.find(NDFL_2_2_DECLARATION_TYPE, drp.id))
+        if (!declarations.isEmpty()) {
+            for (DeclarationData dd in declarations) {
+                if (dd.kpp == declarationData.kpp && dd.oktmo == declarationData.oktmo) {
+                    toReturn++
+                    break
+                }
+            }
+        }
+    }
+    return toReturn
 }
 
 def saveNdflRefences() {
@@ -1444,7 +1495,7 @@ def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndf
     } else {
         def kppOktmoNdflPersonsEntrySet = ndflPersonsGroupedByKppOktmo.entrySet()
         kppOktmoNdflPersonsEntrySet.each {
-            if (it.getKey().equals().pairKppOktmoBeingComparing) {
+            if (it.getKey().equals(pairKppOktmoBeingComparing)) {
                 if (it.getKey().taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
                     logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
                 }
@@ -1717,6 +1768,12 @@ class PairKppOktmo {
     }
 }
 
+/**
+ * Разыменование записи справочника
+ */
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
 /************************************* СПЕЦОТЧЕТ **********************************************************************/
 
 
