@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,27 +20,7 @@ public class ReportServiceImpl implements ReportService {
     private ReportDao reportDao;
 
     @Autowired
-    private FormDataAccessService formDataAccessService;
-
-    @Autowired
     private DeclarationDataAccessService declarationDataAccessService;
-
-    @Override
-    public void create(long formDataId, String blobDataId, FormDataReportType type, boolean checking, boolean manual, boolean absolute) {
-        reportDao.create(formDataId, blobDataId, type.getReportName(), checking, manual, absolute);
-    }
-
-    @Override
-    public String get(TAUserInfo userInfo, long formDataId, FormDataReportType type, boolean checking, boolean manual, boolean absolute) {
-        formDataAccessService.canRead(userInfo, formDataId);
-        return reportDao.get(formDataId, type.getReportName(), checking, manual, absolute);
-    }
-
-
-    @Override
-    public void delete(long formDataId, Boolean manual) {
-        reportDao.delete(formDataId, manual);
-    }
 
     @Override
     public void createDec(long declarationDataId, String blobDataId, DeclarationDataReportType type) {

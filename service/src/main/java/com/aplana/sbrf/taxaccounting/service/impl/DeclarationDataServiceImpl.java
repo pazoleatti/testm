@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -115,12 +113,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private ValidateXMLService validateXMLService;
     @Autowired
     private SourceService sourceService;
-    @Autowired
-    private FormDataDao formDataDao;
-    @Autowired
-    private DataRowDao dataRowDao;
-    @Autowired
-    private FormTemplateService formTemplateService;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired

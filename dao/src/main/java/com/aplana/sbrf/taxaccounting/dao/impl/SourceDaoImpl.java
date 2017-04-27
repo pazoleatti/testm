@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -33,8 +32,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     private DepartmentDao departmentDao;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
-    @Autowired
-    private FormTypeDao formTypeDao;
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
 
@@ -663,7 +660,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("formTemplateId", destinationFormData.getId() == null ? destinationFormData.getFormTemplateId() : null);
         params.put("departmentReportPeriodId", destinationFormData.getId() == null ? destinationFormData.getDepartmentReportPeriodId() : null);
         params.put("kind", destinationFormData.getKind() != null ? destinationFormData.getKind().getId() : null);
-        params.put("compPeriod", destinationFormData.getId() == null ? destinationFormData.getComparativePeriodId() : null);
         params.put("accruing", destinationFormData.getId() == null ? destinationFormData.isAccruing() ? 1 : 0 : null);
         params.put("periodOrder", destinationFormData.getId() == null ? destinationFormData.getPeriodOrder() : null);
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
@@ -685,7 +681,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("formTemplateId", sourceFormData.getId() == null ? sourceFormData.getFormTemplateId() : null);
         params.put("departmentReportPeriodId", sourceFormData.getId() == null ? sourceFormData.getDepartmentReportPeriodId() : null);
         params.put("kind", sourceFormData.getKind() != null ? sourceFormData.getKind().getId() : null);
-        params.put("compPeriod", sourceFormData.getId() == null ? sourceFormData.getComparativePeriodId() : null);
         params.put("accruing", sourceFormData.getId() == null ? sourceFormData.isAccruing() ? 1 : 0 : null);
         params.put("periodOrder", sourceFormData.getId() == null ? sourceFormData.getPeriodOrder() : null);
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
@@ -707,7 +702,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("formTemplateId", sourceFormData.getId() == null ? sourceFormData.getFormTemplateId() : null);
         params.put("departmentReportPeriodId", sourceFormData.getId() == null ? sourceFormData.getDepartmentReportPeriodId() : null);
         params.put("kind", sourceFormData.getKind() != null ? sourceFormData.getKind().getId() : null);
-        params.put("compPeriod", sourceFormData.getId() == null ? sourceFormData.getComparativePeriodId() : null);
         params.put("accruing", sourceFormData.getId() == null ? sourceFormData.isAccruing() ? 1 : 0 : null);
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
         params.put("stateRestriction", stateRestriction != null && (stateRestriction == WorkflowState.CREATED || stateRestriction ==WorkflowState.ACCEPTED) ?
@@ -863,7 +857,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                         relation.setComparativePeriod(departmentReportPeriodDao.get(comparativePeriodId));
                     }
                 }
-                relation.setFormType(formTypeDao.get(SqlUtils.getInteger(rs, "formTypeId")));
             }
 
             //Заполняем исполнителей так, потому что их может быть несколько

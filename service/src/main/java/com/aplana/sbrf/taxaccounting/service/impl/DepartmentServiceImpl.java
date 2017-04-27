@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
@@ -31,9 +30,6 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Autowired
     DepartmentFormTypeDao departmentFormTypeDao;
-
-    @Autowired
-    FormDataDao formDataDao;
 
     @Autowired
     PeriodService periodService;
@@ -397,11 +393,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         } catch (ServiceException e){
             throw new ServiceException("", e);
         }
-    }
-
-    @Override
-    public Department getFormDepartment(Long formDataId) {
-        return departmentDao.getDepartment(formDataDao.getWithoutRows(formDataId).getDepartmentId());
     }
 
     @Override

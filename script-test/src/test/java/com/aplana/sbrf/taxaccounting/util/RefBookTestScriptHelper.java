@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import net.sf.sevenzipjbinding.IInArchive;
 
@@ -232,13 +231,6 @@ public class RefBookTestScriptHelper {
      */
     public Logger getLogger() {
         return logger;
-    }
-
-    /**
-     * DataRowHelper НФ
-     */
-    public DataRowHelper getDataRowHelper() {
-        return mockHelper.getDataRowHelper();
     }
 
     /**

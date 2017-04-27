@@ -133,33 +133,6 @@ public final class ScriptUtils {
     }
 
     /**
-     * Вычисляет сумму указаных в диапазоне чисел. Null значения воспринимаются как 0.
-     * Является аналогом Excel функции "СУММ" в нотации "СУММ(диапазон)"
-     *
-     * @param formData таблица значений
-     * @param range    диапазон ячеек для суммирования
-     * @return сумма диапазона
-     * @see <a href="http://office.microsoft.com/ru-ru/excel-help/HP010342931.aspx?CTT=1">СУММ(число1,[число2],...])</a>
-     */
-    public static double summ(FormData formData, List<DataRow<Cell>> dataRows, Range range) {
-        checkNumericColumns(formData, dataRows, range);
-
-        double sum = 0;
-        List<DataRow<Cell>> rows = dataRows;
-        List<Column> cols = formData.getFormColumns();
-        Rect rect = range.getRangeRect(formData, dataRows);
-        for (int i = rect.y1; i <= rect.y2; i++) {
-            for (int j = rect.x1; j <= rect.x2; j++) {
-                BigDecimal value = (BigDecimal) rows.get(i).get(cols.get(j).getAlias());
-                if (value != null) {
-                    sum += value.doubleValue();
-                }
-            }
-        }
-        return sum;
-    }
-
-    /**
      * Округляет число до требуемой точности. Например, round(3.12345, 3) = 3.123, round(1.5, 0) = 2
      *
      * @param value     округляемое число
@@ -169,64 +142,6 @@ public final class ScriptUtils {
     public static double round(double value, int precision) {
         double factor = Math.pow(10, precision);
         return Math.round(value * factor) / factor;
-    }
-
-    /**
-     * Проверяет, что в указанном диапазоне только числовые столбцы
-     *
-     * @param formData таблица значений
-     * @param range    проверяемый диапазон ячеек
-     * @throws IllegalArgumentException если в диапазоне есть нечисловые столбцы
-     */
-    static void checkNumericColumns(FormData formData, List<DataRow<Cell>> dataRows, Range range) {
-        List<Column> cols = formData.getFormColumns();
-        Rect rect = range.getRangeRect(formData, dataRows);
-        for (int j = rect.x1; j <= rect.x2; j++) {
-            Column col = cols.get(j);
-            if (!(ColumnType.NUMBER.equals(col.getColumnType())))
-                throw new IllegalArgumentException(String.format(WRONG_COLUMN_TYPE,
-                        cols.get(rect.x1).getName(),
-                        cols.get(rect.x2).getName(),
-                        col.getName()));
-        }
-    }
-
-    /**
-     * Суммирует ячейки второго диапазона только для тех строк, для которых выполняется условие фильтрации. В данном
-     * случае под условием фильтрации подразумевается равенство значений строк первого диапазона заранее заданному
-     * значению. Является аналогом Excel функции "СУММЕСЛИ" в нотации "СУММЕСЛИ(диапазон, критерий, диапазон_суммирования)"
-     *
-     * @param formData       таблица данных
-     * @param conditionRange диапазон по которому осуществляется отбор строк (фильтрация)
-     * @param filterValue    значение фильтра
-     * @param summRange      диапазон суммирования
-     * @return сумма ячеек
-     * @throws IllegalArgumentException диапазоны имеют разную размерность
-     * @see <a href="http://office.microsoft.com/ru-ru/excel-help/HP010342932.aspx?CTT=1">СУММЕСЛИ(диапазон, критерий, [диапазон_суммирования])</a>
-     */
-    public static double summIfEquals(FormData formData, List<DataRow<Cell>> dataRows, Range conditionRange, Object filterValue, Range summRange) {
-        Rect summRect = summRange.getRangeRect(formData, dataRows);
-        Rect condRect = conditionRange.getRangeRect(formData, dataRows);
-        if (!summRect.isSameSize(condRect))
-            throw new IllegalArgumentException(NOT_SAME_RANGES);
-
-        double sum = 0;
-        List<DataRow<Cell>> summRows = dataRows;
-        List<Column> summCols = formData.getFormColumns();
-        List<DataRow<Cell>> condRows = dataRows;
-        List<Column> condCols = formData.getFormColumns();
-        for (int i = 0; i < condRect.getHeight(); i++) {
-            for (int j = 0; j < condRect.getWidth(); j++) {
-                Object condValue = condRows.get(condRect.y1 + i).get(condCols.get(condRect.x1 + j).getAlias());
-                if (condValue != null && condValue.equals(filterValue)) {
-                    BigDecimal summValue = (BigDecimal) summRows.get(summRect.y1 + i).get(summCols.get(summRect.x1 + j).getAlias());
-                    if (summValue != null) {
-                        sum += summValue.doubleValue();
-                    }
-                }
-            }
-        }
-        return sum;
     }
 
     /**
@@ -275,36 +190,6 @@ public final class ScriptUtils {
             }
         }
         throw new IllegalArgumentException(String.format(CELL_NOT_FOUND, rowAlias, columnAlias));
-    }
-
-    /**
-     * Функция копирует данные из одной таблицы в другую
-     *
-     * @param fromFrom  таблица - источник
-     * @param toForm    таблица - приемник
-     * @param fromRange диапазон для копирования из источника
-     * @param toRange   диапазон для
-     * @throws IllegalArgumentException указаны неправильные диапазоны ячеек
-     */
-    @SuppressWarnings("unused")
-    public static void copyCellValues(FormData fromFrom, List<DataRow<Cell>> fromDataRows, FormData toForm, List<DataRow<Cell>> toDataRows, Range fromRange, Range toRange) {
-        Rect fromRect = fromRange.getRangeRect(fromFrom, fromDataRows);
-        Rect toRect = toRange.getRangeRect(toForm, toDataRows);
-        if (!fromRect.isSameSize(toRect))
-            throw new IllegalArgumentException(NOT_SAME_RANGES);
-
-        List<DataRow<Cell>> fromRows = fromDataRows;
-        List<Column> fromCols = fromFrom.getFormColumns();
-        List<DataRow<Cell>> toRows = toDataRows;
-        List<Column> toCols = toForm.getFormColumns();
-        for (int i = 0; i < fromRect.getHeight(); i++) {
-            for (int j = 0; j < fromRect.getWidth(); j++) {
-                Object value = fromRows.get(fromRect.y1 + i).get(fromCols.get(fromRect.x1 + j).getAlias());
-				DataRow<Cell> toRow = toRows.get(toRect.y1 + i);
-                Cell cell = toRow.getCell(toCols.get(toRect.x1 + j).getAlias());
-                cell.setValue(value, toRow.getIndex());
-            }
-        }
     }
 
     /**
@@ -2014,33 +1899,6 @@ public final class ScriptUtils {
         return (new BigDecimal(value.toString())).setScale(precision, BigDecimal.ROUND_HALF_UP);
     }
 
-    /**
-     * Сравнить значения итоговых строк.
-     *
-     * @param totalRow итоговая строка нф (с правильными стилями)
-     * @param totalRowFromFile итоговая строка нф со значениями из файла
-     * @param rows строки формы
-     * @param columns список алиасов итоговых графов
-     * @param formData форма
-     * @param logger для вывода сообщении
-     * @param required фатальность
-     */
-    public static void compareSimpleTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowFromFile,
-                                          List<DataRow<Cell>> rows, List<String> columns,
-                                          FormData formData, Logger logger, boolean required) {
-        if (totalRow == null || totalRowFromFile == null || rows == null || columns == null || columns.isEmpty()) {
-            return;
-        }
-        // подсчитанная итоговая строка для сравнения
-        DataRow<Cell> totalRowTmp = formData.createStoreMessagingDataRow();
-        calcTotalSum(rows, totalRowTmp, columns);
-        // задание значении итоговой строке нф из итоговой строки файла
-        totalRow.setImportIndex(totalRowFromFile.getImportIndex());
-        for (String column : columns) {
-            totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), totalRow.getIndex());
-        }
-        compareTotalValues(totalRow, totalRowTmp, columns, logger, required);
-    }
 
     /** Получение Id записи из справочника 520 с использованием кэширования
      * @param nameFromFile наименование лица (юр или вз)

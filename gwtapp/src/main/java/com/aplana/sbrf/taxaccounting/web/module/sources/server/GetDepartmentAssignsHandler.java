@@ -36,32 +36,16 @@ public class GetDepartmentAssignsHandler extends AbstractActionHandler<GetDepart
         QueryParams queryParams = new QueryParams();
         queryParams.setSearchOrdering(action.getOrdering());
         queryParams.setAscending(action.isAscSorting());
-        if(action.isForm()){
-            List<DepartmentFormType> depFormAssigns = sourceService.getDFTByDepartment(action.getDepartmentId(),
-                    action.getTaxType(), periodFrom, periodTo, queryParams);
-            // если без пейджинга то это формирование норм, с пейджингом нужно выносить в дао формирование
-            for (DepartmentFormType dfa : depFormAssigns) {
-                DepartmentAssign departmentAssign = new DepartmentAssign();
-                departmentAssign.setId(dfa.getId());
-                departmentAssign.setDepartmentId(dfa.getDepartmentId());
-                departmentAssign.setTypeId(dfa.getFormTypeId());
-                departmentAssign.setTypeName(sourceService.getFormType(dfa.getFormTypeId()).getName());
-                departmentAssign.setKind(dfa.getKind());
-                departmentAssign.setDeclaration(false);
-                departmentAssigns.add(departmentAssign);
-            }
-        } else {
-            List<DepartmentDeclarationType> depDecAssigns = sourceService.getDDTByDepartment(action.getDepartmentId(),
-                    action.getTaxType(), periodFrom, periodTo, queryParams);
-            for (DepartmentDeclarationType dda : depDecAssigns) {
-                DepartmentAssign departmentAssign = new DepartmentAssign();
-                departmentAssign.setId((long) dda.getId());
-                departmentAssign.setDepartmentId(dda.getDepartmentId());
-                departmentAssign.setTypeId(dda.getDeclarationTypeId());
-                departmentAssign.setTypeName(sourceService.getDeclarationType(dda.getDeclarationTypeId()).getName());
-                departmentAssign.setDeclaration(true);
-                departmentAssigns.add(departmentAssign);
-            }
+        List<DepartmentDeclarationType> depDecAssigns = sourceService.getDDTByDepartment(action.getDepartmentId(),
+                action.getTaxType(), periodFrom, periodTo, queryParams);
+        for (DepartmentDeclarationType dda : depDecAssigns) {
+            DepartmentAssign departmentAssign = new DepartmentAssign();
+            departmentAssign.setId((long) dda.getId());
+            departmentAssign.setDepartmentId(dda.getDepartmentId());
+            departmentAssign.setTypeId(dda.getDeclarationTypeId());
+            departmentAssign.setTypeName(sourceService.getDeclarationType(dda.getDeclarationTypeId()).getName());
+            departmentAssign.setDeclaration(true);
+            departmentAssigns.add(departmentAssign);
         }
 
         /** Получаем уже назначенные связки и обрезаем их */

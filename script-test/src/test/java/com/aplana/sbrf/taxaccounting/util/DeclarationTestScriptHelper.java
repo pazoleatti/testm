@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.util;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -10,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
 import com.aplana.sbrf.taxaccounting.service.script.*;
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.apache.commons.io.IOUtils;
@@ -97,9 +95,6 @@ public class DeclarationTestScriptHelper {
     public void setImportFileName(String importFileName) {
         this.importFileName = importFileName;
     }
-
-
-    private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
     // Заданы константно
     private Logger logger = new Logger();
@@ -417,13 +412,6 @@ public class DeclarationTestScriptHelper {
      */
     public Logger getLogger() {
         return logger;
-    }
-
-    /**
-     * DataRowHelper НФ
-     */
-    public DataRowHelper getDataRowHelper() {
-        return mockHelper.getDataRowHelper();
     }
 
     /**

@@ -46,7 +46,7 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
         CreateAssignResult result = new CreateAssignResult();
         SourceClientData sourceClientData = new SourceClientData();
         Logger logger = new Logger();
-
+        /*
         if (!securityService.currentUserInfo().getUser().hasRole(TARole.N_ROLE_CONTROL_UNP)) {
             for (DepartmentAssign right : action.getRightSelectedObjects()) {
                 FormType rightFormType = sourceService.getFormType(right.getTypeId());
@@ -54,7 +54,7 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
                     throw new ActionException("Недостаточно прав на создание назначения: форма-источник и форма-приемник должны относится к одному и тому же налогу!");
                 }
             }
-        }
+        }*/
 
         String leftDepartmentName = departmentService.getDepartment(action.getLeftDepartmentId()).getName();
         List<SourcePair> sourcePairs = new ArrayList<SourcePair>();
@@ -63,26 +63,26 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
             if (action.getMode() == SourceMode.SOURCES) {
                 sourcePair = new SourcePair(right.getId(), action.getLeftObject().getId());
                 sourcePair.setSourceKind(right.getKind().getTitle());
-                sourcePair.setSourceType(sourceService.getFormType(right.getTypeId()).getName());
+                //sourcePair.setSourceType(sourceService.getFormType(right.getTypeId()).getName());
                 sourcePair.setSourceDepartmentName(departmentService.getDepartment(right.getDepartmentId()).getName());
                 sourcePair.setDestinationDepartmentName(leftDepartmentName);
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(sourceService.getDeclarationType(action.getLeftObject().getTypeId()).getName());
                 } else {
                     sourcePair.setDestinationKind(action.getLeftObject().getKind().getTitle());
-                    sourcePair.setDestinationType(sourceService.getFormType(action.getLeftObject().getTypeId()).getName());
+                    //sourcePair.setDestinationType(sourceService.getFormType(action.getLeftObject().getTypeId()).getName());
                 }
             } else {
                 sourcePair = new SourcePair(action.getLeftObject().getId(), right.getId());
                 sourcePair.setSourceKind(action.getLeftObject().getKind().getTitle());
-                sourcePair.setSourceType(sourceService.getFormType(action.getLeftObject().getTypeId()).getName());
+                //sourcePair.setSourceType(sourceService.getFormType(action.getLeftObject().getTypeId()).getName());
                 sourcePair.setSourceDepartmentName(leftDepartmentName);
                 sourcePair.setDestinationDepartmentName(departmentService.getDepartment(right.getDepartmentId()).getName());
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(sourceService.getDeclarationType(right.getTypeId()).getName());
                 } else {
                     sourcePair.setDestinationKind(right.getKind().getTitle());
-                    sourcePair.setDestinationType(sourceService.getFormType(right.getTypeId()).getName());
+                    //sourcePair.setDestinationType(sourceService.getFormType(right.getTypeId()).getName());
                 }
             }
             sourcePairs.add(sourcePair);

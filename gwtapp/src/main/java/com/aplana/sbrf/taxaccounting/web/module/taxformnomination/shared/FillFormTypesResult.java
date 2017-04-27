@@ -11,8 +11,6 @@ import java.util.List;
  */
 public class FillFormTypesResult implements Result {
 
-    List<FormDataKind> formTypes;
-
     TaxType taxType;
 
     public TaxType getTaxType() {
@@ -21,13 +19,5 @@ public class FillFormTypesResult implements Result {
 
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
-    }
-
-    public List<FormDataKind> getFormTypes() {
-        return formTypes;
-    }
-
-    public void setFormTypes(List<FormDataKind> formTypes) {
-        this.formTypes = formTypes;
     }
 }

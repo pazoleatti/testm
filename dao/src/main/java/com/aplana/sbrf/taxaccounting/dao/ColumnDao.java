@@ -11,7 +11,6 @@ import java.util.Map;
 
 /**
  * Dao для работы с объявлениями столбцов формы
- * В первую очередь предназначено для использования при реализации {@link FormTemplateDao} 
  */
 public interface ColumnDao {
     /**

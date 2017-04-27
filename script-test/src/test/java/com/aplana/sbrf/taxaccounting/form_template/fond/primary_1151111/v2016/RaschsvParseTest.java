@@ -107,11 +107,6 @@ public class RaschsvParseTest extends ScriptTestBase {
                 protected void initFormTemplate() {
                     //do nothing...
                 }
-
-                @Override
-                public void initRowData() {
-                    //do nothing...
-                }
             };
         }
         testHelper.reset();

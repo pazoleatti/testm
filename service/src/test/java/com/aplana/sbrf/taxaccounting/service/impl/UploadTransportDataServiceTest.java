@@ -64,8 +64,6 @@ public class UploadTransportDataServiceTest {
     @Autowired
     LoadRefBookDataService loadRefBookDataService;
     @Autowired
-    FormTypeService formTypeService;
-    @Autowired
     PeriodService periodService;
     @Autowired
     DepartmentReportPeriodService departmentReportPeriodService;
@@ -73,8 +71,6 @@ public class UploadTransportDataServiceTest {
     DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
     UploadTransportDataService uploadTransportDataService;
-    @Autowired
-    FormTemplateService formTemplateService;
 /*
     @Before
     public void init() throws IOException {

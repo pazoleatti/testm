@@ -51,12 +51,6 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.SourceService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormTypeService"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormTemplateService"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookFactory"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">

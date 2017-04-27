@@ -57,8 +57,7 @@ public interface DepartmentService {
      * список департаментов, "размотанный" вверх по иерархии от каждого доступного пользователю департамента. Таким образом,
      * эта функция возвращает список департаментов, который необходим для построения полноценного дерева.
      *
-     * @param availableDepartments список доступных пользователю департаментов. Данный список получаем при вызове
-     *                             FormDataSearchService.getAvailableFilterValues().getDepartmentIds()
+     * @param availableDepartments список доступных пользователю департаментов
      * @return список департаментов, необходимый для построения дерева
      */
     Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments);
@@ -243,13 +242,6 @@ public interface DepartmentService {
      *          Возвращает переданное подразделение, если оно и есть террбанк.
      */
     Department getParentTB(int departmentId);
-
-    /**
-     * Получить получить подразделение создавшее форму
-     * @param formDataId идентификатор формы
-     * @return подразделение создавшее форму
-     */
-    Department getFormDepartment(Long formDataId);
 
     /**
      * Переключание флага использования подразделения модулем Гарантий

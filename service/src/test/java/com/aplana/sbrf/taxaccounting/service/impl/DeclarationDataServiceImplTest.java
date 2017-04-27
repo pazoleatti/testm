@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -31,7 +29,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
@@ -61,10 +58,6 @@ public class DeclarationDataServiceImplTest {
     ReportService reportService;
     @Autowired
     DepartmentFormTypeDao departmentFormTypeDao;
-    @Autowired
-    FormTypeService formTypeService;
-    @Autowired
-    FormTemplateService formTemplateService;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -210,11 +203,6 @@ public class DeclarationDataServiceImplTest {
         declarationData.setReportPeriodId(1);
         declarationData.setDepartmentReportPeriodId(1);
 
-        FormTemplate formTemplate1 = new FormTemplate();
-        formTemplate1.setMonthly(false);
-        FormTemplate formTemplate2 = new FormTemplate();
-        formTemplate2.setMonthly(false);
-
         FormData formData = new FormData();
         formData.setId(1l);
         formData.setReportPeriodId(2);
@@ -302,20 +290,12 @@ public class DeclarationDataServiceImplTest {
         when(reportService.getDec(Matchers.<TAUserInfo>any(), anyLong(), Matchers.<DeclarationDataReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
         when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
-        when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType);
 
         when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
 
         when(departmentReportPeriodService.getLast(1, 1)).thenReturn(drp1);
 
         when(departmentReportPeriodService.getLast(2, 1)).thenReturn(drp2);
-
-        when(formTemplateService.existFormTemplate(1, 1, true)).thenReturn(true);
-        when(formTemplateService.existFormTemplate(2, 1, true)).thenReturn(true);
-        when(formTemplateService.getActiveFormTemplateId(1, 1)).thenReturn(1);
-        when(formTemplateService.getActiveFormTemplateId(2, 1)).thenReturn(2);
-        when(formTemplateService.get(1)).thenReturn(formTemplate1);
-        when(formTemplateService.get(2)).thenReturn(formTemplate2);
 
         try{
             when(sourceService.isDDConsolidationTopical(1L)).thenReturn(false);

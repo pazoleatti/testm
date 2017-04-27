@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
-import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -24,7 +23,7 @@ import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 import java.util.*;
 
 public class DeclarationDestinationsView extends PopupViewWithUiHandlers<DeclarationDestinationsUiHandlers>
-        implements DeclarationDestinationsPresenter.MyView,Editor<FormDataFilter> {
+        implements DeclarationDestinationsPresenter.MyView {
 
     public static final String MODAL_WINDOW_TITLE = "Создание назначения налоговой формы";
 
@@ -37,7 +36,6 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
     ModalWindow modalWindowTitle;
 
     @UiField
-    @Ignore
     Label formTypeLabel;
 
     @UiField

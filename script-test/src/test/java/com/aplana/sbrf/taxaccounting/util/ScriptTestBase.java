@@ -131,57 +131,6 @@ public abstract class ScriptTestBase {
         }
     }
 
-    /**
-     * Универсальная проверка значений после импорта:
-     * в xls файле должно быть слева направо сверху вниз:
-     * 1. для строк : string1, string2, ..., stringN
-     * 2. для чисел : 1, 2, ..., N
-     * 3. для дат : 01.01.year, 02.01.year, ..., NN.NN.year
-     * остальные типы не проверяются
-     *
-     * @param aliases  алиасы граф для проверки
-     * @param rowCount ожидаемое количесвто строк в НФ
-     * @param year     год для проверки дат
-     * @throws java.text.ParseException
-     */
-    protected void defaultCheckLoadData(List<String> aliases, int rowCount, String year) {
-        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-        Calendar calendar = Calendar.getInstance();
-        try {
-            calendar.setTime(sdf.parse("01.01." + year));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        int stringCount = 1;
-        int numberCount = 1;
-
-        for (int i = 0; i < rowCount; i++) {
-            if (dataRows.get(i).getAlias() != null) {
-                continue;
-            }
-            for (String alias : aliases) {
-                Object value = dataRows.get(i).getCell(alias).getValue();
-                // все значения д.б. заполнены
-                Assert.assertNotNull(value);
-                String msg = alias + " at row " + (i + 1) + ":";
-                if (value instanceof String) {
-                    Assert.assertEquals(msg, "string" + stringCount++, value);
-                } else if (value instanceof Number) {
-                    Assert.assertEquals(msg, numberCount++, ((Number) value).doubleValue(), 0);
-                } else if (value instanceof Date) {
-                    Assert.assertEquals(msg, calendar.getTime(), value);
-                    calendar.add(Calendar.DAY_OF_YEAR, 1);
-                }
-            }
-        }
-        Assert.assertEquals(rowCount, dataRows.size());
-    }
-
-    protected void defaultCheckLoadData(List<String> aliases, int rowCount) {
-        defaultCheckLoadData(aliases, rowCount, "2015");
-    }
-
     @Test
     public void checkScriptTest() {
         when(testHelper.getReportPeriodService().getCalendarStartDate(anyInt())).thenCallRealMethod();

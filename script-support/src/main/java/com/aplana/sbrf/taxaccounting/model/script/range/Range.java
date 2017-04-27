@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model.script.range;
 
 import java.io.Serializable;
-import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
 
 /**
  * Описывает диапазон ячеек таблицы. Используется в аналогах Excel-функций внутри скриптов.
@@ -83,38 +80,6 @@ public class Range implements Serializable {
 	private void checkRowRange() {
 		if (rowTo < rowFrom || rowFrom < 0)
 			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, rowFrom, rowTo));
-	}
-
-	/**
-	 * Возвращает координаты прямоугольника, соответствующего данному диапазону по отношению к указанной таблице данных
-	 *
-	 * @param formData таблица данных
-	 * @return прямоугольник
-	 */
-	public Rect getRangeRect(FormData formData,  List<DataRow<Cell>> dataRows) {
-		int colFrom = getColumnIndex(formData, getColFromAlias());
-		int colTo = getColumnIndex(formData, getColToAlias());
-		if (rowTo >= dataRows.size())
-			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, rowFrom, rowTo));
-		return new Rect(colFrom, rowFrom, colTo, rowTo);
-	}
-
-	/**
-	 * Возвращает по алиасу индекс столбца
-	 *
-	 * @param formData таблица значений
-	 * @param colAlias псевдоним столбца
-	 * @return индекс столбца
-	 * @throws IllegalArgumentException если такого псевдонима столбца не существует в объекте FormData
-	 */
-	public static int getColumnIndex(FormData formData, String colAlias) {
-		List<Column> cols = formData.getFormColumns();
-		for (int i = 0; i < cols.size(); i++) {
-			if (cols.get(i).getAlias().equals(colAlias)) {
-				return i;
-			}
-		}
-		throw new IllegalArgumentException("Wrong column alias requested: " + colAlias);
 	}
 
 	@Override

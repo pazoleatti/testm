@@ -71,13 +71,13 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(sourceService.getDeclarationType(action.getDepartmentAssign().getTypeId()).getName());
                 } else {
-                    sourcePair.setDestinationType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
+                    //sourcePair.setDestinationType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
                     sourcePair.setDestinationKind(action.getDepartmentAssign().getKind().getTitle());
                 }
             } else {
                 sourcePair = new SourcePair(action.getDepartmentAssign().getId(), assign.getId());
                 sourcePair.setSourceKind(action.getDepartmentAssign().getKind().getTitle());
-                sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
+                //sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
                 sourcePair.setSourceDepartmentName(leftDepartmentName);
                 sourcePair.setDestinationDepartmentName(assign.getDepartmentName());
                 if (action.isDeclaration()) {

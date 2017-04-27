@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -16,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookFactoryImpl;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.ScriptExecutionService;
@@ -52,7 +50,6 @@ public class ScriptExecutionServiceTest {
     private LockDataService lockDataService;
     private RefBookDao refBookDao;
     private RefBookScriptingService refBookScriptingService;
-    private FormTemplateService formTemplateService;
 
     @Autowired
     TAUserDao userDao;
@@ -101,16 +98,6 @@ public class ScriptExecutionServiceTest {
 
         refBookScriptingService = mock(RefBookScriptingService.class);
         ReflectionTestUtils.setField(scriptExecutionService, "refBookScriptingService", refBookScriptingService);
-
-        FormTemplate formTemplate = new FormTemplate();
-        formTemplate.setId(10);
-        formTemplate.setName("ft10");
-
-        formTemplateService = mock(FormTemplateService.class);
-        when(formTemplateService.get(formTemplate.getId(), 2016)).thenReturn(formTemplate.getId());
-        when(formTemplateService.get(formTemplate.getId())).thenReturn(formTemplate);
-        ReflectionTestUtils.setField(scriptExecutionService, "formTemplateService", formTemplateService);
-
 
         TAUserService userService = mock(TAUserServiceImpl.class);
         when(userService.getUser(anyInt())).thenAnswer(new Answer<TAUser>() {
@@ -202,11 +189,10 @@ public class ScriptExecutionServiceTest {
         when(lockDataService.getLock(anyString())).thenReturn(null);
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
-        Assert.assertEquals(4, logger.getEntries().size());
+        Assert.assertEquals(3, logger.getEntries().size());
         Assert.assertEquals("Выполнен импорт скрипта для макета налоговой формы формы \"template\" из файла \"11-2015.groovy\"", logger.getEntries().get(0).getMessage());
         Assert.assertEquals("Выполнен импорт скрипта для справочника \"ref10\" из файла \"10.groovy\"", logger.getEntries().get(1).getMessage());
-        Assert.assertEquals("Выполнен импорт скрипта для макета налоговой формы \"ft10\" из файла \"10-2016.groovy\"", logger.getEntries().get(2).getMessage());
-        Assert.assertEquals("Импорт завершен", logger.getEntries().get(3).getMessage());
+        Assert.assertEquals("Импорт завершен", logger.getEntries().get(2).getMessage());
     }
 
     /**
@@ -221,15 +207,13 @@ public class ScriptExecutionServiceTest {
 
         when(lockDataService.getLock(anyString())).thenReturn(null);
         when(declarationTemplateService.get(anyInt(), anyInt())).thenReturn(null);
-        when(formTemplateService.get(anyInt(), anyInt())).thenReturn(null);
         when(refBookDao.isRefBookExist(anyLong())).thenReturn(false);
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
-        Assert.assertEquals(4, logger.getEntries().size());
+        Assert.assertEquals(3, logger.getEntries().size());
         Assert.assertEquals("Макет налоговой формы, указанный в файле \"12-2015.groovy\" не существует. Файл пропущен.", logger.getEntries().get(0).getMessage());
-        Assert.assertEquals("Макет налоговой формы, указанный в файле \"12-2016.groovy\" не существует. Файл пропущен.", logger.getEntries().get(1).getMessage());
-        Assert.assertEquals("Справочник, указанный в файле \"12.groovy\" не существует. Файл пропущен.", logger.getEntries().get(2).getMessage());
-        Assert.assertEquals("Импорт завершен", logger.getEntries().get(3).getMessage());
+        Assert.assertEquals("Справочник, указанный в файле \"12.groovy\" не существует. Файл пропущен.", logger.getEntries().get(1).getMessage());
+        Assert.assertEquals("Импорт завершен", logger.getEntries().get(2).getMessage());
     }
 
     /**
@@ -244,15 +228,13 @@ public class ScriptExecutionServiceTest {
 
         when(lockDataService.getLock(anyString())).thenReturn(null);
         when(declarationTemplateService.get(anyInt(), anyInt())).thenReturn(null);
-        when(formTemplateService.get(anyInt(), anyInt())).thenReturn(null);
         when(refBookDao.isRefBookExist(anyLong())).thenReturn(false);
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);
-        Assert.assertEquals(4, logger.getEntries().size());
+        Assert.assertEquals(3, logger.getEntries().size());
         Assert.assertEquals("Наименование файла \"1555.groovy\" некорректно. Файл пропущен.", logger.getEntries().get(0).getMessage());
-        Assert.assertEquals("Наименование файла \"255.groovy\" некорректно. Файл пропущен.", logger.getEntries().get(1).getMessage());
-        Assert.assertEquals("Наименование файла \"12-10.groovy\" некорректно. Файл пропущен.", logger.getEntries().get(2).getMessage());
-        Assert.assertEquals("Импорт завершен", logger.getEntries().get(3).getMessage());
+        Assert.assertEquals("Наименование файла \"12-10.groovy\" некорректно. Файл пропущен.", logger.getEntries().get(1).getMessage());
+        Assert.assertEquals("Импорт завершен", logger.getEntries().get(2).getMessage());
     }
 
     /**
@@ -267,7 +249,6 @@ public class ScriptExecutionServiceTest {
 
         when(lockDataService.getLock(anyString())).thenReturn(null);
         when(declarationTemplateService.get(anyInt(), anyInt())).thenReturn(null);
-        when(formTemplateService.get(anyInt(), anyInt())).thenReturn(null);
         when(refBookDao.isRefBookExist(anyLong())).thenReturn(false);
 
         scriptExecutionService.importScripts(logger, Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMON + fileName), fileName, userInfo);

@@ -297,28 +297,12 @@ public interface SourceService {
     void deleteDDT(Collection<Long> ids);
 	
     /**
-     * Получить вид налоговой формы по идентификатору
-     *
-     * @param formTypeId идентификатор вида
-     * @return Объект, представляющий вид налоговой формы
-     */
-    FormType getFormType(int formTypeId);
-
-    /**
      * Получить описание вида декларации по идентификатору
      *
      * @param declarationTypeId идентификатор вида декларации
      * @return описание вида декларации, с заданным идентификатором
      */
     DeclarationType getDeclarationType(int declarationTypeId);
-
-    /**
-     * Получить все существующие виды налоговых форм по виду налога
-     *
-     * @param taxType вид налога
-     * @return список всех существующих видов налоговых форм по виду налога
-     */
-    List<FormType> listAllByTaxType(TaxType taxType);
 
     /**
      * Возвращает информацию о формах-потребителях, которые должны использовать

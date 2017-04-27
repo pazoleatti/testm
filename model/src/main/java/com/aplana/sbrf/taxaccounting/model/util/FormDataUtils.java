@@ -84,16 +84,6 @@ public final class FormDataUtils {
 		}
 	}
 
-	/**
-	 * Создает группу Cell
-	 *
-	 * @param formTemplate версия макета НФ, в которой хранится информация о стилях и столбцах
-	 * @return
-	 */
-	public static List<Cell> createCells(FormTemplate formTemplate) {
-		return createCells(formTemplate.getColumns(), formTemplate.getStyles());
-	}
-
     /**
      * Создает группу Cell
      *

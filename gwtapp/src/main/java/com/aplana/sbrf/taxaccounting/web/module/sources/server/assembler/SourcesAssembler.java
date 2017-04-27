@@ -31,8 +31,8 @@ public class SourcesAssembler {
     	
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : departmentFormTypes) {
-			formTypes.put(departmentFormType.getFormTypeId(),
-					departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()));
+			//formTypes.put(departmentFormType.getFormTypeId(),
+			//		departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()));
 		}
 		Collections.sort(departmentFormTypes, new DepartmentFormTypeComparator(formTypes));
 		
@@ -45,7 +45,7 @@ public class SourcesAssembler {
         result.setDepartmentId(dft.getDepartmentId());
     	result.setDepartmentName(departmentService.getParentsHierarchy(dft.getDepartmentId()));
     	result.setId(dft.getId());
-        result.setFormType(departmentFormTypeService.getFormType(dft.getFormTypeId()));
+        //result.setFormType(departmentFormTypeService.getFormType(dft.getFormTypeId()));
     	result.setName(result.getFormType().getName());
     	result.setFormKind(dft.getKind());
         result.setStartDateAssign(dft.getPeriodStart());

@@ -51,8 +51,6 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
-    private FormTemplateService formTemplateService;
-    @Autowired
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
     private RefBookDao refBookDao;
@@ -164,38 +162,6 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         continue;
                     }
                     String script = IOUtils.toString(zis, "UTF-8");
-                    /** Импорт скриптов нф */
-                    if (folderName.equals(FOLDERS.form_template.name())) {
-                        int formTypeId, year;
-                        try {
-                            formTypeId = Integer.parseInt(scriptName.substring(0, scriptName.indexOf("-")));
-                            year = Integer.parseInt(scriptName.substring(scriptName.indexOf("-") + 1));
-                        } catch (Exception e) {
-                            logger.error("Наименование файла \"%s\" некорректно. Файл пропущен.", scriptFileName);
-                            continue;
-                        }
-                        Integer formTemplateId = formTemplateService.get(formTypeId, year);
-                        if (formTemplateId == null) {
-                            logger.error("Макет налоговой формы, указанный в файле \"%s\" не существует. Файл пропущен.", scriptFileName);
-                            continue;
-                        }
-
-                        //Проверяем не заблокирован ли макет
-                        FormTemplate formTemplate = SerializationUtils.clone(formTemplateService.get(formTemplateId));
-                        String lockUser = canImportScript(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId, userInfo.getUser());
-                        if (lockUser == null){
-                            formTemplate.setScript(script);
-                            Logger localLogger = new Logger();
-                            formTemplateService.updateScript(formTemplate, localLogger, userInfo);
-                            if (localLogger.containsLevel(LogLevel.ERROR)) {
-                                logger.getEntries().addAll(localLogger.getEntries());
-                                logger.error("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл пропущен ", formTemplate.getName(), scriptFileName);                                continue;
-                            }
-                            logger.info("Выполнен импорт скрипта для макета налоговой формы \"%s\" из файла \"%s\"", formTemplate.getName(), scriptFileName);
-                        } else {
-                            logger.error(LOCK_MESSAGE, "Макет налоговой формы", formTemplate.getName(), lockUser);
-                        }
-                    }
 
                     /** Импорт скриптов деклараций */
                     if (folderName.equals(FOLDERS.declaration_template.name())) {

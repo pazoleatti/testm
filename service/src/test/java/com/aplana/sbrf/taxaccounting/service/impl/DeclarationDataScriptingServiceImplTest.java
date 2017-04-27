@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -84,12 +83,6 @@ public class DeclarationDataScriptingServiceImplTest {
 		sourcesInfo.add(dft);
 		when(departmentFormTypeDao.getDeclarationSources(any(Integer.class), any(Integer.class), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
 		//ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao, DepartmentFormTypeDao.class);
-
-		FormDataDao formDataDao = mock(FormDataDao.class);
-		FormData formData = new FormData();
-		formData.setState(WorkflowState.ACCEPTED);
-		when(formDataDao.find(1, FormDataKind.SUMMARY, DEPARTMENT_ID, REPORT_PERIOD_ID, null, false)).thenReturn(formData);
-		//ReflectionTestUtils.setField(service, "formDataDao", formDataDao, FormDataDao.class);
 
         LogEntryService logEntryService = mock(LogEntryService.class);
         ReflectionTestUtils.setField(service, "logEntryService", logEntryService);

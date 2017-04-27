@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
@@ -26,7 +23,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
@@ -61,18 +57,10 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String FILE_NAME = "Налоговый_отчет_";
     private static final String POSTFIX = ".xlsm";
 
-	@Autowired
-	private FormDataDao formDataDao;
-    @Autowired
-	private FormTemplateDao formTemplateDao;
-	@Autowired
-	private FormDataAccessService formDataAccessService;
     @Autowired
 	private ReportPeriodDao reportPeriodDao;
     @Autowired
 	private LogBusinessDao logBusinessDao;
-    @Autowired
-    private DataRowDao dataRowDao;
     @Autowired
     private RefBookHelper refBookHelper;
     @Autowired
