@@ -14,23 +14,10 @@ import java.util.Map;
  */
 public interface ColumnDao {
     /**
-	 * Получить список столбцов, входящих в заданную форму
-	 * @param formId идентификатор формы
-	 * @return список столбцов формы
-	 */
-	List<Column> getFormColumns(int formId);
-	/**
-	 * Сохранить список столбцов формы
-	 * @param form форма
-	 */
-    Map<ColumnKeyEnum, Collection<Long>> updateFormColumns(FormTemplate form);
-    /**
      * Получить список атрибутов второго уровня для атрибута который используется в колонках.
      * @param attributes атрибуты
      * @return карта из списка атрибутов второго уровня всех колонок где используются attributes. Всегда возвращает список.
 	 * В списке не для всех атрибутов могут присутствовать списки атрибутов второго уровня
      */
 	Map<Long, List<Long>> getAttributeId2(List<RefBookAttribute> attributes);
-
-    int getColumnIdByAlias(int formTemplateId, String columnAlias);
 }

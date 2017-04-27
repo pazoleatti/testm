@@ -74,7 +74,6 @@ public abstract class AbstractLoadTransportDataService {
         // L10("ТФ с таким именем уже есть в архиве, текущий ТФ переименован в «%s».", LogLevel.INFO, false, false),
         L11("Перенос «%s» в каталог архива успешно выполнен.", LogLevel.INFO, false, false),
         L12("Ошибка при архивировании транспортного файла! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, false),
-        L13("Налоговая форма существует и имеет статус «" + WorkflowState.CREATED.getTitle() + "».", LogLevel.INFO, false, true),
         L14("Для подразделения «%s» не назначено первичной или выходной налоговой формы «%s»! Загрузка файла «%s» не выполнена.", LogLevel.ERROR, true, true),
         //L15("ЭП файла «%s» принята, начата загрузка данных файла.", LogLevel.INFO, true, true),
         L15_FD("Из наименования транспортного файла получены следующие данные:", LogLevel.INFO, true, true),

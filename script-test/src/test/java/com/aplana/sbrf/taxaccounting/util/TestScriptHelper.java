@@ -121,7 +121,6 @@ public class TestScriptHelper {
      */
     public TestScriptHelper(String path, FormData formData, ScriptTestMockHelper mockHelper) {
         super();
-        this.formData = formData;
         this.mockHelper = mockHelper;
         // Id подразделения пользователя совпадает c Id подразделения НФ
         userDepartment.setId(formData.getDepartmentId());
@@ -213,7 +212,6 @@ public class TestScriptHelper {
         bindings.put("refBookPersonService", refBookPersonService);
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("formDataDepartment", userDepartment);
-        bindings.put("formData", formData);
         bindings.put("logger", logger);
         bindings.put("userInfo", new TAUserInfo());
         bindings.put("user", user);
@@ -319,13 +317,6 @@ public class TestScriptHelper {
     }
 
     /**
-     * Макет НФ
-     */
-    public FormTemplate getFormTemplate() {
-        return formTemplate.clone();
-    }
-
-    /**
      * Mock RefBookService для реализации mock-логики внутри теста
      */
     public RefBookService getRefBookService() {
@@ -402,10 +393,6 @@ public class TestScriptHelper {
 
     public void setImportFileName(String importFileName) {
         this.importFileName = importFileName;
-    }
-
-    public FormData getFormData() {
-        return formData;
     }
 
     public void setScriptStatusHolder(ScriptStatusHolder scriptStatusHolder) {

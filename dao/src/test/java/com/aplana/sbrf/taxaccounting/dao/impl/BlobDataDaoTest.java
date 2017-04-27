@@ -109,7 +109,7 @@ public class BlobDataDaoTest {
 
         int deleted = blobDataDao.clean();
 
-        Assert.assertEquals(2, deleted);
+        Assert.assertEquals(3, deleted);
 
         bd1 = blobDataDao.get(uuid1);
         bd2 = blobDataDao.get(uuid2);
@@ -122,7 +122,7 @@ public class BlobDataDaoTest {
         Assert.assertNotNull(bd2);
         Assert.assertNull(bd3);
         Assert.assertNull(bd4);
-        Assert.assertNotNull(bd5);
+        Assert.assertNull(bd5);
         Assert.assertNotNull(bd6);
     }
 

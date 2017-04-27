@@ -31,12 +31,6 @@ public class ReportDaoImplTest {
     BlobDataDao blobDataDao;
 
     @Test
-    public void get() {
-        String id = reportDao.get(1, "Excel", false, false, false);
-        assertEquals("uuid_5", id);
-    }
-
-    @Test
     public void getDec() {
         DeclarationDataReportType type = new DeclarationDataReportType(ReportType.PDF_DEC, null);
         String id = reportDao.getDec(3, type);
@@ -47,16 +41,6 @@ public class ReportDaoImplTest {
     public void getAudit() {
         String id = reportDao.getAudit(1, ReportType.EXCEL);
         assertEquals("uuid_6", id);
-    }
-
-    @Test
-    @Transactional(readOnly = false)
-    public void delete(){
-        String id = reportDao.get(1, "Excel", false, false, false);
-        assertEquals("uuid_5", id);
-        reportDao.delete(1, false);
-        id = reportDao.get(1, "Excel", false, false, false);
-        assertEquals(null, id);
     }
 
     @Test
@@ -139,17 +123,6 @@ public class ReportDaoImplTest {
 
         id = reportDao.getAudit(1, ReportType.EXCEL);
         assertEquals(null, id);
-    }
-
-    @Test
-    @Transactional(readOnly = false)
-    public void create() {
-        String id = reportDao.get(11, "Excel", true, true, true);
-        assertEquals(null, id);
-
-        reportDao.create(11, "uuid_2", "Excel", true, true, true);
-        id = reportDao.get(11, "Excel", true, true, true);
-        assertEquals("uuid_2", id);
     }
 
     @Test

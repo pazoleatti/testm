@@ -72,12 +72,10 @@ public class RaschsvParseTest extends ScriptTestBase {
     protected FormData getFormData() {
         FormData formData = new FormData();
         FormType formType = new FormType();
-        formType.setId(TYPE_ID);
         formData.setId(TestScriptHelper.CURRENT_FORM_DATA_ID);
         formData.setFormType(formType);
         formData.setFormTemplateId(TYPE_ID);
         formData.setKind(KIND);
-        formData.setState(WorkflowState.CREATED);
         formData.setDepartmentId(DEPARTMENT_ID);
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
@@ -103,10 +101,6 @@ public class RaschsvParseTest extends ScriptTestBase {
                 throw new ServiceException("Test folder path is null!");
             }
             testHelper = new TestScriptHelper(path, getFormData(), getMockHelper()) {
-                @Override
-                protected void initFormTemplate() {
-                    //do nothing...
-                }
             };
         }
         testHelper.reset();

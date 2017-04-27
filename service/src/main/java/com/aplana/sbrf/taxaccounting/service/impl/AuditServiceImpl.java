@@ -148,9 +148,6 @@ public class AuditServiceImpl implements AuditService {
                 Integer formKindId =null;
                 if (declarationData != null){
                     decTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
-                } else {
-                    ftName = formData.getFormType().getName();
-                    formKindId = formData.getKind().getId();
                 }
 
                 add(event, userInfo, departmentName, departmentId, rpName, decTypeName, ftName, formKindId, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, null, logId);

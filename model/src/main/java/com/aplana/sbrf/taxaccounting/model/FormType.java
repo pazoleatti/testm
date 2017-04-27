@@ -12,41 +12,10 @@ import java.io.Serializable;
 public class FormType implements Serializable {
 	private static final long serialVersionUID = 3632916658352875666L;
 	
-	private int id;
 	private String name;
 	private TaxType taxType;
-    private VersionedObjectStatus status;
     private String code;
-    private boolean isIfrs;
-    private String ifrsName;
 
-    /**
-     * Статус
-     * @return статус вида налоговой формы
-     */
-    public VersionedObjectStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(VersionedObjectStatus status) {
-        this.status = status;
-    }
-
-    /**
-	 * Получить идентификатор типа налоговой формы
-	 * @return идентификатор типа налоговой формы
-	 */
-	public int getId() {
-		return id;
-	}
-	
-	/**
-	 * Задать идентификатор типа налоговой формы
-	 * @param id желаемое значение идентификатора
-	 */
-	public void setId(int id) {
-		this.id = id;
-	}
 	/**
 	 * Получить название вида налоговой формы
 	 * @return название вида налоговой формы
@@ -85,22 +54,6 @@ public class FormType implements Serializable {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public boolean getIsIfrs() {
-        return isIfrs;
-    }
-
-    public void setIsIfrs(boolean isIfrs) {
-        this.isIfrs = isIfrs;
-    }
-
-    public String getIfrsName() {
-        return ifrsName;
-    }
-
-    public void setIfrsName(String ifrsName) {
-        this.ifrsName = ifrsName;
     }
 
     @Override

@@ -208,12 +208,10 @@ public class DeclarationDataServiceImplTest {
         formData.setReportPeriodId(2);
         formData.setDepartmentId(1);
         FormType formType = new FormType();
-        formType.setId(1);
         formType.setName("Тестовый макет");
         formData.setFormType(formType);
         formData.setKind(FormDataKind.PRIMARY);
         formData.setManual(false);
-        formData.setState(WorkflowState.ACCEPTED);
         formData.setDepartmentReportPeriodId(1);
         formData.setPeriodOrder(null);
 

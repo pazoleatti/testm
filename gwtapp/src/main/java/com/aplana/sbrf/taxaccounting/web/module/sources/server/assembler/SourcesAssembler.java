@@ -34,7 +34,7 @@ public class SourcesAssembler {
 			//formTypes.put(departmentFormType.getFormTypeId(),
 			//		departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()));
 		}
-		Collections.sort(departmentFormTypes, new DepartmentFormTypeComparator(formTypes));
+		//Collections.sort(departmentFormTypes, new DepartmentFormTypeComparator(formTypes));
 		
     	return currentAssigns;
     }
@@ -46,7 +46,7 @@ public class SourcesAssembler {
     	result.setDepartmentName(departmentService.getParentsHierarchy(dft.getDepartmentId()));
     	result.setId(dft.getId());
         //result.setFormType(departmentFormTypeService.getFormType(dft.getFormTypeId()));
-    	result.setName(result.getFormType().getName());
+    	//result.setName(result.getFormType().getName());
     	result.setFormKind(dft.getKind());
         result.setStartDateAssign(dft.getPeriodStart());
         result.setEndDateAssign(dft.getPeriodEnd());

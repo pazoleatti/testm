@@ -154,13 +154,9 @@ public class RefBookHelperImplTest {
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
 		when(applicationContext.getBean(RefBookCache.class)).thenReturn(rbCache);
 
-		ColumnDao columnDao = mock(ColumnDao.class);
-		when(columnDao.getAttributeId2(new ArrayList<RefBookAttribute>())).thenReturn(new HashMap<Long, List<Long>>());
-
 		refBookHelper = new RefBookHelperImpl();
 		ReflectionTestUtils.setField(refBookHelper, "refBookFactory", refBookFactory);
 		ReflectionTestUtils.setField(refBookHelper, "applicationContext", applicationContext);
-		ReflectionTestUtils.setField(refBookHelper, "columnDao", columnDao);
 	}
 
 	@Test

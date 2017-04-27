@@ -121,10 +121,8 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         List<RefBookTreeItem> items = new LinkedList<RefBookTreeItem>();
         List<RefBookAttribute> attributes = refBook.getAttributes();
 
-        // кэшируем список дополнительных атрибутов если есть для каждого аттрибута
-        Map<Long, List<Long>> attrId2Map = refBookHelper.getAttrToListAttrId2Map(attributes);
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
-        Map<Long, RefBookDataProvider> refProviders = refBookHelper.getHashedProviders(attributes, attrId2Map);
+        Map<Long, RefBookDataProvider> refProviders = refBookHelper.getHashedProviders(attributes);
 
         for (Map<String, RefBookValue> record : refBookPage) {
             RefBookTreeItem item = new RefBookTreeItem();
@@ -157,16 +155,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
                             RefBookDataProvider attrProvider = refProviders.get(id);
                             // запрашиваем значение для разыменовывания
                             value = attrProvider.getValue(refValue, refBookAttribute.getRefBookAttributeId());
-                            //
                             dereferanceValueString = (value == null ? "" : getColumn(refBookAttribute).getFormatter().format(String.valueOf(value)));
-                            // для каждого найденного дополнительного аттрибута разименуем значение
-                            if (attrId2Map.get(id) != null) {
-                                for (Long id2 : attrId2Map.get(id)) {
-                                    RefBookDataProvider attr2Provider = refProviders.get(id2);
-                                    RefBookValue value2 = attr2Provider.getValue(refValue, id2);
-                                    dereferenceValue.getAttrId2DerefValueMap().put(id2, value2 == null ? "" : getColumn(refBookAttribute).getFormatter().format(String.valueOf(value2)));
-                                }
-                            }
                         }
                     } else {
                         value = record.get(alias);

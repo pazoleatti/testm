@@ -329,7 +329,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         // подразделение, которому назначена налоговая форма
         retList.add(departmentDao.getDepartment(formData.getDepartmentId()).getId());
         // подразделения которые назначены исполнителями для налоговой формы
-        retList.addAll(getExecutorsDepartments(retList, formData.getFormType().getId()));
+        //retList.addAll(getExecutorsDepartments(retList, formData.getFormType().getId()));
         return retList;
     }
 

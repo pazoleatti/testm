@@ -704,9 +704,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("kind", sourceFormData.getKind() != null ? sourceFormData.getKind().getId() : null);
         params.put("accruing", sourceFormData.getId() == null ? sourceFormData.isAccruing() ? 1 : 0 : null);
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
-        params.put("stateRestriction", stateRestriction != null && (stateRestriction == WorkflowState.CREATED || stateRestriction ==WorkflowState.ACCEPTED) ?
-                stateRestriction == WorkflowState.ACCEPTED ? 1 : 0
-                : null);
+        //params.put("stateRestriction", stateRestriction != null && (stateRestriction == WorkflowState.CREATED || stateRestriction ==WorkflowState.ACCEPTED) ?
+        //        stateRestriction == WorkflowState.ACCEPTED ? 1 : 0
+        //        : null);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Relation>() {
                 @Override
@@ -715,8 +715,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     relation.setSource(false);
                     relation.setDeclarationDataId(SqlUtils.getLong(rs, "id"));
                     relation.setCreated(relation.getDeclarationDataId() != null);
-                    relation.setState(relation.getDeclarationDataId() == null ? WorkflowState.NOT_EXIST :
-                            SqlUtils.getInteger(rs, "IS_ACCEPTED") == 1 ? WorkflowState.ACCEPTED : WorkflowState.CREATED);
+                    //relation.setState(relation.getDeclarationDataId() == null ? WorkflowState.NOT_EXIST :
+                    //        SqlUtils.getInteger(rs, "IS_ACCEPTED") == 1 ? WorkflowState.ACCEPTED : WorkflowState.CREATED);
                     relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
                     relation.setTaxOrganCode(rs.getString("taxOrgan"));
                     relation.setKpp(rs.getString("kpp"));
@@ -819,7 +819,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             relation.setSource(source);
             relation.setFormDataId(SqlUtils.getLong(rs, "id"));
             relation.setCreated(relation.getFormDataId() != null);
-            relation.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
+            //relation.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
             relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
             relation.setFormDataKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "formDataKind")));
             relation.setManual(rs.getBoolean("manual"));

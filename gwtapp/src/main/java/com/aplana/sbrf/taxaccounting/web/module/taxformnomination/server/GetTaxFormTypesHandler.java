@@ -29,16 +29,8 @@ public class GetTaxFormTypesHandler extends AbstractActionHandler<GetTaxFormType
     @Override
     public GetTaxFormTypesResult execute(GetTaxFormTypesAction action, ExecutionContext executionContext) throws ActionException {
         GetTaxFormTypesResult res = new GetTaxFormTypesResult();
-        List<FormType> resultList = new ArrayList<FormType>();
         List<DeclarationType> declarationTypeList = sourceService.allDeclarationTypeByTaxType(action.getTaxType());
-        for (DeclarationType item : declarationTypeList){
-            FormType m = new FormType();
-            m.setId(item.getId());
-            m.setName(item.getName());
-            m.setTaxType(item.getTaxType());
-            resultList.add(m);
-        }
-        res.setFormTypeList(resultList);
+        res.setFormTypeList(declarationTypeList);
         return res;
     }
 

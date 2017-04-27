@@ -50,27 +50,13 @@ public interface RefBookHelper {
 	 */
 	void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows, List<Column> columns);
 
-//	Map<String, String> singleRecordDereference(RefBook refBook, RefBookDataProvider provider,
-//			List<RefBookAttribute> attributes, Map<String, RefBookValue> record);
-
-    /**
-     * Получить спискок атрибутов второго уровня (для отображения в связной ячейке) для списка атрибутов справочника
-     * @param attributes список атрибутов
-     * @return список соответсвий атрубут к списку атрибутов(потому что один атрибут может быть в разных колонках)
-     */
-    Map<Long, List<Long>> getAttrToListAttrId2Map(List<RefBookAttribute> attributes);
-
     /**
      * Получить кэш списока провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
-     * @see RefBookHelper#getAttrToListAttrId2Map
      *
      * @param attributes атрибуты справочника
-     * @param attrToListAttrId2Map кэш списка дополнительных атрибутов
-     *                             если есть для каждого аттрибута
-     *                             @see RefBookHelper#getAttrToListAttrId2Map
      * @return мап провайдера для атрибутов-ссылок
      */
-    Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes, Map<Long, List<Long>> attrToListAttrId2Map);
+    Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes);
 
 //    /**
 //     * Получить список соотвествий идентификатора к разыменованному значению записи справочника

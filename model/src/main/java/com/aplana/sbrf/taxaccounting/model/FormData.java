@@ -10,7 +10,6 @@ package com.aplana.sbrf.taxaccounting.model;
 public class FormData extends IdentityObject<Long> {
 	private static final long serialVersionUID = 1L;
 
-	private WorkflowState state;
 	private FormDataKind kind;
 	private Integer departmentId;
 	private Integer reportPeriodId;
@@ -34,30 +33,6 @@ public class FormData extends IdentityObject<Long> {
 
 	public FormData(FormTemplate form) {
 		initFormTemplateParams(form);
-	}
-
-	public WorkflowState getState() {
-		return state;
-	}
-
-	/**
-	 * Установить стадию жизненного цикла объекта FormData Данный метод можно
-	 * вызвать только один раз для каждого инстанса FormData, предполагается,
-	 * что это будет делаться в сервисном слое или в DAO. Для того, чтобы
-	 * изменить стадию у уже существующего объекта нужно использовать методы
-	 *
-	 * @{link FormDataWorkflowService} и затем перечитать состояние объекта из
-	 *        БД при помощи DAO
-	 *
-	 * @param state
-	 *            объект, задающий стадию жизненного цикла
-	 */
-	public void setState(WorkflowState state) {
-		if (this.state != null) {
-			throw new IllegalStateException(
-					"Value of state field is already initialized");
-		}
-		this.state = state;
 	}
 
 	public Integer getDepartmentId() {

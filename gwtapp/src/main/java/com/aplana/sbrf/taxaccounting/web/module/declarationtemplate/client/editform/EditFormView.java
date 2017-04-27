@@ -28,14 +28,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
 
     @UiField
     TextBox name;
-    @UiField
-    TextBox ifrsName;
-    @UiField
-    CheckBox isIfrs;
-    @UiField
-    HorizontalPanel ifrsPanel;
-    @UiField
-    HorizontalPanel checkIfrsPanel;
 
     @Inject
     public EditFormView(Binder uiBinder, MyDriver driver) {
@@ -44,14 +36,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
         this.driver = driver;
         this.driver.initialize(this);
         driver.edit(new DeclarationType());
-
-        isIfrs.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                ifrsPanel.setVisible(event.getValue());
-                if (!event.getValue()) ifrsName.setValue("");
-            }
-        });
     }
 
     @UiHandler("cancel")
@@ -83,16 +67,5 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @Override
     public void edit(DeclarationType type) {
         driver.edit(type);
-        ifrsPanel.setVisible(type.getIsIfrs());
-    }
-
-    @Override
-    public boolean checkIfrs() {
-        return !(isIfrs.getValue() && (ifrsName.getValue() == null || ifrsName.getValue().isEmpty()));
-    }
-
-    @Override
-    public void setVisibleIfrs(boolean isVisibleIfrs) {
-        checkIfrsPanel.setVisible(isVisibleIfrs);
     }
 }

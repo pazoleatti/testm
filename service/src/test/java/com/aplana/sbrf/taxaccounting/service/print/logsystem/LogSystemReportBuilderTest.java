@@ -37,7 +37,7 @@ public class LogSystemReportBuilderTest {
         item.setLogDate(new Date());
         item.setNote("Проверочка!");
         item.setFormKind(FormDataKind.ADDITIONAL);
-        item.setFormTypeName(type.getName());
+        item.setFormTypeName("Сводная");
         item.setDepartmentName("Начальный");
         item.setDepartmentName("Подразделение");
         item.setDeclarationTypeName(declarationType.getName());
