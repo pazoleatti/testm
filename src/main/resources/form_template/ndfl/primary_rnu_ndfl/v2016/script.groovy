@@ -200,8 +200,32 @@
 
 
     NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper() {
+        final Logger localLogger = logger
+        NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper() {
+            @Override
+            public DocType getDocTypeByCode(String code, NaturalPerson ndflPerson) {
+                if (code != null) {
+                    if (docTypeCodeMap == null) {
+                        throw new ServiceException("Не проинициализирован кэш справочника 'Коды документов'!") as Throwable;
+                    }
 
-        NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper();
+                    DocType result = docTypeCodeMap.get(code);
+                    if (result == null) {
+                        String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                        String inp = ndflPerson.getPersonIdentifier().inp
+                        String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
+                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, "",
+                                "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
+                        localLogger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
+                                "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
+                    }
+
+                    return result;
+                } else {
+                    return null;
+                }
+            }
+        }
         naturalPersonRowMapper.setAsnuId(declarationData.asnuId);
 
         //naturalPersonRowMapper.setLogger(logger); //TODO отключил из-за предупреждений по справочнику ФИАС
@@ -303,6 +327,9 @@
 
         //Получаем список всех ФЛ в первичной НФ
         List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper());
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
+        }
 
         logger.info("В ПНФ номер " + declarationData.id + " получены записи о физ.лицах (" + primaryPersonDataList.size() + " записей, " + calcTimeMillis(time));
 
