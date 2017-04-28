@@ -1,20 +1,11 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookCache;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -28,7 +19,6 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
@@ -154,80 +144,10 @@ public class RefBookHelperImplTest {
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
 		when(applicationContext.getBean(RefBookCache.class)).thenReturn(rbCache);
 
-		ColumnDao columnDao = mock(ColumnDao.class);
-		when(columnDao.getAttributeId2(new ArrayList<RefBookAttribute>())).thenReturn(new HashMap<Long, List<Long>>());
-
 		refBookHelper = new RefBookHelperImpl();
 		ReflectionTestUtils.setField(refBookHelper, "refBookFactory", refBookFactory);
 		ReflectionTestUtils.setField(refBookHelper, "applicationContext", applicationContext);
-		ReflectionTestUtils.setField(refBookHelper, "columnDao", columnDao);
 	}
-
-	/**
-	 * Создает строку в НФ
-	 * @param columns
-	 * @return
-	 */
-	private DataRow<Cell> createDataRow(List<Column> columns) {
-		FormTemplate formTemplate = new FormTemplate();
-		formTemplate.getColumns().addAll(columns);
-		List<Cell> cells = FormDataUtils.createCells(formTemplate);
-		return new DataRow<Cell>(cells);
-	}
-
-	@Test
-	public void testDataRowsDereference() {
-        RefBookAttribute refBookAttribute1 = new RefBookAttribute();
-        RefBookAttribute refBookAttribute2 = new RefBookAttribute();
-
-		StringColumn sColumn = new StringColumn();
-		sColumn.setAlias("No");
-		sColumn.setId(1);
-		RefBookColumn rbColumn = new RefBookColumn();
-		rbColumn.setAlias("Rate");
-		rbColumn.setId(2);
-		rbColumn.setRefBookAttributeId(2L);
-        rbColumn.setRefBookAttribute(refBookAttribute2);
-		ReferenceColumn refColumn = new ReferenceColumn();
-		refColumn.setAlias("Country");
-		refColumn.setId(3);
-		refColumn.setParentId(2);
-		refColumn.setRefBookAttributeId(3L);
-		refColumn.setRefBookAttributeId2(1L);
-        refColumn.setRefBookAttribute(refBookAttribute1);
-        ReferenceColumn dateColumn = new ReferenceColumn();
-        dateColumn.setAlias("date");
-        dateColumn.setId(4);
-        dateColumn.setParentId(2);
-        dateColumn.setRefBookAttributeId(4L);
-        dateColumn.setRefBookAttributeId2(null);
-
-		List<Column> columns = Arrays.asList(new Column[] {sColumn, rbColumn, refColumn, dateColumn});
-
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-		DataRow<Cell> dataRow = createDataRow(columns);
-		dataRow.put(sColumn.getAlias(), "Договор №1");
-		dataRow.put(rbColumn.getAlias(), 2L);
-		dataRows.add(dataRow);
-
-		DataRow<Cell> dataRow2 = createDataRow(columns);
-		dataRow2.put(sColumn.getAlias(), "Договор №1");
-		dataRows.add(dataRow2);
-
-		refBookHelper.dataRowsDereference(null, dataRows, columns);
-
-		assertEquals("Договор №1", dataRow.get(sColumn.getAlias()));
-		assertEquals(2L, dataRow.get(rbColumn.getAlias()));
-		assertNull(dataRow.get(refColumn.getAlias()));
-
-		assertEquals("Договор №1", dataRow.getCell(sColumn.getAlias()).getStringValue());
-		assertEquals("435", dataRow.getCell(rbColumn.getAlias()).getRefBookDereference());
-		assertEquals("Россия", dataRow.getCell(refColumn.getAlias()).getRefBookDereference());
-        assertEquals("10.02.2015", dataRow.getCell(dateColumn.getAlias()).getRefBookDereference());
-
-		assertEquals("", dataRow2.getCell(rbColumn.getAlias()).getRefBookDereference());
-        assertEquals("", dataRow2.getCell(dateColumn.getAlias()).getRefBookDereference());
-    }
 
 	@Test
 	public void testRefBookRecordToString() {

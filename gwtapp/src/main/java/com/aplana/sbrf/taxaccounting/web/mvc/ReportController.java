@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.FormDataReportType;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -87,27 +85,6 @@ public class ReportController {
     public void processDownloadDeclarationDataFile(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
         BlobData blobData = blobDataService.get(uuid);
         createResponse(request, response, blobData);
-    }
-
-    /**
-     * Обработка запроса на формирование отчета для налоговых форм
-     * @param formDataId
-     * @param isShowChecked
-     * @param response
-     * @throws IOException
-     */
-    @RequestMapping(value = "{reportType}/{formDataId}/{isShowChecked}/{manual}/{saved}",method = RequestMethod.GET)
-    public void processFormDataDownload(@PathVariable String reportType, @PathVariable long formDataId, @PathVariable boolean isShowChecked,
-                                        @PathVariable boolean manual, @PathVariable boolean saved,
-                                        HttpServletRequest request, HttpServletResponse response)
-            throws IOException, AsyncTaskException {
-        String uuid = reportService.get(securityService.currentUserInfo(), formDataId, FormDataReportType.getFDReportTypeByName(reportType), isShowChecked, manual, saved);
-        if (uuid != null) {
-            BlobData blobData = blobDataService.get(uuid);
-            createResponse(request, response, blobData);
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }
     }
 
     /**

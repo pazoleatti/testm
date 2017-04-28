@@ -2,12 +2,9 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
@@ -73,22 +70,6 @@ public class DeclarationServiceTest {
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
         ReflectionTestUtils.setField(service, "declarationDataService", declarationDataService);
         ReflectionTestUtils.setField(service, "sourceService", sourceService);
-    }
-
-    @Test
-    public void getAcceptedFormDataSources() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-        ReportPeriod reportPeriod = new ReportPeriod();
-        reportPeriod.setId(48);
-        departmentReportPeriod.setReportPeriod(reportPeriod);
-        departmentReportPeriod.setDepartmentId(2);
-
-        FormDataDao formDataDao = mock(FormDataDao.class);
-
-        ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(mockUser(1, 1, TARole.N_ROLE_CONTROL_UNP));
-        assertTrue(service.getAcceptedFormDataSources(declarationData, userInfo, new Logger()) != null);
     }
 
     @Test

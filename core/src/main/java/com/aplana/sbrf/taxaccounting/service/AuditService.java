@@ -91,11 +91,10 @@ public interface AuditService {
      * @param event
      * @param userInfo
      * @param declarationData
-     * @param formData
      * @param note
      * @param blobDataId
      */
-    void add(FormDataEvent event, TAUserInfo userInfo, DeclarationData declarationData, FormData formData, String note, String blobDataId);
+    void add(FormDataEvent event, TAUserInfo userInfo, DeclarationData declarationData, String note, String blobDataId);
 
     /**
      * Удаляем набор записей из журнала по фильтру

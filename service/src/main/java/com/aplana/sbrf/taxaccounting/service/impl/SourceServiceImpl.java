@@ -57,8 +57,6 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
     @Autowired
-    private FormTypeDao formTypeDao;
-    @Autowired
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
     private DepartmentService departmentService;
@@ -1103,16 +1101,6 @@ public class SourceServiceImpl implements SourceService {
             //TODO dloshkarev: можно переделать на in запрос
             departmentDeclarationTypeDao.delete(id);
         }
-    }
-
-    @Override
-    public FormType getFormType(int formTypeId) {
-        return formTypeDao.get(formTypeId);
-    }
-
-    @Override
-    public List<FormType> listAllByTaxType(TaxType taxType) {
-        return formTypeDao.getByTaxType(taxType);
     }
 
     @Override

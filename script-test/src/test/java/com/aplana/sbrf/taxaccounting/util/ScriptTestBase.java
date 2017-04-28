@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.util;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -12,11 +9,6 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.*;
 
 import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -48,7 +40,7 @@ public abstract class ScriptTestBase {
             if (path == null) {
                 throw new ServiceException("Test folder path is null!");
             }
-            testHelper = new TestScriptHelper(path, getFormData(), getMockHelper());
+            testHelper = new TestScriptHelper(path, getMockHelper());
         }
         testHelper.reset();
     }
@@ -60,11 +52,6 @@ public abstract class ScriptTestBase {
     public void printLog() {
         testHelper.printLog();
     }
-
-    /**
-     * Экземпляр НФ
-     */
-    protected abstract FormData getFormData();
 
     /**
      * Путь к каталогу НФ
@@ -129,57 +116,6 @@ public abstract class ScriptTestBase {
         } catch (Exception e) {
             throw new ServiceException("Read reference book error!", e);
         }
-    }
-
-    /**
-     * Универсальная проверка значений после импорта:
-     * в xls файле должно быть слева направо сверху вниз:
-     * 1. для строк : string1, string2, ..., stringN
-     * 2. для чисел : 1, 2, ..., N
-     * 3. для дат : 01.01.year, 02.01.year, ..., NN.NN.year
-     * остальные типы не проверяются
-     *
-     * @param aliases  алиасы граф для проверки
-     * @param rowCount ожидаемое количесвто строк в НФ
-     * @param year     год для проверки дат
-     * @throws java.text.ParseException
-     */
-    protected void defaultCheckLoadData(List<String> aliases, int rowCount, String year) {
-        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-        Calendar calendar = Calendar.getInstance();
-        try {
-            calendar.setTime(sdf.parse("01.01." + year));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        int stringCount = 1;
-        int numberCount = 1;
-
-        for (int i = 0; i < rowCount; i++) {
-            if (dataRows.get(i).getAlias() != null) {
-                continue;
-            }
-            for (String alias : aliases) {
-                Object value = dataRows.get(i).getCell(alias).getValue();
-                // все значения д.б. заполнены
-                Assert.assertNotNull(value);
-                String msg = alias + " at row " + (i + 1) + ":";
-                if (value instanceof String) {
-                    Assert.assertEquals(msg, "string" + stringCount++, value);
-                } else if (value instanceof Number) {
-                    Assert.assertEquals(msg, numberCount++, ((Number) value).doubleValue(), 0);
-                } else if (value instanceof Date) {
-                    Assert.assertEquals(msg, calendar.getTime(), value);
-                    calendar.add(Calendar.DAY_OF_YEAR, 1);
-                }
-            }
-        }
-        Assert.assertEquals(rowCount, dataRows.size());
-    }
-
-    protected void defaultCheckLoadData(List<String> aliases, int rowCount) {
-        defaultCheckLoadData(aliases, rowCount, "2015");
     }
 
     @Test

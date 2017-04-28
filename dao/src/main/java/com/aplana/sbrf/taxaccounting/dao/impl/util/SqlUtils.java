@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.util;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.sql.ResultSet;
@@ -131,18 +130,6 @@ public final class SqlUtils {
 			result.add(list);
 		}
 		return result;
-	}
-
-
-
-	public static String transformFormStatesToSqlInStatement(List<WorkflowState> source) {
-		checkListSize(source);
-		StringBuilder result = new StringBuilder();
-		result.append('(');
-		for (WorkflowState workflowState : source) {
-			result.append(workflowState.getId()).append(',');
-		}
-		return result.deleteCharAt(result.length() - 1).append(')').toString();
 	}
 
 	public static String transformTaxTypeToSqlInStatement(List<TaxType> source) {

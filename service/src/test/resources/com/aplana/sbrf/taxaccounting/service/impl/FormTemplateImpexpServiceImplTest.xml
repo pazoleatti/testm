@@ -6,9 +6,6 @@
     <import resource="classpath:testServiceContext.xml"/>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormTemplateService"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService"/>
     </bean>
 

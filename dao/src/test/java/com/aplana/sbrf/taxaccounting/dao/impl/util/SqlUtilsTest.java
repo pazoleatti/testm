@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -55,12 +54,6 @@ public class SqlUtilsTest {
         Assert.assertTrue(lists.get(1).get(0).equals(4));
         Assert.assertTrue(lists.get(1).get(1).equals(5));
     }
-
-	@Test
-	public void transformFormStatesToSqlInStatementTest() {
-		Assert.assertEquals(String.format("(%s,%s)", WorkflowState.ACCEPTED.getId(), WorkflowState.CREATED.getId()),
-				SqlUtils.transformFormStatesToSqlInStatement(Arrays.asList(new WorkflowState[] {WorkflowState.ACCEPTED, WorkflowState.CREATED})));
-	}
 
 	@Test
 	public void transformTaxTypeToSqlInStatementTest() {

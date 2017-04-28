@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DataRow.MapEntry;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
@@ -82,16 +81,6 @@ public final class FormDataUtils {
 				currentCell.setValueOwner(null);
 			}
 		}
-	}
-
-	/**
-	 * Создает группу Cell
-	 *
-	 * @param formTemplate версия макета НФ, в которой хранится информация о стилях и столбцах
-	 * @return
-	 */
-	public static List<Cell> createCells(FormTemplate formTemplate) {
-		return createCells(formTemplate.getColumns(), formTemplate.getStyles());
 	}
 
     /**

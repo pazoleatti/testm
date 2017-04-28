@@ -11,17 +11,6 @@ import java.util.List;
  */
 public interface ReportDao {
     /**
-     * Создание записи об отчете НФ
-     * @param formDataId
-     * @param blobDataId
-     * @param type
-     * @param checking
-     * @param manual
-     * @param absolute
-     */
-    void create(long formDataId, String blobDataId, String type, boolean checking, boolean manual, boolean absolute);
-
-    /**
      * Создание записи об отчете декларации
      * @param declarationDataId
      * @param blobDataId
@@ -36,17 +25,6 @@ public interface ReportDao {
      * @param type
      */
     void createAudit(Integer userId, String blobDataId, ReportType type);
-
-    /**
-     * Получение записи об отчете НФ
-     * @param formDataId
-     * @param type
-     * @param checking
-     * @param manual
-     * @param absolute
-     * @return uuid
-     */
-    String get(long formDataId, String type, boolean checking, boolean manual, boolean absolute);
 
     /**
      * Получение записи об отчете декларации
@@ -64,13 +42,6 @@ public interface ReportDao {
      * @return uuid
      */
     String getAudit(Integer userId, ReportType type);
-
-    /**
-     * Удаление всех отчетов для НФ
-     * @param formDataId
-     * @param manual
-     */
-    void delete(long formDataId, Boolean manual);
 
     /**
      * Удаление всех отчетов по id декларации

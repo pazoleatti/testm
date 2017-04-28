@@ -20,8 +20,6 @@ public class ColumnContext {
 	Date startDate;
 	Date endDate;
 
-    Long formDataId;
-
 	public ColumnContext() {
 	}
 
@@ -53,12 +51,4 @@ public class ColumnContext {
 	public Date getEndDate() {
 		return endDate;
 	}
-
-    public Long getFormDataId() {
-        return formDataId;
-    }
-
-    public void setFormDataId(Long formDataId) {
-        this.formDataId = formDataId;
-    }
 }

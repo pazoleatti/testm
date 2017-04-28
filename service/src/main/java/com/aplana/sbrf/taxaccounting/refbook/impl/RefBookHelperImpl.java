@@ -33,8 +33,6 @@ public class RefBookHelperImpl implements RefBookHelper {
 	@Autowired
 	private RefBookFactory refBookFactory;
     @Autowired
-	private ColumnDao columnDao;
-    @Autowired
     private PeriodService periodService;
     @Autowired
     LogEntryService logEntryService;
@@ -397,27 +395,13 @@ public class RefBookHelperImpl implements RefBookHelper {
 	}
 
     @Override
-    public Map<Long, List<Long>> getAttrToListAttrId2Map(List<RefBookAttribute> attributes){
-        return columnDao.getAttributeId2(attributes);
-    }
-
-    @Override
-    public Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes, Map<Long, List<Long>> attrId2Map){
+    public Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes){
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         Map<Long, RefBookDataProvider> refProviders = new HashMap<Long, RefBookDataProvider>();
         for (RefBookAttribute attribute : attributes) {
             if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
                 if (!refProviders.containsKey(attribute.getId())) {
                     refProviders.put(attribute.getId(), refBookFactory.getDataProvider(attribute.getRefBookId()));
-                }
-                // проверяем если на этот атрибут для колонок дополнительные отрибуты и кешируем продайдеров
-                List<Long> id2s = attrId2Map.get(attribute.getId());
-                if (id2s != null) {
-                    for (Long id2 : id2s) {
-                        if (!refProviders.containsKey(id2)) {
-                            refProviders.put(id2, refBookFactory.getDataProvider(refBookFactory.getByAttribute(id2).getId()));
-                        }
-                    }
                 }
             }
         }
@@ -591,7 +575,6 @@ public class RefBookHelperImpl implements RefBookHelper {
         }
         List<RefBookAttribute> attributes = refBook.getRefAttributes();
         // кэшируем список дополнительных атрибутов(если есть) для каждого атрибута
-        Map<Long, List<Long>> attrId2Map = getAttrToListAttrId2Map(attributes);
         Map<Long, Map<Long, Set<Long>>> attributesMap = new HashMap<Long, Map<Long, Set<Long>>>();
 
         // разыменовывание ссылок
@@ -604,21 +587,6 @@ public class RefBookHelperImpl implements RefBookHelper {
 				RefBookValue value = record.get(alias);
 				if (value != null && !value.isEmpty()) {
 					recordIds.add(value.getReferenceValue());
-					if (includeAttrId2) {
-						//Получаем связки для атрибутов второго уровня
-						if (attrId2Map.get(id) != null) {
-							for (Long id2 : attrId2Map.get(id)) {
-								Long refBookId2 = refBookCacher.getByAttribute(id2).getId();
-								//attributeIds.add(id2);
-								if (!attributesMap.containsKey(refBookId2)) {
-									attributesMap.put(refBookId2, new HashMap<Long, Set<Long>>());
-								}
-								if (!attributesMap.get(refBookId2).containsKey(id2))
-									attributesMap.get(refBookId2).put(id2, new HashSet<Long>());
-								attributesMap.get(refBookId2).get(id2).add(value.getReferenceValue());
-							}
-						}
-					}
 				}
 			}
 			// групповое разыменование, если есть что разыменовывать

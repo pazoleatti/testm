@@ -51,22 +51,6 @@
                                 <g:TextBox ui:field="name" addStyleNames="{style.editFields}"/>
                             </g:cell>
                         </g:HorizontalPanel>
-                        <g:HorizontalPanel ui:field="checkIfrsPanel">
-                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
-                                <g:Label text="Отчетность для МФСО" addStyleNames="{style.leftLabel}"/>
-                            </g:cell>
-                            <g:cell>
-                                <g:CheckBox ui:field="isIfrs" addStyleNames="{style.editFields}"/>
-                            </g:cell>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel ui:field="ifrsPanel">
-                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
-                                <g:Label text="Наименование для МСФО" addStyleNames="{style.leftLabel}"/>
-                            </g:cell>
-                            <g:cell>
-                                <g:TextBox ui:field="ifrsName" addStyleNames="{style.editFields}"/>
-                            </g:cell>
-                        </g:HorizontalPanel>
                     </g:VerticalPanel>
                 </g:cell>
             </g:VerticalPanel>

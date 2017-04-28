@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1485"/>
+	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -638,8 +638,16 @@
 		<initialValueExpression><![CDATA[$F{ОКТМО} == null ?     "-----------" :     ($F{ОКТМО}+"-----------").substring(0,11)]]></initialValueExpression>
 	</variable>
 	<variable name="TOTAL_PAGES_COUNT" class="java.lang.String" resetType="None">
-		<variableExpression><![CDATA[$V{TOTAL_PAGES_COUNT}==null ? $V{PAGE_NUMBER} : $V{PAGE_NUMBER}+2]]></variableExpression>
-		<initialValueExpression><![CDATA[$V{TOTAL_PAGES_COUNT}==null ? $V{PAGE_NUMBER} : $V{PAGE_NUMBER}+2]]></initialValueExpression>
+		<variableExpression><![CDATA[$V{PAGE_NUMBER}-1]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{PAGE_NUMBER}]]></initialValueExpression>
+	</variable>
+	<variable name="LAST_PAGE" class="java.lang.String" calculation="System">
+		<variableExpression><![CDATA[$V{PAGE_NUMBER}]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{PAGE_NUMBER}]]></initialValueExpression>
+	</variable>
+	<variable name="variable1" class="java.lang.String" incrementType="Report">
+		<variableExpression><![CDATA[$V{PAGE_NUMBER}]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{PAGE_NUMBER}]]></initialValueExpression>
 	</variable>
 	<pageHeader>
 		<band height="53">
@@ -4384,7 +4392,7 @@
 				</textElement>
 				<text><![CDATA[листах]]></text>
 			</staticText>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="ef0c60a6-0ed7-48bc-bb61-4ce58e6e8d4e" x="60" y="311" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -4396,9 +4404,9 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00"+$V{TOTAL_PAGES_COUNT}).substring(("00"+$V{TOTAL_PAGES_COUNT}).length()-3).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+$V{PAGE_NUMBER}).substring(("00"+$V{PAGE_NUMBER}).length()-3).charAt(2)]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="10343199-841c-49e6-87b9-193e9812133a" x="30" y="311" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -4410,9 +4418,9 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00"+$V{TOTAL_PAGES_COUNT}).substring(("00"+$V{TOTAL_PAGES_COUNT}).length()-3).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+$V{PAGE_NUMBER}).substring(("00"+$V{PAGE_NUMBER}).length()-3).charAt(0)]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Page" isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="324cc52d-a4cc-47f5-9457-c5f19177c5f7" x="45" y="311" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -4424,7 +4432,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("00"+$V{TOTAL_PAGES_COUNT}).substring(("00"+$V{TOTAL_PAGES_COUNT}).length()-3).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00"+$V{PAGE_NUMBER}).substring(("00"+$V{PAGE_NUMBER}).length()-3).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="3694ec9d-4015-4029-a043-d1b409ebe4e6" x="514" y="312" width="15" height="19" isPrintWhenDetailOverflows="true"/>

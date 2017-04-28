@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.Relation;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.source.*;
 
 import java.util.*;
@@ -212,7 +210,7 @@ public interface SourceDao {
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    //List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список нф-приемников для указанной нф (включая несозданные)
@@ -222,7 +220,7 @@ public interface SourceDao {
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-приемников
      */
-    List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    //List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список декларация-приемников для указанной нф-источника (включая несозданные)
@@ -232,7 +230,7 @@ public interface SourceDao {
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    //List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
@@ -242,5 +240,5 @@ public interface SourceDao {
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    //List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 }

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesResult;
@@ -29,21 +28,8 @@ public class GetTaxFormTypesHandler extends AbstractActionHandler<GetTaxFormType
     @Override
     public GetTaxFormTypesResult execute(GetTaxFormTypesAction action, ExecutionContext executionContext) throws ActionException {
         GetTaxFormTypesResult res = new GetTaxFormTypesResult();
-        List<FormType> resultList = new ArrayList<FormType>();
-        if (action.isForm()) {
-             resultList = sourceService.listAllByTaxType(action.getTaxType());
-        }
-        else {
-            List<DeclarationType> declarationTypeList = sourceService.allDeclarationTypeByTaxType(action.getTaxType());
-            for (DeclarationType item : declarationTypeList){
-                FormType m = new FormType();
-                m.setId(item.getId());
-                m.setName(item.getName());
-                m.setTaxType(item.getTaxType());
-                resultList.add(m);
-            }
-        }
-        res.setFormTypeList(resultList);
+        List<DeclarationType> declarationTypeList = sourceService.allDeclarationTypeByTaxType(action.getTaxType());
+        res.setFormTypeList(declarationTypeList);
         return res;
     }
 

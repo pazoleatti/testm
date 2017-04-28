@@ -3,10 +3,8 @@ package com.aplana.sbrf.taxaccounting.util.mock;
 import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -15,12 +13,10 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.*;
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
-import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.mockito.invocation.InvocationOnMock;
@@ -30,11 +26,8 @@ import java.io.OutputStream;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -44,8 +37,6 @@ import static org.mockito.Mockito.*;
  * @author Levykin
  */
 public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
-    // DataRowHelper для тестируемой НФ
-    private DataRowHelper currentDataRowHelper = new DataRowHelperStub();
     private RefBookDataProvider refBookDataProvider = mockRefBookDataProvider();
     private Map<Long, Map<Long, Map<String, RefBookValue>>> refBookMap;
     public static Calendar PERIOD_START_DATE = Calendar.getInstance();
@@ -401,12 +392,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         pagingResult.add(pagingResultItem);
         when(refBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenReturn(pagingResult);
         return refBookDataProvider;
-    }
-
-
-    @Override
-    public DataRowHelper getDataRowHelper() {
-        return currentDataRowHelper;
     }
 
     @Override

@@ -15,8 +15,6 @@ public class Relation implements Serializable {
     private Department department;
     /** Период */
     private DepartmentReportPeriod departmentReportPeriod;
-    /** Статус ЖЦ */
-    private WorkflowState state;
     /** форма/декларация создана/не создана */
     private boolean created;
     /** является ли форма источников, в противном случае приемник*/
@@ -30,8 +28,6 @@ public class Relation implements Serializable {
 
     /** Идентификатор созданной формы */
     private Long formDataId;
-    /** Вид НФ */
-    private FormType formType;
     /** Тип НФ */
     private FormDataKind formDataKind;
     /** подразделение-исполнитель*/
@@ -125,14 +121,6 @@ public class Relation implements Serializable {
         this.departmentReportPeriod = departmentReportPeriod;
     }
 
-    public WorkflowState getState() {
-        return state;
-    }
-
-    public void setState(WorkflowState state) {
-        this.state = state;
-    }
-
     public boolean isCreated() {
         return created;
     }
@@ -163,14 +151,6 @@ public class Relation implements Serializable {
 
     public void setFormDataId(Long formDataId) {
         this.formDataId = formDataId;
-    }
-
-    public FormType getFormType() {
-        return formType;
-    }
-
-    public void setFormType(FormType formType) {
-        this.formType = formType;
     }
 
     public FormDataKind getFormDataKind() {
@@ -366,10 +346,8 @@ public class Relation implements Serializable {
         if (department != null ? !department.equals(relation.department) : relation.department != null) return false;
         if (departmentReportPeriod != null ? !departmentReportPeriod.equals(relation.departmentReportPeriod) : relation.departmentReportPeriod != null)
             return false;
-        if (state != relation.state) return false;
         if (taxType != relation.taxType) return false;
         if (formDataId != null ? !formDataId.equals(relation.formDataId) : relation.formDataId != null) return false;
-        if (formType != null ? !formType.equals(relation.formType) : relation.formType != null) return false;
         if (formDataKind != relation.formDataKind) return false;
         if (comparativePeriod != null ? !comparativePeriod.equals(relation.comparativePeriod) : relation.comparativePeriod != null)
             return false;
@@ -402,13 +380,11 @@ public class Relation implements Serializable {
     public int hashCode() {
         int result = department != null ? department.hashCode() : 0;
         result = 31 * result + (departmentReportPeriod != null ? departmentReportPeriod.hashCode() : 0);
-        result = 31 * result + (state != null ? state.hashCode() : 0);
         result = 31 * result + (created ? 1 : 0);
         result = 31 * result + (source ? 1 : 0);
         result = 31 * result + (status ? 1 : 0);
         result = 31 * result + (taxType != null ? taxType.hashCode() : 0);
         result = 31 * result + (formDataId != null ? formDataId.hashCode() : 0);
-        result = 31 * result + (formType != null ? formType.hashCode() : 0);
         result = 31 * result + (formDataKind != null ? formDataKind.hashCode() : 0);
         result = 31 * result + (comparativePeriod != null ? comparativePeriod.hashCode() : 0);
         result = 31 * result + (accruing ? 1 : 0);

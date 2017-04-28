@@ -88,11 +88,6 @@ public class RefBookRecordDereferenceValue implements Comparable<RefBookRecordDe
         return attrId2DerefValueMap;
     }
 
-    public void setAttrId2DerefValueMap(Map<Long, String> attrId2DerefValueMap) {
-        this.attrId2DerefValueMap = attrId2DerefValueMap;
-    }
-
-
     public String getAttrName() {
         return attrName;
     }

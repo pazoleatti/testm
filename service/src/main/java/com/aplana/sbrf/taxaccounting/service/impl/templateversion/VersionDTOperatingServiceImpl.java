@@ -50,8 +50,6 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     private SourceService sourceService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-    @Autowired
-    private FormTypeService formTypeService;
 
     private Calendar calendar = Calendar.getInstance();
 
@@ -165,21 +163,8 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     @Override
     public void checkDestinationsSources(int typeId, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        List<Pair<DepartmentFormType, Pair<Date, Date>>> sourcePairs = sourceService.findSourceFTsForDeclaration(typeId, versionActualDateStart, versionActualDateEnd);
+        //List<Pair<DepartmentFormType, Pair<Date, Date>>> sourcePairs = sourceService.findSourceFTsForDeclaration(typeId, versionActualDateStart, versionActualDateEnd);
         List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> destinationPairs = sourceService.findDestinationDTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
-        for (Pair<DepartmentFormType, Pair<Date, Date>> pair : sourcePairs){
-            DepartmentFormType first = pair.getFirst();
-            FormType typeSource = formTypeService.get(first.getFormTypeId());
-            logger.error(
-                    String.format(MSG_HAVE_SOURCE,
-                            MessageGenerator.mesSpeckPlural(typeSource.getTaxType()),
-                            first.getKind().getTitle(),
-                            formTypeService.get(first.getFormTypeId()).getName(),
-                            departmentService.getDepartment(first.getDepartmentId()).getName(),
-                            getPeriod(pair.getSecond())
-                    )
-            );
-        }
         for (Pair<DepartmentDeclarationType, Pair<Date, Date>> pair : destinationPairs){
             DepartmentDeclarationType first = pair.getFirst();
             logger.error(

@@ -61,7 +61,6 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
         refBookPiker = new RefBookPickerWidget(column.isHierarchical(), null);
         PickerContext context = new PickerContext();
         context.setRegionFilter(PickerContext.RegionFilter.FORM_FILTER);
-        context.setFormDataId(columnContext.getFormDataId());
         refBookPiker.setPickerContext(context);
 		// Create popup panel
         refBookPiker.setTitle(this.column.getName());
