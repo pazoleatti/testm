@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,5 +160,18 @@ public class RefBookServiceImpl implements RefBookService {
             return null;
 
         return map.get(alias);
+    }
+
+    @Override
+    public Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
+                                                     Map<String, Map<String, RefBookValue>> refBookCache) {
+        if (recordId == null) {
+            return null;
+        }
+        String key = ScriptUtils.getRefBookCacheKey(refBookId, recordId);
+        if (!refBookCache.containsKey(key)) {
+            refBookCache.put(key, getRecordData(refBookId, recordId));
+        }
+        return refBookCache.get(key);
     }
 }

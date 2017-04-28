@@ -1,10 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 
-import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
-import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
-import com.aplana.sbrf.taxaccounting.scheduler.api.form.CheckBox;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.ArrayList;

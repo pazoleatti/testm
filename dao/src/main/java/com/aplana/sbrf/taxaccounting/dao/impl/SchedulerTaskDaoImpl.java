@@ -32,9 +32,9 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
             taskData.setTaskName(rs.getString("task_name"));
             taskData.setSchedule(rs.getString("schedule"));
             taskData.setModificationDate(new Date(rs.getTimestamp("modification_date").getTime()));
-            Timestamp start_date = rs.getTimestamp("start_date");
-            if (start_date != null) {
-                taskData.setStartDate(new Date(start_date.getTime()));
+            Timestamp last_fire_date = rs.getTimestamp("last_fire_date");
+            if (last_fire_date != null) {
+                taskData.setLast_fire_date(new Date(last_fire_date.getTime()));
             }
             taskData.setActive(rs.getBoolean("active"));
             return taskData;
@@ -60,7 +60,7 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
             Map<String, Object> valueMap = new HashMap<String, Object>();
             valueMap.put("taskId", taskId);
             SchedulerTaskData taskData = getNamedParameterJdbcTemplate().queryForObject(
-                    "SELECT id, task_name, schedule, active, modification_date, start_date " +
+                    "SELECT id, task_name, schedule, active, modification_date, last_fire_date " +
                             "FROM CONFIGURATION_SCHEDULER WHERE id = :taskId",
                     valueMap,
                     new SchedulerTaskMapper()
@@ -76,7 +76,7 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
     public List<SchedulerTaskData> getAll() {
         try{
             return getJdbcTemplate().query(
-                    "SELECT id, task_name, schedule, active, modification_date, start_date " +
+                    "SELECT id, task_name, schedule, active, modification_date, last_fire_date " +
                             "FROM CONFIGURATION_SCHEDULER ORDER BY id",
                     new SchedulerTaskMapper()
             );

@@ -1,6 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'
+             xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.ui'
              xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
              xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'

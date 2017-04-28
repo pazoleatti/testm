@@ -38,9 +38,6 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
     FormTypeService formTypeService;
 
     @Autowired
-    FormDataService formDataService;
-
-    @Autowired
     DeclarationTypeService declarationTypeService;
 
     @Autowired
@@ -61,12 +58,14 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
         // Удаление записей, для которых не указаны источники-приёмники, из таблицы в БД Системы и из списка назначенных налоговых форм / деклараций на подразделение
         boolean existFormData = false;
         for (FormTypeKind data: action.getKind()) {
+            /*
             // проверим наличие форм
             existFormData |= formDataService.existFormData(data.getFormTypeId().intValue(), data.getKind(), data.getDepartment().getId(), logger);
             // если есть формы, то проверки на связи не делаем
             if (existFormData) {
                 continue;
             }
+            */
             // возьмем его источников - налоговые формы
             //TODO передавать данные с клиента
             Date periodStart = new Date();

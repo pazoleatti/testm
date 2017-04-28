@@ -16,13 +16,8 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.De
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListClientModule;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.gin.AdminModule;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.TemplateVersionListModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
-import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.IfrsModule;
 import com.aplana.sbrf.taxaccounting.web.module.lock.client.LockModule;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsModule;
@@ -71,11 +66,8 @@ public class ClientModule extends AbstractPresenterModule {
 
 		install(new HomeModule());
 		install(new AboutModule());
-		install(new FormDataListClientModule());
-		install(new FormDataModule());
 		install(new SignInClientModule());
 		install(new MainMenuClientModule());
-		install(new AdminModule());
 		install(new DeclarationTemplateModule());
 		install(new DeclarationDataModule());
 		install(new ErrorModule());
@@ -83,7 +75,6 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new LogAreaClientModule());
 		install(new HistoryClientModule());
 		install(new ProjectVersionModule());
-        install(new TemplateVersionListModule());
 		install(new MembersModule());
         install(new ConfigurationModule());
         install(new AuditClientUIModule());
@@ -100,7 +91,6 @@ public class ClientModule extends AbstractPresenterModule {
         install(new ScriptExecutionModule());
         install(new ScriptsImportModule());
         install(new UploadTransportDataModule());
-        install(new IfrsModule());
         install(new LockModule());
         install(new CommonParameterModule());
         install(new ChangeStatusEDClientModule());

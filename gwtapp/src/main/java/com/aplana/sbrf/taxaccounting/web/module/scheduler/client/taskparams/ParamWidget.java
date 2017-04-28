@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client.taskparams;
 
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParamType;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.google.gwt.user.client.ui.Widget;
 
 /**

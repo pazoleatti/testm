@@ -17,7 +17,6 @@ import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
@@ -63,118 +62,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
      */
     public DefaultScriptTestMockHelper(Map<Long, Map<Long, Map<String, RefBookValue>>> map) {
         this.refBookMap = map;
-    }
-
-    @Override
-    public FormDataService mockFormDataService() {
-        // Mock имплементации из-за обращения к реальным методам (addRow())
-        FormDataService formDataService = mock(FormDataServiceImpl.class);
-        // DataRowHelper
-        when(formDataService.getDataRowHelper(any(FormData.class))).thenReturn(currentDataRowHelper);
-
-        // Работа со справочниками
-        when(formDataService.getRefBookRecordIdImport(anyLong(), anyMap(), anyMap(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Long>() {
-            @Override
-            public Long answer(InvocationOnMock invocation) throws Throwable {
-                Long refBookId = (Long) invocation.getArguments()[0];
-                String alias = (String) invocation.getArguments()[3];
-                String value = (String) invocation.getArguments()[4];
-                Map<String, RefBookValue> map = getRecord(refBookId, alias, value);
-                if (map == null) {
-                    return null;
-                }
-                Number number = map.get(RefBook.RECORD_ID_ALIAS).getNumberValue();
-                if (number == null) {
-                    throw new ServiceException("Wrong reference book " + refBookId + " format!");
-                }
-                return number.longValue();
-            }
-        });
-        when(formDataService.getRefBookRecordIdImport(anyLong(), anyMap(), anyMap(), anyString(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Long>() {
-            @Override
-            public Long answer(InvocationOnMock invocation) throws Throwable {
-                Long refBookId = (Long) invocation.getArguments()[0];
-                String alias = (String) invocation.getArguments()[3];
-                String value = (String) invocation.getArguments()[4];
-                Map<String, RefBookValue> map = getRecord(refBookId, alias, value);
-                if (map == null) {
-                    return null;
-                }
-                Number number = map.get(RefBook.RECORD_ID_ALIAS).getNumberValue();
-                if (number == null) {
-                    throw new ServiceException("Wrong reference book " + refBookId + " format!");
-                }
-                return number.longValue();
-            }
-        });
-        when(formDataService.getRefBookRecordImport(anyLong(), anyMap(), anyMap(), anyMap(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
-            @Override
-            public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
-                Long refBookId = (Long) invocation.getArguments()[0];
-                String alias = (String) invocation.getArguments()[4];
-                String value = (String) invocation.getArguments()[5];
-                return getRecord(refBookId, alias, value);
-            }
-        });
-        when(formDataService.getRefBookRecordImport(anyLong(), anyMap(), anyMap(), anyMap(), anyString(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
-            @Override
-            public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
-                Long refBookId = (Long) invocation.getArguments()[0];
-                String alias = (String) invocation.getArguments()[4];
-                String value = (String) invocation.getArguments()[5];
-                return getRecord(refBookId, alias, value);
-            }
-        });
-        when(formDataService.getRefBookRecordId(anyLong(), anyMap(), anyMap(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Long>() {
-            @Override
-            public Long answer(InvocationOnMock invocation) throws Throwable {
-                Long refBookId = (Long) invocation.getArguments()[0];
-                String alias = (String) invocation.getArguments()[3];
-                String value = (String) invocation.getArguments()[4];
-                Map<String, RefBookValue> map = getRecord(refBookId, alias, value);
-                if (map == null) {
-                    return null;
-                }
-                return map.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-            }
-        });
-        when(formDataService.getRefBookRecordId(anyLong(), anyMap(), anyMap(), anyString(), anyString(), any(String.class),
-                any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Long>() {
-            @Override
-            public Long answer(InvocationOnMock invocation) throws Throwable {
-                Long refBookId = (Long) invocation.getArguments()[0];
-                String alias = (String) invocation.getArguments()[3];
-                String value = (String) invocation.getArguments()[4];
-                Map<String, RefBookValue> map = getRecord(refBookId, alias, value);
-                if (map == null) {
-                    return null;
-                }
-                return map.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
-            }
-        });
-        when(formDataService.getRefBookValue(anyLong(), anyLong(), anyMap())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
-            @Override
-            public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
-                Long refBookId = (Long) invocation.getArguments()[0];
-                Long recordId = (Long) invocation.getArguments()[1];
-                Map<Long, Map<String, RefBookValue>> map = refBookMap.get(refBookId);
-                if (map == null) {
-                    return null;
-                }
-                return map.get(recordId);
-            }
-        });
-
-        when(formDataService.getRefBookProvider(any(RefBookFactory.class), anyLong(), anyMap())).thenReturn(refBookDataProvider);
-        // Работа со строками НФ
-        when(formDataService.addRow(any(FormData.class), any(DataRow.class), anyList(), anyList())).thenCallRealMethod();
-
-        return formDataService;
     }
 
     /**
@@ -295,11 +182,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     @Override
     public DepartmentReportPeriodService mockDepartmentReportPeriodService() {
         return mock(DepartmentReportPeriodService.class);
-    }
-
-    @Override
-    public FormTypeService mockFormTypeService() {
-        return mock(FormTypeService.class);
     }
 
     @Override

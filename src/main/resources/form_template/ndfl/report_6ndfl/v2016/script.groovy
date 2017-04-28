@@ -2,6 +2,7 @@ package form_template.ndfl.report_6ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
+import groovy.transform.TypeChecked
 import groovy.xml.MarkupBuilder
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
@@ -22,6 +23,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*
+import com.aplana.sbrf.taxaccounting.service.script.*
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверки
@@ -53,6 +55,17 @@ switch (formDataEvent) {
         println "!CREATE_REPORTS!"
         createReports()
         break
+}
+
+@Field
+final RefBookService refBookService = getProperty("refBookService")
+
+def getProperty(String name) {
+    try{
+        return super.getProperty(name)
+    } catch (MissingPropertyException e) {
+        return null
+    }
 }
 
 // Альяс для списка идентифокаторов физлиц из КНФ
@@ -129,7 +142,7 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field def reportPeriodEndDate = null
 
 // Кэш для справочников
-@Field def refBookCache = [:]
+@Field Map<String, Map<String, RefBookValue>> refBookCache = [:]
 
 // Коды мест предоставления документа
 @Field def presentPlaceCodeCache = [:]
@@ -881,8 +894,9 @@ def getProvider(def long providerId) {
 /**
  * Разыменование записи справочника
  */
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+@TypeChecked
+Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
+    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
@@ -901,8 +915,41 @@ def createForm() {
     def declarationTypeId = currDeclarationTemplate.type.id
 
     if (departmentReportPeriod.correctionDate != null) {
-        def prevDepartmentPeriodReport = getPrevDepartmentReportPeriod(departmentReportPeriod)
-        def declarations = declarationService.find(declarationTypeId, prevDepartmentPeriodReport?.id)
+        def declarations = []
+
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList([departmentReportPeriod.departmentId])
+        departmentReportPeriodFilter.setReportPeriodIdList([departmentReportPeriod.reportPeriod.id])
+        departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
+
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
+        Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
+        while (it.hasNext()) {
+            DepartmentReportPeriod depReportPeriod = it.next();
+            if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+                it.remove();
+            }
+        }
+        departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
+            @Override
+            int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+                if (o1.correctionDate == null) {
+                    return 1;
+                } else if (o2.correctionDate == null) {
+                    return -1;
+                } else {
+                    return o2.correctionDate.compareTo(o1.correctionDate);
+                }
+            }
+        })
+
+        for (DepartmentReportPeriod drp in departmentReportPeriodList) {
+            declarations = declarationService.find(declarationTypeId, drp.id)
+            if (!declarations.isEmpty() || drp.correctionDate == null) {
+                break
+            }
+        }
+
         def declarationsForRemove = []
         declarations.each { declaration ->
             ScriptUtils.checkInterrupted()
@@ -1253,7 +1300,18 @@ def getDepartmentParamTable(def departmentParamId) {
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения")
         }
-        departmentParamTable = departmentParamTableList.get(0)
+        def referencesOktmoList = departmentParamTableList.OKTMO?.value
+        referencesOktmoList.removeAll([null])
+        def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
+        departmentParamTable = departmentParamTableList.find{ dep->
+            def oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
+            if (oktmo != null) {
+                declarationData.kpp.equals(dep.KPP?.value) && declarationData.oktmo.equals(oktmo.CODE.value)
+            }
+        }
+        if (departmentParamTable == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+        }
     }
     return departmentParamTable
 }

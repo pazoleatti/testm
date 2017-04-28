@@ -2361,3 +2361,37 @@ create table department_decl_type_performer
 comment on table department_decl_type_performer is 'Назначения нескольких исполнителей для связки НФ-подразделение';
 comment on column department_decl_type_performer.department_decl_type_id is 'Идентификатор связи подразделения с формой';
 comment on column department_decl_type_performer.performer_dep_id is 'Исполнитель'; 
+--------------------------------------------------------------------------------------------------------------------------
+create table configuration_scheduler (
+  id        			number(9)           not null,
+  task_name 			varchar2(200 char) not null,
+  schedule  			varchar2(100 char),
+  active    			number(1) 			    not null,
+  modification_date   	date          not null,
+  last_fire_date 		date
+);
+
+comment on table configuration_scheduler is 'Настройки задач планировщика';
+comment on column configuration_scheduler.id is 'Идентификатор задачи';
+comment on column configuration_scheduler.task_name is 'Название';
+comment on column configuration_scheduler.schedule is 'Расписание';
+comment on column configuration_scheduler.active is 'Признак активности';
+comment on column configuration_scheduler.modification_date is 'Дата редактирования';
+comment on column configuration_scheduler.last_fire_date is 'Дата последнего запуска';
+
+create table configuration_scheduler_param(
+  id        			number(9)           not null,
+  param_name 			varchar2(200 char) not null,
+  task_id      			number(9)           not null,
+  ord        			number(9)           not null,
+  type        			number(1)           not null,
+  value		  			varchar2(200 char) not null
+);
+
+comment on table configuration_scheduler_param is 'Параметры задач планировщика';
+comment on column configuration_scheduler_param.id is 'Идентификатор параметра';
+comment on column configuration_scheduler_param.task_id is 'Сслыка на задачу планирощика';
+comment on column configuration_scheduler_param.ord is 'Порядок следования';
+comment on column configuration_scheduler_param.type is 'Тип параметра(1 - Строка, 2 - Целое число, 3 - Число с плавающей запятой)';
+comment on column configuration_scheduler_param.value is 'Значение';
+

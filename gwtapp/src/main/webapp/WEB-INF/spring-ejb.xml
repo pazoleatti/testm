@@ -6,11 +6,4 @@
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
 
     <import resource="classpath:/spring/enterprise-context.xml"/>
-
-    <jee:local-slsb
-            id="taskManager"
-            jndi-name="ejblocal:${releaseName}/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal"
-            business-interface="com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager"
-            lookup-home-on-startup="true"
-            />
 </beans>

@@ -497,31 +497,6 @@ public interface SourceService {
     boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId);
 
     /**
-     * Добавляет информацию о консолидации(т.е. была ли она сделана).
-     * Соответствие либо один-к-одному, либо один-ко-многим(т.е. одно в одном списке и сногов другом)
-     * @param tgtFormDataId идентификатор НФ
-     * @param srcFormDataIds форма-источник с которой делалась консолидация для НФ
-     */
-    void addFormDataConsolidationInfo(Long tgtFormDataId, Collection<Long> srcFormDataIds);
-
-    void deleteFDConsolidationInfo(Collection<Long> tgtFormDataIds);
-
-    /**
-     * Проверяет осуществлялась ли консолидация для НФ
-     * @param formDataId
-     * @param sourceFormDataId
-     * @return true если консолидация сделана
-     */
-    boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId);
-
-    /**
-     * Проставление признака неактуальности данных в НФ/декларации-приёмнике
-     * http://conf.aplana.com/pages/viewpage.action?pageId=19662408
-     * @param sourceFormId идентификатор источника
-     */
-    void updateFDDDConsolidation(long sourceFormId);
-
-    /**
      * Проставление признака неактуальности данных в НФ-приёмнике
      * http://conf.aplana.com/pages/viewpage.action?pageId=19662408
      * @param sourceFormId идентификатор источника
@@ -541,39 +516,6 @@ public interface SourceService {
      * @return true - данные актуальны
      */
     boolean isDDConsolidationTopical(long ddTargetId);
-
-    /**
-     * Возвращает список нф-источников для указанной нф (включая несозданные)
-     * @param destinationFormData нф-приемник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные источники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
-     * @return список нф-источников
-     */
-    List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
-                                  TAUserInfo userInfo, Logger logger);
-
-    /**
-     * Возвращает список нф-приемников для указанной нф (включая несозданные)
-     * @param sourceFormData нф-источник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные приемники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
-     * @return список нф-приемников
-     */
-    List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
-                                       TAUserInfo userInfo, Logger logger);
-
-    /**
-     * Возвращает список декларация-приемников для указанной нф-источника (включая несозданные)
-     * @param sourceFormData нф-источник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные приемники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
-     * @return список нф-источников
-     */
-    List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
-                                                  TAUserInfo userInfo, Logger logger);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)

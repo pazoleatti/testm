@@ -21,9 +21,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.CronTask;
+import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
@@ -76,13 +76,30 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
         this.taskRegistrar = scheduledTaskRegistrar;
         taskRegistrar.setScheduler(taskExecutor());
+
+        IntervalTask intervalTask = new IntervalTask(new Runnable() {
+            @Override
+            public void run() {
+                updateAllTask();
+            }
+        }, 60000);
+        tasks.put("updateAllTask", taskRegistrar.scheduleFixedDelayTask(intervalTask));
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                for(ScheduledTask scheduledTask: tasks.values()) {
+                    scheduledTask.cancel();
+                }
+            }
+        });
+
     }
 
     /**
      * Добавляет выполнение методов помеченных {@link AplanaScheduled} в планировщик
      */
     @Override
-    @Scheduled(fixedDelay = 60000)
     public void updateAllTask() {
         Set<Method> methods = AnnotationUtil.findAllAnnotatedMethods(AplanaScheduled.class);
         for (final Method method : methods) {

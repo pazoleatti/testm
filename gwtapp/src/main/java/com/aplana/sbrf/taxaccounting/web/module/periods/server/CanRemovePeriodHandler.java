@@ -31,8 +31,6 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
     @Autowired
     private SecurityService securityService;
     @Autowired
-    private FormDataService formDataService;
-    @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
     @Autowired
     private LogEntryService logEntryService;
@@ -50,15 +48,6 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
         List<Integer> departmentIds = periodService.getAvailableDepartments(action.getTaxType(), user.getUser(), PeriodService.Operation.EDIT, action.getDepartmentId());
         List<LogEntry> logs = new ArrayList<LogEntry>();
 
-        //Check forms
-        List<FormData> formDatas = formDataService.find(departmentIds, action.getReportPeriodId());
-        for (FormData fd : formDatas) {
-            logs.add(new LogEntry(LogLevel.ERROR, "Форма \"" + fd.getFormType().getName() + "\" \"" + fd.getKind().getTitle() +
-                    "\" в подразделении \"" + departmentService.getDepartment(fd.getDepartmentId()).getName() + "\" находится в " +
-                    action.getOperationName() +
-                    " периоде!"));
-        }
-
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDepartmentIds(departmentIds);
         filter.setReportPeriodIds(Collections.singletonList(action.getReportPeriodId()));
@@ -71,7 +60,7 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
                     action.getOperationName() +
                     " периоде!"));
         }
-		result.setCanRemove(formDatas.isEmpty() && declarations.isEmpty());
+		result.setCanRemove(declarations.isEmpty());
         result.setUuid(logEntryService.save(logs));
 		return result;
 	}

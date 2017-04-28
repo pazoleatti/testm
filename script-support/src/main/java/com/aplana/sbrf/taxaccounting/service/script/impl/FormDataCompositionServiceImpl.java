@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -30,12 +26,6 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	private ScriptComponentContext scriptComponentContext;
 
 	@Autowired
-	private FormDataService formDataService;
-
-	@Autowired
-	private FormDataScriptingService formDataScriptingService;
-
-	@Autowired
 	private LogBusinessService logBusinessService;
 
 	@Autowired
@@ -49,28 +39,6 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 
 	@Override
 	public void compose(FormData formData, int departmentReportPeriodId, Integer periodOrder,  int formTypeId, FormDataKind kind) {
-        if (formData.getState() != WorkflowState.ACCEPTED) {
-            auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(), null, formData, "Событие инициировано Системой", null);
-			// Запускаем скрипт консолидации
-			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), formData,
-                    FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
-			// Проверяем результат выполнения скрипта
-			String formName = formData.getFormType().getName();
-            String kindName = formData.getKind().getTitle();
-            String departmentName = departmentService.get(formData.getDepartmentId()).getName();
-            if (scriptComponentContext.getLogger().containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Налоговая форма-приемник не сформирована: Подразделение: «%s», Тип: «%s», Вид: «%s».",
-                        logEntryService.save(scriptComponentContext.getLogger().getEntries()),
-                        departmentName, kindName, formName);
-            } else {
-                scriptComponentContext.getLogger().info("%s: %s налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
-                        FormDataEvent.COMPOSE.getTitle(), "Переформирована", departmentName, kindName, formName);
-            }
-			// Удаляем ранее сформированные отчеты - стали неактуальными
-            formDataService.deleteReport(formData.getId(), formData.isManual(), scriptComponentContext.getUserInfo(), TaskInterruptCause.FORM_MOVE);
-			//TODO Точно ли инициировано системой? Сейчас консолидируем по кнопке "Консолидировать". Аналогично в начале этого метода
-            logBusinessService.add(formData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE, "Событие инициировано Системой");
-		}
 	}
 
 	@Override

@@ -4,6 +4,8 @@ UPDATE ref_book SET script_id = '99034f20-18c3-11e5-b60b-1697f925ec7b' WHERE id 
 UPDATE ref_book SET script_id = '352adf59-372b-4020-98fe-8960dd5bc972' WHERE id = 207;
 UPDATE ref_book SET script_id = '4e387483-0330-4e05-ad46-e9b03a3b025d' WHERE id = 30;
 UPDATE ref_book SET script_id = '39327388-9684-4fd5-a522-c40a21680156' WHERE id = 1030;
+UPDATE ref_book SET script_id = '375ba56a-2509-11e7-93ae-92361f002671' WHERE id = 902;
+UPDATE ref_book SET script_id = '884b9f2e-1678-4d69-9652-b036bba2f728' WHERE id = 904;
 
 COMMIT;
 EXIT;

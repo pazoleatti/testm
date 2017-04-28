@@ -119,18 +119,6 @@ public interface DeclarationService {
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
      *
-     * @param sourceFormData    нф-источник
-     * @param light             true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные приемники
-     * @param stateRestriction  ограничение по состоянию для созданных экземпляров
-     * @return список нф-источников
-     */
-    List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
-                                                  TAUserInfo userInfo, Logger logger);
-
-    /**
-     * Возвращает список нф-источников для указанной декларации (включая несозданные)
-     *
      * @param declaration       декларациz-приемник
      * @param light             true - заполнятся только текстовые данные для GUI и сообщений
      * @param excludeIfNotExist true - исключить несозданные источники

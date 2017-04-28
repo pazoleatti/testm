@@ -445,3 +445,11 @@ alter table log_system add constraint fk_log_system_log foreign key(log_id) refe
 
 --checks
 alter table log_entry add constraint chk_log_entry_lev check(log_level in (0,1,2));
+--------------------------------------------------------------------------------------------------------------------------
+-- Планировщик задач
+--------------------------------------------------------------------------------------------------------------------------
+alter table configuration_scheduler add constraint conf_scheduler_pk primary key (id);
+
+alter table configuration_scheduler_param add constraint conf_scheduler_param_pk primary key (id);
+alter table configuration_scheduler_param add constraint conf_scheduler_param_fk_conf foreign key (task_id) references configuration_scheduler(id) on delete cascade;
+alter table configuration_scheduler_param add constraint conf_scheduler_param_chk_type check(type in (1, 2, 3));

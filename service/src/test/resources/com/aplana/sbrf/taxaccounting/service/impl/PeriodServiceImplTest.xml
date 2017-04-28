@@ -18,9 +18,6 @@
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentService"/>
        </bean>
        <bean class="org.mockito.Mockito" factory-method="mock">
-              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataService"/>
-       </bean>
-       <bean class="org.mockito.Mockito" factory-method="mock">
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataSearchService"/>
        </bean>
        <bean class="org.mockito.Mockito" factory-method="mock">

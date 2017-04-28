@@ -480,22 +480,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	@UiHandler("assignAnchor")
 	public void clickAssignAnchor(ClickEvent event){
 		if(getUiHandlers() != null){
-			if (isForm){
-				getUiHandlers().onClickOpenFormDestinations();
-			} else {
-				getUiHandlers().onClickOpenDeclarationDestinations();
-			}
+			getUiHandlers().onClickOpenDeclarationDestinations();
 		}
 	}
 
 	@UiHandler("cancelAnchor")
 	public void clickCancelAnchor(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			if (isForm) {
-				getUiHandlers().onClickFormCancelAnchor();
-			} else {
-				getUiHandlers().onClickDeclarationCancelAnchor();
-			}
+			getUiHandlers().onClickDeclarationCancelAnchor();
 		}
 	}
 
