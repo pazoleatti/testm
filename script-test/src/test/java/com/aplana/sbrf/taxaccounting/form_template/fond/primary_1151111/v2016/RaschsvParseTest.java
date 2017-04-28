@@ -69,21 +69,6 @@ public class RaschsvParseTest extends ScriptTestBase {
     private static final String FILE_NAME = "NO_RASCHSV_123_1234_7723643863123456789_20170802_guid1.xml";
 
     @Override
-    protected FormData getFormData() {
-        FormData formData = new FormData();
-        FormType formType = new FormType();
-        formData.setId(TestScriptHelper.CURRENT_FORM_DATA_ID);
-        formData.setFormType(formType);
-        formData.setFormTemplateId(TYPE_ID);
-        formData.setKind(KIND);
-        formData.setDepartmentId(DEPARTMENT_ID);
-        formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
-        formData.setReportPeriodId(REPORT_PERIOD_ID);
-        formData.setPeriodOrder(1);
-        return formData;
-    }
-
-    @Override
     protected ScriptTestMockHelper getMockHelper() {
         return getDefaultScriptTestMockHelper(RaschsvParseTest.class);
     }
@@ -100,8 +85,7 @@ public class RaschsvParseTest extends ScriptTestBase {
             if (path == null) {
                 throw new ServiceException("Test folder path is null!");
             }
-            testHelper = new TestScriptHelper(path, getFormData(), getMockHelper()) {
-            };
+            testHelper = new TestScriptHelper(path, getMockHelper());
         }
         testHelper.reset();
     }

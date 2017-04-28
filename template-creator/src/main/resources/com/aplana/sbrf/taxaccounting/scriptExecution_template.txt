@@ -1,7 +1,6 @@
 ﻿import com.aplana.sbrf.taxaccounting.model.Column
 import com.aplana.sbrf.taxaccounting.model.ColumnType
 import com.aplana.sbrf.taxaccounting.model.FormStyle
-import com.aplana.sbrf.taxaccounting.model.FormTemplate
 import com.aplana.sbrf.taxaccounting.model.FormType
 import org.apache.commons.io.IOUtils
 

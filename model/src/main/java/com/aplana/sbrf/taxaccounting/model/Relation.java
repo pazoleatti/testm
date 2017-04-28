@@ -30,8 +30,6 @@ public class Relation implements Serializable {
 
     /** Идентификатор созданной формы */
     private Long formDataId;
-    /** Вид НФ */
-    private FormType formType;
     /** Тип НФ */
     private FormDataKind formDataKind;
     /** подразделение-исполнитель*/
@@ -163,14 +161,6 @@ public class Relation implements Serializable {
 
     public void setFormDataId(Long formDataId) {
         this.formDataId = formDataId;
-    }
-
-    public FormType getFormType() {
-        return formType;
-    }
-
-    public void setFormType(FormType formType) {
-        this.formType = formType;
     }
 
     public FormDataKind getFormDataKind() {
@@ -369,7 +359,6 @@ public class Relation implements Serializable {
         if (state != relation.state) return false;
         if (taxType != relation.taxType) return false;
         if (formDataId != null ? !formDataId.equals(relation.formDataId) : relation.formDataId != null) return false;
-        if (formType != null ? !formType.equals(relation.formType) : relation.formType != null) return false;
         if (formDataKind != relation.formDataKind) return false;
         if (comparativePeriod != null ? !comparativePeriod.equals(relation.comparativePeriod) : relation.comparativePeriod != null)
             return false;
@@ -408,7 +397,6 @@ public class Relation implements Serializable {
         result = 31 * result + (status ? 1 : 0);
         result = 31 * result + (taxType != null ? taxType.hashCode() : 0);
         result = 31 * result + (formDataId != null ? formDataId.hashCode() : 0);
-        result = 31 * result + (formType != null ? formType.hashCode() : 0);
         result = 31 * result + (formDataKind != null ? formDataKind.hashCode() : 0);
         result = 31 * result + (comparativePeriod != null ? comparativePeriod.hashCode() : 0);
         result = 31 * result + (accruing ? 1 : 0);

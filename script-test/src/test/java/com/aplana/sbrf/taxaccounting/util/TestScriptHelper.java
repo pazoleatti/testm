@@ -104,8 +104,6 @@ public class TestScriptHelper {
     private Department userDepartment = new Department();
     // Задаются из конкретного теста
     private InputStream importFileInputStream;
-    private FormData formData;
-    private FormTemplate formTemplate;
     private DataRow<Cell> currentDataRow;
     private ScriptStatusHolder scriptStatusHolder;
     private final ScriptTestMockHelper mockHelper;
@@ -119,16 +117,13 @@ public class TestScriptHelper {
      * @param formData   Экземпляр НФ
      * @param mockHelper Хэлпер с заглушками других сервисов, можно переопределить
      */
-    public TestScriptHelper(String path, FormData formData, ScriptTestMockHelper mockHelper) {
+    public TestScriptHelper(String path, ScriptTestMockHelper mockHelper) {
         super();
         this.mockHelper = mockHelper;
         // Id подразделения пользователя совпадает c Id подразделения НФ
-        userDepartment.setId(formData.getDepartmentId());
         userDepartment.setRegionId(DEPARTMENT_REGION_ID);
         userDepartment.setName(DEPARTMENT_NAME);
-        // Шаблон НФ из файла
-        FormType formType = formData.getFormType();
-        formData.setFormType(formType); // Сбрасывается в FormData#initFormTemplateParams
+
         this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;
         try {
             script = readFile(this.path, charsetName);

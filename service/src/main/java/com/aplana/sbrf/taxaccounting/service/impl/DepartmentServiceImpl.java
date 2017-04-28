@@ -324,16 +324,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getPrintFormDepartments(FormData formData) {
-        List<Integer> retList = new ArrayList<Integer>();
-        // подразделение, которому назначена налоговая форма
-        retList.add(departmentDao.getDepartment(formData.getDepartmentId()).getId());
-        // подразделения которые назначены исполнителями для налоговой формы
-        //retList.addAll(getExecutorsDepartments(retList, formData.getFormType().getId()));
-        return retList;
-    }
-
-    @Override
     public List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, int reportPeriodId) {
         ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
         List<Integer> retList = new ArrayList<Integer>();

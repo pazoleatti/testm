@@ -26,7 +26,7 @@ public interface DeclarationDataScriptingService {
                        Map<String, Object> exchangeParams);
 
     /**
-     * Выполняет скрипт декларации (FormTemplate.script) по определенному событию(без сохранения изменений в БД).
+     * Выполняет скрипт декларации (DeclarationTemplate.script) по определенному событию(без сохранения изменений в БД).
      * @param userInfo информация о текущем пользоваетеле
      * @param declarationTemplate макет декларации
      * @param declarationData данные декларации

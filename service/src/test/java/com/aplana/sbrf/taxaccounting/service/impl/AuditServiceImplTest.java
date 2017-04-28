@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.LogSystem;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TARole;
@@ -30,7 +27,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.atLeastOnce;
@@ -94,7 +90,7 @@ public class AuditServiceImplTest {
     }
 
     @Test
-    public void testAdd(){
+    public void testAdd() {
         Department department1 = new Department();
         department1.setName("Открытое акционерное общество \"Сбербанк России\"");
         department1.setId(0);
@@ -122,48 +118,5 @@ public class AuditServiceImplTest {
 
         assertEquals(argument.getAllValues().get(0).getServer(), "server");
         assertEquals(argument.getAllValues().get(1).getServer(), "server");
-    }
-
-    @Test
-    public void testAddWithCorr(){
-
-        Department department1 = new Department();
-        department1.setName("Центральный аппарат");
-        department1.setId(113);
-        when(departmentService.getDepartment(department1.getId())).thenReturn(department1);
-        when(departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId())).thenReturn("Центральный аппарат");
-        when(departmentService.getParentsHierarchy(department1.getId())).thenReturn("Центральный аппарат/Управление налогового планирования");
-
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-        CALENDAR.set(2015, Calendar.JANUARY, 1);
-        departmentReportPeriod.setCorrectionDate(CALENDAR.getTime());
-        CALENDAR.clear();
-        when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
-
-        ReportPeriod reportPeriod = new ReportPeriod();
-        reportPeriod.setId(1);
-        TaxPeriod taxPeriod = new TaxPeriod();
-        taxPeriod.setYear(2015);
-        reportPeriod.setName("первый квартал");
-        reportPeriod.setTaxPeriod(taxPeriod);
-        when(periodService.getReportPeriod(reportPeriod.getId())).thenReturn(reportPeriod);
-
-        FormData formData = new FormData();
-        formData.setDepartmentId(department1.getId());
-        formData.setDepartmentReportPeriodId(1);
-        formData.setKind(FormDataKind.CONSOLIDATED);
-        formData.setReportPeriodId(1);
-        FormType type = new FormType();
-        type.setName("217");
-        formData.setFormType(type);
-
-        auditService.add(FormDataEvent.CALCULATE, userInfo, null, formData, null, null);
-
-        ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);
-        verify(auditDao, atLeastOnce()).add(argument.capture());
-
-        assertEquals(argument.getValue().getFormDepartmentName(), "Центральный аппарат/Управление налогового планирования");
-        assertEquals(argument.getValue().getReportPeriodName(), "2015 первый квартал в корр.периоде 01.01.2015");
-        assertEquals(argument.getValue().getRoles(), TARole.N_ROLE_ADMIN + ", " + TARole.N_ROLE_CONTROL_NS);
     }
 }

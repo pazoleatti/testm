@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.util;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -12,11 +9,6 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.*;
 
 import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -48,7 +40,7 @@ public abstract class ScriptTestBase {
             if (path == null) {
                 throw new ServiceException("Test folder path is null!");
             }
-            testHelper = new TestScriptHelper(path, getFormData(), getMockHelper());
+            testHelper = new TestScriptHelper(path, getMockHelper());
         }
         testHelper.reset();
     }
@@ -60,11 +52,6 @@ public abstract class ScriptTestBase {
     public void printLog() {
         testHelper.printLog();
     }
-
-    /**
-     * Экземпляр НФ
-     */
-    protected abstract FormData getFormData();
 
     /**
      * Путь к каталогу НФ

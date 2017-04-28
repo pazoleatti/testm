@@ -203,18 +203,6 @@ public class DeclarationDataServiceImplTest {
         declarationData.setReportPeriodId(1);
         declarationData.setDepartmentReportPeriodId(1);
 
-        FormData formData = new FormData();
-        formData.setId(1l);
-        formData.setReportPeriodId(2);
-        formData.setDepartmentId(1);
-        FormType formType = new FormType();
-        formType.setName("Тестовый макет");
-        formData.setFormType(formType);
-        formData.setKind(FormDataKind.PRIMARY);
-        formData.setManual(false);
-        formData.setDepartmentReportPeriodId(1);
-        formData.setPeriodOrder(null);
-
         Department department = new Department();
         department.setName("Тестовое подразделение");
 

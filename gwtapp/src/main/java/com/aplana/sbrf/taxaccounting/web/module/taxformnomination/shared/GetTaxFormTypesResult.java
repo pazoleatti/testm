@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared;
 
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;

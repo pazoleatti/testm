@@ -191,14 +191,6 @@ public interface DepartmentService {
     Collection<Integer> getAppointmentDepartments(TAUser tAUser);
 
     /**
-     * 60 - Выборка id подразделений для параметров печатной формы
-     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11381089">Аналитика</a>
-     * @param formData НФ
-     * @return
-     */
-    List<Integer> getPrintFormDepartments(FormData formData);
-
-    /**
      * 80 - Выборка id подразделений по открытым периодам
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11383234">Аналитика</a>
      * @param tAUser пользователь

@@ -173,26 +173,6 @@ public final class ScriptUtils {
     }
 
     /**
-     * Поиск ячейки таблицы по алиасам строки и столбца
-     *
-     * @param formData    таблица данных
-     * @param columnAlias алиас столбца
-     * @param rowAlias    алиас строки
-     * @return найденная ячейка
-     * @throws IllegalArgumentException указаны неправильные алиасы
-     */
-    public static Cell getCell(FormData formData, List<DataRow<Cell>> dataRows, String columnAlias, String rowAlias) {
-        DataRow<Cell> row = FormDataUtils.getDataRowByAlias(dataRows, rowAlias);
-        if (row != null) {
-            Cell cell = row.getCell(columnAlias);
-            if (cell != null) {
-                return cell;
-            }
-        }
-        throw new IllegalArgumentException(String.format(CELL_NOT_FOUND, rowAlias, columnAlias));
-    }
-
-    /**
      * Получение числа из строки при импорте
      *
      * @param value       Строковое значение

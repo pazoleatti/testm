@@ -28,12 +28,13 @@ public class SourcesAssembler {
     	for (DepartmentFormType departmentFormType : departmentFormTypes) {
 			currentAssigns.add(assemble(departmentFormType, taxType, isControlUNP));
 		}
-    	
+
+		/*
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : departmentFormTypes) {
-			//formTypes.put(departmentFormType.getFormTypeId(),
-			//		departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()));
-		}
+			formTypes.put(departmentFormType.getFormTypeId(),
+					departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()));
+		}*/
 		//Collections.sort(departmentFormTypes, new DepartmentFormTypeComparator(formTypes));
 		
     	return currentAssigns;

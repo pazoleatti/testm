@@ -5,7 +5,6 @@ import java.util.Date;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
@@ -32,7 +31,6 @@ public class CurrentAssign implements Serializable{
     /* Дата окончания */
     private Date endDateAssign;
 
-    private FormType formType;
     private DeclarationType declarationType;
     private TaxType taxType;
     private Boolean isForm;
@@ -44,15 +42,6 @@ public class CurrentAssign implements Serializable{
 
     public void setDeclarationType(DeclarationType declarationType) {
         this.declarationType = declarationType;
-    }
-
-
-    public FormType getFormType() {
-        return formType;
-    }
-
-    public void setFormType(FormType formType) {
-        this.formType = formType;
     }
 
     public Long getId() {
