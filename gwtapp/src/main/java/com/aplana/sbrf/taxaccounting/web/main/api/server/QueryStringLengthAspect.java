@@ -11,7 +11,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -33,7 +35,9 @@ public class QueryStringLengthAspect {
         for (Object arg : args) {
             if (arg instanceof Action) {
                 Class<?> clazz = arg.getClass();
-                for (Field field : clazz.getDeclaredFields()) {
+                List<Field> fields = new ArrayList<Field>(Arrays.asList(clazz.getDeclaredFields()));
+                addDeclaredAndInheritedFields(clazz, fields);
+                for (Field field : fields) {
                     if (field.getType().equals(String.class)) {
                         if (fieldNames.contains(field.getName())) {
                             field.setAccessible(true);
@@ -49,6 +53,14 @@ public class QueryStringLengthAspect {
             }
         }
         return joinPoint.proceed(args);
+    }
+
+    private void addDeclaredAndInheritedFields(Class<?> c, Collection<Field> fields) {
+        fields.addAll(Arrays.asList(c.getDeclaredFields()));
+        Class<?> superClass = c.getSuperclass();
+        if (superClass != null) {
+            addDeclaredAndInheritedFields(superClass, fields);
+        }
     }
 
     private String trimString(String originalText, int maxStringLength) {
