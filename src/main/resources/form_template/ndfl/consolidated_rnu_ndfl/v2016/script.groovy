@@ -107,6 +107,7 @@ def calcTimeMillis(long time) {
 @Field final int NDFL_2_1_TEMPLATE_ID = 102
 @Field final int NDFL_2_2_TEMPLATE_ID = 104
 @Field final int NDFL_6_TEMPLATE_ID = 103
+@Field def ndflPersonCache = [:]
 
 //>------------------< CONSOLIDATION >----------------------<
 
@@ -516,11 +517,10 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
             consNdflPerson = new NdflPerson();
             consNdflPerson.recordId = personRecordId;
             result.put(personRecordId, consNdflPerson);
+            consNdflPerson.incomes.addAll(ndflPerson.incomes);
+            consNdflPerson.deductions.addAll(ndflPerson.deductions);
+            consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
         }
-
-        consNdflPerson.incomes.addAll(ndflPerson.incomes);
-        consNdflPerson.deductions.addAll(ndflPerson.deductions);
-        consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
 
     }
 
@@ -3152,7 +3152,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         Calendar firstWorkingDay = Calendar.getInstance()
                         firstWorkingDay.setTime(getReportPeriodStartDate())
                         firstWorkingDay.set(Calendar.DAY_OF_YEAR, firstWorkingDay.getActualMaximum(Calendar.DAY_OF_YEAR))
-                        firstWorkingDay.add(Calendar.DATE, 1)
+                        firstWorkingDay
+                                .add(Calendar.DATE, 1)
                         if (firstWorkingDay.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
                             firstWorkingDay.add(Calendar.DATE, 2);
                         }
