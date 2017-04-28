@@ -57,9 +57,6 @@ public class RefBookPickerFilterBuilder {
                 case DEFAULT:
                 case FORM_FILTER:
                     Department department = null;
-                    if (context.getFormDataId() != null) {
-                        department = departmentService.getFormDepartment(context.getFormDataId());
-                    }
                     regionFilter = RefBookPickerUtils.buildRegionFilterForUser(department == null ? null : Arrays.asList(department), refBook);
                     if (regionFilter != null && regionFilter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
                         return regionFilter;

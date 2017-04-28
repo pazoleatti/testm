@@ -50,8 +50,6 @@ public class PeriodServiceImpl implements PeriodService {
 	@Autowired
 	private DepartmentService departmentService;
     @Autowired
-    private FormDataSearchService formDataSearchService;
-    @Autowired
     private DeclarationDataService declarationDataService;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -471,36 +469,6 @@ public class PeriodServiceImpl implements PeriodService {
                 departmentIds = departmentService.getBADepartmentIds(user.getUser());
                 break;
         }
-        //Check forms
-        FormDataFilter dataFilter = new FormDataFilter();
-        if (drp.getCorrectionDate() != null) {
-            dataFilter.setCorrectionTag(true);
-            dataFilter.setCorrectionDate(drp.getCorrectionDate());
-        } else {
-            dataFilter.setCorrectionTag(false);
-        }
-        dataFilter.setDepartmentIds(departmentIds);
-		// Проверка на наличие форм в периоде
-        dataFilter.setReportPeriodIds(Collections.singletonList(drp.getReportPeriod().getId()));
-        List<FormData> formDatas = formDataSearchService.findDataByFilter(dataFilter);
-        for (FormData fd : formDatas) {
-            logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
-                    fd.getFormType().getName(), fd.getKind().getTitle(),
-                    departmentService.getDepartment(fd.getDepartmentId()).getName());
-        }
-
-		if (taxType.equals(ETR)) {
-			// Проверка на наличие форм в периоде сравнения
-			dataFilter.setReportPeriodIds(null);
-			dataFilter.setComparativePeriodId(Collections.singletonList(drp.getReportPeriod().getId()));
-			formDatas = formDataSearchService.findDataByFilter(dataFilter);
-			for (FormData fd : formDatas) {
-				logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
-						fd.getFormType().getName(), fd.getKind().getTitle(),
-						departmentService.getDepartment(fd.getDepartmentId()).getName());
-			}
-		}
-
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDepartmentIds(departmentIds);
         filter.setReportPeriodIds(Collections.singletonList(drp.getReportPeriod().getId()));

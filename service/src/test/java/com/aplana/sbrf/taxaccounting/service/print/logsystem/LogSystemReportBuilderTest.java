@@ -21,10 +21,8 @@ public class LogSystemReportBuilderTest {
     @Before
     public void init(){
         LogSearchResultItem item = new LogSearchResultItem();
-        FormType type = new FormType();
         DeclarationType declarationType = new DeclarationType();
         declarationType.setName("РНУ");
-        type.setName("Сводная");
         TAUser user = new TAUser();
         user.setName("Пользователь");
         user.setLogin("controlBank");
@@ -37,7 +35,7 @@ public class LogSystemReportBuilderTest {
         item.setLogDate(new Date());
         item.setNote("Проверочка!");
         item.setFormKind(FormDataKind.ADDITIONAL);
-        item.setFormTypeName(type.getName());
+        item.setFormTypeName("Сводная");
         item.setDepartmentName("Начальный");
         item.setDepartmentName("Подразделение");
         item.setDeclarationTypeName(declarationType.getName());

@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -115,12 +113,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private ValidateXMLService validateXMLService;
     @Autowired
     private SourceService sourceService;
-    @Autowired
-    private FormDataDao formDataDao;
-    @Autowired
-    private DataRowDao dataRowDao;
-    @Autowired
-    private FormTemplateService formTemplateService;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
     @Autowired
@@ -273,7 +265,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataDao.updateNote(id, note);
 
                 logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
-                auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, null, "Налоговая форма создана", null);
+                auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, "Налоговая форма создана", null);
                 return id;
             } finally {
                 lockDataService.unlock(key, userInfo.getUser().getId());
@@ -315,7 +307,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         sourceService.addDeclarationConsolidationInfo(id, declarationDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
-        auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Налоговая форма обновлена", null);
+        auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, "Налоговая форма обновлена", null);
         return createForm;
     }
 
@@ -394,7 +386,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
             declarationDataDao.delete(id);
 
-            auditService.add(FormDataEvent.DELETE , userInfo, declarationData, null, "Налоговая форма удалена", null);
+            auditService.add(FormDataEvent.DELETE , userInfo, declarationData, "Налоговая форма удалена", null);
         } else {
             if (lockData == null) lockData = lockDataAccept;
             if (lockData == null) lockData = lockDataCheck;
@@ -428,7 +420,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationData.setState(State.ACCEPTED);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED, null);
-        auditService.add(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED, userInfo, declarationData, null, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED.getTitle(), null);
+        auditService.add(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED, userInfo, declarationData, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED.getTitle(), null);
 
         lockStateLogger.updateState("Изменение состояния налоговой формы");
 
@@ -459,7 +451,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         sourceService.updateDDConsolidation(declarationData.getId());
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
-        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
+        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
 
         declarationDataDao.setStatus(id, declarationData.getState());
     }
@@ -1576,7 +1568,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
                 logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, null);
                 String note = "Загрузка данных из файла \"" + fileName + "\" в налоговую форму";
-                auditService.add(formDataEvent, userInfo, declarationData, null, note, null);
+                auditService.add(formDataEvent, userInfo, declarationData,  note, null);
             } finally {
                 IOUtils.closeQuietly(dataFileInputStream);
             }

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -33,8 +32,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     private DepartmentDao departmentDao;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
-    @Autowired
-    private FormTypeDao formTypeDao;
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
 
@@ -654,20 +651,19 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 "select count(*) from DECLARATION_DATA_CONSOLIDATION where TARGET_DECLARATION_DATA_ID = ? and SOURCE_DECLARATION_DATA_ID is null",
                 Integer.class, ddTargetId) == 0;
     }
-
+/*
     @Override
     public List<Relation> getSourcesInfo(FormData destinationFormData, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
         String sql = "select * from table(form_data_pckg.get_sources(:stateRestriction, :excludeIfNotExist, :destinationFormDataId, :formTemplateId, :departmentReportPeriodId, :kind, :compPeriod, :accruing, :periodOrder))";
-        params.put("destinationFormDataId", destinationFormData.getId());
-        params.put("formTemplateId", destinationFormData.getId() == null ? destinationFormData.getFormTemplateId() : null);
-        params.put("departmentReportPeriodId", destinationFormData.getId() == null ? destinationFormData.getDepartmentReportPeriodId() : null);
-        params.put("kind", destinationFormData.getKind() != null ? destinationFormData.getKind().getId() : null);
-        params.put("compPeriod", destinationFormData.getId() == null ? destinationFormData.getComparativePeriodId() : null);
-        params.put("accruing", destinationFormData.getId() == null ? destinationFormData.isAccruing() ? 1 : 0 : null);
-        params.put("periodOrder", destinationFormData.getId() == null ? destinationFormData.getPeriodOrder() : null);
-        params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
-        params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
+        //params.put("destinationFormDataId", destinationFormData.getId());
+        //params.put("formTemplateId", destinationFormData.getId() == null ? destinationFormData.getFormTemplateId() : null);
+        //params.put("departmentReportPeriodId", destinationFormData.getId() == null ? destinationFormData.getDepartmentReportPeriodId() : null);
+        //params.put("kind", destinationFormData.getKind() != null ? destinationFormData.getKind().getId() : null);
+        //params.put("accruing", destinationFormData.getId() == null ? destinationFormData.isAccruing() ? 1 : 0 : null);
+        //params.put("periodOrder", destinationFormData.getId() == null ? destinationFormData.getPeriodOrder() : null);
+        //params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
+        //params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
         try {
             List<Relation> result = new ArrayList<Relation>();
             getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result, light, false, true));
@@ -681,15 +677,14 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public List<Relation> getDestinationsInfo(FormData sourceFormData, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
         String sql = "select * from table(form_data_pckg.get_destinations(:stateRestriction, :excludeIfNotExist, :sourceFormDataId, :formTemplateId, :departmentReportPeriodId, :kind, :compPeriod, :accruing, :periodOrder))";
-        params.put("sourceFormDataId", sourceFormData.getId());
-        params.put("formTemplateId", sourceFormData.getId() == null ? sourceFormData.getFormTemplateId() : null);
-        params.put("departmentReportPeriodId", sourceFormData.getId() == null ? sourceFormData.getDepartmentReportPeriodId() : null);
-        params.put("kind", sourceFormData.getKind() != null ? sourceFormData.getKind().getId() : null);
-        params.put("compPeriod", sourceFormData.getId() == null ? sourceFormData.getComparativePeriodId() : null);
-        params.put("accruing", sourceFormData.getId() == null ? sourceFormData.isAccruing() ? 1 : 0 : null);
-        params.put("periodOrder", sourceFormData.getId() == null ? sourceFormData.getPeriodOrder() : null);
-        params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
-        params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
+        //params.put("sourceFormDataId", sourceFormData.getId());
+        //params.put("formTemplateId", sourceFormData.getId() == null ? sourceFormData.getFormTemplateId() : null);
+        //params.put("departmentReportPeriodId", sourceFormData.getId() == null ? sourceFormData.getDepartmentReportPeriodId() : null);
+        //params.put("kind", sourceFormData.getKind() != null ? sourceFormData.getKind().getId() : null);
+        //params.put("accruing", sourceFormData.getId() == null ? sourceFormData.isAccruing() ? 1 : 0 : null);
+        //params.put("periodOrder", sourceFormData.getId() == null ? sourceFormData.getPeriodOrder() : null);
+        //params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
+        //params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
         try {
             List<Relation> result = new ArrayList<Relation>();
             getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result, light, false, false));
@@ -703,16 +698,15 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
         String sql = "select * from table(declaration_pckg.get_destinations(:stateRestriction, :excludeIfNotExist, :sourceFormDataId, :formTemplateId, :departmentReportPeriodId, :kind, :compPeriod, :accruing))";
-        params.put("sourceFormDataId", sourceFormData.getId());
-        params.put("formTemplateId", sourceFormData.getId() == null ? sourceFormData.getFormTemplateId() : null);
-        params.put("departmentReportPeriodId", sourceFormData.getId() == null ? sourceFormData.getDepartmentReportPeriodId() : null);
-        params.put("kind", sourceFormData.getKind() != null ? sourceFormData.getKind().getId() : null);
-        params.put("compPeriod", sourceFormData.getId() == null ? sourceFormData.getComparativePeriodId() : null);
-        params.put("accruing", sourceFormData.getId() == null ? sourceFormData.isAccruing() ? 1 : 0 : null);
-        params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
-        params.put("stateRestriction", stateRestriction != null && (stateRestriction == WorkflowState.CREATED || stateRestriction ==WorkflowState.ACCEPTED) ?
-                stateRestriction == WorkflowState.ACCEPTED ? 1 : 0
-                : null);
+        //params.put("sourceFormDataId", sourceFormData.getId());
+        //params.put("formTemplateId", sourceFormData.getId() == null ? sourceFormData.getFormTemplateId() : null);
+        //params.put("departmentReportPeriodId", sourceFormData.getId() == null ? sourceFormData.getDepartmentReportPeriodId() : null);
+        //params.put("kind", sourceFormData.getKind() != null ? sourceFormData.getKind().getId() : null);
+        //params.put("accruing", sourceFormData.getId() == null ? sourceFormData.isAccruing() ? 1 : 0 : null);
+        //params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
+        //params.put("stateRestriction", stateRestriction != null && (stateRestriction == WorkflowState.CREATED || stateRestriction ==WorkflowState.ACCEPTED) ?
+        //        stateRestriction == WorkflowState.ACCEPTED ? 1 : 0
+        //        : null);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Relation>() {
                 @Override
@@ -721,8 +715,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     relation.setSource(false);
                     relation.setDeclarationDataId(SqlUtils.getLong(rs, "id"));
                     relation.setCreated(relation.getDeclarationDataId() != null);
-                    relation.setState(relation.getDeclarationDataId() == null ? WorkflowState.NOT_EXIST :
-                            SqlUtils.getInteger(rs, "IS_ACCEPTED") == 1 ? WorkflowState.ACCEPTED : WorkflowState.CREATED);
+                    //relation.setState(relation.getDeclarationDataId() == null ? WorkflowState.NOT_EXIST :
+                    //        SqlUtils.getInteger(rs, "IS_ACCEPTED") == 1 ? WorkflowState.ACCEPTED : WorkflowState.CREATED);
                     relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
                     relation.setTaxOrganCode(rs.getString("taxOrgan"));
                     relation.setKpp(rs.getString("kpp"));
@@ -745,7 +739,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Relation>();
         }
-    }
+    }*/
 
     @Override
     public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
@@ -825,7 +819,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             relation.setSource(source);
             relation.setFormDataId(SqlUtils.getLong(rs, "id"));
             relation.setCreated(relation.getFormDataId() != null);
-            relation.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
+            //relation.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
             relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
             relation.setFormDataKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "formDataKind")));
             relation.setManual(rs.getBoolean("manual"));
@@ -863,7 +857,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                         relation.setComparativePeriod(departmentReportPeriodDao.get(comparativePeriodId));
                     }
                 }
-                relation.setFormType(formTypeDao.get(SqlUtils.getInteger(rs, "formTypeId")));
             }
 
             //Заполняем исполнителей так, потому что их может быть несколько

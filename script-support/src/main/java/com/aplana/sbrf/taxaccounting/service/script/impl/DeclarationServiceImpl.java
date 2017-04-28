@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -57,8 +56,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DeclarationDataDao declarationDataDao;
     @Autowired
     private DeclarationDataService declarationDataService;
-    @Autowired
-    private FormDataDao formDataDao;
     @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
     @Autowired
@@ -115,28 +112,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId) {
         return declarationDataDao.findAllDeclarationData(declarationTypeId, departmentId, reportPeriodId);
-    }
-
-    @Override
-    public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) {
-        List<Relation> relations = sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, logger);
-        List<FormData> sources = new ArrayList<FormData>();
-        for (Relation relation : relations) {
-            if (relation.getState() == WorkflowState.ACCEPTED) {
-                FormData formData = formDataDao.get(relation.getFormDataId(), relation.isManual());
-                sources.add(formData);
-            } else {
-                context.getLogger().warn(
-                        "Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
-                        relation.getFormTypeName(),
-                        relation.getFormDataKind().getTitle(),
-                        relation.getFullDepartmentName()
-                );
-            }
-        }
-        FormDataCollection formDataCollection = new FormDataCollection();
-        formDataCollection.setRecords(sources);
-        return formDataCollection;
     }
 
     @Override

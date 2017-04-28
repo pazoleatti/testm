@@ -139,8 +139,6 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         List<RefBookAttribute> attributes = refBook.getAttributes();
         // разыменовывание ссылок
         Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage, true);
-        // кэшируем список дополнительных атрибутов(если есть) для каждого атрибута
-        Map<Long, List<Long>> attrId2Map = refBookHelper.getAttrToListAttrId2Map(attributes);
 
         for (Map<String, RefBookValue> record : refBookPage) {
             RefBookItem item = new RefBookItem();
@@ -181,14 +179,6 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                             if (value.getReferenceValue() == null) tableCell = "";
                             else {
                                 tableCell = dereferenceValues.get(attribute.getId()).get(value.getReferenceValue());
-                            }
-                            if (attrId2Map.get(attribute.getId()) != null) {
-                                for (Long id2 : attrId2Map.get(attribute.getId())) {
-                                    String value2 = null;
-                                    if (dereferenceValues.get(id2) != null)
-                                        value2 = dereferenceValues.get(id2).get(value.getReferenceValue());
-                                    dereferenceValue.getAttrId2DerefValueMap().put(id2, value2 == null ? "" : value2);
-                                }
                             }
                             break;
                         default:

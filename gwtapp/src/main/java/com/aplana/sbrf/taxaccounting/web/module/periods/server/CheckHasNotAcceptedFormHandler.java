@@ -38,9 +38,6 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
     private DeclarationTemplateService declarationTemplateService;
 
     @Autowired
-    private FormDataSearchService formDataSearchService;
-
-    @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Override
@@ -48,30 +45,6 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
         Logger logger = new Logger();
 
         List<Integer> departments = departmentService.getAllChildrenIds(action.getDepartmentId());
-        FormDataFilter dataFilter = new FormDataFilter();
-        dataFilter.setDepartmentIds(departments);
-        dataFilter.setReportPeriodIds(Arrays.asList(action.getReportPeriodId()));
-        if (action.getCorrectPeriod() != null) {
-            dataFilter.setCorrectionTag(true);
-            dataFilter.setCorrectionDate(action.getCorrectPeriod());
-        } else {
-            dataFilter.setCorrectionTag(false);
-        }
-        List<FormData> forms = formDataSearchService.findDataByFilter(dataFilter);
-
-        for (FormData fd : forms) {
-            if (fd.getState() != WorkflowState.ACCEPTED) {
-                DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
-                DepartmentReportPeriod drpCompare = fd.getComparativePeriodId() != null ? departmentReportPeriodService.get(fd.getComparativePeriodId()) : null;
-                logger.warn(MessageGenerator.getFDMsg(FD_NOT_ACCEPTED,
-                                fd,
-                                departmentService.getDepartment(fd.getDepartmentId()).getName(),
-                                fd.isManual(),
-                                drp,
-                                drpCompare)
-                );
-            }
-        }
 
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDepartmentIds(departments);

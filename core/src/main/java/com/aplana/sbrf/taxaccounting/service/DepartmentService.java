@@ -57,8 +57,7 @@ public interface DepartmentService {
      * список департаментов, "размотанный" вверх по иерархии от каждого доступного пользователю департамента. Таким образом,
      * эта функция возвращает список департаментов, который необходим для построения полноценного дерева.
      *
-     * @param availableDepartments список доступных пользователю департаментов. Данный список получаем при вызове
-     *                             FormDataSearchService.getAvailableFilterValues().getDepartmentIds()
+     * @param availableDepartments список доступных пользователю департаментов
      * @return список департаментов, необходимый для построения дерева
      */
     Map<Integer, Department> getRequiredForTreeDepartments(Set<Integer> availableDepartments);
@@ -192,14 +191,6 @@ public interface DepartmentService {
     Collection<Integer> getAppointmentDepartments(TAUser tAUser);
 
     /**
-     * 60 - Выборка id подразделений для параметров печатной формы
-     * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11381089">Аналитика</a>
-     * @param formData НФ
-     * @return
-     */
-    List<Integer> getPrintFormDepartments(FormData formData);
-
-    /**
      * 80 - Выборка id подразделений по открытым периодам
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11383234">Аналитика</a>
      * @param tAUser пользователь
@@ -243,13 +234,6 @@ public interface DepartmentService {
      *          Возвращает переданное подразделение, если оно и есть террбанк.
      */
     Department getParentTB(int departmentId);
-
-    /**
-     * Получить получить подразделение создавшее форму
-     * @param formDataId идентификатор формы
-     * @return подразделение создавшее форму
-     */
-    Department getFormDepartment(Long formDataId);
 
     /**
      * Переключание флага использования подразделения модулем Гарантий

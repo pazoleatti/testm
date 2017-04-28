@@ -13,7 +13,6 @@ public class DataRowColumnFactory {
     private boolean lockMode;
 	private Date startDate;
 	private Date endDate;
-    private Long formDataId;
 
 	public Column<DataRow<Cell>, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow<Cell>> cellTable) {
 		ColumnContext columnContext = new ColumnContext();
@@ -26,7 +25,6 @@ public class DataRowColumnFactory {
 				columnContext.setMode(ColumnContext.Mode.NORMAL_EDIT_MODE);
 			}
 		}
-        columnContext.setFormDataId(formDataId);
 		columnContext.setDateRange(startDate, endDate);
 		Column<DataRow<Cell>, ?> uiColumn;
 		switch (col.getColumnType()) {
@@ -93,12 +91,4 @@ public class DataRowColumnFactory {
 		this.startDate = startDate;
 		this.endDate = endDate;
 	}
-
-    public Long getFormDataId() {
-        return formDataId;
-    }
-
-    public void setFormDataId(Long formDataId) {
-        this.formDataId = formDataId;
-    }
 }

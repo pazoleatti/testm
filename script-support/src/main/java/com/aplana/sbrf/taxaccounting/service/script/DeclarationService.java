@@ -62,15 +62,6 @@ public interface DeclarationService {
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
 
     /**
-     * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
-     * "Принята"
-     *
-     * @param declarationData декларация
-     * @return список НФ-источников в статусе "Принята"
-     */
-    FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData, TAUserInfo userInfo, Logger logger);
-
-    /**
      * Получить данные декларации в формате законодателя (XML)
      *
      * @param declarationDataId идентификатор декларации

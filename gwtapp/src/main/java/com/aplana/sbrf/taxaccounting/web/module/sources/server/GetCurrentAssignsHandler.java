@@ -43,28 +43,14 @@ public class GetCurrentAssignsHandler extends
         queryParams.setSearchOrdering(action.getOrdering());
         queryParams.setAscending(action.isAscSorting());
         boolean isControlUNP = securityService.currentUserInfo().getUser().hasRole(TARole.N_ROLE_CONTROL_UNP);
-        if(!action.isDeclaration()){
-            List<DepartmentFormType> departmentFormTypes;
-            FormType formType = sourceService.getFormType(action.getTypeId());
-            if (action.getMode() == SourceMode.SOURCES) {
-                departmentFormTypes = sourceService.
-                        getDFTSourcesByDFT(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom,
-                                periodTo, queryParams);
-            } else {
-                departmentFormTypes = sourceService.
-                        getFormDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
-            }
-            result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes, formType.getTaxType(), isControlUNP));
+        if (action.getMode() == SourceMode.SOURCES) {
+            List<DepartmentFormType> departmentFormTypes = sourceService
+                    .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo, queryParams);
+            result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes, sourceService.getDeclarationType(action.getTypeId()).getTaxType(), isControlUNP));
         } else {
-            if (action.getMode() == SourceMode.SOURCES) {
-                List<DepartmentFormType> departmentFormTypes = sourceService
-                        .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo, queryParams);
-                result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes, sourceService.getDeclarationType(action.getTypeId()).getTaxType(), isControlUNP));
-            } else {
-                List<DepartmentDeclarationType> departmentFormTypes = sourceService.
-                        getDeclarationDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
-                result.setCurrentSources(sourceAssembler.assembleDDT(departmentFormTypes, sourceService.getFormType(action.getTypeId()).getTaxType(), isControlUNP));
-            }
+            List<DepartmentDeclarationType> departmentFormTypes = sourceService.
+                    getDeclarationDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);
+            //result.setCurrentSources(sourceAssembler.assembleDDT(departmentFormTypes, sourceService.getFormType(action.getTypeId()).getTaxType(), isControlUNP));
         }
 
         return result;

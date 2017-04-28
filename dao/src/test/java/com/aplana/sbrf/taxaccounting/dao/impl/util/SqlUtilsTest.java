@@ -57,12 +57,6 @@ public class SqlUtilsTest {
     }
 
 	@Test
-	public void transformFormStatesToSqlInStatementTest() {
-		Assert.assertEquals(String.format("(%s,%s)", WorkflowState.ACCEPTED.getId(), WorkflowState.CREATED.getId()),
-				SqlUtils.transformFormStatesToSqlInStatement(Arrays.asList(new WorkflowState[] {WorkflowState.ACCEPTED, WorkflowState.CREATED})));
-	}
-
-	@Test
 	public void transformTaxTypeToSqlInStatementTest() {
 		Assert.assertEquals(String.format("('%s','%s')", TaxType.INCOME.getCode(), TaxType.DEAL.getCode()),
 				SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(new TaxType[] {TaxType.INCOME, TaxType.DEAL})));

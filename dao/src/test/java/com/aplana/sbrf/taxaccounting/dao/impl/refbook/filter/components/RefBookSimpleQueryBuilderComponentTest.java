@@ -14,7 +14,6 @@ public class RefBookSimpleQueryBuilderComponentTest {
         RefBookSimpleQueryBuilderComponent builder = new RefBookSimpleQueryBuilderComponent();
         PreparedStatementData ps = builder.psGetMatchedRecordsByUniqueAttributes(createRefBook(), 2L, createRecord(),
                 createUniqueValues());
-        System.out.println(ps.getQueryString());
     }
 
     private RefBook createRefBook(){

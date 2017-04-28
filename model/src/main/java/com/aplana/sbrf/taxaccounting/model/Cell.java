@@ -292,8 +292,6 @@ public class Cell extends AbstractCell {
     /**
      * Задать {@link FormStyle#getAlias() алиас стиля}, связанного с ячейкой.
      * Стиль с таким алиасом должен быть определён в
-     * {@link FormTemplate#getStyles() коллекции стилей}, связанных с шаблоном
-     * налоговой формы
      *
      * @param styleAlias {@link FormStyle#getAlias() алиас стиля}, связанного с
      *                   ячейкой.

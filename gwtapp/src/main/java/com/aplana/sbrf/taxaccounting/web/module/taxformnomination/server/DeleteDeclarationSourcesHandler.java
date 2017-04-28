@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
@@ -36,8 +34,6 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
 	LogEntryService logEntryService;
 	@Autowired
 	DepartmentService departmentService;
-	@Autowired
-	FormTypeService formTypeService;
 	@Autowired
 	DeclarationTypeService declarationTypeService;
 	@Autowired
@@ -60,6 +56,8 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
             if (existDeclaration) {
                 continue;
             }
+			departmentFormTypeService.deleteDDT(Arrays.asList(ddt.getId()));
+            /*
 			List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
 					.getDFTSourceByDDT(ddt.getDepartment().getId(), ddt.getFormTypeId().intValue(), periodStart, periodEnd);
 			if (departmentFormTypes.isEmpty()) { // Нет назначений
@@ -74,7 +72,7 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
                         SOURCE_CANCEL_ERR + sb.delete(sb.length() - 2, sb.length()).toString(),
                         ddt.getDepartment().getName(), ddt.getName()
                 );
-			}
+			}*/
 		}
 
 		result.setUuid(logEntryService.save(logger.getEntries()));
@@ -86,7 +84,7 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
 	public void undo(DeleteDeclarationSourcesAction deleteDeclarationSourcesAction, DeleteDeclarationSourcesResult deleteDeclarationSourcesResult, ExecutionContext executionContext) throws ActionException {
 
 	}
-
+/*
     private StringBuffer getTaxFormErrorTextPart(DepartmentFormType dft){
         StringBuffer stringBuffer = new StringBuffer();
         FormType type = formTypeService.get(dft.getFormTypeId());
@@ -117,5 +115,5 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
         );
 
         return stringBuffer;
-    }
+    }*/
 }

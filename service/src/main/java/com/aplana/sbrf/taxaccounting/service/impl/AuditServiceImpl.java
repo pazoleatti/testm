@@ -123,37 +123,31 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public void add(final FormDataEvent event, final TAUserInfo userInfo, final DeclarationData declarationData, final FormData formData, final String note, final String logId) {
+    public void add(final FormDataEvent event, final TAUserInfo userInfo, final DeclarationData declarationData, final String note, final String logId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
-                int departmentId = declarationData != null ? declarationData.getDepartmentId() : formData.getDepartmentId();
-                Integer reportPeriodId = declarationData != null ? declarationData.getReportPeriodId() : formData.getReportPeriodId();
-                int departmentRPId = declarationData != null ? declarationData.getDepartmentReportPeriodId() : formData.getDepartmentReportPeriodId();
-                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentRPId);
-                String corrStr = departmentReportPeriod.getCorrectionDate() != null ? " в корр.периоде " + sdf.get().format(departmentReportPeriod.getCorrectionDate()) : "";
+                if (declarationData != null) {
+                    int departmentId = declarationData.getDepartmentId();
+                    Integer reportPeriodId = declarationData.getReportPeriodId();
+                    int departmentRPId = declarationData.getDepartmentReportPeriodId();
+                    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentRPId);
+                    String corrStr = departmentReportPeriod.getCorrectionDate() != null ? " в корр.периоде " + sdf.get().format(departmentReportPeriod.getCorrectionDate()) : "";
 
 
-                String departmentName = departmentId == 0 ?
-                        departmentService.getDepartment(departmentId).getName() :
-                        departmentService.getParentsHierarchy(departmentId);
+                    String departmentName = departmentId == 0 ?
+                            departmentService.getDepartment(departmentId).getName() :
+                            departmentService.getParentsHierarchy(departmentId);
 
-                ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
-                String rpName =  String.format(
-                        RP_NAME_WITH_CORR_PATTERN,
-                        reportPeriod.getTaxPeriod().getYear(),
-                        reportPeriod.getName(),
-                        corrStr);
-                String decTypeName = null, ftName = null;
-                Integer formKindId =null;
-                if (declarationData != null){
-                    decTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
-                } else {
-                    ftName = formData.getFormType().getName();
-                    formKindId = formData.getKind().getId();
+                    ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+                    String rpName = String.format(
+                            RP_NAME_WITH_CORR_PATTERN,
+                            reportPeriod.getTaxPeriod().getYear(),
+                            reportPeriod.getName(),
+                            corrStr);
+                    String decTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
+                    add(event, userInfo, departmentName, departmentId, rpName, decTypeName, null, null, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, null, logId);
                 }
-
-                add(event, userInfo, departmentName, departmentId, rpName, decTypeName, ftName, formKindId, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, null, logId);
                 return null;
             }
         });

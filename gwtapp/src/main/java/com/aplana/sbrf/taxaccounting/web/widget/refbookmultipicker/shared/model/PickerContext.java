@@ -9,7 +9,6 @@ public class PickerContext implements Serializable{
     private static final long serialVersionUID = 1437921401222684027L;
 
     private RegionFilter regionFilter = RegionFilter.DEFAULT;
-    private Long formDataId;
     private Long attributeId;
 
     public RegionFilter getRegionFilter() {
@@ -18,14 +17,6 @@ public class PickerContext implements Serializable{
 
     public void setRegionFilter(RegionFilter regionFilter) {
         this.regionFilter = regionFilter;
-    }
-
-    public Long getFormDataId() {
-        return formDataId;
-    }
-
-    public void setFormDataId(Long formDAtaId) {
-        this.formDataId = formDAtaId;
     }
 
     public Long getAttributeId() {

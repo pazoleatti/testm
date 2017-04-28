@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
-import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.XlsxReportMetadata;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.*;
@@ -67,6 +66,13 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     private Date version;
     private String filter;
     private RefBookAttribute sortAttribute;
+
+    public static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     public RefBookExcelReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues, Date version, String filter, final RefBookAttribute sortAttribute) {
         super(FILE_NAME, ".xlsx");
@@ -284,7 +290,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
                 case DATE:
                     style.setAlignment(CellStyle.ALIGN_CENTER);
                     if(format.isEmpty()){
-                        style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.get().toPattern()));
+                        style.setDataFormat(dataFormat.getFormat(sdf.get().toPattern()));
                     } else{
                         style.setDataFormat(dataFormat.getFormat(format));
                     }
@@ -293,7 +299,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
                     if (!Formats.BOOLEAN.equals(attribute.getFormat())) {
                         style.setAlignment(CellStyle.ALIGN_RIGHT);
                         style.setWrapText(true);
-                        style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.getPrecision(attribute.getPrecision())));
+                        style.setDataFormat(dataFormat.getFormat(getPrecision(attribute.getPrecision())));
                         break;
                     }
                 case STRING:
@@ -321,4 +327,18 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         }
         super.cellAlignment();
     }
+
+    /*
+ * Patterns for printing in Exel. "###," shows that we must grouping by 3 characters
+ */
+    public static String getPrecision(int number){
+        StringBuilder str = new StringBuilder("#,##0");
+        if(number>0) {
+            str.append(".");
+            for (int i = 0; i < number; i++)
+                str.append("0");
+        }
+        return str.toString();
+    }
+
 }
