@@ -531,20 +531,20 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 timerSpecific.scheduleRepeating(4000);
                 timerSpecific.run();
             } else {
-                viewPdf.setVisible(false);
+                //viewPdf.setVisible(false);
                 printToXml.setVisible(false);
                 printToExcelPanel.setVisible(false);
                 printAnchor.setEnabled(false);
                 timerSpecific.cancel();
             }
-        } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
+        } /*else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
             if (isLoad) {
                 viewPdf.setVisible(false);
                 timerPDF.cancel();
             } else {
                 viewPdf.setVisible(isVisiblePDF);
             }
-        } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
+        }*/ else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
             if (!isLoad) {
                 getUiHandlers().revealPlaceRequest();
                 timerAccept.cancel();
@@ -661,7 +661,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public void setVisiblePDF(boolean isVisiblePDF) {
         this.isVisiblePDF = isVisiblePDF;
-        viewPdf.setVisible(isVisiblePDF);
+        //viewPdf.setVisible(isVisiblePDF);
     }
 
     @Override
