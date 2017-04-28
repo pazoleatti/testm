@@ -69,6 +69,8 @@ final DeclarationData declarationData = getProperty("declarationData")
 final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
 @Field
 final DeclarationService declarationService = getProperty("declarationService")
+@Field
+final RefBookService refBookService = getProperty("refBookService")
 
 def getProperty(String name) {
     try{
@@ -105,6 +107,7 @@ def calcTimeMillis(long time) {
 @Field final int NDFL_2_1_TEMPLATE_ID = 102
 @Field final int NDFL_2_2_TEMPLATE_ID = 104
 @Field final int NDFL_6_TEMPLATE_ID = 103
+@Field def ndflPersonCache = [:]
 
 //>------------------< CONSOLIDATION >----------------------<
 
@@ -514,11 +517,10 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
             consNdflPerson = new NdflPerson();
             consNdflPerson.recordId = personRecordId;
             result.put(personRecordId, consNdflPerson);
+            consNdflPerson.incomes.addAll(ndflPerson.incomes);
+            consNdflPerson.deductions.addAll(ndflPerson.deductions);
+            consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
         }
-
-        consNdflPerson.incomes.addAll(ndflPerson.incomes);
-        consNdflPerson.deductions.addAll(ndflPerson.deductions);
-        consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
 
     }
 
@@ -1113,54 +1115,55 @@ def checkDataConsolidated(){
     if (FORM_DATA_KIND.equals(FormDataKind.CONSOLIDATED)) {
         // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
         def mapDepartmentNotExistRnu = [
-                4  : 'Байкальский банк',
-                8  : 'Волго-Вятский банк',
-                20 : 'Дальневосточный банк',
-                27 : 'Западно-Сибирский банк',
-                32 : 'Западно-Уральский банк',
-                37 : 'Московский банк',
-                44 : 'Поволжский банк',
-                52 : 'Северный банк',
-                64 : 'Северо-Западный банк',
-                82 : 'Сибирский банк',
-                88 : 'Среднерусский банк',
-                97 : 'Уральский банк',
-                113: 'Центральный аппарат ПАО Сбербанк',
-                102: 'Центрально-Чернозёмный банк',
-                109: 'Юго-Западный банк'
+                4L  : 'Байкальский банк',
+                8L  : 'Волго-Вятский банк',
+                20L : 'Дальневосточный банк',
+                27L : 'Западно-Сибирский банк',
+                32L : 'Западно-Уральский банк',
+                37L : 'Московский банк',
+                44L : 'Поволжский банк',
+                52L : 'Северный банк',
+                64L : 'Северо-Западный банк',
+                82L : 'Сибирский банк',
+                88L : 'Среднерусский банк',
+                97L : 'Уральский банк',
+                113L : 'Центральный аппарат ПАО Сбербанк',
+                102L : 'Центрально-Чернозёмный банк',
+                109L : 'Юго-Западный банк'
         ]
         def listDepartmentNotAcceptedRnu = []
         List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
         for (DeclarationData dd : declarationDataList) {
             // Подразделение
             Long departmentCode = departmentService.get(dd.departmentId)?.code
-            mapDepartmentNotExistRnu.remove(departmentCode)
 
             // Если налоговая форма не принята
             if (!dd.state.equals(State.ACCEPTED)) {
-                listDepartmentNotAcceptedRnu.add(mapDepartmentNotExistRnu.get(departmentCode))
+                listDepartmentNotAcceptedRnu << mapDepartmentNotExistRnu[departmentCode]
             }
+            mapDepartmentNotExistRnu.remove(departmentCode)
         }
 
         // Период
-        def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        def reportPeriod = departmentReportPeriod.reportPeriod
         def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
         def periodCode = period?.CODE?.stringValue
         def periodName = period?.NAME?.stringValue
         def calendarStartDate = reportPeriod?.calendarStartDate
-
+        String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
         if (!mapDepartmentNotExistRnu.isEmpty()) {
             def listDepartmentNotExistRnu = []
             mapDepartmentNotExistRnu.each {
                 listDepartmentNotExistRnu.add(it.value)
             }
             logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                    " года не созданы экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotExistRnu.join("\", \"")}'." +
+                    " года" + correctionDateExpression + " не созданы экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotExistRnu.join("\", \"")}'." +
                     " Данные этих форм не включены в отчетность!")
         }
         if (!listDepartmentNotAcceptedRnu.isEmpty()) {
             logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                    " года имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.join("\", \"")}'," +
+                    " года" + correctionDateExpression + " имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.join("\", \"")}'," +
                     " для которых в системе существуют КНФ в текущем периоде, состояние которых <> 'Принята'. Данные этих форм не включены в отчетность!")
         }
     }
@@ -2588,13 +2591,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 }
 
 // Кэш для справочников
-@Field def refBookCache = [:]
+@Field Map<String, Map<String, RefBookValue>> refBookCache = [:]
 
 /**
  * Разыменование записи справочника
  */
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+@TypeChecked
+Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
+    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /**
@@ -3148,7 +3152,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         Calendar firstWorkingDay = Calendar.getInstance()
                         firstWorkingDay.setTime(getReportPeriodStartDate())
                         firstWorkingDay.set(Calendar.DAY_OF_YEAR, firstWorkingDay.getActualMaximum(Calendar.DAY_OF_YEAR))
-                        firstWorkingDay.add(Calendar.DATE, 1)
+                        firstWorkingDay
+                                .add(Calendar.DATE, 1)
                         if (firstWorkingDay.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
                             firstWorkingDay.add(Calendar.DATE, 2);
                         }
@@ -3171,7 +3176,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         }
                         if (ndflPersonIncomeFind != null) {
                             Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
-                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind)) {
+                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind, dateConditionWorkDay)) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                         "НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncomeFind.taxTransferDate ?: ""}' и Доход.Дата.Выплата (Графа 7)='${ndflPersonIncomeFind.incomePayoutDate ?: ""}'")
@@ -3617,6 +3622,7 @@ class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
 /**
  * Проверка: "Графа 21" = "Графа 7" + "1 рабочий день"
  */
+@TypeChecked
 class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
