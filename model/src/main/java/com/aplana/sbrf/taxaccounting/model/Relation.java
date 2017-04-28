@@ -15,8 +15,6 @@ public class Relation implements Serializable {
     private Department department;
     /** Период */
     private DepartmentReportPeriod departmentReportPeriod;
-    /** Статус ЖЦ */
-    private WorkflowState state;
     /** форма/декларация создана/не создана */
     private boolean created;
     /** является ли форма источников, в противном случае приемник*/
@@ -121,14 +119,6 @@ public class Relation implements Serializable {
 
     public void setDepartmentReportPeriod(DepartmentReportPeriod departmentReportPeriod) {
         this.departmentReportPeriod = departmentReportPeriod;
-    }
-
-    public WorkflowState getState() {
-        return state;
-    }
-
-    public void setState(WorkflowState state) {
-        this.state = state;
     }
 
     public boolean isCreated() {
@@ -356,7 +346,6 @@ public class Relation implements Serializable {
         if (department != null ? !department.equals(relation.department) : relation.department != null) return false;
         if (departmentReportPeriod != null ? !departmentReportPeriod.equals(relation.departmentReportPeriod) : relation.departmentReportPeriod != null)
             return false;
-        if (state != relation.state) return false;
         if (taxType != relation.taxType) return false;
         if (formDataId != null ? !formDataId.equals(relation.formDataId) : relation.formDataId != null) return false;
         if (formDataKind != relation.formDataKind) return false;
@@ -391,7 +380,6 @@ public class Relation implements Serializable {
     public int hashCode() {
         int result = department != null ? department.hashCode() : 0;
         result = 31 * result + (departmentReportPeriod != null ? departmentReportPeriod.hashCode() : 0);
-        result = 31 * result + (state != null ? state.hashCode() : 0);
         result = 31 * result + (created ? 1 : 0);
         result = 31 * result + (source ? 1 : 0);
         result = 31 * result + (status ? 1 : 0);

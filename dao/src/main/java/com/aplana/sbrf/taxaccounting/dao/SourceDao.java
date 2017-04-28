@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.Relation;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.source.*;
 
 import java.util.*;
@@ -241,5 +240,5 @@ public interface SourceDao {
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    //List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 }

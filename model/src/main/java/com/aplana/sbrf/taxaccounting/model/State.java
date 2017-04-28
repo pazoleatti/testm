@@ -42,6 +42,6 @@ public enum State {
 				return state;
 			}
 		}
-		throw new IllegalArgumentException("Wrong WorkflowState id: " + id);
+		throw new IllegalArgumentException("Wrong State id: " + id);
 	}
 }
