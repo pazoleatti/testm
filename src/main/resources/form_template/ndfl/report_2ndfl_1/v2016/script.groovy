@@ -211,8 +211,14 @@ final NDFL_REFERENCES_BIRTHDAY = "BIRTHDAY"
 @Field
 final NDFL_REFERENCES_ERRTEXT = "ERRTEXT"
 
+// Кэш для справочников
+@Field Map<String, Map<String, RefBookValue>> refBookCache = [:]
+
 @Field
 final OKTMO_CACHE = [:]
+
+@Field
+final RefBookService refBookService = getProperty("refBookService")
 
 def buildXml(def writer) {
     buildXml(writer, false, null, null)
@@ -1240,6 +1246,14 @@ def getDeductionMark(def id) {
     getProvider(REF_BOOK_DEDUCTION_MARK_ID).getRecordData(id).NAME?.value
 }
 
+/**
+ * Разыменование записи справочника
+ */
+@TypeChecked
+Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
+    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
 
 @Field
@@ -1313,7 +1327,14 @@ def createForm() {
                 declarationsForRemove << declaration
             }
         }
+
         declarations.removeAll(declarationsForRemove)
+
+        if (declarations.isEmpty()) {
+            createCorrPeriodNotFoundMessage(departmentReportPeriod, departmentReportPeriodList, true)
+            return
+        }
+
         declarations.each { declaration ->
             def pairKppOktmo = new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
             if (!pairKppOktmoList.contains(pairKppOktmo)) {
@@ -1323,6 +1344,11 @@ def createForm() {
         declarations.each {
             ScriptUtils.checkInterrupted();
             ndflReferencesWithError.addAll(getNdflReferencesWithError(it.id, it.reportPeriodId))
+        }
+
+        if (ndflReferencesWithError.isEmpty()) {
+            createCorrPeriodNotFoundMessage(departmentReportPeriod, departmentReportPeriodList, false)
+            return
         }
         // Поиск КПП и ОКТМО для некорр периода
     } else {
@@ -1415,6 +1441,28 @@ def createForm() {
 }
 
 /**
+ * Добавляет в логгер сообщение о том что не найдены формы для корректирующего периода
+ * @param departmentReportPeriod
+ * @param forDepartment
+ * @return
+ */
+def createCorrPeriodNotFoundMessage(departmentReportPeriod, departmentReportPeriodList, boolean forDepartment) {
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    DepartmentReportPeriod prevDrp = departmentReportPeriodList.get(0)
+    def reportPeriod = prevDrp.reportPeriod
+    def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+    def periodCode = period?.CODE?.stringValue
+    def periodName = period?.NAME?.stringValue
+    String correctionDateExpression = prevDrp.correctionDate == null ? "" : ", с датой сдачи корректировки ${prevDrp?.correctionDate?.format("dd.MM.yyyy")},"
+    if (forDepartment) {
+        logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
+    } else {
+        logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдены физические лица для формирования уточненной отчетности")
+    }
+
+}
+
+/**
  * Добавить ФЛ к паре КПП и ОКТМО. Если какая-то пара КПП+ОКТМО указана в справочнике больше 1 раза,
  * прозводится анализ значения "Код НО конечный", указанные для этих повтояющихся пар
  * @param ndflPersonsGroupedByKppOktmo мапа где ключ пара КПП и ОКТМО
@@ -1461,6 +1509,11 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         ScriptUtils.checkInterrupted();
         allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
     }
+
+    if (allDeclarationData.isEmpty()) {
+        createEmptyMessage(departmentReportPeriod, false)
+        return allDeclarationData
+    }
     // удаление форм не со статусом Принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
@@ -1469,7 +1522,26 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         }
     }
     allDeclarationData.removeAll(declarationsForRemove)
+    if (allDeclarationData.isEmpty()) {
+        createEmptyMessage(departmentReportPeriod, true)
+    }
+
     return allDeclarationData
+}
+
+def createEmptyMessage(departmentReportPeriod, boolean acceptChecking) {
+    def reportPeriod = departmentReportPeriod.reportPeriod
+    def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+    def periodCode = period?.CODE?.stringValue
+    def periodName = period?.NAME?.stringValue
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
+    if (acceptChecking) {
+        logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
+    } else {
+        logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
+    }
+
 }
 
 /************************************* ВЫГРУЗКА ***********************************************************************/

@@ -78,7 +78,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir") + File.separator + "%s.%s";
     private static final String CALCULATION_NOT_TOPICAL = "Налоговая форма содержит неактуальные консолидированные данные  " +
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
-            "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
+            "консолидация).";
+    private static final String CALCULATION_NOT_TOPICAL_SUFFIX = " Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
     private static final int DEFAULT_TF_FILE_TYPE_CODE = 1;
 
     @Autowired
@@ -1394,7 +1395,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         boolean consolidationOk = true;
         //Проверка на неактуальные консолидированные данные  3А
         if (!sourceService.isDDConsolidationTopical(dd.getId())){
-            logger.error(CALCULATION_NOT_TOPICAL);
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(dd.getDeclarationTemplateId());
+            boolean isReports = TaxType.NDFL.equals(declarationTemplate.getType().getTaxType()) && DeclarationFormKind.REPORTS.equals(declarationTemplate.getDeclarationFormKind());
+            logger.error(CALCULATION_NOT_TOPICAL + (isReports?"":CALCULATION_NOT_TOPICAL_SUFFIX));
             consolidationOk = false;
         } else {
             //Проверка того, что консолидация вообще когда то выполнялась для всех источников
@@ -1667,6 +1670,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     DeclarationData declarationData = get(entry.getKey(), userInfo);
                     oktmoKppList.add(String.format("ОКТМО: %s, КПП: %s.", declarationData.getOktmo(), declarationData.getKpp()));
                     logger.error("Произошла непредвиденная ошибка при расчете для " + getDeclarationFullName(entry.getKey(), null));
+                    String taxOrgan = declarationData.getTaxOrganCode() != null ? "Налоговый орган: \"" + declarationData.getTaxOrganCode() + "\"" : "";
+                    String kpp = declarationData.getKpp() != null ? ", КПП: \"" + declarationData.getKpp() + "\"" : "";
+                    String oktmo = declarationData.getOktmo() != null ? ", ОКТМО: \"" + declarationData.getOktmo() + "\"" : "";
+                    auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Произошла ошибка для " + taxOrgan + kpp + oktmo, null);
                     logger.getEntries().addAll(scriptLogger.getEntries());
                     declarationDataDao.delete(entry.getKey());
                 } else {
