@@ -2248,7 +2248,7 @@ def checkDataReference(
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
         // Спр5 Код вида дохода (Необязательное поле)
-        if (ndflPersonIncome.incomeCode != null && !incomeCodeMap.find { key, value ->
+        if (ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
             value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
                     ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
                     ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
@@ -2277,7 +2277,7 @@ def checkDataReference(
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода и признака дохода справочнику", fioAndInp, pathError,
                         "'Доход.Вид.Признак (Графа 5)' не соответствует справочнику '$R_INCOME_TYPE'")
             } else {
-                if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode)) {
+                if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeAccruedDate != null) {
                     def incomeCodeRefList = []
                     incomeTypeIdList.each { incomeTypeId ->
                         def incomeCodeRef = incomeCodeMap.get(incomeTypeId)
@@ -2746,9 +2746,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                             "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
-                            "Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий: \\n" +
-                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2\\n" +
-                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 или 1011 и «Графа 12 Раздел 1» = 1\\n" +
+                            "Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий:" +
+                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2," +
+                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 или 1011 и «Графа 12 Раздел 1» = 1," +
                                     " «Графа 7 Раздел 1» ≠ 643 и («Графа 4 Раздел 2» = 2000 или 2001 или 2010 или 2002 или 2003) и («Графа 12 Раздел 1» >= 3)")
                 }
             } else if (ndflPersonIncome.taxRate == 15) {
@@ -2775,8 +2775,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                             "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
-                            "Для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:\\n" +
-                                    " «Графа 12 Раздел 1» >= 2 и «Графа 4 Раздел 2» ≠ 1010\\n" +
+                            "Для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:" +
+                                    " «Графа 12 Раздел 1» >= 2 и «Графа 4 Раздел 2» ≠ 1010," +
                                     " («Графа 4 Раздел 2» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2")
                 }
             } else if (ndflPersonIncome.taxRate == 9) {
@@ -3422,14 +3422,13 @@ boolean dateRelateToCurrentPeriod(def paramName, def date, String kpp, String ok
     if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
         return true
     }
-    logger.warn("""
-У параметра ТФ "$paramName" недопустимое значение: "${date ? date.format("dd.MM.yyyy"): ""}":дата операции не входит в отчетный период ТФ.
-КПП = $kpp.
-ОКТМО = $oktmo
-ФЛ ИНП = $inp
-ФИО = $fio
-ИдОперации = ${ndflPersonIncome.operationId}
-Номер строки = ${ndflPersonIncome.rowNum}""")
+    logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format("dd.MM.yyyy"): ""}: дата операции не входит в отчетный период ТФ. " +
+            "КПП = $kpp, " +
+            "ОКТМО = $oktmo, " +
+            "ФЛ ИНП = $inp, " +
+            "ФИО = $fio, " +
+            "ИдОперации = ${ndflPersonIncome.operationId}, " +
+            "Номер строки = ${ndflPersonIncome.rowNum}.")
     return false
 }
 
@@ -3825,7 +3824,7 @@ def getRefBookNdflDetail(def departmentParamId) {
     def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
     def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-        departmentParamException(departmentId, declarationData.reportPeriodId)
+        departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
     }
     def kppList = []
     def mapOktmo = getRefOktmoByDepartmentId()

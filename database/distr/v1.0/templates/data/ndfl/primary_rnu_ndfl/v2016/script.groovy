@@ -200,8 +200,32 @@
 
 
     NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper() {
+        final Logger localLogger = logger
+        NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper() {
+            @Override
+            public DocType getDocTypeByCode(String code, NaturalPerson ndflPerson) {
+                if (code != null) {
+                    if (docTypeCodeMap == null) {
+                        throw new ServiceException("Не проинициализирован кэш справочника 'Коды документов'!") as Throwable;
+                    }
 
-        NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper();
+                    DocType result = docTypeCodeMap.get(code);
+                    if (result == null) {
+                        String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                        String inp = ndflPerson.getPersonIdentifier().inp
+                        String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
+                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, "",
+                                "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
+                        localLogger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
+                                "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
+                    }
+
+                    return result;
+                } else {
+                    return null;
+                }
+            }
+        }
         naturalPersonRowMapper.setAsnuId(declarationData.asnuId);
 
         //naturalPersonRowMapper.setLogger(logger); //TODO отключил из-за предупреждений по справочнику ФИАС
@@ -303,6 +327,9 @@
 
         //Получаем список всех ФЛ в первичной НФ
         List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper());
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
+        }
 
         logger.info("В ПНФ номер " + declarationData.id + " получены записи о физ.лицах (" + primaryPersonDataList.size() + " записей, " + calcTimeMillis(time));
 
@@ -1745,14 +1772,13 @@
         if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
             return true
         }
-        logger.warn("""
-    У параметра ТФ "$paramName" недопустимое значение: "${date ? date.format("dd.MM.yyyy"): ""}":дата операции не входит в отчетный период ТФ.
-    КПП = $kpp.
-    ОКТМО = $oktmo
-    ФЛ ИНП = $inp
-    ФИО = $fio
-    ИдОперации = ${ndflPersonIncome.operationId}
-    Номер строки = ${ndflPersonIncome.rowNum}""")
+        logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format("dd.MM.yyyy"): ""}: дата операции не входит в отчетный период ТФ. " +
+    "КПП = $kpp, " +
+    "ОКТМО = $oktmo, " +
+    "ФЛ ИНП = $inp, " +
+    "ФИО = $fio, " +
+    "ИдОперации = ${ndflPersonIncome.operationId}, " +
+    "Номер строки = ${ndflPersonIncome.rowNum}.")
         return false
     }
 
@@ -3657,9 +3683,9 @@
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
-                                "Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий: \\n" +
-                                        " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2\\n" +
-                                        " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 или 1011 и «Графа 12 Раздел 1» = 1\\n" +
+                                "Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий:" +
+                                        " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2," +
+                                        " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 или 1011 и «Графа 12 Раздел 1» = 1," +
                                         " «Графа 7 Раздел 1» ≠ 643 и («Графа 4 Раздел 2» = 2000 или 2001 или 2010 или 2002 или 2003) и («Графа 12 Раздел 1» >= 3)")
                     }
                 } else if (ndflPersonIncome.taxRate == 15) {
@@ -3686,8 +3712,8 @@
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
-                                "Для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:\\n" +
-                                        " «Графа 12 Раздел 1» >= 2 и «Графа 4 Раздел 2» ≠ 1010\\n" +
+                                "Для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:" +
+                                        " «Графа 12 Раздел 1» >= 2 и «Графа 4 Раздел 2» ≠ 1010," +
                                         " («Графа 4 Раздел 2» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2")
                     }
                 } else if (ndflPersonIncome.taxRate == 9) {
@@ -4494,7 +4520,7 @@
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
         def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            departmentParamException(departmentId, declarationData.reportPeriodId)
+            departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
         }
         def kppList = []
         def mapOktmo = getRefOktmoByDepartmentId()

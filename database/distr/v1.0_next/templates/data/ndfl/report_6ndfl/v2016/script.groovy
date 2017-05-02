@@ -1,7 +1,6 @@
 package form_template.ndfl.report_6ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.service.script.*
 import groovy.transform.Field
 import groovy.transform.TypeChecked
 import groovy.xml.MarkupBuilder
@@ -16,14 +15,19 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.DeclarationData
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
-import org.apache.commons.lang3.StringUtils;
-import com.aplana.sbrf.taxaccounting.model.ndfl.*
+import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 switch (formDataEvent) {
@@ -96,7 +100,9 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field final FORM_NAME_NDFL6 = "НДФЛ6"
 @Field final FORM_NAME_NDFL2 = "НДФЛ2"
 @Field final int DECLARATION_TYPE_RNU_NDFL_ID = 101
-@Field final int DECLARATION_TYPE_NDFL2_ID = 102
+@Field final int DECLARATION_TYPE_NDFL2_1_ID = 102
+@Field final int DECLARATION_TYPE_NDFL2_2_ID = 104
+@Field final int DECLARATION_TYPE_NDFL6_ID = 103
 
 // Узлы 6 НДФЛ
 @Field final NODE_NAME_SUM_STAVKA6 = "СумСтавка"
@@ -210,7 +216,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 Период: getPeriod(departmentParamIncomeRow, periodCode),
                 ОтчетГод: reportPeriod.taxPeriod.year,
                 КодНО: departmentParamIncomeRow?.TAX_ORGAN_CODE?.value,
-                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
+                НомКорр: sprintf('%02d', findCorrectionNumber()),
                 ПоМесту: taxPlaceTypeCode
         ) {
             def svNP = ["ОКТМО": declarationData.oktmo]
@@ -436,6 +442,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
 //    println(writer)
 }
 
+
 class PairPersonOperationId {
     Long ndflPersonId
     String operationId
@@ -463,6 +470,55 @@ class PairPersonOperationId {
         result = 31 * result + operationId.hashCode()
         return result
     }
+}
+
+int findCorrectionNumber() {
+    int toReturn = 0
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    if (departmentReportPeriod.correctionDate == null) {
+        return toReturn
+    }
+    DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter();
+    departmentReportPeriodFilter.setDepartmentIdList([declarationData.departmentId])
+    departmentReportPeriodFilter.setReportPeriodIdList([declarationData.reportPeriodId])
+    departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
+
+    List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
+    Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
+    while (it.hasNext()) {
+        DepartmentReportPeriod depReportPeriod = it.next();
+        if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+            it.remove();
+        }
+    }
+    departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
+        @Override
+        int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+            if (o1.correctionDate == null) {
+                return 1;
+            } else if (o2.correctionDate == null) {
+                return -1;
+            } else {
+                return o2.correctionDate.compareTo(o1.correctionDate);
+            }
+        }
+    })
+
+    for (DepartmentReportPeriod drp in departmentReportPeriodList) {
+        def declarations = []
+        declarations.addAll(declarationService.find(DECLARATION_TYPE_NDFL6_ID, drp.id))
+        declarations.addAll(declarationService.find(DECLARATION_TYPE_NDFL2_1_ID, drp.id))
+        declarations.addAll(declarationService.find(DECLARATION_TYPE_NDFL2_2_ID, drp.id))
+        if (!declarations.isEmpty()) {
+            for (DeclarationData dd in declarations) {
+                if (dd.kpp == declarationData.kpp && dd.oktmo == declarationData.oktmo) {
+                    toReturn++
+                    break
+                }
+            }
+        }
+    }
+    return toReturn
 }
 
 def saveFileInfo(currDate, fileName) {
@@ -664,7 +720,7 @@ def checkXml() {
  */
 def getNdfl2DeclarationDataId(def taxPeriodYear) {
     def result = []
-    def declarationDataList = declarationService.find(DECLARATION_TYPE_NDFL2_ID, declarationData.departmentReportPeriodId)
+    def declarationDataList = declarationService.find(DECLARATION_TYPE_NDFL2_1_ID, declarationData.departmentReportPeriodId)
     for (DeclarationData dd : declarationDataList) {
         ScriptUtils.checkInterrupted()
         def reportPeriod = reportPeriodService.get(dd.reportPeriodId)
@@ -915,7 +971,7 @@ def createForm() {
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
-
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
     if (departmentReportPeriod.correctionDate != null) {
         def declarations = []
 
@@ -965,6 +1021,7 @@ def createForm() {
             }
         }
         declarations.removeAll(declarationsForRemove)
+
         declarations.each { declaration ->
             pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
         }
@@ -1000,7 +1057,6 @@ def createForm() {
             }
         }
     }
-
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
         declarationService.delete(it.id, userInfo)
     }
@@ -1040,6 +1096,7 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         ScriptUtils.checkInterrupted()
         allDeclarationData.addAll(declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, it))
     }
+
     // удаление форм не со статусом Принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
@@ -1059,7 +1116,7 @@ def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndf
     } else {
         def kppOktmoNdflPersonsEntrySet = ndflPersonsGroupedByKppOktmo.entrySet()
         kppOktmoNdflPersonsEntrySet.each {
-            if (it.getKey().equals().pairKppOktmoBeingComparing) {
+            if (it.getKey().equals(pairKppOktmoBeingComparing)) {
                 if (it.getKey().taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
                     logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
                 }
