@@ -739,7 +739,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Relation>();
         }
-    }*/
+    }
 
     @Override
     public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
@@ -758,7 +758,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Relation>();
         }
-    }
+    }*/
 
     private void fillPerformers(ResultSet rs, List<Relation> result, Map<Relation, List<String>> map, Map<Relation, List<Department>> mapFull,
                                 Relation relation, boolean light

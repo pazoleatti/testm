@@ -2897,7 +2897,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
 
             // СведДох6 НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
-            if (ndflPersonIncome.calculatedTax != null) {
+            if (ndflPersonIncome.calculatedTax != null && ndflPersonIncome.taxRate == 13) {
                 // СведДох6.1
                 if (ndflPersonIncome.taxRate != 13) {
                     if (ndflPersonIncome.calculatedTax ?: 0 != ScriptUtils.round((ndflPersonIncome.taxBase ?: 0 * ndflPersonIncome.taxRate ?: 0), 0)) {
