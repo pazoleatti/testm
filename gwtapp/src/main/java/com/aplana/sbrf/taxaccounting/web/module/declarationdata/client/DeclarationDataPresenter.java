@@ -149,6 +149,7 @@ public class DeclarationDataPresenter
     private DeclarationData declarationData;
     private String taxName;
     private TaxType taxType;
+    private DeclarationFormKind declarationFormKind;
     private List<DeclarationSubreport> subreports = new ArrayList<DeclarationSubreport>();
 
 	@Inject
@@ -196,6 +197,7 @@ public class DeclarationDataPresenter
                                 declarationData = result.getDeclarationData();
 								taxName = result.getTaxType().name();
                                 taxType = result.getTaxType();
+                                declarationFormKind = result.getDeclarationFormKind();
                                 //sourcesPresenter.setTaxType(taxType);
                                 getView().setType(result.getDeclarationFormType());
                                 getView().setFormKind(result.getDeclarationFormKind().getTitle());
@@ -509,13 +511,13 @@ public class DeclarationDataPresenter
                                                     DeleteDeclarationDataResult result) {
                                                 if (!checkExistDeclarationData(result)) return;
                                                 MessageEvent
-                                                        .fire(DeclarationDataPresenter.this,
-                                                                !taxType.equals(TaxType.DEAL) ? DECLARATION_DELETE_MSG : DECLARATION_DELETE_MSG_D);
+                                                        .fire(DeclarationDataPresenter.this, DECLARATION_DELETE_MSG);
+                                                boolean isReports = TaxType.NDFL.equals(taxType) && DeclarationFormKind.REPORTS.equals(declarationFormKind);
                                                 placeManager
-                                                        .revealPlace(new PlaceRequest(
-                                                                DeclarationListNameTokens.DECLARATION_LIST)
-                                                                .with("nType",
-                                                                        taxName));
+                                                        .revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST)
+                                                                .with("nType", taxName)
+                                                                .with(DeclarationListPresenter.REPORTS, isReports?"true":"false"));
+
                                             }
                                         }, DeclarationDataPresenter.this));
                 Dialog.hideMessage();
