@@ -44,6 +44,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
         person.setPrimaryPersonId(ndflPersonId);
         person.setId(SqlUtils.getLong(rs, "person_id"));
+        person.setNum(SqlUtils.getInteger(rs, "row_num"));
 
         person.setSnils(rs.getString("snils"));
         person.setLastName(rs.getString("last_name"));
@@ -79,7 +80,6 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         person.setPension(SqlUtils.getInteger(rs, "pension"));
         person.setMedical(SqlUtils.getInteger(rs, "medical"));
         person.setSocial(SqlUtils.getInteger(rs, "social"));
-        person.setNum(SqlUtils.getInteger(rs, "num"));
         person.setSex(SqlUtils.getInteger(rs, "sex"));
 
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
