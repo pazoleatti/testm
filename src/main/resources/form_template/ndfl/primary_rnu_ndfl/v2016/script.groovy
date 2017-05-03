@@ -290,7 +290,7 @@
             localCalendar.set(Calendar.MINUTE, 0);
             localCalendar.set(Calendar.SECOND, 0);
             localCalendar.set(Calendar.MILLISECOND, 0);
-            localCalendar.add(Calendar.YEAR, 10);
+            localCalendar.add(Calendar.YEAR, 100);
             refBookPersonVersionTo = localCalendar.getTime();
         }
         return refBookPersonVersionTo;
