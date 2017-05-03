@@ -28,8 +28,7 @@ public class GetUserRoleUploadTransportDataHandler extends AbstractActionHandler
 		GetUserRoleUploadTransportDataResult result = new GetUserRoleUploadTransportDataResult();
 		TAUser taUser = securityService.currentUserInfo().getUser();
 		result.setCanUpload(taUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
-				TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-				TARole.N_ROLE_ADMIN));
+				TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP));
 		result.setCanLoad(taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
 				TARole.N_ROLE_ADMIN));
 		return result;

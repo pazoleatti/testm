@@ -74,6 +74,20 @@ switch (formDataEvent) {
         createReports()
         break
 }
+
+@Field
+final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
+@Field
+final DepartmentService departmentService = getProperty("departmentService")
+
+def getProperty(String name) {
+    try{
+        return super.getProperty(name)
+    } catch (MissingPropertyException e) {
+        return null
+    }
+}
+
 /************************************* ДАННЫЕ ДЛЯ ОБЩИХ СОБЫТИЙ *******************************************************/
 
 /************************************* СОЗДАНИЕ XML *****************************************************************/
@@ -153,6 +167,8 @@ int NDFL_2_1_DECLARATION_TYPE = 102
 
 @Field
 int NDFL_2_2_DECLARATION_TYPE = 104
+
+@Field final int DECLARATION_TYPE_NDFL6_ID = 103
 
 @Field
 final String NDFL_2_S_PRIZNAKOM_1 = "2 НДФЛ (1)"
@@ -249,7 +265,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
 
     // инициализация данных о подразделении
     departmentParam = getDepartmentParam(declarationData.departmentId, declarationData.reportPeriodId)
-    departmentParamRow = getDepartmentParamDetails(departmentParam?.id, declarationData.reportPeriodId)
+    departmentParamRow = getDepartmentParamDetails(departmentParam?.id, declarationData.departmentId, declarationData.reportPeriodId)
     String depName = departmentService.get(departmentParam.DEPARTMENT_ID.value.toInteger()).name
     // Имя файла
     def fileName = generateXmlFileId(sberbankInnParam, kodNoProm)
@@ -304,7 +320,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
     def dateDoc = currDate.format(DATE_FORMAT_DOTTED, TimeZone.getTimeZone('Europe/Moscow'))
 
     // Номер корректировки
-    def nomKorr = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
+    def nomKorr = findCorrectionNumber()
     def kodNo = departmentParamRow?.TAX_ORGAN_CODE?.value
     def builder = new MarkupBuilder(writer)
     builder.setDoubleQuotes(true)
@@ -656,6 +672,55 @@ def saveFileInfo(currDate, fileName) {
     declarationService.saveFile(declarationDataFile)
 }
 
+int findCorrectionNumber() {
+    int toReturn = 0
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    if (departmentReportPeriod.correctionDate == null) {
+        return toReturn
+    }
+    DepartmentReportPeriodFilter departmentReportPeriodFilter = new com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter();
+    departmentReportPeriodFilter.setDepartmentIdList([declarationData.departmentId])
+    departmentReportPeriodFilter.setReportPeriodIdList([declarationData.reportPeriodId])
+    departmentReportPeriodFilter.setTaxTypeList([TaxType.NDFL])
+
+    List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)
+    Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
+    while (it.hasNext()) {
+        DepartmentReportPeriod depReportPeriod = it.next();
+        if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+            it.remove();
+        }
+    }
+    departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
+        @Override
+        int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+            if (o1.correctionDate == null) {
+                return 1;
+            } else if (o2.correctionDate == null) {
+                return -1;
+            } else {
+                return o2.correctionDate.compareTo(o1.correctionDate);
+            }
+        }
+    })
+
+    for (DepartmentReportPeriod drp in departmentReportPeriodList) {
+        def declarations = []
+        declarations.addAll(declarationService.find(DECLARATION_TYPE_NDFL6_ID, drp.id))
+        declarations.addAll(declarationService.find(NDFL_2_1_DECLARATION_TYPE, drp.id))
+        declarations.addAll(declarationService.find(NDFL_2_2_DECLARATION_TYPE, drp.id))
+        if (!declarations.isEmpty()) {
+            for (DeclarationData dd in declarations) {
+                if (dd.kpp == declarationData.kpp && dd.oktmo == declarationData.oktmo) {
+                    toReturn++
+                    break
+                }
+            }
+        }
+    }
+    return toReturn
+}
+
 def saveNdflRefences() {
     logger.setTaUserInfo(userInfo)
     getProvider(NDFL_REFERENCES).createRecordVersion(logger, new Date(), null, ndflReferencess)
@@ -693,7 +758,7 @@ def createRefBookAttributesForNdflReference(
  * @return
  */
 def generateXmlFileId(inn, kodNoProm) {
-    def departmentParamRow = departmentParam ? getDepartmentParamDetails(departmentParam?.record_id?.value, declarationData.reportPeriodId) : null
+    def departmentParamRow = departmentParam ? getDepartmentParamDetails(departmentParam?.record_id?.value, declarationData.departmentId ,declarationData.reportPeriodId) : null
     def r_t = "NO_NDFL2"
     def a = kodNoProm
     def k = departmentParamRow?.TAX_ORGAN_CODE?.value
@@ -1140,7 +1205,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
         def provider = getProvider(REF_BOOK_NDFL_ID)
         def departmentParamList = provider.getRecords(rpe, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
         departmentCache.put(departmentId, departmentParamList?.get(0))
     }
@@ -1153,11 +1218,11 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
  * @param reportPeriodId
  * @return
  */
-def getDepartmentParamDetails(def departmentParamId, def reportPeriodId) {
+def getDepartmentParamDetails(def departmentParamId, def departmentId, def reportPeriodId) {
     if (departmentParamRow == null) {
         def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "REF_BOOK_NDFL_ID = $departmentParamId", null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
         def referencesOktmoList = departmentParamTableList.OKTMO?.value
         referencesOktmoList.removeAll([null])
@@ -1169,7 +1234,7 @@ def getDepartmentParamDetails(def departmentParamId, def reportPeriodId) {
             }
         }
         if (departmentParamRow == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
     }
     return departmentParamRow
@@ -1353,7 +1418,7 @@ def createForm() {
         // Поиск КПП и ОКТМО для некорр периода
     } else {
         departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
-        def departmentParamTableList = getDepartmentParamDetailsList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
+        def departmentParamTableList = getDepartmentParamDetailsList(departmentParam?.id, departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         def referencesOktmoList = departmentParamTableList.OKTMO?.value
         referencesOktmoList.removeAll([null])
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
@@ -1478,7 +1543,7 @@ def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndf
     } else {
         def kppOktmoNdflPersonsEntrySet = ndflPersonsGroupedByKppOktmo.entrySet()
         kppOktmoNdflPersonsEntrySet.each {
-            if (it.getKey().equals().pairKppOktmoBeingComparing) {
+            if (it.getKey().equals(pairKppOktmoBeingComparing)) {
                 if (it.getKey().taxOrganCode != pairKppOktmoBeingComparing.taxOrganCode) {
                     logger.warn("Для КПП = ${pairKppOktmoBeingComparing.kpp} ОКТМО = ${pairKppOktmoBeingComparing.oktmo} в справочнике \"Настройки подразделений\" задано несколько значений Кода НО (кон).")
                 }
@@ -1708,14 +1773,14 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
  * @param reportPeriodId
  * @return
  */
-def getDepartmentParamDetailsList(def departmentParamId, def reportPeriodId) {
+def getDepartmentParamDetailsList(def departmentParamId, def departmentId, def reportPeriodId) {
     if (!departmentParamTableListCache.containsKey(departmentParamId)) {
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
         def rpe = getReportPeriodEndDate(reportPeriodId)
         def provider = getProvider(REF_BOOK_NDFL_DETAIL_ID)
         def departmentParamTableList = provider.getRecords(rpe, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
         departmentParamTableListCache.put(departmentParamId, departmentParamTableList)
     }
@@ -1775,6 +1840,12 @@ class PairKppOktmo {
     }
 }
 
+/**
+ * Разыменование записи справочника
+ */
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
 /************************************* СПЕЦОТЧЕТ **********************************************************************/
 
 
@@ -2259,4 +2330,13 @@ def thinBorderStyle(final style) {
     style.setBorderLeft(CellStyle.BORDER_THIN)
     style.setBorderRight(CellStyle.BORDER_THIN)
     return style
+}
+
+@TypeChecked
+void departmentParamException(int departmentId, int reportPeriodId) {
+    ReportPeriod reportPeriod = reportPeriodService.get(reportPeriodId)
+    throw new ServiceException("Отсутствуют настройки подразделения \"%s\" периода \"%s\". Необходимо выполнить настройку в разделе меню \"Налоги->НДФЛ->Настройки подразделений\"",
+            departmentService.get(departmentId).getName(),
+            reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
+    ) as Throwable
 }

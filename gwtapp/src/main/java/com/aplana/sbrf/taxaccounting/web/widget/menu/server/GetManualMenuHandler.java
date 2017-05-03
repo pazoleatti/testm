@@ -65,11 +65,7 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
             menuItems.add(manualMenu);
         }
 
-        if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER,
-                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-            result.setCanShowNotification(true);
-        }
+        result.setCanShowNotification(true);
         result.setMenuItems(menuItems);
 
         return result;

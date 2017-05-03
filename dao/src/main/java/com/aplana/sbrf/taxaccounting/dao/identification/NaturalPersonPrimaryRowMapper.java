@@ -96,7 +96,7 @@ public abstract class NaturalPersonPrimaryRowMapper implements RowMapper<Natural
         }
     }
 
-    public DocType getDocTypeByCode(String code) {
+    public DocType getDocTypeByCode(String code, NaturalPerson person) {
         if (code != null) {
 
             if (docTypeCodeMap == null) {
