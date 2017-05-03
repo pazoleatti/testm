@@ -3835,7 +3835,7 @@
                 }
 
                 // СведДох6 НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
-                if (ndflPersonIncome.calculatedTax != null) {
+                if (ndflPersonIncome.calculatedTax != null && ndflPersonIncome.taxRate == 13) {
                     // СведДох6.1
                     if (ndflPersonIncome.taxRate != 13) {
                         if (ndflPersonIncome.calculatedTax ?: 0 != ScriptUtils.round((ndflPersonIncome.taxBase ?: 0 * ndflPersonIncome.taxRate ?: 0), 0)) {
@@ -4475,7 +4475,7 @@
             }
 
             // Выч21 Документ о праве на налоговый вычет.Сумма (Графы 16) (Графы 8)
-            if (comparNumbGreater(ndflPersonDeduction.notifSumm ?: 0, ndflPersonDeduction.periodCurrSumm ?: 0)) {
+            if (comparNumbGreater(ndflPersonDeduction.periodCurrSumm ?: 0, ndflPersonDeduction.notifSumm ?: 0)) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "",
                         "Применение вычета.Текущий период.Сумма (Графа 16)='${ndflPersonDeduction.periodCurrSumm ?: ""}', Документ о праве на налоговый вычет.Сумма (Графа 8)='${ndflPersonDeduction.notifSumm ?: ""}'")
