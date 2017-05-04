@@ -282,7 +282,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book(id,name,visible,type,read_only,table_name,is_versioned) values(945,'Календарь',1,0,1,'REF_BOOK_CALENDAR',0);
 
 insert into ref_book_attribute(id,ref_book_id,name,alias,type,ord,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values(9451,945,'Дата','CDATE',3,1,1,null,10,1,1,null,1,0,null);
-insert into ref_book_attribute(id,ref_book_id,name,alias,type,ord,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values(9452,945,'Рабочий/Выходной','WORK',2,2,1,0,6,1,0,null,null,0,1);
+insert into ref_book_attribute(id,ref_book_id,name,alias,type,ord,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values(9452,945,'Рабочий/Выходной','CTYPE',2,2,1,0,6,1,0,null,null,0,1);
 
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (950,'Параметры подразделения по НДФЛ',0,0,0,null,'REF_BOOK_NDFL');
 insert into ref_book (id, name, visible, type, read_only, region_attribute_id,table_name) values (951,'Параметры подразделения по НДФЛ (таблица)',0,0,0,null,'REF_BOOK_NDFL_DETAIL');
