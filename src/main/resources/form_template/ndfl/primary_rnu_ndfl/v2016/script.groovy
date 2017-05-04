@@ -87,6 +87,9 @@
     final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
     @Field
     final DepartmentService departmentService = getProperty("departmentService")
+    @Field
+    final CalendarService calendarService = getProperty("calendarService")
+
 
     def getProperty(String name) {
         try{
@@ -1069,9 +1072,9 @@
      */
     Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId(declarationDataId) {
         String whereClause = """
-                JOIN ref_book_person p ON (frb.record_id = p.record_id)
-                JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
-            """
+                    JOIN ref_book_person p ON (frb.record_id = p.record_id)
+                    JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
+                """
         def refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_PERSON_ID, whereClause, getReportPeriodEndDate() - 1)
         def refBookMapResult = new HashMap<Long, Map<String, RefBookValue>>();
         refBookMap.each { personId, refBookValue ->
@@ -1100,9 +1103,9 @@
     Map<Long, Map<String, RefBookValue>> getActualRefInpMapByDeclarationDataId() {
         if (inpActualCache.isEmpty()) {
             String whereClause = """
-                JOIN ref_book_person p ON (frb.person_id = p.id)
-                JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
-            """
+                    JOIN ref_book_person p ON (frb.person_id = p.id)
+                    JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+                """
             Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause, getReportPeriodEndDate() - 1)
 
             refBookMap.each { id, refBook ->
@@ -1780,12 +1783,12 @@
             return true
         }
         logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format("dd.MM.yyyy"): ""}: дата операции не входит в отчетный период ТФ. " +
-    "КПП = $kpp, " +
-    "ОКТМО = $oktmo, " +
-    "ФЛ ИНП = $inp, " +
-    "ФИО = $fio, " +
-    "ИдОперации = ${ndflPersonIncome.operationId}, " +
-    "Номер строки = ${ndflPersonIncome.rowNum}.")
+                "КПП = $kpp, " +
+                "ОКТМО = $oktmo, " +
+                "ФЛ ИНП = $inp, " +
+                "ФИО = $fio, " +
+                "ИдОперации = ${ndflPersonIncome.operationId}, " +
+                "Номер строки = ${ndflPersonIncome.rowNum}.")
         return false
     }
 
@@ -2306,9 +2309,9 @@
     Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
         if (dulActualCache.isEmpty()) {
             String whereClause = """
-                JOIN ref_book_person p ON (frb.person_id = p.id)
-                JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
-            """
+                    JOIN ref_book_person p ON (frb.person_id = p.id)
+                    JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
+                """
             Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
 
             refBookMap.each { personId, refBookValues ->
@@ -3006,15 +3009,15 @@
             }
 
             /*
-            Спр6
-            При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
+                Спр6
+                При проверке Вида дохода должно проверятся не только наличие признака дохода в справочнике, но и принадлежность признака к конкретному Коду вида дохода
 
-            Доход.Вид.Признак (Графа 5) - (Необязательное поле)
-            incomeTypeMap <REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
+                Доход.Вид.Признак (Графа 5) - (Необязательное поле)
+                incomeTypeMap <REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
 
-            Доход.Вид.Код (Графа 4) - (Необязательное поле)
-            incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
-             */
+                Доход.Вид.Код (Графа 4) - (Необязательное поле)
+                incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
+                 */
             if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeType)) {
                 List<Long> incomeTypeIdList = incomeTypeMap.get(ndflPersonIncome.incomeType)
                 if (incomeTypeIdList == null || incomeTypeIdList.isEmpty()) {
@@ -3272,7 +3275,7 @@
                         !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие или отсутствие значения в графе в зависимости от условий",
                             fioAndInp, columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
-    //                println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage))
+                    //                println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage))
                 }
             }
 
@@ -3330,7 +3333,7 @@
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, "", "№пп (Графа 1)")
             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Отсутствие пропусков и повторений в нумерации строк", "", pathError,
                     MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent)
-    //        println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", pathError, MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent))
+            //        println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", pathError, MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent))
         }
 
         println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
@@ -3359,6 +3362,7 @@
     /**
      * Проверка: "Раздел 2. Графа 4,5 заполнены"
      */
+    @TypeChecked
     class Column4And5Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3368,6 +3372,7 @@
     /**
      * Проверка: "Раздел 2. Графа 6 заполнена"
      */
+    @TypeChecked
     class Column6Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3377,6 +3382,7 @@
     /**
      * Проверка: "Раздел 2. Графа 7 заполнена"
      */
+    @TypeChecked
     class Column7Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3386,6 +3392,7 @@
     /**
      * Проверка: "Раздел 2. Графа 10 заполнена"
      */
+    @TypeChecked
     class Column10Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3395,6 +3402,7 @@
     /**
      * Проверка: "Раздел 2. Графы 6, 10 заполнены"
      */
+    @TypeChecked
     class Column6And10Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3404,6 +3412,7 @@
     /**
      * Проверка: "Раздел 2. Графа 11 заполнена"
      */
+    @TypeChecked
     class Column11Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3413,6 +3422,7 @@
     /**
      * Проверка: "Раздел 2. Графы 7, 11 заполнены"
      */
+    @TypeChecked
     class Column7And11Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3422,6 +3432,7 @@
     /**
      * Проверка: "Раздел 2. Графа 12 НЕ заполнена"
      */
+    @TypeChecked
     class Column12NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3431,6 +3442,7 @@
     /**
      * Проверка: "Раздел 2. Графы 13, 14, 15 заполнены"
      */
+    @TypeChecked
     class Column13And14And15Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3440,6 +3452,7 @@
     /**
      * Проверка: "Раздел 2. Графы 16 заполнена"
      */
+    @TypeChecked
     class Column16Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3449,6 +3462,7 @@
     /**
      * Проверка: "Раздел 2. Графы 17 заполнена"
      */
+    @TypeChecked
     class Column17Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3458,6 +3472,7 @@
     /**
      * Проверка: "Раздел 2. Графа 18 или 19 заполнена"
      */
+    @TypeChecked
     class Column18Or19Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3467,6 +3482,7 @@
     /**
      * Проверка: "Раздел 2. Графы 20 заполнена"
      */
+    @TypeChecked
     class Column20Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3476,6 +3492,7 @@
     /**
      * Проверка: "Раздел 2. Графы 21 заполнена"
      */
+    @TypeChecked
     class Column21Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3485,6 +3502,7 @@
     /**
      * Проверка: "Раздел 2. Графы 21 НЕ заполнена"
      */
+    @TypeChecked
     class Column21NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3494,6 +3512,7 @@
     /**
      * Проверка: "Раздел 2. Графы 7, 11 ИЛИ 22, 23, 24 заполнены"
      */
+    @TypeChecked
     class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3503,6 +3522,7 @@
     /**
      * Проверка: "Раздел 2. Графы 7, 11 И 22, 23, 24 НЕ заполнены"
      */
+    @TypeChecked
     class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3512,6 +3532,7 @@
     /**
      * Проверка: "Раздел 2. Графы 22, 23, 24 НЕ заполнены"
      */
+    @TypeChecked
     class Column22And23And24NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3521,6 +3542,7 @@
     /**
      * Проверка: "Раздел 2. Графы 22, 23, 24 заполнены"
      */
+    @TypeChecked
     class Column22And23And24Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3530,6 +3552,7 @@
     /**
      * 	Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна их них
      */
+    @TypeChecked
     class Column22And23And24FillOrColumn22And23And24NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3539,6 +3562,7 @@
     /**
      * 	Всегда возвращает true
      */
+    @TypeChecked
     class ColumnTrueFillOrNotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3589,18 +3613,18 @@
 
         // "Графа 6" = "Графе 7"
         dateConditionDataList << new DateConditionData(["1010", "1011", "3020", "1110", "1400", "2001", "2010", "2012",
-                                                                     "2300", "2710", "2760", "2762", "2770", "2900", "4800"],
+                                                        "2300", "2710", "2760", "2762", "2770", "2900", "4800"],
                 ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
         // "Графа 6" = "Графе 7"
         dateConditionDataList << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
-                                                                     "1541", "1542", "1543", "1544", "1545", "1546", "1547",
-                                                                     "1548", "1549", "1551", "1552", "1554"],
+                                                        "1541", "1542", "1543", "1544", "1545", "1546", "1547",
+                                                        "1548", "1549", "1551", "1552", "1554"],
                 ["01", "02"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
         // Соответствует маске 31.12.20**
         dateConditionDataList << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
-                                                                     "1541", "1542", "1543"],
+                                                        "1541", "1542", "1543"],
                 ["04"], new MatchMask("31.12.20\\d{2}"), """"Соответствует маске 31.12.20**""")
 
         // Последний календарный день месяца
@@ -3856,15 +3880,15 @@
                     // СведДох6.2
                     if (ndflPersonIncome.taxRate == 13 && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "6") {
                         /*
-                        S1 - сумма значений по "Графе 13" (taxBase)
-                        Для суммирования строк по "Графе 13" (taxBase) должны быть соблюдены ВСЕ следующие условия:
-                        1. Суммирование значений должно осуществляться для каждого ФЛ по отдельности
-                        2. Для суммирования значений должны учитывать только те строки, в которых "Графа 6" (incomeAccruedDate) <= "Графы 6" для текущей строки (МЕНЬШЕ ИЛИ РАВНО)
-                        3. Значение "Графы 10" (incomeAccruedSumm) != 0
-                        4. Значение "Графы 6" должно >= даты начала отчетного периода и <= даты окончания отчетного периода
-                        5. Значение "Графы 14" (taxRate) = 13
-                        6. Значение "Графы 4" (incomeCode) != "1010"
-                         */
+                            S1 - сумма значений по "Графе 13" (taxBase)
+                            Для суммирования строк по "Графе 13" (taxBase) должны быть соблюдены ВСЕ следующие условия:
+                            1. Суммирование значений должно осуществляться для каждого ФЛ по отдельности
+                            2. Для суммирования значений должны учитывать только те строки, в которых "Графа 6" (incomeAccruedDate) <= "Графы 6" для текущей строки (МЕНЬШЕ ИЛИ РАВНО)
+                            3. Значение "Графы 10" (incomeAccruedSumm) != 0
+                            4. Значение "Графы 6" должно >= даты начала отчетного периода и <= даты окончания отчетного периода
+                            5. Значение "Графы 14" (taxRate) = 13
+                            6. Значение "Графы 4" (incomeCode) != "1010"
+                             */
                         List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
                         List<NdflPersonIncome> S1List = ndflPersonIncomeCurrentList.findAll {
                             it.incomeAccruedDate <= ndflPersonIncome.incomeAccruedDate
@@ -3874,14 +3898,14 @@
                         } ?: []
                         BigDecimal S1 = S1List.sum { it.taxBase ?: 0 } ?: 0
                         /*
-                        S2 - сумма значений по "Графе 16" (calculatedTax)
-                        Для суммирования строк по "Графе 16" (calculatedTax) должны быть соблюдены ВСЕ следующие условия:
-                        1. Суммирование значений должно осуществляться для каждого ФЛ по отдельности
-                        2. Для суммирования значений должны учитывать только те строки, в которых "Графа 6" (incomeAccruedDate) < "Графы 6" для текущей строки (МЕНЬШЕ)
-                        2. Значение "Графы 6" должно >= даты начала отчетного периода и <= даты окончания отчетного периода
-                        3. Значение "Графы 14" (taxRate) = 13
-                        4. Значение "Графы 4" (incomeCode) != "1010"
-                         */
+                            S2 - сумма значений по "Графе 16" (calculatedTax)
+                            Для суммирования строк по "Графе 16" (calculatedTax) должны быть соблюдены ВСЕ следующие условия:
+                            1. Суммирование значений должно осуществляться для каждого ФЛ по отдельности
+                            2. Для суммирования значений должны учитывать только те строки, в которых "Графа 6" (incomeAccruedDate) < "Графы 6" для текущей строки (МЕНЬШЕ)
+                            2. Значение "Графы 6" должно >= даты начала отчетного периода и <= даты окончания отчетного периода
+                            3. Значение "Графы 14" (taxRate) = 13
+                            4. Значение "Графы 4" (incomeCode) != "1010"
+                             */
                         List<NdflPersonIncome> S2List = S2List = ndflPersonIncomeCurrentList.findAll {
                             it.incomeAccruedDate < ndflPersonIncome.incomeAccruedDate
                             ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate() &&
@@ -4085,13 +4109,13 @@
                         } else if (["2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
                             // 11 подпункт "Графа 21" = "Графа 7" + "1 рабочий день"
                             /*
-                            Найти следующую за текущей строкой, удовлетворяющую условиям:
-                            "Графа 10" > "0"
-                            "Графа 5" ≠ "02"
-                            "Графа 5"≠ "14"
-                            "Графа 7" является минимальной из "Граф 7", удовлетворяющих условию: ("Графа 7" (следующей строки) >= "Графа 7" (текущей строки))
-                            "Графа 7" <= "31.12.20**" + "1 календарный день", где 31.12.20** - последний день текущего года
-                             */
+                                Найти следующую за текущей строкой, удовлетворяющую условиям:
+                                "Графа 10" > "0"
+                                "Графа 5" ≠ "02"
+                                "Графа 5"≠ "14"
+                                "Графа 7" является минимальной из "Граф 7", удовлетворяющих условию: ("Графа 7" (следующей строки) >= "Графа 7" (текущей строки))
+                                "Графа 7" <= "31.12.20**" + "1 календарный день", где 31.12.20** - последний день текущего года
+                                 */
 
                             // Получим 1-ый рабочий день следующего года
                             Calendar firstWorkingDay = Calendar.getInstance()
@@ -4120,7 +4144,7 @@
                             }
                             if (ndflPersonIncomeFind != null) {
                                 Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
-                                if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind)) {
+                                if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind, dateConditionWorkDay)) {
                                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                             "НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncomeFind.taxTransferDate ?: ""}' и Доход.Дата.Выплата (Графа 7)='${ndflPersonIncomeFind.incomePayoutDate ?: ""}'")
@@ -4141,9 +4165,10 @@
      * @param ndflPersonDeductionList
      * @return
      */
+    @TypeChecked
     BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<NdflPersonDeduction> ndflPersonDeductionList) {
         BigDecimal sumNdflDeduction = new BigDecimal(0)
-        for (ndflPersonDeduction in ndflPersonDeductionList) {
+        for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
             if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
                     && ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy") == ndflPersonDeduction.incomeAccrued?.format("dd.MM.yyyy")
                     && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
@@ -4156,15 +4181,16 @@
     /**
      * Класс для получения рабочих дней
      */
+    @TypeChecked
     class DateConditionWorkDay {
 
         // Мапа рабочих дней со сдвигом
         private Map<Date, Date> workDayWithOffset0Cache
         private Map<Date, Date> workDayWithOffset1Cache
         private Map<Date, Date> workDayWithOffset30Cache
-        def calendarService
+        CalendarService calendarService
 
-        DateConditionWorkDay(def calendarService) {
+        DateConditionWorkDay(CalendarService calendarService) {
             workDayWithOffset0Cache = [:]
             workDayWithOffset1Cache = [:]
             workDayWithOffset30Cache = [:]
@@ -4206,6 +4232,7 @@
     /**
      * Класс для соотнесения вида проверки в зависимости от значений "Код вида дохода" и "Признак вида дохода"
      */
+    @TypeChecked
     class DateConditionData {
         List<String> incomeCodes
         List<String> incomeTypes
@@ -4227,6 +4254,7 @@
     /**
      * Проверка: "Графа 6" = "Графе 7"
      */
+    @TypeChecked
     class Column6EqualsColumn7 implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -4239,6 +4267,7 @@
     /**
      * Проверка: Соответствия маске
      */
+    @TypeChecked
     class MatchMask implements DateConditionChecker {
         String maskRegex
 
@@ -4264,6 +4293,7 @@
     /**
      * Проверка "Последний календарный день месяца"
      */
+    @TypeChecked
     class LastMonthCalendarDay implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -4282,6 +4312,7 @@
     /**
      * Проверка: Если «графа 7» < 31.12.20**, то «графа 6» = «графа 7», иначе «графа 6» = 31.12.20**
      */
+    @TypeChecked
     class Column7LastDayOfYear implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -4293,9 +4324,9 @@
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 12) {
-                return new Column6EqualsColumn7().check(ndflPersonIncome)
+                return new Column6EqualsColumn7().check(ndflPersonIncome, dateConditionWorkDay)
             } else {
-                return new MatchMask("31.12.20\\d{2}").check(ndflPersonIncome)
+                return new MatchMask("31.12.20\\d{2}").check(ndflPersonIncome, dateConditionWorkDay)
             }
         }
     }
@@ -4303,6 +4334,7 @@
     /**
      * Проверка: Доход.Дата.Начисление (Графа 6) последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
      */
+    @TypeChecked
     class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -4324,6 +4356,7 @@
     /**
      * Проверка: "Графа 21" = "Графа 7" + "1 рабочий день"
      */
+    @TypeChecked
     class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -4346,6 +4379,7 @@
     /**
      * Проверка: "Графа 21" <= "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" <= "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
      */
+    @TypeChecked
     class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -4368,6 +4402,7 @@
     /**
      * "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
      */
+    @TypeChecked
     class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -4553,13 +4588,13 @@
      */
     def getRefOktmoByDepartmentId() {
         String whereClause = """
-            JOIN REF_BOOK_NDFL_DETAIL nd ON (frb.id = nd.OKTMO)
-            JOIN REF_BOOK_NDFL n ON (n.ID = nd.ref_book_ndfl_id)
-                where n.department_id = ${declarationData.departmentId}
-                       and nd.ref_book_ndfl_id = n.ID
-                       and exists(select 1 from t where t.record_id = frb.record_id and t.version = frb.version)
-                       and frb.status = 0
-    """
+                JOIN REF_BOOK_NDFL_DETAIL nd ON (frb.id = nd.OKTMO)
+                JOIN REF_BOOK_NDFL n ON (n.ID = nd.ref_book_ndfl_id)
+                    where n.department_id = ${declarationData.departmentId}
+                           and nd.ref_book_ndfl_id = n.ID
+                           and exists(select 1 from t where t.record_id = frb.record_id and t.version = frb.version)
+                           and frb.status = 0
+        """
         return getRefBookByRecordVersionWhere(RefBook.Id.OKTMO.id, whereClause, getReportPeriodEndDate() - 1)
     }
 
@@ -4629,6 +4664,7 @@
     /**
      * @author Andrey Drunk
      */
+    @TypeChecked
     public class NaturalPersonRefbookScriptHandler extends NaturalPersonRefbookHandler {
 
         /**

@@ -1342,7 +1342,7 @@ def getDepartmentFullName(def id) {
  * Получить дату начала отчетного периода
  * @return
  */
-def getReportPeriodStartDate() {
+Date getReportPeriodStartDate() {
     if (reportPeriodStartDate == null) {
         reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
     }
@@ -3239,6 +3239,7 @@ interface ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графа 4,5 заполнены"
  */
+@TypeChecked
 class Column4And5Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3248,6 +3249,7 @@ class Column4And5Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графа 6 заполнена"
  */
+@TypeChecked
 class Column6Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3257,6 +3259,7 @@ class Column6Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графа 7 заполнена"
  */
+@TypeChecked
 class Column7Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3266,6 +3269,7 @@ class Column7Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графа 10 заполнена"
  */
+@TypeChecked
 class Column10Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3275,6 +3279,7 @@ class Column10Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 6, 10 заполнены"
  */
+@TypeChecked
 class Column6And10Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3284,6 +3289,7 @@ class Column6And10Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графа 11 заполнена"
  */
+@TypeChecked
 class Column11Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3293,6 +3299,7 @@ class Column11Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 7, 11 заполнены"
  */
+@TypeChecked
 class Column7And11Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3302,6 +3309,7 @@ class Column7And11Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графа 12 НЕ заполнена"
  */
+@TypeChecked
 class Column12NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3311,6 +3319,7 @@ class Column12NotFill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 13, 14, 15 заполнены"
  */
+@TypeChecked
 class Column13And14And15Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3320,6 +3329,7 @@ class Column13And14And15Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 16 заполнена"
  */
+@TypeChecked
 class Column16Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3329,6 +3339,7 @@ class Column16Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 17 заполнена"
  */
+@TypeChecked
 class Column17Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3338,6 +3349,7 @@ class Column17Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графа 18 или 19 заполнена"
  */
+@TypeChecked
 class Column18Or19Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3347,6 +3359,7 @@ class Column18Or19Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 20 заполнена"
  */
+@TypeChecked
 class Column20Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3356,6 +3369,7 @@ class Column20Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 21 заполнена"
  */
+@TypeChecked
 class Column21Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3365,6 +3379,7 @@ class Column21Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 21 НЕ заполнена"
  */
+@TypeChecked
 class Column21NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3374,6 +3389,7 @@ class Column21NotFill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 7, 11 ИЛИ 22, 23, 24 заполнены"
  */
+@TypeChecked
 class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3384,6 +3400,7 @@ class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 7, 11 И 22, 23, 24 НЕ заполнены"
  */
+@TypeChecked
 class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3394,6 +3411,7 @@ class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 22, 23, 24 НЕ заполнены"
  */
+@TypeChecked
 class Column22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3403,6 +3421,7 @@ class Column22And23And24NotFill implements ColumnFillConditionChecker {
 /**
  * Проверка: "Раздел 2. Графы 22, 23, 24 заполнены"
  */
+@TypeChecked
 class Column22And23And24Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3412,6 +3431,7 @@ class Column22And23And24Fill implements ColumnFillConditionChecker {
 /**
  * 	Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна их них
  */
+@TypeChecked
 class Column22And23And24FillOrColumn22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3421,6 +3441,7 @@ class Column22And23And24FillOrColumn22And23And24NotFill implements ColumnFillCon
 /**
  * 	Всегда возвращает true
  */
+@TypeChecked
 class ColumnTrueFillOrNotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
@@ -3429,6 +3450,7 @@ class ColumnTrueFillOrNotFill implements ColumnFillConditionChecker {
 }
 
 // Проверка на принадлежность операций периоду при загрузке ТФ
+@TypeChecked
 boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
                                           String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     // Доход.Дата.Начисление
@@ -3443,8 +3465,9 @@ boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePay
     return true
 }
 
+@TypeChecked
 boolean dateRelateToCurrentPeriod(
-        def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
+        def paramName, Date date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
     if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
         return true
@@ -3465,9 +3488,10 @@ boolean dateRelateToCurrentPeriod(
  * @param ndflPersonDeductionList
  * @return
  */
+@TypeChecked
 BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<NdflPersonDeduction> ndflPersonDeductionList) {
     BigDecimal sumNdflDeduction = new BigDecimal(0)
-    for (ndflPersonDeduction in ndflPersonDeductionList) {
+    for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
         if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
                 && ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy") == ndflPersonDeduction.incomeAccrued?.format("dd.MM.yyyy")
                 && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
@@ -3480,15 +3504,16 @@ BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<Ndfl
 /**
  * Класс для получения рабочих дней
  */
+@TypeChecked
 class DateConditionWorkDay {
 
     // Мапа рабочих дней со сдвигом
     private Map<Date, Date> workDayWithOffset0Cache
     private Map<Date, Date> workDayWithOffset1Cache
     private Map<Date, Date> workDayWithOffset30Cache
-    def calendarService
+    CalendarService calendarService
 
-    DateConditionWorkDay(def calendarService) {
+    DateConditionWorkDay(CalendarService calendarService) {
         workDayWithOffset0Cache = [:]
         workDayWithOffset1Cache = [:]
         workDayWithOffset30Cache = [:]
@@ -3530,6 +3555,7 @@ class DateConditionWorkDay {
 /**
  * Класс для соотнесения вида проверки в зависимости от значений "Код вида дохода" и "Признак вида дохода"
  */
+@TypeChecked
 class DateConditionData {
     List<String> incomeCodes
     List<String> incomeTypes
@@ -3551,6 +3577,7 @@ interface DateConditionChecker {
 /**
  * Проверка: "Графа 6" = "Графе 7"
  */
+@TypeChecked
 class Column6EqualsColumn7 implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -3563,6 +3590,7 @@ class Column6EqualsColumn7 implements DateConditionChecker {
 /**
  * Проверка: Соответствия маске
  */
+@TypeChecked
 class MatchMask implements DateConditionChecker {
     String maskRegex
 
@@ -3588,6 +3616,7 @@ class MatchMask implements DateConditionChecker {
 /**
  * Проверка "Последний календарный день месяца"
  */
+@TypeChecked
 class LastMonthCalendarDay implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -3606,6 +3635,7 @@ class LastMonthCalendarDay implements DateConditionChecker {
 /**
  * Проверка: Если «графа 7» < 31.12.20**, то «графа 6» = «графа 7», иначе «графа 6» = 31.12.20**
  */
+@TypeChecked
 class Column7LastDayOfYear implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -3617,9 +3647,9 @@ class Column7LastDayOfYear implements DateConditionChecker {
         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
         int month = calendarPayout.get(Calendar.MONTH)
         if (dayOfMonth != 31 || month != 12) {
-            return new Column6EqualsColumn7().check(ndflPersonIncome)
+            return new Column6EqualsColumn7().check(ndflPersonIncome, dateConditionWorkDay)
         } else {
-            return new MatchMask("31.12.20\\d{2}").check(ndflPersonIncome)
+            return new MatchMask("31.12.20\\d{2}").check(ndflPersonIncome, dateConditionWorkDay)
         }
     }
 }
@@ -3627,6 +3657,7 @@ class Column7LastDayOfYear implements DateConditionChecker {
 /**
  * Проверка: Доход.Дата.Начисление (Графа 6) последний календарный день месяца (если последний день месяца приходится на выходной, то следующий первый рабочий день)
  */
+@TypeChecked
 class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -3671,6 +3702,7 @@ class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
 /**
  * Проверка: "Графа 21" <= "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" <= "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
  */
+@TypeChecked
 class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
@@ -3693,6 +3725,7 @@ class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
 /**
  * "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
  */
+@TypeChecked
 class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
