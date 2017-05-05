@@ -1306,7 +1306,11 @@
         def resultReportParameters = [:]
         reportParameters.each { key, value ->
             if (value != null) {
-                resultReportParameters.put(key, value)
+                def val = value;
+                if (!(key in ["fromBirthDay", "toBirthDay"])) {
+                    val = '%'+value+'%'
+                }
+                resultReportParameters.put(key, val)
             }
         }
 
@@ -1322,7 +1326,7 @@
         //Кнопки: "Закрыть"
 
         if (pagingResult.isEmpty()) {
-            subreportParamsToString = { it.collect { (it.value != null ? (it.value + ";") : "") } join " " }
+            subreportParamsToString = { it.collect { (it.value != null ? (((it.value instanceof Date)?it.value.format('dd.MM.yyyy'):it.value) + ";") : "") } join " " }
             logger.warn("Физическое лицо: " + subreportParamsToString(reportParameters) + " не найдено в форме");
             //throw new ServiceException("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
         }
@@ -1334,7 +1338,7 @@
             row.firstName = ndflPerson.firstName
             row.middleName = ndflPerson.middleName
             row.snils = ndflPerson.snils
-            row.innNp = ndflPerson.innNp
+            row.innNp = ndflPerson.innNp?:ndflPerson.innForeign
             row.birthDay = ndflPerson.birthDay
             row.idDocNumber = ndflPerson.idDocNumber
             dataRows.add(row)
