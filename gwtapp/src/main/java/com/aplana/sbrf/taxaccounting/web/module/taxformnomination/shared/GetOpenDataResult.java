@@ -16,6 +16,7 @@ public class GetOpenDataResult implements Result {
     // Признак контролера УНП
     // true - контролера УНП, false - контролер, null - не контролер
     private Boolean isControlUNP;
+    private boolean canEdit;
 
     // Список всех подразделений
     private List<Department> departments;
@@ -37,6 +38,14 @@ public class GetOpenDataResult implements Result {
 
     public void setControlUNP(Boolean controlUNP) {
         isControlUNP = controlUNP;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 
     public Set<Integer> getAvailableDepartments() {
