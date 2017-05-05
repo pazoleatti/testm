@@ -196,7 +196,9 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             }
             RefBookDataRow tableRow = new RefBookDataRow();
             tableRow.setValues(tableRowData);
-            tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            if (refBook.hasAttribute("ID")) {
+                tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            }
             rows.add(tableRow);
         }
     }
