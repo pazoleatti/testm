@@ -2501,7 +2501,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT row_number_over");
-        if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
+        if (refBook.hasAttribute("ID")) {
             ps.appendQuery(", ");
             ps.appendQuery("id ");
             ps.appendQuery(RefBook.RECORD_ID_ALIAS);

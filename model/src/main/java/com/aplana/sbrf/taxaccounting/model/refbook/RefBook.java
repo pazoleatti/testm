@@ -291,6 +291,20 @@ public class RefBook implements Serializable {
 		throw new IllegalArgumentException("Attribute \"" + alias + "\" not found in refbook (id=" + id + ", \"" + name + "\"))");
 	}
 
+	/**
+	 * Проверяет существует ли атрибут по его псевдониму.
+	 * @param alias
+	 * @return
+	 */
+	public boolean hasAttribute(final String alias) {
+		for(RefBookAttribute attribute : attributes) {
+			if (alias.equalsIgnoreCase(attribute.getAlias())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public List<RefBookAttribute> getRefAttributes() {
 		List<RefBookAttribute> result = new ArrayList<RefBookAttribute>();
 		// разыменовывание ссылок
