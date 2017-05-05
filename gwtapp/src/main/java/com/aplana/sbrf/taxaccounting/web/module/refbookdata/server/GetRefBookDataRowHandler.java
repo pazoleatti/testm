@@ -119,7 +119,12 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             }
         }
 
-        PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(action.getRelevanceDate(),
+        Date version = null;
+        if (refBook.isVersioned()) {
+            version = action.getRelevanceDate();
+        }
+
+        PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
                 action.getPagingParams(), filter, refBookAttributeList.get(action.getSortColumnIndex()),
                 action.isAscSorting());
         List<RefBookDataRow> rows = new LinkedList<RefBookDataRow>();
