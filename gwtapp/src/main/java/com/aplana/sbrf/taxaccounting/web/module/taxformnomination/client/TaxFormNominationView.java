@@ -334,19 +334,19 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	 * Инициализируется при создании формы
 	 */
 	@Override
-	public void init(TaxType nType, boolean isForm) {
-		this.isForm = isForm;
+	public void init(TaxType nType, boolean canEdit) {
+		this.isForm = false;
 		this.taxType = nType;
 		// Вид налога: в зависимости от налога, выбранного в главном меню ("Вид налога": "Налог на прибыль")
 		taxTypeLabel.setText(nType!= null ? nType.getName() : "Неизвестный вид налога");
-		initView(isForm);
+		initView(canEdit);
 	}
 
 	/**
 	 * Установить вид представления на "Назначение налоговых форм"
 	 * и применить изменения к представлению
 	 */
-	private void initView(boolean isForm) {
+	private void initView(boolean canEdit) {
 		formGrid.redrawHeaders();
 		decGrid.redrawHeaders();
 
@@ -356,38 +356,23 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		// средний лейбл
 		formHeader.setText("Назначение налоговых форм");
 
-		if (isForm) {
-			this.isForm = true;
-			// Кнопка "Редактировать" — неактивна
-			editAnchor.setEnabled(false);
-			editAnchor.setVisible(true);
-			// Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
-			cancelAnchor.setEnabled(false);
-			// показать соответствующую таблицу
-			formGridWrapper.setVisible(true);
-			declarationGridWrapper.setVisible(false);
-			formGrid.setRowCount(0);
-			formPager.setDisplay(formGrid);
-			formPager.setVisible(true);
-			formPager.setPageSize(PAGE_SIZE);
-			declarationPager.setVisible(false);
-		} else {
-			this.isForm = false;
-            editAnchor.setEnabled(false);
-            editAnchor.setVisible(true);
-            // Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
-            cancelAnchor.setEnabled(false);
-			// показать соответствующую таблицу
-			formGridWrapper.setVisible(false);
-			declarationGridWrapper.setVisible(true);
-			// очистить таблицу с декларациями
-			decGrid.setRowCount(0);
+		assignAnchor.setVisible(canEdit);
 
-			formPager.setVisible(false);
-			declarationPager.setVisible(true);
-			declarationPager.setDisplay(decGrid);
-			declarationPager.setPageSize(PAGE_SIZE);
-		}
+		editAnchor.setEnabled(false);
+		editAnchor.setVisible(canEdit);
+		// Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
+		cancelAnchor.setEnabled(false);
+		cancelAnchor.setVisible(canEdit);
+		// показать соответствующую таблицу
+		formGridWrapper.setVisible(false);
+		declarationGridWrapper.setVisible(true);
+		// очистить таблицу с декларациями
+		decGrid.setRowCount(0);
+
+		formPager.setVisible(false);
+		declarationPager.setVisible(true);
+		declarationPager.setDisplay(decGrid);
+		declarationPager.setPageSize(PAGE_SIZE);
 	}
 
 	@Override
@@ -465,8 +450,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 	@UiHandler("switchMode")
 	public void onSwitchModeClick(ClickEvent event) {
-		// если уже режим формы то включаем режим декларации
-		initView(!isForm);
 	}
 
 

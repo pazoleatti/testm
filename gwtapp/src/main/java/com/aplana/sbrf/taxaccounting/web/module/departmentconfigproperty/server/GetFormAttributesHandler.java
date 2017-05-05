@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server;
 
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.GetFormAttributesAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.GetFormAttributesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -20,23 +18,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetFormAttributesHandler extends AbstractActionHandler<GetFormAttributesAction, GetFormAttributesResult> {
 
     @Autowired
     RefBookFactory rbFactory;
+    @Autowired
+    SecurityService securityService;
 
     public GetFormAttributesHandler() {
         super(GetFormAttributesAction.class);
     }
 
     @Override
-    public GetFormAttributesResult execute(GetFormAttributesAction getFormAttributesAction, ExecutionContext executionContext) throws ActionException {
-        List<RefBookAttribute> attributes = rbFactory.get(getFormAttributesAction.getRefBookId()).getAttributes();
+    public GetFormAttributesResult execute(GetFormAttributesAction action, ExecutionContext executionContext) throws ActionException {
         GetFormAttributesResult res = new GetFormAttributesResult();
+
+        // Текущий пользователь
+        TAUser currUser = securityService.currentUserInfo().getUser();
+
+        if (currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
+            res.setCanEdit(true);
+        } else if (currUser.hasRoles(action.getTaxType(), TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+            res.setCanEdit(false);
+        }
+
+        List<RefBookAttribute> attributes = rbFactory.get(action.getRefBookId()).getAttributes();
         res.setAttributes(attributes);
 
-        List<RefBookAttribute> tableAttributes = rbFactory.get(getFormAttributesAction.getTableRefBookId()).getAttributes();
+        List<RefBookAttribute> tableAttributes = rbFactory.get(action.getTableRefBookId()).getAttributes();
         List<Column> tableColumns = new ArrayList<Column>();
         for (RefBookAttribute attribute : tableAttributes) {
             switch (attribute.getAttributeType()) {
