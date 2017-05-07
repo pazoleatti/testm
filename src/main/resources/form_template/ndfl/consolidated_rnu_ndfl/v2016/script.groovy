@@ -675,20 +675,25 @@ List<DeclarationData> findConsolidateDeclarationData(currDepartmentId, departmen
                 allDeclarationDataList.addAll(declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, dep, reportPeriodId))
             }
         }
-        println "allDeclarationDataList $allDeclarationDataList"
         DepartmentReportPeriod depReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
 
         //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
         Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
-        for (DeclarationData declarationData : allDeclarationDataList) {
+        for (DeclarationData dD : allDeclarationDataList) {
             ScriptUtils.checkInterrupted();
-            DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData?.departmentReportPeriodId) as DepartmentReportPeriod;
+            DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(dD?.departmentReportPeriodId) as DepartmentReportPeriod;
+            // Период для того чтобы объединить первичные формы с разных подразделений для одного ТБ в рамках задачи https://jira.aplana.com/browse/SBRFNDFL-939
+            DepartmentReportPeriod tempDepartmentReportPeriod = new DepartmentReportPeriod()
+            tempDepartmentReportPeriod.setId(declarationData.departmentReportPeriodId)
+            tempDepartmentReportPeriod.setDepartmentId(dD.departmentId)
+            tempDepartmentReportPeriod.setReportPeriod(departmentReportPeriod.reportPeriod)
+            tempDepartmentReportPeriod.setCorrectionDate(departmentReportPeriod.correctionDate)
             if (depReportPeriod.correctionDate != departmentReportPeriod.correctionDate) {
                 continue
             }
-            Long asnuId = declarationData.getAsnuId();
-            Integer departmentReportPeriodId = departmentReportPeriod.getId();
-            departmentReportPeriodList.add(departmentReportPeriod);
+            Long asnuId = dD.getAsnuId();
+            Integer departmentReportPeriodId = declarationData.departmentReportPeriodId;
+            departmentReportPeriodList.add(tempDepartmentReportPeriod);
             if (asnuId != null) {
                 Map<Integer, List<DeclarationData>> asnuMap = asnuDataMap.get(asnuId);
                 if (asnuMap == null) {
@@ -701,9 +706,9 @@ List<DeclarationData> findConsolidateDeclarationData(currDepartmentId, departmen
                     asnuMap.put(departmentReportPeriodId, declarationDataList);
                 }
 
-                declarationDataList.add(declarationData);
+                declarationDataList.add(dD);
             } else {
-                logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(currDepartmentId) + ", отчетный период: " + reportPeriodId + ", id: " + declarationData.id);
+                logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(currDepartmentId) + ", отчетный период: " + reportPeriodId + ", id: " + dD.id);
             }
         }
 
