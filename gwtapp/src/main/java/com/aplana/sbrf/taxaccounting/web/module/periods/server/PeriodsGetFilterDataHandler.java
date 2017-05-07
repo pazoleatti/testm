@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGetFilterData, PeriodsGetFilterDataResult> {
 
 	@Autowired
@@ -27,10 +27,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	private DepartmentService departmentService;
 	@Autowired
 	private PeriodService reportPeriodService;
-	@Autowired
-	TAUserService userService;
-	@Autowired
-	RefBookFactory refBookFactory;
 
     public PeriodsGetFilterDataHandler() {
         super(PeriodsGetFilterData.class);
@@ -43,7 +39,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	    res.setTaxType(action.getTaxType());
 
         TaxType taxType = action.getTaxType();
-	    List<Department> departments = new ArrayList<Department>();
         Set<Integer> ad = new HashSet<Integer>();
         if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
 	        res.setCanEdit(true);
@@ -61,14 +56,14 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
                 default:
                     break;
             }
-        } else { // Контролер НС
+        } else if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_OPER, TARole.F_ROLE_CONTROL_NS)) {
 	        res.setCanChangeDepartment(false);
-	        res.setDepartments(departmentService.getTBDepartments(userInfo.getUser(), taxType));
-	        res.setSelectedDepartment(
-			        new DepartmentPair(res.getDepartments().get(0).getId(),
-					        res.getDepartments().get(0).getParentId(),
-					        res.getDepartments().get(0).getName())
-	        );
+			res.setDepartments(Arrays.asList(departmentService.getBankDepartment()));
+			res.setSelectedDepartment(
+					new DepartmentPair(res.getDepartments().get(0).getId(),
+							res.getDepartments().get(0).getParentId(),
+							res.getDepartments().get(0).getName())
+			);
 	        switch (taxType) {
                 case NDFL:
                 case PFR:

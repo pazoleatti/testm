@@ -126,6 +126,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         void setRefBookPeriod(Date startDate, Date endDate);
 
         void onFind(boolean showError);
+
+        void setCanEdit(boolean canEdit);
     }
 
     @Inject
@@ -149,6 +151,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         GetFormAttributesAction action = new GetFormAttributesAction();
         action.setRefBookId(getCurrentRefBookId());
         action.setTableRefBookId(getCurrentTableRefBookId());
+        action.setTaxType(nType);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetFormAttributesResult>() {
                     @Override
@@ -156,6 +159,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                         DepartmentConfigPropertyPresenter.this.columns = result.getTableColumns();
                         getView().setTableColumns(result.getTableColumns());
                         getView().setTextFieldsParams(result.getAttributes());
+                        getView().setCanEdit(result.isCanEdit());
                         getUserDepartment();
                     }
                 }, this));

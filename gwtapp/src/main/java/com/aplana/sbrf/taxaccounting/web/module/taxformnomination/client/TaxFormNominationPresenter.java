@@ -54,7 +54,7 @@ public class TaxFormNominationPresenter
         void setDepartments(List<Integer> department);
 
         // Инициализация
-        void init(TaxType nType, boolean isForm);
+        void init(TaxType nType, boolean canEdit);
 
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
         void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes);
@@ -132,8 +132,8 @@ public class TaxFormNominationPresenter
         String value = request.getParameter("nType", "");
         TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
         TaxFormNominationPresenter.this.taxType = nType;
-        boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
-        getView().init(nType, isForm);
+        //boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
+        getView().init(nType, false);
         declarationDestinationsPresenter.initForm(nType);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
@@ -149,8 +149,8 @@ public class TaxFormNominationPresenter
                                     getProxy().manualRevealFailed();
                                     return;
                                 }
+                                getView().init(taxType, result.isCanEdit());
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-
                             }
                         }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));
     }
