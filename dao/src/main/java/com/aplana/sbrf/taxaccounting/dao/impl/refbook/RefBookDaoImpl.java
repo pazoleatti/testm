@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -2799,9 +2800,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
         if (!ps.getParams().isEmpty()) {
-            return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
+            RowMapper<Map<String, RefBookValue>> rowMapper;
+            if (!refBook.hasAttribute("ID")) {
+                rowMapper = new RefBookCalendarValueMapper(refBook);
+                return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
+            }
+            rowMapper = new RefBookValueMapper(refBook);
+            return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
         } else {
-            return getJdbcTemplate().query(ps.getQuery().toString(), new RefBookValueMapper(refBook));
+            return getJdbcTemplate().query(ps.getQuery().toString(), new RefBookCalendarValueMapper(refBook));
         }
     }
 
