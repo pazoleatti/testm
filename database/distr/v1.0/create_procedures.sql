@@ -2092,7 +2092,7 @@ begin
                      nvl2(tab.street_fname,tab.street_fname||',','') ndfl_full_addr,
                      (select min(f.street_id)
                         from table(fias_pkg.GetFiasAddrsFS(tab.region_code,replace(lower(tab.area_fname),' ',''),replace(lower(tab.city_fname),' ',''),replace(lower(tab.loc_fname),' ',''),replace(lower(tab.street_fname),' ',''),
-                                                           trim(lower(tab.area_type)),trim(lower(tab.city_type)),trim(lower(tab.loc_type)),trim(lower(tab.street_type)),tab.post_index)) f
+                                                           trim(lower(tab.area_type)),trim(lower(tab.city_type)),trim(lower(tab.loc_type)),trim(lower(nvl(tab.street_type,'ул'))),tab.post_index)) f
                        where lower(f.full_addr)=lower(nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||nvl2(tab.loc_fname,tab.loc_fname||',','')||
                                                            nvl2(tab.street_fname,tab.street_fname||',',''))
                      ) fa_id

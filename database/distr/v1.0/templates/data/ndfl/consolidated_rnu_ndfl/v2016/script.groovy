@@ -71,9 +71,13 @@ final DepartmentReportPeriodService departmentReportPeriodService = getProperty(
 final DeclarationService declarationService = getProperty("declarationService")
 @Field
 final RefBookService refBookService = getProperty("refBookService")
+@Field
+final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
+@Field
+final DepartmentService departmentService = getProperty("departmentService")
 
 def getProperty(String name) {
-    try{
+    try {
         return super.getProperty(name)
     } catch (MissingPropertyException e) {
         return null
@@ -107,6 +111,7 @@ def calcTimeMillis(long time) {
 @Field final int NDFL_2_1_TEMPLATE_ID = 102
 @Field final int NDFL_2_2_TEMPLATE_ID = 104
 @Field final int NDFL_6_TEMPLATE_ID = 103
+@Field def ndflPersonCache = [:]
 
 //>------------------< CONSOLIDATION >----------------------<
 
@@ -126,7 +131,7 @@ void consolidation() {
 
     List<Long> declarationDataIdList = collectDeclarationDataIdList(sourcesInfo);
 
-    if (declarationDataIdList.isEmpty()){
+    if (declarationDataIdList.isEmpty()) {
         throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
     }
 
@@ -155,7 +160,6 @@ void consolidation() {
 
     logger.info("Инициализация кэша справочников (" + calcTimeMillis(time));
 
-
     //Карта в которой хранится актуальный record_id и NdflPerson в котором объединяются данные о даходах
     SortedMap<Long, NdflPerson> ndflPersonMap = consolidateNdflPerson(ndflPersonList, declarationDataIdList);
 
@@ -179,8 +183,8 @@ void consolidation() {
 
         Long refBookPersonId = refBookPersonRecord?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
 
-        if (refBookPersonId == null){
-            throw new ServiceException("Ошибка при получение записи справочника 'Физические лица'. Не найдена запись номер: "+refBookPersonRecordId);
+        if (refBookPersonId == null) {
+            throw new ServiceException("Ошибка при получение записи справочника 'Физические лица'. Не найдена запись номер: " + refBookPersonRecordId);
         }
 
         NdflPerson ndflPerson = entry.getValue();
@@ -207,12 +211,12 @@ void consolidation() {
 
         //List<Long> documentsIds = documentProvider.getUniqueRecordIds(null, "PERSON_ID = " + personId + " AND INC_REP = 1");
         if (personDocumentRecord == null || personDocumentRecord.isEmpty()) {
-            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1");
+            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) + ". Отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1");
             continue;
         }
 
         if (addressId != null && addressRecord == null) {
-            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) +  ". Отсутствуют данные в справочнике 'Адреса физических лиц'");
+            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) + ". Отсутствуют данные в справочнике 'Адреса физических лиц'");
             continue;
         }
 
@@ -254,7 +258,7 @@ void consolidation() {
 
     }
 
-    logger.info("Консолидация завершена, новых записей создано: "+(ndflPersonNum - 1) + ", " + calcTimeMillis(time));
+    logger.info("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + calcTimeMillis(time));
 
 }
 
@@ -389,7 +393,7 @@ def buildNdflPerson(Map<String, RefBookValue> personRecord, Map<String, RefBookV
     ndflPerson.status = taxpayerStatusCodes.get(personRecord.get("TAXPAYER_STATE")?.getReferenceValue())
 
     //адрес может быть не задан
-    if (addressRecord != null){
+    if (addressRecord != null) {
         ndflPerson.postIndex = addressRecord.get("POSTAL_CODE")?.getStringValue()
         ndflPerson.regionCode = addressRecord.get("REGION_CODE")?.getStringValue()
         ndflPerson.area = addressRecord.get("DISTRICT")?.getStringValue()
@@ -503,8 +507,8 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
 
     for (NdflPerson ndflPerson : ndflPersonList) {
 
-        if (ndflPerson.personId == null || ndflPerson.recordId == null){
-            throw new ServiceException("Ошибка при консолидации данных. Необходимо повторно выполнить расчет формы "+ndflPerson.declarationDataId);
+        if (ndflPerson.personId == null || ndflPerson.recordId == null) {
+            throw new ServiceException("Ошибка при консолидации данных. Необходимо повторно выполнить расчет формы " + ndflPerson.declarationDataId);
         }
 
         Long personRecordId = ndflPerson.recordId;
@@ -516,11 +520,10 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
             consNdflPerson = new NdflPerson();
             consNdflPerson.recordId = personRecordId;
             result.put(personRecordId, consNdflPerson);
+            consNdflPerson.incomes.addAll(ndflPerson.incomes);
+            consNdflPerson.deductions.addAll(ndflPerson.deductions);
+            consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
         }
-
-        consNdflPerson.incomes.addAll(ndflPerson.incomes);
-        consNdflPerson.deductions.addAll(ndflPerson.deductions);
-        consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
 
     }
 
@@ -593,21 +596,19 @@ def getSourcesListForTemporarySolution() {
     ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     //Идентификатор подразделения по которому формируется консолидированная форма
     def parentDepartmentId = declarationData.departmentId
-    Department department = departmentService.get(parentDepartmentId)
+    //Department department = departmentService.get(parentDepartmentId)
+    List<Department> departments = departmentService.getAllChildren(parentDepartmentId)
 
-    List<DeclarationData> declarationDataList = findConsolidateDeclarationData(parentDepartmentId, declarationDataReportPeriod.id)
-
+    List<DeclarationData> declarationDataList = findConsolidateDeclarationData(parentDepartmentId, departments.id, declarationDataReportPeriod.id)
     for (DeclarationData declarationData : declarationDataList) {
         //Формируем связь источник-приемник
+        Department department = departmentService.get(declarationData.departmentId)
         def relation = getRelation(declarationData, department, declarationDataReportPeriod)
         sources.sourceList.add(relation)
     }
-
     sources.sourcesProcessedByScript = true
     //logger.info("sources found: " + sources.sourceList.size)
 }
-
-
 
 /**
  * Получить набор НФ источников события FormDataEvent.GET_SOURCES.
@@ -661,11 +662,20 @@ def getSourcesList() {
  * Если в некорректирующем и корректирующем (корректирующих) периодах, относящихся к одному отчетному периоду, найдены группы (множества, наборы) ПНФ с совпадающими параметрами: "Подразделение" И "АСНУ":
  * Система включает в КНФ множество ПНФ, относящихся к периоду с наиболее старшим периодом сдачи корректировки
  */
-List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodId) {
+List<DeclarationData> findConsolidateDeclarationData(currDepartmentId, departmentIdList, reportPeriodId) {
     if (needSources) {
         //Список отчетных периодов подразделения
         List<DepartmentReportPeriod> departmentReportPeriodList = new ArrayList<DepartmentReportPeriod>();
-        List<DeclarationData> allDeclarationDataList = declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, departmentId, reportPeriodId);
+        List<DeclarationData> allDeclarationDataList = []
+        //List<List<Integer>> departmentsIdForSearch = departmentIdList.collate(1000)
+        for (dep in departmentIdList) {
+            //allDeclarationDataList.addAll(declarationService.findAllDeclarationDataForManyDepartments(PRIMARY_RNU_NDFL_TEMPLATE_ID, departmentIdList, reportPeriodId))
+            List<DeclarationData> ddList = declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, dep, reportPeriodId)
+            if (ddList != null && !ddList.isEmpty()) {
+                allDeclarationDataList.addAll(declarationService.findAllDeclarationData(PRIMARY_RNU_NDFL_TEMPLATE_ID, dep, reportPeriodId))
+            }
+        }
+        println "allDeclarationDataList $allDeclarationDataList"
         DepartmentReportPeriod depReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
 
         //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
@@ -693,7 +703,7 @@ List<DeclarationData> findConsolidateDeclarationData(departmentId, reportPeriodI
 
                 declarationDataList.add(declarationData);
             } else {
-                logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(departmentId) + ", отчетный период: " + reportPeriodId + ", id: " + declarationData.id);
+                logger.warn("Найдены НФ для которых не заполнено поле АСНУ. Подразделение: " + getDepartmentFullName(currDepartmentId) + ", отчетный период: " + reportPeriodId + ", id: " + declarationData.id);
             }
         }
 
@@ -1031,11 +1041,11 @@ def createSpecificReport() {
             ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
             def reportPeriodName = reportPeriod.getTaxPeriod().year + '_' + reportPeriod.name
             Department department = departmentService.get(declarationData.departmentId)
-            scriptSpecificReportHolder.setFileName("Реестр_сформированной_отчетности_${declarationData.id}_${reportPeriodName}_${department.shortName}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
+            scriptSpecificReportHolder.setFileName("Реестр_сформированной_отчетности_${declarationData.id}_${reportPeriodName}_${department.shortName}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
             break;
         case 'rnu_ndfl_person_all_db':
             createSpecificReportDb();
-            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
+            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
             break;
         default:
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
@@ -1048,7 +1058,7 @@ def createSpecificReportPersonDb() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
     if (ndflPerson != null) {
-        def params = [NDFL_PERSON_ID : ndflPerson.id];
+        def params = [NDFL_PERSON_ID: ndflPerson.id];
         def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
         declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
         scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
@@ -1060,7 +1070,7 @@ def createSpecificReportPersonDb() {
  * Формирует спец. отчеты, данные для которых макет извлекает непосредственно из бд
  */
 def createSpecificReportDb() {
-    def params = [declarationId : declarationData.id]
+    def params = [declarationId: declarationData.id]
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
 }
@@ -1086,7 +1096,7 @@ def createFileName(NdflPerson ndflPerson) {
 }
 
 
-String firstChar(String str){
+String firstChar(String str) {
     if (str != null && !str.isEmpty()) {
         return String.valueOf(Character.toUpperCase(str.charAt(0)));
     } else {
@@ -1109,7 +1119,7 @@ String capitalize(String str) {
  * Проверки которые относятся только к консолидированной
  * @return
  */
-def checkDataConsolidated(){
+def checkDataConsolidated() {
 
     // Общ12
     if (FORM_DATA_KIND.equals(FormDataKind.CONSOLIDATED)) {
@@ -1127,9 +1137,9 @@ def checkDataConsolidated(){
                 82L : 'Сибирский банк',
                 88L : 'Среднерусский банк',
                 97L : 'Уральский банк',
-                113L : 'Центральный аппарат ПАО Сбербанк',
-                102L : 'Центрально-Чернозёмный банк',
-                109L : 'Юго-Западный банк'
+                113L: 'Центральный аппарат ПАО Сбербанк',
+                102L: 'Центрально-Чернозёмный банк',
+                109L: 'Юго-Западный банк'
         ]
         def listDepartmentNotAcceptedRnu = []
         List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
@@ -1169,10 +1179,6 @@ def checkDataConsolidated(){
     }
 
 }
-
-
-
-
 
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
 //если проверки различаются то используется параметр {@link #FORM_DATA_KIND}
@@ -1223,9 +1229,11 @@ def checkDataConsolidated(){
 // Мапа <ID_Данные о физическом лице - получателе дохода, Физическое лицо: <ФИО> ИНП:<ИНП>>
 @Field def ndflPersonFLMap = [:]
 @Field final TEMPLATE_PERSON_FL = "ФИО: '%s', ИНП: '%s'"
+
 class NdflPersonFL {
     String fio
     String inp
+
     NdflPersonFL(String fio, String inp) {
         this.fio = fio
         this.inp = inp
@@ -1538,7 +1546,6 @@ def getRefAddress(def addressIds) {
     }
     return addressCache;
 }
-
 
 /**
  * Получить "Документ, удостоверяющий личность (ДУЛ)"
@@ -2246,7 +2253,7 @@ def checkDataReference(
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
         // Спр5 Код вида дохода (Необязательное поле)
-        if (ndflPersonIncome.incomeCode != null && !incomeCodeMap.find { key, value ->
+        if (ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
             value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
                     ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
                     ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
@@ -2275,7 +2282,7 @@ def checkDataReference(
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода и признака дохода справочнику", fioAndInp, pathError,
                         "'Доход.Вид.Признак (Графа 5)' не соответствует справочнику '$R_INCOME_TYPE'")
             } else {
-                if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode)) {
+                if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeAccruedDate != null) {
                     def incomeCodeRefList = []
                     incomeTypeIdList.each { incomeTypeId ->
                         def incomeCodeRef = incomeCodeMap.get(incomeTypeId)
@@ -2745,9 +2752,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                             "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
-                            "Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий: \\n" +
-                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2\\n" +
-                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 или 1011 и «Графа 12 Раздел 1» = 1\\n" +
+                            "Для «Графа 14 Раздел 2 = 13» не выполнено ни одно из условий:" +
+                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2," +
+                                    " «Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = 1010 или 1011 и «Графа 12 Раздел 1» = 1," +
                                     " «Графа 7 Раздел 1» ≠ 643 и («Графа 4 Раздел 2» = 2000 или 2001 или 2010 или 2002 или 2003) и («Графа 12 Раздел 1» >= 3)")
                 }
             } else if (ndflPersonIncome.taxRate == 15) {
@@ -2774,8 +2781,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                             "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
-                            "Для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:\\n" +
-                                    " «Графа 12 Раздел 1» >= 2 и «Графа 4 Раздел 2» ≠ 1010\\n" +
+                            "Для «Графа 14 Раздел 2 = 30» не выполнено ни одно из условий:" +
+                                    " «Графа 12 Раздел 1» >= 2 и «Графа 4 Раздел 2» ≠ 1010," +
                                     " («Графа 4 Раздел 2» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2")
                 }
             } else if (ndflPersonIncome.taxRate == 9) {
@@ -2897,7 +2904,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
 
             // СведДох6 НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
-            if (ndflPersonIncome.calculatedTax != null) {
+            if (ndflPersonIncome.calculatedTax != null && ndflPersonIncome.taxRate == 13) {
                 // СведДох6.1
                 if (ndflPersonIncome.taxRate != 13) {
                     if (ndflPersonIncome.calculatedTax ?: 0 != ScriptUtils.round((ndflPersonIncome.taxBase ?: 0 * ndflPersonIncome.taxRate ?: 0), 0)) {
@@ -2956,7 +2963,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (ndflPersonIncome.taxRate == 13 && ndflPerson.status == "6") {
                     List<NdflPersonPrepayment> ndflPersonPrepaymentListByBersonIdList = ndflPersonPrepaymentCache.get(ndflPersonIncome.ndflPersonId) ?: []
                     if (!ndflPersonPrepaymentListByBersonIdList.isEmpty()) {
-                        List<NdflPersonPrepayment> ndflPersonPrepaymentCurrentList = ndflPersonPrepaymentListByBersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+                        List<NdflPersonPrepayment> ndflPersonPrepaymentCurrentList = ndflPersonPrepaymentListByBersonIdList.findAll {
+                            it.operationId == ndflPersonIncome.operationId
+                        } ?: []
                         Long ndflPersonPrepaymentSum = ndflPersonPrepaymentCurrentList.sum { it.summ } ?: 0
                         if (!(ndflPersonIncome.calculatedTax ==
                                 ScriptUtils.round((ndflPersonIncome.taxBase ?: 0 * 13 - ndflPersonPrepaymentSum ?: 0), 0))
@@ -3039,15 +3048,25 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
 
             List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
-            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll {
+                it.operationId == ndflPersonIncome.operationId
+            } ?: []
             // "Сумма Граф 16"
-            Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.calculatedTax ?: 0 } ?: 0
+            Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.calculatedTax ?: 0
+            } ?: 0
             // "Сумма Граф 17"
-            Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.withholdingTax ?: 0 } ?: 0
+            Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.withholdingTax ?: 0
+            } ?: 0
             // "Сумма Граф 18"
-            Long notHoldingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.notHoldingTax ?: 0 } ?: 0
+            Long notHoldingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.notHoldingTax ?: 0
+            } ?: 0
             // "Сумма Граф 19"
-            Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.overholdingTax ?: 0 } ?: 0
+            Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.overholdingTax ?: 0
+            } ?: 0
             // "Сумма Граф 20"
             Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
 
@@ -3152,7 +3171,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         Calendar firstWorkingDay = Calendar.getInstance()
                         firstWorkingDay.setTime(getReportPeriodStartDate())
                         firstWorkingDay.set(Calendar.DAY_OF_YEAR, firstWorkingDay.getActualMaximum(Calendar.DAY_OF_YEAR))
-                        firstWorkingDay.add(Calendar.DATE, 1)
+                        firstWorkingDay
+                                .add(Calendar.DATE, 1)
                         if (firstWorkingDay.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
                             firstWorkingDay.add(Calendar.DATE, 2);
                         }
@@ -3206,6 +3226,7 @@ class ColumnFillConditionData {
         this.conditionMessage = conditionMessage
     }
 }
+
 interface ColumnFillConditionChecker {
     boolean check(NdflPersonIncome ndflPersonIncome)
 }
@@ -3416,19 +3437,19 @@ boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePay
     return true
 }
 
-boolean dateRelateToCurrentPeriod(def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
+boolean dateRelateToCurrentPeriod(
+        def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
     if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
         return true
     }
-    logger.warn("""
-У параметра ТФ "$paramName" недопустимое значение: "${date ? date.format("dd.MM.yyyy"): ""}":дата операции не входит в отчетный период ТФ.
-КПП = $kpp.
-ОКТМО = $oktmo
-ФЛ ИНП = $inp
-ФИО = $fio
-ИдОперации = ${ndflPersonIncome.operationId}
-Номер строки = ${ndflPersonIncome.rowNum}""")
+    logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format("dd.MM.yyyy"): ""}: дата операции не входит в отчетный период ТФ. " +
+            "КПП = $kpp, " +
+            "ОКТМО = $oktmo, " +
+            "ФЛ ИНП = $inp, " +
+            "ФИО = $fio, " +
+            "ИдОперации = ${ndflPersonIncome.operationId}, " +
+            "Номер строки = ${ndflPersonIncome.rowNum}.")
     return false
 }
 
@@ -3779,7 +3800,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
         }
 
         // Выч21 Документ о праве на налоговый вычет.Сумма (Графы 16) (Графы 8)
-        if (comparNumbGreater(ndflPersonDeduction.notifSumm ?: 0, ndflPersonDeduction.periodCurrSumm ?: 0)) {
+        if (comparNumbGreater(ndflPersonDeduction.periodCurrSumm ?: 0, ndflPersonDeduction.notifSumm ?: 0)) {
             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "",
                     "Применение вычета.Текущий период.Сумма (Графа 16)='${ndflPersonDeduction.periodCurrSumm ?: ""}', Документ о праве на налоговый вычет.Сумма (Графа 8)='${ndflPersonDeduction.notifSumm ?: ""}'")
@@ -3795,6 +3816,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
 boolean comparNumbEquals(def d1, def d2) {
     return (Math.abs(d1 - d2) < 0.001)
 }
+
 boolean comparNumbGreater(double d1, double d2) {
     return (d1 - d2 > 0.001)
 }
@@ -3809,7 +3831,7 @@ def getRefBookNdfl() {
     def departmentId = declarationData.departmentId
     def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate(), null, "DEPARTMENT_ID = $departmentId", null)
     if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        departmentParamException(departmentId, declarationData.reportPeriodId)
     }
     return departmentParamList?.get(0)
 }
@@ -3824,7 +3846,7 @@ def getRefBookNdflDetail(def departmentParamId) {
     def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
     def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
     }
     def kppList = []
     def mapOktmo = getRefOktmoByDepartmentId()
@@ -3946,4 +3968,13 @@ void checkCreate() {
             logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде, Отчетные налоговые формы не будут сформированы текущем периоде")
         }
     }
+}
+
+@TypeChecked
+void departmentParamException(int departmentId, int reportPeriodId) {
+    ReportPeriod reportPeriod = reportPeriodService.get(reportPeriodId)
+    throw new ServiceException("Отсутствуют настройки подразделения \"%s\" периода \"%s\". Необходимо выполнить настройку в разделе меню \"Налоги->НДФЛ->Настройки подразделений\"",
+            departmentService.get(departmentId).getName(),
+            reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
+    ) as Throwable
 }
