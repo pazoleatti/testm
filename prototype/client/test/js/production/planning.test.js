@@ -1,7 +1,7 @@
-describe('Тестирование mtsUsim.productionPlanning\n', function () {
+describe('Тестирование sbrfNdfl.productionPlanning\n', function () {
     var scope, controller;
 
-    beforeEach(module('mtsUsim.productionPlanning'));
+    beforeEach(module('sbrfNdfl.productionPlanning'));
 
     beforeEach(inject(function (_$rootScope_, $controller) {
         scope = _$rootScope_.$new();

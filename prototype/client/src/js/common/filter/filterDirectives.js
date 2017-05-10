@@ -1,32 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('mtsUsim.filterDirectives', [])
-        /**
-         * Полнотекстовый поиск
-         * (Поиск: "Введите строку)
-         *
-         * Атрибуты:
-         *   "label-сlass" - css-класс для контейнера с подписью
-         *   "input-сlass" - css-класс для контейнера с полем ввода
-         *   "ng-model" - модель для связывания с данными
-         */
-        .directive('fulltextFilter', function () {
-            return {
-                restrict: 'E',
-                ngModel: 'ngModel',
-                templateUrl: 'js/common/filter/fulltextFilter.html',
-                scope: {
-                    ngModel: '='
-                },
-                link: function (scope, element, attr) {
-                    var labelClass = attr.labelClass ? attr.labelClass : 'col-md-3';
-                    element.find('label').parent().addClass(labelClass);
-                    var inputClass = attr.inputClass ? attr.inputClass : 'col-md-9';
-                    element.find('input').parent().addClass(inputClass);
-                }
-            }
-        })
+    angular.module('sbrfNdfl.filterDirectives', [])
         /**
          * Две кнопки "Найти", "Сбросить"
          *
@@ -41,30 +16,6 @@
                 scope: {
                     onSearch: '&onSearch',
                     onClear: '&onClear'
-                }
-            }
-        })
-        /**
-         * Чекбокс "Включая заблокированные"
-         *
-         * Атрибуты:
-         *   "label-сlass" - css-класс для контейнера с подписью
-         *   "input-сlass" - css-класс для контейнера с чекбоксом
-         *   "ng-model" - модель для связывания с данными
-         */
-        .directive('deletedFilter', function () {
-            return {
-                restrict: 'E',
-                ngModel: 'ngModel',
-                templateUrl: 'js/common/filter/deletedFilter.html',
-                scope: {
-                    ngModel: '='
-                },
-                link: function (scope, element, attr) {
-                    var labelClass = attr.labelClass ? attr.labelClass : 'col-md-3';
-                    $(element).find('label:first').parent().addClass(labelClass);
-                    var inputClass = attr.inputClass ? attr.inputClass : 'col-md-9';
-                    element.find('input').parent().parent().addClass(inputClass);
                 }
             }
         })
@@ -689,50 +640,6 @@
                 '</data-select-filter>',
                 link: function (scope, element, attr) {
                     scope.light = angular.isDefined(scope.light) ? scope.light : false;
-                }
-            }
-        })
-        /**
-         * Выбор интервала дат от-до
-         *
-         * Атрибуты:
-         *   "ng-label" - css-класс для контейнера с подписью
-         *   "ng-from-model" - модель для даты "С"
-         *   "ng-to-model" - модель для даты "По"
-         */
-        .directive('dateFromToFilter', function () {
-            return {
-                restrict: 'E',
-                ngModel: 'ngModel',
-                templateUrl: 'js/common/filter/dateFromToFilter.html',
-                scope: {
-                    ngLabel: '@?',
-                    ngFromModel: '=',
-                    ngToModel: '=',
-                    labelWidth: "@"
-                },
-                link: function (scope, element, attributes) {
-                    scope.ngLabel = angular.isDefined(scope.ngLabel) ? scope.ngLabel : "historyDateFromFilterLabel";
-                    scope.dateFromOpened = false;
-                    scope.dateToOpened = false;
-                    scope.dateFromSelectClick = function (){
-                        scope.dateFromOpened = true;
-                    };
-                    scope.dateToSelectClick = function (){
-                        scope.dateToOpened = true;
-                        scope.dateToOptions = {
-                            minDate: scope.ngFromModel,
-                            maxDate: undefined
-                        }
-                    };
-                    // Изменение пропорций метки и поля
-                    scope.labelGridClass = 'col-md-3';
-                    scope.pickerGridClass = 'col-md-9';
-                    if (attributes.labelWidth != undefined) {
-                        var labelWidth = parseInt(attributes.labelWidth);
-                        scope.labelGridClass = 'col-md-' + labelWidth;
-                        scope.pickerGridClass = 'col-md-' + (12 - labelWidth);
-                    }
                 }
             }
         })

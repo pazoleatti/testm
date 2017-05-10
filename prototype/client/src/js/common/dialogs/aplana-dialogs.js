@@ -81,22 +81,6 @@
                         opts = _setOpts(opts);
                         return dialogs.create('js/common/dialogs/confirm.html', 'confirmCtrl', data, opts)
                     },
-                    /**
-                     * Универсальный диалог вопрос-ответ, можно задавать названия кнопок в opts
-                     * opts.labelYes - название кнопки "Да"
-                     * opts.labelNo - название кнопки "Нет"
-                     *
-                     * @param header строка, заголовок
-                     * @param msg строка, текст сообщения
-                     * @param opts объект, параметры диалогового окна
-                     */
-                    lock: function (header, msg) {
-                        var data = {
-                            header: header,
-                            msg: msg
-                        };
-                        return dialogs.create('js/common/dialogs/lock.html', 'lockCtrl', data, {backdrop: 'static', keyboard: false})
-                    },
 
                     /**
                      * Создает произвольный диалог
@@ -187,47 +171,6 @@
                         return dialogs.create('js/common/dialogs/input-message.html', 'inputMessageCtrl', data, opts)
                     },
                     /**
-                     * Диалог для ввода комментария
-                     *
-                     * @returns строка
-                     */
-                    comment: function (comments) {
-                        var data = {
-                            comments: comments
-                        };
-                        var opts = {
-                            copy: false
-                        };
-                        opts = _setOpts(opts);
-                        return dialogs.create('js/common/dialogs/comment.html', 'commentCtrl', data, opts)
-                    },
-                    /**
-                     * Диалог для ввода комментария c отображением истории
-                     * @param entity объект, к которому будет добавлен комментарий
-                     * @param urlGet строка, урл для получения истории комментариев
-                     * @param urlPost строка, урл для добавления нового комментария. В этот метод будет передан параметр entity с обновленным полем комментария
-                     * @param label строка, подпись для поля с комментарием
-                     * @param field строка, путь внутри объекта до поля, в которое будет добавлен комментарий
-                     * @param header строка, заголовок
-                     * @param msg строка, сообщение
-                     */
-                    commentWithHistory: function (entity, urlGet, urlPost, field, label, header, msg) {
-                        var data = {
-                            entity: angular.copy(entity),
-                            urlGet: angular.copy(urlGet),
-                            urlPost: angular.copy(urlPost),
-                            field: angular.copy(field),
-                            label: angular.copy(label),
-                            header: angular.copy(header),
-                            msg: angular.copy(msg)
-                        };
-                        var opts = {
-                            copy: true
-                        };
-                        opts = _setOpts(opts);
-                        return dialogs.create('js/common/dialogs/commentWithHistory.html', 'commentWithHistoryCtrl', data, opts)
-                    },
-                    /**
                      * Диалог для ввода строки
                      *
                      * @param header строка, заголовок
@@ -249,32 +192,6 @@
                         };
                         opts = _setOpts(opts);
                         return dialogs.create('js/common/dialogs/edit-object.html', 'editObjectCtrl', data, opts)
-                    },
-                    /**
-                     * Диалог для импорта файла
-                     *
-                     * @param header строка, заголовок
-                     * @param url урл контроллера-обработчика загрузки файла
-                     * @param successCallback обработчик успешной загрузки
-                     * @param failureCallback обработчик ошибки при загрузке
-                     * @param ctrl кастомный контроллер, если нужна особая логика. По-умолчанию берется стандартный
-                     * @param msg строка, текст сообщения
-                     * @param ext массив разрешенных расширений файла
-                     */
-                    import: function (header, url, successCallback, failureCallback, ctrl, msg, ext) {
-                        var data = {
-                            header: angular.copy(header),
-                            msg: angular.copy(msg),
-                            ext: angular.copy(ext),
-                            url: angular.copy(url),
-                            successCallback: successCallback,
-                            failureCallback: failureCallback
-                        };
-                        var opts = {
-                            copy: false
-                        };
-                        opts = _setOpts(opts);
-                        return dialogs.create('js/common/dialogs/import.html', ctrl ? ctrl : 'aplanaImportCtrl', data, opts)
                     }
                 }
             }
@@ -329,7 +246,7 @@
                         field: field,
                         items: [],
                         searchItems: function (searchText) {
-                            var url = 'rest/entity/' + field.referenceType.substring('com.mts.usim.model.'.length);
+                            var url = 'rest/entity/' + field.referenceType.substring('com.ndlf.model.'.length);
                             var params = {
                                 fulltext: searchText,
                                 sort: field.displayField + '-asc',
@@ -342,12 +259,12 @@
                         }
                     }
                 }
-                if (field.type.startsWith('com.mts.usim.model')) {
+                if (field.type.startsWith('com.ndlf.model')) {
                     $scope.fieldParams[field.name] = {
                         field: field,
                         items: [],
                         searchItems: function (searchText) {
-                            var url = 'rest/entity/' + field.type.substring('com.mts.usim.model.'.length);
+                            var url = 'rest/entity/' + field.type.substring('com.ndlf.model.'.length);
                             var params = {
                                 fulltext: searchText,
                                 sort: field.displayField + '-asc',
@@ -391,122 +308,6 @@
                     $scope.save();
             }
         })
-        .controller('commentCtrl', function ($log, $scope, $uibModalInstance, data) {
-            $scope.comment = '';
-            if(data.comments != undefined && data.comments.length > 0) {
-                $scope.comments = data.comments;
-                $scope.showComments = true;
-            }
-            $scope.save = function () {
-                $uibModalInstance.close($scope.comment)
-            };
-            $scope.cancel = function () {
-                $uibModalInstance.dismiss('Canceled')
-            };
-            $scope.hitEnter = function (evt) {
-                if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.inputMessage, null) || angular.equals($scope.inputMessage, '')))
-
-                    $scope.save();
-            }
-        })
-        .controller('commentWithHistoryCtrl', [
-            '$log', '$scope', '$uibModalInstance', 'data', 'aplanaEntityUtils', '$http',
-            function ($log, $scope, $uibModalInstance, data, aplanaEntityUtils, $http) {
-            $scope.header = data.header ? data.header : "common.dialog.comment.header";
-            $scope.msg = data.msg ? data.msg : "";
-            $scope.label = data.label ? data.label : "Добавить комментарий";
-            $scope.showComments = false;
-            //Получаем список комментариев
-            $scope.comments = [];
-            $http.get(data.urlGet)
-                .then(function (response) {
-                    if (response.data) {
-                        $scope.comments = response.data;
-                        if ($scope.comments && $scope.comments.length != 0) {
-                            $scope.showComments = true;
-                        }
-
-                    }
-                });
-            $scope.save = function () {
-                aplanaEntityUtils.setFieldValue(data.entity, $scope.inputMessage, data.field);
-                $http.post(data.urlPost, data.entity).then(function successCallback(response) {
-                    $uibModalInstance.close()
-                });
-            };
-            $scope.cancel = function () {
-                $uibModalInstance.dismiss('Canceled')
-            };
-            $scope.hitEnter = function (evt) {
-                if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.inputMessage, null) || angular.equals($scope.inputMessage, '')))
-                    $scope.save();
-            }
-        }])
-        .controller('aplanaImportCtrl', [
-            '$http', '$scope', '$uibModalInstance', 'data', '$alertService', 'FileUploader', 'Overlay',
-            function ($http, $scope, $uibModalInstance, data, $alertService, FileUploader, Overlay) {
-                $scope.header = data.header;
-                $scope.url = data.url;
-                $scope.ext = data.ext ? data.ext : undefined;
-                $scope.successCallback = data.successCallback;
-                $scope.failureCallback = data.failureCallback;
-                $scope.msg = data.msg ? data.msg : 'Выберите Excel-файл для загрузки';
-
-                // UPLOAD
-                var uploadFileClick = function () {
-                    if (uploader.queue.length > 0) {
-                        Overlay.processRequest();
-                        uploader.queue[0].upload();
-                        return true
-                    }
-                    return false
-                };
-                //https://github.com/nervgh/angular-file-upload
-                var uploader = $scope.uploader = new FileUploader({
-                    url: $scope.url
-                });
-                if ($scope.ext) {
-                    uploader.filters.push({
-                        name: 'extensionFilter',
-                        fn: function (item, options) {
-                            for (var i = 0; i < $scope.ext.length; i++) {
-                                if (item.name.toLowerCase().endsWith($scope.ext[i])) {
-                                    return true;
-                                }
-                            }
-                            $alertService.notification('Расширение файла не соответствует допустимому формату');
-                            return false;
-                        }
-                    });
-                }
-                uploader.onErrorItem = function (fileItem, response, status, headers) {
-                    Overlay.processResponse();
-                    Overlay.showAlertByStatus(status, response)
-                    if ($scope.failureCallback) {
-                        $scope.failureCallback();
-                    }
-                };
-                uploader.onSuccessItem = function() {
-                    if ($scope.successCallback) {
-                        $scope.successCallback();
-                    }
-                };
-                uploader.onCompleteAll = function () {
-                    Overlay.processResponse();
-                    uploader.queue.length = 0;
-                    angular.element("input[type='file']").val(null);
-                };
-                $scope.save = function () {
-                    uploadFileClick();
-                    $uibModalInstance.close()
-                };
-                $scope.cancel = function () {
-                    $uibModalInstance.dismiss('Canceled')
-                };
-                $scope.hitEnter = function () {
-                    $scope.save();
-                }
-            }])
         .controller('confirmCtrl', ['$scope', '$uibModalInstance', '$translate', 'data',
             function ($scope, $uibModalInstance, $translate, data) {
                 $scope.header = (angular.isDefined(data.header)) ? data.header : $translate.instant('DIALOGS_CONFIRMATION');
@@ -522,11 +323,6 @@
                 $scope.yes = function () {
                     $uibModalInstance.close('yes');
                 };
-            }])
-        .controller('lockCtrl', ['$scope', '$uibModalInstance', '$translate', 'data',
-            function ($scope, $uibModalInstance, $translate, data) {
-                $scope.header = (angular.isDefined(data.header)) ? data.header : $translate.instant('DIALOGS_CONFIRMATION');
-                $scope.msg = (angular.isDefined(data.msg)) ? data.msg : $translate.instant('DIALOGS_CONFIRMATION_MSG');
             }])
         .controller('refBookCtrl', [
             '$scope', '$http', 'aplanaEntityUtils', '$timeout', '$uibModalInstance', 'data',

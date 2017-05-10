@@ -1,19 +1,19 @@
 (function () {
     'use strict';
 
-    angular.module('mtsUsim.header', [
+    angular.module('sbrfNdfl.header', [
             'ui.router',
             'aplana.dropdownMenu',
-            'mtsUsim.Constants',
+            'sbrfNdfl.Constants',
             'userData'
         ])
-        .directive('mtsUsimHeader', function () {
+        .directive('sbrfNdflHeader', function () {
             return {
                 templateUrl: 'js/main/header.html',
-                controller: 'mtsUsimTopMenuController'
+                controller: 'sbrfNdflTopMenuController'
             }
         })
-        .controller('mtsUsimTopMenuController', [
+        .controller('sbrfNdflTopMenuController', [
             '$rootScope', '$scope', '$translate', '$http', '$log', '$location', '$window', 'USER_DATA', 'aplanaDialogs',
             function ($rootScope, $scope, $translate, $http, $log, $location, $window, USER_DATA, aplanaDialogs) {
                 $scope.mainMenu = [];
@@ -71,27 +71,6 @@
                         );
                     }
                     $scope.mainMenu.push(menuItem);
-                }
-
-                // Справочники
-                if (hasRole("REF_BOOK_GUI")) {
-                    $scope.mainMenu.push({
-                        id: 'menu-refbooks', title: 'entity.RefBooks', items: [
-                            {title: 'entity.MacroRegion', href: '#/refbook/MacroRegion'},
-                            {title: 'entity.Region', href: '#/refbook/Region'},
-                            {title: 'entity.Code', href: '#/refbook/Code'},
-                            {title: 'entity.Vendor', href: '#/refbook/Vendor'},
-                            {title: 'entity.Specification', href: '#/refbook/Specification'},
-                            {title: 'entity.Profile', href: '#/refbook/Profile'},
-                            {title: 'entity.CardType', href: '#/refbook/CardType'},
-                            {title: 'entity.Tariff', href: '#/refbook/Tariff'},
-                            {title: 'entity.Hlr', href: '#/refbook/Hlr'},
-                            {title: 'entity.TransportCompany', href: '#/refbook/TransportCompany'},
-                            {title: 'entity.AuthAlgorythm', href: '#/refbook/AuthAlgorythm'},
-                            {title: 'entity.Price', href: '#/refbook/Price'},
-                            {title: 'entity.Delivery', href: '#/refbook/Delivery'}
-                        ]
-                    });
                 }
 
                 $scope.mainMenu.forEach(function (item) {

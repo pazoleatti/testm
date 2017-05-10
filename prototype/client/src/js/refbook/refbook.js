@@ -2,7 +2,7 @@
     'use strict'
 
     angular
-        .module('mtsUsim.refBook', [
+        .module('sbrfNdfl.refBook', [
             'ui.router',
             'aplana.collapse',
             'ui.grid',
@@ -15,9 +15,9 @@
             'ui.bootstrap',
             'ui.select',
             'aplana.entity-utils',
-            'aplana.mtsUsim.directives',
+            'aplana.sbrfNdfl.directives',
             'ngMessages',
-            'mtsUsim.filterDirectives'
+            'sbrfNdfl.filterDirectives'
         ])
         .config(function ($stateProvider) {
             $stateProvider
@@ -359,7 +359,7 @@
                                 name: "macroRegion",
                                 order: 1,
                                 title: "Макрорегион",
-                                type :"com.mts.usim.model.MacroRegion",
+                                type :"com.ndlf.model.MacroRegion",
                                 visible : true,
                                 width : 250
                             }
@@ -468,7 +468,7 @@
                                 displayRow[field] = row[field]
                                 row[field] = new Date(row[field])
                             }
-                        } else if (fieldInfo.type.startsWith('com.mts.usim.model')) {
+                        } else if (fieldInfo.type.startsWith('com.ndlf.model')) {
                             // Ссылки
                             displayRow[field] = row[field] == null ? "" : row[field][fieldInfo.displayField]
                         } else if (fieldInfo.type == 'java.util.List') {
@@ -648,7 +648,7 @@
                             field: field,
                             items: [],
                             searchItems: function(searchText) {
-                                var url = 'rest/entity/light/' + field.referenceType.substring('com.mts.usim.model.'.length)
+                                var url = 'rest/entity/light/' + field.referenceType.substring('com.ndlf.model.'.length)
                                 var params = {
                                     fulltext: searchText,
                                     sort: field.displayField + '-asc',
@@ -679,12 +679,12 @@
                             '        </ui-select-choices>' +
                             '    </ui-select>\n'
                     } else
-                    if (field.type.startsWith('com.mts.usim.model')){
+                    if (field.type.startsWith('com.ndlf.model')){
                         $scope.editPanel[field.name] = {
                             field: field,
                             items: [],
                             searchItems: function(searchText) {
-                                var url = 'rest/entity/light/' + field.type.substring('com.mts.usim.model.'.length)
+                                var url = 'rest/entity/light/' + field.type.substring('com.ndlf.model.'.length)
                                 var params = {
                                     fulltext: searchText,
                                     sort: field.displayField + '-asc',

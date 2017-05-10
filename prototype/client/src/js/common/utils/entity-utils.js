@@ -447,7 +447,7 @@
                                 } else {
                                     displayRow[field] = "";
                                 }
-                            } else if (fieldInfo.type.startsWith('com.mts.usim.model')) {
+                            } else if (fieldInfo.type.startsWith('com.ndlf.model')) {
                                 // Ссылки
                                 displayRow[field] = row[field] == null ? "" : row[field][fieldInfo.displayField];
                             } else if (fieldInfo.type == 'java.util.List' || fieldInfo.type == 'java.util.Set') {

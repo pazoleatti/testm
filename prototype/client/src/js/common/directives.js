@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('aplana.mtsUsim.directives', [])
+    angular.module('aplana.sbrfNdfl.directives', [])
         /**
          * Проверка наличия прав у пользователя на доступ к компоненту
          */
@@ -100,24 +100,6 @@
                         return date;
                     });
                 }
-            };
-        })
-        /**
-         * Добавляет компонент "Ссылка-кнопка"
-         *
-         * Атрибуты:
-         *   "label" - текст сообщения в кнопке
-         *   "ng-link-click" - обработчик нажатия
-         */
-        .directive('linkButton', function () {
-            return {
-                restrict: 'A',
-                scope: {
-                    label: '=',
-                    ngLinkClick: '&'
-                },
-                replace: true,
-                templateUrl: 'js/common/templates/linkButton.html'
             };
         })
 

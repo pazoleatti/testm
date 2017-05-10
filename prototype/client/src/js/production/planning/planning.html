@@ -6,10 +6,17 @@
             <form class="form-horizontal" role="form" novalidate>
                 <div class="row">
                     <div class="filter-col w300">
-                        <data-fulltext-filter
-                                label-class="col-md-4"
-                                input-class="col-md-8"
-                                ng-model="dataOptions.filter.fulltext"/>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'orderNumberFilterLabel' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input data-ng-model="dataOptions.filter.orderNumber"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"
+                                       title="{{dataOptions.filter.orderNumber}}"/>
+                            </div>
+                        </div>
                     </div>
                     <div class="filter-col">
                         <data-search-clear-buttons
@@ -32,9 +39,6 @@
                     {{'common.button.create' | translate}}
                 </button>
             </span>
-            <!-- Экспорт -->
-            <span ng-include="'js/common/templates/exportButton.html'"
-                  data-ng-check-operation="['PRODUCTION_PLAN_EXPORT']"></span>
         </div>
     </div>
     <!-- Таблица -->

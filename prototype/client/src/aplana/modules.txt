@@ -17,15 +17,12 @@ aplana.utils.directives
 aplana.utils
 aplana.modal
 aplana.modal.dialogs
-aplana.fileUpload
-aplana.fileUploadButton
 aplana.focus
 aplana.clickOnce
 aplana.outerWidth
 aplana.accordions
 aplana.select.universal
 aplana.datetimepicker
-aplana.comments
 aplana.tooltip
 aplana.collapse
 aplana.splitter
@@ -41,6 +38,4 @@ ui.mask
 ui.select2
 aplana.webStorage
 aplana.fixedPosition
-aplana.logPanel
 aplana.dropdownMenu
-aplana.sadd

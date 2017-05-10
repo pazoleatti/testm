@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    var widgets = angular.module('mtsUsim.widgets', []);
+    var widgets = angular.module('sbrfNdfl.widgets', []);
 
     /**
      * Виджет для поля ввода
