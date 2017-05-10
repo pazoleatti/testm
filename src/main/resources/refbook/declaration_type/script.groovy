@@ -719,6 +719,10 @@ def readNdfl2ResponseContent() {
                     isEndNotCorrect = true
                 }
 
+                if (!lastEntry.isEmpty()) {
+                    notCorrectList.add(lastEntry)
+                }
+
                 // Блок "ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ" полносью прочитан
                 // Кроме блока прочитана еще последующая стрка "СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ" или какая-то другая
                 // Поэтому вызываем continue, чтобы повторно не вызвать bufferedReader.readLine()
