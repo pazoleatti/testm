@@ -64,7 +64,22 @@ switch (formDataEvent) {
 }
 
 @Field
-final RefBookService refBookService = getProperty("refBookService")
+final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
+@Field
+final DepartmentService departmentService = getProperty("departmentService")
+
+def getProperty(String name) {
+    try{
+        return super.getProperty(name)
+    } catch (MissingPropertyException e) {
+        return null
+    }
+}
+
+@Field
+final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
+@Field
+final DepartmentService departmentService = getProperty("departmentService")
 
 def getProperty(String name) {
     try{
@@ -970,7 +985,7 @@ def createForm() {
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
-
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
     if (departmentReportPeriod.correctionDate != null) {
         def declarations = []
 
@@ -1038,7 +1053,7 @@ def createForm() {
         // Поиск КПП и ОКТМО для некорр периода
     } else {
         def departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
-        def departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.reportPeriod.id)
+        def departmentParamTableList = getDepartmentParamTableList(departmentParam?.id, departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
         def referencesOktmoList = departmentParamTableList.OKTMO?.value
         referencesOktmoList.removeAll([null])
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
@@ -1067,7 +1082,6 @@ def createForm() {
             }
         }
     }
-
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
         declarationService.delete(it.id, userInfo)
     }
@@ -1343,12 +1357,12 @@ def getDepartmentFullName(def id) {
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
 
 // Получить список детали подразделения из справочника для некорректировочного периода
-def getDepartmentParamTableList(def departmentParamId, def reportPeriodId) {
+def getDepartmentParamTableList(def departmentParamId, def departmentId, def reportPeriodId) {
     if (departmentParamTableList == null) {
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
         departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
     }
     return departmentParamTableList
@@ -1359,7 +1373,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId) {
         def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate(reportPeriodId) - 1, null, "DEPARTMENT_ID = $departmentId", null)
 
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(departmentId, reportPeriodId)
         }
         departmentParam = departmentParamList?.get(0)
     }
@@ -1374,7 +1388,7 @@ def getDepartmentParam(def departmentId) {
     if (departmentParam == null) {
         def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            departmentParamException(departmentId, declarationData.reportPeriodId)
         }
         departmentParam = departmentParamList?.get(0)
     }
@@ -1391,7 +1405,7 @@ def getDepartmentParamTable(def departmentParamId) {
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
         }
         def referencesOktmoList = departmentParamTableList.OKTMO?.value
         referencesOktmoList.removeAll([null])
@@ -1403,7 +1417,7 @@ def getDepartmentParamTable(def departmentParamId) {
             }
         }
         if (departmentParamTable == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
+            departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
         }
     }
     return departmentParamTable
@@ -1793,4 +1807,13 @@ def thinBorderStyle(final style) {
     style.setBorderLeft(CellStyle.BORDER_THIN)
     style.setBorderRight(CellStyle.BORDER_THIN)
     return style
+}
+
+@TypeChecked
+void departmentParamException(int departmentId, int reportPeriodId) {
+    ReportPeriod reportPeriod = reportPeriodService.get(reportPeriodId)
+    throw new ServiceException("Отсутствуют настройки подразделения \"%s\" периода \"%s\". Необходимо выполнить настройку в разделе меню \"Налоги->НДФЛ->Настройки подразделений\"",
+            departmentService.get(departmentId).getName(),
+            reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
+    ) as Throwable
 }

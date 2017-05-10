@@ -136,7 +136,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         }
 
         List<LogEntry> result = getJdbcTemplate().query(
-                "select * from log_entry where log_id = ?",
+                "select log_id, ord, creation_date, log_level, message, type, object from log_entry where log_id = ? order by ord",
                 new Object[]{logId},
                 new int[]{Types.VARCHAR},
                 new LogEntryMapper()

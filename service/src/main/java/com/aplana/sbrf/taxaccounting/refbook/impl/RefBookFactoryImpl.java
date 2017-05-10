@@ -118,7 +118,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
         }
         if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
             RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            dataProvider.setWhereClause("ID <> -1");
+            if (refBook.hasAttribute("ID")) {
+                dataProvider.setWhereClause("ID <> -1");
+            }
             dataProvider.setRefBook(refBook);
             return dataProvider;
         } else {
