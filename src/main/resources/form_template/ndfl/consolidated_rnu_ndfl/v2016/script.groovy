@@ -77,6 +77,8 @@ final ReportPeriodService reportPeriodService = getProperty("reportPeriodService
 final DepartmentService departmentService = getProperty("departmentService")
 @Field
 final RefBookService refBookService = getProperty("refBookService")
+@Field
+final FormDataService formDataService = getProperty("formDataService")
 
 def getProperty(String name) {
     try {
@@ -2618,7 +2620,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
  */
 @TypeChecked
 Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
-    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /**
