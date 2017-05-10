@@ -172,8 +172,8 @@ def importTF() {
     Pattern patternUuOtch = Pattern.compile(UU_PATTERN)
 
     if (UploadFileName != null
-            && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
-            && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
+        && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
+        && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
     ) {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
@@ -183,10 +183,10 @@ def importTF() {
     } else if (isNdfl2Response(UploadFileName)) {
         importNdflResponse()
     } else if (
-    patternKvOtch.matcher(UploadFileName).matches() ||
-            patternUoOtch.matcher(UploadFileName).matches() ||
-            patternIvOtch.matcher(UploadFileName).matches() ||
-            patternUuOtch.matcher(UploadFileName).matches()
+        patternKvOtch.matcher(UploadFileName).matches() ||
+        patternUoOtch.matcher(UploadFileName).matches() ||
+        patternIvOtch.matcher(UploadFileName).matches() ||
+        patternUuOtch.matcher(UploadFileName).matches()
     ) {
         importAnswer1151111()
     } else {
@@ -717,6 +717,10 @@ def readNdfl2ResponseContent() {
                     }
 
                     isEndNotCorrect = true
+                }
+
+                if (!lastEntry.isEmpty()) {
+                    notCorrectList.add(lastEntry)
                 }
 
                 // Блок "ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ" полносью прочитан
