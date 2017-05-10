@@ -1325,7 +1325,7 @@
         //Кнопки: "Закрыть"
 
         if (pagingResult.isEmpty()) {
-            subreportParamsToString = { it.collect { (it.value != null ? (it.value + ";") : "") } join " " }
+            subreportParamsToString = { it.collect { (it.value != null ? (((it.value instanceof Date)?it.value.format('dd.MM.yyyy'):it.value) + ";") : "") } join " " }
             logger.warn("Физическое лицо: " + subreportParamsToString(reportParameters) + " не найдено в форме");
             //throw new ServiceException("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
         }
