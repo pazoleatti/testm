@@ -1,0 +1,17 @@
+<!-- Шаблон фильтра недели -->
+<div class="form-group">
+    <div class="col-md-3">
+        <label class="control-label">{{'weekFilterLabel' | translate}}</label>
+    </div>
+    <div class="col-md-9">
+        <ui-select data-ng-model="dataOptions.filter.week" data-ng-disabled="!weekFilterEnabled"
+                   on-select="weekSelected($select.selected)">
+            <ui-select-match allow-clear="true">
+                <span data-ng-bind="$select.selected" title="{{$select.selected}}"></span>
+            </ui-select-match>
+            <ui-select-choices repeat="item in dataOptions.filterList.listWeeks track by $index">
+                <span data-ng-bind-html="item | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>

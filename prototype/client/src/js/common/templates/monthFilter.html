@@ -1,0 +1,17 @@
+<!-- Шаблон фильтра месяца-->
+<div class="form-group">
+    <div class="col-md-3">
+        <label class="control-label">{{'monthFilterLabel' | translate}}</label>
+    </div>
+    <div class="col-md-9">
+        <ui-select ng-model="dataOptions.filter.month" data-ng-disabled="!monthFilterEnabled"
+                   on-select="monthSelected($select.selected)">
+            <ui-select-match allow-clear="true" placeholder="{{'filter.placeholder.all' | translate}}">
+                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+            </ui-select-match>
+            <ui-select-choices repeat="item in dataOptions.filterList.listMonths track by item.name">
+                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>

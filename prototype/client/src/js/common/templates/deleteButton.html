@@ -1,0 +1,7 @@
+<!-- Кнопка Удалить -->
+<button type="button" class="btn btn-default" data-ng-disabled="!deleteButtonEnabled"
+        data-ng-click="deleteButtonClick()">
+    <img src="img/button/{{deleteButtonEnabled ? 'enable' : 'disable'}}/delete.png" width="32px" height="22px"
+         alt="{{'common.button.delete' | translate}}"/>
+    {{'common.button.delete' | translate}}
+</button>

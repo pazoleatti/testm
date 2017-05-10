@@ -1,0 +1,9 @@
+<span>
+    <span class="helpTooltipLink"
+          onmouseover="var el = event.target ? event.target : event.srcElement; var t = $(el).next(); $(t).addClass('showpopup'); event.preventDefault();"
+          onmouseout="var el = event.target ? event.target : event.srcElement; var t = $(el).next(); $(t).removeClass('showpopup'); event.preventDefault();">(?)</span>
+    <span class="tooltip-bottom-popup">
+        <span class="tooltip-text" data-ng-transclude>
+        </span>
+	</span>
+</span>

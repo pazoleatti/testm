@@ -1,0 +1,40 @@
+<nav id="mtsusim-header" class="navbar navbar-default" style="min-width: 1300px;">
+    <div class="navbar-header">
+        <a href="#">
+            <img src="img/logo.png" height="50px" width="125px" alt="logo"/>
+            <span class="logo-text text-center">управление поставками<br />комплектов подключения</span>
+        </a>
+    </div>
+    <span data-aplana-dropdown-menu>
+        <ul class="nav navbar-nav">
+            <div
+                data-aplana-dropdown-menu-top-item
+                data-ng-repeat="menuItem in mainMenu"
+                data-items="menuItem.items"
+                data-title="menuItem.title">
+            </div>
+        </ul>
+    </span>
+    <ul class="nav navbar-nav navbar-right">
+        <li class="build_info">
+                <div>Версия:</div>
+                <div>Номер сборки:</div>
+                <div>Дата сборки:</div>
+        </li>
+        <li class="build_info">
+                <div>{{'Implementation-Version' | translate}}</div>
+                <div>{{'Git-Revision' | translate}}</div>
+                <div>{{'Build-Date' | translate}}</div>
+        </li>
+        <li class="usim-user-info">
+            <div>
+                {{security.userTitle}} <br />
+                <select data-ng-model="security.currentMode"
+                        data-ng-change="setMode()"
+                        data-ng-options="mode.title for mode in security.modes">
+                </select>
+            </div>
+        </li>
+        <li><a class="logout_link" data-ng-click="logout()"><img src="img/logout.png" height="20px" width="12px" alt="logout" title="Выход"></a></li>
+    </ul>
+</nav>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- For bootstrap: the above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <link rel="icon" href="img/favicon.ico">
+    <title>МТС USIM</title>
+
+    <link rel="stylesheet" type="text/css" href="aplana/css/collapse.css">
+    <link rel="stylesheet" type="text/css" href="aplana/css/accordion.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+    <!-- шапка -->
+    <div mts-usim-header></div>
+    <!-- основное содержимое -->
+    <div id="main-content" class="container-fluid" ui-view></div>
+
+    <script src="js/hacks.js"></script> <!-- IE hacks -->
+
+    <script src="js/lib/jquery-2.2.3.js"></script>
+    <script src="js/lib/angular-1.5.5.js"></script>
+    <script src="js/lib/angular-translate-2.11.0.js"></script> <!-- i18n -->
+    <script src="js/lib/angular-translate-loader-url-2.11.0.js"></script> <!-- i18n -->
+    <script src="js/lib/angular-sanitize-1.5.6.js"></script>
+    <script src="js/lib/angular-ui-router-0.2.18.js"></script>
+    <script src="js/lib/ui-grid-3.1.1.js"></script> <!-- angular ui grid  -->
+    <script src="js/lib/ui-bootstrap-tpls-1.3.3.js"></script> <!-- angular + bootstrap -->
+    <script src="js/lib/bootstrap-3.3.5.js"></script>
+    <script src="js/lib/angular-messages-1.5.6.js"></script> <!--https://code.angularjs.org/1.5.6/angular-messages.js-->
+    <script src="js/lib/angular-touch-1.5.5.js"></script>
+    <script src="js/lib/angular-animate-1.5.5.js"></script>
+    <script src="js/lib/grunt-scripts/csv.js"></script>
+    <script src="js/lib/grunt-scripts/pdfmake.js"></script>
+    <script src="js/lib/grunt-scripts/vfs_fonts.js"></script>
+    <script src="js/lib/select-0.19.4.js"></script>
+    <script src="js/lib/validate-1.2.2.js"></script>
+    <script src="js/lib/angular-locale_ru-ru-1.5.6.js"></script>
+    <script src="js/lib/angular-file-upload-2.3.4.js"></script> <!--https://github.com/nervgh/angular-file-upload-->
+    <script src="js/lib/moment.js"></script>
+
+    <!--<script src="js/lib/angular-resource-1.5.5.js"></script>-->
+
+    <script src="aplana/js/utils/aplana.js"></script>
+    <script src="aplana/js/dropdownMenu/dropdownMenu.js"></script>
+    <script src="aplana/js/collapse/collapse.js"></script>
+    <script src="aplana/js/modal/modal.js"></script>
+    <script src="aplana/js/submitValid/submitValid.js"></script>
+
+    <script src="js/common/overlay/overlay.js"></script>
+    <script src="js/common/dialogs/dialogs.js"></script> <!--https://github.com/m-e-conroy/angular-dialog-service-->
+    <script src="js/common/dialogs/alert.js"></script>
+    <script src="js/common/dialogs/aplana-dialogs.js"></script>
+    <script src="js/common/utils/entity-utils.js"></script>
+    <script src="js/common/app-constants.js"></script>
+    <script src="js/common/directives.js"></script>
+    <script src="js/common/dialogs/comments.js"></script>
+    <script src="js/common/widgets/aplana-widgets.js"></script>
+    <script src="js/lib/date.format.js"></script>
+    <script src="js/main/app.js"></script>
+    <script src="js/main/header.js"></script>
+    <script src="js/refbook/refbook.js"></script>
+    <script src="js/production/planning/planning.js"></script>
+    <script src="js/common/filter/filterDirectives.js"></script>
+</body>
+</html>

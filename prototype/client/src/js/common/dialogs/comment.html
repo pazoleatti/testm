@@ -1,0 +1,33 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{'common.dialog.comment.header' | translate}}
+    </h4>
+</div>
+<div class="modal-body">
+    <form name="commentDialogForm" novalidate role="form">
+        <mu-textarea label="{{'common.dialog.comment.textarea.label' | translate}}" ng-model="comment"
+                     model="comment"
+                     required="true"
+                     name="myComment"
+                     ng-maxlength="255"></mu-textarea>
+        <div class="text-danger" data-ng-messages="commentDialogForm.myComment.$error">
+            <p data-ng-message="maxlength">{{'error.form.length'| translate}}</p>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" ng-click="save()"
+            ng-disabled="(commentDialogForm.$dirty && commentDialogForm.$invalid) || commentDialogForm.$pristine">
+        {{"DIALOGS_SAVE" | translate}}
+    </button>
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{"DIALOGS_CANCEL" | translate}}</button>
+</div>
+<div class="modal-footer" data-ng-show="showComments">
+    <div class="form-group" style="margin-top: 2%;">
+        <div class="col-md-3" style="text-align: left;">
+            <label class="control-label">{{'commentsLabel' | translate}}</label>
+        </div>
+        <div class="col-md-9" data-aplana-comments data-ng-model="comments" style="overflow: scroll; height: 300px; overflow-x:hidden;"></div>
+    </div>
+</div>

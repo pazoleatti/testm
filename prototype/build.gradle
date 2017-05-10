@@ -1,0 +1,20 @@
+/**
+ * Проект ПАО МТС «Логистика USIM-комплектов подключения».
+ *
+ * Система предназначена для автоматизации деятельности по управлению заказами SIM карт и пакетов
+ * подключения отдела по работе с карточными продуктами Департамента по работе с партнерами БЕР,
+ * Департаментов по работе с партнерами Макро-регионов БЕР и организаций, осуществляющих производство
+ * комплектов подключения для ОАО "МТС".
+ */
+allprojects {
+    plugins.withType(JavaPlugin).whenPluginAdded {
+        ext {
+            sourceCompatibility = JavaVersion.VERSION_1_7
+            targetCompatibility = JavaVersion.VERSION_1_7
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+}

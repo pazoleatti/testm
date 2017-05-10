@@ -1,0 +1,20 @@
+<div class="address-container"
+     data-ng-class="{required: addressRequired, empty: !ngModelCtrl.$viewValue}">
+
+    <div class="controls">
+        <div data-aplana-link
+             data-aplana-link-class="'icon-cbr-operations-edit'"
+             data-ng-click="editValue()"
+             class="edit-button"></div>
+
+        <div data-aplana-link
+             data-aplana-link-class="'icon-cbr-operations-delete'"
+             data-ng-click="clearValue()"
+             data-aplana-disabled="{{!ngModelCtrl.$viewValue}}"
+             class="clear-button"></div>
+    </div>
+
+    <div class="text">
+        <input type="text" readonly data-ng-model="formattedAddress" data-aplana-tooltip="{{formattedAddress}}">
+    </div>
+</div>
