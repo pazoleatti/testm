@@ -75,6 +75,8 @@ final RefBookService refBookService = getProperty("refBookService")
 final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
 @Field
 final DepartmentService departmentService = getProperty("departmentService")
+@Field
+final RefBookService refBookService = getProperty("refBookService")
 
 def getProperty(String name) {
     try {
@@ -1148,9 +1150,9 @@ def checkDataConsolidated() {
                 82L : 'Сибирский банк',
                 88L : 'Среднерусский банк',
                 97L : 'Уральский банк',
-                113L: 'Центральный аппарат ПАО Сбербанк',
-                102L: 'Центрально-Чернозёмный банк',
-                109L: 'Юго-Западный банк'
+                113L : 'Центральный аппарат ПАО Сбербанк',
+                102L : 'Центрально-Чернозёмный банк',
+                109L : 'Юго-Западный банк'
         ]
         def listDepartmentNotAcceptedRnu = []
         List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
