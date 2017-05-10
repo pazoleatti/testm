@@ -1,0 +1,42 @@
+<div class="form-group">
+    <div class="col-md-3" style="width: 140px; padding-right: 0">
+        <label class="control-label">{{'historyDateFromFilterLabel' | translate}}</label>
+    </div>
+    <div class="col-md-4">
+        <p class="input-group">
+            <input type="text" class="form-control" datetime="yyyy-MM-dd"
+                   uib-datepicker-popup="yyyy-MM-dd"
+                   is-open="dataOptions.filter.dateFromOpened"
+                   close-text="Выбрать"
+                   current-text="Сегодня"
+                   clear-text="Очистить"
+                   data-ng-model="dataOptions.filter.dateFrom"
+                   title="{{dataOptions.filter.dateFrom}}">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default btn-sm" ng-click="dataOptions.filter.dateFromSelectClick()">
+                    <i class="glyphicon glyphicon-calendar"></i>
+                </button>
+            </span>
+        </p>
+    </div>
+    <div class="col-md-1" style="width: 20px; padding: 0">
+        <label class="control-label">{{'dateToFilterLabel' | translate}}</label>
+    </div>
+    <div class="col-md-4">
+        <p class="input-group">
+            <input type="text" class="form-control" datetime="yyyy-MM-dd"
+                   uib-datepicker-popup="yyyy-MM-dd"
+                   is-open="dataOptions.filter.dateToOpened"
+                   close-text="Выбрать"
+                   current-text="Сегодня"
+                   clear-text="Очистить"
+                   data-ng-model="dataOptions.filter.dateTo"
+                   title="{{dataOptions.filter.dateTo}}">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default btn-sm" ng-click="dataOptions.filter.dateToSelectClick()">
+                    <i class="glyphicon glyphicon-calendar"></i>
+                </button>
+            </span>
+        </p>
+    </div>
+</div>

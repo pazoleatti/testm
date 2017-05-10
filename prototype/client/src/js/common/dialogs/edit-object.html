@@ -1,0 +1,176 @@
+<div id="edit-object">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="cancel()">×</button>
+        <h4 class="modal-title">
+            <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{header}}
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div data-ng-if="msg">
+            <span ng-bind-html="msg"></span>
+            <hr/>
+        </div>
+        <form id="editForm" class="form-horizontal" name="editForm" novalidate>
+            <div data-ng-repeat="field in metaData | orderBy: 'ord' ">
+                <div class="form-group form-group-sm" data-ng-class="field.required ? 'required' : ''">
+                    <label class="col-sm-4 control-label">{{field.title}}:</label>
+
+                    <div class="col-sm-6">
+                        <!--String-->
+                        <div data-ng-if="field.type == 'java.lang.String'">
+                            <input type="text" class="form-control input-sm"
+                                   name="{{field.name}}"
+                                   data-ng-model="values[field.name]"
+                                   data-ng-required="field.required ? field.required : false"
+                                   data-ng-disabled="field.readOnly ? field.readOnly : false"
+                                   data-ng-show="field.visible ? field.visible : true"
+                                   data-ng-maxlength="field.maxLength ? field.maxLength : MAX_STRING_LENGTH"
+                                   data-ng-minlength="field.minLength ? field.minLength : MIN_STRING_LENGTH"
+                            >
+
+                            <div class="text-danger" data-ng-messages="editForm[field.name].$error">
+                                <!--<p data-ng-message="required">{{'error.form.required' | translate}}</p>-->
+
+                                <p data-ng-message="maxlength">{{'error.form.string.maxLength'| translate}}&nbsp;{{field.maxLength}}</p>
+
+                                <p data-ng-message="minlength">{{'error.form.string.minLength'| translate}}&nbsp;{{field.minLength}}</p>
+                            </div>
+                        </div>
+                        <!--Long-->
+                        <div data-ng-if="field.type == 'java.lang.Long'">
+                            <input type="number" class="form-control input-sm"
+                                   name="{{field.name}}"
+                                   data-ng-model="values[field.name]"
+                                   data-ng-required="field.required ? field.required : false"
+                                   data-ng-disabled="field.readOnly ? field.readOnly : false"
+                                   data-ng-show="field.visible ? field.visible : true"
+                                   data-ng-max="field.max ? field.max : MAX_NUMBER"
+                                   data-ng-min="field.min ? field.min : MIN_NUMBER"
+                                   data-integer
+                            >
+                            <div class="text-danger" data-ng-messages="editForm[field.name].$error">
+                                <!--<p data-ng-message="required">{{'error.form.required' | translate}}</p>-->
+
+                                <p data-ng-message="max">{{'error.form.number.max'| translate}}&nbsp;{{field.max}}</p>
+
+                                <p data-ng-message="min">{{'error.form.number.min'| translate}}&nbsp;{{field.min}}</p>
+
+                                <p data-ng-message="integer">{{'error.form.number.integer' | translate}}</p>
+                            </div>
+                        </div>
+                        <div data-ng-if="field.type == 'long'">
+                            <input type="number" class="form-control input-sm"
+                                   name="{{field.name}}"
+                                   data-ng-model="values[field.name]"
+                                   data-ng-required="field.required ? field.required : false"
+                                   data-ng-disabled="field.readOnly ? field.readOnly : false"
+                                   data-ng-show="field.visible ? field.visible : true"
+                                   data-ng-max="field.max ? field.max : MAX_NUMBER"
+                                   data-ng-min="field.min ? field.min : MIN_NUMBER"
+                                   data-integer
+                            >
+
+                            <div class="text-danger" data-ng-messages="editForm[field.name].$error">
+                                <!--<p data-ng-message="required">{{'error.form.required' | translate}}</p>-->
+
+                                <p data-ng-message="max">{{'error.form.number.max'| translate}}&nbsp;{{field.max}}</p>
+
+                                <p data-ng-message="min">{{'error.form.number.min'| translate}}&nbsp;{{field.min}}</p>
+
+                                <p data-ng-message="integer">{{'error.form.number.integer' | translate}}</p>
+                            </div>
+                        </div>
+                        <!--Date type=Date???-->
+                        <div data-ng-if="field.type == 'java.util.Date'">
+                            <p class="input-group">
+                                <input
+                                        datepicker-timezone
+                                        name="{{field.name}}"
+                                        type="text"
+                                        class="form-control"
+                                        datepicker-options="field.options"
+                                        datetime="dd.MM.yyyy"
+                                        placeholder="dd.MM.yyyy"
+                                        uib-datepicker-popup="dd.MM.yyyy"
+                                        is-open="fieldParams[field.name].is_open"
+                                        close-text="{{'common.input.date.close' | translate}}"
+                                        current-text="{{'common.input.date.current' | translate}}"
+                                        clear-text="{{'common.input.date.clear' | translate}}"
+                                        data-ng-model="values[field.name]"
+                                        data-ng-required="field.required ? field.required : false"
+                                        data-ng-disabled="field.readOnly ? field.readOnly : false"
+                                        data-ng-show="field.visible ? field.visible : true"
+                                >
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default btn-sm"
+                                                data-ng-click="fieldParams[field.name].selectClick()">
+                                            <i class="glyphicon glyphicon-calendar"></i>
+                                        </button>
+                                    </span>
+                            </p>
+                            <div class="text-danger" data-ng-messages="editForm[field.name].$error">
+                                <!--<p data-ng-message="required">{{'error.form.required' | translate}}</p>-->
+
+                                <p data-ng-message="date">{{'error.form.date' | translate}}</p>
+                            </div>
+                        </div>
+                        <!--List-->
+                        <div data-ng-if="field.type == 'java.util.List'">
+                            <ui-select remove-selected="true"
+                                       multiple
+                                       data-ng-model="values[field.name]"
+                                       data-ng-required="field.required ? field.required : false"
+                                       data-ng-disabled="field.readOnly ? field.readOnly : false"
+                                       data-ng-show="field.visible ? field.visible : true"
+                            >
+                                <ui-select-match>
+                                    <span data-ng-bind="$item[field.displayField]"></span>
+                                </ui-select-match>
+                                <ui-select-choices repeat="item in fieldParams[field.name].items track by $index"
+                                                   refresh="fieldParams[field.name].searchItems($select.search)"
+                                                   refresh-delay="500">
+                                    <span ng-bind-html="item[field.displayField] | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="text-danger" data-ng-messages="editForm[field.name].$error">
+                                <!--<p data-ng-message="required">{{'error.form.required' | translate}}</p>-->
+                            </div>
+                        </div>
+                        <!--Model-->
+                        <div data-ng-if="field.type.startsWith('com.mts.usim.model')">
+                            <ui-select name="{{field.name}}"
+                                       data-ng-model="values[field.name]"
+                                       data-ng-required="field.required ? field.required : false"
+                                       data-ng-disabled="field.readOnly ? field.readOnly : false"
+                                       data-ng-show="field.visible ? field.visible : true"
+                                       data-on-select="fieldParams[field.name].selectClick()"
+                                       data-delete
+                            >
+                                <ui-select-match allow-clear="{{!field.required}}">
+                                    <span data-ng-bind="$select.selected[field.displayField]"></span>
+                                </ui-select-match>
+                                <ui-select-choices repeat="item in fieldParams[field.name].items track by $index"
+                                                   refresh="fieldParams[field.name].searchItems($select.search)"
+                                                   refresh-delay="500">
+                                    <span ng-bind-html="item[field.displayField] | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                            <div class="text-danger" data-ng-messages="editForm[field.name].$error">
+                                <!--<p data-ng-message="required">{{'error.form.required' | translate}}</p>-->
+
+                                <p data-ng-message="delete">{{'error.form.deleted' | translate}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-danger" ng-click="save()"
+                ng-disabled="(editForm.$dirty && editForm.$invalid) || editForm.$pristine">
+            {{"DIALOGS_SAVE" | translate}}
+        </button>
+        <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{"DIALOGS_CANCEL" | translate}}</button>
+    </div>
+</div>

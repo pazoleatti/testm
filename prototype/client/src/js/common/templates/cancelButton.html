@@ -1,0 +1,7 @@
+<!-- Кнопка Отменить -->
+<button type="button" class="btn btn-default" data-ng-disabled="!cancelButtonEnabled"
+        data-ng-click="cancelButtonClick()">
+    <img src="img/button/{{cancelButtonEnabled ? 'enable' : 'disable'}}/cancel.png" width="32px" height="22px"
+         alt="{{'common.button.cancel' | translate}}"/>
+    {{'common.button.cancel' | translate}}
+</button>

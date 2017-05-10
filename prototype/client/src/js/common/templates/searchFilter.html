@@ -1,0 +1,13 @@
+<!-- Шаблон фильтра полнотекстового поиска -->
+<div class="form-group">
+    <div class="col-md-4">
+        <label class="control-label">{{'filterLabel' | translate}}</label>
+    </div>
+    <div class="col-md-8">
+        <input data-ng-model="dataOptions.filter.fulltext"
+               data-ng-disabled="!fulltextFilterEnabled"
+               placeholder="{{'filter.placeholder.search' | translate}}"
+               type="text" class="form-control"
+               title="{{dataOptions.filter.fulltext}}"/>
+    </div>
+</div>

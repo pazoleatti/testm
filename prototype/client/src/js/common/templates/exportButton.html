@@ -1,0 +1,7 @@
+<!-- Кнопка экспорта -->
+<button type="button" class="btn btn-default" data-ng-disabled="!exportButtonEnabled"
+        data-ng-click="exportButtonClick()">
+    <img src="img/button/{{exportButtonEnabled ? 'enable' : 'disable'}}/export.png" width="32px" height="22px"
+         alt="{{'common.button.export' | translate}}"/>
+    {{'common.button.export' | translate}}
+</button>

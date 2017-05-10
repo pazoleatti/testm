@@ -1,0 +1,269 @@
+<div id="planningDetails">
+    <h1>{{'productionPlanning' | translate}}</h1>
+    <div class="header-details">
+        <div class="row">
+            <label class="w100">{{'macroRegionFilterLabel' | translate}}</label>
+            <label>{{planning.macroRegionName}}</label>
+            <button type="button" class="btn btn-default btn-back-to-list" data-ng-click="returnToList()">
+                <img src="img/button/enable/back_to_list.png" width="14px" height="22px" alt="{{'common.button.backToList' | translate}}"/>
+                {{'common.button.backToList' | translate}}
+            </button>
+        </div>
+        <div class="row">
+            <label class="w100">{{'regionFilterLabel' | translate}}</label>
+            <label>{{planning.regionName}}</label>
+        </div>
+        <div class="row">
+            <label class="w100">{{'distributorFilterLabel' | translate}}</label>
+            <label>{{planning.vendorName}}</label>
+        </div>
+    </div>
+    <uib-tabset active="activeForm">
+        <uib-tab index="0" heading="Основная информация" select="selectTab('mainInfo')">
+            <div>
+                <!-- Панель кнопок -->
+                <div class="button_panel" style="padding-top: 12px; padding-left: 12px;">
+                    <div class="btn-toolbar" role="toolbar">
+                        <!-- 03 - Установка приоритета -->
+                        <span ng-include="'js/common/templates/editButton.html'"
+                              data-ng-check-operation="['PRODUCTION_PLAN_UPDATE_PRIORITY']"></span>
+                        <!-- 04 - Установка плановой даты отгрузки -->
+                        <span data-ng-check-operation="['PRODUCTION_PLAN_UPDATE_DATE']">
+                            <button type="button" class="btn btn-default"
+                                    data-ng-disabled="!pointPlanDeliveryDateButtonEnabled"
+                                    data-ng-click="pointPlanDeliveryDateButtonClick()">
+                                <img src="img/button/{{pointPlanDeliveryDateButtonEnabled ? 'enable' : 'disable'}}/edit.png"
+                                     width="32px" height="22px"
+                                     alt="{{'common.button.point' | translate}}"/>
+                                {{'common.button.point' | translate}}
+                            </button>
+                        </span>
+                        <!-- 15 - Указание даты готовности комплектов -->
+                        <span data-ng-check-operation="['PRODUCTION_PLAN_SET_READY_DATE']">
+                            <button type="button" class="btn btn-default"
+                                    data-ng-disabled="!pointReadyDateButtonEnabled"
+                                    data-ng-click="pointReadyDateButtonClick()">
+                                <img src="img/button/{{pointReadyDateButtonEnabled ? 'enable' : 'disable'}}/edit.png"
+                                     width="32px" height="22px"
+                                     alt="{{'production.planning.button.pointReadyDate' | translate}}"/>
+                                {{'production.planning.button.pointReadyDate' | translate}}
+                            </button>
+                        </span>
+                        <!-- 06 - Отправка на согласование «Заказа на производство региона» -->
+                        <span ng-include="'js/common/templates/forwardButton.html'"
+                              data-ng-check-operation="['PRODUCTION_PLAN_TO_APPROVE']"></span>
+                        <!-- 11 - Запрос на замену плановой даты отгрузки -->
+                        <span data-ng-check-operation="['PRODUCTION_PLAN_QUERY_TO_CORRECT']">
+                            <button type="button" class="btn btn-default" data-ng-disabled="!queryDeliveryDateButtonEnabled"
+                                    data-ng-click="queryDeliveryDateButtonClick()">
+                                <img src="img/button/{{queryDeliveryDateButtonEnabled ? 'enable' : 'disable'}}/query_correction.png" width="32px" height="22px"
+                                     alt="{{'common.button.query' | translate}}"/>
+                                {{'common.button.query' | translate}}
+                            </button>
+                        </span>
+                        <!-- 14 - Выполнение «Заказа на производство региона» -->
+                        <span ng-include="'js/common/templates/doneButton.html'"
+                              data-ng-check-operation="['PRODUCTION_PLAN_TO_DONE']"></span>
+                        <!-- 10 - Согласование КЦ плановой даты отгрузки -->
+                        <span ng-include="'js/common/templates/approveBERButton.html'"
+                              data-ng-check-operation="['PRODUCTION_PLAN_TO_APPROVED_BER']"></span>
+                        <!-- 12 - Подтверждение запроса на корректировку «Заказа на производство региона» -->
+                        <span data-ng-check-operation="['PRODUCTION_PLAN_CONFIRM_QUERY_TO_CORRECT']">
+                            <button type="button" class="btn btn-default" data-ng-disabled="!confirmDeliveryDateButtonEnabled"
+                                    data-ng-click="confirmDeliveryDateButtonClick()">
+                                <img src="img/button/{{confirmDeliveryDateButtonEnabled ? 'enable' : 'disable'}}/confirmation.png" width="32px" height="22px"
+                                     alt="{{'common.button.confirm' | translate}}"/>
+                                {{'common.button.confirm' | translate}}
+                            </button>
+                        </span>
+                        <!-- 18 - Возврат на корректировку «Заказа на производство региона» -->
+                        <span ng-include="'js/common/templates/returnButton.html'"
+                              data-ng-check-operation="['PRODUCTION_PLAN_RETURN_TO_CORRECT']"></span>
+                        <!-- 13 - Отказ в корректировке «Заказа на производство региона» -->
+                        <span data-ng-check-operation="['PRODUCTION_PLAN_REJECT_QUERY_TO_CORRECT']">
+                            <button type="button" class="btn btn-default" data-ng-disabled="!rejectDeliveryDateButtonEnabled"
+                                    data-ng-click="rejectDeliveryDateButtonClick()">
+                                <img src="img/button/{{rejectDeliveryDateButtonEnabled ? 'enable' : 'disable'}}/reject.png" width="32px" height="22px"
+                                     alt="{{'common.button.reject' | translate}}"/>
+                                {{'common.button.reject' | translate}}
+                            </button>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Панель информации -->
+                <div id="planningCommonInfo" class="form-horizontal">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <h2>{{'production.planning.commonInfo' | translate}}</h2>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label main-label">{{'statusFilterLabel' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="control-label">{{planning.status.title}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label main-label">{{'numberOrder' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="control-label">{{planning.orderNumber}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label main-label">{{'theNumberOfSets' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="control-label">{{planning.quantity}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label main-label">{{'tariffFilterLabel' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="control-label">{{planning.tariffName}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label main-label">{{'cardFilterLabel' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="control-label">{{planning.cardTypeName}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label main-label">{{'fileNameFilterLabel' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="control-label">{{planning.fullFileName}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label main-label">{{'production.planning.readyDate' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="control-label">{{planning.readyDate ? (planning.readyDate | date :  'dd.MM.y') : 'не
+                                    указана'}}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <h2>{{'production.planning.date' | translate}}</h2>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-5">
+                                <label class="control-label main-label">{{'production.planning.priorityDate' | translate}}</label>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="control-label">{{planning.priorityDate | date :  'dd.MM.y'}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-5">
+                                <label class="control-label main-label">{{'production.planning.reqDeliveryDate' |
+                                    translate}}</label>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="control-label">{{planning.reqDeliveryDate | date :  'dd.MM.y'}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-5">
+                                <label class="control-label main-label">{{'production.planning.planDeliveryDate' |
+                                    translate}}</label>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="control-label">{{planning.planDeliveryDate | date :  'dd.MM.y'}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-5">
+                                <label class="control-label main-label">{{'production.planning.deliveryDate' |
+                                    translate}}</label>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="control-label">{{planning.deliveryDate | date :  'dd.MM.y'}}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab index="2" heading="История" select="selectTab('history')">
+            <div data-ng-controller="planningDetailsHistoryCtrl">
+                <!-- Панель фильтрации -->
+                <div class="grid-filter" style="min-width: 950px;">
+                    <div data-aplana-collapse data-is-collapsed="false" data-label="'filterPanelLabel' | translate">
+                        <form class="form-horizontal" role="form" novalidate>
+                            <div class="row">
+                                <div class="filter-col" style="width: 700px">
+                                    <div class="form-group">
+                                        <div class="col-md-3">
+                                            <label class="control-label">{{'statusChangesFilterLabel' | translate}}</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <ui-select ng-model="dataOptions.filter.transition">
+                                                <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}">
+                                                    <span data-ng-bind="$select.selected.title" title="{{$select.selected.title}}"></span>
+                                                </ui-select-match>
+                                                <ui-select-choices
+                                                        repeat="item in dataOptions.filterList.transitions track by $index">
+                                                    <span data-ng-bind-html="item.title | highlight: $select.search"></span>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="filter-col">
+                                    <data-search-clear-buttons
+                                            on-search="searchHistoryClick()"
+                                            on-clear="clearFilterClick()"/>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 0">
+                                <div class="filter-col w400">
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <label class="control-label">{{'userFilterLabel' | translate}}</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control input-sm"
+                                                   data-ng-model="dataOptions.filter.user"
+                                                   placeholder="Введите имя/фамилию пользователя"
+                                                   title="{{dataOptions.filter.user}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="filter-col w500">
+                                    <date-from-to-filter
+                                            label-width="4"
+                                            ng-from-model="dataOptions.filter.historyDateFrom"
+                                            ng-to-model="dataOptions.filter.historyDateTo"
+                                            ng-label="historyDateFromFilterLabel"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- Таблица -->
+                <div id="planning-history-content" class="content-with-table">
+                    <div id="planning-history-grid" class="usim-grid" data-ui-grid="gridOptions" ui-grid-resize-columns
+                         ui-grid-selection ui-grid-pagination ui-gitd-autoResize></div>
+                </div>
+            </div>
+        </uib-tab>
+    </uib-tabset>
+</div>
