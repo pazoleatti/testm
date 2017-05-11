@@ -1,0 +1,111 @@
+<div id="ndflDetails">
+    <h1>{{'header.ndflDetails.forms' | translate}}</h1>
+    <div class="header-details">
+        <div class="row">
+            <div class="header-col w400">
+                <div class="form-group">
+                    <label class="w100">{{('title.department' | translate)}}:</label>
+                    <label>{{department}}</label>
+                </div>
+                <div class="form-group">
+                    <label class="w100">{{('title.formNumber' | translate)}}:</label>
+                    <label>{{formNumber}}</label>
+                </div>
+                <div class="form-group">
+                    <label class="w100">{{('title.creator' | translate)}}:</label>
+                    <label>{{creator}}</label>
+                </div>
+            </div>
+            <div class="header-col w400">
+                <div class="form-group">
+                    <label class="w200">{{('title.formType' | translate)}}:</label>
+                    <label>{{formType}}</label>
+                </div>
+                <div class="form-group">
+                    <label class="w200">{{('title.period' | translate)}}:</label>
+                    <label>{{period}}</label>
+                </div>
+                <div class="form-group">
+                    <label class="w200">{{('title.state' | translate)}}:</label>
+                    <label>{{state}}</label>
+                </div>
+            </div>
+            <div class="header-col w350">
+                <div class="form-group">
+                    <label class="w100">{{('title.nameAsnu' | translate)}}:</label>
+                    <label>{{nameAsnu}}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Линия-->
+    <hr>
+    <!-- Панель кнопок -->
+    <div class="button_panel">
+        <div class="btn-toolbar" role="toolbar">
+            <!-- Проверить -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
+                        data-ng-click="checkButtonClick()">
+                    <img src="img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/confirmation.png" width="32px" height="22px"
+                         alt="{{'button.check' | translate}}"/>
+                    {{'button.check' | translate}}
+                </button>
+            </span>
+            <!-- Рассчитать -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
+                        data-ng-click="calculateButtonClick()">
+                    <img src="img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/shape.png" width="32px" height="22px"
+                         alt="{{'button.calculate' | translate}}"/>
+                    {{'button.calculate' | translate}}
+                </button>
+            </span>
+            <!-- Принять -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
+                        data-ng-click="acceptButtonClick()">
+                    <img src="img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/reconcile.png" width="32px" height="22px"
+                         alt="{{'button.accept' | translate}}"/>
+                    {{'button.accept' | translate}}
+                </button>
+            </span>
+            <!-- Вернуть в Создана -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
+                        data-ng-click="returnButtonClick()">
+                    <img src="img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/query_correction.png" width="32px" height="22px"
+                         alt="{{'button.return' | translate}}"/>
+                    {{'button.return' | translate}}
+                </button>
+            </span>
+            <!--Редактировать-->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!canEdit"
+                        data-ng-click="editRecordClick()">
+                    <img src="img/button/{{canEdit ? 'enable' : 'disable'}}/edit.png" width="32px" height="22px"
+                         alt="{{'button.edit' | translate}}"/>
+                    {{'button.edit' | translate}}
+                </button>
+            </span>
+        </div>
+    </div>
+    <!--Вкладки-->
+    <uib-tabset active="activeForm">
+        <uib-tab index="0" heading="1. Реквизиты" select="selectTab('requisites')">
+            <div data-ng-controller="ndflDetailsFormsCtrl">
+                <!-- Таблица -->
+                <div id="ndfl-details-content" class="content-with-table">
+                    <div id="ndfl-details-grid" class="usim-grid" data-ui-grid="gridOptions" ui-grid-resize-columns
+                         ui-grid-selection ui-grid-pagination ui-grid-autoResize></div>
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab index="1" heading="2. Сведения о доходах и НДФЛ" select="selectTab('incomesAndNdfl')">
+        </uib-tab>
+        <uib-tab index="2" heading="3. Сведения о вычетах" select="selectTab('deductions')">
+        </uib-tab>
+        <uib-tab index="3" heading="4. Сведения о доходах в виде авансовых платежей" select="selectTab('advancePayments')">
+        </uib-tab>
+    </uib-tabset>
+</div>

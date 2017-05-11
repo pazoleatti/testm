@@ -1,17 +1,17 @@
 'use strict';
 (function () {
 
-    angular.module('sbrfNdfl.ndflForms', ['ui.router'])
+    angular.module('sbrfNdfl.ndflDetailsForms', ['ui.router'])
         .config(['$stateProvider', function ($stateProvider) {
-            $stateProvider.state('ndflForms', {
-                url: '/taxes/ndfl/forms',
-                templateUrl: 'js/taxes/ndfl/ndflForms.html',
-                controller: 'ndflFormsCtrl'
+            $stateProvider.state('ndflDetailsForms', {
+                url: '/taxes/ndfl/forms/{formId}',
+                templateUrl: 'js/taxes/ndfl/ndflDetails.html',
+                controller: 'ndflDetailsFormsCtrl'
             })
         }])
-        .controller('ndflFormsCtrl', [
-            '$scope', '$timeout', 'aplanaEntityUtils', '$state', 'aplanaDialogs',
-            function ($scope, $timeout, aplanaEntityUtils, $state, aplanaDialogs) {
+        .controller('ndflDetailsFormsCtrl', [
+            '$scope', '$timeout', 'aplanaEntityUtils', '$state', '$stateParams', 'aplanaDialogs',
+            function ($scope, $timeout, aplanaEntityUtils, $state, $stateParams, aplanaDialogs) {
                 $scope.customGridColumnsBuilder = function (dataOptions, gridOptions) {
                     for (var fieldName in dataOptions.metaData) {
                         var field = dataOptions.metaData[fieldName];
@@ -218,10 +218,21 @@
                             }
                         }
                     }
+
+                    for (var i = 0; i < dataStub.list.length - 1; i ++){
+                        if (parseInt($stateParams.formId) === dataStub.list[i].id){
+                            $scope.department = dataStub.list[i].department.name;
+                            $scope.formNumber = $stateParams.formId;
+                            $scope.creator = dataStub.list[i].creator;
+                            $scope.formType = dataStub.list[i].formType.name;
+                            $scope.period = dataStub.list[i].period.name;
+                            $scope.state = dataStub.list[i].state.name;
+                            $scope.nameAsnu = dataStub.list[i].asnu.name;
+                        }
+                    }
+
                     return aplanaEntityUtils.fillGrid($scope, data, $scope.customGridColumnsBuilder)
                         .then(setButtonsEnabled);
-                    //return aplanaEntityUtils.fetchData('rest/entity/light/ProductionPlan', $scope)
-                    //    .then(setButtonsEnabled);
                 }
 
                 /**
@@ -229,7 +240,6 @@
                  */
                 function setButtonsEnabled() {
                     $scope.exportButtonEnabled = aplanaEntityUtils.isTableHasValue($scope);
-                    $scope.createButtonEnabled = true;
                     $scope.searchButtonEnabled = true;
                     $scope.clearButtonEnabled = true;
                     if (!$scope.gridApi || !$scope.currentEntityView) {
@@ -250,69 +260,12 @@
                         $scope.deleteButtonEnabled = hasSelectedItems;
                         $scope.acceptButtonEnabled = hasSelectedItems;
                         $scope.returnButtonEnabled = hasSelectedItems;
-
-                        //доступно в статусе «Принят в производство» или «Корректировка» и указан Приоритет
-                        //$scope.splitButtonEnabled = hasSingleSelectedItem
-                        //    && aplanaEntityUtils.isSelectionHasValue($scope, 'priorityDate')
-                        //    && aplanaEntityUtils.isSelectionHasValue($scope, 'status.id', [APP_CONSTANTS.ENTITY_STATUS.PLANNING_TO_PRODUCTION.id, APP_CONSTANTS.ENTITY_STATUS.PLANNING_CORRECTION.id]);
                     }
                 }
 
                 /**
                  * Обработчики нажатий на кнопки
                  */
-                    //Создать
-                $scope.createButtonClick = function () {
-                    var metaData = [
-                        {
-                            "name": "period",
-                            "type": "com.ndlf.model.Period",
-                            "displayField": "name",
-                            "predefinedValues": $scope.dataOptions.filterList.periodList,
-                            "title": "Период",
-                            "width": 20,
-                            "order": 1
-                        },
-                        {
-                            "name": "department",
-                            "type": "com.ndlf.model.Department",
-                            "displayField": "name",
-                            "predefinedValues": $scope.dataOptions.filterList.departmentList,
-                            "title": "Подразделение",
-                            "width": 40,
-                            "order": 2
-                        },
-                        {
-                            "name": "formKind",
-                            "type": "com.ndlf.model.FormKind",
-                            "displayField": "name",
-                            "predefinedValues": $scope.dataOptions.filterList.formKindList,
-                            "title": "Вид налоговой формы",
-                            "width": 35,
-                            "order": 3
-                        }
-                    ];
-
-                    var values = {
-                        period: $scope.dataOptions.filterList.periodList[0],
-                        department: $scope.dataOptions.filterList.departmentList[0],
-                        formKind: $scope.dataOptions.filterList.formKindList[0]
-                    };
-
-                    var dlg = aplanaDialogs.editObject('Создание новой записи', null, metaData, values);
-                    return dlg.result.then(function (entity) {
-                        //Заглушка создания новой записи
-                        entity.id = $scope.dataOptions.data[$scope.dataOptions.data.length - 1].id + 1;
-                        entity.formType = {id: 1, name: "Первичная"};
-                        entity.asnu = {id: 1, name: "АС \"SAP\""};
-                        entity.state = {id: 1, name: "Создана"};
-                        entity.creationDate = new Date();
-                        entity.creator = "Хазиев Ленар";
-                        $scope.dataOptions.data.push(entity);
-                        aplanaEntityUtils.updateViewData($scope);
-                        tableData = $scope.dataOptions.data;
-                    })
-                };
                 //Проверить
                 $scope.checkButtonClick = function () {
                     //Do check
@@ -357,14 +310,6 @@
                     fetchData();
                 };
 
-                function dblClick(row) {
-                    if (row.entity) {
-                        $state.go("ndflDetailsForms", {
-                            formId: row.entity.id,
-                        })
-                    }
-                }
-
 
                 initPage();
 
@@ -373,7 +318,7 @@
                  */
                 function initPage() {
                     //Инициализация грида
-                    aplanaEntityUtils.initGrid($scope, fetchData, setButtonsEnabled, dblClick);
+                    aplanaEntityUtils.initGrid($scope, fetchData, setButtonsEnabled);
                     //Инициалиация фильтра (заглушка)
                     $scope.dataOptions.filterList = {
                         periodList: [{id: 1, name: '2017; 1 квартал'}, {id: 2, name: '2017; 2 квартал'}, {

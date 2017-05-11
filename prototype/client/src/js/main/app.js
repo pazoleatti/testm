@@ -8,6 +8,7 @@
             'app.header',
             'sbrfNdfl.refBook',
             'sbrfNdfl.ndflForms',
+            'sbrfNdfl.ndflDetailsForms',
             'sbrfNdfl.filterDirectives',
             'pascalprecht.translate',
             'aplana.overlay',
@@ -413,22 +414,27 @@
 
         "menu.taxes": "Налоги",
         "menu.taxes.ndfl": "НДФЛ",
+        "menu.taxes.ndfl.details": "НДФЛ детализация",
         "menu.taxes.ndfl.forms": "Формы",
         "header.ndfl.forms": "НДФЛ - Список налоговых форм",
+        "header.ndflDetails.forms": "РНУ НДФЛ",
         "title.period": "Период",
         "title.department": "Подразделение",
         "title.formNumber": "Номер формы",
         "title.formType": "Тип налоговой формы",
         "title.formKind": "Вид налоговой формы",
         "title.asnu": "Наименование АСНУ",
+        "title.nameAsnu" : "АСНУ",
         "title.state": "Состояние",
         "title.file": "Файл",
+        "title.creator": "Создал",
         "button.create": "Создать",
         "button.check": "Проверить",
         "button.calculate": "Расчитать",
         "button.delete": "Удалить",
         "button.accept": "Принять",
-        "button.return": "Вернуть в создана"
+        "button.return": "Вернуть в создана",
+        "button.edit": "Редактировать"
     };
     angular.module('userData', []).constant('USER_DATA', userDataStub);
     angular.element(document).ready(function () {
