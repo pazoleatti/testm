@@ -29,8 +29,8 @@
 
                 $scope.mainMenu = [];
 
-                var menuItem = {id: 'menu-production', title: 'entity.Production', items: []};
-                menuItem.items.push({title: 'productionPlanning', sref: 'productionPlanning'});
+                var menuItem = {id: 'menu-production', title: 'menu.taxes', items: []};
+                menuItem.items.push({title: 'menu.taxes.ndfl', sref: 'ndflForms'});
                 $scope.mainMenu.push(menuItem);
 
                 $scope.mainMenu.forEach(function (item) {
