@@ -5,10 +5,9 @@
 
     angular
         .module('sbrfNdfl', [
-            'sbrfNdfl.header',
+            'app.header',
             'sbrfNdfl.refBook',
             'sbrfNdfl.productionPlanning',
-            'sbrfNdfl.comments',
             'sbrfNdfl.filterDirectives',
             'pascalprecht.translate',
             'aplana.overlay',
