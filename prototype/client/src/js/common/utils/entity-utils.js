@@ -307,10 +307,10 @@
                  *      scope.dataOptions - параметры пэйджинга, сортировки, поиска по таблице
                  *      scope.gridOptions - параметры отображения и работы самой таблицы (стандартные настройки ангуляра)
                  * @param getData               функция для получения данных таблицы
-                 * @param rowDblClick           функция вызываемая при двойном клике в строке таблицы
                  * @param rowSelectionChanged   функция вызываемая при изменении выделения строк в таблице
+                 * @param rowDblClick           функция вызываемая при двойном клике в строке таблицы
                  */
-                function initGrid(scope, getData, rowDblClick, rowSelectionChanged) {
+                function initGrid(scope, getData, rowSelectionChanged, rowDblClick) {
                     scope.numberOfSelectedItems = 0;
                     if (!scope.dataOptions) {
                         scope.dataOptions = {
@@ -567,10 +567,8 @@
                 /**
                  * Функция для обновления внешнего вида таблицы
                  * @param scope ссылка на $scope, либо на $scope.dataOptions (или аналог)
-                 * @param gridOptions ссылка на объект, содержащий массив строк для таблицы (как правило, $scope.gridOptions)
-                 * @param gridApi сслыка на API таблицы
                  */
-                function updateViewData(scope, gridOptions, gridApi) {
+                function updateViewData(scope) {
                     //Учитываем, что мог прийти $scope, а мог - $scope.dataOptions
                     var data = scope.dataOptions ? scope.dataOptions.data
                         : scope.data ? scope.data : [];
@@ -580,8 +578,8 @@
                     data.forEach(function (row) {
                         displayData.push(getRowView(scope, row));
                     });
-                    gridOptions.data = displayData;
-                    clearGridSelection(gridApi)
+                    scope.gridOptions.data = displayData;
+                    clearGridSelection(scope.gridApi)
                 }
 
                 /**
@@ -1099,6 +1097,23 @@
                 }
 
                 /**
+                 * Применяет функцию ко всем выделенным строкам таблицы
+                 * @param scope - скоуп с данными таблицы
+                 * @param f - функция
+                 */
+                function processSelectedEntities(scope, f) {
+                    if (scope.gridApi.selection != undefined) {
+                        scope.gridApi.selection.getSelectedRows().forEach(function (row) {
+                            scope.dataOptions.data.forEach(function (entity) {
+                                if (row.id == entity.id) {
+                                    f(entity)
+                                }
+                            });
+                        });
+                    }
+                }
+
+                /**
                  * Проверяет что все выделенные строки в таблице имеют одно и то же значение в указанном поле.
                  * Дополнительным параметром можно указать значение, которое должно быть в этом поле (совпадать у всех строк)
                  * @param scope скоуп, в котором содержится конфиг таблицы
@@ -1315,6 +1330,7 @@
                     setCurrentRow: setCurrentRow,
                     fetchData: fetchData,
                     getSelectedEntities: getSelectedEntities,
+                    processSelectedEntities: processSelectedEntities,
                     isSelectionHasSameValue: isSelectionHasSameValue,
                     isSelectionHasValue: isSelectionHasValue,
                     isTableHasValue: isTableHasValue,

@@ -22,21 +22,11 @@
                         columnDef.cellTooltip = true;
                         columnDef.visible = field.visible;
                         columnDef.width = field.width || 100;
-                        if (field.name == 'planState') {
-                            //Вставляем картинку по урлу из displayField
-                            columnDef.cellTemplate = '<div title="{{row.entity.planStateId == 0 ? \'В плане\' : row.entity.planStateId == 1 ? \'В производстве\' : \'Заказ на удаление\'}}" ' +
-                                'style="text-align: center;" ><img ng-src="{{grid.getCellValue(row, col)}}" /></div>';
+                        if (field.name == 'formType') {
+                            columnDef.cellTemplate = '<div class="ui-grid-cell-contents ng-binding ng-scope" ' +
+                                'title="{{grid.appScope.getRowValue(row.entity)}}">' +
+                                '<a href="ndflDetails/{{row.entity.id}}">{{grid.getCellValue(row, col)}}</a></div>';
                         }
-                        columnDef.cellClass = function (grid, row, col, rowRenderIndex, colRenderIndex) {
-                            if (row.entity.planStateId == 2) {
-                                return 'deletedRow';
-                            }
-                        };
-
-                        //Если предусмотрены настройки сортировки, устанавливаем их
-                        columnDef.enableSorting = field.type !== 'java.util.SortedSet' && field.type !== 'java.util.List' &&
-                            (gridOptions.excludeSortColumns && gridOptions.excludeSortColumns.indexOf(field.name) == -1);
-
                         if (field.type == "java.util.Date") {
                             var format = field.format == "" ? "dd.MM.yyyy" : field.format;
                             columnDef.type = 'date';
@@ -48,532 +38,187 @@
                     aplanaEntityUtils.fitColumnsWidth(gridOptions, $scope.gridApi.grid.gridWidth);
                 };
 
+
+                var dataStub = {
+                    "list": [
+                        {
+                            id: 1,
+                            formType: {id: 1, name: "Первичная"},
+                            formKind: {id: 1, name: "РНУ НДФЛ (первичная)"},
+                            department: {id: 1, name: "Иркутское отделение №8586 ПАО Сбербанк"},
+                            asnu: {id: 1, name: "АС \"SAP\""},
+                            period: {id: 1, name: "2017; 1 квартал"},
+                            state: {id: 1, name: "Создана"},
+                            fileTF: "99_6100_01200021201728042017000000000000000000015000.xml",
+                            creationDate: new Date(),
+                            creator: "Хазиев Ленар"
+                        },
+                        {
+                            id: 2,
+                            formType: {id: 2, name: "Консолидированная"},
+                            formKind: {id: 2, name: "РНУ НДФЛ (консолидированная)"},
+                            department: {id: 1, name: "Иркутское отделение №8586 ПАО Сбербанк"},
+                            asnu: {id: 2, name: 'АС \"Депозитарий\"'},
+                            period: {id: 1, name: "2017; 1 квартал"},
+                            state: {id: 2, name: "Подготовлена"},
+                            fileTF: "98_6100_01200021201728042017000000000000000000015000.xml",
+                            creationDate: new Date(),
+                            creator: "Хазиев Ленар"
+                        },
+                        {
+                            id: 3,
+                            formType: {id: 1, name: "Первичная"},
+                            formKind: {id: 3, name: "6-НДФЛ"},
+                            department: {id: 2, name: "Читинское отделение №8600 ПАО Сбербанк"},
+                            asnu: {id: 1, name: "АС \"SAP\""},
+                            period: {id: 2, name: "2017; 2 квартал"},
+                            state: {id: 3, name: "Принята"},
+                            fileTF: "97_6100_01200021201728042017000000000000000000015000.xml",
+                            creationDate: new Date(),
+                            creator: "Хазиев Ленар"
+                        },
+                        {
+                            id: 4,
+                            formType: {id: 1, name: "Первичная"},
+                            formKind: {id: 1, name: "РНУ НДФЛ (первичная)"},
+                            department: {id: 1, name: "Иркутское отделение №8586 ПАО Сбербанк"},
+                            asnu: {id: 1, name: "АС \"SAP\""},
+                            period: {id: 3, name: "2017; 3 квартал"},
+                            state: {id: 1, name: "Создана"},
+                            fileTF: "96_6100_01200021201728042017000000000000000000015000.xml",
+                            creationDate: new Date(),
+                            creator: "Хазиев Ленар"
+                        },
+                        {
+                            id: 5,
+                            formType: {id: 1, name: "Первичная"},
+                            formKind: {id: 1, name: "РНУ НДФЛ (первичная)"},
+                            department: {id: 4, name: "ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара)"},
+                            asnu: {id: 2, name: 'АС \"Депозитарий\"'},
+                            period: {id: 3, name: "2017; 3 квартал"},
+                            state: {id: 1, name: "Создана"},
+                            fileTF: "95_6100_01200021201728042017000000000000000000015000.xml",
+                            creationDate: new Date(),
+                            creator: "Хазиев Ленар"
+                        }],
+                    "metaData": [
+                        {
+                            "name": "id",
+                            "type": "java.lang.String",
+                            "title": "Номер формы",
+                            "width": 20,
+                            "order": 1,
+                            "visible": true
+                        },
+                        {
+                            "name": "formType",
+                            "type": "com.ndlf.model.FormType",
+                            "displayField": "name",
+                            "title": "Тип налоговой формы",
+                            "width": 30,
+                            "order": 2,
+                            "visible": true
+                        },
+                        {
+                            "name": "formKind",
+                            "type": "com.ndlf.model.FormKind",
+                            "displayField": "name",
+                            "title": "Вид налоговой формы",
+                            "width": 35,
+                            "order": 3,
+                            "visible": true
+                        },
+                        {
+                            "name": "department",
+                            "type": "com.ndlf.model.Department",
+                            "displayField": "name",
+                            "title": "Подразделение",
+                            "width": 40,
+                            "order": 4,
+                            "visible": true
+                        },
+                        {
+                            "name": "asnu",
+                            "type": "com.ndlf.model.Asnu",
+                            "displayField": "name",
+                            "title": "Наименование АСНУ",
+                            "width": 40,
+                            "order": 5,
+                            "visible": true
+                        },
+                        {
+                            "name": "period",
+                            "type": "com.ndlf.model.Period",
+                            "displayField": "name",
+                            "title": "Период",
+                            "width": 20,
+                            "order": 6,
+                            "visible": true
+                        },
+                        {
+                            "name": "state",
+                            "type": "com.ndlf.model.State",
+                            "displayField": "name",
+                            "title": "Состояние",
+                            "width": 20,
+                            "order": 7,
+                            "visible": true
+                        },
+                        {
+                            "name": "fileTF",
+                            "type": "java.lang.String",
+                            "title": "Файл ТФ",
+                            "width": 40,
+                            "order": 8,
+                            "visible": true
+                        },
+                        {
+                            "name": "creationDate",
+                            "type": "java.util.Date",
+                            "title": "Дата и время создания формы",
+                            "width": 45,
+                            "order": 9,
+                            "visible": true,
+                            "format": "dd.MM.yyyy HH:mm:ss"
+                        },
+                        {
+                            "name": "creator",
+                            "type": "java.lang.String",
+                            "title": "Создал",
+                            "width": 40,
+                            "order": 10,
+                            "visible": true
+                        }],
+                    "offset": 1,
+                    "total": 5,
+                    "count": 5
+                };
+
+                var tableData;
+
                 /**
                  * Получение данных с сервера
                  */
                 function fetchData() {
-                    var dataStub = {
-                        "list": [
-                            {
-                                "id": 75824,
-                                "regionProductionOrder": {
-                                    "id": 78106,
-                                    "region": {
-                                        "id": 59,
-                                        "macroRegion": {
-                                            "id": 6,
-                                            "name": "Сибирь",
-                                            "shortName": null,
-                                            "description": null,
-                                            "deleted": false,
-                                            "beginDate": null,
-                                            "delay": null,
-                                            "threshold": null
-                                        },
-                                        "name": "Барнаул",
-                                        "address": null,
-                                        "description": null,
-                                        "trigram": null,
-                                        "deleted": false
-                                    },
-                                    "profile": null,
-                                    "code": null,
-                                    "hlr": null,
-                                    "amount": 105,
-                                    "fileInfo": {
-                                        "id": 413608,
-                                        "name": null,
-                                        "attacheDate": "2017-02-03",
-                                        "fileType": null,
-                                        "size": 0,
-                                        "entityType": null,
-                                        "entityId": null
-                                    },
-                                    "techFiles": null,
-                                    "status": null,
-                                    "macroRegionProductionOrder": {
-                                        "id": 16559,
-                                        "orderNumber": "2179N16",
-                                        "macroRegion": null,
-                                        "tariff": {
-                                            "id": 509,
-                                            "code": 0,
-                                            "name": "Комплект тест-Коннект LTE (роутер)",
-                                            "shortName": null,
-                                            "techName": null,
-                                            "personality": true,
-                                            "planDateUnlimited": false,
-                                            "dualSim": false,
-                                            "cardTypeList": null,
-                                            "prodPeriod": null,
-                                            "description": null,
-                                            "deleted": false,
-                                            "productRep": false,
-                                            "codeStr": "000"
-                                        },
-                                        "cardType": {"id": null, "name": "320K", "description": null, "deleted": false},
-                                        "totalAmount": 0,
-                                        "formationDate": null,
-                                        "shipmentDate": null,
-                                        "vendor": {
-                                            "id": null,
-                                            "name": "АО НоваКард",
-                                            "shortName": null,
-                                            "contractNumber": null,
-                                            "contractDate": null,
-                                            "description": null,
-                                            "nds": 0,
-                                            "returnAddress": null,
-                                            "orderPrefix": null,
-                                            "orderPostfix": null,
-                                            "currentNumber": null,
-                                            "deleted": false,
-                                            "contractInfo": null,
-                                            "ndsAsDouble": 0
-                                        },
-                                        "status": null,
-                                        "price": null,
-                                        "description": null,
-                                        "month": 0,
-                                        "year": 0,
-                                        "reqDeliveryDate": null,
-                                        "totalPrice": null,
-                                        "nds": null
-                                    },
-                                    "description": null,
-                                    "orderDetails": null,
-                                    "fileName": null,
-                                    "returnedFromPlanning": null,
-                                    "hasAllFiles": null,
-                                    "attachFilesStatusDate": null,
-                                    "macroRegion": null,
-                                    "tariffCode": "000",
-                                    "orderNumber": "2179N16",
-                                    "vendor": {
-                                        "id": null,
-                                        "name": "АО НоваКард",
-                                        "shortName": null,
-                                        "contractNumber": null,
-                                        "contractDate": null,
-                                        "description": null,
-                                        "nds": 0,
-                                        "returnAddress": null,
-                                        "orderPrefix": null,
-                                        "orderPostfix": null,
-                                        "currentNumber": null,
-                                        "deleted": false,
-                                        "contractInfo": null,
-                                        "ndsAsDouble": 0
-                                    },
-                                    "tariff": {
-                                        "id": 509,
-                                        "code": 0,
-                                        "name": "Комплект тест-Коннект LTE (роутер)",
-                                        "shortName": null,
-                                        "techName": null,
-                                        "personality": true,
-                                        "planDateUnlimited": false,
-                                        "dualSim": false,
-                                        "cardTypeList": null,
-                                        "prodPeriod": null,
-                                        "description": null,
-                                        "deleted": false,
-                                        "productRep": false,
-                                        "codeStr": "000"
-                                    },
-                                    "cardType": {"id": null, "name": "320K", "description": null, "deleted": false},
-                                    "trigram": null,
-                                    "personality": "Перс.",
-                                    "tariffTechName": null,
-                                    "fileReceiveDate": "2017-02-03"
-                                },
-                                "readyDate": null,
-                                "reqDeliveryDate": "2017-03-02",
-                                "planState": {
-                                    "name": "В плане",
-                                    "id": 0,
-                                    "imgUrl": "img/icon/statePlan.png",
-                                    "entityStatus": {
-                                        "id": 81,
-                                        "title": "Статус производства: В плане",
-                                        "entityType": null,
-                                        "finalStatus": false
-                                    }
-                                },
-                                "quantity": 105,
-                                "priorityDate": "2017-02-20",
-                                "planDeliveryDate": null,
-                                "status": {
-                                    "id": 25,
-                                    "title": "Принят в производство",
-                                    "entityType": {
-                                        "id": 5,
-                                        "description": "Планирование",
-                                        "tableName": "usim_production_plan",
-                                        "entityClass": "com.ndlf.model.ProductionPlan"
-                                    },
-                                    "finalStatus": false
-                                },
-                                "planComment": "daysdgausydhiua i a dhasiudh asuydhsauygdsaygdaysdua idiajsdi ahsduysagdyasgdisao ajsod hasd sagydah si djsaoid jasid gastyd gausd",
-                                "filePostfix": null,
-                                "fileName": "BAR99110",
-                                "fullFileName": "BAR99110",
-                                "fileDate": null,
-                                "deliveryDate": null,
-                                "macroRegion": {
-                                    "id": 6,
-                                    "name": "Сибирь",
-                                    "shortName": null,
-                                    "description": null,
-                                    "deleted": false,
-                                    "beginDate": null,
-                                    "delay": null,
-                                    "threshold": null
-                                },
-                                "orderNumber": "2179N16",
-                                "vendorName": "АО НоваКард",
-                                "macroRegionName": "Сибирь",
-                                "regionName": "Барнаул",
-                                "tariffPlanDateUnlimited": false,
-                                "cardTypeName": "320K",
-                                "planStateId": 0,
-                                "tariffName": "Комплект тест-Коннект LTE (роутер)"
-                            },
-                            {
-                                "id": 75889,
-                                "regionProductionOrder": {
-                                    "id": 78112,
-                                    "region": {
-                                        "id": 59,
-                                        "macroRegion": {
-                                            "id": 6,
-                                            "name": "Сибирь",
-                                            "shortName": null,
-                                            "description": null,
-                                            "deleted": false,
-                                            "beginDate": null,
-                                            "delay": null,
-                                            "threshold": null
-                                        },
-                                        "name": "Барнаул",
-                                        "address": null,
-                                        "description": null,
-                                        "trigram": null,
-                                        "deleted": false
-                                    },
-                                    "profile": null,
-                                    "code": null,
-                                    "hlr": null,
-                                    "amount": 385,
-                                    "fileInfo": {
-                                        "id": 413634,
-                                        "name": null,
-                                        "attacheDate": "2017-02-03",
-                                        "fileType": null,
-                                        "size": 0,
-                                        "entityType": null,
-                                        "entityId": null
-                                    },
-                                    "techFiles": null,
-                                    "status": null,
-                                    "macroRegionProductionOrder": {
-                                        "id": 16561,
-                                        "orderNumber": "2181N16",
-                                        "macroRegion": null,
-                                        "tariff": {
-                                            "id": 337,
-                                            "code": 0,
-                                            "name": "Комплект тест-Коннект-LTE(модем)",
-                                            "shortName": null,
-                                            "techName": null,
-                                            "personality": true,
-                                            "planDateUnlimited": false,
-                                            "dualSim": false,
-                                            "cardTypeList": null,
-                                            "prodPeriod": null,
-                                            "description": null,
-                                            "deleted": false,
-                                            "productRep": false,
-                                            "codeStr": "000"
-                                        },
-                                        "cardType": {"id": null, "name": "320K", "description": null, "deleted": false},
-                                        "totalAmount": 0,
-                                        "formationDate": null,
-                                        "shipmentDate": null,
-                                        "vendor": {
-                                            "id": null,
-                                            "name": "АО НоваКард",
-                                            "shortName": null,
-                                            "contractNumber": null,
-                                            "contractDate": null,
-                                            "description": null,
-                                            "nds": 0,
-                                            "returnAddress": null,
-                                            "orderPrefix": null,
-                                            "orderPostfix": null,
-                                            "currentNumber": null,
-                                            "deleted": false,
-                                            "contractInfo": null,
-                                            "ndsAsDouble": 0
-                                        },
-                                        "status": null,
-                                        "price": null,
-                                        "description": null,
-                                        "month": 0,
-                                        "year": 0,
-                                        "reqDeliveryDate": null,
-                                        "totalPrice": null,
-                                        "nds": null
-                                    },
-                                    "description": null,
-                                    "orderDetails": null,
-                                    "fileName": null,
-                                    "returnedFromPlanning": null,
-                                    "hasAllFiles": null,
-                                    "attachFilesStatusDate": null,
-                                    "macroRegion": null,
-                                    "tariffCode": "000",
-                                    "orderNumber": "2181N16",
-                                    "vendor": {
-                                        "id": null,
-                                        "name": "АО НоваКард",
-                                        "shortName": null,
-                                        "contractNumber": null,
-                                        "contractDate": null,
-                                        "description": null,
-                                        "nds": 0,
-                                        "returnAddress": null,
-                                        "orderPrefix": null,
-                                        "orderPostfix": null,
-                                        "currentNumber": null,
-                                        "deleted": false,
-                                        "contractInfo": null,
-                                        "ndsAsDouble": 0
-                                    },
-                                    "tariff": {
-                                        "id": 337,
-                                        "code": 0,
-                                        "name": "Комплект тест-Коннект-LTE(модем)",
-                                        "shortName": null,
-                                        "techName": null,
-                                        "personality": true,
-                                        "planDateUnlimited": false,
-                                        "dualSim": false,
-                                        "cardTypeList": null,
-                                        "prodPeriod": null,
-                                        "description": null,
-                                        "deleted": false,
-                                        "productRep": false,
-                                        "codeStr": "000"
-                                    },
-                                    "cardType": {"id": null, "name": "320K", "description": null, "deleted": false},
-                                    "trigram": null,
-                                    "personality": "Перс.",
-                                    "tariffTechName": null,
-                                    "fileReceiveDate": "2017-02-03"
-                                },
-                                "readyDate": null,
-                                "reqDeliveryDate": "2017-03-02",
-                                "planState": {
-                                    "name": "В производстве",
-                                    "id": 1,
-                                    "imgUrl": "img/icon/stateProduction.png",
-                                    "entityStatus": {
-                                        "id": 82,
-                                        "title": "Статус производства: В производстве",
-                                        "entityType": null,
-                                        "finalStatus": false
-                                    }
-                                },
-                                "quantity": 235,
-                                "priorityDate": "2017-02-20",
-                                "planDeliveryDate": null,
-                                "status": {
-                                    "id": 25,
-                                    "title": "Принят в производство",
-                                    "entityType": {
-                                        "id": 5,
-                                        "description": "Планирование",
-                                        "tableName": "usim_production_plan",
-                                        "entityClass": "com.ndlf.model.ProductionPlan"
-                                    },
-                                    "finalStatus": false
-                                },
-                                "planComment": null,
-                                "filePostfix": "2",
-                                "fileName": "BAR99116",
-                                "fullFileName": "BAR99116_2",
-                                "fileDate": null,
-                                "deliveryDate": null,
-                                "macroRegion": {
-                                    "id": 6,
-                                    "name": "Сибирь",
-                                    "shortName": null,
-                                    "description": null,
-                                    "deleted": false,
-                                    "beginDate": null,
-                                    "delay": null,
-                                    "threshold": null
-                                },
-                                "orderNumber": "2181N16",
-                                "vendorName": "АО НоваКард",
-                                "macroRegionName": "Сибирь",
-                                "regionName": "Барнаул",
-                                "tariffPlanDateUnlimited": false,
-                                "cardTypeName": "320K",
-                                "planStateId": 1,
-                                "tariffName": "Комплект тест-Коннект-LTE(модем)"
-                            }],
-                        "metaData": [
-                            {
-                                "name": "planState",
-                                "type": "com.ndlf.model.PlanState",
-                                "referenceType": "void",
-                                "displayField": "imgUrl",
-                                "title": "",
-                                "width": 40,
-                                "order": 1,
-                                "visible": true,
-                                "format": "",
-                                "precision": 0,
-                                "maxLength": null,
-                                "minLength": null,
-                                "max": null,
-                                "min": null,
-                                "required": false,
-                                "readOnly": false,
-                                "unique": false,
-                                "pattern": "",
-                                "defaultValue": 0,
-                                "enableColumnMenu": true,
-                                "canSelectAll": false,
-                                "uniqueGroup": false
-                            },
-                            {
-                                "name": "regionName",
-                                "type": "java.lang.String",
-                                "referenceType": "void",
-                                "displayField": "",
-                                "title": "Регион",
-                                "width": 120,
-                                "order": 3,
-                                "visible": true,
-                                "format": "",
-                                "precision": 0,
-                                "maxLength": null,
-                                "minLength": null,
-                                "max": null,
-                                "min": null,
-                                "required": false,
-                                "readOnly": false,
-                                "unique": false,
-                                "pattern": "",
-                                "defaultValue": 0,
-                                "enableColumnMenu": true,
-                                "canSelectAll": false,
-                                "uniqueGroup": false
-                            },
-                            {
-                                "name": "orderNumber",
-                                "type": "java.lang.String",
-                                "referenceType": "void",
-                                "displayField": "",
-                                "title": "Номер заказа",
-                                "width": 120,
-                                "order": 5,
-                                "visible": true,
-                                "format": "",
-                                "precision": 0,
-                                "maxLength": null,
-                                "minLength": null,
-                                "max": null,
-                                "min": null,
-                                "required": false,
-                                "readOnly": false,
-                                "unique": false,
-                                "pattern": "",
-                                "defaultValue": 0,
-                                "enableColumnMenu": true,
-                                "canSelectAll": false,
-                                "uniqueGroup": false
-                            },
-                            {
-                                "name": "status",
-                                "type": "com.ndlf.model.EntityStatus",
-                                "referenceType": "void",
-                                "displayField": "title",
-                                "title": "Статус",
-                                "width": 210,
-                                "order": 11,
-                                "visible": true,
-                                "format": "",
-                                "precision": 0,
-                                "maxLength": null,
-                                "minLength": null,
-                                "max": null,
-                                "min": null,
-                                "required": false,
-                                "readOnly": false,
-                                "unique": false,
-                                "pattern": "",
-                                "defaultValue": 0,
-                                "enableColumnMenu": true,
-                                "canSelectAll": false,
-                                "uniqueGroup": false
-                            },
-                            {
-                                "name": "priorityDate",
-                                "type": "java.util.Date",
-                                "referenceType": "void",
-                                "displayField": "",
-                                "title": "Приоритет",
-                                "width": 100,
-                                "order": 9,
-                                "visible": true,
-                                "format": "",
-                                "precision": 0,
-                                "maxLength": null,
-                                "minLength": null,
-                                "max": null,
-                                "min": null,
-                                "required": false,
-                                "readOnly": false,
-                                "unique": false,
-                                "pattern": "",
-                                "defaultValue": 0,
-                                "enableColumnMenu": true,
-                                "canSelectAll": false,
-                                "uniqueGroup": false
-                            },
-                            {
-                                "name": "planComment",
-                                "type": "java.lang.String",
-                                "referenceType": "void",
-                                "displayField": "",
-                                "title": "Комментарий",
-                                "width": 210,
-                                "order": 12,
-                                "visible": true,
-                                "format": "",
-                                "precision": 0,
-                                "maxLength": null,
-                                "minLength": null,
-                                "max": null,
-                                "min": null,
-                                "required": false,
-                                "readOnly": false,
-                                "unique": false,
-                                "pattern": "",
-                                "defaultValue": 0,
-                                "enableColumnMenu": true,
-                                "canSelectAll": false,
-                                "uniqueGroup": false
-                            }],
-                        "offset": 1,
-                        "total": 2,
-                        "count": 2
-                    };
-                    return aplanaEntityUtils.fillGrid($scope, dataStub, $scope.customGridColumnsBuilder)
+                    var data = jQuery.extend({}, dataStub);
+                    data.list = tableData ? tableData.slice(0) : data.list.slice(0);
+                    for (var i = 0; i < data.list.length; i++) {
+                        var entity = data.list[i];
+                        if ($scope.dataOptions.filter) {
+                            if (($scope.dataOptions.filter.period && entity.period.id != $scope.dataOptions.filter.period.id) ||
+                                ($scope.dataOptions.filter.department && entity.department.id != $scope.dataOptions.filter.department.id) ||
+                                ($scope.dataOptions.filter.formNumber && entity.id != $scope.dataOptions.filter.formNumber) ||
+                                ($scope.dataOptions.filter.formType && entity.formType.id != $scope.dataOptions.filter.formType.id) ||
+                                ($scope.dataOptions.filter.formKind && entity.formKind.id != $scope.dataOptions.filter.formKind.id) ||
+                                ($scope.dataOptions.filter.asnu && entity.asnu.id != $scope.dataOptions.filter.asnu.id) ||
+                                ($scope.dataOptions.filter.state && entity.state.id != $scope.dataOptions.filter.state.id) ||
+                                ($scope.dataOptions.filter.file && entity.fileTF.indexOf($scope.dataOptions.filter.file) == -1)) {
+                                data.list.splice(i, 1);
+                                i--;
+                            }
+                        }
+                    }
+                    return aplanaEntityUtils.fillGrid($scope, data, $scope.customGridColumnsBuilder)
                         .then(setButtonsEnabled);
                     //return aplanaEntityUtils.fetchData('rest/entity/light/ProductionPlan', $scope)
                     //    .then(setButtonsEnabled);
@@ -616,65 +261,91 @@
                 /**
                  * Обработчики нажатий на кнопки
                  */
-                //Создать
+                    //Создать
                 $scope.createButtonClick = function () {
                     var metaData = [
                         {
-                            name: 'name',
-                            title: 'Наименование',
-                            type: 'java.lang.String',
-                            ord: 1,
-                            maxLength: 10,
-                            readOnly: false,
-                            required: true
-                        }, {
-                            name: 'date',
-                            title: 'Дата',
-                            type: 'java.util.Date',
-                            ord: 2
-                        }, {
-                            name: 'count',
-                            title: 'Количество',
-                            min: 100,
-                            max: 9999,
-                            readOnly: false,
-                            required: true,
-                            type: 'long',
-                            ord: 3
-                        }/**, {
-                            name: 'macroRegion1',
-                            title: 'Макрорегион 1',
-                            type: 'com.ndlf.model.MacroRegion',
-                            ord: 4,
-                            required: true,
-                            displayField: 'name'
-                        }**/
+                            "name": "period",
+                            "type": "com.ndlf.model.Period",
+                            "displayField": "name",
+                            "predefinedValues": $scope.dataOptions.filterList.periodList,
+                            "title": "Период",
+                            "width": 20,
+                            "order": 1
+                        },
+                        {
+                            "name": "department",
+                            "type": "com.ndlf.model.Department",
+                            "displayField": "name",
+                            "predefinedValues": $scope.dataOptions.filterList.departmentList,
+                            "title": "Подразделение",
+                            "width": 40,
+                            "order": 2
+                        },
+                        {
+                            "name": "formKind",
+                            "type": "com.ndlf.model.FormKind",
+                            "displayField": "name",
+                            "predefinedValues": $scope.dataOptions.filterList.formKindList,
+                            "title": "Вид налоговой формы",
+                            "width": 35,
+                            "order": 3
+                        }
                     ];
 
                     var values = {
-                        name: 'тест',
-                        date: new Date()
+                        period: $scope.dataOptions.filterList.periodList[0],
+                        department: $scope.dataOptions.filterList.departmentList[0],
+                        formKind: $scope.dataOptions.filterList.formKindList[0]
                     };
 
                     var dlg = aplanaDialogs.editObject('Создание новой записи', null, metaData, values);
-                    return dlg.result.then(function (values) {
-                        //do something
+                    return dlg.result.then(function (entity) {
+                        //Заглушка создания новой записи
+                        entity.id = $scope.dataOptions.data[$scope.dataOptions.data.length - 1].id + 1;
+                        entity.formType = {id: 1, name: "Первичная"};
+                        entity.asnu = {id: 1, name: "АС \"SAP\""};
+                        entity.state = {id: 1, name: "Создана"};
+                        entity.creationDate = new Date();
+                        entity.creator = "Хазиев Ленар";
+                        $scope.dataOptions.data.push(entity);
+                        aplanaEntityUtils.updateViewData($scope);
+                        tableData = $scope.dataOptions.data;
                     })
                 };
                 //Проверить
                 $scope.checkButtonClick = function () {
+                    //Do check
                 };
                 //Рассчитать
                 $scope.calculateButtonClick = function () {
+                    //Do calculate
                 };
                 //Удалить
                 $scope.deleteButtonClick = function () {
+                    //Клиентская заглушка
+                    aplanaEntityUtils.processSelectedEntities($scope, function (entity) {
+                        $scope.dataOptions.data.splice($scope.dataOptions.data.lastIndexOf(entity), 1);
+                    });
+                    aplanaEntityUtils.updateViewData($scope);
+                    tableData = $scope.dataOptions.data;
                 };
                 //Принять
                 $scope.acceptButtonClick = function () {
+                    //Клиентская заглушка
+                    aplanaEntityUtils.processSelectedEntities($scope, function (entity) {
+                        entity.state = {id: 3, name: "Принята"};
+                        aplanaEntityUtils.updateViewData($scope)
+                    });
                 };
                 //Вернуть в Создана
                 $scope.returnButtonClick = function () {
+                    //Клиентская заглушка
+                    aplanaEntityUtils.processSelectedEntities($scope, function (entity) {
+                        entity.state = {id: 1, name: "Создана"};
+                        aplanaEntityUtils.updateViewData($scope)
+                    });
+                    tableData = $scope.dataOptions.data;
                 };
                 //Поиск по фильтру
                 $scope.searchClick = function () {
@@ -694,17 +365,24 @@
                  */
                 function initPage() {
                     //Инициализация грида
-                    aplanaEntityUtils.initGrid($scope, fetchData, function() {
-                        //row double click
-                    }, setButtonsEnabled);
-                    //Инициалиация фильтра
+                    aplanaEntityUtils.initGrid($scope, fetchData, setButtonsEnabled);
+                    //Инициалиация фильтра (заглушка)
                     $scope.dataOptions.filterList = {
-                        periodList: [{id: 1, title: '2017; 1 квартал'}, {id: 2, title: '2017; 2 квартал'}, {id: 3, title: '2017; 3 квартал'}, {id: 4, title: '2017; 4 квартал'}],
-                        departmentList: [{id: 1, title: 'Иркутское отделение №8586 ПАО Сбербанк'}, {id: 2, title: 'Читинское отделение №8600 ПАО Сбербанк'}, {id: 3, title: 'Якутское отделение №8603 ПАО Сбербанк'}, {id: 4, title: 'ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара)'}],
-                        formTypeList: [{id: 1, title: 'Первичная'}, {id: 2, title: 'Консолидированная'}],
-                        formKindList: [{id: 1, title: '2-НДФЛ'}, {id: 2, title: '6-НДФЛ'}],
-                        asnuList: [{id: 1, title: 'АС \"SAP\"'}, {id: 2, title: 'АС \"Депозитарий\"'}],
-                        stateList: [{id: 1, title: 'Создана'}, {id: 2, title: 'Подготовлена'}, {id: 3, title: 'Принята'}]
+                        periodList: [{id: 1, name: '2017; 1 квартал'}, {id: 2, name: '2017; 2 квартал'}, {
+                            id: 3,
+                            name: '2017; 3 квартал'
+                        }, {id: 4, name: '2017; 4 квартал'}],
+                        departmentList: [{id: 1, name: 'Иркутское отделение №8586 ПАО Сбербанк'}, {
+                            id: 2,
+                            name: 'Читинское отделение №8600 ПАО Сбербанк'
+                        }, {id: 3, name: 'Якутское отделение №8603 ПАО Сбербанк'}, {
+                            id: 4,
+                            name: 'ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара)'
+                        }],
+                        formTypeList: [{id: 1, name: 'Первичная'}, {id: 2, name: 'Консолидированная'}],
+                        formKindList: [{id: 1, name: 'РНУ НДФЛ (первичная)'}, {id: 2, name: 'РНУ НДФЛ (консолидированная)'}, {id: 3, name: '6-НДФЛ'}],
+                        asnuList: [{id: 1, name: 'АС \"SAP\"'}, {id: 2, name: 'АС \"Депозитарий\"'}],
+                        stateList: [{id: 1, name: 'Создана'}, {id: 2, name: 'Подготовлена'}, {id: 3, name: 'Принята'}]
                     };
                     //Инициализация параметров сессии - выбраных ранее строк в гриде + фильтры
                     aplanaEntityUtils.initPageSession($scope, fetchData)

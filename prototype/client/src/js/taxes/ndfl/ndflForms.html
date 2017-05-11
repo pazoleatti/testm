@@ -13,10 +13,10 @@
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.period">
                                     <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
-                                        <span data-ng-bind="$select.selected.title" title="{{$select.selected.title}}"></span>
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
                                     </ui-select-match>
                                     <ui-select-choices repeat="item in dataOptions.filterList.periodList track by $index">
-                                        <span data-ng-bind-html="item.title | highlight: $select.search"></span>
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
                             </div>
@@ -28,10 +28,10 @@
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.department">
                                     <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
-                                        <span data-ng-bind="$select.selected.title" title="{{$select.selected.title}}"></span>
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
                                     </ui-select-match>
                                     <ui-select-choices repeat="item in dataOptions.filterList.departmentList track by $index">
-                                        <span data-ng-bind-html="item.title | highlight: $select.search"></span>
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
                             </div>
@@ -56,10 +56,10 @@
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.formType">
                                     <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
-                                        <span data-ng-bind="$select.selected.title" title="{{$select.selected.title}}"></span>
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
                                     </ui-select-match>
                                     <ui-select-choices repeat="item in dataOptions.filterList.formTypeList track by $index">
-                                        <span data-ng-bind-html="item.title | highlight: $select.search"></span>
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
                             </div>
@@ -71,10 +71,10 @@
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.formKind">
                                     <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
-                                        <span data-ng-bind="$select.selected.title" title="{{$select.selected.title}}"></span>
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
                                     </ui-select-match>
                                     <ui-select-choices repeat="item in dataOptions.filterList.formKindList track by $index">
-                                        <span data-ng-bind-html="item.title | highlight: $select.search"></span>
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
                             </div>
@@ -86,10 +86,10 @@
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.asnu">
                                     <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
-                                        <span data-ng-bind="$select.selected.title" title="{{$select.selected.title}}"></span>
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
                                     </ui-select-match>
                                     <ui-select-choices repeat="item in dataOptions.filterList.asnuList track by $index">
-                                        <span data-ng-bind-html="item.title | highlight: $select.search"></span>
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
                             </div>
@@ -103,10 +103,10 @@
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.state">
                                     <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
-                                        <span data-ng-bind="$select.selected.title" title="{{$select.selected.title}}"></span>
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
                                     </ui-select-match>
                                     <ui-select-choices repeat="item in dataOptions.filterList.stateList track by $index">
-                                        <span data-ng-bind-html="item.title | highlight: $select.search"></span>
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
                             </div>

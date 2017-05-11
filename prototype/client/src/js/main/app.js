@@ -416,7 +416,7 @@
         "menu.taxes.ndfl.forms": "Формы",
         "header.ndfl.forms": "НДФЛ - Список налоговых форм",
         "title.period": "Период",
-        "title.department": "Поддразделение",
+        "title.department": "Подразделение",
         "title.formNumber": "Номер формы",
         "title.formType": "Тип налоговой формы",
         "title.formKind": "Вид налоговой формы",

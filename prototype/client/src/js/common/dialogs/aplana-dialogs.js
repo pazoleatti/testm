@@ -232,7 +232,7 @@
                     $uibModalInstance.close('yes');
                 };
             }])
-        .controller('editObjectCtrl', function ($log, $scope, $uibModalInstance, data, $http) {
+        .controller('editObjectCtrl', function ($log, $scope, $uibModalInstance, data, $http, $timeout) {
             $scope.header = data.header ? data.header : 'Редактирование';
             $scope.msg = data.msg ? data.msg : undefined;
             $scope.metaData = data.metaData;
@@ -264,19 +264,23 @@
                         field: field,
                         items: [],
                         searchItems: function (searchText) {
-                            var url = 'rest/entity/' + field.type.substring('com.ndlf.model.'.length);
-                            var params = {
-                                fulltext: searchText,
-                                sort: field.displayField + '-asc',
-                            };
-                            if (field.filter) {
-                                jQuery.extend(params, field.filter);
+                            if (!field.predefinedValues) {
+                                var url = 'rest/entity/' + field.type.substring('com.ndlf.model.'.length);
+                                var params = {
+                                    fulltext: searchText,
+                                    sort: field.displayField + '-asc',
+                                };
+                                if (field.filter) {
+                                    jQuery.extend(params, field.filter);
+                                }
+                                // Получение данных
+                                $http.get(url, {params: params}).then(
+                                    function (response) {
+                                        $scope.fieldParams[field.name].items = response.data.list
+                                    })
+                            } else {
+                                $scope.fieldParams[field.name].items = field.predefinedValues
                             }
-                            // Получение данных
-                            $http.get(url, {params: params}).then(
-                                function (response) {
-                                    $scope.fieldParams[field.name].items = response.data.list
-                                })
                         },
                         selectClick: function () {
                             if ($scope.values[field.name] == undefined) {
@@ -296,6 +300,11 @@
                 }
 
             });
+
+            $timeout(function() {
+                //Активируем кнопку Сохранить без изменений на форме
+                $scope.editForm.$pristine = false;
+            }, 100);
 
             $scope.save = function () {
                 $uibModalInstance.close($scope.values)
