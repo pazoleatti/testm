@@ -1868,12 +1868,6 @@ class PairKppOktmo {
     }
 }
 
-/**
- * Разыменование записи справочника
- */
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
 /************************************* СПЕЦОТЧЕТ **********************************************************************/
 
 
@@ -2035,7 +2029,8 @@ def searchData(def params) {
                 (params['firstName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName']) : true) &&
                 (params['middleName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName']) : true) &&
                 (params['birthDay'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.@ДатаРожд.text(), params['birthDay']) : true) &&
-                (params['idDocNumber'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) : true)
+                (params['idDocNumber'] ? (StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) ||
+                        StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s,.-]", ""), params['idDocNumber'])) : true)
     }
     // ограничиваем размер выборки
     def result = []
