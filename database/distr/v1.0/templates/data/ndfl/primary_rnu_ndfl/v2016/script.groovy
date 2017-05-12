@@ -214,7 +214,7 @@
                         String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
                         String inp = ndflPerson.getPersonIdentifier().inp
                         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, "",
+                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
                         localLogger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
                                 "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
@@ -1306,7 +1306,11 @@
         def resultReportParameters = [:]
         reportParameters.each { key, value ->
             if (value != null) {
-                resultReportParameters.put(key, value)
+                def val = value;
+                if (!(key in ["fromBirthDay", "toBirthDay"])) {
+                    val = '%'+value+'%'
+                }
+                resultReportParameters.put(key, val)
             }
         }
 
@@ -1322,7 +1326,7 @@
         //Кнопки: "Закрыть"
 
         if (pagingResult.isEmpty()) {
-            subreportParamsToString = { it.collect { (it.value != null ? (it.value + ";") : "") } join " " }
+            subreportParamsToString = { it.collect { (it.value != null ? (((it.value instanceof Date)?it.value.format('dd.MM.yyyy'):it.value) + ";") : "") } join " " }
             logger.warn("Физическое лицо: " + subreportParamsToString(reportParameters) + " не найдено в форме");
             //throw new ServiceException("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
         }
@@ -1334,7 +1338,7 @@
             row.firstName = ndflPerson.firstName
             row.middleName = ndflPerson.middleName
             row.snils = ndflPerson.snils
-            row.innNp = ndflPerson.innNp
+            row.innNp = ndflPerson.innNp?:ndflPerson.innForeign
             row.birthDay = ndflPerson.birthDay
             row.idDocNumber = ndflPerson.idDocNumber
             dataRows.add(row)
@@ -1554,6 +1558,7 @@
         xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
         XMLEventReader reader = xmlFactory.createXMLEventReader(xmlInputStream)
 
+        def ndflPersonNum = 1;
         def sb;
         try {
             while (reader.hasNext()) {
@@ -1584,7 +1589,8 @@
                     String personData = sb.toString();
                     if (personData != null && !personData.isEmpty()) {
                         def infoPart = new XmlSlurper().parseText(sb.toString())
-                        processInfoPart(infoPart)
+                        processInfoPart(infoPart, ndflPersonNum)
+                        ndflPersonNum++
                     }
                 }
             }
@@ -1622,7 +1628,7 @@
         return var1.toString();
     }
 
-    void processInfoPart(infoPart) {
+    void processInfoPart(infoPart, rowNum) {
 
         def ndflPersonNode = infoPart.'ПолучДох'[0]
 
@@ -1641,6 +1647,7 @@
         //Идентификатор декларации для которой загружаются данные
         if (ndflPerson.incomes != null && !ndflPerson.incomes.isEmpty()) {
             ndflPerson.declarationDataId = declarationData.getId()
+            ndflPerson.rowNum = rowNum
             ndflPersonService.save(ndflPerson)
         } else {
             logger.warn("ФЛ ФИО = $fio ФЛ ИНП = ${ndflPerson.inp} Не загружен в систему поскольку не имеет операций в отчетном периоде")
