@@ -25,7 +25,8 @@
                         if (field.name == 'formType') {
                             columnDef.cellTemplate = '<div class="ui-grid-cell-contents ng-binding ng-scope" ' +
                                 'title="{{grid.appScope.getRowValue(row.entity)}}">' +
-                                '<a href="ndflDetails/{{row.entity.id}}">{{grid.getCellValue(row, col)}}</a></div>';
+                                '<a href="index.html#/taxes/ndflDetails/{{row.entity.id}}">{{grid.getCellValue(row, col)}}</a></div>';
+                        // index.html# нкужно будет убрать
                         }
                         if (field.type == "java.util.Date") {
                             var format = field.format == "" ? "dd.MM.yyyy" : field.format;

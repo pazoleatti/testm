@@ -1,5 +1,5 @@
 <div id="ndflDetails">
-    <h1>{{'header.ndflDetails.forms' | translate}}</h1>
+    <h1><a href="#">{{'menu.taxes.ndfl' | translate}}</a> - {{'header.ndflDetails.forms' | translate}}</h1>
     <div class="header-details">
         <div class="row">
             <div class="header-col w400">
@@ -81,9 +81,9 @@
             </span>
             <!--Редактировать-->
             <span>
-                <button type="button" class="btn btn-default" data-ng-disabled="!canEdit"
+                <button type="button" class="btn btn-default" data-ng-disabled="!editButtonEnabled"
                         data-ng-click="editRecordClick()">
-                    <img src="img/button/{{canEdit ? 'enable' : 'disable'}}/edit.png" width="32px" height="22px"
+                    <img src="img/button/{{editButtonEnabled ? 'enable' : 'disable'}}/edit.png" width="32px" height="22px"
                          alt="{{'button.edit' | translate}}"/>
                     {{'button.edit' | translate}}
                 </button>
@@ -94,8 +94,34 @@
     <uib-tabset active="activeForm">
         <uib-tab index="0" heading="1. Реквизиты" select="selectTab('requisites')">
             <div data-ng-controller="ndflDetailsFormsCtrl">
+                <!-- Панель кнопок -->
+                <div class="button_panel" style="float: right">
+                    <div class="btn-toolbar" role="toolbar">
+                        <!--Редактировать запись в таблице-->
+                        <span>
+                            <button type="button" class="btn btn-default" data-ng-disabled="!editRequisitesEnabled"
+                                    data-ng-click="editRequisitesClick()">
+                                <img src="img/button/enable/editRequisites.png" width="15px" height="15px"/>
+                            </button>
+                        </span>
+                        <!--Создать запись в таблице-->
+                        <span>
+                            <button type="button" class="btn btn-default" data-ng-disabled="!createRequisitesEnabled"
+                                    data-ng-click="createRequisitesClick()">
+                                <img src="img/button/enable/createRequisites.png" width="15px" height="15px"/>
+                            </button>
+                        </span>
+                        <!--Удалить запись в таблице-->
+                        <span>
+                            <button type="button" class="btn btn-default" data-ng-disabled="!deleteRequisitesEnabled"
+                                    data-ng-click="deleteRequisitesClick()">
+                                <img src="img/button/enable/deleteRequisites.png" width="15px" height="15px"/>
+                            </button>
+                        </span>
+                    </div>
+                </div>
                 <!-- Таблица -->
-                <div id="ndfl-details-content" class="content-with-table">
+                <div id="ndfl-details-content" class="content-with-table" style="float: left; width: 100%">
                     <div id="ndfl-details-grid" class="usim-grid" data-ui-grid="gridOptions" ui-grid-resize-columns
                          ui-grid-selection ui-grid-pagination ui-grid-autoResize></div>
                 </div>
