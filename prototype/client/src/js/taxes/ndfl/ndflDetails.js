@@ -238,7 +238,7 @@
                             "type": "com.ndlf.model.Dul",
                             "displayField": "code",
                             "title": "ДУЛ. Код",
-                            "width": 20,
+                            "width": 85,
                             "order": 11,
                             "visible": true
                         },
@@ -247,7 +247,7 @@
                             "type": "com.ndlf.model.Dul",
                             "displayField": "number",
                             "title": "ДУЛ. Номер",
-                            "width": 20,
+                            "width": 95,
                             "order": 12,
                             "visible": true
                         },
@@ -256,7 +256,7 @@
                             "type": "com.ndlf.model.Status",
                             "displayField": "id",
                             "title": "Статус (код)",
-                            "width": 20,
+                            "width": 100,
                             "order": 13,
                             "visible": true
                         },
@@ -265,7 +265,7 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "codeSub",
                             "title": "Адрес рег. в РФ. Код субъекта",
-                            "width": 20,
+                            "width": 205,
                             "order": 14,
                             "visible": true
                         },
@@ -274,7 +274,7 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "index",
                             "title": "Адрес рег. в РФ. Индекс",
-                            "width": 20,
+                            "width": 170,
                             "order": 15,
                             "visible": true
                         },
@@ -283,7 +283,7 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "area",
                             "title": "Адрес рег. в РФ. Район",
-                            "width": 20,
+                            "width": 155,
                             "order": 16,
                             "visible": true
                         },
@@ -292,7 +292,7 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "city",
                             "title": "Адрес рег. в РФ. Город",
-                            "width": 20,
+                            "width": 165,
                             "order": 17,
                             "visible": true
                         },
@@ -301,7 +301,7 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "locality",
                             "title": "Адрес рег. в РФ. Населенный пункт",
-                            "width": 20,
+                            "width": 240,
                             "order": 18,
                             "visible": true
                         },
@@ -310,7 +310,7 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "street",
                             "title": "Адрес рег. в РФ. Улица",
-                            "width": 20,
+                            "width": 160,
                             "order": 19,
                             "visible": true
                         },
@@ -319,7 +319,7 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "building",
                             "title": "Адрес рег. в РФ. Дом",
-                            "width": 20,
+                            "width": 145,
                             "order": 20,
                             "visible": true
                         },
@@ -328,7 +328,7 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "housing",
                             "title": "Адрес рег. в РФ. Корпус",
-                            "width": 20,
+                            "width": 170,
                             "order": 21,
                             "visible": true
                         },
@@ -337,13 +337,13 @@
                             "type": "com.ndlf.model.Address",
                             "displayField": "apartment",
                             "title": "Адрес рег. в РФ. Квартира",
-                            "width": 20,
+                            "width": 205,
                             "order": 22,
                             "visible": true
                         }],
                     "offset": 1,
-                    "total": 1,
-                    "count": 1
+                    "total": 2,
+                    "count": 2
                 };
 
                 var tableData;
@@ -357,35 +357,17 @@
                     for (var i = 0; i < data.list.length; i++) {
                         var entity = data.list[i];
                         if ($scope.dataOptions.filter) {
-                            if (($scope.dataOptions.filter.period && entity.period.id != $scope.dataOptions.filter.period.id) ||
-                                ($scope.dataOptions.filter.department && entity.department.id != $scope.dataOptions.filter.department.id) ||
-                                ($scope.dataOptions.filter.formNumber && entity.id != $scope.dataOptions.filter.formNumber) ||
-                                ($scope.dataOptions.filter.formType && entity.formType.id != $scope.dataOptions.filter.formType.id) ||
-                                ($scope.dataOptions.filter.formKind && entity.formKind.id != $scope.dataOptions.filter.formKind.id) ||
-                                ($scope.dataOptions.filter.asnu && entity.asnu.id != $scope.dataOptions.filter.asnu.id) ||
-                                ($scope.dataOptions.filter.state && entity.state.id != $scope.dataOptions.filter.state.id) ||
-                                ($scope.dataOptions.filter.file && entity.fileTF.indexOf($scope.dataOptions.filter.file) == -1)) {
-                                data.list.splice(i, 1);
-                                i--;
+                            if (($scope.dataOptions.filter.inp && entity.inp != $scope.dataOptions.filter.inp)
+                                || ($scope.dataOptions.filter.snils && entity.snils != $scope.dataOptions.filter.snils)
+                                || ($scope.dataOptions.filter.inn && entity.innRf.innRf != $scope.dataOptions.filter.inn && entity.innSitizenship.innSitizenship != $scope.dataOptions.filter.inn)
+                                || ($scope.dataOptions.filter.numberDul && entity.numberDul.number != $scope.dataOptions.filter.numberDul)
+                                || ($scope.dataOptions.filter.surname && entity.surname != $scope.dataOptions.filter.surname)
+                                || ($scope.dataOptions.filter.name && entity.name != $scope.dataOptions.filter.name)
+                                || ($scope.dataOptions.filter.patronymic && entity.patronymic != $scope.dataOptions.filter.patronymic)
+                                || ($scope.dataOptions.filter.dateFrom ? ($scope.dataOptions.filter.dateTo ? ($scope.dataOptions.filter.dateFrom > entity.dateOfBirth || $scope.dataOptions.filter.dateTo < entity.dateOfBirth) : $scope.dataOptions.filter.dateFrom > entity.dateOfBirth) : ($scope.dataOptions.filter.dateTo ? $scope.dataOptions.filter.dateTo < entity.dateOfBirth : false))) {
+                                    data.list.splice(i, 1);
+                                    i--;
                             }
-                        }
-                    }
-
-                    for (var i = 0; i < dataStub.list.length - 1; i ++){
-                        if (parseInt($stateParams.formId) === dataStub.list[i].id){
-                            $scope.department = dataStub.list[i].department.name;
-                            $scope.formNumber = $stateParams.formId;
-                            $scope.creator = dataStub.list[i].creator;
-                            $scope.formType = dataStub.list[i].formType.name;
-                            $scope.period = dataStub.list[i].period.name;
-                            $scope.state = dataStub.list[i].state.name;
-                            $scope.nameAsnu = dataStub.list[i].asnu.name;
-                            //Доступности кнопок над вкладками
-                            $scope.checkButtonEnabled = true;
-                            $scope.calculateButtonEnabled = true;
-                            $scope.acceptButtonEnabled = dataStub.list[i].state.id === 1;
-                            $scope.returnButtonEnabled = dataStub.list[i].state.id !== 1;
-                            $scope.editButtonEnabled = true;
                         }
                     }
 
@@ -397,6 +379,7 @@
                  * Инициализация кнопок
                  */
                 function setButtonsEnabled() {
+                    //Доступность кнопок над таблицей
                     $scope.createReqsEnabled = true;
                     if (!$scope.gridApi || !$scope.currentEntityView) {
                         $scope.editReqEnabled = false;
@@ -405,6 +388,13 @@
                         $scope.editReqsEnabled = $scope.gridApi.grid.selection.selectedCount == 1;
                         $scope.deleteReqsEnabled = $scope.gridApi.grid.selection.selectedCount > 0;
                     }
+
+                    //Доступности кнопок над вкладками
+                    $scope.checkButtonEnabled = true;
+                    $scope.calculateButtonEnabled = true;
+                    $scope.acceptButtonEnabled = $scope.state === "Создана";
+                    $scope.returnButtonEnabled = $scope.state !== "Создана";
+                    $scope.editButtonEnabled = true;
                 }
 
                 /**
@@ -418,31 +408,20 @@
                 $scope.calculateButtonClick = function () {
                     //Do calculate
                 };
-                //Удалить
-                $scope.deleteButtonClick = function () {
-                    //Клиентская заглушка
-                    aplanaEntityUtils.processSelectedEntities($scope, function (entity) {
-                        $scope.dataOptions.data.splice($scope.dataOptions.data.lastIndexOf(entity), 1);
-                    });
-                    aplanaEntityUtils.updateViewData($scope);
-                    tableData = $scope.dataOptions.data;
-                };
                 //Принять
                 $scope.acceptButtonClick = function () {
-                    //Клиентская заглушка
-                    aplanaEntityUtils.processSelectedEntities($scope, function (entity) {
-                        entity.state = {id: 3, name: "Принята"};
-                        aplanaEntityUtils.updateViewData($scope)
-                    });
+                    //Имитация действий над родительской сущностью
+                    $scope.state = "Принята";
+                    setButtonsEnabled();
                 };
                 //Вернуть в Создана
                 $scope.returnButtonClick = function () {
-                    //Клиентская заглушка
-                    aplanaEntityUtils.processSelectedEntities($scope, function (entity) {
-                        entity.state = {id: 1, name: "Создана"};
-                        aplanaEntityUtils.updateViewData($scope)
-                    });
-                    tableData = $scope.dataOptions.data;
+                    //Имитация действий над родительской сущностью
+                    $scope.state = "Создана";
+                    setButtonsEnabled();
+                };
+                //Редактировать
+                $scope.editRecordClick = function () {
                 };
                 //Поиск по фильтру
                 $scope.searchClick = function () {
@@ -461,6 +440,17 @@
                  * Инициализация первичных данных на странице
                  */
                 function initPage() {
+                    for (var i = 0; i < dataStub.list.length; i ++){
+                        if (parseInt($stateParams.formId) === dataStub.list[i].id){
+                            $scope.department = dataStub.list[i].department.name;
+                            $scope.formNumber = $stateParams.formId;
+                            $scope.creator = dataStub.list[i].creator;
+                            $scope.formType = dataStub.list[i].formType.name;
+                            $scope.period = dataStub.list[i].period.name;
+                            $scope.state = dataStub.list[i].state.name;
+                            $scope.nameAsnu = dataStub.list[i].asnu.name;
+                        }
+                    }
                     //Инициализация грида
                     aplanaEntityUtils.initGrid($scope, fetchData, setButtonsEnabled);
                     //Инициалиация фильтра (заглушка)
