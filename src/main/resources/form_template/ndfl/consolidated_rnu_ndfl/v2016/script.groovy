@@ -75,8 +75,6 @@ final RefBookService refBookService = getProperty("refBookService")
 final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
 @Field
 final DepartmentService departmentService = getProperty("departmentService")
-@Field
-final FormDataService formDataService = getProperty("formDataService")
 
 def getProperty(String name) {
     try {
