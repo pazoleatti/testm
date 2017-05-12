@@ -48,6 +48,7 @@ public class RefBookDepartmentDaoTest {
         PagingResult<Map<String, RefBookValue>> data = refBookDepartmentDao.getRecords(new PagingParams(), null, null);
         assertTrue(data.getTotalCount() == DEPARTMENTS_TOTAL_RECORDS);
         assertTrue(data.size() == DEPARTMENTS_COUNT);
+        assertTrue(data.get(0).get(RefBook.RECORD_ID_ALIAS).equals(departmentBankid));
         assertTrue(data.get(1).get("name").equals(departmentTB1Name));
 
         // Получим пустой результат (уйдем за пределы пагинации)
