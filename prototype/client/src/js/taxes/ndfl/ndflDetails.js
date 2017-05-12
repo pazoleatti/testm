@@ -30,7 +30,7 @@
                         gridOptions.columnDefs.push(columnDef);
                     }
 
-                    aplanaEntityUtils.fitColumnsWidth(gridOptions, $scope.gridApi.grid.gridWidth);
+                    //aplanaEntityUtils.fitColumnsWidth(gridOptions, $scope.gridApi.grid.gridWidth);
                 };
 
 
@@ -153,7 +153,7 @@
                             "name": "id",
                             "type": "java.lang.String",
                             "title": "№п/п",
-                            "width": 20,
+                            "width": 60,
                             "order": 1,
                             "visible": true
                         },
@@ -161,7 +161,7 @@
                             "name": "inp",
                             "type": "java.lang.String",
                             "title": "Налогоплательщик. ИНП",
-                            "width": 25,
+                            "width": 170,
                             "order": 2,
                             "visible": true
                         },
@@ -169,7 +169,7 @@
                             "name": "surname",
                             "type": "java.lang.String",
                             "title": "Налогоплательщик. Фамилия",
-                            "width": 40,
+                            "width": 200,
                             "order": 3,
                             "visible": true
                         },
@@ -177,7 +177,7 @@
                             "name": "name",
                             "type": "java.lang.String",
                             "title": "Налогоплательщик. Имя",
-                            "width": 30,
+                            "width": 175,
                             "order": 4,
                             "visible": true
                         },
@@ -185,7 +185,7 @@
                             "name": "patronymic",
                             "type": "java.lang.String",
                             "title": "Налогоплательщик. Отчество",
-                            "width": 40,
+                            "width": 200,
                             "order": 5,
                             "visible": true
                         },
@@ -193,7 +193,7 @@
                             "name": "dateOfBirth",
                             "type": "java.util.Date",
                             "title": "Налогоплательщик. Дата рождения",
-                            "width": 20,
+                            "width": 240,
                             "order": 6,
                             "visible": true,
                             "format": "dd.MM.yyyy HH:mm:ss"
@@ -202,7 +202,7 @@
                             "name": "snils",
                             "type": "java.lang.String",
                             "title": "Налогоплательщик. СНИЛС",
-                            "width": 20,
+                            "width": 190,
                             "order": 7,
                             "visible": true
                         },
@@ -211,7 +211,7 @@
                             "type": "com.ndlf.model.Citizenship",
                             "displayField": "code",
                             "title": "Гражданство (код страны)",
-                            "width": 20,
+                            "width": 185,
                             "order": 8,
                             "visible": true
                         },
@@ -220,7 +220,7 @@
                             "type": "com.ndlf.model.Inn",
                             "displayField": "innRf",
                             "title": "ИНН. В РФ",
-                            "width": 20,
+                            "width": 95,
                             "order": 9,
                             "visible": true
                         },
@@ -229,7 +229,7 @@
                             "type": "com.ndlf.model.Inn",
                             "displayField": "innSitizenship",
                             "title": "ИНН. В стране гражданства",
-                            "width": 20,
+                            "width": 195,
                             "order": 10,
                             "visible": true
                         },
@@ -380,6 +380,12 @@
                             $scope.period = dataStub.list[i].period.name;
                             $scope.state = dataStub.list[i].state.name;
                             $scope.nameAsnu = dataStub.list[i].asnu.name;
+                            //Доступности кнопок над вкладками
+                            $scope.checkButtonEnabled = true;
+                            $scope.calculateButtonEnabled = true;
+                            $scope.acceptButtonEnabled = dataStub.list[i].state.id === 1;
+                            $scope.returnButtonEnabled = dataStub.list[i].state.id !== 1;
+                            $scope.editButtonEnabled = true;
                         }
                     }
 
@@ -391,29 +397,13 @@
                  * Инициализация кнопок
                  */
                 function setButtonsEnabled() {
-                    $scope.exportButtonEnabled = aplanaEntityUtils.isTableHasValue($scope);
-                    $scope.searchButtonEnabled = true;
-                    $scope.clearButtonEnabled = true;
+                    $scope.createReqsEnabled = true;
                     if (!$scope.gridApi || !$scope.currentEntityView) {
-                        $scope.searchButtonEnabled = false;
-                        $scope.clearButtonEnabled = false;
-                        $scope.checkButtonEnabled = false;
-                        $scope.calculateButtonEnabled = false;
-                        $scope.deleteButtonEnabled = false;
-                        $scope.acceptButtonEnabled = false;
-                        $scope.returnButtonEnabled = false;
-                        $scope.editButtonEnabled = false;
+                        $scope.editReqEnabled = false;
+                        $scope.deleteReqsEnabled = false;
                     } else {
-                        $scope.selectedItems = aplanaEntityUtils.getSelectedEntities($scope);
-                        var hasSelectedItems = $scope.gridApi.grid.selection.selectedCount > 0;
-                        var hasSingleSelectedItem = $scope.gridApi.grid.selection.selectedCount == 1;
-
-                        $scope.checkButtonEnabled = hasSelectedItems;
-                        $scope.calculateButtonEnabled = hasSelectedItems;
-                        $scope.deleteButtonEnabled = hasSelectedItems;
-                        $scope.acceptButtonEnabled = hasSelectedItems;
-                        $scope.returnButtonEnabled = hasSelectedItems;
-                        $scope.editButtonEnabled = hasSingleSelectedItem;
+                        $scope.editReqsEnabled = $scope.gridApi.grid.selection.selectedCount == 1;
+                        $scope.deleteReqsEnabled = $scope.gridApi.grid.selection.selectedCount > 0;
                     }
                 }
 
@@ -474,23 +464,7 @@
                     //Инициализация грида
                     aplanaEntityUtils.initGrid($scope, fetchData, setButtonsEnabled);
                     //Инициалиация фильтра (заглушка)
-                    $scope.dataOptions.filterList = {
-                        periodList: [{id: 1, name: '2017; 1 квартал'}, {id: 2, name: '2017; 2 квартал'}, {
-                            id: 3,
-                            name: '2017; 3 квартал'
-                        }, {id: 4, name: '2017; 4 квартал'}],
-                        departmentList: [{id: 1, name: 'Иркутское отделение №8586 ПАО Сбербанк'}, {
-                            id: 2,
-                            name: 'Читинское отделение №8600 ПАО Сбербанк'
-                        }, {id: 3, name: 'Якутское отделение №8603 ПАО Сбербанк'}, {
-                            id: 4,
-                            name: 'ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара)'
-                        }],
-                        formTypeList: [{id: 1, name: 'Первичная'}, {id: 2, name: 'Консолидированная'}],
-                        formKindList: [{id: 1, name: 'РНУ НДФЛ (первичная)'}, {id: 2, name: 'РНУ НДФЛ (консолидированная)'}, {id: 3, name: '6-НДФЛ'}],
-                        asnuList: [{id: 1, name: 'АС \"SAP\"'}, {id: 2, name: 'АС \"Депозитарий\"'}],
-                        stateList: [{id: 1, name: 'Создана'}, {id: 2, name: 'Подготовлена'}, {id: 3, name: 'Принята'}]
-                    };
+
                     //Инициализация параметров сессии - выбраных ранее строк в гриде + фильтры
                     aplanaEntityUtils.initPageSession($scope, fetchData)
                 }
