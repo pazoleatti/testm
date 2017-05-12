@@ -8,29 +8,10 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormLink;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TaxTypeCase;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.refbook.ReferenceCheckResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -60,18 +41,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -103,6 +73,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String FORM_LINK_MSG = "Существует экземпляр %sформы%s, который содержит ссылку на запись! Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\"%s%s%s%s.";
     private static final String REF_BOOK_LINK_MSG = "Существует ссылка на запись справочника. Справочник \"%s\", запись: \"%s\"%s.";
+
+    private static final Long REF_BOOK_CALENDAR_ID = 945L;
 
 	@Autowired
     private ApplicationContext applicationContext;
@@ -2530,9 +2502,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                                 String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
         String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("SELECT row_number_over, ");
-        ps.appendQuery("id ");
-        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery("SELECT row_number_over");
+        if (!refBook.getId().equals(REF_BOOK_CALENDAR_ID)) {
+            ps.appendQuery(", ");
+            ps.appendQuery("id ");
+            ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        }
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", ");
             ps.appendQuery(attribute.getAlias());
@@ -2564,6 +2539,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 ps.appendQuery(" AND ");
             } else {
                 ps.appendQuery(" WHERE ");
+            }
+            if (filterPS.getJoinPartsOfQuery() != null) {
+                ps.appendQuery("frb.");
             }
             ps.appendQuery(whereClause);
             ps.appendQuery(orderBy);
@@ -2641,8 +2619,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(filterPS.getJoinPartsOfQuery());
         }
 
+        ps.appendQuery(" WHERE frb.id != -1 ");
         if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" WHERE ");
+            ps.appendQuery("and ");
             if (parentId == null) {
                 ps.appendQuery("frb.PARENT_ID is null or (");
             }
@@ -2824,7 +2803,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
         if (!ps.getParams().isEmpty()) {
             RowMapper<Map<String, RefBookValue>> rowMapper;
-            if (!refBook.hasAttribute("ID")) {
+            if (refBook.getId().equals(REF_BOOK_CALENDAR_ID)) {
                 rowMapper = new RefBookCalendarValueMapper(refBook);
                 return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
             }

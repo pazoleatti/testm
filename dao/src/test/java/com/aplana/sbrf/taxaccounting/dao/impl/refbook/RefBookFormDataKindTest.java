@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +54,9 @@ public class RefBookFormDataKindTest {
         pagingParams.setCount(2);
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(FORM_DATA_KIND_REF_BOOK_ID, FORM_DATA_KIND_TABLE_NAME, pagingParams, null, null, null);
         assertEquals(2, records.size());
+        assertEquals(FormDataKind.UNP.getId(), records.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
         assertEquals(FormDataKind.UNP.getTitle(), records.get(0).get(ATTRIBUTE_NAME).getStringValue());
+        assertEquals(FormDataKind.ADDITIONAL.getId(), records.get(1).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
         assertEquals(FormDataKind.ADDITIONAL.getTitle(), records.get(1).get(ATTRIBUTE_NAME).getStringValue());
     }
 
@@ -64,6 +67,7 @@ public class RefBookFormDataKindTest {
         pagingParams.setCount(3);
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(FORM_DATA_KIND_REF_BOOK_ID, FORM_DATA_KIND_TABLE_NAME, pagingParams, null, null, null);
         assertEquals(1, records.size());
+        assertEquals(FormDataKind.ADDITIONAL.getId(), records.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
         assertEquals(FormDataKind.ADDITIONAL.getTitle(), records.get(0).get(ATTRIBUTE_NAME).getStringValue());
     }
 

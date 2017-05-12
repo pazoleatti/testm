@@ -119,12 +119,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             }
         }
 
-        Date version = null;
-        if (refBook.isVersioned()) {
-            version = action.getRelevanceDate();
-        }
-
-        PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
+        PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(action.getRelevanceDate(),
                 action.getPagingParams(), filter, refBookAttributeList.get(action.getSortColumnIndex()),
                 action.isAscSorting());
         List<RefBookDataRow> rows = new LinkedList<RefBookDataRow>();
@@ -201,7 +196,9 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             }
             RefBookDataRow tableRow = new RefBookDataRow();
             tableRow.setValues(tableRowData);
-            tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            if (!refBook.getId().equals(REF_BOOK_CALENDAR_ID)) {
+                tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            }
             rows.add(tableRow);
         }
     }
