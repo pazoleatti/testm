@@ -22,6 +22,9 @@
                 opts = opts || {};
                 _opts.size = (angular.isDefined(opts.size) && ((opts.size === 'sm') || (opts.size === 'lg') || (opts.size === 'md'))) ? opts.size : _wSize;
                 _opts.backdrop = (angular.isDefined(opts.backdrop)) ? opts.backdrop : _b;
+                if (angular.isDefined(opts.windowClass)) {
+                    _opts.windowClass = opts.windowClass;
+                }
                 return _opts;
             };
 

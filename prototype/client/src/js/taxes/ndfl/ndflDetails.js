@@ -1,7 +1,7 @@
 'use strict';
 (function () {
 
-    angular.module('sbrfNdfl.ndflDetailsForms', ['ui.router'])
+    angular.module('sbrfNdfl.ndflDetailsForms', ['ui.router', 'sbrfNdfl.widgets'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflDetailsForms', {
                 url: '/taxes/ndflDetails/{formId}',
@@ -423,6 +423,37 @@
                 //Редактировать
                 $scope.editRecordClick = function () {
                 };
+                //Добавить ФЛ
+                $scope.createFLClick = function () {
+                    var params = {};
+                    jQuery.extend(params, $scope.dataOptions);
+
+                    var data = {
+                        scope: angular.copy(params),
+                        mode: 'create'
+                    };
+                    var opts = {
+                        copy: true,
+                        windowClass: 'fl-modal-window'
+                    };
+                    return aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts)
+                };
+                //Редактировать ФЛ
+                $scope.editFLClick = function () {
+                    var params = {};
+                    jQuery.extend(params, $scope.dataOptions);
+
+                    var data = {
+                        scope: angular.copy(params),
+                        entity: aplanaEntityUtils.getSelectedEntities($scope)[0],
+                        mode: 'edit'
+                    };
+                    var opts = {
+                        copy: true,
+                        windowClass: 'fl-modal-window'
+                    };
+                    return aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts)
+                };
                 //Поиск по фильтру
                 $scope.searchClick = function () {
                     fetchData();
@@ -462,6 +493,61 @@
                 $scope.$watchCollection('[dataOptions.filter.fulltext]', function () {
                     aplanaEntityUtils.saveFilter($scope);
                 });
+            }])
+        /**
+         * Контроллер формы создания/редактирования ФЛ
+         */
+        .controller('createOrEditFLCtrl', ["$scope", "$http", "$uibModalInstance", "$alertService", "$translate", 'data',
+            function ($scope, $http, $uibModalInstance, $alertService, $translate, data) {
+                initDialog();
+
+                /**
+                 * Инициализация первичных данных
+                 */
+                function initDialog() {
+                    //Получаем scope из главного окна
+                    $scope.parentScope = undefined;
+                    try {
+                        $scope.parentScope = $scope.$resolve.data.scope;
+                    } catch (ex) {
+                    }
+
+                    if (data.mode == 'create') {
+                        //Создание нового ФЛ
+                        $translate('header.ndfl.fl.create').then(function (header) {
+                            $scope.header = header;
+                        });
+                    } else {
+                        $translate('header.ndfl.fl.edit').then(function (header) {
+                            $scope.header = header;
+                        });
+                        $scope.entity = data.entity;
+                    }
+
+                    //Статические данные-заглушка
+                    $scope.dialogDataStub = {
+                        citizenshipList: [{id: 1, name: 'Россия', code: 123}, {id: 2, name: 'Сомали', code: 456}],
+                        statusList: [{id: 1, code: '1', name: 'Налогоплательщик является налоговым резидентом Российской Федерации'}, {id: 2, code: '2', name: 'Налогоплательщик не является налоговым резидентом Российской Федерации'}],
+                        documentCodeList: [{id: 1, code: '21', name: 'Паспорт гражданина Российской Федерации'}, {id: 2, code: '03', name: 'Свидетельство о рождении'}],
+                        subjectList: [{id: 1, code: '52', name: 'Нижегородская область'}, {id: 2, code: '77', name: 'Московская область'}],
+                        districtList: [{id: 1, name: 'Ардатовский район'}, {id: 2, name: 'Арзамасский район'}, {id: 3, name: 'Бронницы'}, {id: 4, name: 'Дзержинский'}],
+                        cityList: [{id: 1, name: 'Ардатов'}, {id: 2, name: 'Арзамас'}, {id: 3, name: 'Бронницы'}, {id: 4, name: 'Дзержинский'}],
+                        localityList: [{id: 1, name: 'Простоквашино'}],
+                        streetList: [{id: 1, name: 'Ленина'}, {id: 2, name: 'Пушкина'}]
+                    }
+                }
+
+                /**
+                 * Обработчики событий
+                 */
+                //Сохранение данных
+                $scope.save = function () {
+                };
+
+                //Закрытие окна
+                $scope.cancel = function () {
+                    $uibModalInstance.dismiss('Canceled');
+                }
             }])
     ;
 }());

@@ -177,12 +177,10 @@
         return {
             restrict: 'E',
             scope: {
-                label: '@',
                 required: '=',
                 model: '=',
                 minDate: '=?',
                 maxDate: '=?',
-                labelWidth: "@",
                 inputStyle: '@', // для дополнительных настроек виджета даты
                 onBlur: '&'
             },
@@ -197,10 +195,6 @@
                         maxDate: $scope.maxDate
                     }
                 };
-                // Изменение пропорций метки и поля
-                var labelWidth = $attributes.labelWidth ? parseInt($attributes.labelWidth) : 4;
-                $scope.labelGridClass = 'col-md-' + labelWidth;
-                $scope.pickerGridClass = 'col-md-' + (12 - labelWidth);
                 $scope.pickerStyle = $scope.inputStyle ? $scope.inputStyle : '';
             }
         }
