@@ -38,8 +38,6 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
     @Autowired
     private DepartmentService departmentService;
 
-    private static final Long REF_BOOK_CALENDAR_ID = 945L;
-
     public GetRefBookDataRowHandler() {
         super(GetRefBookTableDataAction.class);
     }
@@ -202,7 +200,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             }
             RefBookDataRow tableRow = new RefBookDataRow();
             tableRow.setValues(tableRowData);
-            if (!refBook.getId().equals(REF_BOOK_CALENDAR_ID)) {
+            if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
                 tableRow.setRefBookRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
             }
             rows.add(tableRow);
