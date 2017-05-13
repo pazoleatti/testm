@@ -42,8 +42,6 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
     private static final Log LOG = LogFactory.getLog(RefBookFactoryImpl.class);
 
-    private static final Long REF_BOOK_CALENDAR_ID = 945L;
-
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -120,7 +118,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
         }
         if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
             RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            if (!refBook.getId().equals(REF_BOOK_CALENDAR_ID)) {
+            if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
                 dataProvider.setWhereClause("ID <> -1");
             }
             dataProvider.setRefBook(refBook);
