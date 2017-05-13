@@ -74,8 +74,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String FORM_LINK_MSG = "Существует экземпляр %sформы%s, который содержит ссылку на запись! Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\"%s%s%s%s.";
     private static final String REF_BOOK_LINK_MSG = "Существует ссылка на запись справочника. Справочник \"%s\", запись: \"%s\"%s.";
 
-    private static final Long REF_BOOK_CALENDAR_ID = 945L;
-
 	@Autowired
     private ApplicationContext applicationContext;
 
@@ -2503,7 +2501,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT row_number_over");
-        if (!refBook.getId().equals(REF_BOOK_CALENDAR_ID)) {
+        if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
             ps.appendQuery(", ");
             ps.appendQuery("id ");
             ps.appendQuery(RefBook.RECORD_ID_ALIAS);
@@ -2803,7 +2801,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
         if (!ps.getParams().isEmpty()) {
             RowMapper<Map<String, RefBookValue>> rowMapper;
-            if (refBook.getId().equals(REF_BOOK_CALENDAR_ID)) {
+            if (refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
                 rowMapper = new RefBookCalendarValueMapper(refBook);
                 return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
             }
