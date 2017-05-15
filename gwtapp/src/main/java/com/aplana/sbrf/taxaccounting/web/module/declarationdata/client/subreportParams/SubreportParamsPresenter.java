@@ -40,6 +40,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     private DeclarationDataPresenter declarationDataPresenter;
 
     private boolean selectRecord = false;
+    private Map<String, Object> subreportParamValues;
 
     public interface MyView extends PopupView, HasUiHandlers<SubreportParamsUiHandlers> {
 		void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
@@ -92,7 +93,8 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
             action.setDeclarationDataId(declarationDataPresenter.getDeclarationId());
             action.setTaxType(declarationDataPresenter.getTaxType());
             action.setType(declarationSubreport.getAlias());
-            action.setSubreportParamValues(getView().getFieldsValues());
+            subreportParamValues = getView().getFieldsValues();
+            action.setSubreportParamValues(subreportParamValues);
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<PrepareSubreportResult>() {
                         @Override
@@ -142,10 +144,12 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
             action.setForce(false);
             action.setTaxType(declarationDataPresenter.getTaxType());
             action.setType(declarationSubreport.getAlias());
-            action.setSubreportParamValues(getView().getFieldsValues());
             action.setCreate(true);
             if (selectRecord) {
                 action.setSelectedRow(getView().getSelectedRow());
+                action.setSubreportParamValues(subreportParamValues);
+            } else {
+                action.setSubreportParamValues(getView().getFieldsValues());
             }
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<CreateReportResult>() {

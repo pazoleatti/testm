@@ -719,6 +719,10 @@ def readNdfl2ResponseContent() {
                     isEndNotCorrect = true
                 }
 
+                if (!lastEntry.isEmpty()) {
+                    notCorrectList.add(lastEntry)
+                }
+
                 // Блок "ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ" полносью прочитан
                 // Кроме блока прочитана еще последующая стрка "СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ" или какая-то другая
                 // Поэтому вызываем continue, чтобы повторно не вызвать bufferedReader.readLine()
@@ -1040,10 +1044,16 @@ def importNdflResponse() {
                         } else {
                             def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
 
-                            if (entry.valid) {
-                                ndflRef.ERRTEXT.value = "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString()
+                            String errtext;
+                            if (ndflRef.ERRTEXT.value == null || ndflRef.ERRTEXT.value.isEmpty()) {
+                                errtext = ""
                             } else {
-                                ndflRef.ERRTEXT.value = "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString()
+                                errtext = ndflRef.ERRTEXT.value + "; "
+                            }
+                            if (entry.valid) {
+                                ndflRef.ERRTEXT.value = errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString()
+                            } else {
+                                ndflRef.ERRTEXT.value = errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString()
                             }
                             ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
                         }

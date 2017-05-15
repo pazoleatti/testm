@@ -172,8 +172,8 @@ def importTF() {
     Pattern patternUuOtch = Pattern.compile(UU_PATTERN)
 
     if (UploadFileName != null
-            && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
-            && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
+        && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
+        && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
     ) {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
@@ -183,10 +183,10 @@ def importTF() {
     } else if (isNdfl2Response(UploadFileName)) {
         importNdflResponse()
     } else if (
-    patternKvOtch.matcher(UploadFileName).matches() ||
-            patternUoOtch.matcher(UploadFileName).matches() ||
-            patternIvOtch.matcher(UploadFileName).matches() ||
-            patternUuOtch.matcher(UploadFileName).matches()
+        patternKvOtch.matcher(UploadFileName).matches() ||
+        patternUoOtch.matcher(UploadFileName).matches() ||
+        patternIvOtch.matcher(UploadFileName).matches() ||
+        patternUuOtch.matcher(UploadFileName).matches()
     ) {
         importAnswer1151111()
     } else {
@@ -719,6 +719,10 @@ def readNdfl2ResponseContent() {
                     isEndNotCorrect = true
                 }
 
+                if (!lastEntry.isEmpty()) {
+                    notCorrectList.add(lastEntry)
+                }
+
                 // Блок "ДОКУМЕНТЫ С ВЫЯВЛЕННЫМИ И НЕИСПРАВЛЕННЫМИ ОШИБКАМИ" полносью прочитан
                 // Кроме блока прочитана еще последующая стрка "СВЕДЕНИЯ С ИСПРАВЛЕННЫМИ АДРЕСАМИ" или какая-то другая
                 // Поэтому вызываем continue, чтобы повторно не вызвать bufferedReader.readLine()
@@ -1040,10 +1044,16 @@ def importNdflResponse() {
                         } else {
                             def ndflRef = ndflRefProvider.getRecordData(ndflRefIds.get(0))
 
-                            if (entry.valid) {
-                                ndflRef.ERRTEXT.value = "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString()
+                            String errtext;
+                            if (ndflRef.ERRTEXT.value == null || ndflRef.ERRTEXT.value.isEmpty()) {
+                                errtext = ""
                             } else {
-                                ndflRef.ERRTEXT.value = "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString()
+                                errtext = ndflRef.ERRTEXT.value + "; "
+                            }
+                            if (entry.valid) {
+                                ndflRef.ERRTEXT.value = errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString()
+                            } else {
+                                ndflRef.ERRTEXT.value = errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString()
                             }
                             ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
                         }

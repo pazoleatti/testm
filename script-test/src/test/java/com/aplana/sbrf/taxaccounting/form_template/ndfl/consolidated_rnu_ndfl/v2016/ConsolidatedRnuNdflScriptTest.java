@@ -156,10 +156,10 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
         FormSources sources = testHelper.getSources();
         // TODO: проинициализировать для нормальной работы теста
-        Assert.assertEquals(sources.getSourceList().size(), 0);
-        //Assert.assertTrue(sources.isSourcesProcessedByScript());
+        Assert.assertEquals(sources.getSourceList().size(), 5);
+        Assert.assertTrue(sources.isSourcesProcessedByScript());
 
-        //checkLogger();
+        checkLogger();
     }
 
     @Ignore("Тест отключен на время использования временного решения")
