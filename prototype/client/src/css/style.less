@@ -153,6 +153,7 @@ body {
   text-overflow: ellipsis;
   overflow: hidden;
   padding-right: 20px;
+
 }
 
 /***************************************** Стили для модальных окон ***************************************************/
@@ -480,8 +481,107 @@ hr {
   font-weight: 600;
 }
 .form-fieldset .ui-select-toggle {
-   min-height: 30px;
- }
+  min-height: 30px;
+}
 .fl-modal-window .modal-dialog {
-   width: 765px;
+  width: 765px;
+}
+/*-------new-style----------*/
+.navbar-default{
+  background: #1a9f29;
+  .navbar-nav > li > a{
+    color: #fff;
+    &:hover{
+      background: #fff;
+    }
+  }
+}
+.logo{
+  width: 138px;
+  height: 54px;
+  margin: -21px 9px -30px 0;
+  background: #fff;
+  padding: 15px 11px;
+  border-radius: 0 0 16px 0;
+}
+.navbar-right{
+  color: #fff;
+}
+button.btn.btn-default:hover:not([disabled]){
+  border: 1px solid #1a9f29 !important;
+}
+.button_panel button.btn {
+  padding: 1px 5px;
+}
+button.btn.btn-default.ng-binding{
+  img{
+    width: 27px;
+    margin: 0 0 0 -4px;
+  }
+}
+.ui-select-bootstrap > .ui-select-match > .btn{
+  padding: 3px 5px;
+}
+.form-group{
+  .form-control{
+    padding: 1px 5px;
+    min-height: 25px;
+    &:focus{
+      border-color: #1a9f29;
+    }
+  }
+}
+.btn-toolbar {
+  margin-left: 0;
+}
+.btn{
+  padding: 3px 5px;
+}
+.btn-danger {
+  color: #ffffff;
+  background-color: #1a9f29;
+  border-color: #1a9f29;
+  &:focus,&.focus{
+    background: #59bf57;
+    color: hsla(0,0%,100%,.85);
+    border-color: #1a9f29;
+  }
+  &:hover{
+    background: #59bf57;
+    color: hsla(0,0%,100%,.85);
+    border-color: #1a9f29;
+  }
+  &:active, &.active {
+    background: #59bf57;
+    color: hsla(0,0%,100%,.85);
+    border-color: #1a9f29;
+  }
+}
+.btn-danger:active:hover,
+.btn-danger.active:hover,
+.open > .dropdown-toggle.btn-danger:hover,
+.btn-danger:active:focus,
+.btn-danger.active:focus,
+.open > .dropdown-toggle.btn-danger:focus,
+.btn-danger:active.focus,
+.btn-danger.active.focus,
+.open > .dropdown-toggle.btn-danger.focus {
+  background: #59bf57;
+  color: hsla(0,0%,100%,.85);
+  border-color: #1a9f29;
+}
+.logout_link:hover{
+  border: 1px solid #fff;
+}
+.ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell, .ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell{
+  background-color: rgba(26, 159, 41, 0.11);
+}
+#overlay-parent > div{
+  border-top: 6px solid #1a9f29;
+}
+.btn-sm{
+  line-height: 1.45;
+}
+.button_panel {
+  margin-bottom: 8px;
 }
