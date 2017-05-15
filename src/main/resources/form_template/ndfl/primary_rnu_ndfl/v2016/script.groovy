@@ -1825,9 +1825,13 @@
         }
     }
 
-    BigDecimal toBigDecimal(xmlNode) {
+    BigDecimal toBigDecimal(xmlNode) throws NumberFormatException {
         if (xmlNode != null && !xmlNode.isEmpty()) {
-            return xmlNode.text() != null && !xmlNode.text().isEmpty() ? new BigDecimal(xmlNode.text()) : null;
+            try {
+                return xmlNode.text() != null && !xmlNode.text().isEmpty() ? new BigDecimal(xmlNode.text()) : null;
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException("Значение атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не является числом. Проверьте отсутствие пробелов, переводов строки, печатных символов в значении атрибута.")
+            }
         } else {
             return null;
         }
