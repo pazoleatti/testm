@@ -2,6 +2,7 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
+import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -749,15 +750,22 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     List personDocumentList = naturalPerson.getPersonDocumentList();
 
-    if (!personDocumentList && !personDocumentList.isEmpty()) {
+    if (personDocumentList != null && !personDocumentList.isEmpty()) {
+
+        logger.info("naturalPerson: "+naturalPerson)
+        logger.info("updateDocumentList: "+updateDocumentList)
 
         //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
         int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
 
+        logger.info("incRepIndex: "+incRepIndex)
+
         for (int i = 0; i < personDocumentList.size(); i++) {
 
             PersonDocument personDocument = personDocumentList.get(i);
+            logger.info("personDocument: "+personDocument)
             String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
+            logger.info("docInf: "+docInf)
 
             if (i == incRepIndex) {
                 if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
