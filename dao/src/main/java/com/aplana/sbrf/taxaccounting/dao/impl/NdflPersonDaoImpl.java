@@ -342,7 +342,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
 
             if (contains(parameters, "middleName")) {
-                sb.append("AND lower(np.middle_name) like lower(:middleName)) \n");
+                sb.append("AND lower(np.middle_name) like lower(:middleName) \n");
             }
 
             if (contains(parameters, "snils")) {

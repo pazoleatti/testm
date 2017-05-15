@@ -311,7 +311,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             disableButtons();
             return;
         }
-        getView().setCanChangeDeadline(canEditDeadLine(selectedRow));
+        getView().setCanChangeDeadline(canEditDeadLine(selectedRow) && canEdit);
         getView().setCanEditPeriod(!selectedRow.isSubHeader() && selectedRow.isOpen() && canEdit);
         getView().setCanClosePeriod(!selectedRow.isSubHeader() && canEdit);
         getView().setCanDeletePeriod(!selectedRow.isSubHeader() && canEdit);

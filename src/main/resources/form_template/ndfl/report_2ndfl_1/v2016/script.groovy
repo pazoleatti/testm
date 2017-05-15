@@ -264,8 +264,8 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
     def currentPageNumber = xmlPartNumber ?: partNumber
 
     // инициализация данных о подразделении
-    departmentParam = getDepartmentParam(declarationData.departmentId, declarationData.reportPeriodId)
-    departmentParamRow = getDepartmentParamDetails(departmentParam?.id, declarationData.departmentId, declarationData.reportPeriodId)
+    departmentParam = getDepartmentParam(declarationData.departmentId, declarationData.reportPeriodId, true)
+    departmentParamRow = getDepartmentParamDetails(declarationData.kpp, declarationData.oktmo)
     String depName = departmentService.get(departmentParam.DEPARTMENT_ID.value.toInteger()).name
     // Имя файла
     def fileName = generateXmlFileId(sberbankInnParam, kodNoProm)
@@ -758,7 +758,7 @@ def createRefBookAttributesForNdflReference(
  * @return
  */
 def generateXmlFileId(inn, kodNoProm) {
-    def departmentParamRow = departmentParam ? getDepartmentParamDetails(departmentParam?.record_id?.value, declarationData.departmentId ,declarationData.reportPeriodId) : null
+    def departmentParamRow = departmentParam ? getDepartmentParamDetails(declarationData.kpp, declarationData.oktmo) : null
     def r_t = "NO_NDFL2"
     def a = kodNoProm
     def k = departmentParamRow?.TAX_ORGAN_CODE?.value
@@ -1199,13 +1199,17 @@ def getOktmoByCode(code) {
 }
 
 // Получить параметры подразделения (из справочника 950)
-def getDepartmentParam(def departmentId, def reportPeriodId) {
+def getDepartmentParam(def departmentId, def reportPeriodId, boolean throwIfEmpty) {
     if (!departmentCache.containsKey(departmentId)) {
         def rpe = getReportPeriodEndDate(reportPeriodId)
         def provider = getProvider(REF_BOOK_NDFL_ID)
         def departmentParamList = provider.getRecords(rpe, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            departmentParamException(departmentId, reportPeriodId)
+            if (throwIfEmpty) {
+                departmentParamException(departmentId, reportPeriodId)
+            } else {
+                return null
+            }
         }
         departmentCache.put(departmentId, departmentParamList?.get(0))
     }
@@ -1240,6 +1244,22 @@ def getDepartmentParamDetails(def departmentParamId, def departmentId, def repor
     return departmentParamRow
 }
 
+/**
+ * Получить детали подразделения из справочника по кпп и октмо формы
+ * @param departmentParamId
+ * @param reportPeriodId
+ * @return
+ */
+def getDepartmentParamDetails(String kpp, String oktmo) {
+    if (departmentParamRow == null) {
+        def oktmoReference = getProvider(REF_BOOK_OKTMO_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "CODE = '$oktmo'", null).get(0).id.value
+        departmentParamRow = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "OKTMO = $oktmoReference AND KPP = '$kpp'", null).get(0)
+        if (departmentParamRow == null) {
+            departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
+        }
+    }
+    return departmentParamRow
+}
 /**
  * Получение провайдера с использованием кеширования
  * @param providerId
@@ -1417,12 +1437,20 @@ def createForm() {
         }
         // Поиск КПП и ОКТМО для некорр периода
     } else {
-        departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
-        def departmentParamTableList = getDepartmentParamDetailsList(departmentParam?.id, departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
-        def referencesOktmoList = departmentParamTableList.OKTMO?.value
+        // Поиск дочерних подразделений. Поскольку могут существовать пары КПП+ОКТМО в ref_book_ndfl_detail ссылающиеся
+        // только на обособленные подразделения тербанка
+        List<Department> childrenDepartments = departmentService.getAllChildren(departmentReportPeriod.departmentId)
+        def referencesOktmoList = []
+        def departmentParamTableList = []
+        for (Department childrenDepartment in childrenDepartments) {
+            departmentParam = getDepartmentParam(childrenDepartment.id, departmentReportPeriod.reportPeriod.id, false)
+            if (departmentParam != null) {
+                departmentParamTableList.addAll(getDepartmentParamDetailsList(departmentParam?.id, departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id, false))
+                referencesOktmoList.addAll(departmentParamTableList.OKTMO?.value)
+            }
+        }
         referencesOktmoList.removeAll([null])
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
-
         departmentParamTableList.each { dep ->
             ScriptUtils.checkInterrupted();
             if (dep.OKTMO?.value != null) {
@@ -1773,13 +1801,13 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
  * @param reportPeriodId
  * @return
  */
-def getDepartmentParamDetailsList(def departmentParamId, def departmentId, def reportPeriodId) {
+def getDepartmentParamDetailsList(def departmentParamId, def departmentId, def reportPeriodId, boolean throwIfEmpty) {
     if (!departmentParamTableListCache.containsKey(departmentParamId)) {
         def filter = "REF_BOOK_NDFL_ID = $departmentParamId"
         def rpe = getReportPeriodEndDate(reportPeriodId)
         def provider = getProvider(REF_BOOK_NDFL_DETAIL_ID)
         def departmentParamTableList = provider.getRecords(rpe, null, filter, null)
-        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+        if ((departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) && throwIfEmpty) {
             departmentParamException(departmentId, reportPeriodId)
         }
         departmentParamTableListCache.put(departmentParamId, departmentParamTableList)
@@ -1840,12 +1868,6 @@ class PairKppOktmo {
     }
 }
 
-/**
- * Разыменование записи справочника
- */
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
 /************************************* СПЕЦОТЧЕТ **********************************************************************/
 
 
@@ -2007,7 +2029,8 @@ def searchData(def params) {
                 (params['firstName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName']) : true) &&
                 (params['middleName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName']) : true) &&
                 (params['birthDay'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.@ДатаРожд.text(), params['birthDay']) : true) &&
-                (params['idDocNumber'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) : true)
+                (params['idDocNumber'] ? (StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) ||
+                        StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s,.-]", ""), params['idDocNumber'])) : true)
     }
     // ограничиваем размер выборки
     def result = []

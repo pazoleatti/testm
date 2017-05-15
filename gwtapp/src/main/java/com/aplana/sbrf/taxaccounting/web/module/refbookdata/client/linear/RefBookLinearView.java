@@ -269,7 +269,7 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
                 }
             }
             //Если не было среди записей необходимой, то выставляем на первую
-            if (selectionModel.getSelectedObject()==null&&!dataRows.isEmpty()){
+            if (selectionModel.getSelectedObject()==null&&!dataRows.isEmpty() && /*это условие добавлено для того, чтобы содержимое справочника без поля id отображалось при пустой строке поиска*/dataRows.get(0).getRefBookRowId() != null){
                 selectionModel.setSelected(dataRows.get(0), true);
             }
         }
