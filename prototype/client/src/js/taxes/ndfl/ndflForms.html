@@ -1,0 +1,202 @@
+<div id="production-planning">
+    <h1>{{'header.ndfl.forms' | translate}}</h1>
+    <!-- Панель фильтрации -->
+    <div class="grid-filter" style="min-width: 1250px;">
+        <div data-aplana-collapse data-is-collapsed="false" data-label="'filterPanelLabel' | translate">
+            <form class="form-horizontal" role="form" novalidate>
+                <div class="row">
+                    <div class="filter-col w400">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'title.period' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <ui-select ng-model="dataOptions.filter.period">
+                                    <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="item in dataOptions.filterList.periodList track by $index">
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'title.department' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <ui-select ng-model="dataOptions.filter.department">
+                                    <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="item in dataOptions.filterList.departmentList track by $index">
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'title.formNumber' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input data-ng-model="dataOptions.filter.formNumber"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"
+                                       title="{{dataOptions.filter.formNumber}}"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-col w500">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'title.formType' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <ui-select ng-model="dataOptions.filter.formType">
+                                    <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="item in dataOptions.filterList.formTypeList track by $index">
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'title.formKind' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <ui-select ng-model="dataOptions.filter.formKind">
+                                    <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="item in dataOptions.filterList.formKindList track by $index">
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'title.asnu' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <ui-select ng-model="dataOptions.filter.asnu">
+                                    <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="item in dataOptions.filterList.asnuList track by $index">
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-col w300">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'title.state' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <ui-select ng-model="dataOptions.filter.state">
+                                    <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
+                                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="item in dataOptions.filterList.stateList track by $index">
+                                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{'title.file' | translate}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input data-ng-model="dataOptions.filter.file"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"
+                                       title="{{dataOptions.filter.file}}"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-col">
+                        <data-search-clear-buttons
+                                on-search="searchClick()"
+                                on-clear="clearFilterClick()"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Панель кнопок над таблицей -->
+    <div class="button_panel">
+        <div class="btn-toolbar" role="toolbar">
+            <!-- Создать -->
+            <span data-ng-check-operation="['PRODUCTION_PLAN_CREATE']">
+                <button type="button" class="btn btn-default" data-ng-disabled="!createButtonEnabled"
+                        data-ng-click="createButtonClick()">
+                    <img src="img/button/{{createButtonEnabled ? 'enable' : 'disable'}}/new_add.png" width="32px" height="22px"
+                         alt="{{'button.create' | translate}}"/>
+                    {{'button.create' | translate}}
+                </button>
+            </span>
+            <!-- Проверить -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
+                        data-ng-click="checkButtonClick()">
+                    <img src="img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/confirmation.png" width="32px" height="22px"
+                         alt="{{'button.check' | translate}}"/>
+                    {{'button.check' | translate}}
+                </button>
+            </span>
+            <!-- Рассчитать -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
+                        data-ng-click="calculateButtonClick()">
+                    <img src="img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/shape.png" width="32px" height="22px"
+                         alt="{{'button.calculate' | translate}}"/>
+                    {{'button.calculate' | translate}}
+                </button>
+            </span>
+            <!-- Удалить -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!deleteButtonEnabled"
+                        data-ng-click="deleteButtonClick()">
+                    <img src="img/button/{{deleteButtonEnabled ? 'enable' : 'disable'}}/delete.png" width="32px" height="22px"
+                         alt="{{'button.delete' | translate}}"/>
+                    {{'button.delete' | translate}}
+                </button>
+            </span>
+            <!-- Принять -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
+                        data-ng-click="acceptButtonClick()">
+                    <img src="img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/reconcile.png" width="32px" height="22px"
+                         alt="{{'button.accept' | translate}}"/>
+                    {{'button.accept' | translate}}
+                </button>
+            </span>
+            <!-- Вернуть в Создана -->
+            <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
+                        data-ng-click="returnButtonClick()">
+                    <img src="img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/query_correction.png" width="32px" height="22px"
+                         alt="{{'button.return' | translate}}"/>
+                    {{'button.return' | translate}}
+                </button>
+            </span>
+        </div>
+    </div>
+    <!-- Таблица -->
+    <div id="production-planning-content" class="content-with-table">
+        <div id="production-planning-grid" class="usim-grid" data-ui-grid="gridOptions" ui-grid-resize-columns
+             ui-grid-selection ui-grid-pagination ui-grid-autoResize></div>
+    </div>
+    <div class="numberItems">
+        <p>{{'theNumberOfSelectedItems' | translate}}<label style="margin-left: 3px;">{{numberOfSelectedItems}}</label></p>
+    </div>
+</div>

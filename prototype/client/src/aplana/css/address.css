@@ -1,0 +1,24 @@
+.address-container input {
+    width: 100%;
+    background-color: #ffffff !important;
+}
+
+.address-container.required input {
+    background-color: #fdfdeb !important;
+}
+
+.address-container.empty input {
+    color: gray !important;
+    font-style: italic;
+}
+
+.address-container .controls {
+    padding-top: 4px;
+    float: right;
+    width: 46px;
+}
+
+.address-container .text {
+    padding-right: 6px;
+    margin-right: 70px;
+}

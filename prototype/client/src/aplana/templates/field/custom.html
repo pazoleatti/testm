@@ -1,0 +1,18 @@
+<div class="control-group"
+     data-ng-class="{'error' : getFieldByModelId($modelId).$invalid && ( getFieldByModelId($modelId).$dirty || $form.attempt )}">
+    <label class="control-label"></label>
+
+    <div class="controls">
+        <div data-aplana-transclude></div>
+        <div class="help-bottom-popup"
+             data-ng-style="{'display' : !getFieldByModelId($modelId).isHintHidden && getFieldByModelId($modelId).$invalid && ( getFieldByModelId($modelId).$dirty || $form.attempt ) ? 'block' : ''}"
+             data-ng-click="hideHint($modelId)">
+            <div class="help-container">
+                <div class="help-top-arrow"></div>
+                <div data-ng-repeat="(key, error) in getFieldByModelId($modelId).$error"
+                     ng-show="error && ( getFieldByModelId($modelId).$dirty || $form.attempt )"
+                     class="help-text {{$validationMessages[key].className}}">{{::$validationMessages[key].message}}</div>
+            </div>
+        </div>
+    </div>
+</div>
