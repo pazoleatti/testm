@@ -6,7 +6,6 @@
     angular
         .module('sbrfNdfl', [
             'app.header',
-            'sbrfNdfl.refBook',
             'sbrfNdfl.ndflForms',
             'sbrfNdfl.ndflDetailsForms',
             'sbrfNdfl.filterDirectives',
