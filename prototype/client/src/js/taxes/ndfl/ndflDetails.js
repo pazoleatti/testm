@@ -30,7 +30,7 @@
                         gridOptions.columnDefs.push(columnDef);
                     }
 
-                    //aplanaEntityUtils.fitColumnsWidth(gridOptions, $scope.gridApi.grid.gridWidth);
+                    aplanaEntityUtils.fitColumnsWidth(gridOptions, $scope.gridApi.grid.gridWidth);
                 };
 
 
@@ -114,15 +114,15 @@
                             codeDul: {id: 5, code: "01", number: "123456"},
                             numberDul: {id: 5, code: "01", number: "123456"},
                             status: {id: 2, name: "Новый"},
-                            codeSub: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"},
-                            index: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"},
-                            area: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"},
-                            city: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"},
-                            locality: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"},
-                            street: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"},
-                            building: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"},
-                            housing: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"},
-                            apartment: {id: 7, codeSub:"001", index: "079685", area: "Тюменский", city: "Октябрьский", locality: "Октябрьский", street: "Ленина", building: "99", housing: "1", apartment: "102"}
+                            codeSub: "001",
+                            index: "079685",
+                            area: "Тюменский",
+                            city: "Октябрьский",
+                            locality: "Октябрьский",
+                            street: "Ленина",
+                            building: 99,
+                            housing: 1,
+                            apartment: 102
                         },
                         {
                             id: 2,
@@ -138,15 +138,15 @@
                             codeDul: {id: 2, code: "23", number: "0987"},
                             numberDul: {id: 2, code: "23", number: "0987"},
                             status: {id: 2, name: "Новый"},
-                            codeSub: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"},
-                            index: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"},
-                            area: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"},
-                            city: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"},
-                            locality: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"},
-                            street: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"},
-                            building: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"},
-                            housing: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"},
-                            apartment: {id: 1, codeSub:"023", index: "17753", area: "Львовская", city: "Львов", locality: "Львов", street: "Красная", building: "1", housing: "4", apartment: "54"}
+                            codeSub: "023",
+                            index: "17753",
+                            area: "Львовская",
+                            city: "Львов",
+                            locality: "Львов",
+                            street: "Красная",
+                            building: 1,
+                            housing: 4,
+                            apartment: 54
                         }],
                     "metaData": [
                         {
@@ -262,8 +262,7 @@
                         },
                         {
                             "name": "codeSub",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "codeSub",
+                            "type": "java.lang.String",
                             "title": "Адрес рег. в РФ. Код субъекта",
                             "width": 205,
                             "order": 14,
@@ -271,8 +270,7 @@
                         },
                         {
                             "name": "index",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "index",
+                            "type": "java.lang.String",
                             "title": "Адрес рег. в РФ. Индекс",
                             "width": 170,
                             "order": 15,
@@ -280,8 +278,7 @@
                         },
                         {
                             "name": "area",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "area",
+                            "type": "java.lang.String",
                             "title": "Адрес рег. в РФ. Район",
                             "width": 155,
                             "order": 16,
@@ -289,8 +286,7 @@
                         },
                         {
                             "name": "city",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "city",
+                            "type": "java.lang.String",
                             "title": "Адрес рег. в РФ. Город",
                             "width": 165,
                             "order": 17,
@@ -298,8 +294,7 @@
                         },
                         {
                             "name": "locality",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "locality",
+                            "type": "java.lang.String",
                             "title": "Адрес рег. в РФ. Населенный пункт",
                             "width": 240,
                             "order": 18,
@@ -307,8 +302,7 @@
                         },
                         {
                             "name": "street",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "street",
+                            "type": "java.lang.String",
                             "title": "Адрес рег. в РФ. Улица",
                             "width": 160,
                             "order": 19,
@@ -316,8 +310,7 @@
                         },
                         {
                             "name": "building",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "building",
+                            "type": "number",
                             "title": "Адрес рег. в РФ. Дом",
                             "width": 145,
                             "order": 20,
@@ -325,8 +318,7 @@
                         },
                         {
                             "name": "housing",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "housing",
+                            "type": "number",
                             "title": "Адрес рег. в РФ. Корпус",
                             "width": 170,
                             "order": 21,
@@ -334,8 +326,7 @@
                         },
                         {
                             "name": "apartment",
-                            "type": "com.ndlf.model.Address",
-                            "displayField": "apartment",
+                            "type": "number",
                             "title": "Адрес рег. в РФ. Квартира",
                             "width": 205,
                             "order": 22,
