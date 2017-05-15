@@ -1,0 +1,9 @@
+<div class="form-group {{required ? 'required' : ''}}">
+    <div class="{{labelGridClass}}">
+        <label class="control-label">{{label.indexOf(":") > 0 ? label : label + ":"}}</label>
+    </div>
+    <div class="{{pickerGridClass}}">
+        <input data-ng-model="model" data-ng-disabled="disabled" placeholder="{{placeholder}}" type="{{type}}"
+               class="form-control" data-ng-blur="onBlur()" data-ng-pattern="pattern" title="{{model}}"/>
+    </div>
+</div>
