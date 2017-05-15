@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.refbook.*
+import groovy.transform.CompileStatic
 import groovy.transform.Field
 import groovy.transform.Memoized
 import groovy.transform.TypeChecked
@@ -1240,7 +1241,7 @@ def checkDataConsolidated() {
 // Мапа <ID_Данные о физическом лице - получателе дохода, Физическое лицо: <ФИО> ИНП:<ИНП>>
 @Field def ndflPersonFLMap = [:]
 @Field final TEMPLATE_PERSON_FL = "ФИО: '%s', ИНП: '%s'"
-
+@CompileStatic
 class NdflPersonFL {
     String fio
     String inp
@@ -2378,12 +2379,17 @@ def checkDataReference(
  * Общие проверки
  */
 def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, Map<String, RefBookValue>> personMap) {
-
+    long time = System.currentTimeMillis();
+    long timeTotal = time
     // Параметры подразделения
     def mapRefBookNdfl = getRefBookNdfl()
     def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
 
-    long time = System.currentTimeMillis();
+    println "Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+
     for (NdflPerson ndflPerson : ndflPersonList) {
 
         ScriptUtils.checkInterrupted();
@@ -2606,6 +2612,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
     println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
     logger.info("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
+    println "Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)";
+    logger.info("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
 }
 
 // Кэш для справочников
@@ -2628,6 +2636,8 @@ Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
  */
 def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
                     List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
+
+    long time = System.currentTimeMillis()
 
     def personsCache = [:]
     ndflPersonList.each { ndflPerson ->
@@ -3219,11 +3229,14 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
         }
     }
+    println "Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
  * Класс для проверки заполненности полей
  */
+@CompileStatic
 class ColumnFillConditionData {
     ColumnFillConditionChecker columnConditionCheckerAsIs
     ColumnFillConditionChecker columnConditionCheckerToBe
@@ -3763,6 +3776,7 @@ class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
  */
 def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList,
                        List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, Map<String, RefBookValue>> personMap) {
+    long time = System.currentTimeMillis()
 
     for (NdflPerson ndflPerson : ndflPersonList) {
         NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
@@ -3852,6 +3866,8 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
                     "Значение не соответствует правилу: «Графа 16 Раздел 3» <= «Графа 8 Раздел 3»")
         }
     }
+    println "Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
