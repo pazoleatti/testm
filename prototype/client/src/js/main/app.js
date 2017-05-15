@@ -456,12 +456,12 @@
         "title.innRF": "ИНН в РФ",
         "title.innINO": "ИНН в ИНО",
         "title.subject": "Субьект",
-        "title.district": "Район",
+        "title.area": "Район",
         "title.city": "Город",
         "title.locality": "Населенный пункт",
         "title.street": "Улица",
         "title.index": "Индекс",
-        "title.house": "Дом",
+        "title.building": "Дом",
         "title.housing": "Корпус",
         "title.apartment": "Квартира",
 
@@ -472,6 +472,7 @@
         "button.accept": "Принять",
         "button.return": "Вернуть в создана",
         "button.add": "Добавить",
+        "button.save": "Сохранить",
         "button.edit": "Редактировать"
     };
     angular.module('userData', []).constant('USER_DATA', userDataStub);
