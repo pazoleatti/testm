@@ -88,7 +88,10 @@
                             id: 5,
                             formType: {id: 1, name: "Первичная"},
                             formKind: {id: 1, name: "РНУ НДФЛ (первичная)"},
-                            department: {id: 4, name: "ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара)"},
+                            department: {
+                                id: 4,
+                                name: "ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара)"
+                            },
                             asnu: {id: 2, name: 'АС \"Депозитарий\"'},
                             period: {id: 3, name: "2017; 3 квартал"},
                             state: {id: 1, name: "Создана"},
@@ -108,18 +111,25 @@
                             patronymic: "Иванович",
                             dateOfBirth: new Date(),
                             snils: "123-345-567-89",
+                            statusCode: {
+                                id: 1,
+                                code: '1',
+                                name: 'Налогоплательщик является налоговым резидентом Российской Федерации'
+                            },
+                            documentCode: {id: 1, code: '21', name: 'Паспорт гражданина Российской Федерации'},
+                            documentNumber: "1234 545435",
                             citizenship: {id: 1, name: "Россия", code: "143"},
-                            innRf: {id: 3, innRf: "1274146979", innSitizenship: "1274146979"},
-                            innSitizenship: {id: 3, innRf: "1274146979", innSitizenship: "1274146979"},
+                            innRF: "765756",
+                            innINO: "456466",
                             codeDul: {id: 5, code: "01", number: "123456"},
                             numberDul: {id: 5, code: "01", number: "123456"},
                             status: {id: 2, name: "Новый"},
                             codeSub: "001",
                             index: "079685",
-                            area: "Тюменский",
-                            city: "Октябрьский",
-                            locality: "Октябрьский",
-                            street: "Ленина",
+                            subject: {id: 1, code: '52', name: 'Нижегородская область'},
+                            area: {id: 1, name: "Ардатовский район"},
+                            locality: {id: 1, name: "Ардатов"},
+                            street: {id: 1, name: "Ленина"},
                             building: 99,
                             housing: 1,
                             apartment: 102
@@ -132,18 +142,25 @@
                             patronymic: "Гаврилович",
                             dateOfBirth: new Date(),
                             snils: "098-345-567-89",
+                            statusCode: {
+                                id: 1,
+                                code: '1',
+                                name: 'Налогоплательщик является налоговым резидентом Российской Федерации'
+                            },
+                            documentCode: {id: 1, code: '21', name: 'Паспорт гражданина Российской Федерации'},
+                            documentNumber: "1234 455464",
                             citizenship: {id: 2, name: "Украина", code: "167"},
-                            innRf: {id: 87, innRf: "976543", innSitizenship: "123423"},
-                            innSitizenship: {id: 87, innRf: "976543", innSitizenship: "123423"},
+                            innRF: "976543",
+                            innINO: "123423",
                             codeDul: {id: 2, code: "23", number: "0987"},
                             numberDul: {id: 2, code: "23", number: "0987"},
                             status: {id: 2, name: "Новый"},
                             codeSub: "023",
                             index: "17753",
-                            area: "Львовская",
-                            city: "Львов",
-                            locality: "Львов",
-                            street: "Красная",
+                            subject: {id: 1, code: '52', name: 'Нижегородская область'},
+                            area: {id: 2, name: "Арзамасский район"},
+                            city: {id: 2, name: "Арзамас"},
+                            street: {id: 2, name: "Красная"},
                             building: 1,
                             housing: 4,
                             apartment: 54
@@ -216,18 +233,16 @@
                             "visible": true
                         },
                         {
-                            "name": "innRf",
-                            "type": "com.ndlf.model.Inn",
-                            "displayField": "innRf",
+                            "name": "innRF",
+                            "type": "java.lang.String",
                             "title": "ИНН. В РФ",
                             "width": 95,
                             "order": 9,
                             "visible": true
                         },
                         {
-                            "name": "innSitizenship",
-                            "type": "com.ndlf.model.Inn",
-                            "displayField": "innSitizenship",
+                            "name": "innINO",
+                            "type": "java.lang.String",
                             "title": "ИНН. В стране гражданства",
                             "width": 195,
                             "order": 10,
@@ -278,7 +293,8 @@
                         },
                         {
                             "name": "area",
-                            "type": "java.lang.String",
+                            "type": "com.ndlf.model.Area",
+                            "displayField": "name",
                             "title": "Адрес рег. в РФ. Район",
                             "width": 155,
                             "order": 16,
@@ -286,7 +302,8 @@
                         },
                         {
                             "name": "city",
-                            "type": "java.lang.String",
+                            "type": "com.ndlf.model.City",
+                            "displayField": "name",
                             "title": "Адрес рег. в РФ. Город",
                             "width": 165,
                             "order": 17,
@@ -294,7 +311,8 @@
                         },
                         {
                             "name": "locality",
-                            "type": "java.lang.String",
+                            "type": "com.ndlf.model.Locality",
+                            "displayField": "name",
                             "title": "Адрес рег. в РФ. Населенный пункт",
                             "width": 240,
                             "order": 18,
@@ -302,7 +320,8 @@
                         },
                         {
                             "name": "street",
-                            "type": "java.lang.String",
+                            "type": "com.ndlf.model.Street",
+                            "displayField": "name",
                             "title": "Адрес рег. в РФ. Улица",
                             "width": 160,
                             "order": 19,
@@ -310,7 +329,8 @@
                         },
                         {
                             "name": "building",
-                            "type": "number",
+                            "type": "com.ndlf.model.Address",
+                            "displayField": "building",
                             "title": "Адрес рег. в РФ. Дом",
                             "width": 145,
                             "order": 20,
@@ -348,16 +368,16 @@
                     for (var i = 0; i < data.list.length; i++) {
                         var entity = data.list[i];
                         if ($scope.dataOptions.filter) {
-                            if (($scope.dataOptions.filter.inp && entity.inp != $scope.dataOptions.filter.inp)
-                                || ($scope.dataOptions.filter.snils && entity.snils != $scope.dataOptions.filter.snils)
-                                || ($scope.dataOptions.filter.inn && entity.innRf.innRf != $scope.dataOptions.filter.inn && entity.innSitizenship.innSitizenship != $scope.dataOptions.filter.inn)
-                                || ($scope.dataOptions.filter.numberDul && entity.numberDul.number != $scope.dataOptions.filter.numberDul)
-                                || ($scope.dataOptions.filter.surname && entity.surname != $scope.dataOptions.filter.surname)
-                                || ($scope.dataOptions.filter.name && entity.name != $scope.dataOptions.filter.name)
-                                || ($scope.dataOptions.filter.patronymic && entity.patronymic != $scope.dataOptions.filter.patronymic)
+                            if (($scope.dataOptions.filter.inp && entity.inp.indexOf($scope.dataOptions.filter.inp) == -1)
+                                || ($scope.dataOptions.filter.snils && entity.snils.indexOf($scope.dataOptions.filter.snils) == -1)
+                                || ($scope.dataOptions.filter.inn && entity.innRf.innRf.indexOf($scope.dataOptions.filter.inn) == -1 && entity.innCitizenship.innCitizenship.indexOf($scope.dataOptions.filter.inn) == -1)
+                                || ($scope.dataOptions.filter.numberDul && entity.numberDul.number.indexOf($scope.dataOptions.filter.numberDul) == -1)
+                                || ($scope.dataOptions.filter.surname && entity.surname.toLowerCase().indexOf($scope.dataOptions.filter.surname.toLowerCase()) == -1)
+                                || ($scope.dataOptions.filter.name && entity.name.toLowerCase().indexOf($scope.dataOptions.filter.name.toLowerCase()) == -1)
+                                || ($scope.dataOptions.filter.patronymic && entity.patronymic.toLowerCase().indexOf($scope.dataOptions.filter.patronymic.toLowerCase()) == -1)
                                 || ($scope.dataOptions.filter.dateFrom ? ($scope.dataOptions.filter.dateTo ? ($scope.dataOptions.filter.dateFrom > entity.dateOfBirth || $scope.dataOptions.filter.dateTo < entity.dateOfBirth) : $scope.dataOptions.filter.dateFrom > entity.dateOfBirth) : ($scope.dataOptions.filter.dateTo ? $scope.dataOptions.filter.dateTo < entity.dateOfBirth : false))) {
-                                    data.list.splice(i, 1);
-                                    i--;
+                                data.list.splice(i, 1);
+                                i--;
                             }
                         }
                     }
@@ -391,7 +411,7 @@
                 /**
                  * Обработчики нажатий на кнопки
                  */
-                //Проверить
+                    //Проверить
                 $scope.checkButtonClick = function () {
                     //Do check
                 };
@@ -427,7 +447,14 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    return aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts)
+                    var dlg = aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
+                    return dlg.result.then(function (entity) {
+                        //Заглушка создания новой записи
+                        entity.id = $scope.dataOptions.data[$scope.dataOptions.data.length - 1].id + 1;
+                        $scope.dataOptions.data.push(entity);
+                        aplanaEntityUtils.updateViewData($scope);
+                        tableData = $scope.dataOptions.data;
+                    })
                 };
                 //Редактировать ФЛ
                 $scope.editFLClick = function () {
@@ -443,7 +470,17 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    return aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts)
+                    var dlg = aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
+                    return dlg.result.then(function (entity) {
+                        //Заглушка редактирования записи
+                        for (var i = 0; i < $scope.dataOptions.data.length; i++) {
+                            if ($scope.dataOptions.data[i].id == entity.id) {
+                                $scope.dataOptions.data[i] = entity
+                            }
+                        }
+                        aplanaEntityUtils.updateViewData($scope);
+                        tableData = $scope.dataOptions.data;
+                    })
                 };
                 //Поиск по фильтру
                 $scope.searchClick = function () {
@@ -462,8 +499,8 @@
                  * Инициализация первичных данных на странице
                  */
                 function initPage() {
-                    for (var i = 0; i < dataStub.list.length; i ++){
-                        if (parseInt($stateParams.formId) === dataStub.list[i].id){
+                    for (var i = 0; i < dataStub.list.length; i++) {
+                        if (parseInt($stateParams.formId) === dataStub.list[i].id) {
                             $scope.department = dataStub.list[i].department.name;
                             $scope.formNumber = $stateParams.formId;
                             $scope.creator = dataStub.list[i].creator;
@@ -508,9 +545,15 @@
                         $translate('header.ndfl.fl.create').then(function (header) {
                             $scope.header = header;
                         });
+                        $translate('button.add').then(function (title) {
+                            $scope.buttonTitle = title;
+                        });
                     } else {
                         $translate('header.ndfl.fl.edit').then(function (header) {
                             $scope.header = header;
+                        });
+                        $translate('button.save').then(function (title) {
+                            $scope.buttonTitle = title;
                         });
                         $scope.entity = data.entity;
                     }
@@ -518,21 +561,45 @@
                     //Статические данные-заглушка
                     $scope.dialogDataStub = {
                         citizenshipList: [{id: 1, name: 'Россия', code: 123}, {id: 2, name: 'Сомали', code: 456}],
-                        statusList: [{id: 1, code: '1', name: 'Налогоплательщик является налоговым резидентом Российской Федерации'}, {id: 2, code: '2', name: 'Налогоплательщик не является налоговым резидентом Российской Федерации'}],
-                        documentCodeList: [{id: 1, code: '21', name: 'Паспорт гражданина Российской Федерации'}, {id: 2, code: '03', name: 'Свидетельство о рождении'}],
-                        subjectList: [{id: 1, code: '52', name: 'Нижегородская область'}, {id: 2, code: '77', name: 'Московская область'}],
-                        districtList: [{id: 1, name: 'Ардатовский район'}, {id: 2, name: 'Арзамасский район'}, {id: 3, name: 'Бронницы'}, {id: 4, name: 'Дзержинский'}],
-                        cityList: [{id: 1, name: 'Ардатов'}, {id: 2, name: 'Арзамас'}, {id: 3, name: 'Бронницы'}, {id: 4, name: 'Дзержинский'}],
+                        statusList: [{
+                            id: 1,
+                            code: '1',
+                            name: 'Налогоплательщик является налоговым резидентом Российской Федерации'
+                        }, {
+                            id: 2,
+                            code: '2',
+                            name: 'Налогоплательщик не является налоговым резидентом Российской Федерации'
+                        }],
+                        documentCodeList: [{id: 1, code: '21', name: 'Паспорт гражданина Российской Федерации'}, {
+                            id: 2,
+                            code: '03',
+                            name: 'Свидетельство о рождении'
+                        }],
+                        subjectCodeList: [{id: 1, code: '52', name: 'Нижегородская область'}, {
+                            id: 2,
+                            code: '77',
+                            name: 'Московская область'
+                        }],
+                        areaList: [{id: 1, name: 'Ардатовский район'}, {id: 2, name: 'Арзамасский район'}, {
+                            id: 3,
+                            name: 'Бронницы'
+                        }, {id: 4, name: 'Дзержинский'}],
+                        cityList: [{id: 1, name: 'Ардатов'}, {id: 2, name: 'Арзамас'}, {
+                            id: 3,
+                            name: 'Бронницы'
+                        }, {id: 4, name: 'Дзержинский'}],
                         localityList: [{id: 1, name: 'Простоквашино'}],
-                        streetList: [{id: 1, name: 'Ленина'}, {id: 2, name: 'Пушкина'}]
+                        streetList: [{id: 1, name: 'Ленина'}, {id: 2, name: 'Красная'}]
                     }
                 }
 
                 /**
                  * Обработчики событий
                  */
-                //Сохранение данных
+                    //Сохранение данных
                 $scope.save = function () {
+                    //TODO: Send request to server for create/update data
+                    $uibModalInstance.close($scope.entity)
                 };
 
                 //Закрытие окна
