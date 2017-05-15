@@ -368,13 +368,13 @@
                     for (var i = 0; i < data.list.length; i++) {
                         var entity = data.list[i];
                         if ($scope.dataOptions.filter) {
-                            if (($scope.dataOptions.filter.inp && entity.inp != $scope.dataOptions.filter.inp)
-                                || ($scope.dataOptions.filter.snils && entity.snils != $scope.dataOptions.filter.snils)
-                                || ($scope.dataOptions.filter.inn && entity.innRf.innRf != $scope.dataOptions.filter.inn && entity.innCitizenship.innCitizenship != $scope.dataOptions.filter.inn)
-                                || ($scope.dataOptions.filter.numberDul && entity.numberDul.number != $scope.dataOptions.filter.numberDul)
-                                || ($scope.dataOptions.filter.surname && entity.surname != $scope.dataOptions.filter.surname)
-                                || ($scope.dataOptions.filter.name && entity.name != $scope.dataOptions.filter.name)
-                                || ($scope.dataOptions.filter.patronymic && entity.patronymic != $scope.dataOptions.filter.patronymic)
+                            if (($scope.dataOptions.filter.inp && entity.inp.indexOf($scope.dataOptions.filter.inp) == -1)
+                                || ($scope.dataOptions.filter.snils && entity.snils.indexOf($scope.dataOptions.filter.snils) == -1)
+                                || ($scope.dataOptions.filter.inn && entity.innRf.innRf.indexOf($scope.dataOptions.filter.inn) == -1 && entity.innCitizenship.innCitizenship.indexOf($scope.dataOptions.filter.inn) == -1)
+                                || ($scope.dataOptions.filter.numberDul && entity.numberDul.number.indexOf($scope.dataOptions.filter.numberDul) == -1)
+                                || ($scope.dataOptions.filter.surname && entity.surname.toLowerCase().indexOf($scope.dataOptions.filter.surname.toLowerCase()) == -1)
+                                || ($scope.dataOptions.filter.name && entity.name.toLowerCase().indexOf($scope.dataOptions.filter.name.toLowerCase()) == -1)
+                                || ($scope.dataOptions.filter.patronymic && entity.patronymic.toLowerCase().indexOf($scope.dataOptions.filter.patronymic.toLowerCase()) == -1)
                                 || ($scope.dataOptions.filter.dateFrom ? ($scope.dataOptions.filter.dateTo ? ($scope.dataOptions.filter.dateFrom > entity.dateOfBirth || $scope.dataOptions.filter.dateTo < entity.dateOfBirth) : $scope.dataOptions.filter.dateFrom > entity.dateOfBirth) : ($scope.dataOptions.filter.dateTo ? $scope.dataOptions.filter.dateTo < entity.dateOfBirth : false))) {
                                 data.list.splice(i, 1);
                                 i--;
