@@ -4,7 +4,6 @@ drop materialized view mv_fias_city_act;
 drop materialized view mv_fias_locality_act;
 drop materialized view mv_fias_street_act;
 */
-
 create materialized view mv_fias_area_act
 refresh complete on demand
 as

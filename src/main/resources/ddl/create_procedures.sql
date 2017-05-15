@@ -1496,7 +1496,6 @@ create or replace package body person_pkg as
 end person_pkg;
 /
 show errors;
-
 create or replace package fias_pkg
 -- Пакет для поиска адресов в справочнике ФИАС
 as

@@ -532,7 +532,6 @@ create or replace package person_pkg as
 end;
 /
 show errors;
-
 create or replace package body person_pkg as
   
   v_date date:=trunc(sysdate);
