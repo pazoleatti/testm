@@ -400,6 +400,38 @@
                 $scope.$watchCollection('[dataOptions.filter.fulltext]', function () {
                     aplanaEntityUtils.saveFilter($scope);
                 });
-            }])
-    ;
+
+                //Имитация ajax-запроса
+                $scope.searchItems = function (searchText) {
+                    $timeout(function () {
+                        if (searchText == ""){
+                            $scope.dataOptions.filterList = {
+                                periodList: [{id: 1, name: '2017; 1 квартал'}, {id: 2, name: '2017; 2 квартал'}, {
+                                    id: 3,
+                                    name: '2017; 3 квартал'
+                                }, {id: 4, name: '2017; 4 квартал'}],
+                                departmentList: [{id: 1, name: 'Иркутское отделение №8586 ПАО Сбербанк'}, {
+                                    id: 2,
+                                    name: 'Читинское отделение №8600 ПАО Сбербанк'
+                                }, {id: 3, name: 'Якутское отделение №8603 ПАО Сбербанк'}, {
+                                    id: 4,
+                                    name: 'ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара)'
+                                }],
+                                formTypeList: [{id: 1, name: 'Первичная'}, {id: 2, name: 'Консолидированная'}],
+                                formKindList: [{id: 1, name: 'РНУ НДФЛ (первичная)'}, {id: 2, name: 'РНУ НДФЛ (консолидированная)'}, {id: 3, name: '6-НДФЛ'}],
+                                asnuList: [{id: 1, name: 'АС \"SAP\"'}, {id: 2, name: 'АС \"Депозитарий\"'}],
+                                stateList: [{id: 1, name: 'Создана'}, {id: 2, name: 'Подготовлена'}, {id: 3, name: 'Принята'}]
+                            };
+                        } else {
+                            for (var i = 0; i < $scope.dataOptions.filterList.departmentList.length; i++) {
+                                var entity = $scope.dataOptions.filterList.departmentList[i];
+                                if (entity.name.toLowerCase().indexOf(searchText.toLowerCase()) == -1) {
+                                    $scope.dataOptions.filterList.departmentList.splice(i, 1);
+                                    i--;
+                                }
+                            }
+                        }
+                    }, 250);
+                };
+            }]);
 }());
