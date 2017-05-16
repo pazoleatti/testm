@@ -699,4 +699,9 @@ public class DeclarationListView extends
     public void setVisibleCancelButton(boolean isVisible) {
         cancelButton.setVisible(isVisible);
     }
+
+    @Override
+    public void setVisibleCreateButton(boolean isVisible) {
+        create.setVisible(isVisible);
+    }
 }
