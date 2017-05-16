@@ -9,6 +9,7 @@ import java.util.List;
 public class GetFormAttributesResult implements Result {
     List<RefBookAttribute> attributes;
     List<Column> tableColumns;
+    private boolean canEdit;
 
     public List<RefBookAttribute> getAttributes() {
         return attributes;
@@ -24,5 +25,13 @@ public class GetFormAttributesResult implements Result {
 
     public void setTableColumns(List<Column> tableColumns) {
         this.tableColumns = tableColumns;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 }

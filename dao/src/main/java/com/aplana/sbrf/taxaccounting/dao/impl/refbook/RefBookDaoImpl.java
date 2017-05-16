@@ -2501,7 +2501,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT row_number_over");
-        if (refBook.hasAttribute("ID")) {
+        if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
             ps.appendQuery(", ");
             ps.appendQuery("id ");
             ps.appendQuery(RefBook.RECORD_ID_ALIAS);
@@ -2801,7 +2801,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
         if (!ps.getParams().isEmpty()) {
             RowMapper<Map<String, RefBookValue>> rowMapper;
-            if (!refBook.hasAttribute("ID")) {
+            if (refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
                 rowMapper = new RefBookCalendarValueMapper(refBook);
                 return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
             }

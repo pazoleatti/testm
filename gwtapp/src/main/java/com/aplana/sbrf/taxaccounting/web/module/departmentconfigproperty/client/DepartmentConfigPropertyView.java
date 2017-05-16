@@ -824,4 +824,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         }
     }
+
+    @Override
+    public void setCanEdit(boolean canEdit) {
+        editButton.setVisible(canEdit);
+    }
 }

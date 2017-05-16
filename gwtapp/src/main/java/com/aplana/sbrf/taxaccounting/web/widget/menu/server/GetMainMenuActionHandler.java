@@ -89,22 +89,20 @@ public class GetMainMenuActionHandler extends
                                 + TYPE + "=" + menu.getMeta()));
 
                         // ведение периодов
-                        if (currentUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-                            menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
-                                    + ";" + TYPE + "=" + menu.getMeta()));
-                        }
+                        menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
+                                + ";" + TYPE + "=" + menu.getMeta()));
 
                         // настройки подразделений
                         // настройки форм и подразделений, назначение источников-приемников
+                        menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
+                                + DepartmentConfigPropertyTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
+                        menu.getSubMenu().add(
+                                new MenuItem("Назначение форм",
+                                        NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
+                                                + TYPE + "=" + menu.getMeta() + ";"
+                                                + TaxFormNominationToken.isForm + "=" + false));
                         if (currentUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                                 TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-                            menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
-                                    + DepartmentConfigPropertyTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
-                            menu.getSubMenu().add(
-                                    new MenuItem("Назначение форм",
-                                            NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
-                                                    + TYPE + "=" + menu.getMeta() + ";"
-                                                    + TaxFormNominationToken.isForm + "=" + false));
                             if (taxType.equals(TaxType.NDFL)) {
                                 menu.getSubMenu().add(new MenuItem("Отчетность", NUMBER_SIGN
                                         + DeclarationListNameTokens.DECLARATION_LIST + ";"

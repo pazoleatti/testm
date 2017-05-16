@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.QueryParams;
 import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
 
     public GetTableDataHandler() {
