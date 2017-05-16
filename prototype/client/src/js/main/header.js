@@ -48,7 +48,8 @@
                 var updateCurrentUserInfo = function () {
                     var data = USER_DATA;
                     // Формируем строку ФИО
-                    $scope.security.userTitle = data.user.fullShortName;
+                    $scope.security.userTitle = "Шевчук Игорь Викторович";
+                    $scope.security.userDep = "Управление налогового планирования";
                 };
 
                 $scope.treeTaxes = [{

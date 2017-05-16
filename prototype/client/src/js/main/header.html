@@ -1,11 +1,6 @@
 <nav id="app-header" class="navbar navbar-default" style="min-width: 1300px;">
     <div class="navbar-header">
-        <!--<a href="#">
-            <img src="img/logo.png" height="50px" width="125px" alt="logo"/>
-        </a>-->
         <a href="#">
-            <img height="50px" width="125px" style="margin: 0 0 -34px 0; position: relative; z-index: -1;"/>
-
             <div class="logo">
                 <svg version="1.1" id="Слой_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 242 61" style="enable-background:new 0 0 242 61;" xml:space="preserve">
@@ -131,22 +126,23 @@
         </li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
+
         <li class="build_info">
-            <div>Версия:</div>
-            <div>Номер сборки:</div>
-            <div>Дата сборки:</div>
+            <div>Версия: {{'Implementation-Version' | translate}}</div>
+            <div>Номер сборки: {{'Git-Revision' | translate}}</div>
+            <div>Дата сборки: {{'Build-Date' | translate}}</div>
         </li>
-        <li class="build_info">
-            <div>{{'Implementation-Version' | translate}}</div>
-            <div>{{'Git-Revision' | translate}}</div>
-            <div>{{'Build-Date' | translate}}</div>
+        <li>
+           <div class="message" style="padding-top: 16px;">Нет оповещений</div>
         </li>
-        <li class="app-header-user-info">
-            <div>
-                {{security.userTitle}} <br/>
-            </div>
+        <li>
+            <a href="#"><i class="glyphicon glyphicon-info-sign"></i></a>
+            <a href="#"><i class="glyphicon glyphicon-question-sign"></i></a>
         </li>
-        <li><a class="logout_link" data-ng-click="logout()"><img src="img/logout.png" height="20px" width="12px"
-                                                                 alt="logout" title="Выход"></a></li>
+        <li class="app-header-user-info" style="padding-top: 8px;">
+            <div>{{security.userDep}}</div>
+            <div style="text-align: center;">{{security.userTitle}}</div>
+        </li>
+        <li><a class="logout_link" data-ng-click="logout()">Выход</a></li>
     </ul>
 </nav>
