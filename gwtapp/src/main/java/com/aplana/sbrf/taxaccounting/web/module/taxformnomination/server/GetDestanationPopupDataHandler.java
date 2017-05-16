@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +23,7 @@ import java.util.Set;
  * @author auldanov
  */
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanationPopupDataAction, GetDestanationPopupDataResult> {
 
     @Autowired
@@ -52,7 +53,9 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
         result.setAvailableDepartments(availableDepartmentSet);
 
         // Все подразделения
-        result.setDepartments(availableDepartmentList);
+        // Доступные подразделения
+        result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(
+                availableDepartmentSet).values()));
 
         // Исполнители доступные пользователю
         Set<Integer> availablePerformersSet = new HashSet<Integer>();
