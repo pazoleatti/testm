@@ -87,6 +87,7 @@
         "common.button.clear": "Сбросить",
         "filter.placeholder.all": "-Все-",
         "filterPanelLabel": "Фильтр",
+        "infoPanelLabel": "Информация",
         "filter.placeholder.search": "Введите строку",
         "theNumberOfSelectedItems": "Выбрано значений:",
         "common.button.add": "Добавить",
