@@ -30,7 +30,9 @@
                                     <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" allow-clear="true">
                                         <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
                                     </ui-select-match>
-                                    <ui-select-choices repeat="item in dataOptions.filterList.departmentList track by $index">
+                                    <ui-select-choices repeat="item in dataOptions.filterList.departmentList track by $index"
+                                                       data-refresh="searchItems($select.search)"
+                                                       data-refresh-delay="500">
                                         <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
