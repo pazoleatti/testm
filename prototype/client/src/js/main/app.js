@@ -25,7 +25,8 @@
             'aplana.dialogs',
             'ngMessages',
             'angularFileUpload',
-            'sbrfNdfl.Constants'
+            'sbrfNdfl.Constants',
+            'ui.grid.moveColumns'
         ])
         .config(['$stateProvider', '$urlRouterProvider', '$translateProvider',
             function ($stateProvider, $urlRouterProvider, $translateProvider) {
