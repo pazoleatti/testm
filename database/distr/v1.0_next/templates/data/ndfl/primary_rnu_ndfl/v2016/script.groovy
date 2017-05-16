@@ -1,30 +1,31 @@
     package form_template.ndfl.primary_rnu_ndfl.v2016
 
-    import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
-    import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
-    import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
-    import com.aplana.sbrf.taxaccounting.model.*
-    import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-    import com.aplana.sbrf.taxaccounting.model.identification.*
-    import com.aplana.sbrf.taxaccounting.model.log.Logger
-    import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-    import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
-    import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
-    import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
-    import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
-    import com.aplana.sbrf.taxaccounting.model.refbook.*
-    import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
-    import com.aplana.sbrf.taxaccounting.model.util.StringUtils
-    import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
-    import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
-    import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-    import com.aplana.sbrf.taxaccounting.service.script.*
-    import groovy.transform.Field
-    import groovy.transform.Memoized
-    import groovy.transform.TypeChecked
-    import groovy.util.slurpersupport.NodeChild
-    import groovy.xml.MarkupBuilder
-    import org.springframework.jdbc.core.RowMapper
+import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
+import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
+import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.identification.*
+import com.aplana.sbrf.taxaccounting.model.log.Logger
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.refbook.*
+import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
+import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.service.script.*
+import groovy.transform.CompileStatic
+import groovy.transform.Field
+import groovy.transform.Memoized
+import groovy.transform.TypeChecked
+import groovy.util.slurpersupport.NodeChild
+import groovy.xml.MarkupBuilder
+import org.springframework.jdbc.core.RowMapper
 
     import javax.script.ScriptException
     import javax.xml.namespace.QName
@@ -1993,17 +1994,18 @@
 
     @Field Map<Long, String> departmentFullNameMap = [:]
 
-    // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
-    @Field def ndflPersonFLMap = [:]
-    @Field final TEMPLATE_PERSON_FL = "ФИО: '%s', ИНП: '%s'"
-    class NdflPersonFL {
-        String fio
-        String inp
-        NdflPersonFL(String fio, String inp) {
-            this.fio = fio
-            this.inp = inp
-        }
+// Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
+@Field def ndflPersonFLMap = [:]
+@Field final TEMPLATE_PERSON_FL = "ФИО: '%s', ИНП: '%s'"
+@CompileStatic
+class NdflPersonFL {
+    String fio
+    String inp
+    NdflPersonFL(String fio, String inp) {
+        this.fio = fio
+        this.inp = inp
     }
+}
 
     // Виды документов, удостоверяющих личность Мапа <Идентификатор, Код>
     @Field def documentCodesCache = [:]
@@ -3102,17 +3104,22 @@
         logger.info("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)");
     }
 
-    /**
-     * Общие проверки
-     */
-    def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, Map<String, RefBookValue>> personMap) {
+/**
+ * Общие проверки
+ */
+def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, Map<String, RefBookValue>> personMap) {
+    long time = System.currentTimeMillis();
+    long timeTotal = time
+    // Параметры подразделения
+    def mapRefBookNdfl = getRefBookNdfl()
+    def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
 
-        // Параметры подразделения
-        def mapRefBookNdfl = getRefBookNdfl()
-        def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
+    println "Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
 
-        long time = System.currentTimeMillis();
-        for (NdflPerson ndflPerson : ndflPersonList) {
+    time = System.currentTimeMillis();
+
+    for (NdflPerson ndflPerson : ndflPersonList) {
 
             ScriptUtils.checkInterrupted();
 
@@ -3333,16 +3340,19 @@
 
         println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
         logger.info("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
+        println "Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)";
+        logger.info("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
     }
 
-    /**
-     * Класс для проверки заполненности полей
-     */
-    class ColumnFillConditionData {
-        ColumnFillConditionChecker columnConditionCheckerAsIs
-        ColumnFillConditionChecker columnConditionCheckerToBe
-        String conditionPath
-        String conditionMessage
+/**
+ * Класс для проверки заполненности полей
+ */
+@CompileStatic
+class ColumnFillConditionData {
+    ColumnFillConditionChecker columnConditionCheckerAsIs
+    ColumnFillConditionChecker columnConditionCheckerToBe
+    String conditionPath
+    String conditionMessage
 
         ColumnFillConditionData(ColumnFillConditionChecker columnConditionCheckerAsIs, ColumnFillConditionChecker columnConditionCheckerToBe, String conditionPath, String conditionMessage) {
             this.columnConditionCheckerAsIs = columnConditionCheckerAsIs
@@ -3575,9 +3585,11 @@
     def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
                         List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
 
-        def personsCache = [:]
-        ndflPersonList.each { ndflPerson ->
-            personsCache.put(ndflPerson.id, ndflPerson)
+    long time = System.currentTimeMillis()
+
+    def personsCache = [:]
+    ndflPersonList.each { ndflPerson ->
+        personsCache.put(ndflPerson.id, ndflPerson)
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
             if (ndflPersonFL == null) {
@@ -4124,28 +4136,27 @@
                                 firstWorkingDay.add(Calendar.DATE, 1);
                             }
 
-                            // Найдем следующую за текущей строку в РНУ
-                            List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
-                            NdflPersonIncome ndflPersonIncomeFind = null;
-                            ndflPersonIncomeCurrentList.each {
-                                if (it.incomeAccruedSumm ?: 0 > 0 && !["02", "14"].contains(it.incomeType)
-                                        && (ndflPersonIncomeFind == null || ndflPersonIncomeFind.incomePayoutDate > it.incomePayoutDate)
-                                        && ndflPersonIncome.incomePayoutDate <= it.incomePayoutDate
-                                        && ndflPersonIncome.operationId < it.operationId) {
-                                    if (it.incomePayoutDate.before(firstWorkingDay.getTime()) || it.incomePayoutDate.equals(firstWorkingDay.getTime())) {
-                                        ndflPersonIncomeFind = it
-                                    }
+                        // Найдем следующую за текущей строку в РНУ
+                        List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
+                        NdflPersonIncome ndflPersonIncomeFind = null;
+                        ndflPersonIncomeCurrentList.each {
+                            if (it.incomeAccruedSumm ?: 0 > 0 && !["02", "14"].contains(it.incomeType)
+                                    && (ndflPersonIncomeFind == null || ndflPersonIncomeFind.incomePayoutDate > it.incomePayoutDate)
+                                    && ndflPersonIncome.incomePayoutDate <= it.incomePayoutDate
+                                    && ndflPersonIncome.operationId < it.operationId) {
+                                if (it.incomePayoutDate.before(firstWorkingDay.getTime()) || it.incomePayoutDate.equals(firstWorkingDay.getTime())) {
+                                    ndflPersonIncomeFind = it
                                 }
                             }
-                            if (ndflPersonIncomeFind != null) {
-                                Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
-                                if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind, dateConditionWorkDay)) {
-                                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                                    String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                                            "НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncomeFind.taxTransferDate ?: ""}' и Доход.Дата.Выплата (Графа 7)='${ndflPersonIncomeFind.incomePayoutDate ?: ""}'")
-                                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 21", fioAndInp, pathError,
-                                            "Не выполнено условие: если «Графа 4 Раздел 2» = ${ndflPersonIncomeFind.incomeCode ?: ""} и «Графа 5 Раздел 2» = ${ndflPersonIncomeFind.incomeType ?: ""}, то «Графа 21 Раздел 2» = «Графа 7 Раздел 2» + 1 рабочий день")
-                                }
+                        }
+                        if (ndflPersonIncomeFind != null) {
+                            Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
+                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind, dateConditionWorkDay)) {
+                                // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
+                                        "НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncomeFind.taxTransferDate ?: ""}' и Доход.Дата.Выплата (Графа 7)='${ndflPersonIncomeFind.incomePayoutDate ?: ""}'")
+                                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 21", fioAndInp, pathError,
+                                        "Не выполнено условие: если «Графа 4 Раздел 2» = ${ndflPersonIncomeFind.incomeCode ?: ""} и «Графа 5 Раздел 2» = ${ndflPersonIncomeFind.incomeType ?: ""}, то «Графа 21 Раздел 2» = «Графа 7 Раздел 2» + 1 рабочий день")
                             }
                         }
                     }
@@ -4153,6 +4164,10 @@
             }
         }
     }
+
+    println "Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
+}
 
     /**
      * Возвращает "Сумму применения вычета в текущем периоде"
@@ -4432,22 +4447,24 @@
     def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList,
                            List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, Map<String, RefBookValue>> personMap) {
 
-        for (NdflPerson ndflPerson : ndflPersonList) {
-            NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
-            if (ndflPersonFL == null) {
-                if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
-                    // РНУ-НДФЛ первичная
-                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
-                } else {
-                    // РНУ-НДФЛ консолидированная
-                    def personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = personRecord.get(RF_LAST_NAME).value + " " + personRecord.get(RF_FIRST_NAME).value + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
-                }
-                ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
+    long time = System.currentTimeMillis()
+
+    for (NdflPerson ndflPerson : ndflPersonList) {
+        NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
+        if (ndflPersonFL == null) {
+            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+                // РНУ-НДФЛ первичная
+                String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
+            } else {
+                // РНУ-НДФЛ консолидированная
+                def personRecord = personMap.get(ndflPerson.recordId)
+                String fio = personRecord.get(RF_LAST_NAME).value + " " + personRecord.get(RF_FIRST_NAME).value + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
+                ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
             }
+            ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
         }
+    }
 
         def mapNdflPersonIncome = [:]
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
@@ -4520,6 +4537,8 @@
                         "Значение не соответствует правилу: «Графа 16 Раздел 3» <= «Графа 8 Раздел 3»")
             }
         }
+        println "Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)";
+        logger.info("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
     }
 
     /**
