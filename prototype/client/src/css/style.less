@@ -12,7 +12,7 @@
 
 /* style.css */
 
-@mts_red: #E30611;
+@mts_red: #1a9f29;
 // Высота шапки модального окна
 @mts_modal_header_height: 75px;
 
@@ -135,7 +135,7 @@ body {
 .logout_link {
   cursor: pointer;
   margin-left: 20px;
-  border: 1px #ccc solid;
+  border: 1px #1a9f29 solid;
   margin: 8px 0 8px 8px;
   padding: 5px 9px !important;
   border-radius: 5px;
@@ -144,7 +144,7 @@ body {
   border-color: red;
 }
 #edit-object .modal-header h4{
-  color: red;
+  color: #1a9f29;
 }
 
 /* Фикс длинного текста для выбранного элемент в ui-select - текст обрезается */
@@ -471,7 +471,7 @@ hr {
 }
 .form-fieldset {
   padding: 15px;
-  border: 1px solid black;
+  border: 1px solid #ccc;
 }
 .form-fieldset > legend {
   width: auto;
@@ -489,8 +489,24 @@ hr {
 /*-------new-style----------*/
 .navbar-default{
   background: #1a9f29;
+  .navbar-nav > li{
+    border-left: 1px solid #fff;
+    height: 48px;
+    div{
+      padding: 0 10px;
+    }
+    &.dropdown{
+      border: none;
+    }
+  }
   .navbar-nav > li > a{
     color: #fff;
+    padding: 14px!important;
+    border-radius: 1px;
+    outline: none;
+    margin: 0;
+    display: inline-block;
+    border: none;
     &:hover{
       background: #fff;
     }
@@ -499,13 +515,14 @@ hr {
 .logo{
   width: 138px;
   height: 54px;
-  margin: -21px 9px -30px 0;
+  margin: -4px 9px -30px 0;
   background: #fff;
   padding: 15px 11px;
   border-radius: 0 0 16px 0;
 }
 .navbar-right{
   color: #fff;
+  margin-right: 0;
 }
 button.btn.btn-default:hover:not([disabled]){
   border: 1px solid #1a9f29 !important;
@@ -531,32 +548,51 @@ button.btn.btn-default.ng-binding{
     }
   }
 }
-.btn-toolbar {
-  margin-left: 0;
+.form-control{
+  &:focus {
+    border-color: #1a9f29;
+  }
 }
-.btn{
-  padding: 3px 5px;
-}
-.btn-danger {
-  color: #ffffff;
-  background-color: #1a9f29;
-  border-color: #1a9f29;
-  &:focus,&.focus{
+  .btn-toolbar {
+    margin-left: 0;
+  }
+  .btn{
+    padding: 3px 5px;
+  }
+  .btn-danger {
+    color: #ffffff;
+    background-color: #1a9f29;
+    border-color: #1a9f29;
+    &:focus,&.focus{
+      background: #59bf57;
+      color: hsla(0,0%,100%,.85);
+      border-color: #1a9f29;
+    }
+    &:hover{
+      background: #59bf57;
+      color: hsla(0,0%,100%,.85);
+      border-color: #1a9f29;
+    }
+    &:active, &.active {
+      background: #59bf57;
+      color: hsla(0,0%,100%,.85);
+      border-color: #1a9f29;
+    }
+  }
+  .btn-danger:active:hover,
+  .btn-danger.active:hover,
+  .open > .dropdown-toggle.btn-danger:hover,
+  .btn-danger:active:focus,
+  .btn-danger.active:focus,
+  .open > .dropdown-toggle.btn-danger:focus,
+  .btn-danger:active.focus,
+  .btn-danger.active.focus,
+  .open > .dropdown-toggle.btn-danger.focus {
     background: #59bf57;
     color: hsla(0,0%,100%,.85);
     border-color: #1a9f29;
   }
-  &:hover{
-    background: #59bf57;
-    color: hsla(0,0%,100%,.85);
-    border-color: #1a9f29;
-  }
-  &:active, &.active {
-    background: #59bf57;
-    color: hsla(0,0%,100%,.85);
-    border-color: #1a9f29;
-  }
-}
+
 .btn-danger:active:hover,
 .btn-danger.active:hover,
 .open > .dropdown-toggle.btn-danger:hover,
@@ -639,3 +675,34 @@ button.btn.btn-default.ng-binding{
   border-width: 1px;
   border-color: #59bf57;
 }
+  .logout_link:hover{
+    border: 1px solid #fff;
+  }
+  .ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell, .ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell{
+    background-color: rgba(26, 159, 41, 0.11);
+  }
+  #overlay-parent > div{
+    border-top: 6px solid #1a9f29;
+  }
+  .btn-sm{
+    line-height: 1.45;
+  }
+  .button_panel {
+    margin-bottom: 8px;
+  }
+  .filter-col .control-label {
+    padding-top: 5px;
+    float: right;
+    margin-right: -20px!important;
+  }
+  .ui-grid-pager-container{
+    float: right;
+    margin-right: 6px;
+  }
+  .form-horizontal {
+    .form-group-sm {
+      .control-label{
+        margin: 0 -20px 0 30px;
+      }
+    }
+  }

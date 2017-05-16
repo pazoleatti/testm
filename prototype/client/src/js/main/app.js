@@ -145,7 +145,7 @@
         "title.dateOfBirth": "Дата рождения",
         "title.citizenship": "Гражданство (код страны)",
         "title.statusCode": "Статус (код)",
-        "title.document": "Документ, удостоверяющий личность",
+        "title.document": "Документ",
         "title.document.code": "Код",
         "title.document.number": "Номер",
         "title.registrationAddress": "Адрес регистрации в РФ",

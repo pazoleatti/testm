@@ -1,5 +1,5 @@
 <div id="production-planning">
-    <h1>{{'header.ndfl.forms' | translate}}</h1>
+    <h1>{{'header.ndfl.forms' | translate}}:</h1>
     <!-- Панель фильтрации -->
     <div class="grid-filter" style="min-width: 1250px;">
         <div data-aplana-collapse data-is-collapsed="false" data-label="'filterPanelLabel' | translate">
@@ -8,7 +8,7 @@
                     <div class="filter-col w400">
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.period' | translate}}</label>
+                                <label class="control-label">{{'title.period' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.period">
@@ -23,7 +23,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.department' | translate}}</label>
+                                <label class="control-label">{{'title.department' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.department">
@@ -38,7 +38,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.formNumber' | translate}}</label>
+                                <label class="control-label">{{'title.formNumber' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <input data-ng-model="dataOptions.filter.formNumber"
@@ -51,7 +51,7 @@
                     <div class="filter-col w500">
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.formType' | translate}}</label>
+                                <label class="control-label">{{'title.formType' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.formType">
@@ -66,7 +66,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.formKind' | translate}}</label>
+                                <label class="control-label">{{'title.formKind' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.formKind">
@@ -81,7 +81,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.asnu' | translate}}</label>
+                                <label class="control-label">{{'title.asnu' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.asnu">
@@ -98,7 +98,7 @@
                     <div class="filter-col w300">
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.state' | translate}}</label>
+                                <label class="control-label">{{'title.state' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.state">
@@ -113,7 +113,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.file' | translate}}</label>
+                                <label class="control-label">{{'title.file' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <input data-ng-model="dataOptions.filter.file"
@@ -195,8 +195,5 @@
     <div id="production-planning-content" class="content-with-table">
         <div id="production-planning-grid" class="usim-grid" data-ui-grid="gridOptions" ui-grid-resize-columns
              ui-grid-selection ui-grid-pagination ui-grid-autoResize></div>
-    </div>
-    <div class="numberItems">
-        <p>{{'theNumberOfSelectedItems' | translate}}<label style="margin-left: 3px;">{{numberOfSelectedItems}}</label></p>
     </div>
 </div>
