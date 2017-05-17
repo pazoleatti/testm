@@ -6,7 +6,6 @@
     angular
         .module('sbrfNdfl', [
             'app.header',
-            'sbrfNdfl.refBook',
             'sbrfNdfl.ndflForms',
             'sbrfNdfl.ndflDetailsForms',
             'sbrfNdfl.filterDirectives',
@@ -26,7 +25,18 @@
             'ngMessages',
             'angularFileUpload',
             'sbrfNdfl.Constants',
-            'ui.grid.moveColumns'
+            'ui.grid.moveColumns',
+            'ui.grid',
+            'pascalprecht.translate', // локализация
+            'ui.grid.pagination',     // пейджинг
+            'ui.grid.resizeColumns',  // изменение ширины столбцов
+            'ui.grid.saveState',      // сохранение состояния таблицы при переходах
+            'ui.grid.selection',      // выделение строк
+            'ui.grid.autoResize',
+            'ui.bootstrap',
+            'ui.select',
+            'aplana.sbrfNdfl.directives',
+            'ngMessages'
         ])
         .config(['$stateProvider', '$urlRouterProvider', '$translateProvider',
             function ($stateProvider, $urlRouterProvider, $translateProvider) {
