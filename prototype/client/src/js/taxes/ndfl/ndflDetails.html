@@ -247,23 +247,9 @@
                                         </div>
                                 </div>
                                 <div class="filter-col">
-                                        <div class="col-sm-12">
-                                            <!-- Кнопка Найти -->
-                                            <button type="button"
-                                                    class="btn btn-danger"
-                                                    id="searchButton"
-                                                    data-ng-click="searchClick()"
-                                                    style="width: 80px;">
-                                                {{'common.button.search' | translate}}
-                                            </button>
-                                            <!-- Кнопка Сбросить -->
-                                            <button type="button"
-                                                    class="btn btn-default"
-                                                    id="clearButton"
-                                                    data-ng-click="clearFilterClick()">
-                                                {{'common.button.clear' | translate}}
-                                            </button>
-                                        </div>
+                                    <data-search-clear-buttons
+                                            on-search="searchClick()"
+                                            on-clear="clearFilterClick()"/>
                                 </div>
                             </div>
                         </form>
