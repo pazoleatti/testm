@@ -314,10 +314,27 @@ public interface NdflPersonDao {
     List<Integer> findDublRowNum(String tableName, Long declarationDataId);
 
     /**
+     * Поиск дублей по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    Map<Long, List<Integer>> findDublRowNumMap(String tableName, Long declarationDataId);
+
+    /**
      * Поиск пропусков по полю rownum
      * @param tableName
      * @param declarationDataId
      * @return
      */
     List<Integer> findMissingRowNum(String tableName, Long declarationDataId);
+
+    /**
+     * Поиск пропусков по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId);
+
 }
