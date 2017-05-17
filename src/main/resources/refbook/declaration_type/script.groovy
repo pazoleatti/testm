@@ -109,10 +109,10 @@ String ATTR_YEAR = "ОтчетГод";
 
 // Шаблоны имен файлов
 @Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)_(.*)\\.(xml|XML)";
-@Field final String KV_PATTERN = "KV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UO_PATTERN = "UO_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String IV_PATTERN = "IV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
-@Field final String UU_PATTERN = "UU_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String KV_PATTERN = "KV_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
+@Field final String UO_PATTERN = "UO_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
+@Field final String IV_PATTERN = "IV_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
+@Field final String UU_PATTERN = "UU_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
 
 @Field final String NDFL2_PATTERN_PROT_1 = "PROT_NO_NDFL2"
 @Field final String NDFL2_PATTERN_PROT_2 = "прот_NO_NDFL2"
@@ -122,6 +122,10 @@ String ATTR_YEAR = "ОтчетГод";
 @Field final String ANSWER_PATTERN_2 = "UO_"
 @Field final String ANSWER_PATTERN_3 = "IV_"
 @Field final String ANSWER_PATTERN_4 = "UU_"
+@Field final String ANSWER_PATTERN_NDFL_1 = "KV_NONDFL"
+@Field final String ANSWER_PATTERN_NDFL_2 = "UO_NONDFL"
+@Field final String ANSWER_PATTERN_NDFL_3 = "IV_NONDFL"
+@Field final String ANSWER_PATTERN_NDFL_4 = "UU_NONDFL"
 @Field final String NDFL2_KV_FILE_TAG = "СвКвит"
 @Field final String NDFL2_KV_FILE_ATTR = "ИмяОбрабФайла"
 @Field final String NDFL2_UO_FILE_TAG = "ОбщСвУвед"
@@ -178,7 +182,7 @@ def importTF() {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
         importPrimary1151111()
-    } else if (isNdfl6Response(UploadFileName) && isNdfl6AndNot11151111(UploadFileName)) {
+    } else if (isNdfl6Response(UploadFileName)) {
         importNdflResponse()
     } else if (isNdfl2Response(UploadFileName)) {
         importNdflResponse()
@@ -547,10 +551,10 @@ def isNdfl2ResponseReestr(fileName) {
  * Проверяет является ли файл ответом от ФНС 6 НДФЛ
  */
 def isNdfl6Response(fileName) {
-    return fileName.startsWith(ANSWER_PATTERN_1) ||
-            fileName.startsWith(ANSWER_PATTERN_2) ||
-            fileName.startsWith(ANSWER_PATTERN_3) ||
-            fileName.startsWith(ANSWER_PATTERN_4)
+    return fileName.startsWith(ANSWER_PATTERN_NDFL_1) ||
+            fileName.startsWith(ANSWER_PATTERN_NDFL_2) ||
+            fileName.startsWith(ANSWER_PATTERN_NDFL_3) ||
+            fileName.startsWith(ANSWER_PATTERN_NDFL_4)
 }
 
 /**
@@ -646,7 +650,7 @@ def getDocWeight(fileName) {
 @Field final Pattern NDFL2_PROTOCOL_DATE_PATTERN = Pattern.compile("ПРОТОКОЛ № .+ от (\\d{2}\\.\\d{2}\\.\\d{4})")
 @Field final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
 @Field final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
-@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
+@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(NONDFL.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
 
 /**
  * Чтение содержание файла 2 НДФЛ - протокол
