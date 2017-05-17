@@ -94,7 +94,7 @@ final CalendarService calendarService = getProperty("calendarService")
 
 
 def getProperty(String name) {
-    try{
+    try {
         return super.getProperty(name)
     } catch (MissingPropertyException e) {
         return null
@@ -115,15 +115,14 @@ def getProperty(String name) {
 @Field
 def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 
-def moveAcceptedToCreated(){
+def moveAcceptedToCreated() {
     List<Relation> destinationInfo = getDestinationInfo(false);
     for (Relation relation : destinationInfo) {
-        if (relation.declarationState.equals(State.ACCEPTED)){
-            throw new ServiceException("Ошибка изменения состояния формы. Данная форма не может быть возвращена в состояние 'Создана', так как используется в КНФ с состоянием 'Принята', номер формы: "+relation.declarationDataId);
+        if (relation.declarationState.equals(State.ACCEPTED)) {
+            throw new ServiceException("Ошибка изменения состояния формы. Данная форма не может быть возвращена в состояние 'Создана', так как используется в КНФ с состоянием 'Принята', номер формы: " + relation.declarationDataId);
         }
     }
 }
-
 
 //------------------ Calculate ----------------------
 /**
@@ -305,11 +304,11 @@ def getRefBookPersonVersionFrom() {
     return getReportPeriodStartDate();
 }
 
-def updatePrimaryToRefBookPersonReferences(primaryDataRecords){
+def updatePrimaryToRefBookPersonReferences(primaryDataRecords) {
 
     ScriptUtils.checkInterrupted();
 
-    if (FORM_TYPE == 100){
+    if (FORM_TYPE == 100) {
         ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
     } else {
         raschsvPersSvStrahLicService.updateRefBookPersonReferences(primaryDataRecords)
@@ -450,7 +449,6 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
 
         updatePrimaryToRefBookPersonReferences(insertRecords);
 
-
         //Выводим информацию о созданных записях
         for (NaturalPerson person : insertRecords) {
             String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
@@ -523,7 +521,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
             }
         }
 
-        if (msgCnt <= maxMsgCnt){
+        if (msgCnt <= maxMsgCnt) {
             logger.info("Идентификация (" + calcTimeMillis(inTime));
         }
 
@@ -559,6 +557,16 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         if (refBookPerson != null) {
 
             primaryPerson.setId(refBookPerson.getId());
+            /*
+               Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
+               тогда версия записи в справочнике меняется на более раннюю дату, без изменения атрибутов. Такая ситуация
+               вряд ли может возникнуть на практике и проверка создана по заданию тестировщиков.
+              */
+            if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
+                Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
+                downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
+                continue
+            }
 
             //address
             if (primaryPerson.getAddress() != null) {
@@ -566,7 +574,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                     Map<String, RefBookValue> refBookAddressValues = mapAddressAttr(refBookPerson.getAddress());
 
                     fillSystemAliases(refBookAddressValues, refBookPerson.getAddress());
-
                     updateAddressAttr(refBookAddressValues, primaryPerson.getAddress(), addressAttrCnt);
 
                     if (addressAttrCnt.isUpdate()) {
@@ -641,14 +648,12 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                 updCnt++;
             }
 
-
-
         } else {
             //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
             insertPersonList.add(primaryPerson);
         }
 
-        if (msgCnt < maxMsgCnt){
+        if (msgCnt < maxMsgCnt) {
             logger.info("Обновление (" + calcTimeMillis(inTime));
         }
 
@@ -718,6 +723,11 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
 }
 
+def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
+    Date newVersion = getReportPeriodStartDate()
+    getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
+}
+
 def fillSystemAliases(Map<String, RefBookValue> values, RefBookObject refBookObject) {
     values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getId()));
     values.put("RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getRecordId()));
@@ -736,7 +746,6 @@ PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
 }
 
 
-
 @Field
 def INCLUDE_TO_REPORT = 1;
 
@@ -752,20 +761,20 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     if (personDocumentList != null && !personDocumentList.isEmpty()) {
 
-        logger.info("naturalPerson: "+naturalPerson)
-        logger.info("updateDocumentList: "+updateDocumentList)
+        logger.info("naturalPerson: " + naturalPerson)
+        logger.info("updateDocumentList: " + updateDocumentList)
 
         //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
         int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
 
-        logger.info("incRepIndex: "+incRepIndex)
+        logger.info("incRepIndex: " + incRepIndex)
 
         for (int i = 0; i < personDocumentList.size(); i++) {
 
             PersonDocument personDocument = personDocumentList.get(i);
-            logger.info("personDocument: "+personDocument)
+            logger.info("personDocument: " + personDocument)
             String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
-            logger.info("docInf: "+docInf)
+            logger.info("docInf: " + docInf)
 
             if (i == incRepIndex) {
                 if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
@@ -908,7 +917,7 @@ def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
 
-        logger.info("Добавление записей: refBookId=" + refBookId + ", size="+identityObjectList.size())
+        logger.info("Добавление записей: refBookId=" + refBookId + ", size=" + identityObjectList.size())
 
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
@@ -1190,7 +1199,7 @@ def findCountryId(countryCode) {
 
 //------------------ GET_SOURCES ----------------------
 
-List<Relation> getDestinationInfo(boolean isLight){
+List<Relation> getDestinationInfo(boolean isLight) {
 
     List<Relation> destinationInfo = new ArrayList<Relation>();
 
@@ -1292,9 +1301,6 @@ def getRelation(DeclarationData declarationData, Department department, ReportPe
 
 }
 
-
-
-
 //------------------ PREPARE_SPECIFIC_REPORT ----------------------
 
 def prepareSpecificReport() {
@@ -1320,7 +1326,7 @@ def prepareSpecificReport() {
         if (value != null) {
             def val = value;
             if (!(key in ["fromBirthDay", "toBirthDay"])) {
-                val = '%'+value+'%'
+                val = '%' + value + '%'
             }
             resultReportParameters.put(key, val)
         }
@@ -1338,7 +1344,11 @@ def prepareSpecificReport() {
     //Кнопки: "Закрыть"
 
     if (pagingResult.isEmpty()) {
-        subreportParamsToString = { it.collect { (it.value != null ? (((it.value instanceof Date)?it.value.format('dd.MM.yyyy'):it.value) + ";") : "") } join " " }
+        subreportParamsToString = {
+            it.collect {
+                (it.value != null ? (((it.value instanceof Date) ? it.value.format('dd.MM.yyyy') : it.value) + ";") : "")
+            } join " "
+        }
         logger.warn("Физическое лицо: " + subreportParamsToString(reportParameters) + " не найдено в форме");
         //throw new ServiceException("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
     }
@@ -1350,7 +1360,7 @@ def prepareSpecificReport() {
         row.firstName = ndflPerson.firstName
         row.middleName = ndflPerson.middleName
         row.snils = ndflPerson.snils
-        row.innNp = ndflPerson.innNp?:ndflPerson.innForeign
+        row.innNp = ndflPerson.innNp ?: ndflPerson.innForeign
         row.birthDay = ndflPerson.birthDay
         row.idDocNumber = ndflPerson.idDocNumber
         dataRows.add(row)
@@ -1473,7 +1483,7 @@ def createSpecificReport() {
             break;
         case 'rnu_ndfl_person_all_db':
             createSpecificReportDb();
-            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
+            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
             break;
         default:
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
@@ -1486,7 +1496,7 @@ def createSpecificReportPersonDb() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
     if (ndflPerson != null) {
-        def params = [NDFL_PERSON_ID : ndflPerson.id];
+        def params = [NDFL_PERSON_ID: ndflPerson.id];
         def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
         declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
         scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
@@ -1498,7 +1508,7 @@ def createSpecificReportPersonDb() {
  * Формирует спец. отчеты, данные для которых макет извлекает непосредственно из бд
  */
 def createSpecificReportDb() {
-    def params = [declarationId : declarationData.id]
+    def params = [declarationId: declarationData.id]
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
 }
@@ -1547,7 +1557,7 @@ String capitalize(String str) {
 void importData() {
 
     SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-    logger.info("Начало загрузки данных первичной налоговой формы "+declarationData.id+". Дата начала отчетного периода: "+sdf.format(getReportPeriodStartDate())+", дата окончания: "+sdf.format(getReportPeriodEndDate()));
+    logger.info("Начало загрузки данных первичной налоговой формы " + declarationData.id + ". Дата начала отчетного периода: " + sdf.format(getReportPeriodStartDate()) + ", дата окончания: " + sdf.format(getReportPeriodEndDate()));
 
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')))
@@ -1646,7 +1656,7 @@ void processInfoPart(infoPart, rowNum) {
 
     NdflPerson ndflPerson = transformNdflPersonNode(ndflPersonNode)
 
-    def familia = ndflPerson.lastName != null ? ndflPerson.lastName + " ": ""
+    def familia = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
     def imya = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
     def otchestvo = ndflPerson.middleName != null ? ndflPerson.middleName : ""
     def fio = familia + imya + otchestvo
@@ -1680,7 +1690,7 @@ void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOpera
     }
 
     incomes.each {
-        if (it != null){
+        if (it != null) {
             ndflPerson.incomes.add(it);
         }
     }
@@ -1786,12 +1796,13 @@ boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePay
     return true
 }
 
-boolean dateRelateToCurrentPeriod(def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
+boolean dateRelateToCurrentPeriod(
+        def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
     if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
         return true
     }
-    logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format("dd.MM.yyyy"): ""}: дата операции не входит в отчетный период ТФ. " +
+    logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format("dd.MM.yyyy") : ""}: дата операции не входит в отчетный период ТФ. " +
             "КПП = $kpp, " +
             "ОКТМО = $oktmo, " +
             "ФЛ ИНП = $inp, " +
@@ -2008,10 +2019,12 @@ def prepaymentAttr(personPrepayment) {
 // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
 @Field def ndflPersonFLMap = [:]
 @Field final TEMPLATE_PERSON_FL = "ФИО: '%s', ИНП: '%s'"
+
 @CompileStatic
 class NdflPersonFL {
     String fio
     String inp
+
     NdflPersonFL(String fio, String inp) {
         this.fio = fio
         this.inp = inp
@@ -2712,8 +2725,8 @@ def checkDataReference(
             }
 
             //Индекс Индекс соответствует следующему формату: [0-9]{6}
-            if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))){
-                address.add("Индекс - '${ndflPerson.postIndex }' - не соответствует формату");
+            if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))) {
+                address.add("Индекс - '${ndflPerson.postIndex}' - не соответствует формату");
             }
 
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
@@ -3373,6 +3386,7 @@ class ColumnFillConditionData {
         this.conditionMessage = conditionMessage
     }
 }
+
 interface ColumnFillConditionChecker {
     boolean check(NdflPersonIncome ndflPersonIncome)
 }
@@ -3944,7 +3958,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (ndflPersonIncome.taxRate == 13 && ndflPerson.status == "6") {
                     List<NdflPersonPrepayment> ndflPersonPrepaymentListByBersonIdList = ndflPersonPrepaymentCache.get(ndflPersonIncome.ndflPersonId) ?: []
                     if (!ndflPersonPrepaymentListByBersonIdList.isEmpty()) {
-                        List<NdflPersonPrepayment> ndflPersonPrepaymentCurrentList = ndflPersonPrepaymentListByBersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+                        List<NdflPersonPrepayment> ndflPersonPrepaymentCurrentList = ndflPersonPrepaymentListByBersonIdList.findAll {
+                            it.operationId == ndflPersonIncome.operationId
+                        } ?: []
                         Long ndflPersonPrepaymentSum = ndflPersonPrepaymentCurrentList.sum { it.summ } ?: 0
                         if (!(ndflPersonIncome.calculatedTax ==
                                 ScriptUtils.round((ndflPersonIncome.taxBase ?: 0 * 13 - ndflPersonPrepaymentSum ?: 0), 0))
@@ -4027,15 +4043,25 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
 
             List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
-            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll {
+                it.operationId == ndflPersonIncome.operationId
+            } ?: []
             // "Сумма Граф 16"
-            Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.calculatedTax ?: 0 } ?: 0
+            Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.calculatedTax ?: 0
+            } ?: 0
             // "Сумма Граф 17"
-            Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.withholdingTax ?: 0 } ?: 0
+            Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.withholdingTax ?: 0
+            } ?: 0
             // "Сумма Граф 18"
-            Long notHoldingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.notHoldingTax ?: 0 } ?: 0
+            Long notHoldingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.notHoldingTax ?: 0
+            } ?: 0
             // "Сумма Граф 19"
-            Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.overholdingTax ?: 0 } ?: 0
+            Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.overholdingTax ?: 0
+            } ?: 0
             // "Сумма Граф 20"
             Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
 
@@ -4560,6 +4586,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
 boolean comparNumbEquals(def d1, def d2) {
     return (Math.abs(d1 - d2) < 0.001)
 }
+
 boolean comparNumbGreater(double d1, double d2) {
     return (d1 - d2 > 0.001)
 }
@@ -4685,7 +4712,6 @@ def getErrorMsgAbsent(def inputList, def tableName) {
     return resultMsg
 }
 
-
 //TODO вынес handler в скрипт, чтобы не обновлять ядро на нексте
 
 /**
@@ -4759,7 +4785,6 @@ public class NaturalPersonRefbookScriptHandler extends NaturalPersonRefbookHandl
             naturalPerson = buildNaturalPerson(rs, refBookPersonId, primaryPersonId);
             similarityPersonMap.put(refBookPersonId, naturalPerson);
         }
-
 
         //Добавляем документы физлица
         addPersonDocument(rs, naturalPerson);
