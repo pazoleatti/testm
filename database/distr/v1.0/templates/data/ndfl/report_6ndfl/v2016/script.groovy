@@ -67,22 +67,11 @@ switch (formDataEvent) {
 final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
 @Field
 final DepartmentService departmentService = getProperty("departmentService")
+@Field
+final RefBookService refBookService = getProperty("refBookService")
 
 def getProperty(String name) {
     try {
-        return super.getProperty(name)
-    } catch (MissingPropertyException e) {
-        return null
-    }
-}
-
-@Field
-final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
-@Field
-final DepartmentService departmentService = getProperty("departmentService")
-
-def getProperty(String name) {
-    try{
         return super.getProperty(name)
     } catch (MissingPropertyException e) {
         return null
@@ -1044,7 +1033,6 @@ def createForm() {
         declarations.removeAll(declarationsForRemove)
 
         if (declarations.isEmpty()) {
-            Department department = departmentService.get(departmentReportPeriod.departmentId)
             DepartmentReportPeriod prevDrp = departmentReportPeriodList.get(0)
             def reportPeriod = prevDrp.reportPeriod
             def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)

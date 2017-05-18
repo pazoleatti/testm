@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.refbook.*
+import groovy.transform.CompileStatic
 import groovy.transform.Field
 import groovy.transform.Memoized
 import groovy.transform.TypeChecked
@@ -1244,7 +1245,7 @@ def checkDataConsolidated() {
 // Мапа <ID_Данные о физическом лице - получателе дохода, Физическое лицо: <ФИО> ИНП:<ИНП>>
 @Field def ndflPersonFLMap = [:]
 @Field final TEMPLATE_PERSON_FL = "ФИО: '%s', ИНП: '%s'"
-
+@CompileStatic
 class NdflPersonFL {
     String fio
     String inp
@@ -1653,7 +1654,7 @@ RefBookDataProvider getProvider(def long providerId) {
 
 @Field final String MESSAGE_ERROR_DUBL_OR_ABSENT = "В ТФ имеются пропуски или повторы в нумерации строк."
 @Field final String MESSAGE_ERROR_DUBL = " Повторяются строки:"
-@Field final String MESSAGE_ERROR_ABSENT = " Отсутсвуют строки:"
+@Field final String MESSAGE_ERROR_ABSENT = " Отсутствуют строки:"
 
 
 @Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" (%d записей)."
@@ -2382,12 +2383,17 @@ def checkDataReference(
  * Общие проверки
  */
 def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, Map<String, RefBookValue>> personMap) {
-
+    long time = System.currentTimeMillis();
+    long timeTotal = time
     // Параметры подразделения
     def mapRefBookNdfl = getRefBookNdfl()
     def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
 
-    long time = System.currentTimeMillis();
+    println "Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+
     for (NdflPerson ndflPerson : ndflPersonList) {
 
         ScriptUtils.checkInterrupted();
@@ -2536,12 +2542,12 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ?: ""}'",
                 "Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7,11 и 22,23,24"
         )
-        //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них
+        //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна из них
         columnFillConditionDataList << new ColumnFillConditionData(
                 new ColumnTrueFillOrNotFill(),
                 new Column22And23And24FillOrColumn22And23And24NotFill(),
                 "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Платежное поручение.Дата (Графа 22)='${ndflPersonIncome.paymentDate ?: ""}', НДФЛ.Перечисление в бюджет.Платежное поручение.Номер (Графа 23)='${ndflPersonIncome.paymentNumber ?: ""}', НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)='${ndflPersonIncome.taxSumm ?: ""}'",
-                "Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них"
+                "Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна из них"
         )
         columnFillConditionDataList.each { columnFillConditionData ->
             if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
@@ -2610,6 +2616,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
     println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
     logger.info("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
+    println "Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)";
+    logger.info("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
 }
 
 // Кэш для справочников
@@ -2632,6 +2640,8 @@ Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
  */
 def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList,
                     List<NdflPersonPrepayment> ndflPersonPrepaymentList, Map<Long, Map<String, RefBookValue>> personMap) {
+
+    long time = System.currentTimeMillis()
 
     def personsCache = [:]
     ndflPersonList.each { ndflPerson ->
@@ -2971,7 +2981,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 16", fioAndInp, pathError,
-                                "Не выполнено условие: «Графа 16 Раздел 2» ≠ «Сумма Граф 13 Раздел 2» с начала периода на отчетную дату x 13%% - «Сумма Граф 16 Раздел 2» за предыдущие отчетные периоды")
+                                "Не выполнено условие: «Графа 16 Раздел 2» ≠ «Сумма Граф 13 Раздел 2» с начала периода на отчетную дату x 13% - «Сумма Граф 16 Раздел 2» за предыдущие отчетные периоды")
                     }
                 }
                 // СведДох6.3
@@ -2989,7 +2999,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                     "НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax ?: ""}'")
                             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 16", fioAndInp, pathError,
-                                    "Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13%% - «Графа 4 Раздел 4»")
+                                    "Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13% - «Графа 4 Раздел 4»")
                         }
                     }
                 }
@@ -3035,7 +3045,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "НДФЛ.Расчет.Сумма.Удержанный (Графа 17)='${ndflPersonIncome.withholdingTax ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 17", fioAndInp, pathError,
-                                "Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» <= ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%%)")
+                                "Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» <= ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%)")
                     }
                 } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
                         || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1544", "1545",
@@ -3223,11 +3233,14 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
         }
     }
+    println "Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
  * Класс для проверки заполненности полей
  */
+@CompileStatic
 class ColumnFillConditionData {
     ColumnFillConditionChecker columnConditionCheckerAsIs
     ColumnFillConditionChecker columnConditionCheckerToBe
@@ -3438,7 +3451,7 @@ class Column22And23And24Fill implements ColumnFillConditionChecker {
     }
 }
 /**
- * 	Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна их них
+ * 	Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
  */
 @TypeChecked
 class Column22And23And24FillOrColumn22And23And24NotFill implements ColumnFillConditionChecker {
@@ -3767,6 +3780,7 @@ class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
  */
 def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList,
                        List<NdflPersonDeduction> ndflPersonDeductionList, Map<Long, Map<String, RefBookValue>> personMap) {
+    long time = System.currentTimeMillis()
 
     for (NdflPerson ndflPerson : ndflPersonList) {
         NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
@@ -3856,6 +3870,8 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
                     "Значение не соответствует правилу: «Графа 16 Раздел 3» <= «Графа 8 Раздел 3»")
         }
     }
+    println "Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)";
+    logger.info("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**

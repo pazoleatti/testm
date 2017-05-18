@@ -4,6 +4,7 @@ drop materialized view mv_fias_city_act;
 drop materialized view mv_fias_locality_act;
 drop materialized view mv_fias_street_act;
 */
+
 create materialized view mv_fias_area_act
 refresh complete on demand
 as
@@ -79,5 +80,12 @@ create index idx_mv_fias_street_aoid on mv_fias_street_act (aoid asc);
 create index idx_mv_fias_street_fname on mv_fias_street_act (fname asc);
 create index idx_mv_fias_street_pguid on mv_fias_street_act (parentguid asc);
 create index srch_mv_fias_street_reg_fn_tp on mv_fias_street_act (regioncode,fname,ftype,has_child);
+
+alter table mv_fias_area_act add constraint pk_mv_fias_area_act primary key (id);
+alter table mv_fias_city_act add constraint pk_mv_fias_city_act primary key (id);
+alter table mv_fias_locality_act add constraint pk_mv_fias_locality_act primary key (id);
+alter table mv_fias_street_act add constraint pk_mv_fias_street_act primary key (id);
+
+create index idx_mv_fias_street_post on mv_fias_street_act(postalcode);
 
 exit;
