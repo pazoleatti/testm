@@ -2434,6 +2434,11 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         ScriptUtils.checkInterrupted();
 
+        boolean applyTemporalySolution = false
+        if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
+            applyTemporalySolution = true
+        }
+
         NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
@@ -2488,7 +2493,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         //7 Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column22And23And24NotFill(),
-                new Column13And14And15Fill(),
+                new Column13And14And15Fill(applyTemporalySolution),
                 "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Налоговая база (Графа 13)='${ndflPersonIncome.taxBase ?: ""}', НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}', НДФЛ.Расчет.Дата (Графа 15)='${ndflPersonIncome.taxDate ?: ""}'",
                 "Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24"
         )
@@ -3336,8 +3341,21 @@ class Column12NotFill implements ColumnFillConditionChecker {
  */
 @TypeChecked
 class Column13And14And15Fill implements ColumnFillConditionChecker {
+    boolean temporalySolution
+
+    Column13And14And15Fill() {
+        temporalySolution = false
+    }
+
+    Column13And14And15Fill(boolean temporalySolution) {
+        this.temporalySolution = temporalySolution
+    }
+
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
+        if (temporalySolution) {
+            return ndflPersonIncome.taxBase != null  && !ScriptUtils.isEmpty(ndflPersonIncome.taxRate) && ndflPersonIncome.taxDate != null
+        }
         return !ScriptUtils.isEmpty(ndflPersonIncome.taxBase) && !ScriptUtils.isEmpty(ndflPersonIncome.taxRate) && ndflPersonIncome.taxDate != null
     }
 }
