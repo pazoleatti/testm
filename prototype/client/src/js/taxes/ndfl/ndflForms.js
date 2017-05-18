@@ -420,13 +420,18 @@
                  * Инициализация первичных данных
                  */
                 function initDialog() {
-                    $scope.entity = {};
                     //Получаем scope из главного окна
                     $scope.parentScope = undefined;
                     try {
                         $scope.parentScope = $scope.$resolve.data.scope;
                     } catch (ex) {
                     }
+
+                    $scope.entity = {
+                        period: $scope.parentScope.filterList.periodList[0],
+                        department: $scope.parentScope.filterList.departmentList[0],
+                        formKind: $scope.parentScope.filterList.formKindList[0]
+                    };
 
                     $translate('header.ndfl.form.create').then(function (header) {
                         $scope.header = header;
