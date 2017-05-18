@@ -21,7 +21,6 @@
             'ui.router',
             'ui.validate',
             'dialogs.main',
-            'aplana.dialogs',
             'ngMessages',
             'angularFileUpload',
             'sbrfNdfl.Constants',
@@ -127,6 +126,7 @@
 
         "header.ndfl.forms": "НДФЛ - Список налоговых форм",
         "header.ndflDetails.forms": "РНУ НДФЛ",
+        "header.ndfl.form.create": "Создание новой записи",
         "header.ndfl.fl.create": "Добавить запись ФЛ",
         "header.ndfl.fl.edit": "Редактировать запись ФЛ",
 

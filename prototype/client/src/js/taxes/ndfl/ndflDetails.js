@@ -10,8 +10,8 @@
             })
         }])
         .controller('ndflDetailsFormsCtrl', [
-            '$scope', '$timeout', 'aplanaEntityUtils', '$state', '$stateParams', 'aplanaDialogs',
-            function ($scope, $timeout, aplanaEntityUtils, $state, $stateParams, aplanaDialogs) {
+            '$scope', '$timeout', 'aplanaEntityUtils', '$state', '$stateParams', 'dialogs',
+            function ($scope, $timeout, aplanaEntityUtils, $state, $stateParams, dialogs) {
                 $scope.customGridColumnsBuilder = function (dataOptions, gridOptions) {
                     for (var fieldName in dataOptions.metaData) {
                         var field = dataOptions.metaData[fieldName];
@@ -370,7 +370,7 @@
                         if ($scope.dataOptions.filter) {
                             if (($scope.dataOptions.filter.inp && entity.inp.indexOf($scope.dataOptions.filter.inp) == -1)
                                 || ($scope.dataOptions.filter.snils && entity.snils.indexOf($scope.dataOptions.filter.snils) == -1)
-                                || ($scope.dataOptions.filter.inn && entity.innRf.innRf.indexOf($scope.dataOptions.filter.inn) == -1 && entity.innCitizenship.innCitizenship.indexOf($scope.dataOptions.filter.inn) == -1)
+                                || ($scope.dataOptions.filter.inn && entity.innRF.indexOf($scope.dataOptions.filter.inn) == -1 && entity.innINO.indexOf($scope.dataOptions.filter.inn) == -1)
                                 || ($scope.dataOptions.filter.numberDul && entity.numberDul.number.indexOf($scope.dataOptions.filter.numberDul) == -1)
                                 || ($scope.dataOptions.filter.surname && entity.surname.toLowerCase().indexOf($scope.dataOptions.filter.surname.toLowerCase()) == -1)
                                 || ($scope.dataOptions.filter.name && entity.name.toLowerCase().indexOf($scope.dataOptions.filter.name.toLowerCase()) == -1)
@@ -447,7 +447,7 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    var dlg = aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
+                    var dlg = dialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
                     return dlg.result.then(function (entity) {
                         //Заглушка создания новой записи
                         entity.id = $scope.dataOptions.data[$scope.dataOptions.data.length - 1].id + 1;
@@ -470,7 +470,7 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    var dlg = aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
+                    var dlg = dialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
                     return dlg.result.then(function (entity) {
                         //Заглушка редактирования записи
                         for (var i = 0; i < $scope.dataOptions.data.length; i++) {

@@ -4,11 +4,10 @@
     angular
         .module('aplana.entity-utils', [
             'ui.grid',
-            'ngAnimate',
-            'aplana.dialogs'
+            'ngAnimate'
         ])
-        .factory('aplanaEntityUtils', ['$log', '$window', '$http', 'aplanaDialogs', 'USER_DATA', 'APP_CONSTANTS', '$q', '$location', '$timeout', 'Overlay',
-            function ($log, $window, $http, aplanaDialogs, USER_DATA, APP_CONSTANTS, $q, $location, $timeout, Overlay) {
+        .factory('aplanaEntityUtils', ['$log', '$window', '$http', 'USER_DATA', 'APP_CONSTANTS', '$q', '$location', '$timeout', 'Overlay',
+            function ($log, $window, $http, USER_DATA, APP_CONSTANTS, $q, $location, $timeout, Overlay) {
                 var commonRestUrl = "rest/entity/"; //базовая ссылка на CommonRestController
                 /**
                  * Служебная функция для отправки запроса на получения списков сущностей с сервера и заполнения им переданного масива.
