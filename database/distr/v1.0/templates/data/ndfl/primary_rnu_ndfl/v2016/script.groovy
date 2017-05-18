@@ -3313,29 +3313,50 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         List<Integer> rowNumPersonList = ndflPersonService.findDublRowNum("NDFL_PERSON", declarationData.id)
         def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
-        List<Integer> rowNumPersonIncomeList = ndflPersonService.findDublRowNum("NDFL_PERSON_INCOME", declarationData.id)
-        msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeList, T_PERSON_INCOME)
-        List<Integer> rowNumPersonDeductionList = ndflPersonService.findDublRowNum("NDFL_PERSON_DEDUCTION", declarationData.id)
-        msgErrDubl += getErrorMsgDubl(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
-        List<Integer> rowNumPersonPrepaymentList = ndflPersonService.findDublRowNum("NDFL_PERSON_PREPAYMENT", declarationData.id)
-        msgErrDubl += getErrorMsgDubl(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
-        msgErrDubl = msgErrDubl == "" ? "" : MESSAGE_ERROR_DUBL + msgErrDubl
 
         rowNumPersonList = ndflPersonService.findMissingRowNum("NDFL_PERSON", declarationData.id)
         def msgErrAbsent = getErrorMsgAbsent(rowNumPersonList, T_PERSON)
-        rowNumPersonIncomeList = ndflPersonService.findMissingRowNum("NDFL_PERSON_INCOME", declarationData.id)
-        msgErrAbsent += getErrorMsgAbsent(rowNumPersonIncomeList, T_PERSON_INCOME)
-        rowNumPersonDeductionList = ndflPersonService.findMissingRowNum("NDFL_PERSON_DEDUCTION", declarationData.id)
-        msgErrAbsent += getErrorMsgAbsent(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
-        rowNumPersonPrepaymentList = ndflPersonService.findMissingRowNum("NDFL_PERSON_PREPAYMENT", declarationData.id)
-        msgErrAbsent += getErrorMsgAbsent(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
+
+        Map<Long, List<Integer>> rowNumPersonIncomeMap = ndflPersonService.findMissingRowNumMap("NDFL_PERSON_INCOME", declarationData.id)
+        Map<Long, List<Integer>> rowNumPersonDeductionMap = ndflPersonService.findMissingRowNumMap("NDFL_PERSON_DEDUCTION", declarationData.id)
+        Map<Long, List<Integer>> rowNumPersonPrepaymentMap = ndflPersonService.findMissingRowNumMap("NDFL_PERSON_PREPAYMENT", declarationData.id)
+
+        Map<Long, List<Integer>> rowNumPersonIncomeDublMap = ndflPersonService.findDublRowNumMap("NDFL_PERSON_INCOME", declarationData.id)
+        Map<Long, List<Integer>> rowNumPersonDeductionDublMap = ndflPersonService.findDublRowNumMap("NDFL_PERSON_DEDUCTION", declarationData.id)
+        Map<Long, List<Integer>> rowNumPersonPrepaymentDublMap = ndflPersonService.findDublRowNumMap("NDFL_PERSON_PREPAYMENT", declarationData.id)
+
+        for (NdflPerson ndflPerson : ndflPersonList) {
+            ScriptUtils.checkInterrupted();
+
+            List<Integer> rowNumPersonIncomeList = rowNumPersonIncomeMap.get(ndflPerson.id)
+            List<Integer> rowNumPersonDeductionList = rowNumPersonDeductionMap.get(ndflPerson.id)
+            List<Integer> rowNumPersonPrepaymentList = rowNumPersonPrepaymentMap.get(ndflPerson.id)
+
+            List<Integer> rowNumPersonIncomeDublList = rowNumPersonIncomeDublMap.get(ndflPerson.id)
+            List<Integer> rowNumPersonDeductionDublList = rowNumPersonDeductionDublMap.get(ndflPerson.id)
+            List<Integer> rowNumPersonPrepaymentDublList = rowNumPersonPrepaymentDublMap.get(ndflPerson.id)
+
+            if (rowNumPersonIncomeList != null || rowNumPersonDeductionList != null || rowNumPersonPrepaymentList != null) {
+                msgErrAbsent += " ПолучДох ИНП=\"" + ndflPerson.inp +"\"."
+                msgErrAbsent += getErrorMsgAbsent(rowNumPersonIncomeList, T_PERSON_INCOME)
+                msgErrAbsent += getErrorMsgAbsent(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
+                msgErrAbsent += getErrorMsgAbsent(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
+            }
+
+            if (rowNumPersonIncomeDublList != null || rowNumPersonDeductionDublList != null || rowNumPersonPrepaymentDublList != null) {
+                msgErrDubl += " ПолучДох ИНП=\"" + ndflPerson.inp +"\"."
+                msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeDublList, T_PERSON_INCOME)
+                msgErrDubl += getErrorMsgDubl(rowNumPersonDeductionDublList, T_PERSON_DEDUCTION)
+                msgErrDubl += getErrorMsgDubl(rowNumPersonPrepaymentDublList, T_PERSON_PREPAYMENT)
+            }
+        }
+
         msgErrAbsent = msgErrAbsent == "" ? "" : MESSAGE_ERROR_ABSENT + msgErrAbsent
+        msgErrDubl = msgErrDubl == "" ? "" : MESSAGE_ERROR_DUBL + msgErrDubl
         if (msgErrDubl != "" || msgErrAbsent != "") {
             //В ТФ имеются пропуски или повторы в нумерации строк.
-            String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, "", "№пп (Графа 1)")
-            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s", "Отсутствие пропусков и повторений в нумерации строк", "", pathError,
+            logger.warnExp("Текст ошибки: %s", "Отсутствие пропусков и повторений в нумерации строк", "",
                     MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent)
-            //        println(String.format("Ошибка в значении: %s. Текст ошибки: %s.", pathError, MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent))
         }
 
         println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
@@ -4527,9 +4548,8 @@ class ColumnFillConditionData {
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 3 Графы 15", fioAndInp, pathError,
                         "Значение не соответствует правилу: «Графа 15 Раздел 3» = «Графа 10 Раздел 3»")
             }
-
             // Выч21 Документ о праве на налоговый вычет.Сумма (Графы 16) (Графы 8)
-            if (comparNumbGreater(ndflPersonDeduction.notifSumm ?: 0, ndflPersonDeduction.periodCurrSumm ?: 0)) {
+            if (comparNumbGreater(ndflPersonDeduction.periodCurrSumm ?: 0, ndflPersonDeduction.notifSumm ?: 0)) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "",
                         "Применение вычета.Текущий период.Сумма (Графа 16)='${ndflPersonDeduction.periodCurrSumm ?: ""}', Документ о праве на налоговый вычет.Сумма (Графа 8)='${ndflPersonDeduction.notifSumm ?: ""}'")
@@ -4652,7 +4672,7 @@ class ColumnFillConditionData {
      */
     def getErrorMsgDubl(def inputList, def tableName) {
         def resultMsg = ""
-        if (inputList.size() > 0) {
+        if (inputList != null && inputList.size() > 0) {
             resultMsg = " Раздел \"" + tableName + "\" № " + inputList.join(", ") + "."
         }
         return resultMsg
@@ -4666,7 +4686,7 @@ class ColumnFillConditionData {
      */
     def getErrorMsgAbsent(def inputList, def tableName) {
         def resultMsg = ""
-        if (inputList.size() > 0) {
+        if (inputList != null && inputList.size() > 0) {
             resultMsg = " Раздел \"" + tableName + "\" № " + inputList.join(", ") + "."
         }
         return resultMsg
