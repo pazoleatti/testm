@@ -1,7 +1,7 @@
 'use strict';
 (function () {
 
-    angular.module('sbrfNdfl.ndflDetailsForms', ['ui.router', 'sbrfNdfl.widgets'])
+    angular.module('sbrfNdfl.ndflDetailsForms', ['ui.router', 'sbrfNdfl.widgets', 'ui.grid', 'ui.grid.edit'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflDetailsForms', {
                 url: '/taxes/ndflDetails/{formId}',
@@ -540,5 +540,257 @@
                     $uibModalInstance.dismiss('Canceled');
                 }
             }])
+
+// ------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------
+
+
+        .controller('informationDetailsFormsCtrl', ['$scope', '$timeout', 'aplanaEntityUtils', '$state', '$stateParams', 'aplanaDialogs',
+            function ($scope, $timeout, aplanaEntityUtils, $state, $stateParams, aplanaDialogs) {
+
+                $scope.informationOptions = {
+                    columnDefs: [
+                      {field: 'number', displayName: '№ пп'},
+                      {field: 'inp', displayName: 'ИНП'},
+                      {field: 'code', displayName: 'Код вычета'},
+                      {field: 'documentType', displayName: 'Тип'},
+                      {field: 'documentDate', displayName: 'Дата'},
+                      {field: 'documentNumber', displayName: 'Номер'},
+                      {field: 'documentSourceCode', displayName: 'Код источника'},
+                      {field: 'documentSum', displayName: 'Сумма'},
+                      {field: 'ndflId', displayName: 'ID операции'},
+                      {field: 'ndflDate', displayName: 'Дата'},
+                      {field: 'ndflCode', displayName: 'Код дохода'},
+                      {field: 'ndflSum', displayName: 'Сумма'},
+                      {field: 'previousDate', displayName: 'Дата'},
+                      {field: 'previousSum', displayName: 'Сумма'},
+                      {field: 'currentDate', displayName: 'Дата'},
+                      {field: 'currentSum', displayName: 'Сумма'}
+                    ]
+                };
+
+                $scope.customGridColumnsBuilder = function (dataOptions, gridOptions) {
+                    for (var fieldName in dataOptions.metaData) {
+                        var field = dataOptions.metaData[fieldName];
+                        var columnDef = {};
+                        columnDef.name = field.name;
+                        columnDef.displayName = field.title;
+                        columnDef.enableHiding = false;
+                        columnDef.cellTooltip = true;
+                        columnDef.visible = field.visible;
+                        columnDef.width = field.width || 100;
+                        if (field.type == "java.util.Date") {
+                            var format = field.format == "" ? "dd.MM.yyyy" : field.format;
+                            columnDef.type = 'date';
+                            columnDef.cellFilter = "date:'" + format + "'";
+                        }
+                        gridOptions.columnDefs.push(columnDef);
+                    }
+                     aplanaEntityUtils.fitColumnsWidth(gridOptions, $scope.gridApi.grid.gridWidth);
+                };
+
+                var dataForRequisites = {
+                                    "list": [
+                                        {
+                                            id: 1,
+                                            inp: "1234567",
+                                            surname: "Иванов",
+                                            name: "Иван",
+                                            patronymic: "Иванович",
+                                            dateOfBirth: new Date(),
+                                            snils: "123-345-567-89",
+                                            citizenship: {id: 1, name: "Россия", code: "143"},
+                                            innRf: {id: 3, innRf: "1274146979", innSitizenship: "1274146979"},
+                                            innSitizenship: {id: 3, innRf: "1274146979", innSitizenship: "1274146979"},
+                                            codeDul: {id: 5, code: "01", number: "123456"},
+                                            numberDul: {id: 5, code: "01", number: "123456"},
+                                            status: {id: 2, name: "Новый"},
+                                            codeSub: "001",
+                                            index: "079685",
+                                            area: "Тюменский",
+                                            city: "Октябрьский",
+                                            locality: "Октябрьский",
+                                            street: "Ленина",
+                                            building: 99,
+                                            housing: 1,
+                                            apartment: 102
+                                        },
+                                        {
+                                            id: 2,
+                                            inp: "75643",
+                                            surname: "Крапивин",
+                                            name: "Алексей",
+                                            patronymic: "Гаврилович",
+                                            dateOfBirth: new Date(),
+                                            snils: "098-345-567-89",
+                                            citizenship: {id: 2, name: "Украина", code: "167"},
+                                            innRf: {id: 87, innRf: "976543", innSitizenship: "123423"},
+                                            innSitizenship: {id: 87, innRf: "976543", innSitizenship: "123423"},
+                                            codeDul: {id: 2, code: "23", number: "0987"},
+                                            numberDul: {id: 2, code: "23", number: "0987"},
+                                            status: {id: 2, name: "Новый"},
+                                            codeSub: "023",
+                                            index: "17753",
+                                            area: "Львовская",
+                                            city: "Львов",
+                                            locality: "Львов",
+                                            street: "Красная",
+                                            building: 1,
+                                            housing: 4,
+                                            apartment: 54
+                                        }],
+                                    "metaData": [
+                                        {
+                                            "name": "id",
+                                            "type": "java.lang.String",
+                                            "title": "№п/п",
+                                            "width": 60,
+                                            "order": 1,
+                                            "visible": true
+                                        },
+                                        {
+                                            "name": "inp",
+                                            "type": "java.lang.String",
+                                            "title": "Налогоплательщик. ИНП",
+                                            "width": 170,
+                                            "order": 2,
+                                            "visible": true
+                                        }
+                                        ],
+                                    "offset": 1,
+                                    "total": 2,
+                                    "count": 2
+                                };
+
+                                 var dataStub = {
+                                      "list": [
+                                          {
+                                             id: 1,
+                                             formType: {id: 1, name: "Первичная"},
+                                             formKind: {id: 1, name: "РНУ НДФЛ (первичная)"},
+                                                            department: {id: 1, name: "Иркутское отделение №8586 ПАО Сбербанк"},
+                                                            asnu: {id: 1, name: "АС \"SAP\""},
+                                                            period: {id: 1, name: "2017; 1 квартал"},
+                                                            state: {id: 1, name: "Создана"},
+                                                            fileTF: "99_6100_01200021201728042017000000000000000000015000.xml",
+                                                            creationDate: new Date(),
+                                                            creator: "Хазиев Ленар"
+                                                        },
+                                                        {
+                                                            id: 2,
+                                                            formType: {id: 2, name: "Консолидированная"},
+                                                            formKind: {id: 2, name: "РНУ НДФЛ (консолидированная)"},
+                                                            department: {id: 1, name: "Иркутское отделение №8586 ПАО Сбербанк"},
+                                                            asnu: {id: 2, name: 'АС \"Депозитарий\"'},
+                                                            period: {id: 1, name: "2017; 1 квартал"},
+                                                            state: {id: 2, name: "Подготовлена"},
+                                                            fileTF: "98_6100_01200021201728042017000000000000000000015000.xml",
+                                                            creationDate: new Date(),
+                                                            creator: "Хазиев Ленар"
+                                        },
+                                     {
+                                           id: 3,
+                                           formType: {id: 1, name: "Первичная"},
+                                           formKind: {id: 3, name: "6-НДФЛ"},
+                                           department: {id: 2, name: "Читинское отделение №8600 ПАО Сбербанк"},
+                                           asnu: {id: 1, name: "АС \"SAP\""},
+                                           period: {id: 2, name: "2017; 2 квартал"},
+                                           state: {id: 3, name: "Принята"},
+                                           fileTF: "97_6100_01200021201728042017000000000000000000015000.xml",
+                                           creationDate: new Date(),
+                                           creator: "Хазиев Ленар"
+                                       },
+                                       {
+                                            id: 4,
+                                            formType: {id: 1, name: "Первичная"},
+                                            formKind: {id: 1, name: "РНУ НДФЛ (первичная)"},
+                                            department: {id: 1, name: "Иркутское отделение №8586 ПАО Сбербанк"},
+                                            asnu: {id: 1, name: "АС \"SAP\""},
+                                            period: {id: 3, name: "2017; 3 квартал"},
+                                            state: {id: 1, name: "Создана"},
+                                            fileTF: "96_6100_01200021201728042017000000000000000000015000.xml",
+                                            creationDate: new Date(),
+                                            creator: "Хазиев Ленар"
+                                       },
+                                       {
+                                            id: 5,
+                                            formType: {id: 1, name: "Первичная"},
+                                            formKind: {id: 1, name: "РНУ НДФЛ (первичная)"},
+                                            department: {id: 4, name: "ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара)"},
+                                            asnu: {id: 2, name: 'АС \"Депозитарий\"'},
+                                            period: {id: 3, name: "2017; 3 квартал"},
+                                            state: {id: 1, name: "Создана"},
+                                            fileTF: "95_6100_01200021201728042017000000000000000000015000.xml",
+                                            creationDate: new Date(),
+                                            creator: "Хазиев Ленар"
+                                      }]
+                                 };
+
+                                 var tableData;
+
+                                 function setButtonsEnabledInformation() {
+
+                                 }
+
+                                 function fetchDataInformation() {
+                                       var data = jQuery.extend({}, dataForRequisites);
+                                       data.list = tableData ? tableData.slice(0) : data.list.slice(0);
+                                       for (var i = 0; i < data.list.length; i++) {
+                                           var entity = data.list[i];
+                                           if ($scope.dataOptions.filter) {
+                                              if (($scope.dataOptions.filter.inp && entity.inp != $scope.dataOptions.filter.inp)
+                                                || ($scope.dataOptions.filter.snils && entity.snils != $scope.dataOptions.filter.snils)
+                                                || ($scope.dataOptions.filter.inn && entity.innRf.innRf != $scope.dataOptions.filter.inn && entity.innSitizenship.innSitizenship != $scope.dataOptions.filter.inn)
+                                                || ($scope.dataOptions.filter.numberDul && entity.numberDul.number != $scope.dataOptions.filter.numberDul)
+                                                || ($scope.dataOptions.filter.surname && entity.surname != $scope.dataOptions.filter.surname)
+                                                || ($scope.dataOptions.filter.name && entity.name != $scope.dataOptions.filter.name)
+                                                || ($scope.dataOptions.filter.patronymic && entity.patronymic != $scope.dataOptions.filter.patronymic)
+                                                   || ($scope.dataOptions.filter.dateFrom ? ($scope.dataOptions.filter.dateTo ? ($scope.dataOptions.filter.dateFrom > entity.dateOfBirth || $scope.dataOptions.filter.dateTo < entity.dateOfBirth) : $scope.dataOptions.filter.dateFrom > entity.dateOfBirth) : ($scope.dataOptions.filter.dateTo ? $scope.dataOptions.filter.dateTo < entity.dateOfBirth : false))) {
+                                                   data.list.splice(i, 1);
+                                              i--;
+                                              }
+                                          }
+                                       }
+
+                                       $scope.infoGridOptions = {};
+                                       return aplanaEntityUtils.fillGrid($scope, data, $scope.customGridColumnsBuilder, $scope.infoGridOptions)
+                                                        .then(setButtonsEnabledInformation);
+                                   }
+
+                                   initPageInformation();
+
+                                   /**
+                                    * Инициализация первичных данных на странице
+                                   */
+                                   function initPageInformation() {
+                                      for (var i = 0; i < dataStub.list.length; i ++){
+                                         if (parseInt($stateParams.formId) === dataStub.list[i].id){
+                                            $scope.department = dataStub.list[i].department.name;
+                                            $scope.formNumber = $stateParams.formId;
+                                            $scope.creator = dataStub.list[i].creator;
+                                            $scope.formType = dataStub.list[i].formType.name;
+                                            $scope.period = dataStub.list[i].period.name;
+                                            $scope.state = dataStub.list[i].state.name;
+                                            $scope.nameAsnu = dataStub.list[i].asnu.name;
+                                         }
+                                      }
+
+
+
+
+                                      //Инициализация грида
+                                      aplanaEntityUtils.initGrid($scope, fetchDataInformation, setButtonsEnabledInformation);
+                                      //Инициалиация фильтра (заглушка)
+
+                                      //Инициализация параметров сессии - выбраных ранее строк в гриде + фильтры
+                                      aplanaEntityUtils.initPageSession($scope, fetchDataInformation)
+                                   }
+
+
+            }])
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
     ;
 }());

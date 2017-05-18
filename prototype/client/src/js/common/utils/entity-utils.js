@@ -945,17 +945,26 @@
                  * @param data данные + метадата + параметры пэджинга
                  * @param customGridColumnsBuilder функция, для переопределения стандартного способа отображения данных в ячейках таблицы
                  */
-                function fillGrid(scope, data, customGridColumnsBuilder) {
+                function fillGrid(scope, data, customGridColumnsBuilder, gridOptions) {
                     return $q.when(function () {
                         if (scope.dataOptions.customMetadata) {
                             createGridColumns(scope.dataOptions, scope.gridOptions, scope.gridApi);
+                            if (gridOptions != undefined) {
+                                createGridColumns(scope.dataOptions, gridOptions, scope.gridApi);
+                            }
                         } else if (scope.dataOptions.metaData == null) {
                             // Создаем столбцы, если их не было
                             scope.dataOptions.metaData = data.metaData;
                             if (customGridColumnsBuilder) {
                                 customGridColumnsBuilder(scope.dataOptions, scope.gridOptions);
+                                if (gridOptions != undefined) {
+                                    customGridColumnsBuilder(scope.dataOptions, gridOptions);
+                                }
                             } else {
                                 createGridColumns(scope.dataOptions, scope.gridOptions, scope.gridApi);
+                                if (gridOptions != undefined) {
+                                    createGridColumns(scope.dataOptions, gridOptions, scope.gridApi);
+                                }
                             }
                         }
                         scope.gridApi.core.handleWindowResize();
@@ -972,6 +981,10 @@
                             scope.dataOptions.data = rows;
                             scope.gridOptions.totalItems = data.total;
                             updateViewData(scope, scope.gridOptions, scope.gridApi);
+                            if (gridOptions != undefined) {
+                                gridOptions.totalItems = data.total;
+                                updateViewData(scope, gridOptions, scope.gridApi);
+                            }
                         }
                     }())
                 }

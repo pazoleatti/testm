@@ -302,11 +302,34 @@
                 </div>
             </div>
         </uib-tab>
+
         <uib-tab index="1" heading="2. Сведения о доходах и НДФЛ" select="selectTab('incomesAndNdfl')">
         </uib-tab>
+
         <uib-tab index="2" heading="3. Сведения о вычетах" select="selectTab('deductions')">
+            <div data-ng-controller="informationDetailsFormsCtrl" >
+                <div id="information-details-content" class="content-with-table" style="" >
+
+                    <div style="overflow:hidden;" >
+                        <form class="tableForm"><input type="image" src="img/icon/delete.png"></form>
+                        <form class="tableForm"><input type="image" src="img/icon/add.png"></form>
+                        <form class="tableForm"><input type="image" src="img/icon/edit.png"></form>
+                    </div>
+
+                    <div class="gridStyle" ui-grid="informationOptions" ui-grid-edit > </div>
+
+                    <!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="infoGridOptions"
+                         ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->
+
+                    <!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="gridOptions"
+                         ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->
+
+                </div>
+            </div>
         </uib-tab>
+
         <uib-tab index="3" heading="4. Сведения о доходах в виде авансовых платежей" select="selectTab('advancePayments')">
         </uib-tab>
+
     </uib-tabset>
 </div>
