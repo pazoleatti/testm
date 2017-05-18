@@ -1,0 +1,23 @@
+<div class="form-group">
+    <div>
+        <label class="control-label">{{title | translate}}</label>
+    </div>
+    <div>
+        <ui-select
+                data-ng-model="filterValue.id"
+                data-on-select="onSelectProcess()"
+                data-ng-click="onClick()"
+                data-ng-disabled="!filterEnabled"
+                data-on-select-close="selectFilterClosed">
+            <ui-select-match placeholder="{{'filter.placeholder.all' | translate}}" data-allow-clear="true">
+                <span data-ng-bind="$select.selected[displayField]" title="{{$select.selected[displayField]}}"></span>
+            </ui-select-match>
+            <ui-select-choices
+                    data-repeat="item.id as item in items track by $index"
+                    data-refresh="searchItems($select.search)"
+                    data-refresh-delay="500" data-on-scroll-complete="onSelectScrollComplete($select.search)" data-scroll-percent="60">
+                <div ng-bind-html="item[displayField] | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>

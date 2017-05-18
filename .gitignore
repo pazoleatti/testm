@@ -17,3 +17,4 @@ libpeerconnection.log
 .shelf
 database/distr/*/_logs
 database/distr/*/_bad
+build
