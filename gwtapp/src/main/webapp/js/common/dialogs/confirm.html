@@ -1,0 +1,25 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="no()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{header}}
+    </h4>
+</div>
+<div class="modal-body">
+    <form novalidate role="form">
+        <div class="modal-body" ng-bind-html="msg"/>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" ng-click="yes()">
+        {{labelYes}}
+    </button>
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="no()">{{labelNo}}</button>
+</div>
+<div class="modal-footer" data-ng-show="showComments">
+    <div class="form-group" style="margin-top: 2%;">
+        <div class="col-md-3" style="text-align: left;">
+            <label class="control-label">{{'commentsLabel' | translate}}</label>
+        </div>
+        <div class="col-md-9" data-aplana-comments data-ng-model="comments"></div>
+    </div>
+</div>

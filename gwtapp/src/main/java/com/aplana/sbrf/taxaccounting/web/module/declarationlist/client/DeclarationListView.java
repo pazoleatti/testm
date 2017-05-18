@@ -278,7 +278,9 @@ public class DeclarationListView extends
                                 + DeclarationDataTokens.declarationData + ";"
                                 + DeclarationDataTokens.declarationId + "="
                                 + declaration.getDeclarationDataId() + "\">"
-                                + declaration.getDeclarationType() + "</a>");
+                                + declaration.getDeclarationType() + "</a> <br>");
+                        sb.appendHtmlConstant("<a href=\"index.html#/taxes/ndflDetails/1\">"
+                                + declaration.getDeclarationType() + "(prototype)</a>");
                     }
                 }) {
             @Override
