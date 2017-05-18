@@ -4548,9 +4548,8 @@ class ColumnFillConditionData {
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 3 Графы 15", fioAndInp, pathError,
                         "Значение не соответствует правилу: «Графа 15 Раздел 3» = «Графа 10 Раздел 3»")
             }
-
             // Выч21 Документ о праве на налоговый вычет.Сумма (Графы 16) (Графы 8)
-            if (comparNumbGreater(ndflPersonDeduction.notifSumm ?: 0, ndflPersonDeduction.periodCurrSumm ?: 0)) {
+            if (comparNumbGreater(ndflPersonDeduction.periodCurrSumm ?: 0, ndflPersonDeduction.notifSumm ?: 0)) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "",
                         "Применение вычета.Текущий период.Сумма (Графа 16)='${ndflPersonDeduction.periodCurrSumm ?: ""}', Документ о праве на налоговый вычет.Сумма (Графа 8)='${ndflPersonDeduction.notifSumm ?: ""}'")
