@@ -3165,6 +3165,11 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             ScriptUtils.checkInterrupted();
 
+            boolean applyTemporalySolution = false
+            if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
+                applyTemporalySolution = true
+            }
+
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
@@ -3219,7 +3224,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             //7 Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
-                    new Column13And14And15Fill(),
+                    new Column13And14And15Fill(applyTemporalySolution),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Налоговая база (Графа 13)='${ndflPersonIncome.taxBase ?: ""}', НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}', НДФЛ.Расчет.Дата (Графа 15)='${ndflPersonIncome.taxDate ?: ""}'",
                     "Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24"
             )
@@ -3470,8 +3475,21 @@ class ColumnFillConditionData {
      */
     @TypeChecked
     class Column13And14And15Fill implements ColumnFillConditionChecker {
+        boolean temporalySolution
+
+        Column13And14And15Fill() {
+            temporalySolution = false
+        }
+
+        Column13And14And15Fill(boolean temporalySolution) {
+            this.temporalySolution = temporalySolution
+        }
+
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
+            if (temporalySolution) {
+                return ndflPersonIncome.taxBase != null  && !ScriptUtils.isEmpty(ndflPersonIncome.taxRate) && ndflPersonIncome.taxDate != null
+            }
             return !ScriptUtils.isEmpty(ndflPersonIncome.taxBase) && !ScriptUtils.isEmpty(ndflPersonIncome.taxRate) && ndflPersonIncome.taxDate != null
         }
     }
@@ -3636,6 +3654,7 @@ class ColumnFillConditionData {
         }
 
         List<DateConditionData> dateConditionDataList = []
+        List<DateConditionData> dateConditionDataListForBudget = []
 
         DateConditionWorkDay dateConditionWorkDay = new DateConditionWorkDay(calendarService)
 
@@ -3682,6 +3701,45 @@ class ColumnFillConditionData {
         // "Графа 6" = "Графе 7"
         dateConditionDataList << new DateConditionData(["2800"], ["00"], new Column6EqualsColumn7(), """"«Графа 6 Раздел 2» = «Графе 7 Раздел 2»""")
 
+        // 1,2 "Графа 21" = "Графа 7" + "1 рабочий день"
+        dateConditionDataListForBudget << new DateConditionData(["1010", "1011", "3020", "1110", "1400", "2001", "2010",
+                                                                 "2710", "2760", "2762", "2770", "2900", "4800"], ["00"],
+                new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+        // 3,4 "Графа 21" <= "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" <= "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
+        dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
+                                                                 "1541", "1542", "1543", "1544", "1545", "1546", "1547",
+                                                                 "1548", "1549", "1551", "1552", "1553", "1554"], ["01", "02", "03", "04"],
+                new Column21EqualsColumn7Plus30WorkingDays(), """«Графа 21 Раздел 2» <= «Графа 7 Раздел 2» + "30 календарных дней", если «Графа 7 Раздел 2» + "30 календарных дней" - выходной день, то «Графа 21 Раздел 2» <= "Следующий рабочий день" после «Графа 7 Раздел 2» + "30 календарных дней\"""")
+
+        // 6 "Графа 21" = "Графа 7" + "1 рабочий день"
+        dateConditionDataListForBudget << new DateConditionData(["2000"], ["05", "06", "07", "08", "09", "10", "11", "12"],
+                new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+        // 7 "Графа 21" = "Графа 7" + "1 рабочий день"
+        dateConditionDataListForBudget << new DateConditionData(["2002"], ["07", "08", "09", "10"],
+                new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+        // 8 "Графа 21" = "Графа 7" + "1 рабочий день"
+        dateConditionDataListForBudget << new DateConditionData(["2003"], ["13"],
+                new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+        // 9 "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
+        dateConditionDataListForBudget << new DateConditionData(["2012", "2300"], ["00"],
+                new Column21EqualsColumn7LastDayOfMonth(), """«Графа 21 Раздел 2» = Последний календарный день месяца для месяца «Графы 7 Раздел 2», если Последний календарный день месяца - выходной день, то «Графа 21 Раздел 2» = следующий рабочий день""")
+
+        // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
+        dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
+                new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+        // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
+        dateConditionDataListForBudget << new DateConditionData(["2610", "2640", "2641", "2800"], ["00"],
+                new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
+
+        println "dateConditionDataList ${dateConditionDataList.size()}"
+        dateConditionDataList.each { dlist ->
+            println "${dlist.checker.getClass().getName()}"
+        }
         // Сгруппируем Сведения о доходах на основании принадлежности к плательщику
         def ndflPersonIncomeCache = [:]
         ndflPersonIncomeList.each { ndflPersonIncome ->
@@ -4087,44 +4145,7 @@ class ColumnFillConditionData {
                 // СведДох11 НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
                 if (ndflPersonIncome.taxSumm != null) {
 
-                    dateConditionDataList = []
-
-                    // 1,2 "Графа 21" = "Графа 7" + "1 рабочий день"
-                    dateConditionDataList << new DateConditionData(["1010", "1011", "3020", "1110", "1400", "2001", "2010",
-                                                                    "2710", "2760", "2762", "2770", "2900", "4800"], ["00"],
-                            new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
-
-                    // 3,4 "Графа 21" <= "Графа 7" + "30 календарных дней", если "Графа 7" + "30 календарных дней" - выходной день, то "Графа 21" <= "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
-                    dateConditionDataList << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
-                                                                    "1541", "1542", "1543", "1544", "1545", "1546", "1547",
-                                                                    "1548", "1549", "1551", "1552", "1553", "1554"], ["01", "02", "03", "04"],
-                            new Column21EqualsColumn7Plus30WorkingDays(), """«Графа 21 Раздел 2» <= «Графа 7 Раздел 2» + "30 календарных дней", если «Графа 7 Раздел 2» + "30 календарных дней" - выходной день, то «Графа 21 Раздел 2» <= "Следующий рабочий день" после «Графа 7 Раздел 2» + "30 календарных дней\"""")
-
-                    // 6 "Графа 21" = "Графа 7" + "1 рабочий день"
-                    dateConditionDataList << new DateConditionData(["2000"], ["05", "06", "07", "08", "09", "10", "11", "12"],
-                            new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
-
-                    // 7 "Графа 21" = "Графа 7" + "1 рабочий день"
-                    dateConditionDataList << new DateConditionData(["2002"], ["07", "08", "09", "10"],
-                            new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
-
-                    // 8 "Графа 21" = "Графа 7" + "1 рабочий день"
-                    dateConditionDataList << new DateConditionData(["2003"], ["13"],
-                            new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
-
-                    // 9 "Графа 21" = Последний календарный день месяца для месяца "Графы 7", если Последний календарный день месяца - выходной день, то "Графа 21" = следующий рабочий день
-                    dateConditionDataList << new DateConditionData(["2012", "2300"], ["00"],
-                            new Column21EqualsColumn7LastDayOfMonth(), """«Графа 21 Раздел 2» = Последний календарный день месяца для месяца «Графы 7 Раздел 2», если Последний календарный день месяца - выходной день, то «Графа 21 Раздел 2» = следующий рабочий день""")
-
-                    // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
-                    dateConditionDataList << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
-                            new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
-
-                    // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
-                    dateConditionDataList << new DateConditionData(["2610", "2640", "2641", "2800"], ["00"],
-                            new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
-
-                    dateConditionDataList.each { dateConditionData ->
+                    dateConditionDataListForBudget.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                             // Все подпункты, кроме 11-го
                             if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
@@ -4329,7 +4350,7 @@ class ColumnFillConditionData {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
             if (ndflPersonIncome.incomeAccruedDate == null) {
-                return false
+                return true
             }
             Calendar calendar = Calendar.getInstance()
             calendar.setTime(ndflPersonIncome.incomeAccruedDate)
@@ -4354,7 +4375,7 @@ class ColumnFillConditionData {
             calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
-            if (dayOfMonth != 31 || month != 12) {
+            if (dayOfMonth != 31 || month != 11) {
                 return new Column6EqualsColumn7().check(ndflPersonIncome, dateConditionWorkDay)
             } else {
                 return new MatchMask("31.12.20\\d{2}").check(ndflPersonIncome, dateConditionWorkDay)
