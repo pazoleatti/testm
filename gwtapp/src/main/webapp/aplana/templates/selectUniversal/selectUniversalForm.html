@@ -1,0 +1,61 @@
+<div data-bindonce class="tab-content-paddings">
+    <form data-aplana-submit-valid="applyFilter()" novalidate style="margin: 0;"
+          data-ng-show="universalGridConfig.searchFieldName">
+        <table class="horizontal-input-table" style="width: 100%">
+            <tr>
+                <td>
+                    <input type='text' id="uniFilter" style="width: 100%"
+                           data-ng-model="filter.searchFieldName">
+                </td>
+                <td class="col-separator"></td>
+                <td style="width: 150px;">
+                    <div style="display: inline">
+                        <button type="button" class="btn btn-primary btn-sm" data-ng-click="applyFilter()">Найти
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" data-ng-click="clearFilter()"
+                                data-ng-show="filter.searchFieldName.length!=0">Сбросить
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <form class="modal-form" data-aplana-submit-valid="setValue()" name='document-form' novalidate role="form">
+        <div>
+            <table class="horizontal-input-table">
+                <tr>
+                    <td colspan="3">
+                        <div>
+                            <div data-aplana-field>
+                                <div data-aplana-grid
+                                     data-grid-options="universalGrid.options"
+                                     data-grid-ctrl="universalGrid.ctrl"
+                                     id="universalGrid"
+                                     data-init-grid="universalGrid.init(ctrl)"
+                                     data-ng-model="universalGrid.value"
+                                     data-grid-disable-adjust-width="true"
+                                     data-grid-required
+                                     data-grid-keep-selection="true"></div>
+
+                                <div data-aplana-validator data-key='grid-required'>Выберите значение</div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr data-ng-show="universalGrid.options.multiselect">
+                    <td colspan="3" style="max-width: 100px">
+                        <span>Ваш выбор:</span>
+                        <span class="text-info"
+                              data-ng-show="!universalGrid.value.length">Нет выбранных значений</span>
+                        <span style="white-space: normal" data-ng-repeat="item in universalGrid.value" class="label">{{universalShowField(item)}}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="modal-footer form-actions">
+            <button type="submit" class="btn btn-primary btn-sm">Выбрать</button>
+            <button type="button" class="btn btn-primary btn-sm" data-ng-click="dismiss()">Закрыть</button>
+        </div>
+    </form>
+</div>

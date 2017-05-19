@@ -1,0 +1,7 @@
+.markMoved-default {
+    background-color: white;
+    box-shadow: 0 8px 8px rgba(0, 0, 0, 0.5);
+    border-radius: 0 0 6px 6px;
+    z-index: 1000;
+    border-color: #969696 !important;
+}

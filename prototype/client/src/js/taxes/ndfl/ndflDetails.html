@@ -1,70 +1,71 @@
 <div id="ndflDetails">
     <!--Заголовок-->
-    <div class="row">
+    <div class="row" style="min-width: 1400px;">
         <div class="header-col" style="margin-left: 15px;">
-            <h1><a href="#">{{'menu.taxes.ndfl' | translate}}</a> - {{'header.ndflDetails.forms' | translate}}</h1>
+            <h1><a href="#">{{'menu.taxes.ndfl' | translate}}:</a> - {{'header.ndflDetails.forms' | translate}}:</h1>
         </div>
         <div class="header-col w200" style="float: right; margin-top: 20px;">
             <label class="w200"><a href="#">Формирование отчетов</a></label>
         </div>
     </div>
-    <!--Основная информация-->
-    <div class="header-details">
-        <div class="row">
-            <div class="header-col w400">
-                <div>
-                    <label class="w100">{{('title.department' | translate)}}:</label>
-                    <label class="font-normal">{{department}}</label>
-                </div>
-                <div>
-                    <label class="w100">{{('title.formNumber' | translate)}}:</label>
-                    <label class="font-normal">{{formNumber}}</label>
-                </div>
-                <div>
-                    <label class="w100">{{('title.creator' | translate)}}:</label>
-                    <label class="font-normal">{{creator}}</label>
+
+    <div class="grid-filter" style="min-width: 1400px;">
+        <div data-aplana-collapse data-is-collapsed="false" data-label="'infoPanelLabel' | translate">
+            <!--Основная информация-->
+            <div class="header-details">
+                <div class="row">
+                    <div class="header-col w400">
+                        <div>
+                            <label class="w100">{{('title.department' | translate)}}:</label>
+                            <label class="font-normal">{{department}}</label>
+                        </div>
+                        <div>
+                            <label class="w100">{{('title.formNumber' | translate)}}:</label>
+                            <label class="font-normal">{{formNumber}}</label>
+                        </div>
+                        <div>
+                            <label class="w100">{{('title.creator' | translate)}}:</label>
+                            <label class="font-normal">{{creator}}</label>
+                        </div>
+                    </div>
+                    <div class="header-col w300">
+                        <div>
+                            <label>{{('title.formType' | translate)}}:</label>
+                            <label class="font-normal">{{formType}}</label>
+                        </div>
+                        <div>
+                            <label>{{('title.period' | translate)}}:</label>
+                            <label class="font-normal">{{period}}</label>
+                        </div>
+                        <div>
+                            <label>{{('title.state' | translate)}}:</label>
+                            <label class="font-normal">{{state}}</label>
+                        </div>
+                    </div>
+                    <div class="header-col w350">
+                        <div>
+                            <label>{{('title.nameAsnu' | translate)}}:</label>
+                            <label class="font-normal">{{nameAsnu}}</label>
+                        </div>
+                    </div>
+                    <div class="header-col w200" style="float: right;">
+                        <div>
+                            <label class="w200"><a href="#">История изменений</a></label>
+                        </div>
+                        <div>
+                            <label class="w200"><a href="#">Файлы и комментарии</a></label>
+                        </div>
+                        <div>
+                            <label class="w200"><a href="#">Источники</a></label>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="header-col w400">
-                <div>
-                    <label class="w200">{{('title.formType' | translate)}}:</label>
-                    <label class="font-normal">{{formType}}</label>
-                </div>
-                <div>
-                    <label class="w200">{{('title.period' | translate)}}:</label>
-                    <label class="font-normal">{{period}}</label>
-                </div>
-                <div>
-                    <label class="w200">{{('title.state' | translate)}}:</label>
-                    <label class="font-normal">{{state}}</label>
-                </div>
-            </div>
-            <div class="header-col w350">
-                <div>
-                    <label class="w100">{{('title.nameAsnu' | translate)}}:</label>
-                    <label class="font-normal">{{nameAsnu}}</label>
-                </div>
-            </div>
-            <div class="header-col w200" style="float: right;">
-                <div>
-                    <label class="w200"><a href="#">История изменений</a></label>
-                </div>
-                <div>
-                    <label class="w200"><a href="#">Файлы и комментарии</a></label>
-                </div>
-                <div>
-                    <label class="w200"><a href="#">Источники</a></label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--Линия-->
-    <hr>
-    <!-- Панель кнопок -->
-    <div class="button_panel">
-        <div class="btn-toolbar" role="toolbar">
-            <!-- Проверить -->
-            <span>
+            <!-- Панель кнопок -->
+            <div class="button_panel">
+                <div class="btn-toolbar" role="toolbar">
+                    <!-- Проверить -->
+                    <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
                         data-ng-click="checkButtonClick()">
                     <img src="img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/confirmation.png" width="32px" height="22px"
@@ -72,8 +73,8 @@
                     {{'button.check' | translate}}
                 </button>
             </span>
-            <!-- Рассчитать -->
-            <span>
+                    <!-- Рассчитать -->
+                    <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
                         data-ng-click="calculateButtonClick()">
                     <img src="img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/shape.png" width="32px" height="22px"
@@ -81,8 +82,8 @@
                     {{'button.calculate' | translate}}
                 </button>
             </span>
-            <!-- Принять -->
-            <span>
+                    <!-- Принять -->
+                    <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
                         data-ng-click="acceptButtonClick()">
                     <img src="img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/reconcile.png" width="32px" height="22px"
@@ -90,8 +91,8 @@
                     {{'button.accept' | translate}}
                 </button>
             </span>
-            <!-- Вернуть в Создана -->
-            <span>
+                    <!-- Вернуть в Создана -->
+                    <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
                         data-ng-click="returnButtonClick()">
                     <img src="img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/query_correction.png" width="32px" height="22px"
@@ -99,8 +100,8 @@
                     {{'button.return' | translate}}
                 </button>
             </span>
-            <!--Редактировать-->
-            <span>
+                    <!--Редактировать-->
+                    <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!editButtonEnabled"
                         data-ng-click="editRecordClick()">
                     <img src="img/button/{{editButtonEnabled ? 'enable' : 'disable'}}/edit.png" width="32px" height="22px"
@@ -108,25 +109,26 @@
                     {{'button.edit' | translate}}
                 </button>
             </span>
+                </div>
+            </div>
+            <hr />
         </div>
     </div>
-    <!--Линия-->
-    <hr>
     <!--Вкладки-->
     <uib-tabset active="activeForm">
         <uib-tab index="0" heading="1. Реквизиты" select="selectTab('requisites')">
             <div data-ng-controller="ndflDetailsFormsCtrl">
                 <!-- Панель фильтрации -->
-                <div class="grid-filter" style="min-width: 1900px;">
+                <div class="grid-filter" style="min-width: 1900px; margin: 0 0 0 -19px; padding: 0 0 0 21px;">
                     <div data-aplana-collapse data-is-collapsed="false" data-label="'filterPanelLabel' | translate">
                         <form class="form-horizontal" role="form" novalidate>
                             <div class="row">
-                                <div class="filter-col w400" style="margin-right: 50px;">
+                                <div class="filter-col w400">
                                     <div class="form-group">
-                                        <div class="col-md-4">
-                                            <label class="control-label">{{'title.inp' | translate}}</label>
+                                        <div class="col-md-3">
+                                            <label class="control-label">{{'title.inp' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-9">
                                             <input data-ng-model="dataOptions.filter.inp"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -134,10 +136,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-md-4">
-                                            <label class="control-label">{{'title.idOperation' | translate}}</label>
+                                        <div class="col-md-3">
+                                            <label class="control-label">{{'title.idOperation' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-9">
                                             <input data-ng-model="dataOptions.filter.idOperation"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -145,10 +147,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-md-4">
-                                            <label class="control-label">{{'title.kpp' | translate}}</label>
+                                        <div class="col-md-3">
+                                            <label class="control-label">{{'title.kpp' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-9">
                                             <input data-ng-model="dataOptions.filter.kpp"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -156,10 +158,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-md-4">
-                                            <label class="control-label">{{'title.oktmo' | translate}}</label>
+                                        <div class="col-md-3">
+                                            <label class="control-label">{{'title.oktmo' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-9">
                                             <input data-ng-model="dataOptions.filter.oktmo"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -167,12 +169,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="filter-col w400">
+                                <div class="filter-col w450">
                                     <div class="form-group">
-                                        <div class="col-md-4" style="margin-right: -60px;">
-                                            <label class="control-label">{{'title.snils' | translate}}</label>
+                                        <div class="col-md-2" >
+                                            <label class="control-label">{{'title.snils' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-10">
                                             <input data-ng-model="dataOptions.filter.snils"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -180,10 +182,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-md-4" style="margin-right: -60px;">
-                                            <label class="control-label">{{'title.inn' | translate}}</label>
+                                        <div class="col-md-2" >
+                                            <label class="control-label">{{'title.inn' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-10">
                                             <input data-ng-model="dataOptions.filter.inn"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -191,10 +193,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-md-4" style="margin-right: -60px;">
-                                            <label class="control-label">{{'title.numberDul' | translate}}</label>
+                                        <div class="col-md-2" >
+                                            <label class="control-label">{{'title.numberDul' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-10">
                                             <input data-ng-model="dataOptions.filter.numberDul"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -204,10 +206,10 @@
                                 </div>
                                 <div class="filter-col w400">
                                     <div class="form-group">
-                                        <div class="col-md-4" style="margin-right: -60px;">
-                                            <label class="control-label">{{'title.surname' | translate}}</label>
+                                        <div class="col-md-3" >
+                                            <label class="control-label">{{'title.surname' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-9">
                                             <input data-ng-model="dataOptions.filter.surname"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -215,10 +217,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-md-4" style="margin-right: -60px;">
-                                            <label class="control-label">{{'title.name' | translate}}</label>
+                                        <div class="col-md-3" >
+                                            <label class="control-label">{{'title.name' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-9">
                                             <input data-ng-model="dataOptions.filter.name"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
@@ -226,44 +228,28 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-md-4" style="margin-right: -60px;">
-                                            <label class="control-label">{{'title.patronymic' | translate}}</label>
+                                        <div class="col-md-3" >
+                                            <label class="control-label">{{'title.patronymic' | translate}}:</label>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-9">
                                             <input data-ng-model="dataOptions.filter.patronymic"
                                                    placeholder="{{'filter.placeholder.search' | translate}}"
                                                    type="text" class="form-control"
                                                    title="{{dataOptions.filter.patronymic}}"/>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="filter-col w450" style="margin-right: 60px;">
-                                    <date-from-to-filter
-                                            data-label-width="4"
-                                            ng-from-model="dataOptions.filter.dateFrom"
-                                            ng-to-model="dataOptions.filter.dateTo"
-                                            ng-label="title.dateOfBirthFrom"/>
+                                    <div class="form-group">
+                                        <date-from-to-filter
+                                                data-label-width="4"
+                                                ng-from-model="dataOptions.filter.dateFrom"
+                                                ng-to-model="dataOptions.filter.dateTo"
+                                                ng-label="title.dateOfBirthFrom"/>
+                                        </div>
                                 </div>
                                 <div class="filter-col">
-                                    <div class="form-group">
-                                        <!-- Кнопка Найти -->
-                                        <button type="button"
-                                                class="btn btn-danger"
-                                                id="searchButton"
-                                                data-ng-click="searchClick()"
-                                                style="width: 80px;">
-                                            {{'common.button.search' | translate}}
-                                        </button>
-                                    </div>
-                                    <div class="form-group">
-                                        <!-- Кнопка Сбросить -->
-                                        <button type="button"
-                                                class="btn btn-default"
-                                                id="clearButton"
-                                                data-ng-click="clearFilterClick()">
-                                            {{'common.button.clear' | translate}}
-                                        </button>
-                                    </div>
+                                    <data-search-clear-buttons
+                                            on-search="searchClick()"
+                                            on-clear="clearFilterClick()"/>
                                 </div>
                             </div>
                         </form>
@@ -298,7 +284,7 @@
                 <!-- Таблица -->
                 <div id="ndfl-details-content" class="content-with-table" style="float: left; width: 100%">
                     <div id="ndfl-details-grid" class="usim-grid" data-ui-grid="gridOptions" ui-grid-resize-columns
-                         ui-grid-selection ui-grid-pagination ui-grid-autoResize></div>
+                         ui-grid-selection ui-grid-pagination ui-grid-autoResize ui-grid-move-columns></div>
                 </div>
             </div>
         </uib-tab>

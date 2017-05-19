@@ -1,0 +1,17 @@
+<div class="aplana-collapse">
+    <div class="aplana-collapse-accordion" data-ng-click="isCollapsed = !isCollapsed">
+        <a
+                data-bindonce
+                data-ng-class="{ 'collapse-link': !isAccordion, 'collapsed': isCollapsed && !isAccordion,
+                     'collapse-link-accordion': isAccordion, 'collapsed-accordion': isCollapsed && isAccordion }"
+
+                data-ng-click="isCollapsed = !isCollapsed"
+                unselectable="on">{{::label}}</a>
+        <div
+                class="aplana-collapse-accordion-img"
+                data-ng-show="isAccordion"
+                data-ng-class="{'icon-chevron-down': isCollapsed, 'icon-chevron-up': !isCollapsed }"></div>
+    </div>
+
+    <div data-ng-hide="isCollapsed"></div>
+</div>
