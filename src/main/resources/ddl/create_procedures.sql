@@ -3,6 +3,7 @@ create or replace package person_pkg as
   cursor persons_for_insert(c_declaration number) is
      select n.id,
             n.person_id,
+            n.row_num,
             n.inp,
             n.snils,
             n.last_name,
@@ -532,7 +533,6 @@ create or replace package person_pkg as
 end;
 /
 show errors;
-
 create or replace package body person_pkg as
   
   v_date date:=trunc(sysdate);
@@ -564,6 +564,7 @@ create or replace package body person_pkg as
     open v_ref for     
        select n.id,
               n.person_id,
+              n.row_num,
               n.inp,
               n.snils,
               n.last_name,
@@ -1097,6 +1098,7 @@ create or replace package body person_pkg as
     open v_ref for     
        select n.id,
               n.person_id,
+              null row_num,
               null inp,
               n.snils,
               n.familia last_name,
