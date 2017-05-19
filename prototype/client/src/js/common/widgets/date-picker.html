@@ -1,21 +1,15 @@
-<div class="form-group {{required ? 'required' : ''}}">
-    <div class="{{labelGridClass}}">
-        <label class="control-label">{{label.indexOf(":") > 0 ? label : label + ":"}}</label>
-    </div>
-    <div class="{{pickerGridClass}}">
-        <p class="input-group" style="{{pickerStyle}}">
-            <input type="text" class="form-control" datetime="{{format}}" uib-datepicker-popup="{{format}}" datepicker-timezone
-                   is-open="isOpen" close-text="Закрыть" current-text="Сегодня" clear-text="Очистить"
-                   data-ng-blur="onBlur()"
-                   data-ng-model="model"
-                   datepicker-options="datePickerOptions"
-                   data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
-                   title="{{model}}">
+<p class="input-group" style="{{pickerStyle}}">
+    <input type="text" class="form-control" datetime="{{format}}" uib-datepicker-popup="{{format}}" datepicker-timezone
+           is-open="isOpen" close-text="Закрыть" current-text="Сегодня" clear-text="Очистить"
+           data-ng-blur="onBlur()"
+           data-ng-model="model"
+           datepicker-options="datePickerOptions"
+           data-ng-required="required ? required : false"
+           data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
+           title="{{model}}">
             <span class="input-group-btn">
-                <button type="button" class="btn btn-default" ng-click="click()">
+                <button style="height: 34px" type="button" class="btn btn-default" ng-click="click()">
                     <i class="glyphicon glyphicon-calendar"></i>
                 </button>
             </span>
-        </p>
-    </div>
-</div>
+</p>

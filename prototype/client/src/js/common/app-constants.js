@@ -2,7 +2,7 @@
     'use strict'
 
     angular
-        .module('mtsUsim.Constants', [])
+        .module('sbrfNdfl.Constants', [])
 
         .constant('APP_CONSTANTS', {
             SESSION: {

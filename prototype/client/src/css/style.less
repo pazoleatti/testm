@@ -116,8 +116,8 @@ body {
   margin-right: 10px;
 }
 
-.usim-user-info {
-  padding-top: 10px;
+.app-header-user-info {
+  padding-top: 16px;
 }
 
 .aplanaAlert .close {
@@ -179,6 +179,10 @@ body {
 
 .modal-header .close:hover {
   opacity: 1;
+}
+
+.font-normal {
+  font-weight: normal;
 }
 
 .modal-dialog .btn-primary {
@@ -251,10 +255,11 @@ button.btn-back-to-list.btn-default:hover:not([disabled]){
   margin-bottom: 0;
 }
 
-.filter-col {
+.filter-col, .header-col {
   float: left;
   margin-right: 15px;
 }
+
 .red{
   background-color: red;
 }
@@ -455,4 +460,33 @@ input.ui-select-search {
 
 .ui-grid-header-cell-label{
   white-space: nowrap;
+}
+
+hr {
+  border: none; /* Убираем границу */
+  background-color: lightgrey; /* Цвет линии */
+  color: lightgrey; /* Цвет линии для IE6-7 */
+  height: 1px; /* Толщина линии */
+}
+.form-fieldset {
+  padding: 15px;
+  border: 1px solid black;
+}
+.form-fieldset > legend {
+  width: auto;
+  font-size: 12px;
+  border: 0;
+  margin-bottom: 0;
+  font-weight: 600;
+}
+.form-fieldset .ui-select-toggle {
+   min-height: 30px;
+ }
+.fl-modal-window .modal-dialog {
+   width: 765px;
+}
+
+.tableForm {
+    float: right;
+    margin-right: 5px;
 }

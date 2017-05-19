@@ -1,32 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('mtsUsim.filterDirectives', [])
-        /**
-         * Полнотекстовый поиск
-         * (Поиск: "Введите строку)
-         *
-         * Атрибуты:
-         *   "label-сlass" - css-класс для контейнера с подписью
-         *   "input-сlass" - css-класс для контейнера с полем ввода
-         *   "ng-model" - модель для связывания с данными
-         */
-        .directive('fulltextFilter', function () {
-            return {
-                restrict: 'E',
-                ngModel: 'ngModel',
-                templateUrl: 'js/common/filter/fulltextFilter.html',
-                scope: {
-                    ngModel: '='
-                },
-                link: function (scope, element, attr) {
-                    var labelClass = attr.labelClass ? attr.labelClass : 'col-md-3';
-                    element.find('label').parent().addClass(labelClass);
-                    var inputClass = attr.inputClass ? attr.inputClass : 'col-md-9';
-                    element.find('input').parent().addClass(inputClass);
-                }
-            }
-        })
+    angular.module('sbrfNdfl.filterDirectives', [])
         /**
          * Две кнопки "Найти", "Сбросить"
          *
@@ -41,30 +16,6 @@
                 scope: {
                     onSearch: '&onSearch',
                     onClear: '&onClear'
-                }
-            }
-        })
-        /**
-         * Чекбокс "Включая заблокированные"
-         *
-         * Атрибуты:
-         *   "label-сlass" - css-класс для контейнера с подписью
-         *   "input-сlass" - css-класс для контейнера с чекбоксом
-         *   "ng-model" - модель для связывания с данными
-         */
-        .directive('deletedFilter', function () {
-            return {
-                restrict: 'E',
-                ngModel: 'ngModel',
-                templateUrl: 'js/common/filter/deletedFilter.html',
-                scope: {
-                    ngModel: '='
-                },
-                link: function (scope, element, attr) {
-                    var labelClass = attr.labelClass ? attr.labelClass : 'col-md-3';
-                    $(element).find('label:first').parent().addClass(labelClass);
-                    var inputClass = attr.inputClass ? attr.inputClass : 'col-md-9';
-                    element.find('input').parent().parent().addClass(inputClass);
                 }
             }
         })
@@ -692,6 +643,7 @@
                 }
             }
         })
+
         /**
          * Выбор интервала дат от-до
          *
@@ -712,13 +664,13 @@
                     labelWidth: "@"
                 },
                 link: function (scope, element, attributes) {
-                    scope.ngLabel = angular.isDefined(scope.ngLabel) ? scope.ngLabel : "historyDateFromFilterLabel";
+                    scope.ngLabel = angular.isDefined(scope.ngLabel) ? scope.ngLabel : "title.dateFromFilterLabel";
                     scope.dateFromOpened = false;
                     scope.dateToOpened = false;
-                    scope.dateFromSelectClick = function (){
+                    scope.dateFromSelectClick = function () {
                         scope.dateFromOpened = true;
                     };
-                    scope.dateToSelectClick = function (){
+                    scope.dateToSelectClick = function () {
                         scope.dateToOpened = true;
                         scope.dateToOptions = {
                             minDate: scope.ngFromModel,

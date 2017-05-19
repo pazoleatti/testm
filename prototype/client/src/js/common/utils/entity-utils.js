@@ -307,10 +307,10 @@
                  *      scope.dataOptions - параметры пэйджинга, сортировки, поиска по таблице
                  *      scope.gridOptions - параметры отображения и работы самой таблицы (стандартные настройки ангуляра)
                  * @param getData               функция для получения данных таблицы
-                 * @param rowDblClick           функция вызываемая при двойном клике в строке таблицы
                  * @param rowSelectionChanged   функция вызываемая при изменении выделения строк в таблице
+                 * @param rowDblClick           функция вызываемая при двойном клике в строке таблицы
                  */
-                function initGrid(scope, getData, rowDblClick, rowSelectionChanged) {
+                function initGrid(scope, getData, rowSelectionChanged, rowDblClick) {
                     scope.numberOfSelectedItems = 0;
                     if (!scope.dataOptions) {
                         scope.dataOptions = {
@@ -447,7 +447,7 @@
                                 } else {
                                     displayRow[field] = "";
                                 }
-                            } else if (fieldInfo.type.startsWith('com.mts.usim.model')) {
+                            } else if (fieldInfo.type.startsWith('com.ndlf.model')) {
                                 // Ссылки
                                 displayRow[field] = row[field] == null ? "" : row[field][fieldInfo.displayField];
                             } else if (fieldInfo.type == 'java.util.List' || fieldInfo.type == 'java.util.Set') {
@@ -567,10 +567,8 @@
                 /**
                  * Функция для обновления внешнего вида таблицы
                  * @param scope ссылка на $scope, либо на $scope.dataOptions (или аналог)
-                 * @param gridOptions ссылка на объект, содержащий массив строк для таблицы (как правило, $scope.gridOptions)
-                 * @param gridApi сслыка на API таблицы
                  */
-                function updateViewData(scope, gridOptions, gridApi) {
+                function updateViewData(scope) {
                     //Учитываем, что мог прийти $scope, а мог - $scope.dataOptions
                     var data = scope.dataOptions ? scope.dataOptions.data
                         : scope.data ? scope.data : [];
@@ -580,8 +578,8 @@
                     data.forEach(function (row) {
                         displayData.push(getRowView(scope, row));
                     });
-                    gridOptions.data = displayData;
-                    clearGridSelection(gridApi)
+                    scope.gridOptions.data = displayData;
+                    clearGridSelection(scope.gridApi)
                 }
 
                 /**
@@ -947,17 +945,26 @@
                  * @param data данные + метадата + параметры пэджинга
                  * @param customGridColumnsBuilder функция, для переопределения стандартного способа отображения данных в ячейках таблицы
                  */
-                function fillGrid(scope, data, customGridColumnsBuilder) {
+                function fillGrid(scope, data, customGridColumnsBuilder, gridOptions) {
                     return $q.when(function () {
                         if (scope.dataOptions.customMetadata) {
                             createGridColumns(scope.dataOptions, scope.gridOptions, scope.gridApi);
+                            if (gridOptions != undefined) {
+                                createGridColumns(scope.dataOptions, gridOptions, scope.gridApi);
+                            }
                         } else if (scope.dataOptions.metaData == null) {
                             // Создаем столбцы, если их не было
                             scope.dataOptions.metaData = data.metaData;
                             if (customGridColumnsBuilder) {
                                 customGridColumnsBuilder(scope.dataOptions, scope.gridOptions);
+                                if (gridOptions != undefined) {
+                                    customGridColumnsBuilder(scope.dataOptions, gridOptions);
+                                }
                             } else {
                                 createGridColumns(scope.dataOptions, scope.gridOptions, scope.gridApi);
+                                if (gridOptions != undefined) {
+                                    createGridColumns(scope.dataOptions, gridOptions, scope.gridApi);
+                                }
                             }
                         }
                         scope.gridApi.core.handleWindowResize();
@@ -974,6 +981,10 @@
                             scope.dataOptions.data = rows;
                             scope.gridOptions.totalItems = data.total;
                             updateViewData(scope, scope.gridOptions, scope.gridApi);
+                            if (gridOptions != undefined) {
+                                gridOptions.totalItems = data.total;
+                                updateViewData(scope, gridOptions, scope.gridApi);
+                            }
                         }
                     }())
                 }
@@ -1096,6 +1107,23 @@
                         });
                     }
                     return result;
+                }
+
+                /**
+                 * Применяет функцию ко всем выделенным строкам таблицы
+                 * @param scope - скоуп с данными таблицы
+                 * @param f - функция
+                 */
+                function processSelectedEntities(scope, f) {
+                    if (scope.gridApi.selection != undefined) {
+                        scope.gridApi.selection.getSelectedRows().forEach(function (row) {
+                            scope.dataOptions.data.forEach(function (entity) {
+                                if (row.id == entity.id) {
+                                    f(entity)
+                                }
+                            });
+                        });
+                    }
                 }
 
                 /**
@@ -1315,6 +1343,7 @@
                     setCurrentRow: setCurrentRow,
                     fetchData: fetchData,
                     getSelectedEntities: getSelectedEntities,
+                    processSelectedEntities: processSelectedEntities,
                     isSelectionHasSameValue: isSelectionHasSameValue,
                     isSelectionHasValue: isSelectionHasValue,
                     isTableHasValue: isTableHasValue,

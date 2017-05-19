@@ -1,8 +1,7 @@
-<nav id="mtsusim-header" class="navbar navbar-default" style="min-width: 1300px;">
+<nav id="app-header" class="navbar navbar-default" style="min-width: 1300px;">
     <div class="navbar-header">
         <a href="#">
             <img src="img/logo.png" height="50px" width="125px" alt="logo"/>
-            <span class="logo-text text-center">управление поставками<br />комплектов подключения</span>
         </a>
     </div>
     <span data-aplana-dropdown-menu>
@@ -26,13 +25,9 @@
                 <div>{{'Git-Revision' | translate}}</div>
                 <div>{{'Build-Date' | translate}}</div>
         </li>
-        <li class="usim-user-info">
+        <li class="app-header-user-info">
             <div>
                 {{security.userTitle}} <br />
-                <select data-ng-model="security.currentMode"
-                        data-ng-change="setMode()"
-                        data-ng-options="mode.title for mode in security.modes">
-                </select>
             </div>
         </li>
         <li><a class="logout_link" data-ng-click="logout()"><img src="img/logout.png" height="20px" width="12px" alt="logout" title="Выход"></a></li>
