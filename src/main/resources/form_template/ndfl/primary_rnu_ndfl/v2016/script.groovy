@@ -4350,7 +4350,7 @@ class ColumnFillConditionData {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
             if (ndflPersonIncome.incomeAccruedDate == null) {
-                return false
+                return true
             }
             Calendar calendar = Calendar.getInstance()
             calendar.setTime(ndflPersonIncome.incomeAccruedDate)
