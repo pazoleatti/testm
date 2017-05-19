@@ -76,10 +76,7 @@ final RefBookService refBookService = getProperty("refBookService")
 final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
 @Field
 final DepartmentService departmentService = getProperty("departmentService")
-@Field
-final RefBookService refBookService = getProperty("refBookService")
-@Field
-final FormDataService formDataService = getProperty("formDataService")
+
 
 def getProperty(String name) {
     try {
@@ -2231,7 +2228,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Дом
                 if (!ndflPerson.house.equals(house)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Дом (Графа 19)='${ndflPerson.house}'")
+                            "Адрес регистрации в Российской Федерации.Дом (Графа 19)='${ndflPerson.house ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Дом (Графа 19)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -2239,7 +2236,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Корпус
                 if (!ndflPerson.building.equals(building)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Корпус (Графа 20)='${ndflPerson.building}'")
+                            "Адрес регистрации в Российской Федерации.Корпус (Графа 20)='${ndflPerson.building ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Корпус (Графа 20)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -2247,7 +2244,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Квартира
                 if (!ndflPerson.flat.equals(flat)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Квартира (Графа 21)='${ndflPerson.flat}'")
+                            "Адрес регистрации в Российской Федерации.Квартира (Графа 21)='${ndflPerson.flat ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Квартира (Графа 21)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -2628,7 +2625,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
  */
 @TypeChecked
 Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /**
