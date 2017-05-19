@@ -2726,7 +2726,7 @@ def checkDataReference(
 
             //Индекс Индекс соответствует следующему формату: [0-9]{6}
             if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))) {
-                address.add("Индекс - '${ndflPerson.postIndex}' - не соответствует формату");
+                address.add("Индекс - '${ndflPerson.postIndex ?: ""}' - не соответствует формату");
             }
 
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
@@ -2981,7 +2981,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Дом
                 if (!ndflPerson.house.equals(house)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Дом (Графа 19)='${ndflPerson.house}'")
+                            "Адрес регистрации в Российской Федерации.Дом (Графа 19)='${ndflPerson.house ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Дом (Графа 19)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -2989,7 +2989,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Корпус
                 if (!ndflPerson.building.equals(building)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Корпус (Графа 20)='${ndflPerson.building}'")
+                            "Адрес регистрации в Российской Федерации.Корпус (Графа 20)='${ndflPerson.building ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Корпус (Графа 20)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -2997,7 +2997,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Квартира
                 if (!ndflPerson.flat.equals(flat)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Квартира (Графа 21)='${ndflPerson.flat}'")
+                            "Адрес регистрации в Российской Федерации.Квартира (Графа 21)='${ndflPerson.flat ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Квартира (Графа 21)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -3266,14 +3266,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column17Fill(),
                 new Column7And11Fill(),
-                "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm}",
+                "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                 "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
         )
         //11 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column20Fill(),
                 new Column7And11Fill(),
-                "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm ?: ""}",
+                "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                 "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20"
         )
         //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,23,24

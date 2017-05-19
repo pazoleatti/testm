@@ -29,7 +29,9 @@
         <g:cell verticalAlignment="middle">
             <g:VerticalPanel>
                 <g:Button ui:field="apply" text="Найти" width="82px" addStyleNames="{style.right10}"/>
-                <g:HTML height="22px"/>
+                <g:HorizontalPanel >
+                    <g:HTML height="22px"/>
+                </g:HorizontalPanel>
                 <style:LinkButton ui:field="reset" text="Сбросить"  width="82px" height="22px" horizontalAlignment="center" img="" title="Очистить параметры поиска" addStyleNames="{style.right10}"/>
             </g:VerticalPanel>
         </g:cell>
