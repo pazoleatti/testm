@@ -429,6 +429,27 @@
                     };
                     return aplanaDialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts)
                 };
+
+                $scope.editInformationData = function() {
+                    var data = {
+
+                    };
+                    var opts = {
+
+                    };
+                    aplanaDialogs.create('js/taxes/ndfl/informationDialog.html', '', data, opts);
+                }
+
+                $scope.addInformationData = function() {
+                    var data = {
+
+                    };
+                    var opts = {
+
+                    };
+                    aplanaDialogs.create('js/taxes/ndfl/informationDialog.html', '', data, opts);
+                }
+
                 //Редактировать ФЛ
                 $scope.editFLClick = function () {
                     var params = {};
@@ -568,6 +589,26 @@
                       {field: 'currentSum', displayName: 'Сумма'}
                     ]
                 };
+
+                $scope.myData = {
+                     'number' : '112233',
+                     'inp' : '112233',
+                     'code' : '112233',
+                     'documentType' : '33443',
+                     'documentDate' : '221212',
+                     'documentNumber' : '121212',
+                     'documentSourceCode' : '121212',
+                     'documentSum' : '1212121',
+                     'ndflId' : '1212121',
+                     'ndflDate' : '121212',
+                     'ndflCode' : '343434',
+                     'ndflSum' : '544545',
+                     'previousDate' : '343434',
+                     'previousSum' : '232323',
+                     'currentDate' : '23232323',
+                     'currentSum' : '878787878'
+                };
+
 
                 $scope.customGridColumnsBuilder = function (dataOptions, gridOptions) {
                     for (var fieldName in dataOptions.metaData) {
@@ -759,9 +800,6 @@
 
                                    initPageInformation();
 
-                                   /**
-                                    * Инициализация первичных данных на странице
-                                   */
                                    function initPageInformation() {
                                       for (var i = 0; i < dataStub.list.length; i ++){
                                          if (parseInt($stateParams.formId) === dataStub.list[i].id){

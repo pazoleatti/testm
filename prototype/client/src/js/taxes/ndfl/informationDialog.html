@@ -1,0 +1,141 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{header}}
+    </h4>
+</div>
+<div class="modal-body" style="height: 500px; width: 800px;">
+    <form role="form" name="createOrEditFLForm" novalidate class="modal-form form-horizontal">
+        <div>
+
+            <div style="overflow: hidden;" >
+                <div style="width: 200px; float: left;">
+                    <div>
+                        <label class="control-label">ИНП</label>
+                    </div>
+                    <div>
+                    <input type="text" class="form-control" />
+                    </div>
+                </div>
+                <div style="width: 200px; float: left; margin-left: 20px;">
+                    <div>
+                        <label class="control-label">ID операции</label>
+                    </div>
+                    <div>
+                    <input type="text" class="form-control" />
+                    </div>
+                </div>
+                <div style="width: 200px; float: left; margin-left: 20px;">
+                    <div>
+                        <label class="control-label">Код вычета</label>
+                    </div>
+                    <div>
+                    <input type="text" class="form-control" />
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;" >
+                <fieldset class="form-fieldset" style="width: 200px; float: left" >
+                    <legend>Документ о праве на вычет</legend>
+                    <div>
+                        <label class="control-label">Тип</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control" />
+                    </div>
+                    <div>
+                        <label class="control-label">Дата документа</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control" />
+                    </div>
+                    <div>
+                        <label class="control-label" >Номер</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control"/>
+                    </div>
+                    <div>
+                        <label class="control-label" >Код источника</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control"/>
+                    </div>
+                    <div>
+                        <label class="control-label" >Сумма документа</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control"/>
+                    </div>
+                </fieldset>
+                <fieldset class="form-fieldset" style="width: 200px; float: left; margin-left: 20px;" >
+                    <legend>Доход</legend>
+                    <div>
+                        <label class="control-label" >Код дохода</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control"/>
+                    </div>
+                    <div>
+                        <label class="control-label" >Дата дохода</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control"/>
+                    </div>
+                    <div>
+                        <label class="control-label" >Сумма дохода</label>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control"/>
+                    </div>
+                </fieldset>
+                <fieldset class="form-fieldset" style="width: 250px; float: left; margin-left: 20px;" >
+                    <legend>Применение вычета</legend>
+                    <fieldset class="form-fieldset" >
+                        <legend>Предыдущий период</legend>
+                        <div>
+                            <label class="control-label">Дата предыдущего вычета</label>
+                        </div>
+                        <div>
+                            <input type="text" class="form-control"/>
+                        </div>
+                        <div>
+                            <label class="control-label">Сумма предыдущего вычета</label>
+                        </div>
+                        <div>
+                            <input type="text" class="form-control" />
+                        </div>
+                    </fieldset>
+                    <fieldset class="form-fieldset" >
+                        <legend>Текущий период</legend>
+                        <div>
+                            <label class="control-label">Дата текущего вычета</label>
+                        </div>
+                        <div>
+                            <input type="text"  class="form-control" />
+                        </div>
+                        <div>
+                            <label class="control-label">Сумма текущего вычета</label>
+                        </div>
+                        <div>
+                            <input type="text" class="form-control" />
+                        </div>
+                    </fieldset>
+                </fieldset>
+            </div>
+
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button"
+            class="btn btn-danger"
+            data-ng-disabled="createOrEditFLForm.$invalid"
+            ng-click="save()">
+        {{'common.button.add' | translate}}
+    </button>
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{'common.button.cancel' |
+        translate}}
+    </button>
+</div>
