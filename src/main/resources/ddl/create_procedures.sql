@@ -3,6 +3,7 @@ create or replace package person_pkg as
   cursor persons_for_insert(c_declaration number) is
      select n.id,
             n.person_id,
+            n.row_num,
             n.inp,
             n.snils,
             n.last_name,
@@ -532,7 +533,6 @@ create or replace package person_pkg as
 end;
 /
 show errors;
-
 create or replace package body person_pkg as
   
   v_date date:=trunc(sysdate);
@@ -564,6 +564,7 @@ create or replace package body person_pkg as
     open v_ref for     
        select n.id,
               n.person_id,
+              n.row_num,
               n.inp,
               n.snils,
               n.last_name,
@@ -1097,6 +1098,7 @@ create or replace package body person_pkg as
     open v_ref for     
        select n.id,
               n.person_id,
+              null row_num,
               null inp,
               n.snils,
               n.familia last_name,
@@ -1695,9 +1697,13 @@ as
   -- возвращается курсор на таблицу типа TTblCheckExistsAddrByFias
   function CheckExistsAddrByFias(p_declaration number,p_check_type number default 0) return ref_cursor;
   
+  -- Обновление мат. представлений после обновления справочника ФИАС
+  procedure RefreshViews;
+  
 end fias_pkg;
 /
 show errors;
+
 create or replace package body fias_pkg as
   
     v_check_path boolean:=true;
@@ -2128,8 +2134,8 @@ begin
                                   from (
                                         select n.id,
                                                n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
-                                               fias_pkg.GetParseType(3,n.area) area_type,
-                                               fias_pkg.GetParseName(3,n.area) area_fname,
+                                               fias_pkg.GetParseType(3,n.area,1) area_type,
+                                               fias_pkg.GetParseName(3,n.area,1) area_fname,
                                                case when n.city is null and n.region_code='77' then 'г'
                                                     when n.city is null and n.region_code='78' then 'г'
                                                     when n.city is null and n.region_code='92' then 'г'
@@ -2309,6 +2315,18 @@ begin
 
     return v_ref;
   end;
+
+  -------------------------------------------------------------------------------------------------------------
+  -- Обновление мат. представлений после обновления справочника ФИАС
+  -------------------------------------------------------------------------------------------------------------
+  procedure RefreshViews
+  is
+  begin
+    dbms_mview.REFRESH('MV_FIAS_AREA_ACT', 'C');
+    dbms_mview.REFRESH('MV_FIAS_CITY_ACT', 'C');
+    dbms_mview.REFRESH('MV_FIAS_LOCALITY_ACT', 'C');
+    dbms_mview.REFRESH('MV_FIAS_STREET_ACT', 'C');
+ end;
 
 end fias_pkg;
 /

@@ -3,7 +3,6 @@
 
     angular.module('app.header', [
         'ui.router',
-        'aplana.dropdownMenu',
         'sbrfNdfl.Constants',
         'userData'
     ])
@@ -13,41 +12,98 @@
                 controller: 'MainMenuController'
             }
         })
+        .directive('tree', function() {
+            return {
+                restrict: "E",
+                replace: true,
+                scope: {
+                    tree: '='
+                },
+                templateUrl: 'js/main/tree.html'
+            };
+        })
+        .directive('leaf', function($compile) {
+            return {
+                restrict: "E",
+                replace: true,
+                scope: {
+                    leaf: "="
+                },
+                templateUrl: 'js/main/leaf.html',
+                link: function(scope, element, attrs) {
+                    if (angular.isArray(scope.leaf.subtree)) {
+                        element.append("<tree tree='leaf.subtree'></tree>");
+                        element.addClass('dropdown-submenu');
+                        $compile(element.contents())(scope);
+                    }
+                }
+            };
+        })
         .controller('MainMenuController', [
             '$scope', '$translate', '$http', 'USER_DATA',
             function ($scope, $translate, $http, USER_DATA) {
-                $scope.mainMenu = [];
-
                 /**
                  * Обновляет информацию о текущем пользователе
                  */
                 var updateCurrentUserInfo = function () {
                     var data = USER_DATA;
                     // Формируем строку ФИО
-                    $scope.security.userTitle = data.user.fullShortName;
+                    $scope.security.userTitle = "Шевчук Игорь Викторович";
+                    $scope.security.userDep = "Управление налогового планирования";
                 };
 
-                $scope.mainMenu = [];
+                $scope.treeTaxes = [{
+                    name: "НДФЛ",
+                    subtree: [{
+                        name: "Формы",
+                        href: "index.html#/taxes/ndfl/forms"
+                    }, {
+                        name: "Ведение периодов"
+                    }, {
+                        name: "Настройки подразделений"
+                    }, {
+                        name: "Назначение форм"
+                    }, {
+                        name: "Отчетность"
+                    }]
+                }, {
+                    name: "Сервис",
+                    subtree: [{
+                        name: "Загрузить файлы"
+                    }]
+                }, {
+                    name: "Общие параметры"
+                }];
 
-                var menuItem = {id: 'menu-production', title: 'menu.taxes', items: []};
-                menuItem.items.push({title: 'menu.taxes.ndfl', sref: 'ndflForms'});
-                $scope.mainMenu.push(menuItem);
+                $scope.treeNsi = [{
+                    name: "Справочники"
+                }];
 
-                $scope.mainMenu.forEach(function (item) {
-                    // Добавляем стрелочку выпадающего меню (\u25BE - маленькая, \u25BС - крупная)
-                    $translate(item.title).then(function (txt) {
-                        item.title = txt + ' \u25BE'
-                    });
-                    // Выставляем ссылки по умолчанию для пустых подпунктов главного меню
-                    item.items.forEach(function (submenu) {
-                        if (submenu.sref === null && submenu.action === null && submenu.href === null) {
-                            submenu.href = '#';
-                        }
-                        $translate(submenu.title).then(function (txt) {
-                            submenu.title = txt;
-                        })
-                    })
-                });
+                $scope.treeAdministration = [{
+                    name: "Список блокировок"
+                }, {
+                    name: "Журнал аудита"
+                }, {
+                    name: "Список пользователей"
+                }, {
+                    name: "Конфигурационные параметры"
+                }, {
+                    name: "Планировщик задач"
+                }, {
+                    name: "Настройки",
+                    subtree: [{
+                        name: "Макеты налоговых форм"
+                    }, {
+                        name: "Справочники"
+                    }, {
+                        name: "Сбросить кэш"
+                    }, {
+                        name: "Экспорт макетов"
+                    }, {
+                        name: "Импорт скриптов"
+                    }]
+                }];
+
                 $scope.security = {};
 
                 $scope.security.userTitle = '';
