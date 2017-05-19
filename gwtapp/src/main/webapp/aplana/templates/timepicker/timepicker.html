@@ -1,0 +1,32 @@
+<div>
+    <div class="cbr-picker cbr-timepicker">
+		<div class="cbr-picker-button">
+			<span data-ng-if="showHint"
+				data-aplana-popover-template='<div class="popover"><div class="arrow"></div>
+                                              <div class="popover-content" style="padding: 6px 6px 0px 6px;"></div></div>'
+				data-aplana-popover="'aplana/templates/timeHint/hint.html'"
+				data-trigger="hover">
+
+				<button type="button" class="btn btn-popover"
+					data-aplana-popover-template='<div class="popover"><div class="arrow"></div>
+                                              <div class="popover-content" style="padding: 2px;"></div></div>'
+					data-placement="bottom-right" data-container="body">
+
+					<i class="icon-time"></i>
+				</button>
+			</span>
+			<span data-ng-if="!showHint">
+				<button type="button" class="btn btn-popover"
+					data-aplana-popover-template='<div class="popover"><div class="arrow"></div>
+                                              <div class="popover-content" style="padding: 2px;"></div></div>'
+					data-placement="bottom-right" data-container="body">
+
+					<i class="icon-time"></i>
+				</button>
+			</span>
+		</div>
+		<div class="cbr-picker-input">
+            <input type="text">
+        </div>
+    </div>
+</div>

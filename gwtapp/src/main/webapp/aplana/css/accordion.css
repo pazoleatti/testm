@@ -1,0 +1,65 @@
+/* CBR Accordion */
+.accordion-heading .accordion-toggle {
+	font-weight: bold;
+	border-bottom: 1px dashed #E30611;
+	padding: 4px 0 2px 0;
+}
+
+.accordion-heading a.accordion-toggle.collapsed,
+a.collapse-link.collapsed {
+    background-image: url(../img/sprites/cbr_icons_sprite.png);
+    background-repeat: no-repeat;
+    background-position: 0 -673px;
+}
+
+.accordion-heading a.accordion-toggle,
+a.collapse-link {
+    background-image: url(../img/sprites/cbr_icons_sprite.png);
+    background-repeat: no-repeat;
+    background-position: 0 -694px;
+    background-color: transparent;
+    padding-left: 20px;
+    padding-bottom: 20px;
+    height: 20px;
+    color: #1a9f29;
+    border-bottom: 1px dashed #1a9f29;
+    text-decoration: none;
+    font-weight: normal;
+    display: block;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.accordion-heading a.accordion-toggle,
+a.collapse-link.nomargin {
+	margin: 0;
+}
+
+.accordion-heading a.accordion-toggle:active,
+a.collapse-link:active {
+	background-color: transparent;
+}
+.accordion-heading a.accordion-toggle:focus,
+a.collapse-link:focus {
+	outline: none;
+}
+
+.accordion-group {
+	border: none;
+	margin-bottom: 8px;
+}
+
+.accordion-inner {
+	border: 1px dashed #E30611;
+	border-top: none;
+}
+
