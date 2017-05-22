@@ -58,6 +58,7 @@ public class RefBookTestScriptHelper {
     private BlobDataService blobDataService;
     private DepartmentService departmentService;
     private DepartmentReportPeriodService departmentReportPeriodService;
+    private FiasRefBookService fiasRefBookService;
 
     // Заданы константно
     private Logger logger = new Logger();
@@ -78,6 +79,7 @@ public class RefBookTestScriptHelper {
     private Integer accountPeriodId; // необходим для БО: форма 101 и 102
     private IInArchive fiasArchive;
     private StringBuilder msgBuilder;
+
 
     /**
      * Сервис работы со скриптами справочников в тестовом режиме
@@ -112,6 +114,7 @@ public class RefBookTestScriptHelper {
         blobDataService = mockHelper.mockBlobDataService();
         departmentService = mockHelper.mockDepartmentService();
         departmentReportPeriodService = mockHelper.mockDepartmentReportPeriodService();
+        fiasRefBookService = mockHelper.mockFiasRefBookService();
     }
 
     public void setImportFileInputStream(InputStream importFileInputStream) {
@@ -147,6 +150,7 @@ public class RefBookTestScriptHelper {
         bindings.put("userInfo", new TAUserInfo());
         bindings.put("dataFile", dataFile);
         bindings.put("msgBuilder", msgBuilder);
+        bindings.put("fiasRefBookService", fiasRefBookService);
 
         if (formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE ||
                 formDataEvent == FormDataEvent.IMPORT ||
@@ -371,5 +375,13 @@ public class RefBookTestScriptHelper {
 
     public void setMsgBuilder(StringBuilder msgBuilder) {
         this.msgBuilder = msgBuilder;
+    }
+
+    public FiasRefBookService getFiasRefBookService() {
+        return fiasRefBookService;
+    }
+
+    public void setFiasRefBookService(FiasRefBookService fiasRefBookService) {
+        this.fiasRefBookService = fiasRefBookService;
     }
 }

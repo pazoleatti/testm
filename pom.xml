@@ -553,7 +553,19 @@
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>2.6</version>
 				</plugin>
-			</plugins>
+                <plugin>
+                    <groupId>org.lesscss</groupId>
+                    <artifactId>lesscss-maven-plugin</artifactId>
+                    <version>1.7.0.1.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
 		</pluginManagement>
 		<plugins>
 
