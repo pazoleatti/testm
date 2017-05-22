@@ -16,7 +16,7 @@
                         if (!_.isUndefined(value) && !_.isNull(value) && value !== "") {
                             var fullNameAsArray = value.split(" ");
                             var surnameWithInitials = fullNameAsArray[0] + " " + fullNameAsArray[1].charAt(0) + "." + fullNameAsArray[2].charAt(0) + ".";
-                            filter.push({property: "surnameWithInitials", operation: "STRING_CONTAINS_IC", value: surnameWithInitials});
+                            filter.push({property: "surnameWithInitials", value: surnameWithInitials});
                         }
                     }
                 };
