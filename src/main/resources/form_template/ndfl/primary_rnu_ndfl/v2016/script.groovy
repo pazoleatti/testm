@@ -1727,7 +1727,7 @@ import org.springframework.jdbc.core.RowMapper
         personIncome.incomeCode = toString(node.'@КодДох')
         personIncome.incomeType = toString(node.'@ТипДох')
 
-        personIncome.operationId = toBigDecimal(operationNode.'@ИдОпер')
+        personIncome.operationId = toString(operationNode.'@ИдОпер')
         personIncome.oktmo = toString(operationNode.'@ОКТМО')
         personIncome.kpp = toString(operationNode.'@КПП')
 
@@ -1790,7 +1790,7 @@ import org.springframework.jdbc.core.RowMapper
 
         NdflPersonDeduction personDeduction = new NdflPersonDeduction()
         personDeduction.rowNum = toInteger(node.'@НомСтр')
-        personDeduction.operationId = toBigDecimal(node.parent().'@ИдОпер')
+        personDeduction.operationId = toString(node.parent().'@ИдОпер')
         personDeduction.typeCode = toString(node.'@ВычетКод')
         personDeduction.notifType = toString(node.'@УведТип')
         personDeduction.notifDate = toDate(node.'@УведДата')
@@ -1810,7 +1810,7 @@ import org.springframework.jdbc.core.RowMapper
     NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
         personPrepayment.rowNum = toInteger(node.'@НомСтр')
-        personPrepayment.operationId = toBigDecimal(node.parent().'@ИдОпер')
+        personPrepayment.operationId = toString(node.parent().'@ИдОпер')
         personPrepayment.summ = toBigDecimal(node.'@Аванс')
         personPrepayment.notifNum = toString(node.'@УведНом')
         personPrepayment.notifDate = toDate(node.'@УведДата')
