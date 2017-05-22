@@ -59,6 +59,10 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
         return result;
     }
 
+    @Override
+    public void refreshViews() {
+        getJdbcTemplate().execute("call fias_pkg.RefreshViews()");
+    }
 
     /**
      * [ID, POST_INDEX, REGION_CODE, AREA, CITY, LOCALITY, STREET, NDFL_FULL_ADDR, AREA_TYPE, AREA_FNAME, CITY_TYPE, CITY_FNAME, LOC_TYPE, LOC_FNAME, STREET_TYPE, STREET_FNAME, CHK_INDEX, CHK_REGION, CHK_AREA, CHK_CITY, CHK_LOC, CHK_STREET]
