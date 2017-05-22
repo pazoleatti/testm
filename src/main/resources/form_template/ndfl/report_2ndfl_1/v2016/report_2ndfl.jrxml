@@ -691,6 +691,16 @@
     "":
     $F{Отчество2})]]></initialValueExpression>
 	</variable>
+	<variable name="vEmptyCnt" class="java.lang.String">
+		<variableExpression><![CDATA[$F{numrows_Page1}-$F{numrows_Page2}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{numrows_Page1}-$F{numrows_Page2}]]></initialValueExpression>
+	</variable>
+	<variable name="vEmptyDataSource" class="java.lang.String">
+		<variableExpression><![CDATA[$F{numrows_Page1}>0 &&$F{numrows_Page1}>$F{numrows_Page2}?     "/СведДох/ДохВыч/СвСумДох[position()<= "+$V{vEmptyCnt}.toString()+"]/СвСумВыч":     "/СведДох/ДохВыч/СвСумДох/СвСумВыч"]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{numrows_Page1}>0 &&$F{numrows_Page1}>$F{numrows_Page2}?
+    "/СведДох/ДохВыч/СвСумДох[position()<= "+$V{vEmptyCnt}.toString()+"]/СвСумВыч":
+    "/СведДох/ДохВыч/СвСумДох/СвСумВыч"]]></initialValueExpression>
+	</variable>
 	<filterExpression><![CDATA[$F{НомСпр}==$P{pNumSpravka}]]></filterExpression>
 	<group name="grStavka" minHeightToStartNewPage="100" keepTogether="true">
 		<groupExpression><![CDATA[$F{Ставка}]]></groupExpression>
@@ -1768,11 +1778,11 @@
 					<printWhenExpression><![CDATA[$F{numrows_Page1}>$F{numrows_Page2}]]></printWhenExpression>
 				</reportElement>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
-					<datasetRun subDataset="dsEmptyPage2" uuid="fcedc294-22ed-4007-813e-1765dd5749f8">
+					<datasetRun subDataset="dsEmptyPage2" uuid="840d9877-3d67-4724-97d1-da473db429cc">
 						<datasetParameter name="pCount">
 							<datasetParameterExpression><![CDATA[$F{numrows_Page1}-$F{numrows_Page2}]]></datasetParameterExpression>
 						</datasetParameter>
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/СведДох/ДохВыч/СвСумДох/СвСумВыч")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource($V{vEmptyDataSource})]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="12" width="289">
 						<textField isBlankWhenNull="true">
