@@ -97,7 +97,7 @@
                             <label class="control-label">{{'title.document.code' | translate}}</label>
                         </div>
                         <div>
-                            <ui-select ng-model="entity.document.code" required>
+                            <ui-select ng-model="entity.documentCode" required>
                                 <ui-select-match allow-clear="false">
                                     <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
                                 </ui-select-match>
@@ -112,7 +112,7 @@
                             <label class="control-label">{{'title.document.number' | translate}}</label>
                         </div>
                         <div>
-                            <input data-ng-model="entity.document.number" required
+                            <input data-ng-model="entity.documentNumber" required
                                    type="text" class="form-control"
                                    title="{{entity.document.number}}"/>
                         </div>
@@ -156,7 +156,7 @@
                             <ui-select-match allow-clear="false">
                                 <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
                             </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.subjectList track by $index">
+                            <ui-select-choices repeat="item in dialogDataStub.subjectCodeList track by $index">
                                 <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                             </ui-select-choices>
                         </ui-select>
@@ -164,14 +164,14 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.district' | translate}}</label>
+                        <label class="control-label">{{'title.area' | translate}}</label>
                     </div>
                     <div>
-                        <ui-select ng-model="entity.district" required>
+                        <ui-select ng-model="entity.area" required>
                             <ui-select-match allow-clear="false">
                                 <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
                             </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.districtList track by $index">
+                            <ui-select-choices repeat="item in dialogDataStub.areaList track by $index">
                                 <span data-ng-bind-html="item.name | highlight: $select.search"></span>
                             </ui-select-choices>
                         </ui-select>
@@ -227,19 +227,19 @@
                         <label class="control-label">{{'title.index' | translate}}</label>
                     </div>
                     <div>
-                        <input data-ng-model="entity.codeSub.index" required
+                        <input data-ng-model="entity.index" required
                                type="text" class="form-control"
                                title="{{entity.index}}"/>
                     </div>
                 </div>
                 <div style="float: left; width: 80px;">
                     <div>
-                        <label class="control-label">{{'title.house' | translate}}</label>
+                        <label class="control-label">{{'title.building' | translate}}</label>
                     </div>
                     <div>
-                        <input data-ng-model="entity.house" required
+                        <input data-ng-model="entity.building" required
                                type="text" class="form-control"
-                               title="{{entity.house}}"/>
+                               title="{{entity.building}}"/>
                     </div>
                 </div>
                 <div style="width: 80px; display: inline-block; margin-left: 15px;">
@@ -271,7 +271,7 @@
             class="btn btn-danger"
             data-ng-disabled="createOrEditFLForm.$invalid"
             ng-click="save()">
-        {{'common.button.add' | translate}}
+        {{buttonTitle}}
     </button>
     <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{'common.button.cancel' |
         translate}}

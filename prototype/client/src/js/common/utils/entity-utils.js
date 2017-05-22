@@ -4,132 +4,11 @@
     angular
         .module('aplana.entity-utils', [
             'ui.grid',
-            'ngAnimate',
-            'aplana.dialogs'
+            'ngAnimate'
         ])
-        .factory('aplanaEntityUtils', ['$log', '$window', '$http', 'aplanaDialogs', 'USER_DATA', 'APP_CONSTANTS', '$q', '$location', '$timeout', 'Overlay',
-            function ($log, $window, $http, aplanaDialogs, USER_DATA, APP_CONSTANTS, $q, $location, $timeout, Overlay) {
+        .factory('aplanaEntityUtils', ['$log', '$window', '$http', 'USER_DATA', 'APP_CONSTANTS', '$q', '$location', '$timeout', 'Overlay',
+            function ($log, $window, $http, USER_DATA, APP_CONSTANTS, $q, $location, $timeout, Overlay) {
                 var commonRestUrl = "rest/entity/"; //базовая ссылка на CommonRestController
-
-                //Экзепляры getReport и getReportByUrl для привязки контекста
-                var getReportWithContext = _getReport;
-                var getReportByUrlWithContext = _getReportByUrl;
-
-
-                /**
-                 * Возвращает список идентификаторов объектов в виде строки. Разделитель - запятая
-                 *
-                 * @param entities список объектов
-                 * @returns {string} список идентификаторов, разделенных запятой
-                 */
-                function getEntityIds(entities) {
-                    var result = [];
-                    entities.forEach(function (entity) {
-                        result.push(entity.id);
-                    });
-                    return result.join(", ");
-                }
-
-                /**
-                 * Возвращает для таблицы список идентификаторов объектов в выделенных строках
-                 *
-                 * TODO - если найдется другой способ, переделать
-                 * Заменил проверку if (gridApi.constructor.name == "GridApi") на if (gridApi.selection != undefined),
-                 * т.к. IE не поддерживает constructor.name.
-                 *
-                 * @param gridApi данные о таблице
-                 * @returns {string} список идентификаторов, разделенных запятой
-                 */
-                function getSelectedEntityIds(gridApi) {
-                    if (gridApi.selection != undefined) {
-                        return getEntityIds(gridApi.selection.getSelectedRows());
-                    } else {
-                        return "";
-                    }
-                }
-
-                /**
-                 * Сформировать отчет по указанным параметрам. Приватная версия
-                 *
-                 * @param gridApi ссылка на таблицу, если требуется отображать в отчете только выделенные строки
-                 * @param reportType тип отчета, можно использовать краткое название класса "MacroRegion", "Remains" и т.д.
-                 * @param entityId (опционально) идентификатор объекта, для которого формируется отчет
-                 * @param reportKind (опционально) вид отчета, произвольная строка, например: "xlsx", "csv", "pdf", .... По умолчанию "xlsx"
-                 * @param filterParams (опционально) дополнительные параметры формирования отчета (фильтрация данных)
-                 */
-                function _getReport(gridApi, reportType, entityId, reportKind, filterParams) {
-                    //Есть нужный контекст, то параметры запроса тянем из него
-                    if (!this || !this.params) {
-                        var params = angular.extend({}, filterParams ? filterParams : {});
-                    } else {
-                        var params = angular.extend({}, this.params ? this.params : {});
-                    }
-
-                    params.reportType = reportType;
-                    if (entityId) {
-                        params.entityId = entityId
-                    }
-                    params.reportKind = reportKind ? reportKind : 'xlsx';
-                    delete params.paging; // убираем параметры пейджинга
-                    if (gridApi && gridApi.grid.selection.selectedCount != 0) { // если есть выделенные строки, то только их
-                        params.id = getSelectedEntityIds(gridApi)
-                    }
-                    //Преобразование формата даты в нормально передающийся через $window.location
-                    for (var key in params) {
-                        if (params[key] instanceof Date) {
-                            params[key] = params[key].format("yyyy-mm-dd")
-                        }
-                    }
-                    //Удаление пустых значений
-                    for (var key in params) {
-                        if (!params[key] && !(typeof params[key] == 'number' && params[key] == 0) || (typeof params[key] == 'string' && params[key].trim().length == 0)) {
-                            delete params[key]
-                        }
-                    }
-                    $window.location = 'rest/service/reportService/getReport?' + $.param(params)
-                }
-
-                function _getReportByUrl(url, filterParams, reportKind) {
-                    if (!this || !this.params) {
-                        var params = angular.extend({}, filterParams ? filterParams : {});
-                    } else {
-                        var params = angular.extend({}, this.params ? this.params : {});
-                    }
-
-                    params.reportKind = reportKind ? reportKind : 'xlsx';
-                    delete params.paging; // убираем параметры пейджинга
-                    //Преобразование формата даты в нормально передающийся через $window.location
-                    for (var key in params) {
-                        if (params[key] instanceof Date) {
-                            params[key] = params[key].format("yyyy-mm-dd")
-                        }
-                    }
-                    $window.location = url + '?' + $.param(params)
-                }
-
-                /**
-                 * Публичная функция-обёртка для вызова _getReport с привязанным контекстом
-                 * @param gridApi
-                 * @param reportType
-                 * @param entityId
-                 * @param reportKind
-                 * @param filterParams
-                 */
-                function getReport(gridApi, reportType, entityId, reportKind, filterParams) {
-                    getReportWithContext(gridApi, reportType, entityId, reportKind, filterParams);
-                }
-
-                /**
-                 * Функция-обёртка для вызова getReportByUrl с контекстом
-                 * @param url
-                 * @param filterParams
-                 * @param reportKind
-                 */
-                function getReportByUrl(url, filterParams, reportKind) {
-                    getReportByUrlWithContext(url, filterParams, reportKind);
-                }
-
-
                 /**
                  * Служебная функция для отправки запроса на получения списков сущностей с сервера и заполнения им переданного масива.
                  * @param url адрес REST-сервиса для получения списка
@@ -226,18 +105,6 @@
 
                     $log.info(angular.toJson(params));
                     return params;
-                }
-
-                /**
-                 * Функция для заполнения метаданных таблицы
-                 * @param scope объект, содержащиё параметры запроса. Как правило - $scope.dataOptions
-                 * @param metaData метаданные
-                 */
-                function setMetaData(scope, metaData) {
-                    scope.metaData = {};
-                    metaData.forEach(function (field) {
-                        scope.metaData[field.name] = field;
-                    });
                 }
 
                 /**
@@ -378,8 +245,6 @@
                                     }
                                     scope.rowsRenderedTimeout = $timeout(function () {
                                         heightRowsChanged = calculateAutoHeight('', scope.gridApi.grid, heightRowsChanged);
-                                        //Восстанавливаем выделение строк, если оно было
-                                        restoreSelection(scope);
                                     });
                                 });
                                 scope.gridApi.core.on.scrollEnd(scope, function () {
@@ -388,14 +253,6 @@
                             }
                         };
                     }
-                }
-
-                /**
-                 * Функция для очистки выделения в таблице
-                 * @param gridApi ссылка на API таблицы (как правило, $scope.gridApi)
-                 */
-                function clearGridSelection(gridApi) {
-                    gridApi.selection.clearSelectedRows();
                 }
 
                 /**
@@ -496,29 +353,6 @@
                 }
 
                 /**
-                 * Устанавливает значение поля в объекте.
-                 * Имя поля может быть задано как путь внутри объекта. Например: role.name
-                 * @param object объект, в котором нужно установить значение поля
-                 * @param value значение
-                 * @param field название поля
-                 */
-                function setFieldValue(object, value, field) {
-                    if (field.indexOf('.') != -1) {
-                        //Имя представляет собой путь внутри полей объекта
-                        var currentField = value;
-                        field.split('.').forEach(function (fieldName) {
-                            if (currentField) {
-                                currentField = currentField[fieldName];
-                            }
-                        });
-                        currentField = value;
-                    } else {
-                        //Просто имя поля
-                        object[field] = value;
-                    }
-                }
-
-                /**
                  * Получает значение поля из объекта.
                  * Имя поля может быть задано как путь внутри объекта. Например: role.name
                  * @param object объект, из которого нужно получить значение поля
@@ -542,29 +376,6 @@
                 }
 
                 /**
-                 * Устанавливает значение поля в объекте.
-                 * Имя поля может быть задано как путь внутри объекта. Например: role.name
-                 * @param object объект, в котором нужно установить значение поля
-                 * @param value значение
-                 * @param field название поля
-                 */
-                function setFieldValue(object, value, field) {
-                    if (field.indexOf('.') != -1) {
-                        //Имя представляет собой путь внутри полей объекта
-                        var currentField = value;
-                        field.split('.').forEach(function (fieldName) {
-                            if (currentField) {
-                                currentField = currentField[fieldName];
-                            }
-                        });
-                        currentField = value;
-                    } else {
-                        //Просто имя поля
-                        object[field] = value;
-                    }
-                }
-
-                /**
                  * Функция для обновления внешнего вида таблицы
                  * @param scope ссылка на $scope, либо на $scope.dataOptions (или аналог)
                  */
@@ -579,7 +390,6 @@
                         displayData.push(getRowView(scope, row));
                     });
                     scope.gridOptions.data = displayData;
-                    clearGridSelection(scope.gridApi)
                 }
 
                 /**
@@ -811,10 +621,6 @@
                         scope.tempEntityView = angular.extend({}, scope.currentEntityView);
                     }
 
-                    if (gridApi.grid.selection.selectedCount > 0) {
-                        saveSelection(scope);
-                    }
-
                     //Действия, которые нужно выполнить после обновления текущей строки, например, переопределить доступность кнопок.
                     if (callback && (typeof callback) == "function") {
                         callback();
@@ -838,54 +644,10 @@
                 }
 
                 /**
-                 * Функция для проверки наличия у текущей роли текущего пользователя хотя бы одной нужной операции.
-                 * @param (array) operation операции, которые нужно проверить, константа из класса Operation
-                 * @returns {boolean}
-                 */
-                function checkOneOperation(operation) {
-                    if (!operation || operation.length == 0) {
-                        return false;
-                    }
-
-                    return operation.reduce(function (result, operation) {
-                        result = result || USER_DATA.authorities.indexOf(operation) >= 0
-                        return result;
-                    }, false);
-                }
-
-                /**
                  * Инициализирует переменные сессии для текущего раздела
                  */
                 function initPageSession(scope, callback) {
-                    sessionStorage.removeItem(APP_CONSTANTS.SESSION.SELECTED_IDS);
                     return restoreFilter(scope, callback)
-                }
-
-                /**
-                 * Запоминает выделенные строки таблицы в сессии
-                 */
-                function saveSelection(scope) {
-                    var ids = [];
-                    scope.gridApi.selection.getSelectedRows().forEach(function (row) {
-                        ids.push(row.id);
-                    });
-                    sessionStorage.setItem(APP_CONSTANTS.SESSION.SELECTED_IDS, JSON.stringify(ids));
-                }
-
-                /**
-                 * Восстанавлиет выделенные строки таблицы из сессии
-                 */
-                function restoreSelection(scope) {
-                    var ids = JSON.parse(sessionStorage.getItem(APP_CONSTANTS.SESSION.SELECTED_IDS));
-                    if (ids) {
-                        scope.gridOptions.data.forEach(function (row) {
-                            ids.forEach(function (id) {
-                                if (row.id == id) {
-                                    scope.gridApi.selection.selectRow(row);
-                                }
-                            });
-                        });
-                    }
                 }
 
                 /**
@@ -916,7 +678,7 @@
                             var filterListUrl = url + "#filterList";
                             for (var item in sessionStorage) {
                                 //Очищаем сохраненные фильтры для других разделов
-                                if (sessionStorage.hasOwnProperty(item) && item != APP_CONSTANTS.SESSION.SELECTED_IDS &&
+                                if (sessionStorage.hasOwnProperty(item) &&
                                     url.split("/")[1] != item.split("/")[1] && item != url && item != filterListUrl) {
                                     sessionStorage.removeItem(item);
                                 }
@@ -1091,25 +853,6 @@
                 }
 
                 /**
-                 * Возвращает список объектов, соответствующих выделенным строкам в таблице
-                 * @param scope
-                 * @returns {Array}
-                 */
-                function getSelectedEntities(scope) {
-                    var result = [];
-                    if (scope.gridApi.selection != undefined) {
-                        scope.gridApi.selection.getSelectedRows().forEach(function (row) {
-                            scope.dataOptions.data.forEach(function (entity) {
-                                if (row.id == entity.id) {
-                                    result.push(entity);
-                                }
-                            });
-                        });
-                    }
-                    return result;
-                }
-
-                /**
                  * Применяет функцию ко всем выделенным строкам таблицы
                  * @param scope - скоуп с данными таблицы
                  * @param f - функция
@@ -1124,166 +867,6 @@
                             });
                         });
                     }
-                }
-
-                /**
-                 * Проверяет что все выделенные строки в таблице имеют одно и то же значение в указанном поле.
-                 * Дополнительным параметром можно указать значение, которое должно быть в этом поле (совпадать у всех строк)
-                 * @param scope скоуп, в котором содержится конфиг таблицы
-                 * @param field путь до поля внутри объекта
-                 * @param requiredValue (необязательное) если указано - сравнивается со значениями поля всех строк (должно совпадать)
-                 */
-                function isSelectionHasSameValue(scope, field, requiredValue) {
-                    var currentValue = undefined;
-                    var hasEmpty = false;
-                    var selectedItems = getSelectedEntities(scope);
-                    if (selectedItems.length == 1) {
-                        if (requiredValue) {
-                            //Если выбрана одна строка, то проверяем ее значение в поле
-                            return isSelectionHasValue(scope, field, [requiredValue])
-                        } else {
-                            //Если искомое значение не указано и выбрана одна строка, то сравнивать нет смысла
-                            return true;
-                        }
-                    }
-                    for (var i = 0; i < selectedItems.length; i++) {
-                        //Проверяем каждую строку на соответствие требуемому значению + сравниваем между собой
-                        var item = selectedItems[i];
-                        var value = getFieldValue(item, field);
-                        if (value != undefined) {
-                            if (hasEmpty) {
-                                return false;
-                            }
-                            if (currentValue == undefined) {
-                                currentValue = value;
-                            } else {
-                                if (JSON.stringify(currentValue) !== JSON.stringify(value)
-                                    || (requiredValue && JSON.stringify(value) !== JSON.stringify(requiredValue))) {
-                                    return false;
-                                }
-                            }
-                        } else {
-                            if (requiredValue && JSON.stringify(value) !== JSON.stringify(requiredValue)) {
-                                return false;
-                            }
-                            hasEmpty = true;
-                        }
-                    }
-                    return true;
-                }
-
-                /**
-                 * Проверяет что все выделенные строки в таблице имеют значение из списка в указанном поле.
-                 * Список возможных значений указывается параметром, если не указан - то проверяется что значение поля непустое
-                 * @param scope скоуп, в котором содержится конфиг таблицы
-                 * @param field путь до поля внутри объекта
-                 * @param requiredValues (необязательное) массив значений для сравнения со всеми остальными. Если не указано, то проверяется, что значение поля - непустое
-                 */
-                function isSelectionHasValue(scope, field, requiredValues) {
-                    var selectedItems = getSelectedEntities(scope);
-                    if (selectedItems.length == 0) {
-                        return false;
-                    }
-                    for (var i = 0; i < selectedItems.length; i++) {
-                        var item = selectedItems[i];
-                        if (!isObjectHasValue(item, field, requiredValues)) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-
-                /**
-                 * Проверяет что указанный объект имеет определенное значение в указанном поле.
-                 * Список возможных значений указывается параметром, если не указан - то проверяется что значение поля непустое
-                 * @param object объект, в котором надо найти значение
-                 * @param field путь до поля внутри объекта
-                 * @param requiredValues (необязательное) массив значений для сравнения со всеми остальными. Если не указано, то проверяется, что значение поля - непустое
-                 */
-                function isObjectHasValue(object, field, requiredValues) {
-                    var value = getFieldValue(object, field);
-                    if (requiredValues) {
-                        //Если искомые значения указаны - ищем их
-                        if (value != undefined) {
-                            return hasValueInArray(value, requiredValues)
-                        }
-                    } else {
-                        //Иначе - достаточно, что значение поля непустое
-                        return value !== undefined && value != null;
-                    }
-                }
-
-                /**
-                 * Проверяет существование элемента в массиве
-                 * @param value значение элемента
-                 * @param requiredValues массив элементов
-                 */
-                function hasValueInArray(value, requiredValues) {
-                    if (requiredValues) {
-                        var hasInArray = false;
-                        for (var j = 0; j < requiredValues.length; j++) {
-                            var requiredValue = requiredValues[j];
-                            if (JSON.stringify(requiredValue) === JSON.stringify(value)) {
-                                hasInArray = true;
-                            }
-                        }
-                        return hasInArray;
-                    } else {
-                        return value !== undefined
-                    }
-                }
-
-                /**
-                 * Проверяет что все какой либо строке таблицы есть указанное значение в нужном поле.
-                 * @param scope скоуп, в котором содержится конфиг таблицы
-                 * @param field (необязательное) путь до поля внутри объекта. Если не указано - проверется, есть ли вообще в таблице значения
-                 * @param requiredValues (необязательное) массив значений. Если не указано - проверется, есть ли вообще в таблице значения
-                 */
-                function isTableHasValue(scope, field, requiredValues) {
-                    if (!field || !requiredValues || requiredValues.length == 0) {
-                        return scope.dataOptions.data.length > 0
-                    }
-                    for (var i = 0; i < scope.dataOptions.data.length; i++) {
-                        var item = scope.dataOptions.data[i];
-                        if (isObjectHasValue(item, field, requiredValues)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
-                /**
-                 * Функция возвращает дату в формате дд.мм.гггг
-                 * @param date
-                 */
-                function getDateStr(date) {
-                    if (!date) {
-                        return null;
-                    }
-                    var result = "";
-                    if (typeof date != "string") {
-                        var tmpDate = date;
-                        if (typeof date === "number") {
-                            tmpDate = new Date(date);
-                        }
-                        result += tmpDate.getDate() < 10 ? "0" + tmpDate.getDate() : tmpDate.getDate();
-                        result += ".";
-                        result += tmpDate.getMonth() + 1 < 10 ? "0" + (tmpDate.getMonth() + 1) : tmpDate.getMonth() + 1;
-                        result += ".";
-                        result += tmpDate.getFullYear();
-                    } else {
-                        var dateElts = date.split("-");
-                        result = dateElts[2] + "." + dateElts[1] + "." + dateElts[0];
-                    }
-                    return result;
-                }
-
-                /**
-                 * Проверяет наличие прав/роли у текущего пользователя
-                 * @param role
-                 */
-                function hasRole(role) {
-                    return $.inArray(role, USER_DATA.authorities) !== -1;
                 }
 
                 /**
@@ -1303,13 +886,48 @@
                     return pageSizes;
                 }
 
+                /**
+                 * Возвращает список объектов, соответствующих выделенным строкам в таблице
+                 * @param scope
+                 * @returns {Array}
+                 */
+                function getSelectedEntities(scope) {
+                    var result = [];
+                    if (scope.gridApi.selection != undefined) {
+                        scope.gridApi.selection.getSelectedRows().forEach(function (row) {
+                            scope.dataOptions.data.forEach(function (entity) {
+                                if (row.id == entity.id) {
+                                    result.push(entity);
+                                }
+                            });
+                        });
+                    }
+                    return result;
+                }
+
+                /**
+                 * Проверяет что все какой либо строке таблицы есть указанное значение в нужном поле.
+                 * @param scope скоуп, в котором содержится конфиг таблицы
+                 * @param field (необязательное) путь до поля внутри объекта. Если не указано - проверется, есть ли вообще в таблице значения
+                 * @param requiredValues (необязательное) массив значений. Если не указано - проверется, есть ли вообще в таблице значения
+                 */
+                function isTableHasValue (scope, field, requiredValues) {
+                    if (!field || !requiredValues || requiredValues.length == 0) {
+                        return scope.dataOptions.data.length > 0
+                    }
+                    for (var i = 0; i < scope.dataOptions.data.length; i++) {
+                        var item = scope.dataOptions.data[i];
+                        if (isObjectHasValue(item, field, requiredValues)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
                 return {
                     commonRestUrl: commonRestUrl,
 
                     //Функции для работы с данными
-                    getEntityIds: getEntityIds,
-                    getSelectedEntityIds: getSelectedEntityIds,
-                    getReport: getReport,
                     getEntityList: getEntityList,
                     getEntity: getEntity,
                     getSort: getSort,
@@ -1326,35 +944,24 @@
                     sendRequestForCreate: sendRequestForCreate,
                     getDataByView: getDataByView,
                     getFieldValue: getFieldValue,
-                    setFieldValue: setFieldValue,
-                    isObjectHasValue: isObjectHasValue,
-                    getDateStr: getDateStr,
-                    getReportByUrl: getReportByUrl,
 
                     //Функции для работы с правами
-                    hasRole: hasRole,
                     checkOperation: checkOperation,
-                    checkOneOperation: checkOneOperation,
 
                     //Функции для работы с гридами
                     initGrid: initGrid,
                     fillGrid: fillGrid,
-                    clearGridSelection: clearGridSelection,
                     setCurrentRow: setCurrentRow,
                     fetchData: fetchData,
-                    getSelectedEntities: getSelectedEntities,
                     processSelectedEntities: processSelectedEntities,
-                    isSelectionHasSameValue: isSelectionHasSameValue,
-                    isSelectionHasValue: isSelectionHasValue,
-                    isTableHasValue: isTableHasValue,
                     getPageSizes: getPageSizes,
                     calculateAutoHeight: calculateAutoHeight,
                     fitColumnsWidth: fitColumnsWidth,
+                    isTableHasValue: isTableHasValue,
+                    getSelectedEntities: getSelectedEntities,
 
                     //Функции работы с данными сессии
                     initPageSession: initPageSession,
-                    saveSelection: saveSelection,
-                    restoreSelection: restoreSelection,
                     saveFilter: saveFilter,
                     restoreFilter: restoreFilter
                 };

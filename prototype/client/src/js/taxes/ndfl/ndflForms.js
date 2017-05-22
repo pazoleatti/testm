@@ -10,8 +10,8 @@
             })
         }])
         .controller('ndflFormsCtrl', [
-            '$scope', '$timeout', 'aplanaEntityUtils', '$state', 'aplanaDialogs',
-            function ($scope, $timeout, aplanaEntityUtils, $state, aplanaDialogs) {
+            '$scope', '$timeout', 'aplanaEntityUtils', '$state', 'dialogs',
+            function ($scope, $timeout, aplanaEntityUtils, $state, dialogs) {
                 $scope.customGridColumnsBuilder = function (dataOptions, gridOptions) {
                     for (var fieldName in dataOptions.metaData) {
                         var field = dataOptions.metaData[fieldName];
@@ -264,43 +264,17 @@
                  */
                     //Создать
                 $scope.createButtonClick = function () {
-                    var metaData = [
-                        {
-                            "name": "period",
-                            "type": "com.ndlf.model.Period",
-                            "displayField": "name",
-                            "predefinedValues": $scope.dataOptions.filterList.periodList,
-                            "title": "Период",
-                            "width": 20,
-                            "order": 1
-                        },
-                        {
-                            "name": "department",
-                            "type": "com.ndlf.model.Department",
-                            "displayField": "name",
-                            "predefinedValues": $scope.dataOptions.filterList.departmentList,
-                            "title": "Подразделение",
-                            "width": 40,
-                            "order": 2
-                        },
-                        {
-                            "name": "formKind",
-                            "type": "com.ndlf.model.FormKind",
-                            "displayField": "name",
-                            "predefinedValues": $scope.dataOptions.filterList.formKindList,
-                            "title": "Вид налоговой формы",
-                            "width": 35,
-                            "order": 3
-                        }
-                    ];
+                    var params = {};
+                    jQuery.extend(params, $scope.dataOptions);
 
-                    var values = {
-                        period: $scope.dataOptions.filterList.periodList[0],
-                        department: $scope.dataOptions.filterList.departmentList[0],
-                        formKind: $scope.dataOptions.filterList.formKindList[0]
+                    var data = {
+                        scope: angular.copy(params)
                     };
-
-                    var dlg = aplanaDialogs.editObject('Создание новой записи', null, metaData, values);
+                    var opts = {
+                        copy: true,
+                        windowClass: 'fl-modal-window'
+                    };
+                    var dlg = dialogs.create('js/taxes/ndfl/createFormDialog.html', 'createFormCtrl', data, opts);
                     return dlg.result.then(function (entity) {
                         //Заглушка создания новой записи
                         entity.id = $scope.dataOptions.data[$scope.dataOptions.data.length - 1].id + 1;
@@ -400,6 +374,82 @@
                 $scope.$watchCollection('[dataOptions.filter.fulltext]', function () {
                     aplanaEntityUtils.saveFilter($scope);
                 });
+
+                //Имитация ajax-запроса
+                $scope.searchItems = function (searchText) {
+                    $timeout(function () {
+                        if (searchText == ""){
+                            $scope.dataOptions.filterList = {
+                                periodList: [{id: 1, name: '2017; 1 квартал'}, {id: 2, name: '2017; 2 квартал'}, {
+                                    id: 3,
+                                    name: '2017; 3 квартал'
+                                }, {id: 4, name: '2017; 4 квартал'}],
+                                departmentList: [{id: 1, name: 'Иркутское отделение №8586 ПАО Сбербанк'}, {
+                                    id: 2,
+                                    name: 'Читинское отделение №8600 ПАО Сбербанк'
+                                }, {id: 3, name: 'Якутское отделение №8603 ПАО Сбербанк'}, {
+                                    id: 4,
+                                    name: 'ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара)'
+                                }],
+                                formTypeList: [{id: 1, name: 'Первичная'}, {id: 2, name: 'Консолидированная'}],
+                                formKindList: [{id: 1, name: 'РНУ НДФЛ (первичная)'}, {id: 2, name: 'РНУ НДФЛ (консолидированная)'}, {id: 3, name: '6-НДФЛ'}],
+                                asnuList: [{id: 1, name: 'АС \"SAP\"'}, {id: 2, name: 'АС \"Депозитарий\"'}],
+                                stateList: [{id: 1, name: 'Создана'}, {id: 2, name: 'Подготовлена'}, {id: 3, name: 'Принята'}]
+                            };
+                        } else {
+                            for (var i = 0; i < $scope.dataOptions.filterList.departmentList.length; i++) {
+                                var entity = $scope.dataOptions.filterList.departmentList[i];
+                                if (entity.name.toLowerCase().indexOf(searchText.toLowerCase()) == -1) {
+                                    $scope.dataOptions.filterList.departmentList.splice(i, 1);
+                                    i--;
+                                }
+                            }
+                        }
+                    }, 250);
+                };
             }])
-    ;
+
+        /**
+         * Контроллер формы создания/редактирования ФЛ
+         */
+        .controller('createFormCtrl', ["$scope", "$http", "$uibModalInstance", "$alertService", "$translate", 'data',
+            function ($scope, $http, $uibModalInstance, $alertService, $translate, data) {
+                initDialog();
+
+                /**
+                 * Инициализация первичных данных
+                 */
+                function initDialog() {
+                    //Получаем scope из главного окна
+                    $scope.parentScope = undefined;
+                    try {
+                        $scope.parentScope = $scope.$resolve.data.scope;
+                    } catch (ex) {
+                    }
+
+                    $scope.entity = {
+                        period: $scope.parentScope.filterList.periodList[0],
+                        department: $scope.parentScope.filterList.departmentList[0],
+                        formKind: $scope.parentScope.filterList.formKindList[0]
+                    };
+
+                    $translate('header.ndfl.form.create').then(function (header) {
+                        $scope.header = header;
+                    });
+                }
+
+                /**
+                 * Обработчики событий
+                 */
+                    //Сохранение данных
+                $scope.save = function () {
+                    //TODO: Send request to server for create/update data
+                    $uibModalInstance.close($scope.entity)
+                };
+
+                //Закрытие окна
+                $scope.cancel = function () {
+                    $uibModalInstance.dismiss('Canceled');
+                }
+            }])
 }());

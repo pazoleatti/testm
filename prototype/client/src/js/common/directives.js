@@ -22,59 +22,6 @@
         }])
 
         /**
-         * Обработка скролла выпадашки, трубется для загрузки содержимого выпадашки порциями. Необходимо для фикса тормозов в IE, если в выпадашке несколько сотен строк
-         * в атрибуте on-scroll-complete указывается функция для загрузки следующей порции данных
-         */
-        .directive('onScrollComplete',  ['$timeout', function ($timeout) {
-            return function (scope, elm, attr) {
-                var raw = elm[0];
-                var delay = false;
-
-                elm.bind('scroll', function (event) {
-                    var percent = Math.abs((raw.scrollTop / (raw.offsetHeight - raw.scrollHeight)) * 100);
-                    if (!delay || delay && percent >= 100) {
-                        delay = true;
-                        $timeout(function () {
-                            delay = false
-                        }, 100);
-                        if (percent > attr.scrollPercent) {
-                            scope.$apply(attr.onScrollComplete)
-                        }
-                    }
-                });
-            };
-        }])
-
-        /**
-         * Обработка закрытия выпадающего списка
-         * в атрибуте on-select-close указывается имя события, которое нужно передать в верхние scope
-         */
-        .directive('onSelectClose',  ['$timeout', function ($timeout) {
-            return function (scope, elm, attr) {
-                var eventName = attr.onSelectClose;
-
-                scope.$on('uis:close', function(event, data) {
-                    scope.$emit(eventName);
-                })
-            };
-        }])
-
-        /**
-         * Исправляет баг в стандартном компоненте Angular ui-select:
-         * При указании свойства multiply не работает валидация этого поля (например data-ng-required="true")
-         */
-        .directive('requireMultiple', function () {
-            return {
-                require: 'ngModel',
-                link: function postLink(scope, element, attrs, ngModel) {
-                    ngModel.$validators.required = function (value) {
-                        return angular.isArray(value) && value.length > 0;
-                    };
-                }
-            };
-        })
-
-        /**
          * Исправляет баг в datepicker, когда берется локальная дата клиента вместо даты UTC
          */
         .directive('datepickerTimezone', function () {
@@ -204,36 +151,5 @@
                     };
                 }
             };
-        })
-
-        //Исправляет баг: для mu-textarea не работает проверка на обязательность
-        .directive('requiredTextarea', function () {
-            return {
-                require: 'ngModel',
-                link: function postLink(scope, element, attrs, ngModel) {
-                    ngModel.$validators.requiredTextarea = function (value) {
-                        return value.length === 0;
-                    };
-                }
-            };
-        })
-        //Запрещает/разрешает редактирование вложенных input'ов с классом ui-select-search в зависимости от значения атрибута
-        .directive('ngDisableSearch', function () {
-            return {
-                restrict: 'A',
-                multiElement: true,
-                link: function (scope, element, attr) {
-                    scope.$watch(attr.ngDisableSearch, function (value) {
-                        var input = element[0].querySelector("input.ui-select-search");
-                        if (input) {
-                            if (value) {
-                                input.setAttribute("disabled", "disabled");
-                            } else {
-                                input.removeAttribute("disabled");
-                            }
-                        }
-                    })
-                }
-            }
         });
 }());
