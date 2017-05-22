@@ -3736,10 +3736,6 @@ class ColumnFillConditionData {
         dateConditionDataListForBudget << new DateConditionData(["2610", "2640", "2641", "2800"], ["00"],
                 new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
 
-        println "dateConditionDataList ${dateConditionDataList.size()}"
-        dateConditionDataList.each { dlist ->
-            println "${dlist.checker.getClass().getName()}"
-        }
         // Сгруппируем Сведения о доходах на основании принадлежности к плательщику
         def ndflPersonIncomeCache = [:]
         ndflPersonIncomeList.each { ndflPersonIncome ->
@@ -3759,7 +3755,7 @@ class ColumnFillConditionData {
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
                 // СведДох1 Доход.Дата.Начисление (Графа 6)
-                if (dateConditionDataList != null) {
+                if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
                     dateConditionDataList.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                             if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
