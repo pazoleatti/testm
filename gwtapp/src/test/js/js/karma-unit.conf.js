@@ -2,9 +2,9 @@ module.exports = function(config) {
     config.set({
         basePath: '../../../',
         files: [
-            'main/webapp/js/js/lib/jquery-2.2.3.js',
-            'test/js/lib/angular-1.5.5.js',
-            'test/js/lib/angular-mocks-1.5.8.js',
+            'main/webapp/js/js/lib/jquery-3.2.1.js',
+            'test/js/lib/angular-1.5.9.js',
+            'test/js/lib/angular-mocks-1.5.9.js',
             'test/js/lib/underscore-1.8.3.js',
             'main/webapp/js/js/common/utils/*.js',
             'test/js/js/utils/*.spec.js'

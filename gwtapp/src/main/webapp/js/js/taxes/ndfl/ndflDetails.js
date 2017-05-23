@@ -447,7 +447,7 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    var dlg = dialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
+                    var dlg = dialogs.create('js/js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
                     return dlg.result.then(function (entity) {
                         //Заглушка создания новой записи
                         entity.id = $scope.dataOptions.data[$scope.dataOptions.data.length - 1].id + 1;
@@ -491,7 +491,7 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    var dlg = dialogs.create('js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
+                    var dlg = dialogs.create('js/js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
                     return dlg.result.then(function (entity) {
                         //Заглушка редактирования записи
                         for (var i = 0; i < $scope.dataOptions.data.length; i++) {
