@@ -8,7 +8,7 @@
     ])
         .directive('appHeader', function () {
             return {
-                templateUrl: 'js/main/header.html',
+                templateUrl: 'js/js/main/header.html',
                 controller: 'MainMenuController'
             }
         })
@@ -19,7 +19,7 @@
                 scope: {
                     tree: '='
                 },
-                templateUrl: 'js/main/tree.html'
+                templateUrl: 'js/js/main/tree.html'
             };
         })
         .directive('leaf', function($compile) {
@@ -29,7 +29,7 @@
                 scope: {
                     leaf: "="
                 },
-                templateUrl: 'js/main/leaf.html',
+                templateUrl: 'js/js/main/leaf.html',
                 link: function(scope, element, attrs) {
                     if (angular.isArray(scope.leaf.subtree)) {
                         element.append("<tree tree='leaf.subtree'></tree>");
@@ -52,57 +52,80 @@
                     $scope.security.userDep = "Управление налогового планирования";
                 };
 
-                $scope.treeTaxes = [{
-                    name: "НДФЛ",
-                    subtree: [{
-                        name: "Формы",
-                        href: "index.html#/taxes/ndfl/forms"
-                    }, {
-                        name: "Ведение периодов"
-                    }, {
-                        name: "Настройки подразделений"
-                    }, {
-                        name: "Назначение форм"
-                    }, {
-                        name: "Отчетность"
-                    }]
-                }, {
-                    name: "Сервис",
-                    subtree: [{
-                        name: "Загрузить файлы"
-                    }]
-                }, {
-                    name: "Общие параметры"
-                }];
+                $http.get('download/configService/getConfig').then(
+                    function (response) {
+                        $scope.gwtMode = response.data.gwtMode;
 
-                $scope.treeNsi = [{
-                    name: "Справочники"
-                }];
+                        $scope.treeTaxes = [{
+                            name: "НДФЛ",
+                            subtree: [{
+                                name: "Формы",
+                                href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL"
+                            }, {
+                                name: "Ведение периодов",
+                                href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
+                            }, {
+                                name: "Настройки подразделений",
+                                href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
+                            }, {
+                                name: "Назначение форм",
+                                href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
+                            }, {
+                                name: "Отчетность",
+                                href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL;isReports=true"
+                            }]
+                        }, {
+                            name: "Сервис",
+                            subtree: [{
+                                name: "Загрузить файлы",
+                                href: "Main.jsp" + $scope.gwtMode + "#!uploadTransportData"
+                            }]
+                        }, {
+                            name: "Общие параметры",
+                            href: "Main.jsp" + $scope.gwtMode + "#!commonParameter"
+                        }];
 
-                $scope.treeAdministration = [{
-                    name: "Список блокировок"
-                }, {
-                    name: "Журнал аудита"
-                }, {
-                    name: "Список пользователей"
-                }, {
-                    name: "Конфигурационные параметры"
-                }, {
-                    name: "Планировщик задач"
-                }, {
-                    name: "Настройки",
-                    subtree: [{
-                        name: "Макеты налоговых форм"
-                    }, {
-                        name: "Справочники"
-                    }, {
-                        name: "Сбросить кэш"
-                    }, {
-                        name: "Экспорт макетов"
-                    }, {
-                        name: "Импорт скриптов"
-                    }]
-                }];
+                        $scope.treeNsi = [{
+                            name: "Справочники",
+                            href: "Main.jsp" + $scope.gwtMode + "#!refbooklist"
+                        }];
+
+                        $scope.treeAdministration = [{
+                            name: "Список блокировок",
+                            href: "Main.jsp" + $scope.gwtMode + "#!lockList"
+                        }, {
+                            name: "Журнал аудита",
+                            href: "Main.jsp" + $scope.gwtMode + "#!audit"
+                        }, {
+                            name: "Список пользователей",
+                            href: "Main.jsp" + $scope.gwtMode + "#!members"
+                        }, {
+                            name: "Конфигурационные параметры",
+                            href: "Main.jsp" + $scope.gwtMode + "#!configuration"
+                        }, {
+                            name: "Планировщик задач",
+                            href: "Main.jsp" + $scope.gwtMode + "#!taskList"
+                        }, {
+                            name: "Настройки",
+                            subtree: [{
+                                name: "Макеты налоговых форм",
+                                href: "Main.jsp" + $scope.gwtMode + "#!declarationTemplateList"
+                            }, {
+                                name: "Справочники",
+                                href: "Main.jsp" + $scope.gwtMode + "#!refbooklistadmin"
+                            }, {
+                                name: "Сбросить кэш",
+                                href: "cache/clear-cache"
+                            }, {
+                                name: "Экспорт макетов",
+                                href: "download/formTemplate/downloadAll"
+                            }, {
+                                name: "Импорт скриптов",
+                                href: "Main.jsp" + $scope.gwtMode + "#!scriptsImport"
+                            }]
+                        }];
+                    }
+                );
 
                 $scope.security = {};
 
