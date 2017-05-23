@@ -2771,7 +2771,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // СведДох1 Доход.Дата.Начисление (Графа 6)
-            if (dateConditionDataList != null) {
+            if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
                 dateConditionDataList.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
