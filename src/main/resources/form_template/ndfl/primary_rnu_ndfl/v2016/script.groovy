@@ -3313,59 +3313,6 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         ScriptUtils.checkInterrupted();
 
-        // Общ8 Отсутствие пропусков и повторений в нумерации строк
-        time = System.currentTimeMillis();
-
-        List<Integer> rowNumPersonList = ndflPersonService.findDublRowNum("NDFL_PERSON", declarationData.id)
-        def msgErrDubl = getErrorMsgDubl(rowNumPersonList, T_PERSON)
-
-        rowNumPersonList = ndflPersonService.findMissingRowNum("NDFL_PERSON", declarationData.id)
-        def msgErrAbsent = getErrorMsgAbsent(rowNumPersonList, T_PERSON)
-
-        Map<Long, List<Integer>> rowNumPersonIncomeMap = ndflPersonService.findMissingRowNumMap("NDFL_PERSON_INCOME", declarationData.id)
-        Map<Long, List<Integer>> rowNumPersonDeductionMap = ndflPersonService.findMissingRowNumMap("NDFL_PERSON_DEDUCTION", declarationData.id)
-        Map<Long, List<Integer>> rowNumPersonPrepaymentMap = ndflPersonService.findMissingRowNumMap("NDFL_PERSON_PREPAYMENT", declarationData.id)
-
-        Map<Long, List<Integer>> rowNumPersonIncomeDublMap = ndflPersonService.findDublRowNumMap("NDFL_PERSON_INCOME", declarationData.id)
-        Map<Long, List<Integer>> rowNumPersonDeductionDublMap = ndflPersonService.findDublRowNumMap("NDFL_PERSON_DEDUCTION", declarationData.id)
-        Map<Long, List<Integer>> rowNumPersonPrepaymentDublMap = ndflPersonService.findDublRowNumMap("NDFL_PERSON_PREPAYMENT", declarationData.id)
-
-        for (NdflPerson ndflPerson : ndflPersonList) {
-            ScriptUtils.checkInterrupted();
-
-            List<Integer> rowNumPersonIncomeList = rowNumPersonIncomeMap.get(ndflPerson.id)
-            List<Integer> rowNumPersonDeductionList = rowNumPersonDeductionMap.get(ndflPerson.id)
-            List<Integer> rowNumPersonPrepaymentList = rowNumPersonPrepaymentMap.get(ndflPerson.id)
-
-            List<Integer> rowNumPersonIncomeDublList = rowNumPersonIncomeDublMap.get(ndflPerson.id)
-            List<Integer> rowNumPersonDeductionDublList = rowNumPersonDeductionDublMap.get(ndflPerson.id)
-            List<Integer> rowNumPersonPrepaymentDublList = rowNumPersonPrepaymentDublMap.get(ndflPerson.id)
-
-            if (rowNumPersonIncomeList != null || rowNumPersonDeductionList != null || rowNumPersonPrepaymentList != null) {
-                msgErrAbsent += " ПолучДох ИНП=\"" + ndflPerson.inp +"\"."
-                msgErrAbsent += getErrorMsgAbsent(rowNumPersonIncomeList, T_PERSON_INCOME)
-                msgErrAbsent += getErrorMsgAbsent(rowNumPersonDeductionList, T_PERSON_DEDUCTION)
-                msgErrAbsent += getErrorMsgAbsent(rowNumPersonPrepaymentList, T_PERSON_PREPAYMENT)
-            }
-
-            if (rowNumPersonIncomeDublList != null || rowNumPersonDeductionDublList != null || rowNumPersonPrepaymentDublList != null) {
-                msgErrDubl += " ПолучДох ИНП=\"" + ndflPerson.inp +"\"."
-                msgErrDubl += getErrorMsgDubl(rowNumPersonIncomeDublList, T_PERSON_INCOME)
-                msgErrDubl += getErrorMsgDubl(rowNumPersonDeductionDublList, T_PERSON_DEDUCTION)
-                msgErrDubl += getErrorMsgDubl(rowNumPersonPrepaymentDublList, T_PERSON_PREPAYMENT)
-            }
-        }
-
-        msgErrAbsent = msgErrAbsent == "" ? "" : MESSAGE_ERROR_ABSENT + msgErrAbsent
-        msgErrDubl = msgErrDubl == "" ? "" : MESSAGE_ERROR_DUBL + msgErrDubl
-        if (msgErrDubl != "" || msgErrAbsent != "") {
-            //В ТФ имеются пропуски или повторы в нумерации строк.
-            logger.warnExp("Текст ошибки: %s", "Отсутствие пропусков и повторений в нумерации строк", "",
-                    MESSAGE_ERROR_DUBL_OR_ABSENT + msgErrDubl + msgErrAbsent)
-        }
-
-        println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
-        logger.info("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
         println "Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)";
         logger.info("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
     }
