@@ -1727,7 +1727,7 @@ import org.springframework.jdbc.core.RowMapper
         personIncome.incomeCode = toString(node.'@КодДох')
         personIncome.incomeType = toString(node.'@ТипДох')
 
-        personIncome.operationId = toBigDecimal(operationNode.'@ИдОпер')
+        personIncome.operationId = toString(operationNode.'@ИдОпер')
         personIncome.oktmo = toString(operationNode.'@ОКТМО')
         personIncome.kpp = toString(operationNode.'@КПП')
 
@@ -1790,7 +1790,7 @@ import org.springframework.jdbc.core.RowMapper
 
         NdflPersonDeduction personDeduction = new NdflPersonDeduction()
         personDeduction.rowNum = toInteger(node.'@НомСтр')
-        personDeduction.operationId = toBigDecimal(node.parent().'@ИдОпер')
+        personDeduction.operationId = toString(node.parent().'@ИдОпер')
         personDeduction.typeCode = toString(node.'@ВычетКод')
         personDeduction.notifType = toString(node.'@УведТип')
         personDeduction.notifDate = toDate(node.'@УведДата')
@@ -1810,7 +1810,7 @@ import org.springframework.jdbc.core.RowMapper
     NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
         personPrepayment.rowNum = toInteger(node.'@НомСтр')
-        personPrepayment.operationId = toBigDecimal(node.parent().'@ИдОпер')
+        personPrepayment.operationId = toString(node.parent().'@ИдОпер')
         personPrepayment.summ = toBigDecimal(node.'@Аванс')
         personPrepayment.notifNum = toString(node.'@УведНом')
         personPrepayment.notifDate = toDate(node.'@УведДата')
@@ -3683,10 +3683,6 @@ class ColumnFillConditionData {
         dateConditionDataListForBudget << new DateConditionData(["2610", "2640", "2641", "2800"], ["00"],
                 new Column21EqualsColumn7Plus1WorkingDay(), """«Графа 21 Раздел 2» = «Графа 7 Раздел 2» + "1 рабочий день\"""")
 
-        println "dateConditionDataList ${dateConditionDataList.size()}"
-        dateConditionDataList.each { dlist ->
-            println "${dlist.checker.getClass().getName()}"
-        }
         // Сгруппируем Сведения о доходах на основании принадлежности к плательщику
         def ndflPersonIncomeCache = [:]
         ndflPersonIncomeList.each { ndflPersonIncome ->
@@ -3706,7 +3702,7 @@ class ColumnFillConditionData {
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
                 // СведДох1 Доход.Дата.Начисление (Графа 6)
-                if (dateConditionDataList != null) {
+                if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
                     dateConditionDataList.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                             if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
