@@ -3286,24 +3286,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 }
             }
 
-            // Общ10 Соответствие КПП и ОКТМО Тербанку
-            if (ndflPersonIncome.oktmo != null) {
-                def kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
-                if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-
-                    if (kppList == null) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                                "Доход.Источник выплаты.ОКТМО (Графа 8)='${ndflPersonIncome.oktmo ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие КПП и ОКТМО Тербанку", fioAndInp, pathError,
-                                "Значение 'Доход.Источник выплаты.ОКТМО (Графа 8)' не найдено в Справочнике '$R_DETAIL' для подразделения '${department ? department.name : ""}'")
-                    } else {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                                "Доход.Источник выплаты.КПП (Графа 9)='${ndflPersonIncome.kpp ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие КПП и ОКТМО Тербанку", fioAndInp, pathError,
-                                "Значение 'Доход.Источник выплаты.КПП (Графа 9)' не найдено в Справочнике '$R_DETAIL' для подразделения '${department ? department.name : ""}'")
-                    }
-                }
-            }
+            // Общ10 Соответствие КПП и ОКТМО Тербанку выполняется только для КНФ
         }
 
         ScriptUtils.checkInterrupted();
@@ -4344,7 +4327,7 @@ class ColumnFillConditionData {
             // если последний день месяца приходится на выходной, то следующий первый рабочий день
             int offset = 0
             workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-            return workDay == ndflPersonIncome.incomeAccruedDate
+            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
         }
     }
 

@@ -3705,7 +3705,7 @@ class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
         // если последний день месяца приходится на выходной, то следующий первый рабочий день
         int offset = 0
         workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-        return workDay == ndflPersonIncome.incomeAccruedDate
+        return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
     }
 }
 
