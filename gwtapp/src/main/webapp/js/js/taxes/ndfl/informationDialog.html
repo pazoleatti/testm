@@ -4,7 +4,7 @@
         <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{header}}
     </h4>
 </div>
-<div class="modal-body" style="height: 500px; width: 800px;">
+<div class="modal-body information-dialog-body" style="height: 500px; width: 800px;">
     <form role="form" name="createOrEditFLForm" novalidate class="modal-form form-horizontal">
         <div>
 
@@ -14,7 +14,7 @@
                         <label class="control-label">ИНП</label>
                     </div>
                     <div>
-                    <input type="text" class="form-control" />
+                        <input type="text" class="form-control" data-ng-model="entity.inp" />
                     </div>
                 </div>
                 <div style="width: 200px; float: left; margin-left: 20px;">
@@ -22,7 +22,7 @@
                         <label class="control-label">ID операции</label>
                     </div>
                     <div>
-                    <input type="text" class="form-control" />
+                        <input type="text" class="form-control" />
                     </div>
                 </div>
                 <div style="width: 200px; float: left; margin-left: 20px;">
@@ -30,7 +30,7 @@
                         <label class="control-label">Код вычета</label>
                     </div>
                     <div>
-                    <input type="text" class="form-control" />
+                        <input type="text" class="form-control" />
                     </div>
                 </div>
             </div>
