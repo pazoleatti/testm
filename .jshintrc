@@ -1,0 +1,30 @@
+{
+    "curly": true,
+    "eqeqeq": true,
+    "immed": true,
+    "latedef": true,
+    "newcap": true,
+    "noarg": true,
+    "sub": true,
+    "boss": true,
+    "eqnull": true,
+    "strict": false,
+
+    "predef": [
+        "angular",
+        "$",
+        "document",
+        "window",
+        "it",
+        "expect",
+        "element",
+        "browser",
+        "beforeEach",
+        "describe",
+        "_",
+        "module",
+        "console",
+        "afterEach",
+        "inject"
+    ]
+}
