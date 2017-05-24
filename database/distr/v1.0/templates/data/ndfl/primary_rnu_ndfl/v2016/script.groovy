@@ -3905,7 +3905,7 @@ class ColumnFillConditionData {
                         List<NdflPersonIncome> S1List = ndflPersonIncomeCurrentList.findAll {
                             it.incomeAccruedDate <= ndflPersonIncome.incomeAccruedDate &&
                             it.incomeAccruedSumm != null && it.incomeAccruedSumm != 0 &&
-                                    ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate() &&
+                                    ndflPersonIncome.incomeAccruedDate >= getReportPeriodStartDate() && ndflPersonIncome.incomeAccruedDate <= getReportPeriodEndDate() &&
                                     it.taxRate == 13 && it.incomeCode != "1010"
                         } ?: []
                         BigDecimal S1 = S1List.sum { it.taxBase ?: 0 } ?: 0
@@ -3920,7 +3920,7 @@ class ColumnFillConditionData {
                              */
                         List<NdflPersonIncome> S2List = ndflPersonIncomeCurrentList.findAll {
                             it.incomeAccruedDate < ndflPersonIncome.incomeAccruedDate &&
-                            ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate() &&
+                            ndflPersonIncome.incomeAccruedDate >= getReportPeriodStartDate() && ndflPersonIncome.incomeAccruedDate <= getReportPeriodEndDate() &&
                                     it.taxRate == 13 && it.incomeCode != "1010"
                         } ?: []
                         BigDecimal S2 = S2List.sum { it.calculatedTax ?: 0 } ?: 0
