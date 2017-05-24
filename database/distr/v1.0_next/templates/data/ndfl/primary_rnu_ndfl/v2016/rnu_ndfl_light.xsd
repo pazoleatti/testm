@@ -701,7 +701,7 @@ GUID</xs:documentation>
 											</xs:complexType>
 										</xs:element>
 									</xs:sequence>
-									<xs:attribute name="ÈäÎïåð" type="xs:integer" use="required"/>
+									<xs:attribute name="ÈäÎïåð" type="xs:string" use="required"/>
 									<xs:attribute name="ÊÏÏ" use="required">
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
