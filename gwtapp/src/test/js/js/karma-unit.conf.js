@@ -9,14 +9,12 @@ module.exports = function(config) {
             'main/webapp/client/js/common/utils/*.js',
             'test/js/js/utils/*.spec.js'
         ],
-        autoWatch: true,
         singleRun: true,
         frameworks: ['jasmine'],
         browsers: ['IE'],
         plugins: [
             'karma-jasmine',
             'karma-chrome-launcher',
-            'karma-firefox-launcher',
             'karma-ie-launcher',
             'karma-junit-reporter'
         ],
@@ -26,10 +24,6 @@ module.exports = function(config) {
             suite: 'unit',
             useBrowserName: false
         },
-        logLevel: config.LOG_DEBUG,
-        loggers: [
-            {type: 'console'}
-        ],
-        colors: true
+        logLevel: config.LOG_DEBUG
     });
 };

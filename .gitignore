@@ -18,3 +18,4 @@ libpeerconnection.log
 database/distr/*/_logs
 database/distr/*/_bad
 build
+gwtapp/src/karma-unit-report.xml

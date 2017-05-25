@@ -27,8 +27,7 @@ describe('Test filterUtils.', function () {
             ]);
             filter = [];
             service.getSurnameWithInitials("", filter);
-            expect(filter).toEqual([
-            ]);
+            expect(filter).toEqual([]);
             filter = [];
             service.getSurnameWithInitials(null, filter);
             expect(filter).toEqual([]);
