@@ -12,7 +12,7 @@
         .directive('searchClearButtons', function () {
             return {
                 restrict: 'E',
-                templateUrl: 'js/js/common/filter/searchClearButtons.html',
+                templateUrl: 'client/js/common/filter/searchClearButtons.html',
                 scope: {
                     onSearch: '&onSearch',
                     onClear: '&onClear'
@@ -31,7 +31,7 @@
             return {
                 restrict: 'E',
                 ngModel: 'ngModel',
-                templateUrl: 'js/js/common/filter/dateFromToFilter.html',
+                templateUrl: 'client/js/common/filter/dateFromToFilter.html',
                 scope: {
                     ngLabel: '@?',
                     ngFromModel: '=',

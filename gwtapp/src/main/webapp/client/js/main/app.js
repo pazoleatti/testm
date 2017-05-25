@@ -45,7 +45,7 @@
                 $stateProvider
                     .state('/', {
                         url: '/',
-                        templateUrl: 'js/js/main/app.html'
+                        templateUrl: 'client/js/main/app.html'
                     })
 
                 // Настройка источника локализованных сообщений
