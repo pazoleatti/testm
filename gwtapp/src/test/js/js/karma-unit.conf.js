@@ -9,6 +9,7 @@ module.exports = function(config) {
             'main/webapp/client/js/common/utils/*.js',
             'test/js/js/utils/*.spec.js'
         ],
+        autoWatch: true,
         singleRun: true,
         frameworks: ['jasmine'],
         browsers: ['IE'],
