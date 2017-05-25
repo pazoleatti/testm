@@ -99,7 +99,7 @@ public class DeclarationTemplateControllerTest {
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.SUCCESS_UUID.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/declarationTemplate/uploadDect/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/uploadDect/1").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -133,7 +133,7 @@ public class DeclarationTemplateControllerTest {
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.ERROR_UUID.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/declarationTemplate/uploadDect/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/uploadDect/1").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -178,7 +178,7 @@ public class DeclarationTemplateControllerTest {
             expectedJson.put(UuidEnum.ERROR_UUID.toString(), uuid);
             expectedJson.put(UuidEnum.UPLOADED_FILE.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/declarationTemplate/uploadDect/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/uploadDect/1").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -215,7 +215,7 @@ public class DeclarationTemplateControllerTest {
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.SUCCESS_UUID.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/uploadXsd/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/uploadXsd/1").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -239,7 +239,7 @@ public class DeclarationTemplateControllerTest {
 
         String uuid = UUID.randomUUID().toString();
         when(blobDataService.get(uuid)).thenReturn(data);
-        mockMvc.perform(get(String.format("/downloadByUuid/%s", uuid)).header("User-Agent", "msie"))
+        mockMvc.perform(get(String.format("/actions/downloadByUuid/%s", uuid)).header("User-Agent", "msie"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(s))
                 .andExpect(MockMvcResultMatchers.header().string(key, value));

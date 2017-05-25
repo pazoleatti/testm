@@ -38,7 +38,7 @@ public class DeclarationTemplateMainView extends ViewWithUiHandlers<DeclarationT
     interface Binder extends UiBinder<Widget, DeclarationTemplateMainView> { }
 
     interface UrlTemplates extends SafeHtmlTemplates {
-        @Template("download/declarationTemplate/uploadDect/{0}")
+        @Template("controller/actions/declarationTemplate/uploadDect/{0}")
         SafeHtml getUploadDTUrl(int dtId);
     }
 

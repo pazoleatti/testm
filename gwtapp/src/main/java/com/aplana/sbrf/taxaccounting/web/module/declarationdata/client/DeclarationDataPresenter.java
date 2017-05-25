@@ -572,7 +572,7 @@ public class DeclarationDataPresenter
 
     @Override
 	public void downloadXml() {
-		Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xml/"
+		Window.open(GWT.getHostPageBaseURL() + "rest/download/declarationData/xml/"
 				+ declarationId, null, null);
 	}
 
@@ -646,11 +646,11 @@ public class DeclarationDataPresenter
                             } else if (CreateAsyncTaskStatus.EXIST.equals(result.getStatus())) {
                                 switch (type.getReportType()) {
                                     case EXCEL_DEC:
-                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
+                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/declarationData/xlsx/"
                                                 + declarationId);
                                         break;
                                     case SPECIFIC_REPORT_DEC:
-                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/specific/"
+                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/declarationData/specific/"
                                                 + type.getSubreport().getAlias() + "/" + declarationId);
                                         break;
                                     default:

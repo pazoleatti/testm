@@ -364,7 +364,7 @@ public class DeclarationListView extends
                         }
 
                         sb.appendHtmlConstant("<a href=\""
-                                + "download/declarationData/xml/"+
+                                + "controller/actions/declarationData/xml/"+
                                 + declaration.getDeclarationDataId()+"\">"
                                 + declaration.getFileName() + "</a>");
                     }

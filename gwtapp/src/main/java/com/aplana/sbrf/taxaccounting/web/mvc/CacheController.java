@@ -10,12 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Controller
+@RequestMapping(value = "/actions/")
 public class CacheController {
 
 	@Autowired
 	CacheManagerDecorator cacheManagerDecorator;
 
-	@RequestMapping(value = "/clear-cache",method = RequestMethod.GET)
+	@RequestMapping(value = "/cache/clear-cache",method = RequestMethod.GET)
 	public void clearCache(HttpServletResponse resp) throws IOException {
 		cacheManagerDecorator.clearAll();
         resp.setContentType("text/plain");

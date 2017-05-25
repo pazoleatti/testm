@@ -54,7 +54,7 @@ public class UploadControllerTest {
             contentTypeParams.put("boundary", "265001916915724");
             MediaType mediaType = new MediaType("multipart", "form-data", contentTypeParams);
 
-            mockMvc.perform(fileUpload("/uploadController/pattern").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/uploadController/pattern").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")

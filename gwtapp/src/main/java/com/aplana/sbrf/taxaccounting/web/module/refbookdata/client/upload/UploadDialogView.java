@@ -48,7 +48,7 @@ public class UploadDialogView extends ViewWithUiHandlers<UploadDialogUiHandlers>
     @Inject
     public UploadDialogView(Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-        formPanel.setAction(GWT.getHostPageBaseURL() + "upload/uploadController/pattern/");
+        formPanel.setAction(GWT.getHostPageBaseURL() + "controller/actions/uploadController/pattern/");
         formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {

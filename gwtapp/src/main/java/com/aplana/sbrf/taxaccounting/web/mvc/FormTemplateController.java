@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Controller
+@RequestMapping(value = "/actions")
 public class FormTemplateController {
 
 	private static final Log LOG = LogFactory.getLog(FormTemplateController.class);

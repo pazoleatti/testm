@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @RestController
-@RequestMapping(value = "configService", method = RequestMethod.GET, produces = "application/json")
+@RequestMapping(value = "/rest/configService", method = RequestMethod.GET, produces = "application/json")
 @EnableWebMvc
 public class ConfigurationRestController {
 

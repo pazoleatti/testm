@@ -10,7 +10,7 @@
 	<http pattern="/login" security="none"/>
 	<http pattern="/resources/**" security="none"/>
 	<http pattern="/j_security_check" security="none"/>
-    <http pattern="/cache/clear-cache" security="none"/>
+    <http pattern="/controller/actions/cache/clear-cache" security="none"/>
 	<http pattern="/GenericAccountManagementService" security="none"/>
 	<http pattern="/GenericAccountManagementService/**" security="none"/>
 	<http pattern="/TaxAccountingSupportingData" security="none"/>
@@ -19,7 +19,6 @@
     <http pattern="/DepartmentManagementService/**" security="none"/>
 	<http pattern="/AuditManagementService" security="none"/>
 	<http pattern="/AuditManagementService/**" security="none"/>
-    <http pattern="/download/timer/ping/" security="none"/>
 
 	<!--
 		А вот здесь мы уже определяем фильтры аутентификации.

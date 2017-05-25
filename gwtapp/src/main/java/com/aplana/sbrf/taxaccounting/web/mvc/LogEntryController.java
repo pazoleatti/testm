@@ -29,6 +29,7 @@ import java.util.List;
  * @author Dmitriy Levykin
  */
 @Controller
+@RequestMapping(value = "/actions")
 public class LogEntryController {
 
     private static final Log LOG = LogFactory.getLog(LogEntryController.class);
