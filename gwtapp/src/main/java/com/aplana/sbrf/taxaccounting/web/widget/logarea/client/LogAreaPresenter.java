@@ -76,7 +76,7 @@ public class LogAreaPresenter extends
         }
         uuid = event.getUuid();
         if (uuid != null) {
-            getView().setPrintLink(GWT.getHostPageBaseURL() + "download/logEntry/" + uuid);
+            getView().setPrintLink(GWT.getHostPageBaseURL() + "controller/actions/logEntry/" + uuid);
         }
         onRangeChange(0, getView().getLogEntriesView().getPageSize());
     }

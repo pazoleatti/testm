@@ -412,7 +412,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 
 	@Override
 	public void getBlobFromServer(String uuid) {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
+		Window.open(GWT.getHostPageBaseURL() + "controller/actions/downloadBlobController/processLogDownload/" + uuid, "", "");
 	}
 
     @Override

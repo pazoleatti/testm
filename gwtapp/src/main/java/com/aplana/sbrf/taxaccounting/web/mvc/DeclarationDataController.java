@@ -20,7 +20,7 @@ import java.io.*;
 import java.net.URLEncoder;
 
 @Controller
-@RequestMapping(value = "declarationData")
+@RequestMapping(value = "/actions/declarationData")
 public class DeclarationDataController {
 
     @Autowired

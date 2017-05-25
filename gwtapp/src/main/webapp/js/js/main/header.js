@@ -52,7 +52,7 @@
                     $scope.security.userDep = "Управление налогового планирования";
                 };
 
-                $http.get('download/configService/getConfig').then(
+                $http.get('controller/rest/configService/getConfig').then(
                     function (response) {
                         $scope.gwtMode = response.data.gwtMode;
 
@@ -115,10 +115,10 @@
                                 href: "Main.jsp" + $scope.gwtMode + "#!refbooklistadmin"
                             }, {
                                 name: "Сбросить кэш",
-                                href: "cache/clear-cache"
+                                href: "controller/actions/cache/clear-cache"
                             }, {
                                 name: "Экспорт макетов",
-                                href: "download/formTemplate/downloadAll"
+                                href: "controller/actions/formTemplate/downloadAll"
                             }, {
                                 name: "Импорт скриптов",
                                 href: "Main.jsp" + $scope.gwtMode + "#!scriptsImport"

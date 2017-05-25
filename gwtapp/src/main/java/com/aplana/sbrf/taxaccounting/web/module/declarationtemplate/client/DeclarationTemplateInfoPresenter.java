@@ -86,14 +86,14 @@ public class DeclarationTemplateInfoPresenter
     @Override
     public void downloadJrxml() {
         if (declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getJrxmlBlobId() != null && !declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getJrxmlBlobId().isEmpty()) {
-            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getJrxmlBlobId());
+            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/downloadByUuid/" + declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getJrxmlBlobId());
         }
     }
 
     @Override
     public void downloadXsd() {
         if (declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getXsdId() != null && !declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getXsdId().isEmpty()) {
-            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getXsdId());
+            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/downloadByUuid/" + declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getXsdId());
         }
     }
 

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Controller
+@RequestMapping(value = "/actions")
 public class TransportDataController {
     private static final Log LOG = LogFactory.getLog(TransportDataController.class);
 
