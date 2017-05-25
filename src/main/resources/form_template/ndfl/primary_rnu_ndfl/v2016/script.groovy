@@ -1832,7 +1832,7 @@ public class IncomesSheetFiller implements SheetFiller {
     @Override
     void fillSheet(Workbook wb, SheetFillerContext context) {
         List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList();
-        Collections.sort(ndflPersonIncomeList, new Comparator<NdflPersonIncome>() {
+        /*Collections.sort(ndflPersonIncomeList, new Comparator<NdflPersonIncome>() {
             @Override
             int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
                 Date ad1 = (Date) o1.getIncomeAccruedDate();
@@ -1846,7 +1846,7 @@ public class IncomesSheetFiller implements SheetFiller {
                     return pd1.compareTo(pd2);
                 }
             }
-        });
+        });*/
         Sheet sheet = wb.getSheetAt(2);
         int index = 3;
         for (NdflPersonIncome npi : ndflPersonIncomeList) {
