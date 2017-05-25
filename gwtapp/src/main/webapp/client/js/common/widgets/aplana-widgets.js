@@ -20,7 +20,7 @@
                 inputStyle: '@', // для дополнительных настроек виджета даты
                 onBlur: '&'
             },
-            templateUrl: 'js/js/common/widgets/date-picker.html',
+            templateUrl: 'client/js/common/widgets/date-picker.html',
             link: function ($scope, $element, $attributes) {
                 $scope.format = "dd.MM.yyyy";
                 $scope.isOpen = false;

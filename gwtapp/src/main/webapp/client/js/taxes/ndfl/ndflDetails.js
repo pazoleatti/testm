@@ -5,7 +5,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflDetailsForms', {
                 url: '/taxes/ndflDetails/{formId}',
-                templateUrl: 'js/js/taxes/ndfl/ndflDetails.html',
+                templateUrl: 'client/js/taxes/ndfl/ndflDetails.html',
                 controller: 'ndflDetailsFormsCtrl'
             })
         }])
@@ -447,7 +447,7 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    var dlg = dialogs.create('js/js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
+                    var dlg = dialogs.create('client/js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
                     return dlg.result.then(function (entity) {
                         //Заглушка создания новой записи
                         entity.id = $scope.dataOptions.data[$scope.dataOptions.data.length - 1].id + 1;
@@ -467,7 +467,7 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    dialogs.create('js/js/taxes/ndfl/informationDialog.html', 'createOrEditFLCtrl', data, opts);
+                    dialogs.create('client/js/taxes/ndfl/informationDialog.html', 'createOrEditFLCtrl', data, opts);
                 }
 
                 $scope.addInformationData = function() {
@@ -477,7 +477,7 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    dialogs.create('js/js/taxes/ndfl/informationDialog.html', 'createOrEditFLCtrl', data, opts);
+                    dialogs.create('client/js/taxes/ndfl/informationDialog.html', 'createOrEditFLCtrl', data, opts);
                 }
 
                 //Редактировать ФЛ
@@ -494,7 +494,7 @@
                         copy: true,
                         windowClass: 'fl-modal-window'
                     };
-                    var dlg = dialogs.create('js/js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
+                    var dlg = dialogs.create('client/js/taxes/ndfl/createOrEditFlDialog.html', 'createOrEditFLCtrl', data, opts);
                     return dlg.result.then(function (entity) {
                         //Заглушка редактирования записи
                         for (var i = 0; i < $scope.dataOptions.data.length; i++) {

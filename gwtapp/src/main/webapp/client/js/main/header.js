@@ -8,7 +8,7 @@
     ])
         .directive('appHeader', function () {
             return {
-                templateUrl: 'js/js/main/header.html',
+                templateUrl: 'client/js/main/header.html',
                 controller: 'MainMenuController'
             }
         })
@@ -19,7 +19,7 @@
                 scope: {
                     tree: '='
                 },
-                templateUrl: 'js/js/main/tree.html'
+                templateUrl: 'client/js/main/tree.html'
             };
         })
         .directive('leaf', function($compile) {
@@ -29,7 +29,7 @@
                 scope: {
                     leaf: "="
                 },
-                templateUrl: 'js/js/main/leaf.html',
+                templateUrl: 'client/js/main/leaf.html',
                 link: function(scope, element, attrs) {
                     if (angular.isArray(scope.leaf.subtree)) {
                         element.append("<tree tree='leaf.subtree'></tree>");

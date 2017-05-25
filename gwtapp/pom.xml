@@ -270,8 +270,8 @@
                 <artifactId>lesscss-maven-plugin</artifactId>
                 <version>1.7.0.1.1</version>
                 <configuration>
-                    <sourceDirectory>src/main/webapp/js/css</sourceDirectory>
-                    <outputDirectory>${webappDirectory}/js/css</outputDirectory>
+                    <sourceDirectory>src/main/webapp/client/css</sourceDirectory>
+                    <outputDirectory>${webappDirectory}/client/css</outputDirectory>
                     <compress>true</compress>
                     <includes>
                         <include>style.less</include>
@@ -303,11 +303,11 @@
 								<resource>
 									<directory>src/main/webapp</directory>
 									<includes>
-										<include>js/aplana/**</include>
-										<include>js/css/*.css</include>
-										<include>js/css/fonts/*.*</include>
-										<include>js/img/**</include>
-										<include>js/**</include>
+										<include>client/aplana/**</include>
+										<include>client/css/*.css</include>
+										<include>client/css/fonts/*.*</include>
+										<include>client/img/**</include>
+										<include>client/**</include>
 										<include>index.html</include>
 									</includes>
 								</resource>

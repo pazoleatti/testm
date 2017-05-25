@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('aplana.utils', ['ngSanitize']).
-        constant('AplanaTemplatePath', 'js/aplana/templates/').
+        constant('AplanaTemplatePath', 'client/aplana/templates/').
         constant("i18nPath", "aplana/i18n/").
         factory('AplanaUtils', ['AplanaTemplatePath', '$parse', '$sanitize', 'dateFilter', function (AplanaTemplatePath, $parse, $sanitize, dateFilter) {
 

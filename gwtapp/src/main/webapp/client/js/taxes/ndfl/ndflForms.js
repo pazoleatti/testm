@@ -5,7 +5,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflForms', {
                 url: '/taxes/ndfl/forms',
-                templateUrl: 'js/js/taxes/ndfl/ndflForms.html',
+                templateUrl: 'client/js/taxes/ndfl/ndflForms.html',
                 controller: 'ndflFormsCtrl'
             })
         }])
