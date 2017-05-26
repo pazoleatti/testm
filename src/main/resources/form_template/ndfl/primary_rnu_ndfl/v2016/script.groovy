@@ -1,5 +1,17 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.xssf.streaming.SXSSFCell
+import org.apache.poi.xssf.streaming.SXSSFRow
+import org.apache.poi.xssf.streaming.SXSSFSheet
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFRow
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
@@ -7,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
+import com.aplana.sbrf.taxaccounting.model.BlobData
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
@@ -1485,6 +1498,9 @@ def createSpecificReport() {
             createSpecificReportDb();
             scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
             break;
+        case 'rnu_ndfl_person_load_to_excel':
+            loadAllDeclarationDataToExcel()
+            break
         default:
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
     }
@@ -1551,6 +1567,434 @@ String capitalize(String str) {
             .append(Character.toTitleCase(str.charAt(0)))
             .append(str.substring(1).toLowerCase())
             .toString();
+}
+
+/**
+ * Выгрузка в Excel РНУ-НДФЛ
+ */
+public void loadAllDeclarationDataToExcel() {
+
+    ScriptUtils.checkInterrupted();
+    long time = System.currentTimeMillis();
+    long timeTotal = time
+    List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
+    logger.info("Получение записей из таблицы " + T_PERSON + " (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
+    logger.info("Получение записей из таблицы " + T_PERSON_INCOME + " (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
+    logger.info("Получение записей из таблицы " + T_PERSON_DEDUCTION + " (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
+    logger.info("Получение записей из таблицы " + T_PERSON_PREPAYMENT + " (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    String departmentName = departmentService.get(declarationData.departmentId)?.name
+    String reportDate = getReportPeriodEndDate().format("dd.MM.yyyy") + " г."
+    String period = getProvider(RefBook.Id.PERIOD_CODE.getId()).getRecordData(reportPeriod.dictTaxPeriodId)?.NAME?.value
+    String year = getReportPeriodEndDate().format("yyyy") + " г."
+    logger.info("Получение данных о налоговой форме (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerContext context = new SheetFillerContext(departmentName, reportDate, period, year, ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+    Workbook xssfWorkbook = getSpecialReportTemplate()
+    logger.info("Получение шаблона спецотчета (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerFactory.getSheetFiller(0).fillSheet(xssfWorkbook, context)
+    logger.info("Заполнение листа Заголовок (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    Workbook sxssfWorkbook = new SXSSFWorkbook(xssfWorkbook, 100, true)
+
+    SheetFillerFactory.getSheetFiller(1).fillSheet(sxssfWorkbook, context)
+    logger.info("Заполнение листа 1.Реквизиты (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerFactory.getSheetFiller(2).fillSheet(sxssfWorkbook, context)
+    logger.info("Заполнение листа 2. Свед о дох (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerFactory.getSheetFiller(3).fillSheet(sxssfWorkbook, context)
+    logger.info("Заполнение листа 3. Свед о вычет (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerFactory.getSheetFiller(4).fillSheet(sxssfWorkbook, context)
+    logger.info("Заполнение листа 4. Аванс платеж (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    OutputStream writer = null
+    try {
+        writer = scriptSpecificReportHolder.getFileOutputStream()
+        sxssfWorkbook.write(writer)
+    } finally {
+        writer.close()
+        scriptSpecificReportHolder
+                .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+    }
+
+    logger.info("Запись в файл (" + (System.currentTimeMillis() - time) + " мс)");
+    logger.info("Время выгрузки (" + (System.currentTimeMillis() - timeTotal) + " мс)");
+}
+
+/**
+ * Класс инкапсулирующий данные
+ */
+public class SheetFillerContext {
+
+    private String departmentName;
+
+    private String reportDate;
+
+    private String period;
+
+    private String year;
+
+    private List<NdflPerson> ndflPersonList;
+
+    private List<NdflPersonIncome> ndflPersonIncomeList;
+
+    private List<NdflPersonDeduction> ndflPersonDeductionList;
+
+    private List<NdflPersonPrepayment> ndflPersonPrepaymentList;
+
+    private Map<Long, NdflPerson> idNdflPersonMap;
+
+    SheetFillerContext(String departmentName, String reportDate, String period, String year, List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList, List<NdflPersonPrepayment> ndflPersonPrepaymentList) {
+        this.departmentName = departmentName
+        this.reportDate = reportDate
+        this.period = period
+        this.year = year
+        this.ndflPersonList = ndflPersonList
+        this.ndflPersonIncomeList = ndflPersonIncomeList
+        this.ndflPersonDeductionList = ndflPersonDeductionList
+        this.ndflPersonPrepaymentList = ndflPersonPrepaymentList
+    }
+
+    String getDepartmentName() {
+        return departmentName
+    }
+
+    String getReportDate() {
+        return reportDate
+    }
+
+    String getPeriod() {
+        return period
+    }
+
+    String getYear() {
+        return year
+    }
+
+    List<NdflPerson> getNdflPersonList() {
+        return ndflPersonList
+    }
+
+    List<NdflPersonIncome> getNdflPersonIncomeList() {
+        return ndflPersonIncomeList
+    }
+
+    List<NdflPersonDeduction> getNdflPersonDeductionList() {
+        return ndflPersonDeductionList
+    }
+
+    List<NdflPersonPrepayment> getNdflPersonPrepaymentList() {
+        return ndflPersonPrepaymentList
+    }
+
+    Map<Long, NdflPerson> getIdNdflPersonMap() {
+        if (idNdflPersonMap == null) {
+            idNdflPersonMap = new HashMap<>();
+            for (NdflPerson ndflPerson : ndflPersonList) {
+                idNdflPersonMap.put(ndflPerson.getId(), ndflPerson);
+            }
+        }
+        return idNdflPersonMap;
+    }
+}
+
+/**
+ * Интерфейс определяющий заполнение листа и состояние классов реализующих интерфеййс
+ */
+interface SheetFiller {
+
+    void fillSheet(Workbook wb, SheetFillerContext context);
+}
+
+/**
+ * Фабрика для получения экземплярая SheetFiller по индексу листа
+ */
+public class SheetFillerFactory {
+    public static SheetFiller getSheetFiller(int sheetIndex) {
+        switch(sheetIndex) {
+            case 0:
+                return new TitleSheetFiller();
+            case 1:
+                return new RequisitesSheetFiller();
+            case 2:
+                return new IncomesSheetFiller();
+            case 3:
+                return new DeductionsSheetFiller();
+            case 4:
+                return new PrepaymentSheetFiller();
+        }
+    }
+}
+
+/**
+ * Заполнитель заголовка
+ */
+public class TitleSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, final SheetFillerContext context) {
+        Sheet sheet = wb.getSheetAt(0);
+        Cell cell0 = sheet.getRow(1).createCell(2);
+        cell0.setCellValue(context.getDepartmentName());
+        Cell cell1 = sheet.createRow(2).createCell(1);
+        cell1.setCellValue(context.getReportDate());
+        Cell cell2 = sheet.getRow(4).createCell(2);
+        cell2.setCellValue(context.getPeriod() + " " + context.getYear());
+    }
+}
+
+/**
+ * Заполнитель реквизитов
+ */
+public class RequisitesSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        Sheet sheet = wb.getSheetAt(1);
+        int index = 3;
+        for (NdflPerson np : context.getNdflPersonList()) {
+            ScriptUtils.checkInterrupted();
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(np.getRowNum() != null? np.getRowNum() : "");
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(np.getInp() != null? np.getInp() : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(np.getLastName() != null? np.getLastName() : "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(np.getFirstName() != null? np.getFirstName() : "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(np.getMiddleName() != null? np.getMiddleName() : "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(np.getBirthDay() != null? np.getBirthDay() : "");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(np.getCitizenship() != null? np.getCitizenship() : "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(np.getInnNp() != null? np.getInnNp() : "");
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(np.getInnForeign() != null? np.getInnForeign() : "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(np.getIdDocType() != null? np.getIdDocType() : "");
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(np.getIdDocNumber() != null? np.getIdDocNumber() : "");
+            Cell cell12 = row.createCell(12);
+            cell12.setCellValue(np.getStatus() != null? np.getStatus() : "");
+            Cell cell13 = row.createCell(13);
+            cell13.setCellValue(np.getRegionCode() != null? np.getRegionCode() : "");
+            Cell cell14 = row.createCell(14);
+            cell14.setCellValue(np.getPostIndex() != null? np.getPostIndex() : "");
+            Cell cell15 = row.createCell(15);
+            cell15.setCellValue(np.getArea() != null? np.getArea() : "");
+            Cell cell16 = row.createCell(16);
+            cell16.setCellValue(np.getCity() != null? np.getCity() : "");
+            Cell cell17 = row.createCell(17);
+            cell17.setCellValue(np.getLocality() != null? np.getLocality() : "");
+            Cell cell18 = row.createCell(18);
+            cell18.setCellValue(np.getStreet() != null? np.getStreet() : "");
+            Cell cell19 = row.createCell(19);
+            cell19.setCellValue(np.getHouse() != null? np.getHouse() : "");
+            Cell cell20 = row.createCell(20);
+            cell20.setCellValue(np.getBuilding() != null? np.getBuilding() : "");
+            Cell cell21 = row.createCell(21);
+            cell21.setCellValue(np.getFlat() != null? np.getFlat() : "");
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений о доходах
+ */
+public class IncomesSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList();
+        /*Collections.sort(ndflPersonIncomeList, new Comparator<NdflPersonIncome>() {
+            @Override
+            int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                Date ad1 = (Date) o1.getIncomeAccruedDate();
+                Date ad2 = (Date) o2.getIncomeAccruedDate();
+                int adComp = ad1.compareTo(ad2);
+                if (adComp != 0) {
+                    return adComp;
+                } else {
+                    Date pd1 = (Date) o1.getIncomePayoutDate();
+                    Date pd2 = (Date) o2.getIncomePayoutDate();
+                    return pd1.compareTo(pd2);
+                }
+            }
+        });*/
+        Sheet sheet = wb.getSheetAt(2);
+        int index = 3;
+        for (NdflPersonIncome npi : ndflPersonIncomeList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(npi.getRowNum() != null? npi.getRowNum() : "");
+            Cell cell2 = row.createCell(2);
+            String inp = context.getIdNdflPersonMap().get(npi.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(npi.getOperationId() != null? npi.getOperationId(): "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(npi.getIncomeCode() != null? npi.getIncomeCode(): "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(npi.getIncomeType() != null? npi.getIncomeType(): "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(npi.getIncomeAccruedDate() != null? npi.getIncomeAccruedDate(): "");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(npi.getIncomePayoutDate() != null? npi.getIncomePayoutDate(): "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(npi.getKpp() != null? npi.getKpp(): "");
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(npi.getOktmo() != null? npi.getOktmo(): "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(npi.getIncomeAccruedSumm() != null? npi.getIncomeAccruedSumm().doubleValue(): "");
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(npi.getIncomePayoutSumm() != null? npi.getIncomePayoutSumm().doubleValue(): "");
+            Cell cell12 = row.createCell(12);
+            cell12.setCellValue(npi.getTotalDeductionsSumm() != null? npi.getTotalDeductionsSumm().doubleValue(): "");
+            Cell cell13 = row.createCell(13);
+            cell13.setCellValue(npi.getTaxBase() != null? npi.getTaxBase().doubleValue(): "");
+            Cell cell14 = row.createCell(14);
+            cell14.setCellValue(npi.getTaxRate() != null? npi.getTaxRate(): "");
+            Cell cell15 = row.createCell(15);
+            cell15.setCellValue(npi.getTaxDate() != null? npi.getTaxDate(): "");
+            Cell cell16 = row.createCell(16);
+            cell16.setCellValue(npi.getCalculatedTax() != null? npi.getCalculatedTax(): "")
+            Cell cell17 = row.createCell(17);
+            cell17.setCellValue(npi.getWithholdingTax() != null? npi.getWithholdingTax(): "");
+            Cell cell18 = row.createCell(18);
+            cell18.setCellValue(npi.getNotHoldingTax() != null? npi.getNotHoldingTax(): "");
+            Cell cell19 = row.createCell(19);
+            cell19.setCellValue(npi.getOverholdingTax() != null? npi.getOverholdingTax(): "");
+            Cell cell20 = row.createCell(20);
+            cell20.setCellValue(npi.getRefoundTax() != null? npi.getRefoundTax(): "");
+            Cell cell21 = row.createCell(21);
+            cell21.setCellValue(npi.getTaxTransferDate() != null? npi.getTaxTransferDate(): "");
+            Cell cell22 = row.createCell(22);
+            cell22.setCellValue(npi.getPaymentDate() != null? npi.getPaymentDate(): "");
+            Cell cell23 = row.createCell(23);
+            cell23.setCellValue(npi.getPaymentNumber() != null? npi.getPaymentNumber(): "");
+            Cell cell24 = row.createCell(24);
+            cell24.setCellValue(npi.getTaxSumm() != null? npi.getTaxSumm(): "");
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений о вычетах
+ */
+public class DeductionsSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonDeduction> ndflPersonDeductionList = context.getNdflPersonDeductionList();
+        Sheet sheet = wb.getSheetAt(3);
+        int index = 3;
+        for (NdflPersonDeduction npd : ndflPersonDeductionList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(npd.getRowNum() != null? npd.getRowNum() : "");
+            Cell cell2 = row.createCell(2);
+            String inp = context.getIdNdflPersonMap().get(npd.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(npd.getTypeCode() != null? npd.getTypeCode(): "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(npd.getNotifType() != null? npd.getNotifType(): "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(npd.getNotifDate() != null? npd.getNotifDate(): "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(npd.getNotifNum() != null? npd.getNotifNum(): "б/н");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(npd.getNotifSource() != null? npd.getNotifSource(): "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(npd.getNotifSumm() != null? npd.getNotifSumm().doubleValue(): "");
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(npd.getOperationId() != null? npd.getOperationId(): "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(npd.getIncomeAccrued() != null? npd.getIncomeAccrued(): "");
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(npd.getIncomeCode() != null? npd.getIncomeCode(): "");
+            Cell cell12 = row.createCell(12);
+            cell12.setCellValue(npd.getIncomeSumm() != null? npd.getIncomeSumm().doubleValue(): "");
+            Cell cell13 = row.createCell(13);
+            cell13.setCellValue(npd.getPeriodPrevDate() != null? npd.getPeriodPrevDate(): "");
+            Cell cell14 = row.createCell(14);
+            cell14.setCellValue(npd.getPeriodPrevSumm() != null? npd.getPeriodPrevSumm().doubleValue(): "");
+            Cell cell15 = row.createCell(15);
+            cell15.setCellValue(npd.getPeriodCurrDate() != null? npd.getPeriodCurrDate(): "");
+            Cell cell16 = row.createCell(16);
+            cell16.setCellValue(npd.getPeriodCurrSumm() != null? npd.getPeriodCurrSumm(): "");
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений об авансах
+ */
+public class PrepaymentSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList = context.getNdflPersonPrepaymentList();
+        Sheet sheet = wb.getSheetAt(4);
+        int index = 3;
+        for (NdflPersonPrepayment npp : ndflPersonPrepaymentList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(npp.getRowNum() != null? npp.getRowNum() : "");
+            Cell cell2 = row.createCell(2);
+            String inp = context.getIdNdflPersonMap().get(npp.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(npp.getOperationId() != null? npp.getOperationId(): "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(npp.getSumm() != null? npp.getSumm(): "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(npp.getNotifNum() != null? npp.getNotifNum(): "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(npp.getNotifDate() != null? npp.getNotifDate(): "");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(npp.getNotifSource() != null? npp.getNotifSource(): "");
+            index++;
+        }
+    }
+}
+
+// Находит в базе данных шаблон спецотчета
+XSSFWorkbook getSpecialReportTemplate() {
+    BlobData blobData = blobDataServiceDaoImpl.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
+    return new XSSFWorkbook(blobData.getInputStream())
 }
 //------------------ Import Data ----------------------
 
