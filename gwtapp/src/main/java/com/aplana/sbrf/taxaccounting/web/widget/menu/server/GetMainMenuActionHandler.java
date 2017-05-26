@@ -44,9 +44,9 @@ import java.util.Properties;
 public class GetMainMenuActionHandler extends
 		AbstractActionHandler<GetMainMenuAction, GetMainMenuResult> {
 
-	private static final String CLEAR_CACHE_LINK = "cache/clear-cache";
+	private static final String CLEAR_CACHE_LINK = "controller/actions/cache/clear-cache";
 	private static final String NUMBER_SIGN = "#";
-    private static final String DOWNLOAD_ALL_TEMPLATES = "download/formTemplate/downloadAll";
+    private static final String DOWNLOAD_ALL_TEMPLATES = "controller/actions/formTemplate/downloadAll";
 	private static final String TYPE = "nType";
 
 	public GetMainMenuActionHandler() {

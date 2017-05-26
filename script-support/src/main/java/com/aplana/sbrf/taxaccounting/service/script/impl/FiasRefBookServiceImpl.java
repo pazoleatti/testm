@@ -36,4 +36,9 @@ public class FiasRefBookServiceImpl implements FiasRefBookService {
     public Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationDataId, int p_check_type) {
         return fiasRefBookDao.checkExistsAddressByFias(declarationDataId, p_check_type);
     }
+
+    @Override
+    public void refreshViews() {
+        fiasRefBookDao.refreshViews();
+    }
 }

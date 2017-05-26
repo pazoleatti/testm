@@ -46,7 +46,7 @@ public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
 		DeclarationListPresenter.MyView {
 
-    public static final String DECLARATION_HEADER = "Список налоговых форм";
+    public static final String DECLARATION_HEADER = "Формы";
     public static final String DECLARATION_HEADER_R = "Отчетность";
     public static final String DECLARATION_CREATE = "Создать налоговую форму...";
     public static final String DECLARATION_CREATE_D = "Создать уведомление...";
@@ -278,7 +278,9 @@ public class DeclarationListView extends
                                 + DeclarationDataTokens.declarationData + ";"
                                 + DeclarationDataTokens.declarationId + "="
                                 + declaration.getDeclarationDataId() + "\">"
-                                + declaration.getDeclarationType() + "</a>");
+                                + declaration.getDeclarationType() + "</a> <br>");
+                        sb.appendHtmlConstant("<a href=\"index.html#/taxes/ndflDetails/1\">"
+                                + declaration.getDeclarationType() + "(prototype)</a>");
                     }
                 }) {
             @Override
@@ -362,7 +364,7 @@ public class DeclarationListView extends
                         }
 
                         sb.appendHtmlConstant("<a href=\""
-                                + "download/declarationData/xml/"+
+                                + "controller/actions/declarationData/xml/"+
                                 + declaration.getDeclarationDataId()+"\">"
                                 + declaration.getFileName() + "</a>");
                     }

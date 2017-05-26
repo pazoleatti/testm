@@ -20,7 +20,7 @@ import java.net.URLEncoder;
  * User: avanteev
  */
 @Controller
-@RequestMapping("/downloadBlobController")
+@RequestMapping("/actions/downloadBlobController")
 public class ReportController {
 
     @Autowired
@@ -58,19 +58,6 @@ public class ReportController {
     public void processLogDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
         BlobData blobData = blobDataService.get(uuid);
         reportService.deleteAudit(uuid);
-        createResponse(request, response, blobData);
-    }
-
-    /**
-     * Получает архив ЖА
-     * @param uuid
-     * @param request
-     * @param response
-     * @throws IOException
-     */
-    @RequestMapping(value = "/formDataFile/{uuid}", method = RequestMethod.GET)
-    public void processDownloadFormDataFile(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        BlobData blobData = blobDataService.get(uuid);
         createResponse(request, response, blobData);
     }
 

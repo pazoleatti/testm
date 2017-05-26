@@ -67,7 +67,7 @@ public class DeclarationTemplateFilesPresenter
     @Override
     public void downloadFile() {
         if (getView().getDeclarationTemplateFile().getBlobDataId() != null) {
-            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + getView().getDeclarationTemplateFile().getBlobDataId());
+            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/downloadByUuid/" + getView().getDeclarationTemplateFile().getBlobDataId());
         }
     }
 

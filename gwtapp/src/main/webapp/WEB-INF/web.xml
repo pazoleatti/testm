@@ -66,11 +66,10 @@
   	</servlet>
   	<servlet-mapping>
 		<servlet-name>mvc-dispatcher</servlet-name>
-		<url-pattern>/download/*</url-pattern>
-        <url-pattern>/upload/*</url-pattern>
-        <url-pattern>/cache/*</url-pattern>
+		<url-pattern>/controller/*</url-pattern>
         <url-pattern>/j_spring_security_logout</url-pattern>
 	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>rpc-dispatcher</servlet-name>
 		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>

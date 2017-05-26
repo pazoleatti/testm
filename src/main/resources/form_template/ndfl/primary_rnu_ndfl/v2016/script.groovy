@@ -1,5 +1,17 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.xssf.streaming.SXSSFCell
+import org.apache.poi.xssf.streaming.SXSSFRow
+import org.apache.poi.xssf.streaming.SXSSFSheet
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFRow
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
@@ -7,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
+import com.aplana.sbrf.taxaccounting.model.BlobData
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
@@ -94,7 +107,7 @@ final CalendarService calendarService = getProperty("calendarService")
 
 
 def getProperty(String name) {
-    try{
+    try {
         return super.getProperty(name)
     } catch (MissingPropertyException e) {
         return null
@@ -115,15 +128,14 @@ def getProperty(String name) {
 @Field
 def PERIOD_CODE_REFBOOK = RefBook.Id.PERIOD_CODE.getId();
 
-def moveAcceptedToCreated(){
+def moveAcceptedToCreated() {
     List<Relation> destinationInfo = getDestinationInfo(false);
     for (Relation relation : destinationInfo) {
-        if (relation.declarationState.equals(State.ACCEPTED)){
-            throw new ServiceException("Ошибка изменения состояния формы. Данная форма не может быть возвращена в состояние 'Создана', так как используется в КНФ с состоянием 'Принята', номер формы: "+relation.declarationDataId);
+        if (relation.declarationState.equals(State.ACCEPTED)) {
+            throw new ServiceException("Ошибка изменения состояния формы. Данная форма не может быть возвращена в состояние 'Создана', так как используется в КНФ с состоянием 'Принята', номер формы: " + relation.declarationDataId);
         }
     }
 }
-
 
 //------------------ Calculate ----------------------
 /**
@@ -305,11 +317,11 @@ def getRefBookPersonVersionFrom() {
     return getReportPeriodStartDate();
 }
 
-def updatePrimaryToRefBookPersonReferences(primaryDataRecords){
+def updatePrimaryToRefBookPersonReferences(primaryDataRecords) {
 
     ScriptUtils.checkInterrupted();
 
-    if (FORM_TYPE == 100){
+    if (FORM_TYPE == 100) {
         ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
     } else {
         raschsvPersSvStrahLicService.updateRefBookPersonReferences(primaryDataRecords)
@@ -450,7 +462,6 @@ def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
 
         updatePrimaryToRefBookPersonReferences(insertRecords);
 
-
         //Выводим информацию о созданных записях
         for (NaturalPerson person : insertRecords) {
             String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
@@ -523,7 +534,7 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
             }
         }
 
-        if (msgCnt <= maxMsgCnt){
+        if (msgCnt <= maxMsgCnt) {
             logger.info("Идентификация (" + calcTimeMillis(inTime));
         }
 
@@ -559,6 +570,16 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
         if (refBookPerson != null) {
 
             primaryPerson.setId(refBookPerson.getId());
+            /*
+               Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
+               тогда версия записи в справочнике меняется на более раннюю дату, без изменения атрибутов. Такая ситуация
+               вряд ли может возникнуть на практике и проверка создана по заданию тестировщиков.
+              */
+            if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
+                Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
+                downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
+                continue
+            }
 
             //address
             if (primaryPerson.getAddress() != null) {
@@ -566,7 +587,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                     Map<String, RefBookValue> refBookAddressValues = mapAddressAttr(refBookPerson.getAddress());
 
                     fillSystemAliases(refBookAddressValues, refBookPerson.getAddress());
-
                     updateAddressAttr(refBookAddressValues, primaryPerson.getAddress(), addressAttrCnt);
 
                     if (addressAttrCnt.isUpdate()) {
@@ -641,14 +661,12 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
                 updCnt++;
             }
 
-
-
         } else {
             //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
             insertPersonList.add(primaryPerson);
         }
 
-        if (msgCnt < maxMsgCnt){
+        if (msgCnt < maxMsgCnt) {
             logger.info("Обновление (" + calcTimeMillis(inTime));
         }
 
@@ -718,6 +736,11 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
 
 }
 
+def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
+    Date newVersion = getReportPeriodStartDate()
+    getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
+}
+
 def fillSystemAliases(Map<String, RefBookValue> values, RefBookObject refBookObject) {
     values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getId()));
     values.put("RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getRecordId()));
@@ -736,7 +759,6 @@ PersonIdentifier findIdentifierByAsnu(NaturalPerson person, Long asnuId) {
 }
 
 
-
 @Field
 def INCLUDE_TO_REPORT = 1;
 
@@ -752,20 +774,20 @@ def checkIncReportFlag(NaturalPerson naturalPerson, List<PersonDocument> updateD
 
     if (personDocumentList != null && !personDocumentList.isEmpty()) {
 
-        logger.info("naturalPerson: "+naturalPerson)
-        logger.info("updateDocumentList: "+updateDocumentList)
+        logger.info("naturalPerson: " + naturalPerson)
+        logger.info("updateDocumentList: " + updateDocumentList)
 
         //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
         int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
 
-        logger.info("incRepIndex: "+incRepIndex)
+        logger.info("incRepIndex: " + incRepIndex)
 
         for (int i = 0; i < personDocumentList.size(); i++) {
 
             PersonDocument personDocument = personDocumentList.get(i);
-            logger.info("personDocument: "+personDocument)
+            logger.info("personDocument: " + personDocument)
             String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
-            logger.info("docInf: "+docInf)
+            logger.info("docInf: " + docInf)
 
             if (i == incRepIndex) {
                 if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
@@ -908,7 +930,7 @@ def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
     //подготовка записей
     if (identityObjectList != null && !identityObjectList.isEmpty()) {
 
-        logger.info("Добавление записей: refBookId=" + refBookId + ", size="+identityObjectList.size())
+        logger.info("Добавление записей: refBookId=" + refBookId + ", size=" + identityObjectList.size())
 
         List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
         for (IdentityObject identityObject : identityObjectList) {
@@ -1190,7 +1212,7 @@ def findCountryId(countryCode) {
 
 //------------------ GET_SOURCES ----------------------
 
-List<Relation> getDestinationInfo(boolean isLight){
+List<Relation> getDestinationInfo(boolean isLight) {
 
     List<Relation> destinationInfo = new ArrayList<Relation>();
 
@@ -1292,9 +1314,6 @@ def getRelation(DeclarationData declarationData, Department department, ReportPe
 
 }
 
-
-
-
 //------------------ PREPARE_SPECIFIC_REPORT ----------------------
 
 def prepareSpecificReport() {
@@ -1320,7 +1339,7 @@ def prepareSpecificReport() {
         if (value != null) {
             def val = value;
             if (!(key in ["fromBirthDay", "toBirthDay"])) {
-                val = '%'+value+'%'
+                val = '%' + value + '%'
             }
             resultReportParameters.put(key, val)
         }
@@ -1338,7 +1357,11 @@ def prepareSpecificReport() {
     //Кнопки: "Закрыть"
 
     if (pagingResult.isEmpty()) {
-        subreportParamsToString = { it.collect { (it.value != null ? (((it.value instanceof Date)?it.value.format('dd.MM.yyyy'):it.value) + ";") : "") } join " " }
+        subreportParamsToString = {
+            it.collect {
+                (it.value != null ? (((it.value instanceof Date) ? it.value.format('dd.MM.yyyy') : it.value) + ";") : "")
+            } join " "
+        }
         logger.warn("Физическое лицо: " + subreportParamsToString(reportParameters) + " не найдено в форме");
         //throw new ServiceException("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
     }
@@ -1350,7 +1373,7 @@ def prepareSpecificReport() {
         row.firstName = ndflPerson.firstName
         row.middleName = ndflPerson.middleName
         row.snils = ndflPerson.snils
-        row.innNp = ndflPerson.innNp?:ndflPerson.innForeign
+        row.innNp = ndflPerson.innNp ?: ndflPerson.innForeign
         row.birthDay = ndflPerson.birthDay
         row.idDocNumber = ndflPerson.idDocNumber
         dataRows.add(row)
@@ -1473,8 +1496,11 @@ def createSpecificReport() {
             break;
         case 'rnu_ndfl_person_all_db':
             createSpecificReportDb();
-            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss' )}.xlsx")
+            scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
             break;
+        case 'rnu_ndfl_person_load_to_excel':
+            loadAllDeclarationDataToExcel()
+            break
         default:
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
     }
@@ -1486,7 +1512,7 @@ def createSpecificReportPersonDb() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
     if (ndflPerson != null) {
-        def params = [NDFL_PERSON_ID : ndflPerson.id];
+        def params = [NDFL_PERSON_ID: ndflPerson.id];
         def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
         declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
         scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
@@ -1498,7 +1524,7 @@ def createSpecificReportPersonDb() {
  * Формирует спец. отчеты, данные для которых макет извлекает непосредственно из бд
  */
 def createSpecificReportDb() {
-    def params = [declarationId : declarationData.id]
+    def params = [declarationId: declarationData.id]
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
 }
@@ -1542,12 +1568,440 @@ String capitalize(String str) {
             .append(str.substring(1).toLowerCase())
             .toString();
 }
+
+/**
+ * Выгрузка в Excel РНУ-НДФЛ
+ */
+public void loadAllDeclarationDataToExcel() {
+
+    ScriptUtils.checkInterrupted();
+    long time = System.currentTimeMillis();
+    long timeTotal = time
+    List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
+    logger.info("Получение записей из таблицы " + T_PERSON + " (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
+    logger.info("Получение записей из таблицы " + T_PERSON_INCOME + " (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
+    logger.info("Получение записей из таблицы " + T_PERSON_DEDUCTION + " (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+    logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
+    logger.info("Получение записей из таблицы " + T_PERSON_PREPAYMENT + " (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    String departmentName = departmentService.get(declarationData.departmentId)?.name
+    String reportDate = getReportPeriodEndDate().format("dd.MM.yyyy") + " г."
+    String period = getProvider(RefBook.Id.PERIOD_CODE.getId()).getRecordData(reportPeriod.dictTaxPeriodId)?.NAME?.value
+    String year = getReportPeriodEndDate().format("yyyy") + " г."
+    logger.info("Получение данных о налоговой форме (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerContext context = new SheetFillerContext(departmentName, reportDate, period, year, ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+    Workbook xssfWorkbook = getSpecialReportTemplate()
+    logger.info("Получение шаблона спецотчета (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerFactory.getSheetFiller(0).fillSheet(xssfWorkbook, context)
+    logger.info("Заполнение листа Заголовок (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    Workbook sxssfWorkbook = new SXSSFWorkbook(xssfWorkbook, 100, true)
+
+    SheetFillerFactory.getSheetFiller(1).fillSheet(sxssfWorkbook, context)
+    logger.info("Заполнение листа 1.Реквизиты (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerFactory.getSheetFiller(2).fillSheet(sxssfWorkbook, context)
+    logger.info("Заполнение листа 2. Свед о дох (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerFactory.getSheetFiller(3).fillSheet(sxssfWorkbook, context)
+    logger.info("Заполнение листа 3. Свед о вычет (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    SheetFillerFactory.getSheetFiller(4).fillSheet(sxssfWorkbook, context)
+    logger.info("Заполнение листа 4. Аванс платеж (" + (System.currentTimeMillis() - time) + " мс)");
+
+    time = System.currentTimeMillis();
+    OutputStream writer = null
+    try {
+        writer = scriptSpecificReportHolder.getFileOutputStream()
+        sxssfWorkbook.write(writer)
+    } finally {
+        writer.close()
+        scriptSpecificReportHolder
+                .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+    }
+
+    logger.info("Запись в файл (" + (System.currentTimeMillis() - time) + " мс)");
+    logger.info("Время выгрузки (" + (System.currentTimeMillis() - timeTotal) + " мс)");
+}
+
+/**
+ * Класс инкапсулирующий данные
+ */
+public class SheetFillerContext {
+
+    private String departmentName;
+
+    private String reportDate;
+
+    private String period;
+
+    private String year;
+
+    private List<NdflPerson> ndflPersonList;
+
+    private List<NdflPersonIncome> ndflPersonIncomeList;
+
+    private List<NdflPersonDeduction> ndflPersonDeductionList;
+
+    private List<NdflPersonPrepayment> ndflPersonPrepaymentList;
+
+    private Map<Long, NdflPerson> idNdflPersonMap;
+
+    SheetFillerContext(String departmentName, String reportDate, String period, String year, List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList, List<NdflPersonPrepayment> ndflPersonPrepaymentList) {
+        this.departmentName = departmentName
+        this.reportDate = reportDate
+        this.period = period
+        this.year = year
+        this.ndflPersonList = ndflPersonList
+        this.ndflPersonIncomeList = ndflPersonIncomeList
+        this.ndflPersonDeductionList = ndflPersonDeductionList
+        this.ndflPersonPrepaymentList = ndflPersonPrepaymentList
+    }
+
+    String getDepartmentName() {
+        return departmentName
+    }
+
+    String getReportDate() {
+        return reportDate
+    }
+
+    String getPeriod() {
+        return period
+    }
+
+    String getYear() {
+        return year
+    }
+
+    List<NdflPerson> getNdflPersonList() {
+        return ndflPersonList
+    }
+
+    List<NdflPersonIncome> getNdflPersonIncomeList() {
+        return ndflPersonIncomeList
+    }
+
+    List<NdflPersonDeduction> getNdflPersonDeductionList() {
+        return ndflPersonDeductionList
+    }
+
+    List<NdflPersonPrepayment> getNdflPersonPrepaymentList() {
+        return ndflPersonPrepaymentList
+    }
+
+    Map<Long, NdflPerson> getIdNdflPersonMap() {
+        if (idNdflPersonMap == null) {
+            idNdflPersonMap = new HashMap<>();
+            for (NdflPerson ndflPerson : ndflPersonList) {
+                idNdflPersonMap.put(ndflPerson.getId(), ndflPerson);
+            }
+        }
+        return idNdflPersonMap;
+    }
+}
+
+/**
+ * Интерфейс определяющий заполнение листа и состояние классов реализующих интерфеййс
+ */
+interface SheetFiller {
+
+    void fillSheet(Workbook wb, SheetFillerContext context);
+}
+
+/**
+ * Фабрика для получения экземплярая SheetFiller по индексу листа
+ */
+public class SheetFillerFactory {
+    public static SheetFiller getSheetFiller(int sheetIndex) {
+        switch(sheetIndex) {
+            case 0:
+                return new TitleSheetFiller();
+            case 1:
+                return new RequisitesSheetFiller();
+            case 2:
+                return new IncomesSheetFiller();
+            case 3:
+                return new DeductionsSheetFiller();
+            case 4:
+                return new PrepaymentSheetFiller();
+        }
+    }
+}
+
+/**
+ * Заполнитель заголовка
+ */
+public class TitleSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, final SheetFillerContext context) {
+        Sheet sheet = wb.getSheetAt(0);
+        Cell cell0 = sheet.getRow(1).createCell(2);
+        cell0.setCellValue(context.getDepartmentName());
+        Cell cell1 = sheet.createRow(2).createCell(1);
+        cell1.setCellValue(context.getReportDate());
+        Cell cell2 = sheet.getRow(4).createCell(2);
+        cell2.setCellValue(context.getPeriod() + " " + context.getYear());
+    }
+}
+
+/**
+ * Заполнитель реквизитов
+ */
+public class RequisitesSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        Sheet sheet = wb.getSheetAt(1);
+        int index = 3;
+        for (NdflPerson np : context.getNdflPersonList()) {
+            ScriptUtils.checkInterrupted();
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(np.getRowNum() != null? np.getRowNum() : "");
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(np.getInp() != null? np.getInp() : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(np.getLastName() != null? np.getLastName() : "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(np.getFirstName() != null? np.getFirstName() : "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(np.getMiddleName() != null? np.getMiddleName() : "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(np.getBirthDay() != null? np.getBirthDay() : "");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(np.getCitizenship() != null? np.getCitizenship() : "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(np.getInnNp() != null? np.getInnNp() : "");
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(np.getInnForeign() != null? np.getInnForeign() : "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(np.getIdDocType() != null? np.getIdDocType() : "");
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(np.getIdDocNumber() != null? np.getIdDocNumber() : "");
+            Cell cell12 = row.createCell(12);
+            cell12.setCellValue(np.getStatus() != null? np.getStatus() : "");
+            Cell cell13 = row.createCell(13);
+            cell13.setCellValue(np.getRegionCode() != null? np.getRegionCode() : "");
+            Cell cell14 = row.createCell(14);
+            cell14.setCellValue(np.getPostIndex() != null? np.getPostIndex() : "");
+            Cell cell15 = row.createCell(15);
+            cell15.setCellValue(np.getArea() != null? np.getArea() : "");
+            Cell cell16 = row.createCell(16);
+            cell16.setCellValue(np.getCity() != null? np.getCity() : "");
+            Cell cell17 = row.createCell(17);
+            cell17.setCellValue(np.getLocality() != null? np.getLocality() : "");
+            Cell cell18 = row.createCell(18);
+            cell18.setCellValue(np.getStreet() != null? np.getStreet() : "");
+            Cell cell19 = row.createCell(19);
+            cell19.setCellValue(np.getHouse() != null? np.getHouse() : "");
+            Cell cell20 = row.createCell(20);
+            cell20.setCellValue(np.getBuilding() != null? np.getBuilding() : "");
+            Cell cell21 = row.createCell(21);
+            cell21.setCellValue(np.getFlat() != null? np.getFlat() : "");
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений о доходах
+ */
+public class IncomesSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList();
+        /*Collections.sort(ndflPersonIncomeList, new Comparator<NdflPersonIncome>() {
+            @Override
+            int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                Date ad1 = (Date) o1.getIncomeAccruedDate();
+                Date ad2 = (Date) o2.getIncomeAccruedDate();
+                int adComp = ad1.compareTo(ad2);
+                if (adComp != 0) {
+                    return adComp;
+                } else {
+                    Date pd1 = (Date) o1.getIncomePayoutDate();
+                    Date pd2 = (Date) o2.getIncomePayoutDate();
+                    return pd1.compareTo(pd2);
+                }
+            }
+        });*/
+        Sheet sheet = wb.getSheetAt(2);
+        int index = 3;
+        for (NdflPersonIncome npi : ndflPersonIncomeList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(npi.getRowNum() != null? npi.getRowNum() : "");
+            Cell cell2 = row.createCell(2);
+            String inp = context.getIdNdflPersonMap().get(npi.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(npi.getOperationId() != null? npi.getOperationId(): "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(npi.getIncomeCode() != null? npi.getIncomeCode(): "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(npi.getIncomeType() != null? npi.getIncomeType(): "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(npi.getIncomeAccruedDate() != null? npi.getIncomeAccruedDate(): "");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(npi.getIncomePayoutDate() != null? npi.getIncomePayoutDate(): "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(npi.getKpp() != null? npi.getKpp(): "");
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(npi.getOktmo() != null? npi.getOktmo(): "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(npi.getIncomeAccruedSumm() != null? npi.getIncomeAccruedSumm().doubleValue(): "");
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(npi.getIncomePayoutSumm() != null? npi.getIncomePayoutSumm().doubleValue(): "");
+            Cell cell12 = row.createCell(12);
+            cell12.setCellValue(npi.getTotalDeductionsSumm() != null? npi.getTotalDeductionsSumm().doubleValue(): "");
+            Cell cell13 = row.createCell(13);
+            cell13.setCellValue(npi.getTaxBase() != null? npi.getTaxBase().doubleValue(): "");
+            Cell cell14 = row.createCell(14);
+            cell14.setCellValue(npi.getTaxRate() != null? npi.getTaxRate(): "");
+            Cell cell15 = row.createCell(15);
+            cell15.setCellValue(npi.getTaxDate() != null? npi.getTaxDate(): "");
+            Cell cell16 = row.createCell(16);
+            cell16.setCellValue(npi.getCalculatedTax() != null? npi.getCalculatedTax(): "")
+            Cell cell17 = row.createCell(17);
+            cell17.setCellValue(npi.getWithholdingTax() != null? npi.getWithholdingTax(): "");
+            Cell cell18 = row.createCell(18);
+            cell18.setCellValue(npi.getNotHoldingTax() != null? npi.getNotHoldingTax(): "");
+            Cell cell19 = row.createCell(19);
+            cell19.setCellValue(npi.getOverholdingTax() != null? npi.getOverholdingTax(): "");
+            Cell cell20 = row.createCell(20);
+            cell20.setCellValue(npi.getRefoundTax() != null? npi.getRefoundTax(): "");
+            Cell cell21 = row.createCell(21);
+            cell21.setCellValue(npi.getTaxTransferDate() != null? npi.getTaxTransferDate(): "");
+            Cell cell22 = row.createCell(22);
+            cell22.setCellValue(npi.getPaymentDate() != null? npi.getPaymentDate(): "");
+            Cell cell23 = row.createCell(23);
+            cell23.setCellValue(npi.getPaymentNumber() != null? npi.getPaymentNumber(): "");
+            Cell cell24 = row.createCell(24);
+            cell24.setCellValue(npi.getTaxSumm() != null? npi.getTaxSumm(): "");
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений о вычетах
+ */
+public class DeductionsSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonDeduction> ndflPersonDeductionList = context.getNdflPersonDeductionList();
+        Sheet sheet = wb.getSheetAt(3);
+        int index = 3;
+        for (NdflPersonDeduction npd : ndflPersonDeductionList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(npd.getRowNum() != null? npd.getRowNum() : "");
+            Cell cell2 = row.createCell(2);
+            String inp = context.getIdNdflPersonMap().get(npd.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(npd.getTypeCode() != null? npd.getTypeCode(): "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(npd.getNotifType() != null? npd.getNotifType(): "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(npd.getNotifDate() != null? npd.getNotifDate(): "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(npd.getNotifNum() != null? npd.getNotifNum(): "б/н");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(npd.getNotifSource() != null? npd.getNotifSource(): "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(npd.getNotifSumm() != null? npd.getNotifSumm().doubleValue(): "");
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(npd.getOperationId() != null? npd.getOperationId(): "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(npd.getIncomeAccrued() != null? npd.getIncomeAccrued(): "");
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(npd.getIncomeCode() != null? npd.getIncomeCode(): "");
+            Cell cell12 = row.createCell(12);
+            cell12.setCellValue(npd.getIncomeSumm() != null? npd.getIncomeSumm().doubleValue(): "");
+            Cell cell13 = row.createCell(13);
+            cell13.setCellValue(npd.getPeriodPrevDate() != null? npd.getPeriodPrevDate(): "");
+            Cell cell14 = row.createCell(14);
+            cell14.setCellValue(npd.getPeriodPrevSumm() != null? npd.getPeriodPrevSumm().doubleValue(): "");
+            Cell cell15 = row.createCell(15);
+            cell15.setCellValue(npd.getPeriodCurrDate() != null? npd.getPeriodCurrDate(): "");
+            Cell cell16 = row.createCell(16);
+            cell16.setCellValue(npd.getPeriodCurrSumm() != null? npd.getPeriodCurrSumm(): "");
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений об авансах
+ */
+public class PrepaymentSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList = context.getNdflPersonPrepaymentList();
+        Sheet sheet = wb.getSheetAt(4);
+        int index = 3;
+        for (NdflPersonPrepayment npp : ndflPersonPrepaymentList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(npp.getRowNum() != null? npp.getRowNum() : "");
+            Cell cell2 = row.createCell(2);
+            String inp = context.getIdNdflPersonMap().get(npp.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(npp.getOperationId() != null? npp.getOperationId(): "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(npp.getSumm() != null? npp.getSumm(): "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(npp.getNotifNum() != null? npp.getNotifNum(): "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(npp.getNotifDate() != null? npp.getNotifDate(): "");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(npp.getNotifSource() != null? npp.getNotifSource(): "");
+            index++;
+        }
+    }
+}
+
+// Находит в базе данных шаблон спецотчета
+XSSFWorkbook getSpecialReportTemplate() {
+    BlobData blobData = blobDataServiceDaoImpl.get(scriptSpecificReportHolder.getDeclarationSubreport().getBlobDataId())
+    return new XSSFWorkbook(blobData.getInputStream())
+}
 //------------------ Import Data ----------------------
 
 void importData() {
 
     SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-    logger.info("Начало загрузки данных первичной налоговой формы "+declarationData.id+". Дата начала отчетного периода: "+sdf.format(getReportPeriodStartDate())+", дата окончания: "+sdf.format(getReportPeriodEndDate()));
+    logger.info("Начало загрузки данных первичной налоговой формы " + declarationData.id + ". Дата начала отчетного периода: " + sdf.format(getReportPeriodStartDate()) + ", дата окончания: " + sdf.format(getReportPeriodEndDate()));
 
     //валидация по схеме
     declarationService.validateDeclaration(declarationData, userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')))
@@ -1646,7 +2100,7 @@ void processInfoPart(infoPart, rowNum) {
 
     NdflPerson ndflPerson = transformNdflPersonNode(ndflPersonNode)
 
-    def familia = ndflPerson.lastName != null ? ndflPerson.lastName + " ": ""
+    def familia = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
     def imya = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
     def otchestvo = ndflPerson.middleName != null ? ndflPerson.middleName : ""
     def fio = familia + imya + otchestvo
@@ -1680,7 +2134,7 @@ void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOpera
     }
 
     incomes.each {
-        if (it != null){
+        if (it != null) {
             ndflPerson.incomes.add(it);
         }
     }
@@ -1786,12 +2240,13 @@ boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePay
     return true
 }
 
-boolean dateRelateToCurrentPeriod(def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
+boolean dateRelateToCurrentPeriod(
+        def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
     //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
     if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
         return true
     }
-    logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format("dd.MM.yyyy"): ""}: дата операции не входит в отчетный период ТФ. " +
+    logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format("dd.MM.yyyy") : ""}: дата операции не входит в отчетный период ТФ. " +
             "КПП = $kpp, " +
             "ОКТМО = $oktmo, " +
             "ФЛ ИНП = $inp, " +
@@ -2008,10 +2463,12 @@ def prepaymentAttr(personPrepayment) {
 // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
 @Field def ndflPersonFLMap = [:]
 @Field final TEMPLATE_PERSON_FL = "ФИО: '%s', ИНП: '%s'"
+
 @CompileStatic
 class NdflPersonFL {
     String fio
     String inp
+
     NdflPersonFL(String fio, String inp) {
         this.fio = fio
         this.inp = inp
@@ -2712,8 +3169,8 @@ def checkDataReference(
             }
 
             //Индекс Индекс соответствует следующему формату: [0-9]{6}
-            if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))){
-                address.add("Индекс - '${ndflPerson.postIndex }' - не соответствует формату");
+            if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))) {
+                address.add("Индекс - '${ndflPerson.postIndex ?: ""}' - не соответствует формату");
             }
 
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
@@ -2968,7 +3425,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Дом
                 if (!ndflPerson.house.equals(house)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Дом (Графа 19)='${ndflPerson.house}'")
+                            "Адрес регистрации в Российской Федерации.Дом (Графа 19)='${ndflPerson.house ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Дом (Графа 19)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -2976,7 +3433,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Корпус
                 if (!ndflPerson.building.equals(building)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Корпус (Графа 20)='${ndflPerson.building}'")
+                            "Адрес регистрации в Российской Федерации.Корпус (Графа 20)='${ndflPerson.building ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Корпус (Графа 20)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -2984,7 +3441,7 @@ def checkDataReference(
                 // Адрес регистрации в Российской Федерации.Квартира
                 if (!ndflPerson.flat.equals(flat)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                            "Адрес регистрации в Российской Федерации.Квартира (Графа 21)='${ndflPerson.flat}'")
+                            "Адрес регистрации в Российской Федерации.Квартира (Графа 21)='${ndflPerson.flat ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
                             "'Адрес регистрации в Российской Федерации.Квартира (Графа 21)' не соответствует справочнику '$R_PERSON'")
                 }
@@ -3253,14 +3710,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column17Fill(),
                 new Column7And11Fill(),
-                "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm}",
+                "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                 "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
         )
         //11 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column20Fill(),
                 new Column7And11Fill(),
-                "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm ?: ""}",
+                "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ?: ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                 "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20"
         )
         //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,23,24
@@ -3373,6 +3830,7 @@ class ColumnFillConditionData {
         this.conditionMessage = conditionMessage
     }
 }
+
 interface ColumnFillConditionChecker {
     boolean check(NdflPersonIncome ndflPersonIncome)
 }
@@ -3944,7 +4402,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (ndflPersonIncome.taxRate == 13 && ndflPerson.status == "6") {
                     List<NdflPersonPrepayment> ndflPersonPrepaymentListByBersonIdList = ndflPersonPrepaymentCache.get(ndflPersonIncome.ndflPersonId) ?: []
                     if (!ndflPersonPrepaymentListByBersonIdList.isEmpty()) {
-                        List<NdflPersonPrepayment> ndflPersonPrepaymentCurrentList = ndflPersonPrepaymentListByBersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+                        List<NdflPersonPrepayment> ndflPersonPrepaymentCurrentList = ndflPersonPrepaymentListByBersonIdList.findAll {
+                            it.operationId == ndflPersonIncome.operationId
+                        } ?: []
                         Long ndflPersonPrepaymentSum = ndflPersonPrepaymentCurrentList.sum { it.summ } ?: 0
                         if (!(ndflPersonIncome.calculatedTax ==
                                 ScriptUtils.round((ndflPersonIncome.taxBase ?: 0 * 13 - ndflPersonPrepaymentSum ?: 0), 0))
@@ -4027,15 +4487,25 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
 
             List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
-            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll {
+                it.operationId == ndflPersonIncome.operationId
+            } ?: []
             // "Сумма Граф 16"
-            Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.calculatedTax ?: 0 } ?: 0
+            Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.calculatedTax ?: 0
+            } ?: 0
             // "Сумма Граф 17"
-            Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.withholdingTax ?: 0 } ?: 0
+            Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.withholdingTax ?: 0
+            } ?: 0
             // "Сумма Граф 18"
-            Long notHoldingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.notHoldingTax ?: 0 } ?: 0
+            Long notHoldingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.notHoldingTax ?: 0
+            } ?: 0
             // "Сумма Граф 19"
-            Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.overholdingTax ?: 0 } ?: 0
+            Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {
+                it.overholdingTax ?: 0
+            } ?: 0
             // "Сумма Граф 20"
             Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
 
@@ -4560,6 +5030,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
 boolean comparNumbEquals(def d1, def d2) {
     return (Math.abs(d1 - d2) < 0.001)
 }
+
 boolean comparNumbGreater(double d1, double d2) {
     return (d1 - d2 > 0.001)
 }
@@ -4685,7 +5156,6 @@ def getErrorMsgAbsent(def inputList, def tableName) {
     return resultMsg
 }
 
-
 //TODO вынес handler в скрипт, чтобы не обновлять ядро на нексте
 
 /**
@@ -4759,7 +5229,6 @@ public class NaturalPersonRefbookScriptHandler extends NaturalPersonRefbookHandl
             naturalPerson = buildNaturalPerson(rs, refBookPersonId, primaryPersonId);
             similarityPersonMap.put(refBookPersonId, naturalPerson);
         }
-
 
         //Добавляем документы физлица
         addPersonDocument(rs, naturalPerson);

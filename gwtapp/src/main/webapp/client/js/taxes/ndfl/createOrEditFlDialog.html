@@ -1,0 +1,279 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{header}}
+    </h4>
+</div>
+<div class="modal-body" style="height: 500px">
+    <form role="form" name="createOrEditFLForm" novalidate class="modal-form form-horizontal">
+        <div>
+            <fieldset class="form-fieldset" style="width: 200px; float: left">
+                <legend>{{'title.taxpayer' | translate}}</legend>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.inp' | translate}}</label>
+                    </div>
+                    <div>
+                        <input data-ng-model="entity.inp" required
+                               type="text" class="form-control"
+                               title="{{entity.inp}}"/>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.surname' | translate}}</label>
+                    </div>
+                    <div>
+                        <input data-ng-model="entity.surname" required
+                               type="text" class="form-control"
+                               title="{{entity.surname}}"/>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.name' | translate}}</label>
+                    </div>
+                    <div>
+                        <input data-ng-model="entity.name" required
+                               type="text" class="form-control"
+                               title="{{entity.name}}"/>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.patronymic' | translate}}</label>
+                    </div>
+                    <div>
+                        <input data-ng-model="entity.patronymic" required
+                               type="text" class="form-control"
+                               title="{{entity.patronymic}}"/>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.dateOfBirth' | translate}}</label>
+                    </div>
+                    <div>
+                        <mu-date-picker required="true" model="entity.dateOfBirth"></mu-date-picker>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.citizenship' | translate}}</label>
+                    </div>
+                    <div>
+                        <ui-select ng-model="entity.citizenship" required>
+                            <ui-select-match allow-clear="false">
+                                <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="item in dialogDataStub.citizenshipList track by $index">
+                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.statusCode' | translate}}</label>
+                    </div>
+                    <div>
+                        <ui-select ng-model="entity.statusCode" required>
+                            <ui-select-match allow-clear="false">
+                                <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="item in dialogDataStub.statusList track by $index">
+                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div style="width: 200px; display: inline-block; margin-left: 15px;">
+                <fieldset class="form-fieldset">
+                    <legend>{{'title.document' | translate}}</legend>
+                    <div>
+                        <div>
+                            <label class="control-label">{{'title.document.code' | translate}}</label>
+                        </div>
+                        <div>
+                            <ui-select ng-model="entity.documentCode" required>
+                                <ui-select-match allow-clear="false">
+                                    <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
+                                </ui-select-match>
+                                <ui-select-choices repeat="item in dialogDataStub.documentCodeList track by $index">
+                                    <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div>
+                        <div>
+                            <label class="control-label">{{'title.document.number' | translate}}</label>
+                        </div>
+                        <div>
+                            <input data-ng-model="entity.documentNumber" required
+                                   type="text" class="form-control"
+                                   title="{{entity.document.number}}"/>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-fieldset" style="margin-top: 15px;">
+                    <legend>{{'title.document' | translate}}</legend>
+                    <div>
+                        <div>
+                            <label class="control-label">{{'title.innRF' | translate}}</label>
+                        </div>
+                        <div>
+                            <input data-ng-model="entity.innRF" required
+                                   type="text" class="form-control"
+                                   title="{{entity.innRF}}"/>
+                        </div>
+                    </div>
+                    <div>
+                        <div>
+                            <label class="control-label">{{'title.innINO' | translate}}</label>
+                        </div>
+                        <div>
+                            <input data-ng-model="entity.innINO" required
+                                   type="text" class="form-control"
+                                   title="{{entity.innINO}}"/>
+                        </div>
+                    </div>
+                </fieldset>
+
+            </div>
+
+            <fieldset class="form-fieldset" style="width: 300px; float: right">
+                <legend>{{'title.registrationAddress' | translate}}</legend>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.subject' | translate}}</label>
+                    </div>
+                    <div>
+                        <ui-select ng-model="entity.subject" required>
+                            <ui-select-match allow-clear="false">
+                                <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="item in dialogDataStub.subjectCodeList track by $index">
+                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.area' | translate}}</label>
+                    </div>
+                    <div>
+                        <ui-select ng-model="entity.area" required>
+                            <ui-select-match allow-clear="false">
+                                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="item in dialogDataStub.areaList track by $index">
+                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.city' | translate}}</label>
+                    </div>
+                    <div>
+                        <ui-select ng-model="entity.city">
+                            <ui-select-match allow-clear="false">
+                                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="item in dialogDataStub.cityList track by $index">
+                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.locality' | translate}}</label>
+                    </div>
+                    <div>
+                        <ui-select ng-model="entity.locality">
+                            <ui-select-match allow-clear="false">
+                                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="item in dialogDataStub.localityList track by $index">
+                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.street' | translate}}</label>
+                    </div>
+                    <div>
+                        <ui-select ng-model="entity.street" required>
+                            <ui-select-match allow-clear="false">
+                                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="item in dialogDataStub.streetList track by $index">
+                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{'title.index' | translate}}</label>
+                    </div>
+                    <div>
+                        <input data-ng-model="entity.index" required
+                               type="text" class="form-control"
+                               title="{{entity.index}}"/>
+                    </div>
+                </div>
+                <div style="float: left; width: 80px;">
+                    <div>
+                        <label class="control-label">{{'title.building' | translate}}</label>
+                    </div>
+                    <div>
+                        <input data-ng-model="entity.building" required
+                               type="text" class="form-control"
+                               title="{{entity.building}}"/>
+                    </div>
+                </div>
+                <div style="width: 80px; display: inline-block; margin-left: 15px;">
+                    <div>
+                        <label class="control-label">{{'title.housing' | translate}}</label>
+                    </div>
+                    <div>
+                        <input data-ng-model="entity.housing"
+                               type="text" class="form-control"
+                               title="{{entity.housing}}"/>
+                    </div>
+                </div>
+                <div style="float: right; width: 80px;">
+                    <div>
+                        <label class="control-label">{{'title.apartment' | translate}}</label>
+                    </div>
+                    <div>
+                        <input data-ng-model="entity.apartment" required
+                               type="text" class="form-control"
+                               title="{{entity.apartment}}"/>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button"
+            class="btn btn-danger"
+            data-ng-disabled="createOrEditFLForm.$invalid"
+            ng-click="save()">
+        {{buttonTitle}}
+    </button>
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{'common.button.cancel' |
+        translate}}
+    </button>
+</div>

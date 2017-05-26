@@ -27,6 +27,7 @@ import java.net.URLEncoder;
 import java.util.Date;
 
 @Controller
+@RequestMapping(value = "/actions")
 public class DeclarationTemplateController {
 
 	private static final Log LOG = LogFactory.getLog(DeclarationTemplateController.class);

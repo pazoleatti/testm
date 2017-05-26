@@ -27,7 +27,7 @@ import java.util.List;
  */
 
 @Controller
-@RequestMapping("/uploadController")
+@RequestMapping("/actions/uploadController")
 public class UploadController {
 
     private static final int MAX_FILE_SIZE = 5242880; // 5 МБайт

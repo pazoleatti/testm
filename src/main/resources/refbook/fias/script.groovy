@@ -72,6 +72,9 @@ void importData() {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
     }
 
+    // Обновление материализованных представлений
+    fiasRefBookService.refreshViews()
+
     logger.info("Завершение импорта данных справочника ФИАС. Записей загружено: "+addressObjectGuidsMap.size() + calcTimeMillis(time));
 
 }

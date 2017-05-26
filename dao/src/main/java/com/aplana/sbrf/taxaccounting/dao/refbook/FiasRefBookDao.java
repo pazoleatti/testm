@@ -38,5 +38,9 @@ public interface FiasRefBookDao {
      */
     Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationId, int p_check_type);
 
+    /**
+     * Вызывает процедуру обновляющую материальные представления после импорта в ФИАС
+     */
+    public void refreshViews();
 
 }

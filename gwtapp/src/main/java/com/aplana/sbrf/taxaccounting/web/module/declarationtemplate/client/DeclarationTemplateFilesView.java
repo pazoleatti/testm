@@ -55,7 +55,7 @@ public class DeclarationTemplateFilesView extends ViewWithUiHandlers<Declaration
 
     private List<DeclarationTemplateFile> declarationTemplateFiles;
 
-    private static String actionUrl = "upload/uploadController/pattern/";
+    private static String actionUrl = "controller/actions/uploadController/pattern/";
     private static String respPattern = "(<pre.*?>|<PRE.*?>)(.+?)(</pre>|</PRE>)(.*)";
 
     @Inject
