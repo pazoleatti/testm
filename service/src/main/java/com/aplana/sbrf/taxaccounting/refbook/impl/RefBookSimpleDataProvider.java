@@ -705,7 +705,13 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
     @Override
     public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
-        return refBookDao.dereferenceValues(getRefBook().getTableName(), attributeId, recordIds);
+        Map<Long, Map<String, RefBookValue>> recordData = getRecordData(new ArrayList<Long>(recordIds));
+        String refBookAttributeAlias = refBook.getAttribute(attributeId).getAlias();
+        Map<Long, RefBookValue> result = new HashMap<Long, RefBookValue>();
+        for(Map.Entry<Long, Map<String, RefBookValue>> record: recordData.entrySet()) {
+            result.put(record.getKey(), record.getValue().get(refBookAttributeAlias));
+        }
+        return result;
     }
 
     @Override
