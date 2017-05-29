@@ -251,7 +251,8 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	}
 
-    private void updateUserAsnu(final TAUser user) {
+	@Override
+    public void updateUserAsnu(final TAUser user) {
         try {
             getJdbcTemplate().update("delete from sec_user_asnu where user_id=?", user.getId());
 
