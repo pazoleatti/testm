@@ -1333,8 +1333,15 @@ import org.springframework.jdbc.core.RowMapper
             dataRows.add(row)
         }
 
+        int countOfAvailableNdflPerson = pagingResult.size()
+
+        if (countOfAvailableNdflPerson >= pageSize) {
+            countOfAvailableNdflPerson = ndflPersonService.findNdflPersonCountByParameters(declarationData.id, resultReportParameters);
+        }
+
         result.setTableColumns(tableColumns);
         result.setDataRows(dataRows);
+        result.setCountAvailableDataRows(countOfAvailableNdflPerson)
         scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
         scriptSpecificReportHolder.setSubreportParamValues(params)
     }

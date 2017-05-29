@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -22,6 +20,8 @@ public class PrepareSpecificReportResult implements Serializable{
      */
     List<DataRow<Cell>> dataRows;
 
+    private int countAvailableDataRows;
+
     public List<Column> getTableColumns() {
         return tableColumns;
     }
@@ -36,5 +36,13 @@ public class PrepareSpecificReportResult implements Serializable{
 
     public void setDataRows(List<DataRow<Cell>> dataRows) {
         this.dataRows = dataRows;
+    }
+
+    public int getCountAvailableDataRows() {
+        return countAvailableDataRows;
+    }
+
+    public void setCountAvailableDataRows(int countAvailableDataRows) {
+        this.countAvailableDataRows = countAvailableDataRows;
     }
 }

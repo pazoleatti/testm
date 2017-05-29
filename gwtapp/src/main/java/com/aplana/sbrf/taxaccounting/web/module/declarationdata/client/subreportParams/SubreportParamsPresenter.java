@@ -21,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesRes
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -28,7 +29,6 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
-
 import java.util.*;
 
 /**
@@ -48,9 +48,14 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
 
     public interface MyView extends PopupView, HasUiHandlers<SubreportParamsUiHandlers> {
         void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
+
         Map<String, Object> getFieldsValues() throws BadValueException, WarnValueException;
+
         void setTableData(PrepareSpecificReportResult prepareSpecificReportResult);
+
         DataRow<Cell> getSelectedRow();
+
+        void updateInfoLabel(boolean visible, String text, Map<String, String> styleMap);
     }
 
     @Inject
@@ -93,6 +98,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     @Override
     public void onFind() {
         try {
+            getView().updateInfoLabel(false, null, null);
             final PrepareSubreportAction action = new PrepareSubreportAction();
             action.setDeclarationDataId(declarationDataPresenter.getDeclarationId());
             action.setTaxType(declarationDataPresenter.getTaxType());
@@ -116,7 +122,13 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                                     StringBuilder message = new StringBuilder("Физическое лицо: ");
                                     for (Map.Entry<String, Object> entry : action.getSubreportParamValues().entrySet()) {
                                         if (entry.getValue() != null) {
-                                            message.append(entry.getValue().toString()).append("; ");
+                                            String token = "";
+                                            if (entry.getValue() instanceof Date) {
+                                                token = DateTimeFormat.getFormat("dd.MM.yyyy").format((Date) entry.getValue());
+                                            } else {
+                                                token = entry.getValue().toString();
+                                            }
+                                            message.append(token).append("; ");
                                         }
                                     }
                                     message.delete(message.length() - 2, message.length());
@@ -127,6 +139,27 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                                     } catch (WarnValueException e) {
                                         Dialog.warningMessage("Отчет не сформирован", createDialogMessage(e));
                                     }
+                                }
+                                int countAvailbaleDataRows = result.getPrepareSpecificReportResult().getCountAvailableDataRows();
+                                int resultSize = result.getPrepareSpecificReportResult().getDataRows().size();
+                                if (resultSize < countAvailbaleDataRows) {
+                                    StringBuilder infoMessage = new StringBuilder();
+                                    Map<String, String> styleMap = new HashMap<String, String>();
+                                    styleMap.put("backgroundColor", "rgb(199, 248, 250)");
+                                    infoMessage.append("Найдено ")
+                                            .append(countAvailbaleDataRows)
+                                            .append(" записей. Отображено записей ")
+                                            .append(resultSize)
+                                            .append(". Уточните критерии поиска.");
+                                    getView().updateInfoLabel(true, infoMessage.toString(), styleMap);
+                                } else {
+                                    StringBuilder infoMessage = new StringBuilder();
+                                    Map<String, String> styleMap = new HashMap<String, String>();
+                                    styleMap.put("backgroundColor", "rgb(240, 248, 209)");
+                                    infoMessage.append("Найдено записей ")
+                                            .append(countAvailbaleDataRows)
+                                            .append(".");
+                                    getView().updateInfoLabel(true, infoMessage.toString(), styleMap);
                                 }
                             }
                         }
@@ -142,13 +175,17 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
             dispatcher.execute(action,
                     CallbackUtils.defaultCallback(new SaveLogEntriesCallBack(), this));
         } catch (WarnValueException wve) {
-            Dialog.warningMessage("Отчет не сформирован", createDialogMessage(wve));
+            Map<String, String> styleMap = new HashMap<String, String>();
+            styleMap.put("backgroundColor", "rgb(240, 248, 209)");
+            getView().updateInfoLabel(true, createDialogMessage(wve), styleMap);
         }
     }
 
     @Override
     public void onCreate() {
         try {
+            getView().updateInfoLabel(false, null, null);
+            ;
             CreateReportAction action = new CreateReportAction();
             action.setDeclarationDataId(declarationDataPresenter.getDeclarationId());
             action.setForce(false);
@@ -186,7 +223,9 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
             dispatcher.execute(action,
                     CallbackUtils.defaultCallback(new SaveLogEntriesCallBack(), this));
         } catch (WarnValueException wve) {
-            Dialog.warningMessage("Отчет не сформирован", createDialogMessage(wve));
+            Map<String, String> styleMap = new HashMap<String, String>();
+            styleMap.put("backgroundColor", "rgb(240, 248, 209)");
+            getView().updateInfoLabel(true, createDialogMessage(wve), styleMap);
         }
 
     }
@@ -202,21 +241,22 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     @Override
     public void onHide() {
         super.onHide();
+        getView().updateInfoLabel(false, null, null);
         closeFormDataHandlerRegistration.removeHandler();
     }
 
     private String createDialogMessage(AbstractBadValueException ex) {
         StringBuilder message = new StringBuilder();
-        for (String entry : ex){
+        for (String entry : ex) {
             message.append(entry).append('\n');
         }
         message.deleteCharAt(message.length() - 1);
         return message.toString();
     }
 
-    private SaveLogEntriesAction createLogEntriesActionFromException (AbstractBadValueException exception, LogLevel logLevel) {
+    private SaveLogEntriesAction createLogEntriesActionFromException(AbstractBadValueException exception, LogLevel logLevel) {
         List<LogEntry> logEntries = new ArrayList<LogEntry>();
-        for (String entry : exception){
+        for (String entry : exception) {
             logEntries.add(new LogEntry(logLevel, entry));
         }
 

@@ -58,7 +58,7 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     Button cancelButton;
 
     @UiField
-    Label horSep, selectRecordLabel;
+    Label horSep, selectRecordLabel, infoLabel;
 
     @UiField
     ResizeLayoutPanel resultPanel;
@@ -68,6 +68,9 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
     @UiField
     FlexiblePager pager;
+
+    @UiField
+    HTMLPanel infoPanel;
 
     //private final PopupPanel widget;
     Map<DeclarationSubreportParam, HasValue> widgets;
@@ -362,5 +365,18 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     @Override
     public DataRow<Cell> getSelectedRow() {
         return singleSelectionModel.getSelectedObject();
+    }
+
+    @Override
+    public void updateInfoLabel(boolean visible, String text, Map<String, String> styleMap) {
+        if(text != null) {
+            infoLabel.setText(text);
+        }
+        if (styleMap != null) {
+            for (Map.Entry<String, String> entry : styleMap.entrySet()) {
+                infoPanel.getElement().getStyle().setProperty(entry.getKey(), entry.getValue());
+            }
+        }
+        infoPanel.setVisible(visible);
     }
 }

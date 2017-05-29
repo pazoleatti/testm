@@ -323,10 +323,31 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return new PagingResult<NdflPerson>(result, getCount(totalQuery, parameters));
     }
 
+    @Override
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters) {
+        parameters.put("declarationDataId", declarationDataId);
+        String query = buildCountQuery(parameters);
+        return getNamedParameterJdbcTemplate().queryForObject(query, parameters, Integer.class);
+    }
+
     public static String buildQuery(Map<String, Object> parameters) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " \n");
+        sb.append(buildQueryBody(parameters));
+        sb.append("ORDER BY np.row_num \n");
+        return sb.toString();
+    }
+
+    public static String buildCountQuery(Map<String, Object> params) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT COUNT(*) \n")
+                .append(buildQueryBody(params));
+        return sb.toString();
+    }
+
+    private static String buildQueryBody(Map<String, Object> parameters) {
+        StringBuilder sb = new StringBuilder();
         sb.append("FROM ndfl_person np \n");
         sb.append(" LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id \n");
         sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
@@ -369,9 +390,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 sb.append("AND (np.id_doc_number is null OR np.id_doc_number = :idDocNumber) \n");
             }
         }
-        sb.append("ORDER BY np.row_num \n");
         return sb.toString();
-
     }
 
     private static boolean contains(Map<String, Object> param, String key) {

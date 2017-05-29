@@ -133,6 +133,14 @@ public interface NdflPersonService {
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize);
 
     /**
+     * Найти количество NdflPerson по заданным параметрам
+     * @param declarationDataId
+     * @param parameters
+     * @return
+     */
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters);
+
+    /**
      * Удаляет все данные о физлицах из декларации
      *
      * @param declarationDataId
