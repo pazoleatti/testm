@@ -2,11 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exc
 
 import java.util.Map;
 
-public class BadValueException extends AbstractBadValueException {
-    public BadValueException(){
+public class WarnValueException extends AbstractBadValueException {
+    public WarnValueException(){
         super();
     }
-    public BadValueException(Map<String, String> descriptionMap) {
+    public WarnValueException(Map<String, String> descriptionMap) {
         super(descriptionMap);
     }
 }

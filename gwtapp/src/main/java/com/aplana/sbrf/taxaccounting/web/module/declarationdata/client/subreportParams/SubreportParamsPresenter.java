@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
+import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -11,7 +13,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.AbstractBadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.WarnValueException;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -25,7 +29,10 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Презентор "Параметры печатной формы"
@@ -43,22 +50,22 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     private Map<String, Object> subreportParamValues;
 
     public interface MyView extends PopupView, HasUiHandlers<SubreportParamsUiHandlers> {
-		void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
-        Map<String, Object> getFieldsValues() throws BadValueException;
+        void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
+        Map<String, Object> getFieldsValues() throws BadValueException, WarnValueException;
         void setTableData(PrepareSpecificReportResult prepareSpecificReportResult);
         DataRow<Cell> getSelectedRow();
     }
 
-	@Inject
-	public SubreportParamsPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
-		super(eventBus, view);
+    @Inject
+    public SubreportParamsPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
+        super(eventBus, view);
         this.dispatcher = dispatcher;
-		getView().setUiHandlers(this);
-	}
+        getView().setUiHandlers(this);
+    }
 
-	@Override
-	protected void onReveal() {
-		super.onReveal();
+    @Override
+    protected void onReveal() {
+        super.onReveal();
         closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
             @Override
             public void onClose(CloseEvent<Window> event) {
@@ -117,22 +124,11 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                     }, this));
         } catch (BadValueException bve) {
             Dialog.errorMessage("Отчет не сформирован", "Обнаружены фатальные ошибки!");
-            List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            for (String entry : bve){
-                logEntries.add(new LogEntry(LogLevel.ERROR, entry));
-            }
-
-            SaveLogEntriesAction action = new SaveLogEntriesAction();
-            action.setLogEntries(logEntries);
-
+            SaveLogEntriesAction action = createLogEntriesActionFromException(bve, LogLevel.ERROR);
             dispatcher.execute(action,
-                    CallbackUtils.defaultCallback(
-                            new AbstractCallback<SaveLogEntriesResult>() {
-                                @Override
-                                public void onSuccess(SaveLogEntriesResult result) {
-                                    LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
-                                }
-                            }, this));
+                    CallbackUtils.defaultCallback(new SaveLogEntriesCallBack(), this));
+        } catch (WarnValueException wve) {
+            Dialog.warningMessage("Отчет не сформирован", createDialogMessage(wve));
         }
     }
 
@@ -172,29 +168,18 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                     }, this));
         } catch (BadValueException bve) {
             Dialog.errorMessage("Отчет не сформирован", "Обнаружены фатальные ошибки!");
-            List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            for (String entry : bve){
-                logEntries.add(new LogEntry(LogLevel.ERROR, entry));
-            }
-
-            SaveLogEntriesAction action = new SaveLogEntriesAction();
-            action.setLogEntries(logEntries);
-
+            SaveLogEntriesAction action = createLogEntriesActionFromException(bve, LogLevel.ERROR);
             dispatcher.execute(action,
-                    CallbackUtils.defaultCallback(
-                            new AbstractCallback<SaveLogEntriesResult>() {
-                                @Override
-                                public void onSuccess(SaveLogEntriesResult result) {
-                                    LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
-                                }
-                            }, this));
+                    CallbackUtils.defaultCallback(new SaveLogEntriesCallBack(), this));
+        } catch (WarnValueException wve) {
+            Dialog.warningMessage("Отчет не сформирован", createDialogMessage(wve));
         }
 
     }
 
     public void setSubreport(DeclarationSubreport declarationSubreport) {
-		this.declarationSubreport = declarationSubreport;
-	}
+        this.declarationSubreport = declarationSubreport;
+    }
 
     public void setDeclarationDataPresenter(DeclarationDataPresenter declarationDataPresenter) {
         this.declarationDataPresenter = declarationDataPresenter;
@@ -204,5 +189,33 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     public void onHide() {
         super.onHide();
         closeFormDataHandlerRegistration.removeHandler();
+    }
+
+    private String createDialogMessage(AbstractBadValueException ex) {
+        StringBuilder message = new StringBuilder();
+        for (String entry : ex){
+            message.append(entry).append('\n');
+        }
+        message.deleteCharAt(message.length() - 1);
+        return message.toString();
+    }
+
+    private SaveLogEntriesAction createLogEntriesActionFromException (AbstractBadValueException exception, LogLevel logLevel) {
+        List<LogEntry> logEntries = new ArrayList<LogEntry>();
+        for (String entry : exception){
+            logEntries.add(new LogEntry(logLevel, entry));
+        }
+
+        SaveLogEntriesAction action = new SaveLogEntriesAction();
+        action.setLogEntries(logEntries);
+
+        return action;
+    }
+
+    private class SaveLogEntriesCallBack extends AbstractCallback<SaveLogEntriesResult> {
+        @Override
+        public void onSuccess(SaveLogEntriesResult result) {
+            LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
+        }
     }
 }

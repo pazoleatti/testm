@@ -2,9 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subrepor
 
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefBookParamInfo;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.WarnValueException;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -112,7 +112,7 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
     @UiHandler("createButton")
     public void onCreate(ClickEvent event) {
-       getUiHandlers().onCreate();
+        getUiHandlers().onCreate();
     }
 
     @UiHandler("cancelButton")
@@ -264,9 +264,10 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> getFieldsValues() throws BadValueException {
+    public Map<String, Object> getFieldsValues() throws BadValueException, WarnValueException {
         Map<String, Object> fieldsValues = new HashMap<String, Object>();
         Map<String, String> errorMap = new LinkedHashMap<String, String>();
+        Map<String, String> warnMap = new LinkedHashMap<String, String>();
         boolean required = false;
         for (Map.Entry<DeclarationSubreportParam, HasValue> field : widgets.entrySet()) {
             Object value = null;
@@ -305,11 +306,14 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
                 errorMap.put(field.getKey().getName(), "значение некорректно");
             }
         }
-        if (errorMap.isEmpty() && !required) {
-            errorMap.put("", "Необходимо заполнить хотя бы одно из полей");
+        if (warnMap.isEmpty() && !required) {
+            warnMap.put("", "Для поиска физического лица необходимо выбрать хотя бы один критерий поиска");
         }
         if (!errorMap.isEmpty())
             throw new BadValueException(errorMap);
+        if (!warnMap.isEmpty()) {
+            throw new WarnValueException(warnMap);
+        }
         return fieldsValues;
     }
 
