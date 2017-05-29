@@ -76,4 +76,10 @@ public interface TAUserDao {
 	 * @return true если пользователь с таким логином есть, false если нет
 	 */
 	boolean existsUser(String login);
+
+	/**
+	 * Обновляет запись в справочнике "Ограничение доступа по АСНУ"
+	 * @param user
+	 */
+	void updateUserAsnu(TAUser user);
 }

@@ -133,7 +133,8 @@ public class RefBook implements Serializable {
 		NDFL_DETAIL(951), 							// Настройки подразделений по НДФЛ (таблица)
 		FOND(960), 									// Настройки подразделений по Сборы, взносы
 		FOND_DETAIL(961), 							// Настройки подразделений по Сборы, взносы (таблица)
-		NDFL_REFERENCES(964);                       // Реестр справок
+		NDFL_REFERENCES(964),                       // Реестр справок
+		SEC_USER_ASNU(942);							// Ограничение доступа по АСНУ
 
         private final long id;
 
@@ -164,7 +165,8 @@ public class RefBook implements Serializable {
 		NDFL_DETAIL("REF_BOOK_NDFL_DETAIL"),
         FOND("REF_BOOK_FOND"),
         FOND_DETAIL("REF_BOOK_FOND_DETAIL"),
-		FIAS_ADDR_OBJECT("FIAS_ADDROBJ");
+		FIAS_ADDR_OBJECT("FIAS_ADDROBJ"),
+		USER("SEC_USER");
 
 		private final String table;
 

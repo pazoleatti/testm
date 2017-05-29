@@ -117,12 +117,18 @@ public class RefBookFactoryImpl implements RefBookFactory {
             return applicationContext.getBean("refBookAsyncConfigProvider", RefBookAsyncConfigProvider.class);
         }
         if (refBook.getTableName() != null && !refBook.getTableName().isEmpty()) {
-            RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
-                dataProvider.setWhereClause("ID <> -1");
+            if (SEC_USER_ASNU.getId() == refBookId) {
+                RefBookUserAsnuDataProvider dataProvider = applicationContext.getBean("refBookUserAsnu", RefBookUserAsnuDataProvider.class);
+                dataProvider.setRefBook(refBook);
+                return dataProvider;
+            } else {
+                RefBookSimpleReadOnly dataProvider = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+                if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
+                    dataProvider.setWhereClause("ID <> -1");
+                }
+                dataProvider.setRefBook(refBook);
+                return dataProvider;
             }
-            dataProvider.setRefBook(refBook);
-            return dataProvider;
         } else {
             RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
             refBookUniversal.setRefBookId(refBookId);
