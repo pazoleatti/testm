@@ -911,10 +911,6 @@ def prepareSpecificReport() {
 
     PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters, startIndex, pageSize);
 
-    if (pagingResult.isEmpty()) {
-        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + resultReportParameters);
-    }
-
     pagingResult.getRecords().each() { ndflPerson ->
         DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
         row.getCell("id").setStringValue(ndflPerson.id.toString())

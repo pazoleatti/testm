@@ -29,10 +29,7 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Презентор "Параметры печатной формы"
@@ -114,6 +111,23 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                             } else {
                                 // отображение таблицы
                                 getView().setTableData(result.getPrepareSpecificReportResult());
+                                if (result.getPrepareSpecificReportResult().getDataRows().isEmpty()) {
+                                    Map<String, String> warnMap = new LinkedHashMap<String, String>();
+                                    StringBuilder message = new StringBuilder("Физическое лицо: ");
+                                    for (Map.Entry<String, Object> entry : action.getSubreportParamValues().entrySet()) {
+                                        if (entry.getValue() != null) {
+                                            message.append(entry.getValue().toString()).append("; ");
+                                        }
+                                    }
+                                    message.delete(message.length() - 2, message.length());
+                                    message.append(" не найдено в форме");
+                                    warnMap.put("", message.toString());
+                                    try {
+                                        throw new WarnValueException(warnMap);
+                                    } catch (WarnValueException e) {
+                                        Dialog.warningMessage("Отчет не сформирован", createDialogMessage(e));
+                                    }
+                                }
                             }
                         }
 
