@@ -924,6 +924,12 @@ def prepareSpecificReport() {
         dataRows.add(row)
     }
 
+    int countOfAvailableNdflPerson = pagingResult.size()
+
+    if (countOfAvailableNdflPerson >= pageSize) {
+        countOfAvailableNdflPerson = ndflPersonService.findNdflPersonCountByParameters(declarationData.id, resultReportParameters);
+    }
+
     result.setTableColumns(tableColumns);
     result.setDataRows(dataRows);
     scriptSpecificReportHolder.setPrepareSpecificReportResult(result)

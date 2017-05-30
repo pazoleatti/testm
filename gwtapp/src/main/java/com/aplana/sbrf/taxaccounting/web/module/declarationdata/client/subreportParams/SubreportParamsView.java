@@ -277,13 +277,13 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
             try {
                 switch (field.getKey().getType()) {
                     case NUMBER:
-                        value = checkNumber(field.getKey(), field.getValue(), errorMap);
+                        value = checkNumber(field.getKey(), field.getValue(), warnMap);
                         break;
                     case STRING:
                         String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
                                 null : (String)field.getValue().getValue();
                         if (string!= null && string.length() > STRING_VALUE_MAX_LENGTH) {
-                            errorMap.put(field.getKey().getName(), "количество символов превышает максимально допустимое = " + STRING_VALUE_MAX_LENGTH);
+                            warnMap.put(field.getKey().getName(), "количество символов превышает максимально допустимое = " + STRING_VALUE_MAX_LENGTH);
                         }
                         value = string;
                         break;
@@ -298,15 +298,19 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
                     default:
                         break;
                 }
-                checkRequired(field.getKey(), value, errorMap);
+                checkRequired(field.getKey(), value, warnMap);
                 fieldsValues.put(field.getKey().getAlias(), value);
                 if (value != null) {
                     required = true;
                 }
             } catch (NumberFormatException nfe) {
-                errorMap.put(field.getKey().getName(), "значение некорректно. Неправильный формат числа");
+                if (field.getKey().getAlias().equalsIgnoreCase("inn")) {
+                    warnMap.put(field.getKey().getName(), "значение должно состоять из цифр. Длина 12 символов.");
+                } else {
+                    warnMap.put(field.getKey().getName(), "значение некорректно. Неправильный формат числа");
+                }
             } catch (ClassCastException cce) {
-                errorMap.put(field.getKey().getName(), "значение некорректно");
+                warnMap.put(field.getKey().getName(), "значение некорректно");
             }
         }
         if (warnMap.isEmpty() && !required) {
