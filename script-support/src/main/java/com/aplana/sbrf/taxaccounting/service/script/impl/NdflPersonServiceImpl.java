@@ -143,6 +143,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters) {
+        return ndflPersonDao.findNdflPersonCountByParameters(declarationDataId, parameters);
+    }
+
+    @Override
     public List<NdflPersonPrepayment> findPrepaymentsByNdflPersonIdList(List<Long> ndflPersonIdList) {
         return ndflPersonDao.findPrepaymentsByNdflPersonIdList(ndflPersonIdList);
     }

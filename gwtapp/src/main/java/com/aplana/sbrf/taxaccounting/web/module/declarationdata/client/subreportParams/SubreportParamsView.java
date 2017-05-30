@@ -2,9 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subrepor
 
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefBookParamInfo;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.WarnValueException;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -58,7 +58,7 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     Button cancelButton;
 
     @UiField
-    Label horSep, selectRecordLabel;
+    Label horSep, selectRecordLabel, infoLabel;
 
     @UiField
     ResizeLayoutPanel resultPanel;
@@ -68,6 +68,9 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
     @UiField
     FlexiblePager pager;
+
+    @UiField
+    HTMLPanel infoPanel;
 
     //private final PopupPanel widget;
     Map<DeclarationSubreportParam, HasValue> widgets;
@@ -112,7 +115,7 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
     @UiHandler("createButton")
     public void onCreate(ClickEvent event) {
-       getUiHandlers().onCreate();
+        getUiHandlers().onCreate();
     }
 
     @UiHandler("cancelButton")
@@ -264,22 +267,23 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> getFieldsValues() throws BadValueException {
+    public Map<String, Object> getFieldsValues() throws BadValueException, WarnValueException {
         Map<String, Object> fieldsValues = new HashMap<String, Object>();
         Map<String, String> errorMap = new LinkedHashMap<String, String>();
+        Map<String, String> warnMap = new LinkedHashMap<String, String>();
         boolean required = false;
         for (Map.Entry<DeclarationSubreportParam, HasValue> field : widgets.entrySet()) {
             Object value = null;
             try {
                 switch (field.getKey().getType()) {
                     case NUMBER:
-                        value = checkNumber(field.getKey(), field.getValue(), errorMap);
+                        value = checkNumber(field.getKey(), field.getValue(), warnMap);
                         break;
                     case STRING:
                         String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
                                 null : (String)field.getValue().getValue();
                         if (string!= null && string.length() > STRING_VALUE_MAX_LENGTH) {
-                            errorMap.put(field.getKey().getName(), "количество символов превышает максимально допустимое = " + STRING_VALUE_MAX_LENGTH);
+                            warnMap.put(field.getKey().getName(), "количество символов превышает максимально допустимое = " + STRING_VALUE_MAX_LENGTH);
                         }
                         value = string;
                         break;
@@ -294,22 +298,29 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
                     default:
                         break;
                 }
-                checkRequired(field.getKey(), value, errorMap);
+                checkRequired(field.getKey(), value, warnMap);
                 fieldsValues.put(field.getKey().getAlias(), value);
                 if (value != null) {
                     required = true;
                 }
             } catch (NumberFormatException nfe) {
-                errorMap.put(field.getKey().getName(), "значение некорректно. Неправильный формат числа");
+                if (field.getKey().getAlias().equalsIgnoreCase("inn")) {
+                    warnMap.put(field.getKey().getName(), "значение должно состоять из цифр. Длина 12 символов.");
+                } else {
+                    warnMap.put(field.getKey().getName(), "значение некорректно. Неправильный формат числа");
+                }
             } catch (ClassCastException cce) {
-                errorMap.put(field.getKey().getName(), "значение некорректно");
+                warnMap.put(field.getKey().getName(), "значение некорректно");
             }
         }
-        if (errorMap.isEmpty() && !required) {
-            errorMap.put("", "Необходимо заполнить хотя бы одно из полей");
+        if (warnMap.isEmpty() && !required) {
+            warnMap.put("", "Для поиска физического лица необходимо выбрать хотя бы один критерий поиска");
         }
         if (!errorMap.isEmpty())
             throw new BadValueException(errorMap);
+        if (!warnMap.isEmpty()) {
+            throw new WarnValueException(warnMap);
+        }
         return fieldsValues;
     }
 
@@ -358,5 +369,18 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     @Override
     public DataRow<Cell> getSelectedRow() {
         return singleSelectionModel.getSelectedObject();
+    }
+
+    @Override
+    public void updateInfoLabel(boolean visible, String text, Map<String, String> styleMap) {
+        if(text != null) {
+            infoLabel.setText(text);
+        }
+        if (styleMap != null) {
+            for (Map.Entry<String, String> entry : styleMap.entrySet()) {
+                infoPanel.getElement().getStyle().setProperty(entry.getKey(), entry.getValue());
+            }
+        }
+        infoPanel.setVisible(visible);
     }
 }

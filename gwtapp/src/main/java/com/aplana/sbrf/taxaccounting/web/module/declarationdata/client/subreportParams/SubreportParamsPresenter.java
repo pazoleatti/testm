@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
+import com.aplana.sbrf.taxaccounting.model.PrepareSpecificReportResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -11,12 +13,15 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.AbstractBadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.WarnValueException;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -24,7 +29,6 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
-
 import java.util.*;
 
 /**
@@ -43,22 +47,27 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     private Map<String, Object> subreportParamValues;
 
     public interface MyView extends PopupView, HasUiHandlers<SubreportParamsUiHandlers> {
-		void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
-        Map<String, Object> getFieldsValues() throws BadValueException;
+        void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
+
+        Map<String, Object> getFieldsValues() throws BadValueException, WarnValueException;
+
         void setTableData(PrepareSpecificReportResult prepareSpecificReportResult);
+
         DataRow<Cell> getSelectedRow();
+
+        void updateInfoLabel(boolean visible, String text, Map<String, String> styleMap);
     }
 
-	@Inject
-	public SubreportParamsPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
-		super(eventBus, view);
+    @Inject
+    public SubreportParamsPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
+        super(eventBus, view);
         this.dispatcher = dispatcher;
-		getView().setUiHandlers(this);
-	}
+        getView().setUiHandlers(this);
+    }
 
-	@Override
-	protected void onReveal() {
-		super.onReveal();
+    @Override
+    protected void onReveal() {
+        super.onReveal();
         closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
             @Override
             public void onClose(CloseEvent<Window> event) {
@@ -89,6 +98,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     @Override
     public void onFind() {
         try {
+            getView().updateInfoLabel(false, null, null);
             final PrepareSubreportAction action = new PrepareSubreportAction();
             action.setDeclarationDataId(declarationDataPresenter.getDeclarationId());
             action.setTaxType(declarationDataPresenter.getTaxType());
@@ -107,6 +117,50 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                             } else {
                                 // отображение таблицы
                                 getView().setTableData(result.getPrepareSpecificReportResult());
+                                if (result.getPrepareSpecificReportResult().getDataRows().isEmpty()) {
+                                    Map<String, String> warnMap = new LinkedHashMap<String, String>();
+                                    StringBuilder message = new StringBuilder("Физическое лицо: ");
+                                    for (Map.Entry<String, Object> entry : action.getSubreportParamValues().entrySet()) {
+                                        if (entry.getValue() != null) {
+                                            String token = "";
+                                            if (entry.getValue() instanceof Date) {
+                                                token = DateTimeFormat.getFormat("dd.MM.yyyy").format((Date) entry.getValue());
+                                            } else {
+                                                token = entry.getValue().toString();
+                                            }
+                                            message.append(token).append("; ");
+                                        }
+                                    }
+                                    message.delete(message.length() - 2, message.length());
+                                    message.append(" не найдено в форме");
+                                    warnMap.put("", message.toString());
+                                    try {
+                                        throw new WarnValueException(warnMap);
+                                    } catch (WarnValueException e) {
+                                        Dialog.warningMessage("Отчет не сформирован", createDialogMessage(e));
+                                    }
+                                }
+                                int countAvailbaleDataRows = result.getPrepareSpecificReportResult().getCountAvailableDataRows();
+                                int resultSize = result.getPrepareSpecificReportResult().getDataRows().size();
+                                if (resultSize < countAvailbaleDataRows) {
+                                    StringBuilder infoMessage = new StringBuilder();
+                                    Map<String, String> styleMap = new HashMap<String, String>();
+                                    styleMap.put("backgroundColor", "rgb(199, 248, 250)");
+                                    infoMessage.append("Найдено ")
+                                            .append(countAvailbaleDataRows)
+                                            .append(" записей. Отображено записей ")
+                                            .append(resultSize)
+                                            .append(". Уточните критерии поиска.");
+                                    getView().updateInfoLabel(true, infoMessage.toString(), styleMap);
+                                } else {
+                                    StringBuilder infoMessage = new StringBuilder();
+                                    Map<String, String> styleMap = new HashMap<String, String>();
+                                    styleMap.put("backgroundColor", "rgb(240, 248, 209)");
+                                    infoMessage.append("Найдено записей ")
+                                            .append(countAvailbaleDataRows)
+                                            .append(".");
+                                    getView().updateInfoLabel(true, infoMessage.toString(), styleMap);
+                                }
                             }
                         }
 
@@ -117,28 +171,21 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                     }, this));
         } catch (BadValueException bve) {
             Dialog.errorMessage("Отчет не сформирован", "Обнаружены фатальные ошибки!");
-            List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            for (String entry : bve){
-                logEntries.add(new LogEntry(LogLevel.ERROR, entry));
-            }
-
-            SaveLogEntriesAction action = new SaveLogEntriesAction();
-            action.setLogEntries(logEntries);
-
+            SaveLogEntriesAction action = createLogEntriesActionFromException(bve, LogLevel.ERROR);
             dispatcher.execute(action,
-                    CallbackUtils.defaultCallback(
-                            new AbstractCallback<SaveLogEntriesResult>() {
-                                @Override
-                                public void onSuccess(SaveLogEntriesResult result) {
-                                    LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
-                                }
-                            }, this));
+                    CallbackUtils.defaultCallback(new SaveLogEntriesCallBack(), this));
+        } catch (WarnValueException wve) {
+            Map<String, String> styleMap = new HashMap<String, String>();
+            styleMap.put("backgroundColor", "rgb(240, 248, 209)");
+            getView().updateInfoLabel(true, createDialogMessage(wve), styleMap);
         }
     }
 
     @Override
     public void onCreate() {
         try {
+            getView().updateInfoLabel(false, null, null);
+            ;
             CreateReportAction action = new CreateReportAction();
             action.setDeclarationDataId(declarationDataPresenter.getDeclarationId());
             action.setForce(false);
@@ -172,29 +219,20 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                     }, this));
         } catch (BadValueException bve) {
             Dialog.errorMessage("Отчет не сформирован", "Обнаружены фатальные ошибки!");
-            List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            for (String entry : bve){
-                logEntries.add(new LogEntry(LogLevel.ERROR, entry));
-            }
-
-            SaveLogEntriesAction action = new SaveLogEntriesAction();
-            action.setLogEntries(logEntries);
-
+            SaveLogEntriesAction action = createLogEntriesActionFromException(bve, LogLevel.ERROR);
             dispatcher.execute(action,
-                    CallbackUtils.defaultCallback(
-                            new AbstractCallback<SaveLogEntriesResult>() {
-                                @Override
-                                public void onSuccess(SaveLogEntriesResult result) {
-                                    LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
-                                }
-                            }, this));
+                    CallbackUtils.defaultCallback(new SaveLogEntriesCallBack(), this));
+        } catch (WarnValueException wve) {
+            Map<String, String> styleMap = new HashMap<String, String>();
+            styleMap.put("backgroundColor", "rgb(240, 248, 209)");
+            getView().updateInfoLabel(true, createDialogMessage(wve), styleMap);
         }
 
     }
 
     public void setSubreport(DeclarationSubreport declarationSubreport) {
-		this.declarationSubreport = declarationSubreport;
-	}
+        this.declarationSubreport = declarationSubreport;
+    }
 
     public void setDeclarationDataPresenter(DeclarationDataPresenter declarationDataPresenter) {
         this.declarationDataPresenter = declarationDataPresenter;
@@ -203,6 +241,35 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     @Override
     public void onHide() {
         super.onHide();
+        getView().updateInfoLabel(false, null, null);
         closeFormDataHandlerRegistration.removeHandler();
+    }
+
+    private String createDialogMessage(AbstractBadValueException ex) {
+        StringBuilder message = new StringBuilder();
+        for (String entry : ex) {
+            message.append(entry).append('\n');
+        }
+        message.deleteCharAt(message.length() - 1);
+        return message.toString();
+    }
+
+    private SaveLogEntriesAction createLogEntriesActionFromException(AbstractBadValueException exception, LogLevel logLevel) {
+        List<LogEntry> logEntries = new ArrayList<LogEntry>();
+        for (String entry : exception) {
+            logEntries.add(new LogEntry(logLevel, entry));
+        }
+
+        SaveLogEntriesAction action = new SaveLogEntriesAction();
+        action.setLogEntries(logEntries);
+
+        return action;
+    }
+
+    private class SaveLogEntriesCallBack extends AbstractCallback<SaveLogEntriesResult> {
+        @Override
+        public void onSuccess(SaveLogEntriesResult result) {
+            LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
+        }
     }
 }

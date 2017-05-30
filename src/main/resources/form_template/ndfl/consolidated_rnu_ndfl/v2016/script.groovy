@@ -911,10 +911,6 @@ def prepareSpecificReport() {
 
     PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters, startIndex, pageSize);
 
-    if (pagingResult.isEmpty()) {
-        throw new ServiceException("По заданным параметрам ни одной записи не найдено: " + resultReportParameters);
-    }
-
     pagingResult.getRecords().each() { ndflPerson ->
         DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
         row.getCell("id").setStringValue(ndflPerson.id.toString())
@@ -926,6 +922,12 @@ def prepareSpecificReport() {
         row.birthDay = ndflPerson.birthDay
         row.idDocNumber = ndflPerson.idDocNumber
         dataRows.add(row)
+    }
+
+    int countOfAvailableNdflPerson = pagingResult.size()
+
+    if (countOfAvailableNdflPerson >= pageSize) {
+        countOfAvailableNdflPerson = ndflPersonService.findNdflPersonCountByParameters(declarationData.id, resultReportParameters);
     }
 
     result.setTableColumns(tableColumns);

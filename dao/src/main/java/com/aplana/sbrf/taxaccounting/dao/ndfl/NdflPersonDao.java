@@ -188,6 +188,14 @@ public interface NdflPersonDao {
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
 
     /**
+     * Найти количество NdflPerson по заданным параметрам
+     * @param declarationDataId
+     * @param parameters
+     * @return
+     */
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters);
+
+    /**
      * @param sqlQuery
      * @param parameters
      * @return
