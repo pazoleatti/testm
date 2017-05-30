@@ -545,12 +545,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 viewPdf.setVisible(isVisiblePDF);
             }
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
-            if (!isLoad) {
+            if (isLoad) {
                 getUiHandlers().revealPlaceRequest();
                 timerAccept.cancel();
             }
         } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
-            if (!isLoad) {
+            if (isLoad) {
                 getUiHandlers().revealPlaceRequest();
                 timerCheck.cancel();
             }
@@ -571,7 +571,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 timerPDF.run();
             }
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
-            timerAccept.scheduleRepeating(4000);
+            timerAccept.scheduleRepeating(1000);
             timerAccept.run();
         } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
             timerCheck.scheduleRepeating(4000);
