@@ -273,6 +273,7 @@ public class DeclarationDataPresenter
 
     @Override
     public void onTimerReport(final DeclarationDataReportType type, final boolean isTimer) {
+
         TimerReportAction action = new TimerReportAction();
         action.setDeclarationDataId(declarationId);
         action.setType(type.getReportAlias());
