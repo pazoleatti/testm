@@ -2,12 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
@@ -19,7 +18,9 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.MyView>{
 
@@ -89,6 +90,10 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
 
     @Override
     void create() throws BadValueException {
+        if (currentRefBookId == RefBook.Id.SEC_USER_ASNU.getId()) {
+            save();
+            return;
+        }
         AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
         action.setRefBookId(currentRefBookId);
         if (isVersionMode) {

@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -13,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service("refBookUserAsnu")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -32,13 +32,70 @@ public class RefBookUserAsnuDataProvider extends AbstractReadOnlyRefBook {
     @Autowired
     RefBookSimpleReadOnly refBookSimpleReadOnly;
 
+    @Autowired
+    RefBookSimpleDataProvider refBookSimpleDataProvider;
+
+    @Autowired
+    protected RefBookFactory refBookFactory;
+
+    @Autowired
+    private LockDataService lockService;
+
+    @Autowired
+    private LogEntryService logEntryService;
+
     @Override
     public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> record) {
-        TAUser user = taUserDao.getUser(record.get("USER_ID").getReferenceValue().intValue());
-        Long asnuId = record.get("ASNU_ID").getReferenceValue();
-        if (!user.getAsnuIds().contains(asnuId)) {
-            user.getAsnuIds().add(asnuId);
-            taUserDao.updateUserAsnu(user);
+        List<String> lockedObjects = new ArrayList<String>();
+        int userId = logger.getTaUserInfo().getUser().getId();
+        String lockKey = refBookFactory.generateTaskKey(getRefBookId(), ReportType.EDIT_REF_BOOK);
+        if (isNotLocked(getRefBook(), userId, lockKey)) {
+            try {
+                //Блокировка установлена
+                lockedObjects.add(lockKey);
+                //Блокируем связанные справочники
+                lockReferencedBooks(logger, lockedObjects);
+                TAUser user = taUserDao.getUser(record.get("USER_ID").getReferenceValue().intValue());
+                Long asnuId = record.get("ASNU_ID").getReferenceValue();
+                if (!user.getAsnuIds().contains(asnuId)) {
+                    user.getAsnuIds().add(asnuId);
+                    taUserDao.updateUserAsnu(user);
+                }
+            } finally {
+                for (String lock : lockedObjects) {
+                    lockService.unlock(lock, userId);
+                }
+            }
+        } else {
+            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
+                    logEntryService.save(logger.getEntries()));
+        }
+    }
+
+    @Override
+    public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
+        List<String> lockedObjects = new ArrayList<String>();
+        int userId = logger.getTaUserInfo().getUser().getId();
+        String lockKey = refBookFactory.generateTaskKey(getRefBookId(), ReportType.EDIT_REF_BOOK);
+        if (isNotLocked(getRefBook(), userId, lockKey)) {
+            try {
+                //Блокировка установлена
+                lockedObjects.add(lockKey);
+                //Блокируем связанные справочники
+                lockReferencedBooks(logger, lockedObjects);
+                Map<String, RefBookValue> record = getRecordData(uniqueRecordIds.get(0));
+                TAUser user = taUserDao.getUser(record.get("USER_ID").getReferenceValue().intValue());
+                Long asnuId = record.get("ASNU_ID").getReferenceValue();
+                user.getAsnuIds().remove(asnuId);
+                taUserDao.updateUserAsnu(user);
+            } finally {
+                for (String lock : lockedObjects) {
+                    lockService.unlock(lock, userId);
+                }
+            }
+        } else {
+            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
+                    logEntryService.save(logger.getEntries()));
         }
     }
 
@@ -123,4 +180,30 @@ public class RefBookUserAsnuDataProvider extends AbstractReadOnlyRefBook {
     public String getTableName() {
         return refBook.getTableName();
     }
+
+    private boolean isNotLocked(RefBook refBook, int userId, String lockKey) {
+        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBook.getId());
+        return lockType == null && lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null;
+    }
+
+    private void lockReferencedBooks(@NotNull Logger logger, List<String> lockedObjects) {
+        int userId = logger.getTaUserInfo().getUser().getId();
+        List<RefBookAttribute> attributes = getRefBook().getAttributes();
+        for (RefBookAttribute attribute : attributes) {
+            if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
+                String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
+                if (!lockedObjects.contains(referenceLockKey)) {
+                    if (isNotLocked(attributeRefBook, userId, referenceLockKey)) {
+                        lockedObjects.add(referenceLockKey);
+                    } else {
+                        throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
+                                logEntryService.save(logger.getEntries()));
+                    }
+                }
+            }
+        }
+    }
+
 }
