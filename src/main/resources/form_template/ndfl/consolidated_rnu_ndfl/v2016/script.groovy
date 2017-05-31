@@ -932,6 +932,7 @@ def prepareSpecificReport() {
 
     result.setTableColumns(tableColumns);
     result.setDataRows(dataRows);
+    result.setCountAvailableDataRows(countOfAvailableNdflPerson)
     scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
     scriptSpecificReportHolder.setSubreportParamValues(params)
 }
