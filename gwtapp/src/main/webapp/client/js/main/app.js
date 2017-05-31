@@ -14,6 +14,7 @@
             'aplana.alert',
             'aplana.modal',
             'aplana.utils',
+            'aplana.grid',
             'aplana.entity-utils',
             'aplana.submitValid',
             'aplana.dropdownMenu',

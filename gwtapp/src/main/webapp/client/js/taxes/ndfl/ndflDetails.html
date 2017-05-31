@@ -267,7 +267,7 @@
                         </span>
                         <!--Создать запись в таблице-->
                         <span>
-                            <button type="button" class="btn btn-default" data-ng-disabled="!createReqsEnabled"
+                            <button type="button" class="btn btn-default"
                                     data-ng-click="createFLClick()">
                                 <img src="client/img/button/enable/createRequisites.png" width="15px" height="15px"/>
                             </button>
@@ -282,10 +282,16 @@
                     </div>
                 </div>
                 <!-- Таблица -->
-                <div id="ndfl-details-content" class="content-with-table" style="float: left; width: 100%">
-                    <div id="ndfl-details-grid" class="usim-grid" data-ui-grid="gridOptions" ui-grid-resize-columns
-                         ui-grid-selection ui-grid-pagination ui-grid-autoResize ui-grid-move-columns></div>
+                <div class="tab-content-paddings">
+                    <div data-aplana-grid data-grid-options="requisitesGridOptions"
+                         data-grid-ctrl="ourGrid2"
+                         data-init-grid="initOurGrid(ctrl)" id="requisitesTable"
+                         data-grid-enable-adjust-width-by-columns="true"></div>
                 </div>
+                <!--<div id="ndfl-details-content" class="content-with-table" style="float: left; width: 100%">-->
+                    <!--<div id="ndfl-details-grid" class="usim-grid" data-ui-grid="gridOptions" ui-grid-resize-columns-->
+                         <!--ui-grid-selection ui-grid-pagination ui-grid-autoResize ui-grid-move-columns></div>-->
+                <!--</div>-->
             </div>
         </uib-tab>
 
@@ -293,26 +299,26 @@
         </uib-tab>
 
         <uib-tab index="2" heading="3. Сведения о вычетах" select="selectTab('deductions')">
-            <div data-ng-controller="informationDetailsFormsCtrl" >
-                <div id="information-details-content" class="content-with-table" style="" >
+            <!--<div data-ng-controller="informationDetailsFormsCtrl" >-->
+                <!--<div id="information-details-content" class="content-with-table" style="" >-->
 
-                    <div style="overflow:hidden;" >
-                        <form class="tableForm"><input type="image" src="client/img/icon/delete.png" data-ng-click="" ></form>
-                        <form class="tableForm"><input type="image" src="client/img/icon/add.png" data-ng-click="addInformationData()" ></form>
-                        <form class="tableForm"><input type="image" src="client/img/icon/edit.png" data-ng-click="editInformationData()" ></form>
-                    </div>
+                    <!--<div style="overflow:hidden;" >-->
+                        <!--<form class="tableForm"><input type="image" src="client/img/icon/delete.png" data-ng-click="" ></form>-->
+                        <!--<form class="tableForm"><input type="image" src="client/img/icon/add.png" data-ng-click="addInformationData()" ></form>-->
+                        <!--<form class="tableForm"><input type="image" src="client/img/icon/edit.png" data-ng-click="editInformationData()" ></form>-->
+                    <!--</div>-->
 
-                    <div class="gridStyle" ui-grid="informationOptions" ui-grid-resize-columns
-                         ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div>
+                    <!--<div class="gridStyle" ui-grid="informationOptions" ui-grid-resize-columns-->
+                         <!--ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div>-->
 
-                    <!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="infoGridOptions"
-                         ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->
+                    <!--&lt;!&ndash; <div id="information-details-grid" class="usim-grid" data-ui-grid="infoGridOptions"-->
+                         <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> &ndash;&gt;-->
 
-                    <!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="gridOptions"
-                         ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->
+                    <!--&lt;!&ndash; <div id="information-details-grid" class="usim-grid" data-ui-grid="gridOptions"-->
+                         <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> &ndash;&gt;-->
 
-                </div>
-            </div>
+                <!--</div>-->
+            <!--</div>-->
         </uib-tab>
 
         <uib-tab index="3" heading="4. Сведения о доходах в виде авансовых платежей" select="selectTab('advancePayments')">
