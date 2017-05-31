@@ -132,11 +132,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
                 return (long) importedData.size();
             }
         });
-        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
-        result.put("operation_id", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-        PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
-        pagingResult.add(result);
-        when(testHelper.getRefBookDataProvider().getRecordsVersion(any(Date.class), any(Date.class), any(PagingParams.class), anyString())).thenReturn(pagingResult);
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         Assert.assertEquals(importedData.size(), 0);
         checkLogger();

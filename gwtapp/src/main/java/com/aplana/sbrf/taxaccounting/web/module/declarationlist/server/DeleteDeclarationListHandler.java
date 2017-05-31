@@ -2,11 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DeleteDeclarationListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DeleteDeclarationListResult;
@@ -17,15 +20,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDeclarationListAction, DeleteDeclarationListResult> {
-	@Autowired
-	private DeclarationDataService declarationDataService;
-	@Autowired
-	private SecurityService securityService;
+    @Autowired
+    private DeclarationDataService declarationDataService;
+    @Autowired
+    private SecurityService securityService;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private NotificationService notificationService;
 
     public DeleteDeclarationListHandler() {
         super(DeleteDeclarationListAction.class);
@@ -36,12 +45,13 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
         DeleteDeclarationListResult result = new DeleteDeclarationListResult();
         TAUserInfo taUserInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        for(Long declarationId: action.getDeclarationIds()) {
+        for (Long declarationId : action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(declarationId)) {
                 try {
-                        String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
-                        declarationDataService.delete(declarationId, taUserInfo);
-                        logger.info("Успешно удалена %s.", declarationFullName);
+                    String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
+                    declarationDataService.delete(declarationId, taUserInfo);
+                    logger.info("Успешно удалена %s.", declarationFullName);
+                    sendNotifications("Успешно удалена " + declarationFullName, logEntryService.save(logger.getEntries()), taUserInfo.getUser().getId(), NotificationType.DEFAULT, null);
                 } catch (Exception e) {
                     logger.error("При удалении %s возникли ошибки:", declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));
                     if (e instanceof ServiceLoggerException) {
@@ -55,11 +65,26 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
-	    return result;
+        return result;
     }
 
     @Override
     public void undo(DeleteDeclarationListAction action, DeleteDeclarationListResult result, ExecutionContext context) throws ActionException {
         // Nothing!
+    }
+
+    private void sendNotifications(String msg, String uuid, Integer userId, NotificationType notificationType, String reportId) {
+        if (msg != null && !msg.isEmpty()) {
+            List<Notification> notifications = new ArrayList<Notification>();
+            Notification notification = new Notification();
+            notification.setUserId(userId);
+            notification.setCreateDate(new Date());
+            notification.setText(msg);
+            notification.setLogId(uuid);
+            notification.setReportId(reportId);
+            notification.setNotificationType(notificationType);
+            notifications.add(notification);
+            notificationService.saveList(notifications);
+        }
     }
 }

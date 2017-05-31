@@ -5,12 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.AcceptDeclarationListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.AcceptDeclarationListResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
@@ -21,8 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
@@ -44,6 +39,9 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
 
     @Autowired
     private AsyncTaskManagerService asyncTaskManagerService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public AcceptDeclarationListHandler() {
         super(AcceptDeclarationListAction.class);
@@ -114,10 +112,13 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
                         logger.error(e);
                     }
                 } else {
-                    logger.info("Выполяется операция \"%s\" для %s:", "Отмена принятия", declarationDataService.getDeclarationFullName(declarationId, null));
+                    String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
+                    logger.info("Выполяется операция \"%s\" для %s:", "Отмена принятия", declarationFullName);
                     try {
                         declarationDataService.cancel(logger, declarationId, securityService.currentUserInfo());
-                        logger.info("Налоговая форма успешно переведена в статус \"%s\".", State.CREATED.getTitle());
+                        String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", declarationId, State.CREATED.getTitle()).toString();
+                        logger.info(message);
+                        sendNotifications(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
                     } catch (Exception e) {
                         logger.error(e);
                     }
@@ -133,5 +134,20 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
     @Override
     public void undo(AcceptDeclarationListAction action, AcceptDeclarationListResult result, ExecutionContext context) throws ActionException {
         // Nothing!
+    }
+
+    private void sendNotifications(String msg, String uuid, Integer userId, NotificationType notificationType, String reportId) {
+        if (msg != null && !msg.isEmpty()) {
+            List<Notification> notifications = new ArrayList<Notification>();
+            Notification notification = new Notification();
+            notification.setUserId(userId);
+            notification.setCreateDate(new Date());
+            notification.setText(msg);
+            notification.setLogId(uuid);
+            notification.setReportId(reportId);
+            notification.setNotificationType(notificationType);
+            notifications.add(notification);
+            notificationService.saveList(notifications);
+        }
     }
 }
