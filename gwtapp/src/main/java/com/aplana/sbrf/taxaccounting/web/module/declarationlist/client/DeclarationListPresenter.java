@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.De
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.event.UpdateNotificationCount;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -32,7 +33,8 @@ import java.util.*;
 
 public class DeclarationListPresenter extends
 		DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
-		DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterApplyEvent.DeclarationFilterApplyHandler {
+		DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterApplyEvent.DeclarationFilterApplyHandler,
+        UpdateNotificationCount.UpdateNotificationCountHandler {
 
     private static final String TYPE = "nType";
     public static final String REPORTS = "isReports";
@@ -53,6 +55,12 @@ public class DeclarationListPresenter extends
     @Override
     public void onClickApply(DeclarationFilterApplyEvent event) {
         onFind();
+    }
+
+    @Override
+    protected void onBind() {
+        super.onBind();
+        addRegisteredHandler(UpdateNotificationCount.getType(), this);
     }
 
     private void onFind() {
@@ -372,5 +380,18 @@ public class DeclarationListPresenter extends
     @Override
     public Boolean getIsReports() {
         return isReports;
+    }
+
+    @Override
+    public void updateNotificationCountHandler(UpdateNotificationCount event) {
+        GetDeclarationListStateAction action = new GetDeclarationListStateAction();
+        action.setDeclarationIds(getView().getVisibleItemIds());
+        dispatcher.execute(action, CallbackUtils
+                .simpleCallback(new AbstractCallback<GetDeclarationListStateResult>() {
+                    @Override
+                    public void onSuccess(GetDeclarationListStateResult result) {
+                        getView().updateStatus(result.getStateMap());
+                    }
+                }));
     }
 }

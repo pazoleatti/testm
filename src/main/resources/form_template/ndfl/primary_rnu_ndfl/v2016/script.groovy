@@ -1,4 +1,4 @@
-    package form_template.ndfl.primary_rnu_ndfl.v2016
+package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
@@ -26,6 +26,9 @@ import groovy.transform.TypeChecked
 import groovy.util.slurpersupport.NodeChild
 import groovy.xml.MarkupBuilder
 import org.springframework.jdbc.core.RowMapper
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
     import javax.script.ScriptException
     import javax.xml.namespace.QName
@@ -1472,12 +1475,39 @@ import org.springframework.jdbc.core.RowMapper
         if (ndflPerson != null) {
             def params = [NDFL_PERSON_ID : ndflPerson.id];
             def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
-            declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+            exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
             scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
         } else {
             throw new ServiceException("Не найдены данные для формирования отчета!");
         }
     }
+
+    @TypeChecked
+    void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
+        try {
+            JRXlsxExporter exporter = new JRXlsxExporter();
+            exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
+                    jasperPrint);
+            exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
+            exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET,
+                    Boolean.TRUE);
+            exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
+                    Boolean.TRUE);
+            exporter.setParameter(
+                    JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND,
+                    Boolean.FALSE);
+            exporter.setParameter(
+                    JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS,
+                    Boolean.FALSE);
+
+            exporter.exportReport();
+            exporter.reset();
+        } catch (Exception e) {
+            throw new ServiceException(
+                    "Невозможно экспортировать отчет в XLSX", e) as Throwable
+        }
+    }
+
     /**
      * Формирует спец. отчеты, данные для которых макет извлекает непосредственно из бд
      */

@@ -540,6 +540,7 @@ public class DeclarationListView extends
         this.asnuNames = asnuNames;
         selectionModel.clear();
         checkedRows.clear();
+        updateButton();
         if (selectedItemIds != null) {
             for(DeclarationDataSearchResultItem item: records) {
                 if (selectedItemIds.contains(item.getDeclarationDataId())) {
@@ -551,8 +552,27 @@ public class DeclarationListView extends
     }
 
     @Override
+    public void updateStatus(Map<Long, State> stateMap) {
+        for(DeclarationDataSearchResultItem item: declarationTable.getVisibleItems()) {
+            if (stateMap.containsKey(item.getDeclarationDataId())) {
+                item.setState(stateMap.get(item.getDeclarationDataId()));
+            }
+        }
+        declarationTable.redraw();
+    }
+
+    @Override
     public void updateData() {
         declarationTable.setVisibleRangeAndClearData(declarationTable.getVisibleRange(), true);
+    }
+
+    @Override
+    public List<Long> getVisibleItemIds() {
+        List<Long> visibleItemIds = new ArrayList<Long>();
+        for(DeclarationDataSearchResultItem item: declarationTable.getVisibleItems()) {
+            visibleItemIds.add(item.getDeclarationDataId());
+        }
+        return visibleItemIds;
     }
 
     @Override

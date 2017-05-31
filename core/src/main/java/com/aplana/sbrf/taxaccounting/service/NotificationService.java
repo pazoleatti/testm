@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -80,4 +81,10 @@ public interface NotificationService {
      * @param notificationIds идентификаторы оповещений
      */
     void deleteAll(List<Long> notificationIds);
+
+    /**
+     * Получение даты последнего оповещения
+     * @return
+     */
+    Date getLastNotificationDate();
 }
