@@ -35,8 +35,8 @@ prompt roles and system user
 @@sec_user;
 @@sec_user_role;
 
-prompt configuration_scheduler
-@@configuration_scheduler;
+prompt configuration
+@@configuration.sql;
 
 commit;
 exit;
