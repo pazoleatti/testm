@@ -1320,17 +1320,6 @@ import org.springframework.jdbc.core.RowMapper
 
         PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters, startIndex, pageSize);
 
-        //Если записи не найдены, то система формирует предупреждение:
-        //Заголовок: "Предупреждение"
-        //Текст: "Физическое лицо: <Данные ФЛ> не найдено в форме", где <Данные ФЛ> - значение полей формы, по которым выполнялся поиск физического лица, через разделитель "; "
-        //Кнопки: "Закрыть"
-
-        if (pagingResult.isEmpty()) {
-            subreportParamsToString = { it.collect { (it.value != null ? (((it.value instanceof Date)?it.value.format('dd.MM.yyyy'):it.value) + ";") : "") } join " " }
-            logger.warn("Физическое лицо: " + subreportParamsToString(reportParameters) + " не найдено в форме");
-            //throw new ServiceException("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
-        }
-
         pagingResult.getRecords().each() { ndflPerson ->
             DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
             row.getCell("id").setStringValue(ndflPerson.id.toString())
@@ -1344,8 +1333,15 @@ import org.springframework.jdbc.core.RowMapper
             dataRows.add(row)
         }
 
+        int countOfAvailableNdflPerson = pagingResult.size()
+
+        if (countOfAvailableNdflPerson >= pageSize) {
+            countOfAvailableNdflPerson = ndflPersonService.findNdflPersonCountByParameters(declarationData.id, resultReportParameters);
+        }
+
         result.setTableColumns(tableColumns);
         result.setDataRows(dataRows);
+        result.setCountAvailableDataRows(countOfAvailableNdflPerson)
         scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
         scriptSpecificReportHolder.setSubreportParamValues(params)
     }
@@ -1638,8 +1634,14 @@ import org.springframework.jdbc.core.RowMapper
         def fio = familia + imya + otchestvo
         def ndflPersonOperations = infoPart.'СведОпер'
 
+        // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
+        def incomeCodeMap = getRefIncomeCode()
+
+        // Коды видов вычетов
+        def deductionTypeList = getRefDeductionType()
+
         ndflPersonOperations.each {
-            processNdflPersonOperation(ndflPerson, it, fio)
+            processNdflPersonOperation(ndflPerson, it, fio, incomeCodeMap, deductionTypeList)
         }
 
         //Идентификатор декларации для которой загружаются данные
@@ -1651,12 +1653,12 @@ import org.springframework.jdbc.core.RowMapper
         }
     }
 
-    void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode, String fio) {
+    void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode, String fio, def incomeCodeMap, def deductionTypeList) {
 
         List<NdflPersonIncome> incomes = new ArrayList<NdflPersonIncome>();
         // При создание объекто операций доходов выполняется проверка на соответствие дат отчетному периоду
         incomes.addAll(ndflPersonOperationsNode.'СведДохНал'.collect {
-            transformNdflPersonIncome(it, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, fio)
+            transformNdflPersonIncome(it, ndflPerson, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, fio, incomeCodeMap)
         });
         // Если проверка на даты не прошла, то операция не добавляется.
         // https://jira.aplana.com/browse/SBRFNDFL-581 - временное решение если дата не прошла то загружаем, но выводим сообщение
@@ -1670,12 +1672,9 @@ import org.springframework.jdbc.core.RowMapper
             }
         }
 
-        //ndflPerson.incomes.addAll(incomes);
-
-
         List<NdflPersonDeduction> deductions = new ArrayList<NdflPersonDeduction>();
         deductions.addAll(ndflPersonOperationsNode.'СведВыч'.collect {
-            transformNdflPersonDeduction(it)
+            transformNdflPersonDeduction(it, ndflPerson, fio, deductionTypeList)
         });
         ndflPerson.deductions.addAll(deductions)
 
@@ -1715,7 +1714,7 @@ import org.springframework.jdbc.core.RowMapper
         return ndflPerson
     }
 
-    NdflPersonIncome transformNdflPersonIncome(NodeChild node, String kpp, String oktmo, String inp, String fio) {
+    NdflPersonIncome transformNdflPersonIncome(NodeChild node, NdflPerson ndflPerson, String kpp, String oktmo, String inp, String fio, def incomeCodeMap) {
         def operationNode = node.parent();
 
         Date incomeAccruedDate = toDate(node.'@ДатаДохНач')
@@ -1753,10 +1752,26 @@ import org.springframework.jdbc.core.RowMapper
         personIncome.paymentDate = toDate(node.'@ПлПоручДат')
         personIncome.paymentNumber = toString(node.'@ПлатПоручНом')
         personIncome.taxSumm = toInteger(node.'@НалПерСумм')
+
+        // Спр5 Код вида дохода (Необязательное поле)
+        if (personIncome.incomeCode != null && personIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
+            value.CODE?.stringValue == personIncome.incomeCode &&
+                    personIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
+                    personIncome.incomeAccruedDate <= value.record_version_to?.dateValue
+        }) {
+            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+
+            String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, personIncome.rowNum ?: "",
+                    "Доход.Вид.Код (Графа 4)='${personIncome.incomeCode ?: ""}'")
+            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода дохода справочнику", fioAndInp, pathError,
+                    "'Доход.Вид.Код (Графа 4)' не соответствует справочнику '$R_INCOME_CODE'")
+        }
+
         return personIncome
     }
 
     // Проверка на принадлежность операций периоду при загрузке ТФ
+    @TypeChecked
     boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
                                               String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         // Доход.Дата.Начисление
@@ -1786,7 +1801,7 @@ import org.springframework.jdbc.core.RowMapper
         return false
     }
 
-    NdflPersonDeduction transformNdflPersonDeduction(NodeChild node) {
+    NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, String fio, def deductionTypeList) {
 
         NdflPersonDeduction personDeduction = new NdflPersonDeduction()
         personDeduction.rowNum = toInteger(node.'@НомСтр')
@@ -1804,6 +1819,16 @@ import org.springframework.jdbc.core.RowMapper
         personDeduction.periodPrevSumm = toBigDecimal(node.'@СумПредВыч')
         personDeduction.periodCurrDate = toDate(node.'@ДатаТекВыч')
         personDeduction.periodCurrSumm = toBigDecimal(node.'@СумТекВыч')
+
+        if (!deductionTypeList.contains(personDeduction.typeCode)) {
+            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+
+            String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_DEDUCTION, personDeduction.rowNum ?: "",
+                    "Код вычета (Графа 3)='${personDeduction.typeCode ?: ""}'")
+            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода вычета справочнику", fioAndInp, pathError,
+                    "'Код вычета (Графа 3)' не соответствует справочнику '$R_TYPE_CODE'")
+        }
+
         return personDeduction
     }
 
@@ -3700,20 +3725,22 @@ class ColumnFillConditionData {
                 }
 
                 // СведДох2 Сумма вычета (Графа 12)
-                BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
-                if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                            "Сумма вычета (Раздел 2 Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: 0}', сумма значений (Графа 16 Раздел 3)='${sumNdflDeduction ?: 0}'")
-                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
-                            "Значение не соответствует правилу: «Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»")
-                }
-                if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                            "Сумма значений (Графа 16 Раздел 3)='${sumNdflDeduction ?: 0}', Доход.Сумма.Начисление (Графа 10 Раздел 2)='${ndflPersonIncome.incomeAccruedSumm ?: 0}'")
-                    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
-                            "Значение не соответствует правилу: сумма значений «Граф 16 Раздела 3» <= «Графа 10 Раздел 2»")
+                if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0) {
+                    BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
+                    if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
+                                "Сумма вычета (Раздел 2 Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: 0}', сумма значений (Графа 16 Раздел 3)='${sumNdflDeduction ?: 0}'")
+                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
+                                "Значение не соответствует правилу: «Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»")
+                    }
+                    if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
+                                "Сумма значений (Графа 16 Раздел 3)='${sumNdflDeduction ?: 0}', Доход.Сумма.Начисление (Графа 10 Раздел 2)='${ndflPersonIncome.incomeAccruedSumm ?: 0}'")
+                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 12", fioAndInp, pathError,
+                                "Значение не соответствует правилу: сумма значений «Граф 16 Раздела 3» <= «Графа 10 Раздел 2»")
+                    }
                 }
 
                 // СведДох4 НДФЛ.Процентная ставка (Графа 14)
