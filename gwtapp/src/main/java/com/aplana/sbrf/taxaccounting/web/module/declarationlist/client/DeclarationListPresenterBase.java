@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.State;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
@@ -27,7 +28,11 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames, Map<Long, String> asnuNames, List<Long> selectedItemIds);
 
+		void updateStatus(Map<Long, State> stateMap);
+
         void updateData();
+
+        List<Long> getVisibleItemIds();
 
 		DeclarationDataSearchOrdering getSearchOrdering();
 

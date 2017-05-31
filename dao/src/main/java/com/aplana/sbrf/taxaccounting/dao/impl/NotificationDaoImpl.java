@@ -329,4 +329,13 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             }
         }, userId);
     }
+
+    @Override
+    public Date getLastNotificationDate() {
+        Date lastDate = getJdbcTemplate().queryForObject("select max(CREATE_DATE) from NOTIFICATION", Date.class);
+        if (lastDate != null) {
+            return new Date(lastDate.getTime());
+        }
+        return null;
+    }
 }

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -86,4 +87,10 @@ public interface NotificationDao {
      * @return список оповещений, на которые у пользователя есть полные права
      */
     List<Long> getAllowedNotifications(List<Long> notificationIds, int userId);
+
+	/**
+	 * Получение даты последнего оповещения
+	 * @return
+	 */
+	Date getLastNotificationDate();
 }

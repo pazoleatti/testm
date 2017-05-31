@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.event.UpdateNotificationCount;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.*;
 import com.google.gwt.core.client.Scheduler;
@@ -9,6 +10,8 @@ import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+
+import java.util.Date;
 
 /**
  * Презентор для меню "Руководство пользователя"
@@ -22,6 +25,7 @@ public class ManualMenuPresenter extends AbstractMenuPresenter<ManualMenuPresent
     private MainMenuPresenter mainMenuPresenter;
 
     private Timer refreshTimer;
+    private Date lastNotificationDate = null;
 
     @Inject
     public ManualMenuPresenter(EventBus eventBus, ManualMenuView view, DialogPresenter dialogPresenter, MainMenuPresenter mainMenuPresenter, DispatchAsync dispatchAsync) {
@@ -85,6 +89,11 @@ public class ManualMenuPresenter extends AbstractMenuPresenter<ManualMenuPresent
                         getView().updateNotificationCount(result.getNotificationCount());
                         if (result.isEditedRoles()) {
                             mainMenuPresenter.onReveal();
+                        }
+                        if (lastNotificationDate != null && !lastNotificationDate.equals(result.getLastNotificationDate()) ||
+                                lastNotificationDate == null && result.getLastNotificationDate() != null) {
+                            UpdateNotificationCount.fire(ManualMenuPresenter.this);
+                            lastNotificationDate = result.getLastNotificationDate();
                         }
                     }
                 }));
