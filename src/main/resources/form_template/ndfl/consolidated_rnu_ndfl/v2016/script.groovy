@@ -20,6 +20,9 @@ import javax.xml.stream.events.XMLEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.log.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
 import groovy.xml.MarkupBuilder
 
@@ -1070,12 +1073,39 @@ def createSpecificReportPersonDb() {
     if (ndflPerson != null) {
         def params = [NDFL_PERSON_ID: ndflPerson.id];
         def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
-        declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+        exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
         scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
     } else {
         throw new ServiceException("Не найдены данные для формирования отчета!");
     }
 }
+
+@TypeChecked
+void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
+    try {
+        JRXlsxExporter exporter = new JRXlsxExporter();
+        exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
+                jasperPrint);
+        exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
+        exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET,
+                Boolean.TRUE);
+        exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
+                Boolean.TRUE);
+        exporter.setParameter(
+                JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND,
+                Boolean.FALSE);
+        exporter.setParameter(
+                JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS,
+                Boolean.FALSE);
+
+        exporter.exportReport();
+        exporter.reset();
+    } catch (Exception e) {
+        throw new ServiceException(
+                "Невозможно экспортировать отчет в XLSX", e) as Throwable
+    }
+}
+
 /**
  * Формирует спец. отчеты, данные для которых макет извлекает непосредственно из бд
  */
