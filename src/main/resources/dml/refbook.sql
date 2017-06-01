@@ -355,6 +355,9 @@ update ref_book_attribute set required = 1 where id = 9529;
 
 update ref_book_attribute set attribute_id = 652 where id=9421;
 
+update ref_book_attribute set width=12,max_length=12 where id=9527;
+update ref_book_attribute set max_length=1000 where id=9534;
+
 ---------------------------------
 
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
