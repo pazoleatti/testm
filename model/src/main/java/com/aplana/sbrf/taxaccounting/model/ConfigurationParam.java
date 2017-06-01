@@ -46,7 +46,9 @@ public enum ConfigurationParam {
      * Общие параметры
      */
     SBERBANK_INN("ИНН ПАО Сбербанк", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
-    NO_CODE("Код НО (пром.)", ConfigurationParamGroup.COMMON_PARAM, true, false, 2);
+    NO_CODE("Код НО (пром.)", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
+    SHOW_TIMING("Отображать сообщения о времени выполнения", ConfigurationParamGroup.COMMON_PARAM, true, false, 2),
+    LIMIT_IDENT("Порог схожести ФЛ", ConfigurationParamGroup.COMMON_PARAM, true, false, 2);
 
     private String caption;
     private ConfigurationParamGroup group;
