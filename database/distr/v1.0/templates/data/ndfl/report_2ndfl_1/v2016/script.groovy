@@ -2109,8 +2109,7 @@ def fillGeneralData(workbook) {
     // КПП
     String kpp = declarationData.kpp
     //	Дата сдачи корректировки
-    String dateDelivery = getProvider(REPORT_PERIOD_TYPE_ID)
-            .getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "ID = ${departmentReportPeriod.reportPeriod.dictTaxPeriodId}", null).get(0).END_DATE.value?.format(DATE_FORMAT_DOTTED)
+    String dateDelivery = departmentReportPeriod.correctionDate?.format(DATE_FORMAT_DOTTED)
     // ОКТМО
     String oktmo = declarationData.oktmo
     // Код НО (конечный)
