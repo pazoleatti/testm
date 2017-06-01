@@ -27,8 +27,13 @@
         border-top: 0;
     }
 
+    .labelBold {
+        font-weight: bold;
+    }
+
     .label {
         border: 1px solid #aeaeac;
+        margin-bottom: 5px;
     }
 
     .pager {
@@ -38,17 +43,20 @@
 
     <dw:ModalWindow ui:field="modalWindow"
                     iconUrl="resources/img/star.png"
-                    title="Назначение дублей, оригинала записи справочника ФЛ">
+                    title="Назначить оригинал и дубли выбранной записи справочника ФЛ">
         <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">
+                    <g:cell>
+                        <g:Label width="800px" text="Выбранная запись справочника ФЛ:" addStyleNames="{style.labelBold}"/>
+                    </g:cell>
                     <g:cell>
                         <g:Label ui:field="note" width="800px" text="" addStyleNames="{style.label}"/>
                     </g:cell>
 
                     <g:VerticalPanel width="100%">
                         <g:cell>
-                            <g:Label width="800px" text="Оригинал:"/>
+                            <g:Label width="800px" text="Оригинал выбранной записи справочника ФЛ:" addStyleNames="{style.labelBold}"/>
                         </g:cell>
                         <g:HorizontalPanel ui:field="buttonOriginalPanel" spacing="3" verticalAlignment="middle">
                             <style:LinkButton text="Добавить" ui:field="addOriginalPerson" img="resources/img/row-add.png"/>
@@ -66,7 +74,7 @@
 
                     <g:VerticalPanel width="100%">
                         <g:cell>
-                            <g:Label width="100px" text="Дубли:"/>
+                            <g:Label width="800px" text="Дубли выбранной записи справочника ФЛ:" addStyleNames="{style.labelBold}"/>
                         </g:cell>
                         <g:HorizontalPanel ui:field="buttonDuplicatePanel" spacing="3" verticalAlignment="middle">
                             <style:LinkButton text="Добавить" ui:field="addDuplicatePerson" img="resources/img/row-add.png"/>
