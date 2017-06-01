@@ -183,7 +183,7 @@
                         </g:VerticalPanel>
                     </g:cell>
                     <!--Инфо по форме. Середина-->
-                    <g:cell horizontalAlignment="left" width="40%">
+                    <g:cell horizontalAlignment="left" width="400px">
                         <g:HorizontalPanel ui:field="centerBlock" addStyleNames="{style.centerBlock}" >
                             <g:cell>
                                 <g:VerticalPanel spacing="2" horizontalAlignment="right" width="140px">
@@ -207,7 +207,7 @@
                         <g:SimplePanel ui:field="propertyBlock" height="58px">
                             <g:HorizontalPanel addStyleNames="{style.centerBlock}">
                                 <g:cell>
-                                    <g:VerticalPanel ui:field="leftAttrPanel" spacing="2" horizontalAlignment="right" width="185px">
+                                    <g:VerticalPanel ui:field="leftAttrPanel" spacing="2" horizontalAlignment="right" width="55px">
                                     </g:VerticalPanel>
                                 </g:cell>
                                 <g:cell>
@@ -216,9 +216,6 @@
                                 </g:cell>
                             </g:HorizontalPanel>
                         </g:SimplePanel>
-                    </g:cell>
-                    <g:cell width="10%">
-                        <g:Label width="100%"/>
                     </g:cell>
                     <!--Правые кнопки ссылки-->
                     <g:cell horizontalAlignment="right">
