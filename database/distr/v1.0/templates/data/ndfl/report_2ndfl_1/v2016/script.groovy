@@ -48,7 +48,7 @@ switch (formDataEvent) {
         println "!CALCULATE!"
         buildXml(xml)
         // Формирование pdf-отчета формы
-//        declarationService.createPdfReport(logger, declarationData, userInfo)
+        //        declarationService.createPdfReport(logger, declarationData, userInfo)
         break
     case FormDataEvent.COMPOSE: // Консолидирование
         println "!COMPOSE!"
@@ -81,7 +81,7 @@ final ReportPeriodService reportPeriodService = getProperty("reportPeriodService
 final DepartmentService departmentService = getProperty("departmentService")
 
 def getProperty(String name) {
-    try{
+    try {
         return super.getProperty(name)
     } catch (MissingPropertyException e) {
         return null
@@ -353,13 +353,13 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                             nomSpr = getProvider(NDFL_REFERENCES).getRecords(new Date(), null, "PERSON_ID = ${np.personId} AND DECLARATION_DATA_ID = ${uncorretctedPeriodDd.id}", null).get(0).NUM.value
                         } else {
                             def declarations = declarationService.findAllDeclarationData(NDFL_2_2_DECLARATION_TYPE, declarationData.departmentId, declarationData.reportPeriodId)
-                            declarations = declarations.findAll{
+                            declarations = declarations.findAll {
                                 it.kpp == declarationData.kpp && it.oktmo == declarationData.oktmo
                             }
                             if (!declarations.isEmpty()) {
                                 boolean first = true
                                 String filter = "("
-                                for(d in declarations) {
+                                for (d in declarations) {
                                     if (!first) {
                                         filter += "OR "
                                     } else {
@@ -503,7 +503,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                                             def sumDohod = getSumDohod(priznakF, ndflPersonIncomesGroupedByIncomeCode.get(incomeKey))
                                             if (priznakF == "2") {
                                                 def svSumVichNotOstalnie = getSvSumVich(filterDeductions(ndflPersonIncomesWhereIncomeAccruedSumGreaterZero, deductionsSelectedForDeductionsSum))
-                                                def svSumVichA = (!svSumVich.isEmpty()?(svSumVich*.СумВычет.sum()?:0):0) + (!svSumVichNotOstalnie.isEmpty()?(svSumVichNotOstalnie*.СумВычет.sum()?:0):0)
+                                                def svSumVichA = (!svSumVich.isEmpty() ? (svSumVich*.СумВычет.sum() ?: 0) : 0) + (!svSumVichNotOstalnie.isEmpty() ? (svSumVichNotOstalnie*.СумВычет.sum() ?: 0) : 0)
                                                 sumDohod = sumDohod / taxRateKey * 100 + svSumVichA
                                             }
                                             sumDohod = ScriptUtils.round(sumDohod, 2)
@@ -512,7 +512,7 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                                             СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
                                                     КодДоход: incomeKey,
                                                     СумДоход: sumDohod,
-                                                    Страница: isForSpecificReport?(index <= ((countIncome + 1) / 2) ? 1 : 2):null
+                                                    Страница: isForSpecificReport ? (index <= ((countIncome + 1) / 2) ? 1 : 2) : null
                                             ) {
                                                 if (!svSumVich.isEmpty()) {
                                                     svSumVich.each {
@@ -600,8 +600,8 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                             // Доходы отобранные по датам для поля tax_date(Дата НДФЛ)
                             def incomesByTaxDate = ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, startDate, endDate)
                             Date firstDateOfMarchOfNextPeriod = getFirstMarchOfNextPeriod(endDate)
-                            СумИтНалПер(СумДохОбщ: priznakF == "1"?ScriptUtils.round(getSumDohod(priznakF, ndflPersonIncomesAll), 2):ScriptUtils.round(sumDohodAll, 2),
-                                    НалБаза: priznakF == "1"?ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2):ScriptUtils.round(sumDohodAll - sumVichAll, 2),
+                            СумИтНалПер(СумДохОбщ: priznakF == "1" ? ScriptUtils.round(getSumDohod(priznakF, ndflPersonIncomesAll), 2) : ScriptUtils.round(sumDohodAll, 2),
+                                    НалБаза: priznakF == "1" ? ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2) : ScriptUtils.round(sumDohodAll - sumVichAll, 2),
                                     НалИсчисл: getNalIschisl(priznakF, ndflPersonIncomesAll),
                                     АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
                                     НалУдерж: getNalUderzh(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
@@ -853,7 +853,7 @@ def filterDeductions(ndflPersonIncomes, def ndflPersonDeductions) {
     for (d in ndflPersonDeductions) {
         Calendar taxDateCalDeduction = new GregorianCalendar();
         taxDateCalDeduction.setTime(d.incomeAccrued)
-        for(ndflPersonIncome in ndflPersonIncomes) {
+        for (ndflPersonIncome in ndflPersonIncomes) {
             Calendar taxDateCalIncome = new GregorianCalendar();
             taxDateCalIncome.setTime(ndflPersonIncome.incomeAccruedDate)
 
@@ -866,7 +866,6 @@ def filterDeductions(ndflPersonIncomes, def ndflPersonDeductions) {
     }
     return toReturn
 }
-
 
 /**
  * Получить авансы для ФЛ за период для доходов с одинаковым номером операции
@@ -994,7 +993,7 @@ def getSvSumVich(def deductionsFilteredForCurrIncome) {
         }
         if (!deductionsForSum.isEmpty()) {
             toReturn << [КодВычет: deductionsForSum[0].typeCode,
-                    СумВычет: ScriptUtils.round(getSumVichOfPeriodCurrSumm(deductionsForSum), 2)]
+                         СумВычет: ScriptUtils.round(getSumVichOfPeriodCurrSumm(deductionsForSum), 2)]
         }
     }
     return toReturn
@@ -1225,7 +1224,7 @@ def getDepartmentParamDetails(def departmentParamId, def departmentId, def repor
         def referencesOktmoList = departmentParamTableList.OKTMO?.value
         referencesOktmoList.removeAll([null])
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
-        departmentParamRow = departmentParamTableList.find{ dep->
+        departmentParamRow = departmentParamTableList.find { dep ->
             def oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
             if (oktmo != null) {
                 declarationData.kpp.equals(dep.KPP?.value) && declarationData.oktmo.equals(oktmo.CODE.value)
@@ -1843,12 +1842,12 @@ def prepareSpecificReport() {
         }
     }
 
+    // Ограничение числа выводимых записей
+    int pageSize = 10
+
     // Поиск данных по фильтру
-    def docs = searchData(resultReportParameters)
-    if (docs.size() == 0) {
-        subreportParamsToString = { it.collect { (it.value != null ? (it.value + ";") : "") } join " " }
-        logger.warn("Физическое лицо по заданным параметрам параметрам: " + subreportParamsToString(resultReportParameters) + " не найдено");
-    }
+    def docs = searchData(resultReportParameters, pageSize)
+
     // Формирование списка данных для вывода в таблицу
     docs.each() { doc ->
         DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
@@ -1861,8 +1860,15 @@ def prepareSpecificReport() {
         dataRows.add(row)
     }
 
+    int countOfAvailableNdflPerson = docs.size()
+
+    if (countOfAvailableNdflPerson >= pageSize) {
+        countOfAvailableNdflPerson = counter;
+    }
+
     result.setTableColumns(tableColumns);
     result.setDataRows(dataRows);
+    result.setCountAvailableDataRows(countOfAvailableNdflPerson)
     scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
     scriptSpecificReportHolder.setSubreportParamValues(params)
 }
@@ -1954,7 +1960,10 @@ def createRowColumns() {
 /**
  * Поиск справок согласно фильтру
  */
-def searchData(def params) {
+@Field
+int counter = 0
+
+def searchData(def params, pageSize) {
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)
     def docs = Файл.Документ.findAll { doc ->
@@ -1968,8 +1977,10 @@ def searchData(def params) {
     // ограничиваем размер выборки
     def result = []
     docs.each {
-        if (result.size() < 100)
+        if (result.size() < pageSize) {
             result << it
+        }
+        counter++
     }
     result
 }
@@ -1987,10 +1998,15 @@ def createSpecificReport() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
     params['pNumSpravka'] = row.pNumSpravka
+    params['lastName'] = row.lastName
+    params['firstName'] = row.firstName
+    params['middleName'] = row.middleName
+    params['birthDay'] = Date.parse(DATE_FORMAT_DOTTED, row.birthDay)
+    params['idDocNumber'] = row.idDocNumber
 
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)
-    def xmlPartNumber = 1 + (long)((new Long(Файл.Документ.find{doc -> true }.@НомСпр.text()))/NUMBER_OF_PERSONS)
+    def xmlPartNumber = 1 + (long) ((new Long(Файл.Документ.find { doc -> true }.@НомСпр.text())) / NUMBER_OF_PERSONS)
 
     def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
         buildXmlForSpecificReport(it, xmlPartNumber, new Long(row.pNumSpravka))
