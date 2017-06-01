@@ -152,6 +152,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9119, 901, 'Номер квартиры', 'APPARTMENT', 1, 11, null, null, 1, null, 15, 0, 0, null, null, 0, 20);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9110, 901, 'Код страны проживания', 'COUNTRY_ID', 4, 2, 10, 50, 1, null, 15, 0, 0, null, null, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values( 9121, 901, 'Адрес', 'ADDRESS', 1, 12, null, null, 1, null, 15, 0, 0, null, null, 0, 255);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values( 9122, 901, 'Адрес', 'ADDRESS_FULL', 1, 13, null, null, 0, null, 15, 0, 0, null, null, 1, 255);
 
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9021, 902, 'Код ДУЛ', 'DOC_ID', 4, 1, 360, 3601, 1, null, 15, 1, 0, null, null, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9022, 902, 'Серия и номер ДУЛ', 'DOC_NUMBER', 1, 2, null, null, 1, null, 15, 1, 0, null, null, 0, 25);
@@ -367,6 +368,8 @@ update ref_book_attribute set attribute_id = 652 where id=9421;
 
 update ref_book_attribute set width=12,max_length=12 where id=9527;
 update ref_book_attribute set max_length=1000 where id=9534;
+
+update ref_book_attribute set attribute_id = 9122 where id = 9054;
 
 ---------------------------------
 /*
