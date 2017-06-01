@@ -33,6 +33,7 @@ import java.util.regex.Pattern
 /**
  * Скрипт макета декларации РНУ-НДФЛ(консолидированная)
  */
+initConfiguration()
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreate()
@@ -83,6 +84,26 @@ final RefBookService refBookService = getProperty("refBookService")
 final FormDataService formDataService = getProperty("formDataService")
 @Field
 final String DATE_FORMAT = "dd.MM.yyyy"
+@Field
+Boolean showTiming = false
+
+def initConfiguration() {
+    final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
+    String showTiming = configurationParamModel?.get(ConfigurationParam.SHOW_TIMING)?.get(0)?.get(0)
+    String limitIdent = configurationParamModel?.get(ConfigurationParam.LIMIT_IDENT)?.get(0)?.get(0)
+    if (showTiming.equals("1")) {
+        this.showTiming = true
+    }
+    SIMILARITY_THRESHOLD = limitIdent? (Double.valueOf(limitIdent) * 1000).intValue() : 0
+    println this.showTiming
+    println SIMILARITY_THRESHOLD
+}
+
+def logForDebug(String message, Object... args) {
+    if (showTiming) {
+        logger.info(message, args)
+    }
+}
 
 def getProperty(String name) {
     try {
@@ -143,7 +164,7 @@ void consolidation() {
         throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
     }
 
-    logger.info("Номера первичных НФ включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + calcTimeMillis(time));
+    logForDebug("Номера первичных НФ включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + calcTimeMillis(time));
 
     List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
 
@@ -156,23 +177,23 @@ void consolidation() {
 
     //record_id, Map<String, RefBookValue>
     Map<Long, Map<String, RefBookValue>> refBookPersonMap = getActualRefPersonsByDeclarationDataIdList(declarationDataIdList);
-    logger.info("Выгрузка справочника Физические лица (" + refBookPersonMap.size() + " записей, " + calcTimeMillis(time));
+    logForDebug("Выгрузка справочника Физические лица (" + refBookPersonMap.size() + " записей, " + calcTimeMillis(time));
 
     //id, Map<String, RefBookValue>
     Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPersonMap);
-    logger.info("Выгрузка справочника Адреса физических лиц (" + addressMap.size() + " записей, " + calcTimeMillis(time));
+    logForDebug("Выгрузка справочника Адреса физических лиц (" + addressMap.size() + " записей, " + calcTimeMillis(time));
 
     //id, List<Map<String, RefBookValue>>
     Map<Long, List<Map<String, RefBookValue>>> personDocMap = getActualRefDulByDeclarationDataIdList(declarationDataIdList)
-    logger.info("Выгрузка справочника Документы физических лиц (" + personDocMap.size() + " записей, " + calcTimeMillis(time));
+    logForDebug("Выгрузка справочника Документы физических лиц (" + personDocMap.size() + " записей, " + calcTimeMillis(time));
 
-    logger.info("Инициализация кэша справочников (" + calcTimeMillis(time));
+    logForDebug("Инициализация кэша справочников (" + calcTimeMillis(time));
 
     //Карта в которой хранится актуальный record_id и NdflPerson в котором объединяются данные о даходах
     SortedMap<Long, NdflPerson> ndflPersonMap = consolidateNdflPerson(ndflPersonList, declarationDataIdList);
 
-    logger.info(String.format("Количество физических лиц, загруженных из первичных НФ-источников: %d", ndflPersonList.size()));
-    logger.info(String.format("Количество уникальных физических лиц в формах-источниках по справочнику ФЛ: %d", ndflPersonMap.size()));
+    logForDebug(String.format("Количество физических лиц, загруженных из первичных НФ-источников: %d", ndflPersonList.size()));
+    logForDebug(String.format("Количество уникальных физических лиц в формах-источниках по справочнику ФЛ: %d", ndflPersonMap.size()));
 
 
     time = System.currentTimeMillis();
@@ -266,7 +287,7 @@ void consolidation() {
 
     }
 
-    logger.info("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + calcTimeMillis(time));
+    logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + calcTimeMillis(time));
 
 }
 
@@ -1805,32 +1826,32 @@ def checkData() {
     // Реквизиты
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
     println "Получены записи таблицы '$T_PERSON' (${ndflPersonList.size()} записей)."
-    logger.info(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
+    logForDebug(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
 
     // Сведения о доходах и НДФЛ
     List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
     println "Получены записи таблицы '$T_PERSON_INCOME' (${ndflPersonList.size()} записей)."
-    logger.info(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
+    logForDebug(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
 
     // Сведения о вычетах
     List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
     println "Получены записи таблицы '$T_PERSON_DEDUCTION' (${ndflPersonList.size()} записей)."
-    logger.info(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
+    logForDebug(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
 
     // Сведения о доходах в виде авансовых платежей
     List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
     println "Получены записи таблицы '$T_PERSON_PREPAYMENT' (${ndflPersonList.size()} записей)."
-    logger.info(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
+    logForDebug(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
 
     println "Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     // ФЛ Map<person_id, RefBook>
     Map<Long, Map<String, RefBookValue>> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
-    logger.info(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
+    logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
     println "Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)");
 
     ScriptUtils.checkInterrupted();
 
@@ -1853,7 +1874,7 @@ def checkData() {
     checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, personMap)
 
     println "Все проверки (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Все проверки (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Все проверки (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -1880,53 +1901,53 @@ def checkDataReference(
     // Страны
     def citizenshipCodeMap = getRefCountryCode()
     println "Получен справочник '$R_CITIZENSHIP' (${citizenshipCodeMap.size()} записей).";
-    logger.info(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
+    logForDebug(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
 
     // Виды документов, удостоверяющих личность
     def documentTypeMap = getRefDocumentTypeCode()
     println "Получен справочник '$R_ID_DOC_TYPE' (${documentTypeMap.size()} записей).";
-    logger.info(SUCCESS_GET_REF_BOOK, R_ID_DOC_TYPE, documentTypeMap.size())
+    logForDebug(SUCCESS_GET_REF_BOOK, R_ID_DOC_TYPE, documentTypeMap.size())
 
     // Статус налогоплательщика
     def taxpayerStatusMap = getRefTaxpayerStatusCode()
-    logger.info(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
+    logForDebug(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
 
     // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
     def incomeCodeMap = getRefIncomeCode()
-    logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
+    logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
 
     // Виды доходов Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
     def incomeTypeMap = getRefIncomeType()
-    logger.info(SUCCESS_GET_REF_BOOK, R_INCOME_TYPE, incomeTypeMap.size())
+    logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_TYPE, incomeTypeMap.size())
 
     // Ставки
     def rateList = getRefRate()
-    logger.info(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
+    logForDebug(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
 
     // Коды видов вычетов
     def deductionTypeList = getRefDeductionType()
-    logger.info(SUCCESS_GET_REF_BOOK, R_TYPE_CODE, deductionTypeList.size())
+    logForDebug(SUCCESS_GET_REF_BOOK, R_TYPE_CODE, deductionTypeList.size())
 
     // Коды налоговых органов
     def taxInspectionList = getRefNotifSource()
-    logger.info(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
+    logForDebug(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
     println "Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     // ИНП Map<person_id, List<RefBook>>
     def inpMap = getActualRefInpMapByDeclarationDataId()
-    logger.info(SUCCESS_GET_TABLE, R_INP, inpMap.size())
+    logForDebug(SUCCESS_GET_TABLE, R_INP, inpMap.size())
     println "Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     // ДУЛ Map<person_id, List<RefBook>>
     def dulMap = getActualRefDulByDeclarationDataId()
-    logger.info(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
+    logForDebug(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
     println "Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)");
 
     // Получим Мапу адресов
     // Адреса
@@ -1941,17 +1962,17 @@ def checkDataReference(
     }
     if (addressIds.size() > 0) {
         addressMap = getRefAddress(addressIds)
-        logger.info(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
+        logForDebug(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
     }
     println "Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)");
 
     //поиск всех адресов формы в справочнике ФИАС
     time = System.currentTimeMillis();
     Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
-    logger.info(SUCCESS_GET_TABLE, R_FIAS, checkFiasAddressMap.size());
+    logForDebug(SUCCESS_GET_TABLE, R_FIAS, checkFiasAddressMap.size());
     println "Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
 
     long timeIsExistsAddress = 0
     time = System.currentTimeMillis();
@@ -2282,10 +2303,10 @@ def checkDataReference(
         }
     }
     println "Проверки на соответствие справочникам / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
 
     println "Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)";
-    logger.info("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)");
+    logForDebug("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)");
 
     time = System.currentTimeMillis();
     for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
@@ -2355,7 +2376,7 @@ def checkDataReference(
         }
     }
     println "Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
@@ -2383,7 +2404,7 @@ def checkDataReference(
         }
     }
     println "Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION}' (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION}' (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION}' (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
     for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
@@ -2403,7 +2424,7 @@ def checkDataReference(
         }
     }
     println "Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -2417,7 +2438,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
 
     println "Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
 
@@ -2459,7 +2480,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         }
     }
     println "Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
 
@@ -2613,7 +2634,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     ScriptUtils.checkInterrupted();
 
     println "Общие проверки / '$T_PERSON_INCOME' (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Общие проверки / '$T_PERSON_INCOME' (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Общие проверки / '$T_PERSON_INCOME' (" + (System.currentTimeMillis() - time) + " мс)");
 
     ScriptUtils.checkInterrupted();
 
@@ -2647,9 +2668,9 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     }
 
     println "Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Общие проверки / Проверки на отсутствие повторений (" + (System.currentTimeMillis() - time) + " мс)");
     println "Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)";
-    logger.info("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
+    logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
 }
 
 // Кэш для справочников
@@ -3269,7 +3290,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         }
     }
     println "Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
@@ -3919,7 +3940,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
         }
     }
     println "Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)";
-    logger.info("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
+    logForDebug("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
 /**
