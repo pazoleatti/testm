@@ -1,4 +1,4 @@
-    package form_template.ndfl.primary_rnu_ndfl.v2016
+package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
@@ -26,6 +26,9 @@ import groovy.transform.TypeChecked
 import groovy.util.slurpersupport.NodeChild
 import groovy.xml.MarkupBuilder
 import org.springframework.jdbc.core.RowMapper
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
     import javax.script.ScriptException
     import javax.xml.namespace.QName
@@ -1472,12 +1475,39 @@ import org.springframework.jdbc.core.RowMapper
         if (ndflPerson != null) {
             def params = [NDFL_PERSON_ID : ndflPerson.id];
             def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
-            declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+            exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
             scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
         } else {
             throw new ServiceException("Не найдены данные для формирования отчета!");
         }
     }
+
+    @TypeChecked
+    void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
+        try {
+            JRXlsxExporter exporter = new JRXlsxExporter();
+            exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
+                    jasperPrint);
+            exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
+            exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET,
+                    Boolean.TRUE);
+            exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
+                    Boolean.TRUE);
+            exporter.setParameter(
+                    JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND,
+                    Boolean.FALSE);
+            exporter.setParameter(
+                    JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS,
+                    Boolean.FALSE);
+
+            exporter.exportReport();
+            exporter.reset();
+        } catch (Exception e) {
+            throw new ServiceException(
+                    "Невозможно экспортировать отчет в XLSX", e) as Throwable
+        }
+    }
+
     /**
      * Формирует спец. отчеты, данные для которых макет извлекает непосредственно из бд
      */
@@ -1722,7 +1752,7 @@ import org.springframework.jdbc.core.RowMapper
         Date taxDate = toDate(node.'@ДатаНалог')
 
         NdflPersonIncome personIncome = new NdflPersonIncome()
-        personIncome.rowNum = toInteger(node.'@НомСтр')
+        personIncome.rowNum = toBigDecimal(node.'@НомСтр')
         personIncome.incomeCode = toString(node.'@КодДох')
         personIncome.incomeType = toString(node.'@ТипДох')
 
@@ -1743,15 +1773,15 @@ import org.springframework.jdbc.core.RowMapper
         personIncome.taxBase = toBigDecimal(node.'@НалБаза')
         personIncome.taxRate = toInteger(node.'@Ставка')
         personIncome.taxDate = toDate(node.'@ДатаНалог')
-        personIncome.calculatedTax = toInteger(node.'@НИ')
-        personIncome.withholdingTax = toInteger(node.'@НУ')
-        personIncome.notHoldingTax = toInteger(node.'@ДолгНП')
-        personIncome.overholdingTax = toInteger(node.'@ДолгНА')
-        personIncome.refoundTax = toInteger(node.'@ВозврНал')
+        personIncome.calculatedTax = toBigDecimal(node.'@НИ')
+        personIncome.withholdingTax = toBigDecimal(node.'@НУ')
+        personIncome.notHoldingTax = toBigDecimal(node.'@ДолгНП')
+        personIncome.overholdingTax = toBigDecimal(node.'@ДолгНА')
+        personIncome.refoundTax = toLong(node.'@ВозврНал')
         personIncome.taxTransferDate = toDate(node.'@СрокПрчслНал')
         personIncome.paymentDate = toDate(node.'@ПлПоручДат')
         personIncome.paymentNumber = toString(node.'@ПлатПоручНом')
-        personIncome.taxSumm = toInteger(node.'@НалПерСумм')
+        personIncome.taxSumm = toLong(node.'@НалПерСумм')
 
         // Спр5 Код вида дохода (Необязательное поле)
         if (personIncome.incomeCode != null && personIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
@@ -1804,7 +1834,7 @@ import org.springframework.jdbc.core.RowMapper
     NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, String fio, def deductionTypeList) {
 
         NdflPersonDeduction personDeduction = new NdflPersonDeduction()
-        personDeduction.rowNum = toInteger(node.'@НомСтр')
+        personDeduction.rowNum = toBigDecimal(node.'@НомСтр')
         personDeduction.operationId = toString(node.parent().'@ИдОпер')
         personDeduction.typeCode = toString(node.'@ВычетКод')
         personDeduction.notifType = toString(node.'@УведТип')
@@ -1834,7 +1864,7 @@ import org.springframework.jdbc.core.RowMapper
 
     NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
-        personPrepayment.rowNum = toInteger(node.'@НомСтр')
+        personPrepayment.rowNum = toBigDecimal(node.'@НомСтр')
         personPrepayment.operationId = toString(node.parent().'@ИдОпер')
         personPrepayment.summ = toBigDecimal(node.'@Аванс')
         personPrepayment.notifNum = toString(node.'@УведНом')
@@ -1845,7 +1875,23 @@ import org.springframework.jdbc.core.RowMapper
 
     Integer toInteger(xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
-            return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Integer.valueOf(xmlNode.text()) : null;
+            try {
+                return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Integer.valueOf(xmlNode.text()) : null;
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException("Значение атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не является числом. Проверьте отсутствие пробелов, переводов строки, печатных символов в значении атрибута.")
+            }
+        } else {
+            return null;
+        }
+    }
+
+    Long toLong(xmlNode) {
+        if (xmlNode != null && !xmlNode.isEmpty()) {
+            try {
+                return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Long.valueOf(xmlNode.text()) : null;
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException("Значение атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не является числом. Проверьте отсутствие пробелов, переводов строки, печатных символов в значении атрибута.")
+            }
         } else {
             return null;
         }
