@@ -246,7 +246,7 @@ public class NdflPersonDaoTest {
 
     private NdflPersonIncome createNdflPersonIncomes(int row) {
         NdflPersonIncome personIncome = new NdflPersonIncome();
-        personIncome.setRowNum(row);
+        personIncome.setRowNum(BigDecimal.valueOf(row));
         personIncome.setOperationId("11111");
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
@@ -256,7 +256,7 @@ public class NdflPersonDaoTest {
 
     private NdflPersonDeduction createNdflPersonDeduction(int row) {
         NdflPersonDeduction personDeduction = new NdflPersonDeduction();
-        personDeduction.setRowNum(row);
+        personDeduction.setRowNum(BigDecimal.valueOf(row));
         personDeduction.setOperationId("11111");
         personDeduction.setTypeCode("001");
 
@@ -281,7 +281,7 @@ public class NdflPersonDaoTest {
 
     private NdflPersonPrepayment createNdflPersonPrepayment(int row) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
-        personPrepayment.setRowNum(row);
+        personPrepayment.setRowNum(BigDecimal.valueOf(row));
         personPrepayment.setOperationId("11111");
 
         personPrepayment.setSumm(1999999L);

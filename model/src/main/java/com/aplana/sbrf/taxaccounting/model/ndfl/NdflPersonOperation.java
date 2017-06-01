@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 
+import java.math.BigDecimal;
+
 /**
  * @author Andrey Drunk
  */
@@ -15,7 +17,7 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
     /**
      * Порядковый номер строки
      */
-    protected Integer rowNum;
+    protected BigDecimal rowNum;
 
     /**
      * Идентификатор операции
@@ -35,11 +37,11 @@ public abstract class NdflPersonOperation extends IdentityObject<Long> {
         this.ndflPersonId = ndflPersonId;
     }
 
-    public Integer getRowNum() {
+    public BigDecimal getRowNum() {
         return rowNum;
     }
 
-    public void setRowNum(Integer rowNum) {
+    public void setRowNum(BigDecimal rowNum) {
         this.rowNum = rowNum;
     }
 

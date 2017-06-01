@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -187,14 +186,14 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         Integer column14NotEmpty = 1;
         Date column15Empty = null;
         Date column15NotEmpty = new Date();
-        Long column16Empty = null;
-        Long column16NotEmpty = 1L;
-        Long column17Empty = null;
-        Long column17NotEmpty = 1L;
-        Long column18Empty = null;
-        Long column18NotEmpty = 1L;
-        Long column19Empty = null;
-        Long column19NotEmpty = 1L;
+        BigDecimal column16Empty = null;
+        BigDecimal column16NotEmpty = BigDecimal.valueOf(1L);
+        BigDecimal column17Empty = null;
+        BigDecimal column17NotEmpty = BigDecimal.valueOf(1L);
+        BigDecimal column18Empty = null;
+        BigDecimal column18NotEmpty = BigDecimal.valueOf(1L);
+        BigDecimal column19Empty = null;
+        BigDecimal column19NotEmpty = BigDecimal.valueOf(1L);
         Long column20Empty = null;
         Long column20NotEmpty = 1L;
         Date column21Empty = null;
@@ -203,8 +202,8 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         Date column22NotEmpty = new Date();
         String column23Empty = null;
         String column23NotEmpty = "1";
-        Integer column24Empty = null;
-        Integer column24NotEmpty = 1;
+        Long column24Empty = null;
+        Long column24NotEmpty = 1L;
 
         //1 Раздел 2. Графы 4,5 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
         final NdflPersonIncome ndflPersonIncome1 = createNdflPersonIncome(ndflPerson1.getId(), 1, column4Empty,
@@ -419,7 +418,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .status("2")
                 .build();
         final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(1)
+                .rowNum(BigDecimal.valueOf(1))
                 .ndflPersonId(ndflPerson1.getId())
                 .taxRate(13)
                 .incomeCode("1010")
@@ -439,7 +438,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .status("1")
                 .build();
         final NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(2)
+                .rowNum(BigDecimal.valueOf(2))
                 .ndflPersonId(ndflPerson2.getId())
                 .taxRate(15)
                 .incomeCode("1010")
@@ -459,7 +458,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .status("2")
                 .build();
         final NdflPersonIncome ndflPersonIncome3 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(3)
+                .rowNum(BigDecimal.valueOf(3))
                 .ndflPersonId(ndflPerson3.getId())
                 .taxRate(35)
                 .incomeCode("2740")
@@ -527,7 +526,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         NdflPersonIncome ndflPersonIncome;
         public static class Builder {
             private Long id;
-            private Integer rowNum;
+            private BigDecimal rowNum;
             protected Long ndflPersonId;
             private String incomeCode;
             private String incomeType;
@@ -541,17 +540,17 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private BigDecimal taxBase;
             private Integer taxRate;
             private Date taxDate;
-            private Long calculatedTax;
-            private Long withholdingTax;
-            private Long notHoldingTax;
-            private Long overholdingTax;
+            private BigDecimal calculatedTax;
+            private BigDecimal withholdingTax;
+            private BigDecimal notHoldingTax;
+            private BigDecimal overholdingTax;
             private Long refoundTax;
             private Date taxTransferDate;
             private Date paymentDate;
             private String paymentNumber;
-            private Integer taxSumm;
+            private Long taxSumm;
             public Builder id(Long id) {this.id = id; return this;}
-            public Builder rowNum(Integer rowNum) {this.rowNum = rowNum; return this;}
+            public Builder rowNum(BigDecimal rowNum) {this.rowNum = rowNum; return this;}
             public Builder ndflPersonId(Long ndflPersonId) {this.ndflPersonId = ndflPersonId; return this;}
             public Builder incomeCode(String incomeCode) {this.incomeCode = incomeCode; return this;}
             public Builder incomeType(String incomeType) {this.incomeType = incomeType; return this;}
@@ -565,15 +564,15 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             public Builder taxBase(BigDecimal taxBase) {this.taxBase = taxBase; return this;}
             public Builder taxRate(Integer taxRate) {this.taxRate = taxRate; return this;}
             public Builder taxDate(Date taxDate) {this.taxDate = taxDate; return this;}
-            public Builder calculatedTax(Long calculatedTax) {this.calculatedTax = calculatedTax; return this;}
-            public Builder withholdingTax(Long withholdingTax) {this.withholdingTax = withholdingTax; return this;}
-            public Builder notHoldingTax(Long notHoldingTax) {this.notHoldingTax = notHoldingTax; return this;}
-            public Builder overholdingTax(Long overholdingTax) {this.overholdingTax = overholdingTax; return this;}
+            public Builder calculatedTax(BigDecimal calculatedTax) {this.calculatedTax = calculatedTax; return this;}
+            public Builder withholdingTax(BigDecimal withholdingTax) {this.withholdingTax = withholdingTax; return this;}
+            public Builder notHoldingTax(BigDecimal notHoldingTax) {this.notHoldingTax = notHoldingTax; return this;}
+            public Builder overholdingTax(BigDecimal overholdingTax) {this.overholdingTax = overholdingTax; return this;}
             public Builder refoundTax(Long refoundTax) {this.refoundTax = refoundTax; return this;}
             public Builder taxTransferDate(Date taxTransferDate) {this.taxTransferDate = taxTransferDate; return this;}
             public Builder paymentDate(Date paymentDate) {this.paymentDate = paymentDate; return this;}
             public Builder paymentNumber(String paymentNumber) {this.paymentNumber = paymentNumber; return this;}
-            public Builder taxSumm(Integer taxSumm) {this.taxSumm = taxSumm; return this;}
+            public Builder taxSumm(Long taxSumm) {this.taxSumm = taxSumm; return this;}
             public NdflPersonIncome build() {
                 return new NdflPersonIncomeBuilder(this).ndflPersonIncome;
             }
@@ -805,13 +804,13 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                                                     String column4, String column5,
                                                     Date column6, Date column7, BigDecimal column10, BigDecimal column11,
                                                     BigDecimal column12, BigDecimal column13, Integer column14, Date column15,
-                                                    Long column16, Long column17, Long column18, Long column19, Long column20,
-                                                    Date column21, Date column22, String column23, Integer column24
+                                                    BigDecimal column16, BigDecimal column17, BigDecimal column18, BigDecimal column19, Long column20,
+                                                    Date column21, Date column22, String column23, Long column24
     ) {
         NdflPersonIncome ndflPersonIncome = new NdflPersonIncome();
 
         ndflPersonIncome.setNdflPersonId(ndflPersonId);
-        ndflPersonIncome.setRowNum(rowNum);
+        ndflPersonIncome.setRowNum(BigDecimal.valueOf(rowNum));
 
         ndflPersonIncome.setIncomeCode(column4);
         ndflPersonIncome.setIncomeType(column5);

@@ -1752,7 +1752,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
         Date taxDate = toDate(node.'@ДатаНалог')
 
         NdflPersonIncome personIncome = new NdflPersonIncome()
-        personIncome.rowNum = toInteger(node.'@НомСтр')
+        personIncome.rowNum = toBigDecimal(node.'@НомСтр')
         personIncome.incomeCode = toString(node.'@КодДох')
         personIncome.incomeType = toString(node.'@ТипДох')
 
@@ -1773,15 +1773,15 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
         personIncome.taxBase = toBigDecimal(node.'@НалБаза')
         personIncome.taxRate = toInteger(node.'@Ставка')
         personIncome.taxDate = toDate(node.'@ДатаНалог')
-        personIncome.calculatedTax = toInteger(node.'@НИ')
-        personIncome.withholdingTax = toInteger(node.'@НУ')
-        personIncome.notHoldingTax = toInteger(node.'@ДолгНП')
-        personIncome.overholdingTax = toInteger(node.'@ДолгНА')
-        personIncome.refoundTax = toInteger(node.'@ВозврНал')
+        personIncome.calculatedTax = toBigDecimal(node.'@НИ')
+        personIncome.withholdingTax = toBigDecimal(node.'@НУ')
+        personIncome.notHoldingTax = toBigDecimal(node.'@ДолгНП')
+        personIncome.overholdingTax = toBigDecimal(node.'@ДолгНА')
+        personIncome.refoundTax = toLong(node.'@ВозврНал')
         personIncome.taxTransferDate = toDate(node.'@СрокПрчслНал')
         personIncome.paymentDate = toDate(node.'@ПлПоручДат')
         personIncome.paymentNumber = toString(node.'@ПлатПоручНом')
-        personIncome.taxSumm = toInteger(node.'@НалПерСумм')
+        personIncome.taxSumm = toLong(node.'@НалПерСумм')
 
         // Спр5 Код вида дохода (Необязательное поле)
         if (personIncome.incomeCode != null && personIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
@@ -1834,7 +1834,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
     NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, String fio, def deductionTypeList) {
 
         NdflPersonDeduction personDeduction = new NdflPersonDeduction()
-        personDeduction.rowNum = toInteger(node.'@НомСтр')
+        personDeduction.rowNum = toBigDecimal(node.'@НомСтр')
         personDeduction.operationId = toString(node.parent().'@ИдОпер')
         personDeduction.typeCode = toString(node.'@ВычетКод')
         personDeduction.notifType = toString(node.'@УведТип')
@@ -1864,7 +1864,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
     NdflPersonPrepayment transformNdflPersonPrepayment(NodeChild node) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
-        personPrepayment.rowNum = toInteger(node.'@НомСтр')
+        personPrepayment.rowNum = toBigDecimal(node.'@НомСтр')
         personPrepayment.operationId = toString(node.parent().'@ИдОпер')
         personPrepayment.summ = toBigDecimal(node.'@Аванс')
         personPrepayment.notifNum = toString(node.'@УведНом')
@@ -1875,7 +1875,23 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
     Integer toInteger(xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
-            return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Integer.valueOf(xmlNode.text()) : null;
+            try {
+                return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Integer.valueOf(xmlNode.text()) : null;
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException("Значение атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не является числом. Проверьте отсутствие пробелов, переводов строки, печатных символов в значении атрибута.")
+            }
+        } else {
+            return null;
+        }
+    }
+
+    Long toLong(xmlNode) {
+        if (xmlNode != null && !xmlNode.isEmpty()) {
+            try {
+                return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Long.valueOf(xmlNode.text()) : null;
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException("Значение атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не является числом. Проверьте отсутствие пробелов, переводов строки, печатных символов в значении атрибута.")
+            }
         } else {
             return null;
         }

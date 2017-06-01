@@ -1,20 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.consolidated_rnu_ndfl.v2016;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormSources;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.Relation;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.State;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
@@ -37,21 +23,11 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.util.TestUtils.toDate;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -285,20 +261,20 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     private NdflPersonIncome createNdflPersonIncomes(int row, String operationId) {
         NdflPersonIncome personIncome = new NdflPersonIncome();
-        personIncome.setRowNum(row);
+        personIncome.setRowNum(BigDecimal.valueOf(row));
         personIncome.setOperationId("11111");
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
         personIncome.setIncomeAccruedDate(parseDate("01.01.2017"));
         personIncome.setPaymentNumber("aaaaaaaa" + row);
-        personIncome.setTaxSumm(122222);
+        personIncome.setTaxSumm(122222L);
         personIncome.setOperationId(operationId);
         return personIncome;
     }
 
     private NdflPersonDeduction createNdflPersonDeduction(int row) {
         NdflPersonDeduction personDeduction = new NdflPersonDeduction();
-        personDeduction.setRowNum(row);
+        personDeduction.setRowNum(BigDecimal.valueOf(row));
         personDeduction.setOperationId("11111");
         personDeduction.setTypeCode("001");
 
@@ -323,7 +299,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     private NdflPersonPrepayment createNdflPersonPrepayment(int row) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
-        personPrepayment.setRowNum(row);
+        personPrepayment.setRowNum(BigDecimal.valueOf(row));
         personPrepayment.setOperationId("11111");
         personPrepayment.setSumm(1999999L); //по xsd это поле xs:integer
         personPrepayment.setNotifNum("123-456-000");
