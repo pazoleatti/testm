@@ -2165,7 +2165,8 @@ create table ref_book_address
   house varchar2(20 char),
   build varchar2(20 char),
   appartment varchar2(20 char),
-  address varchar2(255 char)
+  address varchar2(255 char),
+  address_full varchar2(255 char)
 );
 
 comment on table ref_book_address is 'Адрес места жительства';
@@ -2185,6 +2186,7 @@ comment on column ref_book_address.house is 'Номер дома (владени
 comment on column ref_book_address.build is 'Номер корпуса (строения)';
 comment on column ref_book_address.appartment is 'Номер квартиры';
 comment on column ref_book_address.address is 'Адрес';
+comment on column ref_book_address.address_full is 'Полный адрес';
 
 create table ref_book_id_tax_payer
 (
