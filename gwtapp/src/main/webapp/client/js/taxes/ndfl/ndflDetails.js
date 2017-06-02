@@ -12,6 +12,12 @@
         .controller('ndflDetailsFormsCtrl', [
             '$scope', '$timeout', 'aplanaEntityUtils', '$state', '$stateParams', 'dialogs',
             function ($scope, $timeout, aplanaEntityUtils, $state, $stateParams, dialogs) {
+                $scope.searchFilter = {
+                    ajaxFilter: [],
+                    params: {},
+                    isClear: false,
+                    filterName: 'ndflDetailsFilter'
+                };
                 var dataStub = {
                     "list": [
                         {
@@ -182,7 +188,7 @@
                         {name: 'surname', index: 'surname', width: 200},
                         {name: 'name', index: 'name', width: 175},
                         {name: 'patronymic', index: 'patronymic', width: 200},
-                        {name: 'dateOfBirth', index: 'dateOfBirth', width: 240, formatter: 'date'},
+                        {name: 'dateOfBirth', index: 'dateOfBirth', width: 240, formatter: 'date', formatoptions: { newformat: 'd.m.Y H:m:s'}},
                         {name: 'snils', index: 'snils', width: 190, sortable: false},
                         {name: 'citizenship.code', index: 'citizenship', width: 185},
                         {name: 'innRF', index: 'innRF', width: 95},
@@ -240,8 +246,8 @@
                     data.list = tableData ? tableData.slice(0) : data.list.slice(0);
                     for (var i = 0; i < data.list.length; i++) {
                         var entity = data.list[i];
-                        if ($scope.dataOptions.filter) {
-                            if (($scope.dataOptions.filter.inp && entity.inp.indexOf($scope.dataOptions.filter.inp) === -1) || ($scope.dataOptions.filter.snils && entity.snils.indexOf($scope.dataOptions.filter.snils) === -1) || ($scope.dataOptions.filter.inn && entity.innRF.indexOf($scope.dataOptions.filter.inn) === -1 && entity.innINO.indexOf($scope.dataOptions.filter.inn) === -1) || ($scope.dataOptions.filter.numberDul && entity.numberDul.number.indexOf($scope.dataOptions.filter.numberDul) === -1) || ($scope.dataOptions.filter.surname && entity.surname.toLowerCase().indexOf($scope.dataOptions.filter.surname.toLowerCase()) === -1) || ($scope.dataOptions.filter.name && entity.name.toLowerCase().indexOf($scope.dataOptions.filter.name.toLowerCase()) === -1) || ($scope.dataOptions.filter.patronymic && entity.patronymic.toLowerCase().indexOf($scope.dataOptions.filter.patronymic.toLowerCase()) === -1) || ($scope.dataOptions.filter.dateFrom ? ($scope.dataOptions.filter.dateTo ? ($scope.dataOptions.filter.dateFrom > entity.dateOfBirth || $scope.dataOptions.filter.dateTo < entity.dateOfBirth) : $scope.dataOptions.filter.dateFrom > entity.dateOfBirth) : ($scope.dataOptions.filter.dateTo ? $scope.dataOptions.filter.dateTo < entity.dateOfBirth : false))) {
+                        if ($scope.searchFilter.params) {
+                            if (($scope.searchFilter.params.inp && entity.inp.indexOf($scope.searchFilter.params.inp) === -1) || ($scope.searchFilter.params.snils && entity.snils.indexOf($scope.searchFilter.params.snils) === -1) || ($scope.searchFilter.params.inn && entity.innRF.indexOf($scope.searchFilter.params.inn) === -1 && entity.innINO.indexOf($scope.searchFilter.params.inn) === -1) || ($scope.searchFilter.params.numberDul && entity.numberDul.number.indexOf($scope.searchFilter.params.numberDul) === -1) || ($scope.searchFilter.params.surname && entity.surname.toLowerCase().indexOf($scope.searchFilter.params.surname.toLowerCase()) === -1) || ($scope.searchFilter.params.name && entity.name.toLowerCase().indexOf($scope.searchFilter.params.name.toLowerCase()) === -1) || ($scope.searchFilter.params.patronymic && entity.patronymic.toLowerCase().indexOf($scope.searchFilter.params.patronymic.toLowerCase()) === -1) || ($scope.searchFilter.params.dateFrom ? ($scope.searchFilter.params.dateTo ? ($scope.searchFilter.params.dateFrom > entity.dateOfBirth || $scope.searchFilter.params.dateTo < entity.dateOfBirth) : $scope.searchFilter.params.dateFrom > entity.dateOfBirth) : ($scope.searchFilter.params.dateTo ? $scope.searchFilter.params.dateTo < entity.dateOfBirth : false))) {
                                 data.list.splice(i, 1);
                                 i--;
                             }
@@ -300,7 +306,7 @@
                 //Добавить ФЛ
                 $scope.createFLClick = function () {
                     var params = {};
-                    jQuery.extend(params, $scope.dataOptions);
+                    jQuery.extend(params, $scope.searchFilter);
 
                     var data = {
                         scope: angular.copy(params),
@@ -320,33 +326,10 @@
                     });
                 };
 
-                $scope.editInformationData = function() {
-                    var params = {};
-                    jQuery.extend(params, $scope.dataOptions);
-                    var data = {
-
-                    };
-                    var opts = {
-                        copy: true,
-                        windowClass: 'fl-modal-window'
-                    };
-                    dialogs.create('client/js/taxes/ndfl/informationDialog.html', 'createOrEditFLCtrl', data, opts);
-                };
-
-                $scope.addInformationData = function() {
-                    var data = {
-                    };
-                    var opts = {
-                        copy: true,
-                        windowClass: 'fl-modal-window'
-                    };
-                    dialogs.create('client/js/taxes/ndfl/informationDialog.html', 'createOrEditFLCtrl', data, opts);
-                };
-
                 //Редактировать ФЛ
                 $scope.editFLClick = function () {
                     var params = {};
-                    jQuery.extend(params, $scope.dataOptions);
+                    jQuery.extend(params, $scope.searchFilter);
 
                     var data = {
                         scope: angular.copy(params),
@@ -370,11 +353,13 @@
                 };
                 //Поиск по фильтру
                 $scope.searchClick = function () {
+                    $scope.searchFilter.isClear = true;
                     fetchData();
                 };
                 //Очистка фильтра
                 $scope.clearFilterClick = function () {
-                    $scope.dataOptions.filter = {};
+                    $scope.searchFilter.params = {};
+                    $scope.searchFilter.isClear = false;
                     fetchData();
                 };
 
@@ -699,6 +684,28 @@
         //        function setButtonsEnabledInformation() {
         //
         //        }
+        //$scope.editInformationData = function() {
+        //    var params = {};
+        //    jQuery.extend(params, $scope.dataOptions);
+        //    var data = {
+        //
+        //    };
+        //    var opts = {
+        //        copy: true,
+        //        windowClass: 'fl-modal-window'
+        //    };
+        //    dialogs.create('client/js/taxes/ndfl/informationDialog.html', 'createOrEditFLCtrl', data, opts);
+        //};
+        //
+        //$scope.addInformationData = function() {
+        //    var data = {
+        //    };
+        //    var opts = {
+        //        copy: true,
+        //        windowClass: 'fl-modal-window'
+        //    };
+        //    dialogs.create('client/js/taxes/ndfl/informationDialog.html', 'createOrEditFLCtrl', data, opts);
+        //};
         //
         //        function fetchDataInformation() {
         //            var data = jQuery.extend({}, dataForRequisites);
@@ -750,154 +757,5 @@
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------------------
-
-
-        //.controller('incomesAndNdfl', ['$scope', function ($scope) {
-        //        $scope.data = {
-        //            "list": [
-        //                {
-        //                    id: 1,
-        //                    inp: "1234567",
-        //                    surname: "Иванов",
-        //                    name: "Иван",
-        //                    patronymic: "Иванович",
-        //                    dateOfBirth: new Date(),
-        //                    snils: "123-345-567-89",
-        //                    statusCode: {
-        //                        id: 1,
-        //                        code: '1',
-        //                        name: 'Налогоплательщик является налоговым резидентом Российской Федерации'
-        //                    },
-        //                    documentCode: {id: 1, code: '21', name: 'Паспорт гражданина Российской Федерации'},
-        //                    documentNumber: "1234 545435",
-        //                    citizenship: {id: 1, name: "Россия", code: "143"},
-        //                    innRF: "765756",
-        //                    innINO: "456466",
-        //                    codeDul: {id: 5, code: "01", number: "123456"},
-        //                    numberDul: {id: 5, code: "01", number: "123456"},
-        //                    status: {id: 2, name: "Новый"},
-        //                    codeSub: "001",
-        //                    index: "079685",
-        //                    subject: {id: 1, code: '52', name: 'Нижегородская область'},
-        //                    area: {id: 1, name: "Ардатовский район"},
-        //                    locality: {id: 1, name: "Ардатов"},
-        //                    street: {id: 1, name: "Ленина"},
-        //                    building: 99,
-        //                    housing: 1,
-        //                    apartment: 102
-        //                },
-        //                {
-        //                    id: 2,
-        //                    inp: "75643",
-        //                    surname: "Крапивин",
-        //                    name: "Алексей",
-        //                    patronymic: "Гаврилович",
-        //                    dateOfBirth: new Date(),
-        //                    snils: "098-345-567-89",
-        //                    statusCode: {
-        //                        id: 1,
-        //                        code: '1',
-        //                        name: 'Налогоплательщик является налоговым резидентом Российской Федерации'
-        //                    },
-        //                    documentCode: {id: 1, code: '21', name: 'Паспорт гражданина Российской Федерации'},
-        //                    documentNumber: "1234 455464",
-        //                    citizenship: {id: 2, name: "Украина", code: "167"},
-        //                    innRF: "976543",
-        //                    innINO: "123423",
-        //                    codeDul: {id: 2, code: "23", number: "0987"},
-        //                    numberDul: {id: 2, code: "23", number: "0987"},
-        //                    status: {id: 2, name: "Новый"},
-        //                    codeSub: "023",
-        //                    index: "17753",
-        //                    subject: {id: 1, code: '52', name: 'Нижегородская область'},
-        //                    area: {id: 2, name: "Арзамасский район"},
-        //                    city: {id: 2, name: "Арзамас"},
-        //                    street: {id: 2, name: "Красная"},
-        //                    building: 1,
-        //                    housing: 4,
-        //                    apartment: 54
-        //                }]
-        //        };
-        //
-        //        $scope.gridOptions =
-        //        {
-        //            datatype: "local",
-        //            height: 250,
-        //            caption: "Таблица №1",
-        //            colNames: [
-        //                '№п/п',
-        //                'Налогоплательщик. ИНП',
-        //                'Налогоплательщик. Фамилия',
-        //                'Налогоплательщик. Имя',
-        //                'Налогоплательщик. Отчество',
-        //                'Налогоплательщик. Дата рождения',
-        //                'Налогоплательщик. СНИЛС',
-        //                'Гражданство (код страны)',
-        //                'ИНН. В стране гражданства',
-        //                'ДУЛ. Код',
-        //                'ДУЛ. Номер',
-        //                'Статус (код)',
-        //                'Адрес рег. в РФ. Код субъекта',
-        //                'Адрес рег. в РФ. Индекс',
-        //                'Адрес рег. в РФ. Район',
-        //                'Адрес рег. в РФ. Город',
-        //                'Адрес рег. в РФ. Населенный пункт',
-        //                'Адрес рег. в РФ. Улица',
-        //                'Адрес рег. в РФ. Дом',
-        //                'Адрес рег. в РФ. Корпус',
-        //                'Адрес рег. в РФ. Квартира'],
-        //            colModel: [
-        //                {name: 'id', index: 'id', width: 60},
-        //                {name: 'inp', index: 'inp', width: 170},
-        //                {name: 'surname', index: 'surname', width: 200},
-        //                {name: 'name', index: 'name', width: 175, align: "right"},
-        //                {name: 'patronymic', index: 'patronymic', width: 200, align: "right"},
-        //                {name: 'dateOfBirth', index: 'dateOfBirth', width: 240, align: "right"},
-        //                {name: 'snils', index: 'snils', width: 190, sortable: false},
-        //                {name: 'citizenship', index: 'citizenship', width: 185},
-        //                {name: 'innRF', index: 'innRF', width: 95},
-        //                {name: 'innINO', index: 'innINO', width: 195},
-        //                {name: 'codeDul', index: 'codeDul', width: 85, align: "right"},
-        //                {name: 'numberDul', index: 'numberDul', width: 95, align: "right"},
-        //                {name: 'status', index: 'status', width: 100, align: "right"},
-        //                {name: 'codeSub', index: 'codeSub', width: 205, sortable: false},
-        //                {name: 'index', index: 'index', width: 170, align: "right"},
-        //                {name: 'area', index: 'area', width: 155, align: "right"},
-        //                {name: 'city', index: 'city', width: 165, align: "right"},
-        //                {name: 'locality', index: 'locality', width: 240, align: "right"},
-        //                {name: 'building', index: 'building', width: 145, align: "right"},
-        //                {name: 'housing', index: 'housing', width: 170, align: "right"},
-        //                {name: 'apartment', index: 'apartment', width: 205, align: "right"}
-        //            ],
-        //            rowNum: 2,
-        //            rowList: [10, 20, 30],
-        //            sortname: 'id',
-        //            viewrecords: true,
-        //            sortorder: "desc",
-        //            hidegrid: false,
-        //            multiselect: true
-        //
-        //        };
-        //
-        //        /**
-        //         * инициализирует грид №1
-        //         * @param ctrl контроллер грида
-        //         */
-        //        $scope.initOurGrid = function (ctrl) {
-        //            $scope.ctrlMyGrid = ctrl;
-        //            var grid = ctrl.getGrid();
-        //            grid.setGridParam({
-        //                onSelectRow: function (rowId, status) {
-        //                    $scope.selectedItem1 = ctrl.getAllSelectedRows();
-        //                    $scope.$apply();
-        //                },
-        //                onSelectAll: function (aRowids, status) {
-        //                    $scope.selectedItem1 = ctrl.getAllSelectedRows();
-        //                    $scope.$apply();
-        //                }
-        //            });
-        //
-        //        };
-        //    }])
     ;
 }());
