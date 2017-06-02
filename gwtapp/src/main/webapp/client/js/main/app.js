@@ -9,6 +9,7 @@
             'sbrfNdfl.ndflForms',
             'sbrfNdfl.ndflDetailsForms',
             'sbrfNdfl.filterDirectives',
+            'ndfl.filterUtils',
             'pascalprecht.translate',
             'aplana.overlay',
             'aplana.alert',
