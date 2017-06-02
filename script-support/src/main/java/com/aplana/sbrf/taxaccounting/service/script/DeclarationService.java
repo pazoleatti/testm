@@ -158,7 +158,6 @@ public interface DeclarationService {
      */
     JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params);
 
-
     /**
      * Формирование jasper-отчета, отличие от предыдущего метода берет на себя управление формированием xml данных
      *
@@ -168,6 +167,16 @@ public interface DeclarationService {
      * @return сформированный отчет
      */
     JasperPrint createJasperReport(InputStream jrxml, Map<String, Object> parameters, Closure xmlBuilder);
+
+    /**
+     * Формирование jasper-отчета, отличие от предыдущего метода берет на себя управление формированием xml данных
+     *
+     * @param jrxml      исходный jrxml-шаблон отчета
+     * @param parameters
+     * @param xmlData   xml поток входных данных
+     * @return сформированный отчет
+     */
+    JasperPrint createJasperReport(InputStream jrxml, Map<String, Object> parameters, InputStream xmlData);
 
     /**
      * Метод записывает xml данные в буфер формирует поток на чтение

@@ -745,24 +745,61 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 
     public String setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
-        File xlsxFile = null;
-        try {
-            xlsxFile = File.createTempFile("report", ".xlsx");
-            getXlsxData(declarationData.getId(), xlsxFile, userInfo, stateLogger);
+        String script = declarationTemplateService.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
+        if (DeclarationDataScriptingServiceImpl.canExecuteScript(script, FormDataEvent.CREATE_EXCEL_REPORT)) {
+            Map<String, Object> params = new HashMap<String, Object>();
+            ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
+            File reportFile = null;
+            try {
+                reportFile = File.createTempFile("specific_report", ".dat");
+                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile));
+                InputStream inputStream = null;
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                if (declarationTemplate.getJrxmlBlobId() != null) {
+                    inputStream = blobDataService.get(declarationTemplate.getJrxmlBlobId()).getInputStream();
+                }
+                try {
+                    scriptSpecificReportHolder.setFileOutputStream(outputStream);
+                    scriptSpecificReportHolder.setFileInputStream(inputStream);
+                    scriptSpecificReportHolder.setFileName("report.xlsx");
+                    params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+                    stateLogger.updateState("Формирование XLSX отчета");
+                    declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE_EXCEL_REPORT, logger, params);
+                    if (logger.containsLevel(LogLevel.ERROR)) {
+                        throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
+                    }
+                } finally {
+                    IOUtils.closeQuietly(outputStream);
+                    IOUtils.closeQuietly(inputStream);
+                }
+                stateLogger.updateState("Сохранение XLSX в базе данных");
+                return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
+            } catch (IOException e) {
+                throw new ServiceException(e.getLocalizedMessage(), e);
+            } finally {
+                if (reportFile != null)
+                    reportFile.delete();
+            }
+        } else {
+            File xlsxFile = null;
+            try {
+                xlsxFile = File.createTempFile("report", ".xlsx");
+                getXlsxData(declarationData.getId(), xlsxFile, userInfo, stateLogger);
 
-            LOG.info(String.format("Сохранение XLSX в базе данных для налоговой формы %s", declarationData.getId()));
-            stateLogger.updateState("Сохранение XLSX в базе данных");
+                LOG.info(String.format("Сохранение XLSX в базе данных для налоговой формы %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение XLSX в базе данных");
 
-            reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.JASPER_DEC));
-            return blobDataService.create(xlsxFile.getPath(), getXmlDataFileName(declarationData.getId(), userInfo).replace("zip", "xlsx"));
-        } catch (IOException e) {
-            throw new ServiceException("Ошибка при формировании временного файла для XLSX", e);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (xlsxFile != null)
-                xlsxFile.delete();
+                reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.JASPER_DEC));
+                return blobDataService.create(xlsxFile.getPath(), getXmlDataFileName(declarationData.getId(), userInfo).replace("zip", "xlsx"));
+            } catch (IOException e) {
+                throw new ServiceException("Ошибка при формировании временного файла для XLSX", e);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+                throw new ServiceException(e.getMessage());
+            } finally {
+                if (xlsxFile != null)
+                    xlsxFile.delete();
+            }
         }
     }
 
