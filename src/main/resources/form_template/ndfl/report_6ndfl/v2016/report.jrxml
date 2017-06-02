@@ -4,8 +4,8 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="false"/>
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1932"/>
+	<property name="ireport.x" value="85"/>
+	<property name="ireport.y" value="1928"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -659,7 +659,7 @@
 		<groupExpression><![CDATA[$F{Ставка}]]></groupExpression>
 	</group>
 	<pageHeader>
-		<band height="55">
+		<band height="50">
 			<printWhenExpression><![CDATA[$V{PAGE_NUMBER}>1]]></printWhenExpression>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
 				<reportElement uuid="d35e810e-c45b-4018-a275-aad7bb81350c" x="366" y="30" width="14" height="19" isPrintWhenDetailOverflows="true"/>
@@ -676,7 +676,7 @@
 				<textFieldExpression><![CDATA[("00"+($V{PAGE_NUMBER})).substring(("00"+($V{PAGE_NUMBER})).length()-3).charAt(2)]]></textFieldExpression>
 			</textField>
 			<image hAlign="Center">
-				<reportElement uuid="c7d91d93-1615-403c-b3ec-90880cee8199" x="14" y="10" width="101" height="42"/>
+				<reportElement uuid="c7d91d93-1615-403c-b3ec-90880cee8199" x="14" y="10" width="101" height="39"/>
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarCode2}).processString() )]]></imageExpression>
 			</image>
 			<textField isBlankWhenNull="true">
@@ -8870,7 +8870,7 @@
 				<reportElement uuid="92e1c8bd-b035-4234-b2bf-cd0ffc3a7600" x="0" y="0" width="100" height="1"/>
 			</break>
 			<staticText>
-				<reportElement uuid="44debce7-991e-4ca9-9566-a4153a167299" x="0" y="1" width="595" height="19" isPrintWhenDetailOverflows="true">
+				<reportElement uuid="44debce7-991e-4ca9-9566-a4153a167299" x="0" y="1" width="565" height="19" isPrintWhenDetailOverflows="true">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Приложение №2"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -10198,7 +10198,7 @@
 				<textFieldExpression><![CDATA[$V{ИсчислНалДив}.charAt(2)]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="ea46da56-20bc-4112-a399-a01878f47c73" x="307" y="143" width="270" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="ea46da56-20bc-4112-a399-a01878f47c73" x="307" y="143" width="258" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement verticalAlignment="Top">
 					<font fontName="Arial" size="9" isItalic="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
@@ -10995,7 +10995,7 @@
 				<textFieldExpression><![CDATA[$V{ВозврНалИт}.charAt(9)]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="774ec234-ebb7-4e01-b11a-fd3ec40d3333" x="308" y="57" width="270" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="774ec234-ebb7-4e01-b11a-fd3ec40d3333" x="308" y="57" width="257" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isItalic="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
@@ -12709,7 +12709,7 @@
 				<textFieldExpression><![CDATA[$V{НеУдержНалИт}.charAt(14)]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="86eaaf31-6a8c-4569-a142-ca016e886c22" x="308" y="58" width="270" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="86eaaf31-6a8c-4569-a142-ca016e886c22" x="303" y="58" width="272" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isItalic="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
@@ -13060,7 +13060,7 @@
 				<text><![CDATA[080]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="ccfc2747-0480-48f8-967d-cb57d2b8f3d0" x="28" y="58" width="278" height="20" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="ccfc2747-0480-48f8-967d-cb57d2b8f3d0" x="28" y="58" width="275" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isItalic="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
@@ -13497,8 +13497,9 @@
 				</reportElement>
 			</break>
 			<staticText>
-				<reportElement uuid="050cfb2e-33d7-40e0-afd2-98dd16c06d16" x="2" y="1" width="577" height="22" isPrintWhenDetailOverflows="true">
+				<reportElement uuid="050cfb2e-33d7-40e0-afd2-98dd16c06d16" x="2" y="1" width="573" height="22" isPrintWhenDetailOverflows="true">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Приложение №2"/>
+					<property name="net.sf.jasperreports.export.xls.wrap.text" value="false"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isBold="true" pdfEncoding="Identity-H"/>
@@ -13506,12 +13507,12 @@
 				<text><![CDATA[Раздел 2. Даты и суммы фактически полученных доходов и удержанного налога на доходы физических лиц]]></text>
 			</staticText>
 			<componentElement>
-				<reportElement uuid="836b1f11-95bb-4ce6-8068-69d5b52c71a5" x="0" y="23" width="567" height="109"/>
+				<reportElement uuid="836b1f11-95bb-4ce6-8068-69d5b52c71a5" x="0" y="23" width="565" height="109"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="dsPart2" uuid="866b376f-ba20-47c5-b2e2-b263e9591331">
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/НДФЛ6/ДохНал/СумДата")]]></dataSourceExpression>
 					</datasetRun>
-					<jr:listContents height="109" width="567">
+					<jr:listContents height="109" width="565">
 						<staticText>
 							<reportElement uuid="bc647320-55a7-4366-aba8-890285997db3" x="1" y="37" width="27" height="20" isPrintWhenDetailOverflows="true"/>
 							<textElement verticalAlignment="Middle">
@@ -15296,8 +15297,9 @@
 				<text><![CDATA[.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="49a209a7-ea31-4443-a262-1c61bba9ce30" x="0" y="1" width="584" height="22" isPrintWhenDetailOverflows="true">
+				<reportElement uuid="49a209a7-ea31-4443-a262-1c61bba9ce30" x="0" y="1" width="575" height="22" isPrintWhenDetailOverflows="true">
 					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Приложение №2"/>
+					<property name="net.sf.jasperreports.export.xls.wrap.text" value="false"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isBold="true" pdfEncoding="Identity-H"/>
@@ -15320,7 +15322,7 @@
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="26">
+		<band height="28">
 			<printWhenExpression><![CDATA[($V{PAGE_NUMBER}>1)]]></printWhenExpression>
 			<staticText>
 				<reportElement uuid="073459a6-6902-41de-830b-55660715d20d" x="334" y="12" width="96" height="13"/>
