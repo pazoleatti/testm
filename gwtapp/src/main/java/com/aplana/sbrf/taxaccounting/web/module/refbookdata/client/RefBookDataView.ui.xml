@@ -34,6 +34,10 @@
             border-top: 1px solid #aeaeac;
         }
 
+        .right5{
+            right: 5px;
+        }
+
         .marginRight5{
             margin-right: 5px;
         }
@@ -137,13 +141,11 @@
                         <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению"/>
                     </g:cell>
 
-                    <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
+                    <g:HorizontalPanel verticalAlignment="middle" horizontalAlignment="right" addStyleNames="{style.right5}">
                         <style:LinkButton title="Назначить оригинал/дубли" text="Назначить оригинал/дубли" ui:field="duplicate" img="resources/img/pencil-16.png" addStyleNames="{style.marginRight5}"/>
                         <g:Button title="Завершить редактирование" text="Завершить редактирование"
                                   ui:field="cancelEdit"/>
                         <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit" img="resources/img/pencil-16.png"/>
-                        <style:LinkButton title="Создать запрос на изменение..." text="Создать запрос на изменение..." ui:field="sendQuery"
-                                          img="resources/img/pencil-16.png" visible="false"/>
                     </g:HorizontalPanel>
 
                 </g:HorizontalPanel>
