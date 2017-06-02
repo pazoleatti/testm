@@ -19,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.script.*
-import com.sun.org.apache.xalan.internal.lib.ExsltDatetime
 import groovy.transform.CompileStatic
 import groovy.transform.Field
 import groovy.transform.Memoized
