@@ -40,6 +40,9 @@ public enum FormDataEvent implements Serializable {
 
     CHANGE_STATUS_ED(26, "Изменить состояние ЭД"),
 
+    CREATE_EXCEL_REPORT(27, "Сформировать Excel отчет"),
+	CREATE_PDF_REPORT(28, "Сформировать PDF отчет"),
+
     MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),
 	MOVE_APPROVED_TO_ACCEPTED(103, "Принять из \"Утверждена\""),

@@ -1048,12 +1048,12 @@ def importNdflResponse() {
                             if (ndflRef.ERRTEXT.value == null || ndflRef.ERRTEXT.value.isEmpty()) {
                                 errtext = ""
                             } else {
-                                errtext = ndflRef.ERRTEXT.value + "; "
+                                errtext = ndflRef.ERRTEXT.value + ".\n"
                             }
                             if (entry.valid) {
-                                ndflRef.ERRTEXT.value = errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString()
+                                ndflRef.ERRTEXT.setValueForce(errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\"; (Адрес признан верным (ИФНСМЖ - ${entry.valid}))".toString())
                             } else {
-                                ndflRef.ERRTEXT.value = errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString()
+                                ndflRef.ERRTEXT.setValueForce(errtext + "Текст ошибки от ФНС: \"${entry.addressBefore}\" ДО исправления; (\"${entry.addressAfter}\" ПОСЛЕ исправления)".toString())
                             }
                             ndflRefProvider.updateRecordVersion(logger, ndflRefIds.get(0), null, null, ndflRef)
                         }

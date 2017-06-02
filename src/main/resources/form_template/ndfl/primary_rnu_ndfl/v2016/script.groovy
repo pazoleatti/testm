@@ -19,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.script.*
-import com.sun.org.apache.xalan.internal.lib.ExsltDatetime
 import groovy.transform.CompileStatic
 import groovy.transform.Field
 import groovy.transform.Memoized
@@ -38,7 +37,8 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
     import javax.xml.stream.events.*
     import java.sql.ResultSet
     import java.sql.SQLException
-    import java.text.SimpleDateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
     import java.util.regex.Matcher
     import java.util.regex.Pattern
 
@@ -1934,7 +1934,15 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
     Date toDate(xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
-            return xmlNode.text() != null && !xmlNode.text().isEmpty() ? new java.text.SimpleDateFormat(DATE_FORMAT).parse(xmlNode.text()) : null;
+            SimpleDateFormat format = new java.text.SimpleDateFormat(DATE_FORMAT)
+            if (xmlNode.text() != null && !xmlNode.text().isEmpty()) {
+                Date date = format.parse(xmlNode.text())
+                if (format.format(date) != xmlNode.text()) {
+                    throw new ServiceException("Значения атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не существует.")
+                }
+            } else {
+                return null
+            }
         } else {
             return null;
         }

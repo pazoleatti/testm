@@ -31,6 +31,7 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
         void init(RefBookDataRow row, List<RefBookAttribute> attributes);
         void setTableColumns(final List<RefBookColumn> columns);
         void setDuplicateTableColumns(final List<RefBookColumn> columns);
+        void setRelevanceDate(Date relevanceDate);
         void setTableRows(final List<RefBookDataRow> rows);
         void setDuplicateTableRows(final List<RefBookDataRow> rows);
     }
@@ -116,9 +117,10 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
 
     }
 
-    public void init(RefBookDataRow row, List<RefBookColumn> columns) {
+    public void init(RefBookDataRow row, Date relevanceDate, List<RefBookColumn> columns) {
         getView().setTableColumns(columns);
         getView().setDuplicateTableColumns(columns);
+        getView().setRelevanceDate(relevanceDate);
         this.row = row;
         this.columns = columns;
         //getView().init(row, columns);

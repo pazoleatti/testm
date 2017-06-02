@@ -99,6 +99,16 @@ public class RefBookValue implements Serializable {
 		}
 	}
 
+	/**
+	 * Установка значения. Без проверки на тип значения.
+	 * @param value устанавливаемое значение. Для все типов, кроме ссылки значение является примитивом. Для
+	 *              атрибутов-ссылок в качестве значения можно передавать как код строки (примитив), на которую
+	 *              ссылаемся, так и непосредственно сам объект-строка.
+	 */
+	public final void setValueForce(Object value) {
+		this.value = value;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

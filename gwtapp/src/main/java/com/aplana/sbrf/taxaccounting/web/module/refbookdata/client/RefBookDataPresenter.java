@@ -575,7 +575,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     @Override
     public void duplicateClicked() {
-        personPresenter.init(refBookLinearPresenter.getSelectedRow(), columns);
+        personPresenter.init(refBookLinearPresenter.getSelectedRow(), getView().getRelevanceDate(), columns);
         addToPopupSlot(personPresenter);
     }
 

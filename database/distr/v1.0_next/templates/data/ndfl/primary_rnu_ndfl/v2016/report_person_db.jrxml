@@ -10,6 +10,7 @@
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
 	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.collapse.row.span" value="false"/>
+	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="true"/>
 	<style name="table">
 		<box>
 			<pen lineWidth="1.0" lineColor="#000000"/>
@@ -2802,4 +2803,15 @@ ID операции]]></text>
 			</componentElement>
 		</band>
 	</detail>
+	<pageFooter>
+		<band height="50">
+			<staticText>
+				<reportElement uuid="949d574f-7d2e-4825-99d9-b8f0336a652e" x="0" y="0" width="30" height="10"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ ]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
 </jasperReport>
