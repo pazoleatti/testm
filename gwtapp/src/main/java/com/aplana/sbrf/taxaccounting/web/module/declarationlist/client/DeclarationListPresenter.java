@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
@@ -50,6 +51,7 @@ public class DeclarationListPresenter extends
     private TaxType taxType;
     private Boolean isReports;
     private boolean ready = false;
+    private EventBus eventBus;
 
     @ProxyEvent
     @Override
@@ -73,6 +75,7 @@ public class DeclarationListPresenter extends
 
     @Override
     public void onCreateClicked() {
+        eventBus.fireEvent(new FocusActionEvent(true));
         creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), DeclarationFormKind.CONSOLIDATED, this);
     }
 
@@ -96,7 +99,8 @@ public class DeclarationListPresenter extends
 	                         PlaceManager placeManager, DispatchAsync dispatcher,
 	                         DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter,
                              DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter, ChangeStatusEDPresenter changeStatusEDPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter, changeStatusEDPresenter);
+        super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter, changeStatusEDPresenter);
+        this.eventBus = eventBus;
 		getView().setUiHandlers(this);
     }
 
@@ -247,9 +251,16 @@ public class DeclarationListPresenter extends
     }
 
     @Override
+    protected void onReveal() {
+        super.onReveal();
+        eventBus.fireEvent(new FocusActionEvent(false));
+    }
+
+    @Override
     protected void onHide() {
         super.onHide();
         selectedItemIds = getView().getSelectedIds();
+        eventBus.fireEvent(new FocusActionEvent(true));
     }
 
     @Override
@@ -331,6 +342,7 @@ public class DeclarationListPresenter extends
             });
         }
     }
+
 
     @Override
     public void onRecalculateClicked() {

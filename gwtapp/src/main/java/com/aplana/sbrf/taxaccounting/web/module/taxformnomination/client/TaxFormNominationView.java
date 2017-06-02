@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -20,6 +20,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeLayoutPanel;
@@ -78,6 +79,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	private TaxType taxType;
 	// Количество записей по умолчанию на страницу
 	private final static int PAGE_SIZE = 100;
+
+	private boolean enterEventDisabled;
 
 	// изменяемые колонки в таблице
 	private GenericDataGrid.DataGridResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle, declarationTypeHeader;
@@ -153,6 +156,32 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 		initFormGrid();
 		initDecGrid();
+		decGrid.addHandler(new FocusHandler() {
+			@Override
+			public void onFocus(FocusEvent event) {
+				enterEventDisabled = true;
+			}
+		}, FocusEvent.getType());
+		decGrid.addHandler(new BlurHandler() {
+			@Override
+			public void onBlur(BlurEvent event) {
+				enterEventDisabled = false;
+			}
+		}, BlurEvent.getType());
+		Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+			@Override
+			public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+				if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER && !enterEventDisabled) {
+					if (isForm) {
+						formPager.firstPage();
+						reloadFormTableData();
+					} else {
+						reloadDeclarationTableData();
+						declarationPager.firstPage();
+					}
+				}
+			}
+		});
 	}
 
 	/* Инициализация таблицы отображающий данные вкладки "Назначение налоговых форм"   */
