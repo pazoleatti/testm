@@ -134,7 +134,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
     /**
-     * Метод формирует список по которому будет рассчитывается схожесть записи
+     * Метод формирует список по которому будет рассчитываться схожесть записи
      *
      * @return
      */
@@ -151,7 +151,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Имя
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Имя", 5) {
+        result.add(new BaseWeigthCalculator<IdentityPerson>("Имя", 10) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getFirstName(), b.getFirstName());
@@ -166,16 +166,8 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             }
         });
 
-        //Пол
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Пол", 1) {
-            @Override
-            public double calc(IdentityPerson a, IdentityPerson b) {
-                return compareNumber(a.getSex(), b.getSex());
-            }
-        });
-
         //Дата рождения
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Дата рождения", 5) {
+        result.add(new BaseWeigthCalculator<IdentityPerson>("Дата рождения", 10) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareDate(a.getBirthDate(), b.getBirthDate());
@@ -191,7 +183,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Идентификатор физлица номер и код АСНУ
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Идентификатор физлица", 10) {
+        result.add(new BaseWeigthCalculator<IdentityPerson>("Идентификатор физлица", 15) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
 
@@ -207,7 +199,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                     PersonIdentifier refBookPersonId = findIdentifier(refBookPerson, primaryPersonId.getInp(), primaryPersonId.getAsnuId());
                     return (refBookPersonId != null) ? weigth : 0D;
                 } else {
-                    //если  значени параметра не задано то оно не должно учитыватся при сравнении со списком
+                    //Если  значени параметра не задано то оно не должно учитыватся при сравнении со списком
                     return weigth;
                 }
             }
@@ -239,12 +231,21 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Статус налогоплательщика
-//        result.add(new BaseWeigthComporator<IdentityPerson>(1) {
-//            @Override
-//            public double calc(IdentityPerson a, IdentityPerson b) {
-//                return compareString(a.getStatus(), b.getStatus());
-//            }
-//        });
+        result.add(new BaseWeigthCalculator<IdentityPerson>("Статус налогоплательщика", 1) {
+            @Override
+            public double calc(IdentityPerson personA, IdentityPerson personB) {
+                TaxpayerStatus a = personA.getTaxPayerStatus();
+                TaxpayerStatus b = personB.getTaxPayerStatus();
+
+                if (a != null && b != null) {
+                    return compareNumber(a.getId(), b.getId());
+                } else if (a == null && b == null) {
+                    return weigth;
+                } else {
+                    return 0D;
+                }
+            }
+        });
 
         //Документ вид документа и код
         result.add(new BaseWeigthCalculator<IdentityPerson>("ДУЛ", 10) {
@@ -257,7 +258,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
                 PersonDocument primaryPersonDocument = primaryPerson.getPersonDocument();
 
-
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
                     PersonDocument personDocument = findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
@@ -269,9 +269,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
         });
 
-        /**
-         * Адрес в РФ
-         */
+        //Адрес в РФ
         result.add(new BaseWeigthCalculator<IdentityPerson>("Адрес в РФ", 1) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
@@ -335,7 +333,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
         });
 
-        //адрес ино
+        //Адрес ино
         result.add(new BaseWeigthCalculator<IdentityPerson>("Адрес ино", 1) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {

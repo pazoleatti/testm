@@ -5,16 +5,20 @@ import com.aplana.gwt.client.TextBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.*;
+import com.google.web.bindery.event.shared.EventBus;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -62,13 +66,24 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private TextBox notePicker;
 
+    @UiField
+    Button apply;
+
+    private boolean enterEventDisabled;
+
     @Inject
 	@UiConstructor
-    public DeclarationFilterView(final MyBinder binder) {
+    public DeclarationFilterView(final MyBinder binder, EventBus eventBus) {
         super();
-
+        eventBus.addHandler(FocusActionEvent.TYPE, new FocusActionEventHandler() {
+            @Override
+            public void update(FocusActionEvent event) {
+                enterEventDisabled = event.isFocusEnabled();
+            }
+        });
         declarationDataIdPicker = new TextBox();
         declarationDataIdPicker.setTitle("Номер формы");
+
 
         reportPeriodPicker = new PeriodPickerPopupWidget(true);
         reportPeriodPicker.setSetDefaultValue(true);
@@ -155,6 +170,16 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         notePicker.setTitle("Примечание");
 
         initWidget(binder.createAndBindUi(this));
+
+        Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER && !enterEventDisabled) {
+                    getUiHandlers().onApplyFilter();
+                }
+            }
+        });
+
     }
 
     @Override
