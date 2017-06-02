@@ -26,6 +26,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.PagingParams
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -36,6 +37,9 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -65,6 +69,9 @@ switch (formDataEvent) {
         println "!CREATE_SPECIFIC_REPORT!"
         createSpecificReport()
         break
+    case FormDataEvent.CREATE_EXCEL_REPORT: //создание xlsx отчета
+        createXlsxReport()
+        break
     case FormDataEvent.CREATE_FORMS: // создание экземпляра
         println "!CREATE_FORMS!"
         createForm()
@@ -79,6 +86,10 @@ switch (formDataEvent) {
 final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
 @Field
 final DepartmentService departmentService = getProperty("departmentService")
+@Field
+final DeclarationService declarationService = getProperty("declarationService")
+@Field
+final DeclarationData declarationData = getProperty("declarationData")
 
 def getProperty(String name) {
     try {
@@ -2015,6 +2026,43 @@ def createSpecificReport() {
 
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+}
+
+/**
+ * Создать XLSX отчет
+ * @return
+ */
+@TypeChecked
+def createXlsxReport() {
+    ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder)getProperty("scriptSpecificReportHolder")
+    def params = new HashMap<String, Object>()
+    params.put("declarationId", declarationData.getId());
+
+    JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id));
+
+    exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName("report.xlsx")
+}
+
+@TypeChecked
+void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
+    try {
+        JRXlsxExporter exporter = new JRXlsxExporter();
+        exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
+                jasperPrint);
+        exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
+        exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
+                Boolean.TRUE);
+        exporter.setParameter(
+                JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND,
+                Boolean.FALSE);
+
+        exporter.exportReport();
+        exporter.reset();
+    } catch (Exception e) {
+        throw new ServiceException(
+                "Невозможно экспортировать отчет в XLSX", e) as Throwable
+    }
 }
 
 /**
