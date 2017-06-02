@@ -1,0 +1,84 @@
+/*  CBR page container */
+
+.pageContainer {min-width: @pageContainerWidth;} 
+.cbr-topContainer {content: ""; min-width: @pageContainerWidth;}
+.cbr-bottomContainer {content: ""; min-width: @pageContainerWidth;}
+.cbr-mainContainer {
+	//overflow: hidden;
+    clear: both;
+    position: relative;
+    z-index: 300;
+    min-width: @pageContainerWidth;
+    background-color: white;
+}
+
+.cbr-topContainerBorder {
+	min-width: @pageContainerBorderWidth;
+	height: @pageCornerHeight;
+	float: left;
+	background: url(../img/page/borderTop.png) repeat-x 0 0 white;
+}
+.cbr-bottomContainerBorder {
+	min-width: @pageContainerBorderWidth;
+	height: @pageCornerHeight;
+	float: left;
+	//background: url(../img/page/borderBottom.png) repeat-x 0 bottom white;
+}
+.cbr-leftContainerBorder {
+	width: @pageLeftBorderWidth;
+	height: 100%;
+	float: left;
+    position: absolute;
+    background: url(../img/page/borderLeft.png) repeat-y 0 0;
+}
+.cbr-rightContainerBorder {
+	width: @pageLeftBorderWidth;
+	height: 100%;
+	right: 0;
+	top: 0;
+    position: absolute;
+	background: url(../img/page/borderRight.png) repeat-y 0 0;
+}
+.cbr-container {
+	min-width: @gridRowWidth;
+	position: relative;
+	left: @pageLeftBorderWidth;
+	
+	/*
+	 * поднимаем весь контейнер вверх для оптимизации верхнего пространства,
+	 * однако при этом низ так же поднимается
+	 */
+	top: -22px;
+	
+	/* исправление для всплывающих элементов с position: absolute */
+	overflow: auto; 
+	min-height: 300px;
+}
+.cbr-appVersionNum {
+	//position: absolute;
+	//margin: 2px 0 0 10px;
+	color: #737B8C;
+    font-size: 11px;
+  	padding-right: 5px;
+  	padding-top: 8px;
+  	line-height: 8px;
+}
+//.cbr-containerCorner {
+//	float: left;
+//	width: @pageCornerWidth;
+//	height: @pageCornerHeight;
+//	background: url(../img/page/corners.png) no-repeat 0 0;
+//}
+//.cbr-topLeftContainerCorner {background-position: 0 0;}
+//.cbr-topRightContainerCorner {background-position: 0 -32px;}
+//.cbr-bottomLeftContainerCorner {background-position: 0 -64px;}
+//.cbr-bottomRightContainerCorner {background-position: 0 -96px;}
+
+//body {
+//	background-color: #7E7F7F;
+//}
+
+
+
+
+

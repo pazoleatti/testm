@@ -1,0 +1,222 @@
+// CBR link
+a.aplanaLink {text-decoration: none;}
+a.cbr-btn_prim {text-decoration: none;}
+a.cbr-btn_prim:hover {
+  text-decoration: none;
+  color: #714129;
+}
+a.aplanaLink i {text-decoration: none;}
+//a.aplanaLink span {text-decoration: underline; margin-left: 4px;}
+a.aplanaLink:HOVER span {text-decoration: none;}
+
+a.helpTooltipLink {text-decoration: none; cursor: pointer;}
+a.helpTooltipLink:HOVER {text-decoration: none;}
+
+/* disabled link */
+a.aplanaLink.disabled {cursor: default;}
+a.aplanaLink.disabled span {text-decoration: none; color: #999999;}
+a.aplanaLink.disabled:HOVER span {text-decoration: none;}
+
+a.cbr-btn_prim.disabled {cursor: default;}
+a.cbr-btn_prim.disabled span {text-decoration: none; color: #999999;}
+a.cbr-btn_prim.disabled:HOVER span {text-decoration: none;}
+
+/* nav */
+.nav > li > a.aplanaLink.disabled:hover {
+	background: none;
+}
+
+
+
+/*
+	Переопределение отрисовки иконки перед ссылкой.
+ 	вместо стандартных рисуются из файла.
+*/
+
+/* для ссылки которая выглядит как secondary button */
+i.cbr-aplana-link {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  .ie7-restore-right-whitespace();
+  line-height: 21px;
+  background-repeat: no-repeat;
+  margin-bottom: -4px;
+  margin-right: 5px;
+
+  background-position: 0 -16px;
+}
+
+/* для ссылки которая выглядит как primary button */
+a.cbr-btn_prim i{
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  .ie7-restore-right-whitespace();
+  line-height: 21px;
+  background-repeat: no-repeat;
+  margin-bottom: -5px;
+  margin-right: 5px;
+
+  background-position: 0 0;
+}
+
+
+[class^="icon-cbr-operations"],
+[class*=" icon-cbr-operations"]{
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  .ie7-restore-right-whitespace();
+  line-height: 21px;
+  background-repeat: no-repeat;
+  margin-bottom: -3px;
+  margin-right: 5px;
+
+  background-position: 0 -16px;
+}
+
+.aplanaLink[disabled] [class^="icon-cbr-operations"],
+.aplanaLink[disabled] [class*="icon-cbr-operations"] {
+  background-position: 0 -32px;
+}
+
+.aplanaLink.disabled [class^="icon-cbr-operations"],
+.aplanaLink.disabled [class*="icon-cbr-operations"] {
+  background-position: 0 -32px;
+}
+
+.aplanaLink[disabled="disabled"] [class^="icon-cbr-operations"],
+.aplanaLink[disabled="disabled"] [class*="icon-cbr-operations"] {
+  background-position: 0 -32px;
+}
+
+
+.aplanaLink[disabled] i.cbr-aplana-link {
+  background-position: 0 -32px;
+}
+
+.aplanaLink.disabled i.cbr-aplana-link {
+  background-position: 0 -32px;
+}
+
+.aplanaLink[disabled="disabled"] i.cbr-aplana-link {
+  background-position: 0 -32px;
+}
+
+a.cbr-btn_prim[disabled] i.cbr-aplana-link {
+  background-position: 0 -32px;
+}
+
+a.cbr-btn_prim.disabled i.cbr-aplana-link {
+  background-position: 0 -32px;
+}
+
+a.cbr-btn_prim[disabled="disabled"] i.cbr-aplana-link {
+  background-position: 0 -32px;
+}
+
+
+// для иконок у тега i
+i.cbr-aplana-link.btn_back, .icon-cbr-operations-back {
+  background-image: url("../img/sprites_orange/icon-back.png");
+}
+
+i.cbr-aplana-link.btn_forward, .icon-cbr-operations-forward {
+  background-image: url("../img/sprites_orange/icon-forward.png");
+}
+
+i.cbr-aplana-link.btn_save, .icon-cbr-operations-save_doc {
+  background-image: url("../img/sprites_orange/icon-save.png");
+}
+
+i.cbr-aplana-link.btn_edit, .icon-cbr-operations-edit {
+  background-image: url("../img/sprites_orange/icon-edit.png");
+}
+
+i.cbr-aplana-link.btn_cancel, .icon-cbr-operations-cancel_doc {
+  background-image: url("../img/sprites_orange/icon-cross.png");
+}
+
+i.cbr-aplana-link.btn_open, .icon-cbr-operations-open_doc {
+  background-image: url("../img/sprites_orange/icon-open.png");
+}
+
+i.cbr-aplana-link.btn_new, .icon-cbr-operations-new_doc {
+  background-image: url("../img/sprites_orange/icon-new.png");
+}
+
+i.cbr-aplana-link.btn_archive, .icon-cbr-operations-archive, .icon-cbr-operations-backup {
+  background-image: url("../img/sprites_orange/icon-archive.png");
+}
+
+i.cbr-aplana-link.btn_upload, .icon-cbr-operations-upload, .icon-cbr-operations-restore {
+  background-image: url("../img/sprites_orange/icon-upload.png");
+}
+
+i.cbr-aplana-link.btn_download, .icon-cbr-operations-download {
+  background-image: url("../img/sprites_orange/icon-download.png");
+}
+
+i.cbr-aplana-link.btn_add,  .icon-cbr-operations-new_doc{
+  background-image: url("../img/sprites_orange/icon-add.png");
+}
+
+i.cbr-aplana-link.btn_remove, .icon-cbr-operations-delete {
+  background-image: url("../img/sprites_orange/icon-remove.png");
+}
+
+i.cbr-aplana-link.btn_control, .icon-cbr-operations-control {
+  background-image: url("../img/sprites_orange/icon-control.png");
+}
+
+i.cbr-aplana-link.btn_user-incorrect, .icon-cbr-operations-user-incorrect {
+  background-image: url("../img/sprites_orange/icon-user-incorrect.png");
+}
+
+i.cbr-aplana-link.btn_user-appoint, .icon-cbr-operations-user-appoint {
+  background-image: url("../img/sprites_orange/icon-user-appoint.png");
+}
+
+i.cbr-aplana-link.btn_export, .icon-cbr-operations-export {
+  background-image: url("../img/sprites_orange/icon-export.png");
+}
+
+i.cbr-aplana-link.btn_approved, .icon-cbr-operations-approved {
+  background-image: url("../img/sprites_orange/icon-approved.png");
+}
+
+i.cbr-aplana-link.btn_refresh, .icon-cbr-operations-refresh {
+  background-image: url("../img/sprites_orange/icon-refresh.png");
+}
+
+i.cbr-aplana-link.btn_favorit, .icon-cbr-operations-favorit {
+  background-image: url("../img/sprites_orange/icon-favorit.png");
+}
+
+i.cbr-aplana-link.btn_generate, .icon-cbr-operations-generate {
+  background-image: url("../img/sprites_orange/icon-generate.png");
+}
+
+i.cbr-aplana-link.btn_sadd, .icon-cbr-operations-sadd {
+  background-image: url("../img/sprites_orange/icon-sadd.png");
+}
+
+i.cbr-aplana-link.btn_version, .icon-cbr-operations-version {
+  background-image: url("../img/sprites_orange/icon-version.png");
+}
+i.cbr-aplana-link.btn_copy, .icon-cbr-operations-copy{
+  background-image: url("../img/sprites_orange/icon-copy.png");
+}
+i.cbr-aplana-link.btn_search_on_server, .icon-cbr-operations-search_on_server{
+  background-image: url("../img/sprites_orange/icon-search_on_server.png");
+}
+i.cbr-aplana-link.btn_search_on_server, .icon-cbr-operations-items-plan-up{
+  background-image: url("../img/sprites_orange/icon-order-items-plan-up.png");
+}
+i.cbr-aplana-link.btn_search_on_server, .icon-cbr-operations-items-plan-down{
+  background-image: url("../img/sprites_orange/icon-order-items-plan-down.png");
+}
+i.cbr-aplana-link.btn_remove, .icon-cbr-operations-recover {
+  background-image: url("../img/sprites_orange/icon-recover.png");
+}
