@@ -507,6 +507,31 @@
                         localityList: [{id: 1, name: 'Простоквашино'}],
                         streetList: [{id: 1, name: 'Ленина'}, {id: 2, name: 'Красная'}]
                     };
+
+                    // Селект выбора квартала
+                    $scope.quarterSelect = {
+                        options: {
+                            minimumResultsForSearch: -1,
+                            id: function (item) {
+                                return item.value;
+                            },
+                            allowClear: false,
+                            formatSelection: function (quarter) {
+                                return quarter.value;
+                            },
+                            formatResult: function (quarter) {
+                                return quarter.value;
+                            },
+                            data: {
+                                results: [
+                                    {value: 1},
+                                    {value: 2},
+                                    {value: 3},
+                                    {value: 4}
+                                ]
+                            }
+                        }
+                    };
                 }
 
                 initDialog();

@@ -61,16 +61,19 @@
                     <div>
                         <label class="control-label">{{'title.citizenship' | translate}}</label>
                     </div>
-                    <div>
-                        <ui-select ng-model="entity.citizenship" required>
-                            <ui-select-match allow-clear="false">
-                                <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
-                            </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.citizenshipList track by $index">
-                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                            </ui-select-choices>
-                        </ui-select>
+                    <div style="width: 110px;" data-ui-select2="quarterSelect.options"
+                         data-ng-model="entity.citizenship">
                     </div>
+                    <!--<div>-->
+                        <!--<ui-select ng-model="entity.citizenship" required>-->
+                            <!--<ui-select-match allow-clear="false">-->
+                                <!--<span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>-->
+                            <!--</ui-select-match>-->
+                            <!--<ui-select-choices repeat="item in dialogDataStub.citizenshipList track by $index">-->
+                                <!--<span data-ng-bind-html="item.name | highlight: $select.search"></span>-->
+                            <!--</ui-select-choices>-->
+                        <!--</ui-select>-->
+                    <!--</div>-->
                 </div>
                 <div>
                     <div>

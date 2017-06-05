@@ -37,7 +37,8 @@
             'ui.bootstrap',
             'ui.select',
             'aplana.sbrfNdfl.directives',
-            'ngMessages'
+            'ngMessages',
+            'ui.select2'
         ])
         .config(['$stateProvider', '$urlRouterProvider', '$translateProvider',
             function ($stateProvider, $urlRouterProvider, $translateProvider) {
