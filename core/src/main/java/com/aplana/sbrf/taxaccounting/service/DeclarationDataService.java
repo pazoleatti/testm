@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
@@ -83,7 +82,7 @@ public interface DeclarationDataService {
      * @param stateLogger
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
-    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
+    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
 
     /**
      * Подготовить данные для спец. отчета

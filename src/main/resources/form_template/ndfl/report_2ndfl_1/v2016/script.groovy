@@ -316,6 +316,9 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
             ndflPersonsList = []
         }
     }
+    if (!checkMandatoryFields(ndflPersonsList)) {
+        return
+    }
     // Порядковый номер физического лица
     def nomSpr = (currentPageNumber - 1) * NUMBER_OF_PERSONS
     def nomSprCorr = 0
@@ -657,6 +660,32 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
         ScriptUtils.checkInterrupted();
         saveFileInfo(currDate, fileName)
     }
+}
+
+/**
+ * Проверяет заполнены ли обязательные поля у физическмх лиц
+ * @param ndflPerson
+ * @return true - заполнены обязательные поля, false - не заполнены обязательные поля
+ */
+boolean checkMandatoryFields(List<NdflPerson> ndflPersonList) {
+    boolean  toReturn = true
+    for (NdflPerson ndflPerson : ndflPersonList) {
+        List<String> mandatoryFields = new LinkedList<>();
+        if (ndflPerson.rowNum == null) mandatoryFields << "№пп"
+        if (ndflPerson.inp == null || ndflPerson.inp.isEmpty()) mandatoryFields << "Налогоплательщик.ИНП"
+        if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty()) mandatoryFields << "Налогоплательщик.Фамилия"
+        if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty()) mandatoryFields << "Налогоплательщик.Имя"
+        if (ndflPerson.birthDay == null) mandatoryFields << "Налогоплательщик.Дата рождения"
+        if (ndflPerson.citizenship == null || ndflPerson.citizenship.isEmpty()) mandatoryFields << "Гражданство (код страны)"
+        if (ndflPerson.idDocType == null || ndflPerson.idDocType.isEmpty()) mandatoryFields << "Документ удостоверяющий личность.Код"
+        if (ndflPerson.idDocNumber == null || ndflPerson.idDocNumber.isEmpty()) mandatoryFields << "Документ удостоверяющий личность.Номер"
+        if (ndflPerson.status == null || ndflPerson.status.isEmpty()) mandatoryFields << "Статус (Код)"
+        if (!mandatoryFields.isEmpty()) {
+            logger.error("Не заполнены обязательные поля: ${mandatoryFields.join(', ')}. ФИО: ${ndflPerson.lastName ?: ""} ${ndflPerson.firstName ?: ""} ${ndflPerson.middleName ?: ""}, ИНП: ${ndflPerson.inp}")
+            toReturn = false
+        }
+    }
+    return toReturn
 }
 
 // Сохранение информации о файле в комментариях
@@ -2009,11 +2038,14 @@ def createSpecificReport() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
     params['pNumSpravka'] = row.pNumSpravka
-    params['lastName'] = row.lastName
-    params['firstName'] = row.firstName
-    params['middleName'] = row.middleName
-    params['birthDay'] = Date.parse(DATE_FORMAT_DOTTED, row.birthDay)
-    params['idDocNumber'] = row.idDocNumber
+
+    def subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
+    subReportViewParams['Номер справки'] = row.pNumSpravka.toString()
+    subReportViewParams['Фамилия'] = row.lastName
+    subReportViewParams['Имя'] = row.firstName
+    subReportViewParams['Отчество'] = row.middleName
+    subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay.format(DATE_FORMAT_DOTTED) : ""
+    subReportViewParams['№ ДУЛ'] = row.idDocNumber
 
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)

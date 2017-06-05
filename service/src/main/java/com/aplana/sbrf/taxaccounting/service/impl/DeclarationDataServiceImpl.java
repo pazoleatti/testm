@@ -139,9 +139,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
     public static final String TAG_FILE = "Файл";
-	public static final String TAG_DOCUMENT = "Документ";
-	public static final String ATTR_FILE_ID = "ИдФайл";
-	public static final String ATTR_DOC_DATE = "ДатаДок";
+    public static final String TAG_DOCUMENT = "Документ";
+    public static final String ATTR_FILE_ID = "ИдФайл";
+    public static final String ATTR_DOC_DATE = "ДатаДок";
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
     public static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"%s%s для макета!";
@@ -211,16 +211,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         taxOrganKpp != null
                                 ? ", КПП: \"" + taxOrganKpp + "\""
                                 : "",
-						oktmo != null
-								? ", ОКТМО: \"" + oktmo + "\""
-								: "",
+                        oktmo != null
+                                ? ", ОКТМО: \"" + oktmo + "\""
+                                : "",
                         asunId != null
                                 ? ", Наименование АСНУ: \"" + asnuProvider.getRecordData(asunId).get("NAME").getStringValue() + "\""
                                 : "",
                         fileName != null
                                 ? ", Имя файла: \"" + fileName + "\""
                                 : "")
-                ) == null) {
+        ) == null) {
             //Если блокировка успешно установлена
             try {
                 /*
@@ -248,7 +248,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setDeclarationTemplateId(declarationTemplateId);
                 newDeclaration.setTaxOrganCode(taxOrganCode);
                 newDeclaration.setKpp(taxOrganKpp);
-				newDeclaration.setOktmo(oktmo);
+                newDeclaration.setOktmo(oktmo);
                 newDeclaration.setAsnuId(asunId);
                 newDeclaration.setFileName(fileName);
                 newDeclaration.setNote(note);
@@ -566,9 +566,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private InputStream getJasper(String jrxmlTemplate) {
-		if (jrxmlTemplate == null) {
-			throw new ServiceException("Шаблон отчета не найден");
-		}
+        if (jrxmlTemplate == null) {
+            throw new ServiceException("Шаблон отчета не найден");
+        }
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(jrxmlTemplate.getBytes(ENCODING));
             return compileReport(inputStream);
@@ -630,14 +630,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void setPdfDataBlobs(Logger logger,
-                                     DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+                                DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         LOG.info(String.format("Получение данных налоговой формы %s", declarationData.getId()));
         stateLogger.updateState("Получение данных налоговой формы");
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC);
         if (xmlUuid != null) {
             File pdfFile = null;
             JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
-            try {                
+            try {
                 LOG.info(String.format("Заполнение Jasper-макета налоговой формы %s", declarationData.getId()));
                 stateLogger.updateState("Заполнение Jasper-макета");
                 JasperPrint jasperPrint = createJasperReport(declarationData, jrSwapFile, userInfo);
@@ -678,7 +678,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger) {
+    public String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger) {
         Map<String, Object> params = new HashMap<String, Object>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
         File reportFile = null;
@@ -696,6 +696,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 scriptSpecificReportHolder.setFileName(ddReportType.getSubreport().getAlias());
                 scriptSpecificReportHolder.setSubreportParamValues(subreportParamValues);
                 scriptSpecificReportHolder.setSelectedRecord(selectedRecord);
+                scriptSpecificReportHolder.setViewParamValues(viewParamValues);
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
                 stateLogger.updateState("Формирование отчета");
                 if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
@@ -805,7 +806,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     // расчет декларации
     private boolean setDeclarationBlobs(Logger logger,
-                                     DeclarationData declarationData, Date docDate, TAUserInfo userInfo, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+                                        DeclarationData declarationData, Date docDate, TAUserInfo userInfo, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         if (exchangeParams == null) {
             exchangeParams = new HashMap<String, Object>();
         }
@@ -930,7 +931,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                     FormDataEvent operation, File xmlFile, String fileName, String xsdBlobDataId, LockStateLogger stateLogger) {
+                                    FormDataEvent operation, File xmlFile, String fileName, String xsdBlobDataId, LockStateLogger stateLogger) {
         if (xsdBlobDataId == null && declarationData != null) {
             LOG.info(String.format("Получение данных налоговой формы %s", declarationData.getId()));
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
@@ -1669,9 +1670,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> parameters, Connection connection) {
-		if (xmlData != null) {
-			parameters.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xmlData);
-		}
+        if (xmlData != null) {
+            parameters.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xmlData);
+        }
         ByteArrayInputStream inputStream = compileReport(jrxmlTemplate);
 
         try {
@@ -1682,7 +1683,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED, noRollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();

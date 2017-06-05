@@ -108,8 +108,6 @@ import java.text.SimpleDateFormat
             this.showTiming = true
         }
         SIMILARITY_THRESHOLD = limitIdent? (Double.valueOf(limitIdent) * 1000).intValue() : 0
-        println this.showTiming
-        println SIMILARITY_THRESHOLD
     }
 
     def logForDebug(String message, Object... args) {
@@ -1495,8 +1493,16 @@ import java.text.SimpleDateFormat
     def createSpecificReportPersonDb() {
         def row = scriptSpecificReportHolder.getSelectedRecord()
         def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
+
+        def subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
+        subReportViewParams['Фамилия'] = row.lastName
+        subReportViewParams['Имя'] = row.firstName
+        subReportViewParams['Отчество'] = row.middleName
+        subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay?.format(DATE_FORMAT) : ""
+        subReportViewParams['№ ДУЛ'] = row.idDocNumber
         if (ndflPerson != null) {
             def params = [NDFL_PERSON_ID : ndflPerson.id];
+
             def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
             exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
             scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
@@ -1935,6 +1941,7 @@ import java.text.SimpleDateFormat
                 if (format.format(date) != xmlNode.text()) {
                     throw new ServiceException("Значения атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не существует.")
                 }
+                return date
             } else {
                 return null
             }
