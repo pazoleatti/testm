@@ -141,6 +141,9 @@ final String DATE_FORMAT_FLATTEN = "yyyyMMdd"
 final String DATE_FORMAT_DOTTED = "dd.MM.yyyy"
 
 @Field
+final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
+
+@Field
 final int REF_BOOK_NDFL_ID = 950
 
 @Field
@@ -2056,8 +2059,10 @@ def createSpecificReport() {
         it.flush()
     });
 
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    StringBuilder fileName = new StringBuilder(declarationTemplate.name).append("_").append(declarationData.id).append("_").append(row.lastName ?: "").append(" ").append(row.firstName ?: "").append(" ").append(row.middleName ?: "").append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
     declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-    scriptSpecificReportHolder.setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+    scriptSpecificReportHolder.setFileName(fileName.toString())
 }
 
 /**
@@ -2072,8 +2077,9 @@ def createXlsxReport() {
 
     JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id));
 
+    StringBuilder fileName = new StringBuilder("Реестр_справок_").append(declarationData.id).append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
     exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
-    scriptSpecificReportHolder.setFileName("report.xlsx")
+    scriptSpecificReportHolder.setFileName(fileName.toString())
 }
 
 @TypeChecked
@@ -2164,8 +2170,8 @@ def fillPrimaryRnuWithErrors() {
     fillPrimaryRnuNDFLWithErrorsTable(workbook)
     workbook.write(writer)
     writer.close()
-    scriptSpecificReportHolder
-            .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+    StringBuilder fileName = new StringBuilder("Первичные_РНУ_с_ошибками_").append(declarationData.id).append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
+    scriptSpecificReportHolder.setFileName(fileName.toString())
 }
 
 /**
