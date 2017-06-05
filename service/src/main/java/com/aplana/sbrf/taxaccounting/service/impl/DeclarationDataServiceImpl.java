@@ -1802,4 +1802,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public boolean existDeclarationData(long declarationDataId) {
         return declarationDataDao.existDeclarationData(declarationDataId);
     }
+
+    @Override
+    public void preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId) {
+        DeclarationData declarationDataTemp = new DeclarationData();
+        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
+        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+
+        declarationDataScriptingService.executeScript(userInfo,
+                declarationDataTemp, FormDataEvent.PRE_CREATE_REPORTS, logger, null);
+        // Проверяем ошибки
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Найдены ошибки при выполнении выгрузки отчетности",
+                    logEntryService.save(logger.getEntries()));
+        }
+    }
 }

@@ -22,13 +22,15 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
+import com.aplana.sbrf.taxaccounting.model.log.Logger
+import com.aplana.sbrf.taxaccounting.service.script.*
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+
+import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверки
@@ -56,6 +58,9 @@ switch (formDataEvent) {
         println "!CREATE_FORMS!"
         createForm()
         break
+    case FormDataEvent.PRE_CREATE_REPORTS:
+        preCreateReports()
+        break
     case FormDataEvent.CREATE_REPORTS:
         println "!CREATE_REPORTS!"
         createReports()
@@ -66,6 +71,14 @@ switch (formDataEvent) {
 final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
 @Field
 final DepartmentService departmentService = getProperty("departmentService")
+@Field
+final DeclarationService declarationService = getProperty("declarationService")
+@Field
+final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
+@Field
+final DeclarationData declarationData = getProperty("declarationData")
+@Field
+final Logger logger = getProperty("logger")
 
 def getProperty(String name) {
     try {
@@ -974,13 +987,12 @@ def departmentParamTableList = null;
 @Field
 final int REF_BOOK_DOC_STATE = 929
 
-def createForm() {
+List<PairKppOktmo> getPairKppOktmoList() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def pairKppOktmoList = []
 
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
-    Department department = departmentService.get(departmentReportPeriod.departmentId)
     if (departmentReportPeriod.correctionDate != null) {
         def declarations = []
 
@@ -994,7 +1006,11 @@ def createForm() {
         while (it.hasNext()) {
             DepartmentReportPeriod depReportPeriod = it.next();
             if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
-                it.remove();
+                it.remove()
+            }
+            if (departmentReportPeriod.correctionDate != null && depReportPeriod.correctionDate != null &&
+                    depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
+                it.remove()
             }
         }
         departmentReportPeriodList.sort(true, new Comparator<DepartmentReportPeriod>() {
@@ -1061,10 +1077,18 @@ def createForm() {
             }
         }
     }
+    return pairKppOktmoList
+}
+
+Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    def pairKppOktmoList = getPairKppOktmoList()
+    def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    def declarationTypeId = currDeclarationTemplate.type.id
     // список форм рну-ндфл для отчетного периода всех ТБ
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
     // Список физлиц для каждой пары КПП и ОКТМО
-    def ndflPersonsGroupedByKppOktmo = [:]
+    Map<PairKppOktmo, List<NdflPerson>> ndflPersonsGroupedByKppOktmo = [:]
 
     if (!allDeclarationData.isEmpty()) {
         pairKppOktmoList.each { pair ->
@@ -1075,6 +1099,15 @@ def createForm() {
             }
         }
     }
+    return ndflPersonsGroupedByKppOktmo
+}
+
+def createForm() {
+    def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    def declarationTypeId = currDeclarationTemplate.type.id
+    // Список физлиц для каждой пары КПП и ОКТМО
+    def ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
+
     declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
         declarationService.delete(it.id, userInfo)
     }
@@ -1154,6 +1187,9 @@ def getPrevDepartmentReportPeriod(departmentReportPeriod) {
 }
 
 def createReports() {
+    if (!preCreateReports()) {
+        return
+    }
     ScriptUtils.checkInterrupted()
     ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
     scriptParams.put("fileName", "reports.zip")
@@ -1163,7 +1199,7 @@ def createReports() {
         Department department = departmentService.get(departmentReportPeriod.departmentId);
         String strCorrPeriod = "";
         if (departmentReportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
+            strCorrPeriod = " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
         }
         String path = String.format("Отчетность %s, %s, %s, %s%s",
                 declarationTemplate.getName(),
@@ -1185,6 +1221,44 @@ def createReports() {
     } finally {
         IOUtils.closeQuietly(zos);
     }
+}
+
+@TypeChecked
+boolean preCreateReports() {
+    ScriptUtils.checkInterrupted()
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
+    Department department = departmentService.get(departmentReportPeriod.departmentId);
+    String strCorrPeriod = "";
+    if (departmentReportPeriod.getCorrectionDate() != null) {
+        strCorrPeriod = " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+    }
+    def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
+    def declarationList = declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId)
+    if (declarationList.isEmpty()) {
+        logger.error("Отсутствуют отчетность %s для %s, %s. Сформируйте отчетность и повторите операцию",
+                declarationTemplate.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()+ ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                department.getName())
+        return false
+    }
+
+    Set<PairKppOktmo> pairKppOktmoList = getNdflPersonsGroupedByKppOktmo().keySet()
+
+    declarationList.each {
+        pairKppOktmoList.remove(new PairKppOktmo(it.kpp, it.oktmo, it.taxOrganCode))
+    }
+
+    if (!pairKppOktmoList.isEmpty()) {
+        List<String> kppOktmo = []
+        pairKppOktmoList.each {
+            kppOktmo.add(""+it.kpp+"/"+it.oktmo)
+        }
+        logger.error("Отсутствуют отчетные формы для следующих КПП+ОКТМО: %s. Сформируйте отчетность и повторите операцию",
+                com.aplana.sbrf.taxaccounting.model.util.StringUtils.join(kppOktmo.toArray(), ", ", null))
+        return false
+    }
+    return true
 }
 
 /*********************************ПОЛУЧИТЬ ИСТОЧНИКИ*******************************************************************/
