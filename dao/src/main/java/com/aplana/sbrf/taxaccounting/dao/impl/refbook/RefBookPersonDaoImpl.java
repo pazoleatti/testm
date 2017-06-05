@@ -44,6 +44,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, primaryRnuRowMapper), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
+        params.addValue("p_asnu", asnuId);
         Map<String, Object> returnedResults = call.execute(params);
         return (List<NaturalPerson>) returnedResults.get("ref_cursor");
     }
@@ -54,6 +55,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
+        params.addValue("p_asnu", asnuId);
         call.execute(params);
         return naturalPersonHandler.getResult();
     }
