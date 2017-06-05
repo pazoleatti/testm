@@ -115,7 +115,7 @@
         </div>
     </div>
     <!--Вкладки-->
-    <uib-tabset active="activeForm">
+    <uib-tabset active="activeForm" class="form100" style="height:100%;">
         <uib-tab index="0" heading="1. Реквизиты" select="selectTab('requisites')">
             <div data-ng-controller="ndflDetailsFormsCtrl">
                 <!-- Панель фильтрации -->
@@ -285,9 +285,13 @@
                 </div>
                 <!-- Таблица -->
                 <div class="tab-content-paddings" style="float: left;">
-                    <div data-aplana-grid data-grid-options="requisitesGridOptions"
+                    <div data-aplana-grid
+                         data-grid-fill-space-container-selector=".button_panel"
+                         data-grid-fill-space-container-selector-top="#ndflDetails"
+                         data-grid-options="requisitesGridOptions"
                          data-grid-ctrl="ourGrid2"
-                         data-init-grid="initOurGrid(ctrl)" id="requisitesTable"
+                         data-init-grid="initOurGrid(ctrl)"
+                         id="requisitesTable"
                          data-grid-enable-adjust-width-by-columns="true"></div>
                 </div>
                 <!--<div id="ndfl-details-content" class="content-with-table" style="float: left; width: 100%">-->
