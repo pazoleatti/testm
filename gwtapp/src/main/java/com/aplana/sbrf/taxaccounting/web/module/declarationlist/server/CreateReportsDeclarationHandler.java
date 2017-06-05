@@ -71,6 +71,8 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriods.get(0);
 
+        declarationDataService.preCreateReports(logger, userInfo, departmentReportPeriod, action.getDeclarationTypeId());
+
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("declarationTypeId", action.getDeclarationTypeId());
         params.put("departmentReportPeriodId", departmentReportPeriod.getId());

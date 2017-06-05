@@ -410,4 +410,11 @@ public interface DeclarationDataService {
 	 * @return
 	 */
 	boolean existDeclarationData(long declarationDataId);
+
+	/**
+	 * Проверки перед созданием отчетности для выгрузки
+	 * @param departmentReportPeriod - отчетный период
+	 * @param declarationTypeId идентификатор типа декларации
+	 */
+	void preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId);
 }

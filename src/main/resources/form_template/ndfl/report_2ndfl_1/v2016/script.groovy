@@ -29,6 +29,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.PagingParams
+import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
@@ -89,7 +90,11 @@ final DepartmentService departmentService = getProperty("departmentService")
 @Field
 final DeclarationService declarationService = getProperty("declarationService")
 @Field
+final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
+@Field
 final DeclarationData declarationData = getProperty("declarationData")
+@Field
+final Logger logger = getProperty("logger")
 
 def getProperty(String name) {
     try {
@@ -1373,12 +1378,58 @@ def getDeductionMark(def id) {
 final int RNU_NDFL_DECLARATION_TYPE = 101
 
 @Field
-def departmentParamTableList = null;
+def departmentParamTableList = null
 
 @Field
-def departmentParamTableListCache = [:];
+def departmentParamTableListCache = [:]
 
 def createForm() {
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+    def declarationTypeId = currDeclarationTemplate.type.id
+    // Мапа где значение физлица для каждой пары КПП и ОКТМО
+    def ndflPersonsIdGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
+
+    // Удаление ранее созданных отчетных форм
+    declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
+        ScriptUtils.checkInterrupted();
+        declarationService.delete(it.id, userInfo)
+    }
+    // Создание ОНФ для каждой пары КПП и ОКТМО
+    ndflPersonsIdGroupedByKppOktmo.each { npGroup ->
+        ScriptUtils.checkInterrupted();
+        def oktmo = npGroup.key.oktmo
+        def kpp = npGroup.key.kpp
+        def taxOrganCode = npGroup.key.taxOrganCode
+
+        def npGroupValue = npGroup.value.collate(NUMBER_OF_PERSONS)
+        def partTotal = npGroupValue.size()
+        npGroupValue.eachWithIndex { part, index ->
+            ScriptUtils.checkInterrupted();
+            def npGropSourcesIdList = part.id
+            if (npGropSourcesIdList == null || npGropSourcesIdList.isEmpty()) {
+                if (departmentReportPeriod.correctionDate != null) {
+                    logger.info("Для КПП $kpp - ОКТМО $oktmo отсутствуют данные физических лиц, содержащих ошибки от ФНС в справке 2НДФЛ. Создание формы 2НДФЛ невозможно.")
+                }
+                return;
+            }
+            Map<String, Object> params
+            Long ddId
+            def indexFrom1 = ++index
+            def note = "Часть ${indexFrom1} из ${partTotal}"
+            params = new HashMap<String, Object>()
+            ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
+                    departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, note.toString())
+            //appendNdflPersonsToDeclarationData(ddId, part)
+            params.put(PART_NUMBER, indexFrom1)
+            params.put(PART_TOTAL, partTotal)
+            params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
+            formMap.put(ddId, params)
+        }
+    }
+}
+
+Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def pairKppOktmoList = []
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
@@ -1509,46 +1560,8 @@ def createForm() {
             }
         }
     }
-
-    // Удаление ранее созданных отчетных форм
-    declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
-        ScriptUtils.checkInterrupted();
-        declarationService.delete(it.id, userInfo)
-    }
-    // Создание ОНФ для каждой пары КПП и ОКТМО
-    ndflPersonsIdGroupedByKppOktmo.each { npGroup ->
-        ScriptUtils.checkInterrupted();
-        def oktmo = npGroup.key.oktmo
-        def kpp = npGroup.key.kpp
-        def taxOrganCode = npGroup.key.taxOrganCode
-
-        def npGroupValue = npGroup.value.collate(NUMBER_OF_PERSONS)
-        def partTotal = npGroupValue.size()
-        npGroupValue.eachWithIndex { part, index ->
-            ScriptUtils.checkInterrupted();
-            def npGropSourcesIdList = part.id
-            if (npGropSourcesIdList == null || npGropSourcesIdList.isEmpty()) {
-                if (departmentReportPeriod.correctionDate != null) {
-                    logger.info("Для КПП $kpp - ОКТМО $oktmo отсутствуют данные физических лиц, содержащих ошибки от ФНС в справке 2НДФЛ. Создание формы 2НДФЛ невозможно.")
-                }
-                return;
-            }
-            Map<String, Object> params
-            Long ddId
-            def indexFrom1 = ++index
-            def note = "Часть ${indexFrom1} из ${partTotal}"
-            params = new HashMap<String, Object>()
-            ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                    departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, note.toString())
-            //appendNdflPersonsToDeclarationData(ddId, part)
-            params.put(PART_NUMBER, indexFrom1)
-            params.put(PART_TOTAL, partTotal)
-            params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
-            formMap.put(ddId, params)
-        }
-    }
+    return ndflPersonsIdGroupedByKppOktmo
 }
-
 /**
  * Добавить ФЛ к паре КПП и ОКТМО. Если какая-то пара КПП+ОКТМО указана в справочнике больше 1 раза,
  * прозводится анализ значения "Код НО конечный", указанные для этих повтояющихся пар
@@ -1645,6 +1658,47 @@ def createReports() {
         IOUtils.closeQuietly(zos);
     }
 }
+
+
+@TypeChecked
+boolean preCreateReports() {
+    ScriptUtils.checkInterrupted()
+    DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
+    Department department = departmentService.get(departmentReportPeriod.departmentId);
+    String strCorrPeriod = "";
+    if (departmentReportPeriod.getCorrectionDate() != null) {
+        strCorrPeriod = " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+    }
+    def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
+    def declarationList = declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId)
+    if (declarationList.isEmpty()) {
+        logger.error("Отсутствуют отчетность %s для %s, %s. Сформируйте отчетность и повторите операцию",
+                declarationTemplate.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()+ ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                department.getName())
+        return false
+    }
+
+    Set<PairKppOktmo> pairKppOktmoList = getNdflPersonsGroupedByKppOktmo().keySet()
+
+    declarationList.each {
+        pairKppOktmoList.remove(new PairKppOktmo(it.kpp, it.oktmo, it.taxOrganCode))
+    }
+
+    if (!pairKppOktmoList.isEmpty()) {
+        List<String> kppOktmo = []
+        pairKppOktmoList.each {
+            kppOktmo.add(""+it.kpp+"/"+it.oktmo)
+        }
+        logger.error("Отсутствуют отчетные формы для следующих КПП+ОКТМО: %s. Сформируйте отчетность и повторите операцию",
+                com.aplana.sbrf.taxaccounting.model.util.StringUtils.join(kppOktmo.toArray(), ", ", null))
+        return false
+    }
+    return true
+}
+
+
 /*********************************ПОЛУЧИТЬ ИСТОЧНИКИ*******************************************************************/
 @Field
 def sourceReportPeriod = null
