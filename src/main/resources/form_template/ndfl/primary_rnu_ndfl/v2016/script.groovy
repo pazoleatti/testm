@@ -2690,11 +2690,6 @@ class NdflPersonFL {
         println "Получен справочник '$R_INCOME_TYPE' (${incomeTypeMap.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_TYPE, incomeTypeMap.size())
 
-        // Ставки
-        def rateList = getRefRate()
-        println "Получен справочник '$R_RATE' (${rateList.size()} записей).";
-        logForDebug(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
-
         // Коды видов вычетов
         def deductionTypeList = getRefDeductionType()
         println "Получен справочник '$R_TYPE_CODE' (${deductionTypeList.size()} записей).";
@@ -3147,14 +3142,6 @@ class NdflPersonFL {
                         }
                     }
                 }
-            }
-
-            // Спр7 НДФЛ.Процентная ставка (Необязательное поле)
-            if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate.toString())) {
-                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                        "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
-                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ставки налога справочнику", fioAndInp, pathError,
-                        "'НДФЛ.Процентная ставка (Графа 14)' не соответствует справочнику '$R_RATE'")
             }
         }
         println "Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)";
