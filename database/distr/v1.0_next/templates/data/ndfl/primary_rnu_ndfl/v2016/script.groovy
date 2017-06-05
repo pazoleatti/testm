@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
+import com.aplana.sbrf.taxaccounting.dao.identification.*
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
@@ -108,8 +109,6 @@ import java.text.SimpleDateFormat
             this.showTiming = true
         }
         SIMILARITY_THRESHOLD = limitIdent? (Double.valueOf(limitIdent) * 1000).intValue() : 0
-        println this.showTiming
-        println SIMILARITY_THRESHOLD
     }
 
     def logForDebug(String message, Object... args) {
@@ -775,8 +774,7 @@ import java.text.SimpleDateFormat
 
         List personDocumentList = naturalPerson.getPersonDocumentList();
 
-        if (!personDocumentList && !personDocumentList.isEmpty()) {
-
+        if (personDocumentList != null && !personDocumentList.isEmpty()) {
             //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
             int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
 
@@ -1495,8 +1493,16 @@ import java.text.SimpleDateFormat
     def createSpecificReportPersonDb() {
         def row = scriptSpecificReportHolder.getSelectedRecord()
         def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
+
+        def subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
+        subReportViewParams['Фамилия'] = row.lastName
+        subReportViewParams['Имя'] = row.firstName
+        subReportViewParams['Отчество'] = row.middleName
+        subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay?.format(DATE_FORMAT) : ""
+        subReportViewParams['№ ДУЛ'] = row.idDocNumber
         if (ndflPerson != null) {
             def params = [NDFL_PERSON_ID : ndflPerson.id];
+
             def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
             exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
             scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
@@ -1935,6 +1941,7 @@ import java.text.SimpleDateFormat
                 if (format.format(date) != xmlNode.text()) {
                     throw new ServiceException("Значения атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не существует.")
                 }
+                return date
             } else {
                 return null
             }
@@ -2683,11 +2690,6 @@ class NdflPersonFL {
         println "Получен справочник '$R_INCOME_TYPE' (${incomeTypeMap.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_TYPE, incomeTypeMap.size())
 
-        // Ставки
-        def rateList = getRefRate()
-        println "Получен справочник '$R_RATE' (${rateList.size()} записей).";
-        logForDebug(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
-
         // Коды видов вычетов
         def deductionTypeList = getRefDeductionType()
         println "Получен справочник '$R_TYPE_CODE' (${deductionTypeList.size()} записей).";
@@ -3140,14 +3142,6 @@ class NdflPersonFL {
                         }
                     }
                 }
-            }
-
-            // Спр7 НДФЛ.Процентная ставка (Необязательное поле)
-            if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate.toString())) {
-                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                        "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
-                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ставки налога справочнику", fioAndInp, pathError,
-                        "'НДФЛ.Процентная ставка (Графа 14)' не соответствует справочнику '$R_RATE'")
             }
         }
         println "Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)";
