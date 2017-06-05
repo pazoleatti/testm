@@ -187,6 +187,8 @@ public class PersonView extends PopupViewWithUiHandlers<PersonUiHandlers> implem
        add("MIDDLE_NAME");
        add("INN");
        add("SNILS");
+       add("INN_FOREIGN");
+       add("DOC_NUMBER");
        add("OLD_ID");
     }};
 

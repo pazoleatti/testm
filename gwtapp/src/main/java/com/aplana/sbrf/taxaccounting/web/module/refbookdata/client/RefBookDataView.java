@@ -49,8 +49,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     TextBox filterText, filterLastName, filterFirstName;
     @UiField
-    LinkButton sendQuery;
-    @UiField
     DropdownButton printAnchor;
     @UiField
     LinkButton upload;
@@ -223,11 +221,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         getUiHandlers().duplicateClicked();
     }
 
-    @UiHandler("sendQuery")
-    void sendQueryButtonClicked(ClickEvent event) {
-        getUiHandlers().sendQuery();
-    }
-
 	@UiHandler("deleteRow")
 	void deleteRowButtonClicked(ClickEvent event) {
         getUiHandlers().onDeleteRowClicked();
@@ -307,7 +300,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @Override
     public void updateSendQuery(boolean isAvailable) {
-        sendQuery.setVisible(isAvailable);
         edit.setVisible(!isAvailable && edit.isVisible());
     }
 

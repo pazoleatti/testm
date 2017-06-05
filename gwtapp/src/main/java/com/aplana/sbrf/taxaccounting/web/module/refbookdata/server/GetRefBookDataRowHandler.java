@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRo
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -33,10 +34,6 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
     private RefBookFactory refBookFactory;
     @Autowired
     private RefBookHelper refBookHelper;
-    @Autowired
-    private SecurityService securityService;
-    @Autowired
-    private DepartmentService departmentService;
 
     public GetRefBookDataRowHandler() {
         super(GetRefBookTableDataAction.class);
@@ -128,7 +125,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 action.isAscSorting());
         List<RefBookDataRow> rows = new LinkedList<RefBookDataRow>();
 
-        dereference(refBook, refBookPage, rows, refBookHelper, columnMap);
+        dereference(refBook, action.isPerson(), refBookFactory, refBookPage, rows, refBookHelper, columnMap);
 
         result.setTotalCount(refBookPage.getTotalCount());
         result.setDataRows(rows);
@@ -142,10 +139,25 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
      * @param refBookPage исходные данные для разыменовывания
      * @param rows        пустой список, в который должен быть записан результат
      */
-    public static void dereference(RefBook refBook, List<Map<String, RefBookValue>> refBookPage, List<RefBookDataRow> rows, RefBookHelper refBookHelper, Map<RefBookAttribute, Column> columnMap) {
+    public static void dereference(RefBook refBook, boolean isPerson, RefBookFactory refBookFactory, List<Map<String, RefBookValue>> refBookPage, List<RefBookDataRow> rows, RefBookHelper refBookHelper, Map<RefBookAttribute, Column> columnMap) {
         if (refBookPage.isEmpty()) {
             return;
         }
+        if (isPerson) {
+            refBook = SerializationUtils.clone(refBook);
+            RefBook idDocRefBook = refBookFactory.get(RefBook.Id.ID_DOC.getId());
+            refBook.getAttributes().add(idDocRefBook.getAttribute("DOC_NUMBER"));
+
+            RefBookDataProvider idDocProvider = refBookFactory.getDataProvider(RefBook.Id.ID_DOC.getId());
+            for(Map<String, RefBookValue> row: refBookPage) {
+                Long personId = row.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+                List<Map<String, RefBookValue>> idDocRecords = idDocProvider.getRecords(null, null, "INC_REP = 1 AND PERSON_ID = " + personId, null);
+                if (idDocRecords.size() > 0) {
+                    row.put("DOC_NUMBER", idDocRecords.get(0).get("DOC_NUMBER"));
+                }
+            }
+        }
+
         List<RefBookAttribute> attributes = refBook.getAttributes();
         // разыменовывание ссылок
         Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage, false);
