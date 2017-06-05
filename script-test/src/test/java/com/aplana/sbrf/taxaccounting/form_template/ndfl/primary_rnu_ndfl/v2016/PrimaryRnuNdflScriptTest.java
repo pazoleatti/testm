@@ -100,6 +100,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
 
     @Test
+    @Ignore
     public void importDataTest() throws IOException {
         RefBookDataProvider refBookDataProviderIncomeCode = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.INCOME_CODE.getId())).thenReturn(refBookDataProviderIncomeCode);

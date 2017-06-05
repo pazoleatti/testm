@@ -2038,11 +2038,14 @@ def createSpecificReport() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
     params['pNumSpravka'] = row.pNumSpravka
-    params['lastName'] = row.lastName
-    params['firstName'] = row.firstName
-    params['middleName'] = row.middleName
-    params['birthDay'] = Date.parse(DATE_FORMAT_DOTTED, row.birthDay)
-    params['idDocNumber'] = row.idDocNumber
+
+    def subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
+    subReportViewParams['Номер справки'] = row.pNumSpravka.toString()
+    subReportViewParams['Фамилия'] = row.lastName
+    subReportViewParams['Имя'] = row.firstName
+    subReportViewParams['Отчество'] = row.middleName
+    subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay.format(DATE_FORMAT_DOTTED) : ""
+    subReportViewParams['№ ДУЛ'] = row.idDocNumber
 
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)

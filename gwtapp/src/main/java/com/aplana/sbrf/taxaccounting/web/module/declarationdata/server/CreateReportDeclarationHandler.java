@@ -91,6 +91,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                         params.put("alias", ddReportType.getReportAlias());
                         if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
                             params.put("subreportParamValues", action.getSubreportParamValues());
+                            params.put("viewParamValues", new LinkedHashMap<String, String>());
                             if (action.getSelectedRow() != null) {
                                 params.put("selectedRecord", action.getSelectedRow());
                             }

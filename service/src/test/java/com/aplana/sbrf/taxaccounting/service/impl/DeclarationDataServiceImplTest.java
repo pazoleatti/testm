@@ -31,7 +31,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
@@ -453,7 +452,7 @@ public class DeclarationDataServiceImplTest {
         });
         ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
 
-        declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, null, userInfo, new LockStateLogger() {
+        declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, null,null, userInfo, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 //Nothing
