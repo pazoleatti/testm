@@ -100,7 +100,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
 
     @Test
-    @Ignore
     public void importDataTest() throws IOException {
         RefBookDataProvider refBookDataProviderIncomeCode = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.INCOME_CODE.getId())).thenReturn(refBookDataProviderIncomeCode);
@@ -134,7 +133,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             }
         });
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(importedData.size(), 2);
+        Assert.assertEquals(2, importedData.size());
         checkLogger();
     }
 
