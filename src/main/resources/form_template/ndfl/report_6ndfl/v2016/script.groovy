@@ -712,13 +712,9 @@ def checkXml() {
 
     // Код отчетного периода
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
-
-    if (["34", "90"].contains(periodCode)) {
-        def ndfl2DeclarationDataIds = getNdfl2DeclarationDataId(reportPeriod.taxPeriod.year)
-        if (ndfl2DeclarationDataIds.size() > 0) {
-            checkBetweenDocumentXml(ndfl2DeclarationDataIds)
-        }
+    def ndfl2DeclarationDataIds = getNdfl2DeclarationDataId()
+    if (ndfl2DeclarationDataIds.size() > 0) {
+        checkBetweenDocumentXml(ndfl2DeclarationDataIds)
     }
 }
 
@@ -727,20 +723,22 @@ def checkXml() {
  * @param taxPeriodYear - отчетный год
  *
  */
-def getNdfl2DeclarationDataId(def taxPeriodYear) {
+def getNdfl2DeclarationDataId() {
     def result = []
     def declarationDataList = declarationService.find(DECLARATION_TYPE_NDFL2_1_ID, declarationData.departmentReportPeriodId)
     for (DeclarationData dd : declarationDataList) {
         ScriptUtils.checkInterrupted()
-        def reportPeriod = reportPeriodService.get(dd.reportPeriodId)
-        def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
-        if (reportPeriod.taxPeriod.year == taxPeriodYear
-                && periodCode == "34"
+        if (dd.departmentReportPeriodId == declarationData.departmentReportPeriodId
                 && dd.kpp == declarationData.kpp
                 && dd.oktmo == declarationData.oktmo
                 && dd.taxOrganCode == declarationData.taxOrganCode) {
             result.add(dd.id)
         }
+    }
+    if (result.isEmpty()) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        Department department = departmentService.get(departmentReportPeriod.departmentId)
+        logger.error("Отсутствует форма 2-НДФЛ (1) для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED): ""}")
     }
     return result
 }
