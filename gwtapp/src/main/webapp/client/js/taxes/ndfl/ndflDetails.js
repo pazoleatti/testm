@@ -353,14 +353,68 @@
                 };
                 //Поиск по фильтру
                 $scope.searchClick = function () {
-                    $scope.searchFilter.isClear = true;
+                    $scope.searchFilter.fillFilterParams();
+                    if ($scope.searchFilter.ajaxFilter.length !== 0){
+                        $scope.searchFilter.isClear = true;
+                    }
                     fetchData();
                 };
-                //Очистка фильтра
-                $scope.clearFilterClick = function () {
-                    $scope.searchFilter.params = {};
-                    $scope.searchFilter.isClear = false;
-                    fetchData();
+
+                $scope.searchFilter.fillFilterParams = function () {
+                    if ($scope.searchFilter.params.inp) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "inp",
+                            value: $scope.searchFilter.params.inp
+                        });
+                    }
+                    if ($scope.searchFilter.params.snils) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "snils",
+                            value: $scope.searchFilter.params.snils
+                        });
+                    }
+                    if ($scope.searchFilter.params.inn) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "inn",
+                            value: $scope.searchFilter.params.inn
+                        });
+                    }
+                    if ($scope.searchFilter.params.numberDul) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "numberDul",
+                            value: $scope.searchFilter.params.numberDul
+                        });
+                    }
+                    if ($scope.searchFilter.params.surname) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "surname",
+                            value: $scope.searchFilter.params.surname
+                        });
+                    }
+                    if ($scope.searchFilter.params.name) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "name",
+                            value: $scope.searchFilter.params.name
+                        });
+                    }
+                    if ($scope.searchFilter.params.patronymic) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "patronymic",
+                            value: $scope.searchFilter.params.patronymic
+                        });
+                    }
+                    if ($scope.searchFilter.params.dateFrom) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "dateFrom",
+                            value: $scope.searchFilter.params.dateFrom
+                        });
+                    }
+                    if ($scope.searchFilter.params.dateTo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "dateTo",
+                            value: $scope.searchFilter.params.dateTo
+                        });
+                    }
                 };
 
 
