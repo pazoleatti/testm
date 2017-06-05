@@ -1224,6 +1224,7 @@ def createReports() {
 @TypeChecked
 boolean preCreateReports() {
     ScriptUtils.checkInterrupted()
+    Map<String, Object> paramMap = (Map<String, Object>)getProperty("paramMap")
     DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
     DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
     Department department = departmentService.get(departmentReportPeriod.departmentId);
@@ -1234,10 +1235,14 @@ boolean preCreateReports() {
     def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
     def declarationList = declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId)
     if (declarationList.isEmpty()) {
-        logger.error("Отсутствуют отчетность %s для %s, %s. Сформируйте отчетность и повторите операцию",
+        String msg = String.format("Отсутствуют отчетность \"%s\" для \"%s\", \"%s\". Сформируйте отчетность и повторите операцию",
                 declarationTemplate.getName(),
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()+ ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
                 department.getName())
+        logger.error(msg)
+        if (paramMap != null) {
+            paramMap.put("errMsg", msg)
+        }
         return false
     }
 
@@ -1252,8 +1257,13 @@ boolean preCreateReports() {
         pairKppOktmoList.each {
             kppOktmo.add(""+it.kpp+"/"+it.oktmo)
         }
-        logger.error("Отсутствуют отчетные формы для следующих КПП+ОКТМО: %s. Сформируйте отчетность и повторите операцию",
+        String msg = String.format("Отсутствуют отчетные формы для следующих КПП+ОКТМО: %s. Сформируйте отчетность и повторите операцию",
                 com.aplana.sbrf.taxaccounting.model.util.StringUtils.join(kppOktmo.toArray(), ", ", null))
+        logger.error(msg)
+        if (paramMap != null) {
+            paramMap.put("errMsg", msg)
+        }
+
         return false
     }
     return true

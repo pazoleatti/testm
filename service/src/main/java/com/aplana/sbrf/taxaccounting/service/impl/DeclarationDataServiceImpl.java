@@ -1809,13 +1809,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
 
+        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        exchangeParams.put("paramMap", paramMap);
+
         declarationDataScriptingService.executeScript(userInfo,
-                declarationDataTemp, FormDataEvent.PRE_CREATE_REPORTS, logger, null);
+                declarationDataTemp, FormDataEvent.PRE_CREATE_REPORTS, logger, exchangeParams);
         // Проверяем ошибки
         if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Найдены ошибки при выполнении выгрузки отчетности",
-                    logEntryService.save(logger.getEntries()));
+            String msg = "Найдены ошибки при выполнении выгрузки отчетности";
+            if (paramMap.containsKey("errMsg")) {
+                msg = (String)paramMap.get("errMsg");
+            }
+            throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
         }
     }
 }
