@@ -1682,7 +1682,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED, noRollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger) {
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();
