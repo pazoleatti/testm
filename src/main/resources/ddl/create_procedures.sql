@@ -522,8 +522,8 @@ create or replace package person_pkg as
   procedure FillRecordVersions(p_date date default trunc(sysdate));
   
   -- Получение курсоров для идентификации НДФЛ
-  function GetPersonForIns(p_declaration number) return ref_cursor;
-  function GetPersonForUpd(p_declaration number) return ref_cursor;
+  function GetPersonForIns(p_declaration number,p_asnu number default 1) return ref_cursor;
+  function GetPersonForUpd(p_declaration number,p_asnu number default 1) return ref_cursor;
   function GetPersonForCheck(p_declaration number,p_asnu number default 1) return ref_cursor;
   -- Получение курсоров для идентификации 115
   function GetPersonForIns115(p_declaration number) return ref_cursor;
@@ -557,7 +557,7 @@ create or replace package body person_pkg as
   end;
 
   -- Получение курсоров для идентификации НДФЛ
-  function GetPersonForIns(p_declaration number) return ref_cursor
+  function GetPersonForIns(p_declaration number,p_asnu number default 1) return ref_cursor
   is
     v_ref ref_cursor;
   begin
@@ -606,12 +606,13 @@ create or replace package body person_pkg as
                                                            and p.birth_date=n.birth_day)
           and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', ''))
           and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ',''))
-          and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ',''));
+          and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ',''))
+          and not exists(select 1 from ref_book_id_tax_payer t where t.as_nu=p_asnu and lower(t.inp)=lower(n.inp));
   
     return v_ref;
   end;
 
-  function GetPersonForUpd(p_declaration number) return ref_cursor
+  function GetPersonForUpd(p_declaration number,p_asnu number default 1) return ref_cursor
   is
     v_ref ref_cursor;
   begin
@@ -681,7 +682,7 @@ create or replace package body person_pkg as
                                                                and replace(nvl(fv.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
                                                                )
               where n.declaration_data_id=p_declaration
-                and exists (select 1 from ref_book_person c
+                and exists (select 1 from ref_book_person c left join ref_book_id_tax_payer t on (t.person_id=c.id)
                              where replace(lower(nvl(c.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
                                and replace(lower(nvl(c.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
                                and replace(lower(nvl(c.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
@@ -689,6 +690,7 @@ create or replace package body person_pkg as
                                and replace(replace(nvl(c.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
                                and replace(nvl(c.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
                                and replace(nvl(c.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
+                               and t.as_nu=p_asnu and lower(t.inp)=lower(n.inp)
                                )
                 and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = fv.version and t.record_id = fv.record_id)
                 ) fv join ref_book_person person on (person.id=fv.ref_person_id)
@@ -1098,7 +1100,6 @@ create or replace package body person_pkg as
     open v_ref for     
        select n.id,
               n.person_id,
-              null row_num,
               null inp,
               n.snils,
               n.familia last_name,
@@ -1498,7 +1499,6 @@ create or replace package body person_pkg as
 end person_pkg;
 /
 show errors;
-
 create or replace package fias_pkg
 -- Пакет для поиска адресов в справочнике ФИАС
 as
@@ -1697,13 +1697,9 @@ as
   -- возвращается курсор на таблицу типа TTblCheckExistsAddrByFias
   function CheckExistsAddrByFias(p_declaration number,p_check_type number default 0) return ref_cursor;
   
-  -- Обновление мат. представлений после обновления справочника ФИАС
-  procedure RefreshViews;
-  
 end fias_pkg;
 /
 show errors;
-
 create or replace package body fias_pkg as
   
     v_check_path boolean:=true;
@@ -2134,8 +2130,8 @@ begin
                                   from (
                                         select n.id,
                                                n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
-                                               fias_pkg.GetParseType(3,n.area,1) area_type,
-                                               fias_pkg.GetParseName(3,n.area,1) area_fname,
+                                               fias_pkg.GetParseType(3,n.area) area_type,
+                                               fias_pkg.GetParseName(3,n.area) area_fname,
                                                case when n.city is null and n.region_code='77' then 'г'
                                                     when n.city is null and n.region_code='78' then 'г'
                                                     when n.city is null and n.region_code='92' then 'г'
@@ -2315,18 +2311,6 @@ begin
 
     return v_ref;
   end;
-
-  -------------------------------------------------------------------------------------------------------------
-  -- Обновление мат. представлений после обновления справочника ФИАС
-  -------------------------------------------------------------------------------------------------------------
-  procedure RefreshViews
-  is
-  begin
-    dbms_mview.REFRESH('MV_FIAS_AREA_ACT', 'C');
-    dbms_mview.REFRESH('MV_FIAS_CITY_ACT', 'C');
-    dbms_mview.REFRESH('MV_FIAS_LOCALITY_ACT', 'C');
-    dbms_mview.REFRESH('MV_FIAS_STREET_ACT', 'C');
- end;
 
 end fias_pkg;
 /
