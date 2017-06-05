@@ -50,8 +50,8 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
                 try {
                     String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
                     declarationDataService.delete(declarationId, taUserInfo);
-                    logger.info("Успешно удалена %s.", declarationFullName);
-                    sendNotifications("Успешно удалена " + declarationFullName, logEntryService.save(logger.getEntries()), taUserInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                    logger.info("Успешно удалена %s, № %d", declarationFullName, declarationId);
+                    sendNotifications("Успешно удалена " + declarationFullName + ", № " + declarationId, logEntryService.save(logger.getEntries()), taUserInfo.getUser().getId(), NotificationType.DEFAULT, null);
                 } catch (Exception e) {
                     logger.error("При удалении %s возникли ошибки:", declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));
                     if (e instanceof ServiceLoggerException) {
