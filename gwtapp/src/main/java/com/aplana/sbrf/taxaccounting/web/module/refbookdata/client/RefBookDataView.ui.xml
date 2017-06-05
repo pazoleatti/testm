@@ -34,6 +34,16 @@
             border-top: 1px solid #aeaeac;
         }
 
+        .overflowHidden{
+            overflow: hidden;
+            min-width: 10px;
+            height: 16px;
+        }
+
+        .minWidth150{
+            min-width: 200px;
+        }
+
         .right5{
             right: 5px;
         }
@@ -128,26 +138,30 @@
                         <g:Label ui:field="lastName" text="Фамилия: " addStyleNames="{style.marginRight2}"/>
                         <g:TextBox width="120px" ui:field="filterLastName" addStyleNames="{style.marginRight5}"/>
                         <g:Label ui:field="firstName" text="Имя: " addStyleNames="{style.marginRight2}"/>
-                        <g:TextBox width="120px" ui:field="filterFirstName" addStyleNames="{style.marginRight2}"/>
+                        <g:TextBox width="100px" ui:field="filterFirstName" addStyleNames="{style.marginRight2}"/>
                     </g:HorizontalPanel>
                     <g:cell>
-                        <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
+                        <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight2}">
                             <g:HTML ui:field="separator2" addStyleNames="{style.verSep}"/>
                             <g:TextBox width="170px" ui:field="filterText" addStyleNames="{style.marginRight5}"/>
                             <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
                         </g:HorizontalPanel>
                     </g:cell>
+
                     <g:cell horizontalAlignment="left" width="100%">
-                        <g:CheckBox ui:field="exactSearch" wordWrap="false" text="Искать по точному совпадению"/>
+                        <g:HorizontalPanel verticalAlignment="middle" title="Искать по точному совпадению">
+                            <g:CheckBox ui:field="exactSearch" />
+                            <g:Label text="Искать по точному совпадению" addStyleNames="{style.overflowHidden}"/>
+                        </g:HorizontalPanel>
                     </g:cell>
 
-                    <g:HorizontalPanel verticalAlignment="middle" horizontalAlignment="right" addStyleNames="{style.right5}">
-                        <style:LinkButton title="Назначить оригинал/дубли" text="Назначить оригинал/дубли" ui:field="duplicate" img="resources/img/pencil-16.png" addStyleNames="{style.marginRight5}"/>
-                        <g:Button title="Завершить редактирование" text="Завершить редактирование"
-                                  ui:field="cancelEdit"/>
-                        <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit" img="resources/img/pencil-16.png"/>
-                    </g:HorizontalPanel>
-
+                    <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                        <g:HorizontalPanel >
+                            <style:LinkButton title="Назначить оригинал/дубли" text="Назначить оригинал/дубли" ui:field="duplicate" img="resources/img/pencil-16.png" addStyleNames="{style.marginRight5}"/>
+                            <g:Button title="Завершить редактирование" text="Завершить редактирование" ui:field="cancelEdit"/>
+                            <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit" img="resources/img/pencil-16.png"/>
+                        </g:HorizontalPanel>
+                    </g:cell>
                 </g:HorizontalPanel>
 
                 <g:Label ui:field="lockInformation" visible="false"  addStyleNames="{lock.lockInformation}"/>

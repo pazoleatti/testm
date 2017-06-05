@@ -1512,15 +1512,10 @@ import java.text.SimpleDateFormat
             exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
                     jasperPrint);
             exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
-            exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET,
-                    Boolean.TRUE);
             exporter.setParameter(JRXlsExporterParameter.IS_DETECT_CELL_TYPE,
                     Boolean.TRUE);
             exporter.setParameter(
                     JRXlsExporterParameter.IS_WHITE_PAGE_BACKGROUND,
-                    Boolean.FALSE);
-            exporter.setParameter(
-                    JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_COLUMNS,
                     Boolean.FALSE);
 
             exporter.exportReport();
@@ -1537,7 +1532,7 @@ import java.text.SimpleDateFormat
     def createSpecificReportDb() {
         def params = [declarationId : declarationData.id]
         def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
-        declarationService.exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+        exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
     }
 
     /**
