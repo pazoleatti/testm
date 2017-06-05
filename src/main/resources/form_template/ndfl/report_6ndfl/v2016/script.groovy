@@ -137,6 +137,8 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 
 @Field final String DATE_FORMAT_UNDERLINE = "yyyyMMdd"
 @Field final String DATE_FORMAT_DOTTED = "dd.MM.yyyy"
+@Field
+final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
 
 // Кэш провайдеров
 @Field def providerCache = [:]
@@ -1577,8 +1579,9 @@ def fillPrimaryRnuWithErrors() {
     fillPrimaryRnuNDFLWithErrorsTable(workbook)
     workbook.write(writer)
     writer.close()
+    StringBuilder fileName = new StringBuilder("Первичные_РНУ_с_ошибками_").append(declarationData.id).append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
     scriptSpecificReportHolder
-            .setFileName(scriptSpecificReportHolder.getDeclarationSubreport().getAlias() + ".xlsx")
+            .setFileName(fileName.toString())
 }
 
 /**
