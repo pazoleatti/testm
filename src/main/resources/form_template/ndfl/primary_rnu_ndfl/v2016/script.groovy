@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
+import com.aplana.sbrf.taxaccounting.dao.identification.*
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
@@ -773,8 +774,7 @@ import java.text.SimpleDateFormat
 
         List personDocumentList = naturalPerson.getPersonDocumentList();
 
-        if (!personDocumentList && !personDocumentList.isEmpty()) {
-
+        if (personDocumentList != null && !personDocumentList.isEmpty()) {
             //индекс документа в списке personDocumentList который выбран главным, всем остальным необходимо выставить статус incRep 0
             int incRepIndex = IdentificationUtils.selectIncludeReportDocumentIndex(naturalPerson, personDocumentList);
 
