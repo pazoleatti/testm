@@ -1075,10 +1075,7 @@ def createSpecificReport() {
             break;
         case 'report_kpp_oktmo':
             createSpecificReportDb();
-            ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-            def reportPeriodName = reportPeriod.getTaxPeriod().year + '_' + reportPeriod.name
-            Department department = departmentService.get(declarationData.departmentId)
-            scriptSpecificReportHolder.setFileName("Реестр_сформированной_отчетности_${declarationData.id}_${reportPeriodName}_${department.shortName}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
+            scriptSpecificReportHolder.setFileName("Реестр_загруженных_данных_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
             break;
         case 'rnu_ndfl_person_all_db':
             createSpecificReportDb();
@@ -1094,6 +1091,12 @@ def createSpecificReport() {
 def createSpecificReportPersonDb() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
     def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
+    def subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
+    subReportViewParams['Фамилия'] = row.lastName
+    subReportViewParams['Имя'] = row.firstName
+    subReportViewParams['Отчество'] = row.middleName
+    subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay?.format(DATE_FORMAT) : ""
+    subReportViewParams['№ ДУЛ'] = row.idDocNumber
     if (ndflPerson != null) {
         def params = [NDFL_PERSON_ID: ndflPerson.id];
         def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
@@ -1915,10 +1918,6 @@ def checkDataReference(
     def incomeTypeMap = getRefIncomeType()
     logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_TYPE, incomeTypeMap.size())
 
-    // Ставки
-    def rateList = getRefRate()
-    logForDebug(SUCCESS_GET_REF_BOOK, R_RATE, rateList.size())
-
     // Коды видов вычетов
     def deductionTypeList = getRefDeductionType()
     logForDebug(SUCCESS_GET_REF_BOOK, R_TYPE_CODE, deductionTypeList.size())
@@ -2360,14 +2359,6 @@ def checkDataReference(
                     }
                 }
             }
-        }
-
-        // Спр7 НДФЛ.Процентная ставка (Необязательное поле)
-        if (ndflPersonIncome.taxRate != null && !rateList.contains(ndflPersonIncome.taxRate.toString())) {
-            String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
-                    "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
-            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ставки налога справочнику", fioAndInp, pathError,
-                    "'НДФЛ.Процентная ставка (Графа 14)' не соответствует справочнику '$R_RATE'")
         }
     }
     println "Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)";

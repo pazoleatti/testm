@@ -243,7 +243,7 @@ import java.text.SimpleDateFormat
                         String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
                         String inp = ndflPerson.getPersonIdentifier().inp
                         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, "",
+                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
                         localLogger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
                                 "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
@@ -1608,6 +1608,7 @@ import java.text.SimpleDateFormat
         xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
         XMLEventReader reader = xmlFactory.createXMLEventReader(xmlInputStream)
 
+        def ndflPersonNum = 1;
         def sb;
         try {
             while (reader.hasNext()) {
@@ -1638,7 +1639,8 @@ import java.text.SimpleDateFormat
                     String personData = sb.toString();
                     if (personData != null && !personData.isEmpty()) {
                         def infoPart = new XmlSlurper().parseText(sb.toString())
-                        processInfoPart(infoPart)
+                        processInfoPart(infoPart, ndflPersonNum)
+                        ndflPersonNum++
                     }
                 }
             }
@@ -1676,7 +1678,7 @@ import java.text.SimpleDateFormat
         return var1.toString();
     }
 
-    void processInfoPart(infoPart) {
+    void processInfoPart(infoPart, rowNum) {
 
         def ndflPersonNode = infoPart.'ПолучДох'[0]
 
@@ -1701,6 +1703,7 @@ import java.text.SimpleDateFormat
         //Идентификатор декларации для которой загружаются данные
         if (ndflPerson.incomes != null && !ndflPerson.incomes.isEmpty()) {
             ndflPerson.declarationDataId = declarationData.getId()
+            ndflPerson.rowNum = rowNum
             ndflPersonService.save(ndflPerson)
         } else {
             logger.warn("ФЛ ФИО = $fio ФЛ ИНП = ${ndflPerson.inp} Не загружен в систему поскольку не имеет операций в отчетном периоде")
@@ -3338,14 +3341,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column7And11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm}",
+                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}}'",
                     "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
             )
             //11 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column20Fill(),
                     new Column7And11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm ?: ""}",
+                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                     "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20"
             )
             //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,23,24

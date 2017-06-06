@@ -80,7 +80,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir") + File.separator + "%s.%s";
     private static final String CALCULATION_NOT_TOPICAL = "Налоговая форма содержит неактуальные консолидированные данные  " +
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
-            "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
+            "консолидация).";
+    private static final String CALCULATION_NOT_TOPICAL_SUFFIX = " Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
     private static final int DEFAULT_TF_FILE_TYPE_CODE = 1;
 
     @Autowired
@@ -1417,17 +1418,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     return null;
                 }
             case XML_DEC:
-                long cellCountSource = 0;
-                DeclarationData declarationData = get(declarationDataId, userInfo);
-                for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, new Logger())){
-                    if (relation.isCreated() && relation.getState() == WorkflowState.ACCEPTED) {
-                        FormData formData = formDataDao.getWithoutRows(relation.getFormDataId());
-                        int rowCountSource = dataRowDao.getRowCount(formData);
-                        int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
-                        cellCountSource += rowCountSource * columnCountSource;
-                    }
+                String uuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+                if (uuid != null) {
+                    return (long)Math.ceil(blobDataService.getLength(uuid) / 1024.);
+                } else {
+                    return 0L;
                 }
-                return cellCountSource;
             case SPECIFIC_REPORT_DEC:
                 Map<String, Object> exchangeParams = new HashMap<String, Object>();
                 ScriptTaskComplexityHolder taskComplexityHolder = new ScriptTaskComplexityHolder();
@@ -1445,7 +1441,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         boolean consolidationOk = true;
         //Проверка на неактуальные консолидированные данные  3А
         if (!sourceService.isDDConsolidationTopical(dd.getId())){
-            logger.error(CALCULATION_NOT_TOPICAL);
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(dd.getDeclarationTemplateId());
+            boolean isReports = TaxType.NDFL.equals(declarationTemplate.getType().getTaxType()) && DeclarationFormKind.REPORTS.equals(declarationTemplate.getDeclarationFormKind());
+            logger.error(CALCULATION_NOT_TOPICAL + (isReports?"":CALCULATION_NOT_TOPICAL_SUFFIX));
             consolidationOk = false;
         } else {
             //Проверка того, что консолидация вообще когда то выполнялась для всех источников
@@ -1809,13 +1807,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
 
+        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        exchangeParams.put("paramMap", paramMap);
+
         declarationDataScriptingService.executeScript(userInfo,
-                declarationDataTemp, FormDataEvent.PRE_CREATE_REPORTS, logger, null);
+                declarationDataTemp, FormDataEvent.PRE_CREATE_REPORTS, logger, exchangeParams);
         // Проверяем ошибки
         if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Найдены ошибки при выполнении выгрузки отчетности",
-                    logEntryService.save(logger.getEntries()));
+            String msg = "Найдены ошибки при выполнении выгрузки отчетности";
+            if (paramMap.containsKey("errMsg")) {
+                msg = (String)paramMap.get("errMsg");
+            }
+            throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
         }
     }
 }
