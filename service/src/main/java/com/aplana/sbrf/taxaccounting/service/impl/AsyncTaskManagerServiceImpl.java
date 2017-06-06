@@ -122,7 +122,15 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
 							params, balancingVariant);
 
                     // Шаг 8
-                    logger.info(String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo), "Для формы № " + params.get("declarationDataId")));
+                    Object declarationDataId = params.get("declarationDataId");
+                    if (declarationDataId != null) {
+                        String message = String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo), "Для формы № " + params.get("declarationDataId"));
+                        logger.info(message.replaceAll("\"\"", "\""));
+                    } else {
+                        String message = String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo), "");
+                        logger.info(message.replaceAll("\"\"", "\""));
+                    }
+
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
                     int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
