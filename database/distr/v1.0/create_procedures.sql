@@ -42,10 +42,11 @@ create or replace package person_pkg as
         and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.last_name),' ','')
                                                          and replace(lower(p.first_name),' ','') = replace(lower(n.first_name),' ','')
                                                          and replace(lower(p.middle_name),' ','') = replace(lower(n.middle_name),' ','')
-                                                         and p.birth_date=n.birth_day)
-        and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', ''))
-        and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ',''))
-        and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ',''));
+                                                         and p.birth_date=n.birth_day
+                                                         and p.status=0)
+        and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', '') and p.status=0)
+        and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ','') and p.status=0)
+        and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ','') and p.status=0);
 
   cursor persons_for_update(c_declaration number) is
     select fv.person_id,
@@ -603,11 +604,12 @@ create or replace package body person_pkg as
           and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.last_name),' ','')
                                                            and replace(lower(p.first_name),' ','') = replace(lower(n.first_name),' ','')
                                                            and replace(lower(p.middle_name),' ','') = replace(lower(n.middle_name),' ','')
-                                                           and p.birth_date=n.birth_day)
-          and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', ''))
-          and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ',''))
-          and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ',''))
-          and not exists(select 1 from ref_book_id_tax_payer t where t.as_nu=p_asnu and lower(t.inp)=lower(n.inp));
+                                                           and p.birth_date=n.birth_day
+                                                           and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', '') and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ','') and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ','') and p.status=0)
+          and not exists(select 1 from ref_book_id_tax_payer t where t.as_nu=p_asnu and lower(t.inp)=lower(n.inp) and t.status=0);
   
     return v_ref;
   end;
