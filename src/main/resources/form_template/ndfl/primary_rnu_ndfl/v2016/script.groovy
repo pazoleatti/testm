@@ -360,7 +360,7 @@ import java.text.SimpleDateFormat
             return
         }
 
-        logForDebug("В ПНФ номер " + declarationData.id + " получены записи о физ.лицах (" + primaryPersonDataList.size() + " записей, " + calcTimeMillis(time));
+        logForDebug("В ПНФ номер " + declarationData.id + " получены записи о физ. лицах (" + primaryPersonDataList.size() + " записей, " + calcTimeMillis(time));
 
         //println "Find primary data in " + declarationData.id + " found: " + primaryPersonDataList.size() + " person " + calcTimeMillis(time)
 
@@ -3263,7 +3263,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                         "СНИЛС='${ndflPerson.snils ?: ""}'")
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Корректность СНИЛС", fioAndInp, pathError,
-                        "Некорректное значение Некорректное значение 'СНИЛС'")
+                        "Некорректное значение 'СНИЛС'")
             }
         }
         println "Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)";
@@ -3294,7 +3294,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column22And23And24NotFill(),
                     new Column4And5Fill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Вид.Код (Графа 4)='${ndflPersonIncome.incomeCode ?: ""}', Доход.Вид.Признак (Графа 5)='${ndflPersonIncome.incomeType ?: ""}'",
-                    "Раздел 2. Графы 4,5 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24"
+                    "Раздел 2. Графы 4, 5 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24"
             )
             //2 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
             columnFillConditionDataList << new ColumnFillConditionData(
@@ -3324,68 +3324,68 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                     "Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7"
             )
-            //6 Раздел 2. Графа 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22,23,24
+            //6 Раздел 2. Графа 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24Fill(),
                     new Column12NotFill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Сумма вычета (Графа 12)='${ndflPersonIncome.totalDeductionsSumm ?: ""}'",
-                    "Раздел 2. Графы 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22,23,24"
+                    "Раздел 2. Графы 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22, 23, 24"
             )
-            //7 Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
+            //7 Раздел 2. Графы 13, 14, 15 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column13And14And15Fill(applyTemporalySolution),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Налоговая база (Графа 13)='${ndflPersonIncome.taxBase ?: ""}', НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}', НДФЛ.Расчет.Дата (Графа 15)='${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}'",
-                    "Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24"
+                    "Раздел 2. Графы 13, 14, 15 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24"
             )
-            //8 Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 16
+            //8 Раздел 2. Графы 6, 10 должны быть заполнены, если заполнена Раздел 2. Графа 16
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column16Fill(),
                     new Column6And10Fill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""}', Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'",
-                    "Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 16"
+                    "Раздел 2. Графы 6, 10 должны быть заполнены, если заполнена Раздел 2. Графа 16"
             )
-            //9 Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
+            //9 Раздел 2. Графы 6, 10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column18Or19Fill(),
                     new Column6And10Fill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Начисление (Графа 6)='${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""}', Доход.Сумма.Начисление (Графа 10)='${ndflPersonIncome.incomeAccruedSumm ?: ""}'",
-                    "Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19"
+                    "Раздел 2. Графы 6, 10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19"
             )
-            //10 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17
+            //10 Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 17
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column7And11Fill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}}'",
-                    "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
+                    "Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
             )
-            //11 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20
+            //11 Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 20
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column20Fill(),
                     new Column7And11Fill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
-                    "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20"
+                    "Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 20"
             )
-            //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,23,24
+            //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7, 11 или 23, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column7And11Or22And23And24Fill(),
                     new Column21Fill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): ""}'",
-                    "Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 22,23,24"
+                    "Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7, 11 или 22, 23, 24"
             )
-            //12 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7,11 и 22,23,24
+            //12 Раздел 2. Графа 21 должна быть НЕ заполнена, если НЕ заполнены Раздел 2. Графы 7, 11 и 22, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column7And11And22And23And24NotFill(),
                     new Column21NotFill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): ""}'",
-                    "Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7,11 и 22,23,24"
+                    "Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7, 11 и 22, 23, 24"
             )
-            //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна из них
+            //13 Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них
             columnFillConditionDataList << new ColumnFillConditionData(
                     new ColumnTrueFillOrNotFill(),
                     new Column22And23And24FillOrColumn22And23And24NotFill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Платежное поручение.Дата (Графа 22)='${ndflPersonIncome.paymentDate ? ndflPersonIncome.paymentDate.format(DATE_FORMAT): ""}', НДФЛ.Перечисление в бюджет.Платежное поручение.Номер (Графа 23)='${ndflPersonIncome.paymentNumber ?: ""}', НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)='${ndflPersonIncome.taxSumm ?: ""}'",
-                    "Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна из них"
+                    "Должны быть либо заполнены все 3 Графы 22, 23, 24, либо ни одна из них"
             )
             columnFillConditionDataList.each { columnFillConditionData ->
                 if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&

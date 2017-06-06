@@ -1721,7 +1721,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else {
                     success++;
                     if (createForm) {
-                        logger.info("Успешно выполнена расчет для " + getDeclarationFullName(entry.getKey(), null));
+                        logger.info("Успешно выполнен расчет для " + getDeclarationFullName(entry.getKey(), null));
                     }
                     logger.getEntries().addAll(scriptLogger.getEntries());
                 }
