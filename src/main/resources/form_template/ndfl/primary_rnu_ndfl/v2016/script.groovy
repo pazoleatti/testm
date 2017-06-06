@@ -3205,9 +3205,9 @@ class NdflPersonFL {
             if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
                 //TODO turn_to_error
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum ?: "",
-                        "Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Графа 7)='${ndflPersonPrepayment.notifSource ?: ""}'")
+                        "Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи. Код налогового органа, выдавшего уведомление (Графа 7)='${ndflPersonPrepayment.notifSource ?: ""}'")
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода налоговой инспекции справочнику", fioAndInp, pathError,
-                        "'Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Графа 7)' не соответствует справочнику '$R_NOTIF_SOURCE'")
+                        "'Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи. Код налогового органа, выдавшего уведомление (Графа 7)' не соответствует справочнику '$R_NOTIF_SOURCE'")
             }
         }
         println "Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)";
@@ -5032,7 +5032,7 @@ class ColumnFillConditionData {
             declarationList.addAll(declarationService.find(103, prevDepartmentReportPeriod.getId()))
             declarationList.addAll(declarationService.find(104, prevDepartmentReportPeriod.getId()))
             if (declarationList.isEmpty()) {
-                logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде, Отчетные налоговые формы не будут сформированы текущем периоде")
+                logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде. Отчетные налоговые формы не будут сформированы текущем периоде")
             }
         }
     }

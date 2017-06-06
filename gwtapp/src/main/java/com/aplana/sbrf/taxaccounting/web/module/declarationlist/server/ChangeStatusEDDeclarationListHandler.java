@@ -42,9 +42,9 @@ public class ChangeStatusEDDeclarationListHandler extends AbstractActionHandler<
                 String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC);
                 try {
                     declarationDataService.changeDocState(localLogger, userInfo, declarationId, action.getDocStateId());
-                    logger.info("Успешно выполнено изменение состояния ЭД %s", declarationFullName);
+                    logger.info("Успешно выполнено изменение состояния ЭД для объекта: %s", declarationFullName);
                 } catch (Exception e) {
-                    logger.error("При изменение состояния ЭД %s возникли ошибки:", declarationFullName);
+                    logger.error("При изменение состояния ЭД для объекта: %s возникли ошибки:", declarationFullName);
                 } finally {
                     logger.getEntries().addAll(localLogger.getEntries());
                 }
