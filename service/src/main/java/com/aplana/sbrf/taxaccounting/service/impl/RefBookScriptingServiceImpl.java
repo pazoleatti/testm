@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import groovy.lang.Binding;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -67,6 +68,8 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Autowired
     private AuditService auditService;
 
+    private final static String SCRIPT_PATH_PREFIX = "../src/main/resources/refbook";
+
     @Override
     public boolean executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
         RefBook refBook = refBookFactory.get(refBookId);
@@ -86,11 +89,15 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return false;
         }
         String script = writer.toString();
+        String scriptFilePath = null;
+        if (versionInfoProperties != null && versionInfoProperties.getProperty("productionMode").equals("false")) {
+            scriptFilePath = getScriptFilePath(script, SCRIPT_PATH_PREFIX, logger);
+        }
         if (!canExecuteScript(script, event)) {
             return false;
         }
 
-        boolean result = executeScript(userInfo, refBook, script, event, logger, additionalParameters);
+        boolean result = executeScript(userInfo, refBook, script, scriptFilePath, event, logger, additionalParameters);
         // Откат при возникновении фатальных ошибок в скрипте
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("Проверка не пройдена (присутствуют фатальные ошибки)", logEntryService.save(logger.getEntries()));
@@ -104,7 +111,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         boolean result = tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
             @Override
             public Boolean execute() {
-                return executeScript(userInfo, refBook, script, event, logger, additionalParameters);
+                return executeScript(userInfo, refBook, script, null, event, logger, additionalParameters);
             }
         });
         return result;
@@ -126,7 +133,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         logger.getEntries().addAll(tempLogger.getEntries());
     }
 
-    private boolean executeScript(TAUserInfo userInfo, RefBook refBook, String script, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
+    private boolean executeScript(TAUserInfo userInfo, RefBook refBook, String script, String scriptFilePath, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
         // Локальный логгер для импорта конкретного справочника
         Logger scriptLogger = new Logger();
         scriptLogger.setTaUserInfo(userInfo);
@@ -134,6 +141,10 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         // Биндиг параметров для выполнения скрипта
         Bindings bindings = getScriptEngine().createBindings();
         bindings.put("dataSource", applicationContext.getBean("dataSource"));
+
+        Binding binding = new Binding();
+        binding.setVariable("dataSource", applicationContext.getBean("dataSource"));
+
         // ScriptExposed
         Map<String, ?> scriptComponents = applicationContext.getBeansWithAnnotation(ScriptExposed.class);
         for (Object component : scriptComponents.values()) {
@@ -145,19 +156,30 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             }
         }
         bindings.putAll(scriptComponents);
+        for(Map.Entry<String, ?> entry: scriptComponents.entrySet()) {
+            binding.setVariable(entry.getKey(), entry.getValue());
+        }
 
         bindings.put("formDataEvent", event);
         bindings.put("logger", scriptLogger);
         bindings.put("userInfo", userInfo);
         bindings.put("refBookFactory", refBookFactory);
+
+        binding.setVariable("formDataEvent", event);
+        binding.setVariable("logger", scriptLogger);
+        binding.setVariable("userInfo", userInfo);
+        binding.setVariable("refBookFactory", refBookFactory);
+
         String applicationVersion = "ФП «НДФЛ, Фонды и Сборы»";
         if (versionInfoProperties != null) {
             applicationVersion += " " + versionInfoProperties.getProperty("version");
         }
         bindings.put("applicationVersion", applicationVersion);
+        binding.setVariable("applicationVersion", applicationVersion);
 
         if (userInfo != null && userInfo.getUser() != null) {
             bindings.put("user", userInfo.getUser());
+            binding.setVariable("user", userInfo.getUser());
         }
 
         // Перенос доп. параметров
@@ -166,13 +188,18 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
                 if (bindings.containsKey(entry.getKey()))
                     throw new IllegalArgumentException(String.format(DUPLICATING_ARGUMENTS_ERROR, entry.getKey()));
                 bindings.put(entry.getKey(), entry.getValue());
+                binding.setVariable(entry.getKey(), entry.getValue());
             }
         }
 
         // Выполнение импорта скрипта справочника
         scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Событие «" + event.getTitle()
                 + "» для справочника «" + refBook.getName() + "»"));
-        executeScript(bindings, script, scriptLogger);
+        if (scriptFilePath == null || versionInfoProperties == null || versionInfoProperties.getProperty("productionMode").equals("true")) {
+            executeScript(bindings, script, scriptLogger);
+        } else {
+            executeLocalScript(binding, scriptFilePath, logger);
+        }
         scriptLogger.setMessageDecorator(null);
 
         // Перенос записей из локального лога в глобальный
