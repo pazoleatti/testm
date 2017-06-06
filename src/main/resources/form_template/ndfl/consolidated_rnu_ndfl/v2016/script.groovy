@@ -238,10 +238,10 @@ void consolidation() {
         Long addressId = refBookPersonRecord.get("ADDRESS")?.getReferenceValue();
         Map<String, RefBookValue> addressRecord = addressMap.get(addressId);
 
-        //List<Long> documentsIds = documentProvider.getUniqueRecordIds(null, "PERSON_ID = " + personId + " AND INC_REP = 1");
-        if (personDocumentRecord == null || personDocumentRecord.isEmpty()) {
-            logger.warn("Для физического лица: " + buildRefBookNotice(refBookPersonRecord) + ". Отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1");
-            continue;
+        if (personDocumentsList == null || personDocumentsList.isEmpty()) {
+            logger.warn("Физическое лицо: " + buildRefBookPersonFio(refBookPersonRecord) + ", Идентификатор ФЛ: " + buildRefBookPersonId(refBookPersonRecord) + ", включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность'")
+        } else if (personDocumentRecord == null || personDocumentRecord.isEmpty()) {
+            logger.warn("Физическое лицо: " + buildRefBookPersonFio(refBookPersonRecord) + ", Идентификатор ФЛ: " + buildRefBookPersonId(refBookPersonRecord) + ", включено в форму без указания ДУЛ, отсутствуют данные в справочнике 'Документы, удостоверяющие личность' с признаком включения в отчетность: 1")
         }
 
         if (addressId != null && addressRecord == null) {
@@ -313,6 +313,27 @@ String buildRefBookNotice(Map<String, RefBookValue> refBookPersonRecord) {
     sb.append(getVal(refBookPersonRecord, "MIDDLE_NAME")).append(" ");
     sb.append(" [id=").append(getVal(refBookPersonRecord, RefBook.RECORD_ID_ALIAS)).append("]");
     return sb.toString();
+}
+
+/**
+ * TODO Использовать метод com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils#buildRefBookNotice(java.util.Map)
+ * @param refBookPersonRecord
+ * @return
+ */
+String buildRefBookPersonFio(Map<String, RefBookValue> refBookPersonRecord) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getVal(refBookPersonRecord, "LAST_NAME")).append(" ");
+    sb.append(getVal(refBookPersonRecord, "FIRST_NAME")).append(" ");
+    sb.append(getVal(refBookPersonRecord, "MIDDLE_NAME"));
+    return sb.toString();
+}
+
+/**
+ * @param refBookPersonRecord
+ * @return
+ */
+String buildRefBookPersonId(Map<String, RefBookValue> refBookPersonRecord) {
+    return getVal(refBookPersonRecord, "RECORD_ID");
 }
 
 /**
@@ -414,10 +435,10 @@ def buildNdflPerson(Map<String, RefBookValue> personRecord, Map<String, RefBookV
     ndflPerson.citizenship = countryCodes.get(countryId)
 
     //ДУЛ - заполняется на основе справочника Документы, удостоверяющие личность
-    Map<String, RefBookValue> docTypeRecord = documentTypeRefBook.get(identityDocumentRecord.get("DOC_ID")?.getReferenceValue())
+    Map<String, RefBookValue> docTypeRecord = (identityDocumentRecord!= null)?documentTypeRefBook.get(identityDocumentRecord.get("DOC_ID")?.getReferenceValue()):null
     ndflPerson.idDocType = docTypeRecord?.get("CODE")?.getStringValue();
 
-    ndflPerson.idDocNumber = identityDocumentRecord.get("DOC_NUMBER")?.getStringValue()
+    ndflPerson.idDocNumber = identityDocumentRecord?.get("DOC_NUMBER")?.getStringValue()
 
     ndflPerson.status = taxpayerStatusCodes.get(personRecord.get("TAXPAYER_STATE")?.getReferenceValue())
 
