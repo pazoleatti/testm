@@ -4,7 +4,9 @@ import com.aplana.sbrf.taxaccounting.groovy.jsr223.GroovyScriptEngine;
 import com.aplana.sbrf.taxaccounting.groovy.jsr223.GroovyScriptEngineFactory;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyShell;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -130,6 +132,16 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		return matcher.find();
 	}
 
+	protected String getScriptFilePath(String script, String scriptPathPrefix, Logger logger) {
+		String scriptFilePath = null;
+		try {
+			scriptFilePath = getLocalScriptPath(script, scriptPathPrefix);
+		} catch (Exception e) {
+			LOG.warn(e.getMessage(), e);
+			logger.error("Не удалось получить локальный скрипт", e);
+		}
+		return scriptFilePath;
+	}
 	protected String getLocalScriptPath(String script, String path) throws SyntaxException, IOException {
 		Class scriptClass = ((GroovyScriptEngine)getScriptEngine()).getScriptClass(script);
 		String packageName = scriptClass.getName().substring(0, scriptClass.getName().lastIndexOf('.'));
@@ -156,5 +168,17 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 			}
 		}
 		return null;
+	}
+
+	protected Object executeLocalScript(Binding binding, String scriptFilePath, Logger logger) {
+		try {
+			File scriptFile = new File(scriptFilePath);
+			config.setSourceEncoding("UTF-8");
+			GroovyShell groovyShell = new GroovyShell(binding, config);
+			return groovyShell.evaluate(scriptFile);
+		} catch (Exception e) {
+			logScriptException(e, logger);
+			return false;
+		}
 	}
 }
