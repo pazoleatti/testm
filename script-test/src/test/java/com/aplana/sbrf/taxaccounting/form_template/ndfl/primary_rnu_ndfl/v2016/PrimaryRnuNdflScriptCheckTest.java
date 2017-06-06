@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -76,6 +77,20 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             }
         }
         return ndflPersonIncomeList;
+    }
+
+    private List<NdflPersonDeduction> getNdflPersonDeductionListFromNdflPersonList(List<NdflPerson> ndflPersonList) {
+        List<NdflPersonDeduction> ndflPersonDeductionList = new ArrayList<NdflPersonDeduction>();
+        for (NdflPerson ndflPerson : ndflPersonList) {
+            List<NdflPersonDeduction> npiList = ndflPerson.getDeductions();
+
+            for (NdflPersonDeduction npi : npiList) {
+                ndflPersonDeductionList.add(npi);
+
+            }
+        }
+
+        return ndflPersonDeductionList;
     }
 
     /**
@@ -395,9 +410,259 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
 
-        Assert.assertTrue(containLog("(.*)'1'(.*)«Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2(.*)"));
-        Assert.assertTrue(containLog("(.*)'2'(.*)«Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1(.*)"));
-        Assert.assertTrue(containLog("(.*)'3'(.*)«Графа 4 Раздел 2» = .2740 или 3020 или 2610. и «Графа 12 Раздел 1» ≠ 2(.*)"));
+        int i=0;
+
+        if(containLog("(.*)«Графа 14 Раздел 2 = 13»")){
+            Assert.assertTrue(containLog("( (.*)'1'(.*)«Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2(.*) )|"+
+                    "( (.*)'2'(.*)«Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = (1010)|(1011) и «Графа 12 Раздел 1» = 1(.*) )|"+
+                    "(.*)«Графа 7 Раздел 1» ≠ 643 и («Графа 4 Раздел 2» = 2000 или 2001 или 2010 или 2002 или 2003) и («Графа 12 Раздел 1» >= 3"));
+            i++;
+        }
+
+        if(containLog("(.*)«Графа 14 Раздел 2 = 15»(.*)")){
+            Assert.assertTrue(containLog("(.*)«Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1(.*)"));
+            i++;
+        }
+
+        if(containLog("(.*)«Графа 14 Раздел 2 = 35»(.*)")){
+            Assert.assertTrue(containLog("(.*)«Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1(.*)"));
+            i++;
+        }
+
+        if(containLog("(.*)«Графа 14 Раздел 2 = 30»(.*)")){
+            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|"+
+                    "((«Графа 12 Раздел 4» ≠ 2000 или 2001 или 2010) и \"графа 12 Раздел 1\" > 2)"));
+            i++;
+        }
+
+        if(containLog("(.*)«Графа 14 Раздел 2 = 9»(.*)")){
+            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|"+
+                    "(«Графа 12 Раздел 4» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2)"));
+            i++;
+        }
+
+        if(containLog("(.*)«Графа 7 Раздел 1 = 9»(.*)")){
+            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|"+
+                    "(«Графа 12 Раздел 4» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2)"));
+            i++;
+        }
+
+
+        if((containLog("(.*)«Графа 7 Раздел 1» ≠ 643(.*)")) &&(i==0)){
+            Assert.assertTrue(containLog("((.*)«Графа 7 Раздел 1» ≠ 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1"));
+        }
+    }
+    /**
+     * Тесты для "Проверки заполнения граф по алгоритмам заполнения РНУ НДФЛ / 4 "Заполнение Раздела 2 Графы 12"
+     */
+
+    @Test
+    public void checkDataIncome2Test() {
+        initRefBook();
+
+        List<NdflPerson> ndflPersonList = checkDataIncome2Mock();
+
+        List<NdflPersonIncome> ndflPersonIncomeList = getNdflPersonIncomeListFromNdflPersonList(ndflPersonList);
+        List<NdflPersonDeduction> ndflPersonDeductionList = getNdflPersonDeductionListFromNdflPersonList(ndflPersonList);
+
+        when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenReturn(ndflPersonList);
+        when(testHelper.getNdflPersonService().findNdflPersonIncome(any(Long.class))).thenReturn(ndflPersonIncomeList);
+        when(testHelper.getNdflPersonService().findNdflPersonDeduction(any(Long.class))).thenReturn(ndflPersonDeductionList);
+
+        testHelper.execute(FormDataEvent.CHECK);
+        checkLogger();
+        Assert.assertTrue(containLog("(.*)«Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»(.*)"));
+        Assert.assertTrue(containLog("(.*)Значение не соответствует правилу: «Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»(.*)"));
+        Assert.assertTrue(containLog("(.*)сумма значений «Граф 16 Раздела 3» <= «Графа 10 Раздел 2»(.*)"));
+    }
+
+    /**
+     * Тестовые данные для "Сведения о доходах и НДФЛ" / СведДох4 НДФЛ.Процентная ставка (Графа 12)
+     * @return
+     */
+    private List<NdflPerson> checkDataIncome2Mock() {
+        RefBookPersonTest refBookPersonTest1 = createRefBookPersonTest1();
+        final NdflPerson ndflPerson1 = new NdflPersonBuilder.Builder()
+                .id(1L)
+                .personId(refBookPersonTest1.getId())
+                .lastName(refBookPersonTest1.getLastName())
+                .firstName(refBookPersonTest1.getFirstName())
+                .middleName(refBookPersonTest1.getMiddleName())
+                .status("16")
+                .citizenship("643")
+                .status("2")
+
+                .build();
+        Date d=new Date( 2015,12,12);
+        final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
+                .rowNum(new BigDecimal(1))
+                .ndflPersonId(ndflPerson1.getId())
+                .operationId("1234")
+                .taxRate(13)
+                .incomeType("1010")
+                .incomeCode("1010")
+                .incomeAccruedDate(d)
+                .incomePayoutDate(new Date(2015,3,12))
+                .incomeAccruedSumm(new BigDecimal(125))
+                .totalDeductionsSumm( new BigDecimal(125 )  )
+                .incomePayoutSumm(new BigDecimal(1232))
+                .build();
+        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
+
+            add(ndflPersonIncome1);
+        }});
+
+        final NdflPersonDeduction ndflPersonDeduction1 = new NdflPersonDeductionBuilder.Builder()
+
+                .rowNum(new BigDecimal(1))
+                .operationId("1234")
+                .ndflPersonId(ndflPerson1.getId())
+                .typeCode("1010")
+                .incomeAccrued(d)
+                .incomeCode("1212")
+                .periodCurrDate(d)
+                .notifSumm(new BigDecimal(125))
+                .incomeSumm(new BigDecimal(125))
+                .periodCurrSumm(new BigDecimal(125))
+                .build();
+        ndflPerson1.setDeductions(new ArrayList<NdflPersonDeduction>(){{
+            add(ndflPersonDeduction1);
+        }});
+
+        final NdflPerson ndflPerson2 = new NdflPersonBuilder.Builder()
+                .id(1L)
+                .personId(refBookPersonTest1.getId())
+                .lastName(refBookPersonTest1.getLastName())
+                .firstName(refBookPersonTest1.getFirstName())
+                .middleName(refBookPersonTest1.getMiddleName())
+                .status("16")
+                .citizenship("643")
+                .status("2")
+
+                .build();
+
+        final NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncomeBuilder.Builder()
+                .rowNum(new BigDecimal(1))
+                .ndflPersonId(ndflPerson1.getId())
+                .operationId("1234")
+                .taxRate(13)
+                .incomeType("1010")
+                .incomeCode("1010")
+                .incomeAccruedDate(d)
+                .incomePayoutDate(new Date(2015,7,12))
+                .incomeAccruedSumm(new BigDecimal(325))
+                .totalDeductionsSumm( new BigDecimal(125 )  )
+                .incomePayoutSumm(new BigDecimal(132))
+                .build();
+        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
+
+            add(ndflPersonIncome1);
+        }});
+
+        final NdflPersonDeduction ndflPersonDeduction2 = new NdflPersonDeductionBuilder.Builder()
+
+                .rowNum(new BigDecimal(1))
+                .operationId("1234")
+                .ndflPersonId(ndflPerson1.getId())
+                .typeCode("1010")
+                .incomeAccrued(d)
+                .incomeCode("1212")
+                .periodCurrDate(d)
+                .notifSumm(new BigDecimal(125))
+                .incomeSumm(new BigDecimal(125))
+                .periodCurrSumm(new BigDecimal(125))
+                .build();
+        ndflPerson2.setDeductions(new ArrayList<NdflPersonDeduction>(){{
+            add(ndflPersonDeduction1);
+        }});
+
+
+// и «графа 10 Раздел 3»= «графа 6 Раздел 2», то «графа 12 Раздел 2» = сумма значений «граф 16 Раздел 3» при соблюдении обязательного условия: «сумма значений «граф 16 Раздела 3» ≤ «графа 10 Раздел 2»
+
+
+        List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>(){{
+            add(ndflPerson1);
+            add(ndflPerson2);
+        }};
+        return ndflPersonList;
+    }
+
+    /*Заполнение Раздела 2 Графы 15*/
+    @Ignore
+    @Test
+    public void checkDataIncome5Test() {
+        initRefBook();
+
+        List<NdflPerson> ndflPersonList = checkDataIncome5Mock();
+        List<NdflPersonIncome> ndflPersonIncomeList = getNdflPersonIncomeListFromNdflPersonList(ndflPersonList);
+        List<NdflPersonDeduction> ndflPersonDeductionsList = getNdflPersonDeductionListFromNdflPersonList(ndflPersonList);
+
+        when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenReturn(ndflPersonList);
+        when(testHelper.getNdflPersonService().findNdflPersonIncome(any(Long.class))).thenReturn(ndflPersonIncomeList);
+        when(testHelper.getNdflPersonService().findNdflPersonDeduction(any(Long.class))).thenReturn(ndflPersonDeductionsList);
+        testHelper.execute(FormDataEvent.CHECK);
+        checkLogger();
+        Assert.assertTrue(containLog("(.*)qwertty(.*)"));
+
+    }
+
+    private List<NdflPerson> checkDataIncome5Mock(){
+        RefBookPersonTest refBookPersonTest1 = createRefBookPersonTest1();
+        final NdflPerson ndflPerson1 = new NdflPersonBuilder.Builder()
+                .id(1L)
+                .personId(refBookPersonTest1.getId())
+                .lastName(refBookPersonTest1.getLastName())
+                .firstName(refBookPersonTest1.getFirstName())
+                .middleName(refBookPersonTest1.getMiddleName())
+                .status("6")
+                .citizenship("643")
+                .status("2")
+                .build();
+
+        final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
+                .rowNum(new BigDecimal(1))
+                .id(new Long(12))
+                .ndflPersonId(ndflPerson1.getId())
+                .taxRate(13)
+                .incomeCode("1010")
+                .incomeAccruedDate(new Date(2015,12,12))
+                .calculatedTax(new BigDecimal(12))
+                .incomePayoutDate(new Date(2015,12,12))
+                .paymentDate(new Date(2015,12,12))
+                .taxDate(new Date(2015,12,12))
+                .incomeAccruedSumm(new BigDecimal(125))
+                .totalDeductionsSumm( new BigDecimal(6 )  )
+                .calculatedTax(new BigDecimal(12))
+
+                .build();
+        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
+            add(ndflPersonIncome1);
+        }});
+
+        final NdflPersonDeduction ndflPersonDeduction1 = new NdflPersonDeductionBuilder.Builder()
+
+                .id(ndflPerson1.getId())
+                .ndflPersonId(ndflPerson1.getId())
+                .typeCode("104")
+                // Применение вычета.Текущий период.Сумма (Графа 16 P3)
+                .periodCurrSumm(new BigDecimal(1212))
+                .incomeAccrued(new Date(2012,12,12))
+                .notifSumm(new BigDecimal(104))
+                .build();
+
+        ndflPerson1.setDeductions(new ArrayList<NdflPersonDeduction>(){{
+            add(ndflPersonDeduction1);
+        }});
+
+
+
+// и «графа 10 Раздел 3»= «графа 6 Раздел 2», то «графа 12 Раздел 2» = сумма значений «граф 16 Раздел 3» при соблюдении обязательного условия: «сумма значений «граф 16 Раздела 3» ≤ «графа 10 Раздел 2»
+
+
+        List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>(){{
+            add(ndflPerson1);
+        }};
+        return ndflPersonList;
     }
 
     /**
@@ -524,8 +789,10 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
      */
     private static class NdflPersonIncomeBuilder {
         NdflPersonIncome ndflPersonIncome;
+
         public static class Builder {
             private Long id;
+            private String operationId;
             private BigDecimal rowNum;
             protected Long ndflPersonId;
             private String incomeCode;
@@ -549,37 +816,141 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private Date paymentDate;
             private String paymentNumber;
             private Long taxSumm;
-            public Builder id(Long id) {this.id = id; return this;}
-            public Builder rowNum(BigDecimal rowNum) {this.rowNum = rowNum; return this;}
-            public Builder ndflPersonId(Long ndflPersonId) {this.ndflPersonId = ndflPersonId; return this;}
-            public Builder incomeCode(String incomeCode) {this.incomeCode = incomeCode; return this;}
-            public Builder incomeType(String incomeType) {this.incomeType = incomeType; return this;}
-            public Builder incomeAccruedDate(Date incomeAccruedDate) {this.incomeAccruedDate = incomeAccruedDate; return this;}
-            public Builder incomePayoutDate(Date incomePayoutDate) {this.incomePayoutDate = incomePayoutDate; return this;}
-            public Builder oktmo(String oktmo) {this.oktmo = oktmo; return this;}
-            public Builder kpp(String kpp) {this.kpp = kpp; return this;}
-            public Builder incomeAccruedSumm(BigDecimal incomeAccruedSumm) {this.incomeAccruedSumm = incomeAccruedSumm; return this;}
-            public Builder incomePayoutSumm(BigDecimal incomePayoutSumm) {this.incomePayoutSumm = incomePayoutSumm; return this;}
-            public Builder totalDeductionsSumm(BigDecimal totalDeductionsSumm) {this.totalDeductionsSumm = totalDeductionsSumm; return this;}
-            public Builder taxBase(BigDecimal taxBase) {this.taxBase = taxBase; return this;}
-            public Builder taxRate(Integer taxRate) {this.taxRate = taxRate; return this;}
-            public Builder taxDate(Date taxDate) {this.taxDate = taxDate; return this;}
-            public Builder calculatedTax(BigDecimal calculatedTax) {this.calculatedTax = calculatedTax; return this;}
-            public Builder withholdingTax(BigDecimal withholdingTax) {this.withholdingTax = withholdingTax; return this;}
-            public Builder notHoldingTax(BigDecimal notHoldingTax) {this.notHoldingTax = notHoldingTax; return this;}
-            public Builder overholdingTax(BigDecimal overholdingTax) {this.overholdingTax = overholdingTax; return this;}
-            public Builder refoundTax(Long refoundTax) {this.refoundTax = refoundTax; return this;}
-            public Builder taxTransferDate(Date taxTransferDate) {this.taxTransferDate = taxTransferDate; return this;}
-            public Builder paymentDate(Date paymentDate) {this.paymentDate = paymentDate; return this;}
-            public Builder paymentNumber(String paymentNumber) {this.paymentNumber = paymentNumber; return this;}
-            public Builder taxSumm(Long taxSumm) {this.taxSumm = taxSumm; return this;}
+
+            public Builder id(Long id) {
+                this.id = id;
+                return this;
+            }
+
+            public Builder rowNum(BigDecimal rowNum) {
+                this.rowNum = rowNum;
+                return this;
+            }
+
+            public Builder ndflPersonId(Long ndflPersonId) {
+                this.ndflPersonId = ndflPersonId;
+                return this;
+            }
+
+            public Builder incomeCode(String incomeCode) {
+                this.incomeCode = incomeCode;
+                return this;
+            }
+
+            public Builder incomeType(String incomeType) {
+                this.incomeType = incomeType;
+                return this;
+            }
+
+            public Builder incomeAccruedDate(Date incomeAccruedDate) {
+                this.incomeAccruedDate = incomeAccruedDate;
+                return this;
+            }
+
+            public Builder incomePayoutDate(Date incomePayoutDate) {
+                this.incomePayoutDate = incomePayoutDate;
+                return this;
+            }
+
+            public Builder operationId(String operationId) {
+                this.operationId = operationId;
+                return this;
+            }
+
+            public Builder oktmo(String oktmo) {
+                this.oktmo = oktmo;
+                return this;
+            }
+
+            public Builder kpp(String kpp) {
+                this.kpp = kpp;
+                return this;
+            }
+
+            public Builder incomeAccruedSumm(BigDecimal incomeAccruedSumm) {
+                this.incomeAccruedSumm = incomeAccruedSumm;
+                return this;
+            }
+
+            public Builder incomePayoutSumm(BigDecimal incomePayoutSumm) {
+                this.incomePayoutSumm = incomePayoutSumm;
+                return this;
+            }
+
+            public Builder totalDeductionsSumm(BigDecimal totalDeductionsSumm) {
+                this.totalDeductionsSumm = totalDeductionsSumm;
+                return this;
+            }
+
+            public Builder taxBase(BigDecimal taxBase) {
+                this.taxBase = taxBase;
+                return this;
+            }
+
+            public Builder taxRate(Integer taxRate) {
+                this.taxRate = taxRate;
+                return this;
+            }
+
+            public Builder taxDate(Date taxDate) {
+                this.taxDate = taxDate;
+                return this;
+            }
+
+            public Builder calculatedTax(BigDecimal calculatedTax) {
+                this.calculatedTax = calculatedTax;
+                return this;
+            }
+
+            public Builder withholdingTax(BigDecimal withholdingTax) {
+                this.withholdingTax = withholdingTax;
+                return this;
+            }
+
+            public Builder notHoldingTax(BigDecimal notHoldingTax) {
+                this.notHoldingTax = notHoldingTax;
+                return this;
+            }
+
+            public Builder overholdingTax(BigDecimal overholdingTax) {
+                this.overholdingTax = overholdingTax;
+                return this;
+            }
+
+            public Builder refoundTax(Long refoundTax) {
+                this.refoundTax = refoundTax;
+                return this;
+            }
+
+            public Builder taxTransferDate(Date taxTransferDate) {
+                this.taxTransferDate = taxTransferDate;
+                return this;
+            }
+
+            public Builder paymentDate(Date paymentDate) {
+                this.paymentDate = paymentDate;
+                return this;
+            }
+
+            public Builder paymentNumber(String paymentNumber) {
+                this.paymentNumber = paymentNumber;
+                return this;
+            }
+
+            public Builder taxSumm(Long taxSumm) {
+                this.taxSumm = taxSumm;
+                return this;
+            }
+
             public NdflPersonIncome build() {
                 return new NdflPersonIncomeBuilder(this).ndflPersonIncome;
             }
         }
+
         private NdflPersonIncomeBuilder(Builder b) {
             this.ndflPersonIncome = new NdflPersonIncome();
             this.ndflPersonIncome.setId(b.id);
+            this.ndflPersonIncome.setOperationId(b.operationId);
             this.ndflPersonIncome.setRowNum(b.rowNum);
             this.ndflPersonIncome.setNdflPersonId(b.ndflPersonId);
             this.ndflPersonIncome.setIncomeCode(b.incomeCode);
@@ -603,6 +974,141 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             this.ndflPersonIncome.setPaymentDate(b.paymentDate);
             this.ndflPersonIncome.setPaymentNumber(b.paymentNumber);
             this.ndflPersonIncome.setTaxSumm(b.taxSumm);
+        }
+    }
+
+    private static class NdflPersonDeductionBuilder {
+        NdflPersonDeduction ndflPersonDeduction;
+
+        public static class Builder {
+            private Long ndflPersonId;
+            private Long id;
+            private BigDecimal rowNum;
+            private String typeCode;
+            private String notifType;
+            private Date notifDate;
+            private String notifNum;
+            private String notifSource;
+            private BigDecimal notifSumm;
+            private Date incomeAccrued;
+            private String incomeCode;
+            private BigDecimal incomeSumm;
+            private Date periodPrevDate;
+            private BigDecimal periodPrevSumm;
+            private Date periodCurrDate;
+            private BigDecimal periodCurrSumm;
+            private String operationId;
+
+            public Builder id(Long id) {
+                this.id = id;
+                return this;
+            }
+
+            public Builder ndflPersonId(Long ndflPersonId) {
+                this.ndflPersonId = ndflPersonId;
+                return this;
+            }
+
+            public Builder typeCode(String typeCode) {
+                this.typeCode = typeCode;
+                return this;
+            }
+
+            public Builder notifType(String notifType) {
+                this.notifType = notifType;
+                return this;
+            }
+
+            public Builder notifDate(Date notifDate) {
+                this.notifDate = notifDate;
+                return this;
+            }
+
+            public Builder notifNum(String notifNum) {
+                this.notifNum = notifNum;
+                return this;
+            }
+
+            public Builder notifSource(String notifSource) {
+                this.notifSource = notifSource;
+                return this;
+            }
+
+            public Builder notifSumm(BigDecimal notifSumm) {
+                this.notifSumm = notifSumm;
+                return this;
+            }
+
+            public Builder incomeAccrued(Date incomeAccrued) {
+                this.incomeAccrued = incomeAccrued;
+                return this;
+            }
+
+            public Builder incomeCode(String incomeCode) {
+                this.incomeCode = incomeCode;
+                return this;
+            }
+
+            public Builder incomeSumm(BigDecimal incomeSumm) {
+                this.incomeSumm = incomeSumm;
+                return this;
+            }
+
+            public Builder periodPrevDate(Date periodPrevDate) {
+                this.periodPrevDate = periodPrevDate;
+                return this;
+            }
+
+            public Builder periodPrevSumm(BigDecimal periodPrevSumm) {
+                this.periodPrevSumm = periodPrevSumm;
+                return this;
+            }
+
+            public Builder periodCurrDate(Date periodCurrDate) {
+                this.periodCurrDate = periodCurrDate;
+                return this;
+            }
+
+            public Builder periodCurrSumm(BigDecimal periodCurrSumm) {
+                this.periodCurrSumm = periodCurrSumm;
+                return this;
+            }
+
+            public Builder operationId(String operationId) {
+                this.operationId = operationId;
+                return this;
+            }
+
+            public NdflPersonDeduction build() {
+                return new NdflPersonDeductionBuilder(this).ndflPersonDeduction;
+            }
+
+            public Builder rowNum(BigDecimal rowNum) {
+                this.rowNum = rowNum;
+                return this;
+            }
+
+        }
+
+        private NdflPersonDeductionBuilder(Builder b) {
+            this.ndflPersonDeduction = new NdflPersonDeduction();
+            this.ndflPersonDeduction.setNdflPersonId(b.ndflPersonId);
+            this.ndflPersonDeduction.setId(b.id);
+            this.ndflPersonDeduction.setTypeCode(b.typeCode);
+            this.ndflPersonDeduction.setNotifType(b.notifType);
+            this.ndflPersonDeduction.setNotifDate(b.notifDate);
+            this.ndflPersonDeduction.setNotifNum(b.notifNum);
+            this.ndflPersonDeduction.setNotifSource(b.notifSource);
+            this.ndflPersonDeduction.setNotifSumm(b.notifSumm);
+            this.ndflPersonDeduction.setIncomeAccrued(b.incomeAccrued);
+            this.ndflPersonDeduction.setIncomeCode(b.incomeCode);
+            this.ndflPersonDeduction.setIncomeSumm(b.incomeSumm);
+            this.ndflPersonDeduction.setPeriodPrevDate(b.periodPrevDate);
+            this.ndflPersonDeduction.setPeriodPrevSumm(b.periodPrevSumm);
+            this.ndflPersonDeduction.setPeriodCurrDate(b.periodCurrDate);
+            this.ndflPersonDeduction.setPeriodCurrSumm(b.periodCurrSumm);
+            this.ndflPersonDeduction.setOperationId(b.operationId);
+            this.ndflPersonDeduction.setRowNum(b.rowNum);
         }
     }
 
@@ -855,6 +1361,10 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 266135799L));
         pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "21"));
         pagingResult.add(pagingResultItem);
+        Map<String, RefBookValue> pagingResultItem2 = new HashMap<String, RefBookValue>();
+        pagingResultItem2.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 266135799L));
+        pagingResultItem2.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "12"));
+        pagingResult.add(pagingResultItem2);
         mockRefBook(RefBook.Id.DOCUMENT_CODES.getId(), pagingResult);
     }
 
@@ -866,6 +1376,8 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
         pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 268574899L));
         pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "1"));
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 268512899L));
+        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "2"));
         pagingResult.add(pagingResultItem);
         mockRefBook(RefBook.Id.TAXPAYER_STATUS.getId(), pagingResult);
     }
@@ -876,8 +1388,18 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
     private void initRefBookIncomeCode() {
         PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
         Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
-        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 352164399L));
-        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "2000"));
+        pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 350014309L));
+        pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "1010"));
+        pagingResultItem.put("record_version_to", new RefBookValue(RefBookAttributeType.DATE,  new Date(2016,12,12)));
+        pagingResult.add(pagingResultItem);
+        Map<String, RefBookValue> pagingResultItem2 = new HashMap<String, RefBookValue>();
+        pagingResultItem2.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 352114309L));
+        pagingResultItem2.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "2010"));
+        pagingResult.add(pagingResultItem2);
+        Map<String, RefBookValue> pagingResultItem3 = new HashMap<String, RefBookValue>();
+        pagingResultItem3.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 312084399L));
+        pagingResultItem3.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "104"));
+        pagingResult.add(pagingResultItem3);
         pagingResult.add(pagingResultItem);
         mockRefBook(RefBook.Id.INCOME_CODE.getId(), pagingResult);
     }
@@ -893,6 +1415,12 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         pagingResultItem.put("INCOME_TYPE_ID", new RefBookValue(RefBookAttributeType.NUMBER, 352164399L));
         pagingResultItem.put("MARK", new RefBookValue(RefBookAttributeType.STRING, "05"));
         pagingResult.add(pagingResultItem);
+        Map<String, RefBookValue> pagingResultItem2 = new HashMap<String, RefBookValue>();
+        pagingResultItem2.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 352196699L));
+        // Ссылка на таблицу "Коды видов доходов"
+        pagingResultItem2.put("INCOME_TYPE_ID", new RefBookValue(RefBookAttributeType.NUMBER, 352164399L));
+        pagingResultItem2.put("MARK", new RefBookValue(RefBookAttributeType.STRING, "1010"));
+        pagingResult.add(pagingResultItem2);
         mockRefBook(RefBook.Id.INCOME_KIND.getId(), pagingResult);
     }
 
@@ -916,7 +1444,11 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
         pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 266955499L));
         pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "104"));
+        Map<String, RefBookValue> pagingResultItem2 = new HashMap<String, RefBookValue>();
+        pagingResultItem2.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 266950499L));
+        pagingResultItem2.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "1010"));
         pagingResult.add(pagingResultItem);
+        pagingResult.add(pagingResultItem2);
         mockRefBook(RefBook.Id.DEDUCTION_TYPE.getId(), pagingResult);
     }
 

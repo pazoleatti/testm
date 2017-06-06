@@ -56,6 +56,10 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
         void setUserDepartmentId(Integer userDepartmentId);
 
 		void setAsnuFilter(List<Long> asnuIds);
+
+		void addEnterNativePreviewHandler();
+
+		void removeEnterNativePreviewHandler();
     }
 
 	private final DispatchAsync dispatchAsync;
@@ -112,6 +116,18 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 						    DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
 					    }
 					}, this));
+	}
+
+	@Override
+	protected void onReveal() {
+		super.onReveal();
+		getView().addEnterNativePreviewHandler();
+	}
+
+	@Override
+	protected void onHide() {
+		super.onHide();
+		getView().removeEnterNativePreviewHandler();
 	}
 
 	private Map<Integer, String> fillDeclarationTypesMap(DeclarationDataFilterAvailableValues source){

@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -70,6 +71,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     Button apply;
 
     private boolean enterEventDisabled;
+
+    private HandlerRegistration nativePreviewHandler;
 
     @Inject
 	@UiConstructor
@@ -170,15 +173,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         notePicker.setTitle("Примечание");
 
         initWidget(binder.createAndBindUi(this));
-
-        Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-            @Override
-            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER && !enterEventDisabled) {
-                    getUiHandlers().onApplyFilter();
-                }
-            }
-        });
 
     }
 
@@ -644,5 +638,22 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     @Override
     public void setUserDepartmentId(Integer userDepartmentId) {
         departmentPicker.setUserDepartmentId(userDepartmentId);
+    }
+
+    @Override
+    public void addEnterNativePreviewHandler() {
+        nativePreviewHandler = Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER && !enterEventDisabled) {
+                    getUiHandlers().onApplyFilter();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void removeEnterNativePreviewHandler() {
+        nativePreviewHandler.removeHandler();
     }
 }

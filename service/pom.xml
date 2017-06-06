@@ -244,4 +244,19 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>development</id>
+            <properties>
+                <productionMode>false</productionMode>
+            </properties>
+        </profile>
+        <profile>
+            <id>production</id>
+            <properties>
+                <productionMode>true</productionMode>
+            </properties>
+        </profile>
+    </profiles>
 </project>

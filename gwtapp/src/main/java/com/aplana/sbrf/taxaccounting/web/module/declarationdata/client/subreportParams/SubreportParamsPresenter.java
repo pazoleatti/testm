@@ -29,6 +29,7 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
+
 import java.util.*;
 
 /**
@@ -56,6 +57,10 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
         DataRow<Cell> getSelectedRow();
 
         void updateInfoLabel(boolean visible, String text, Map<String, String> styleMap);
+
+        void addEnterNativePreviewHandler();
+
+        void removeEnterNativePreviewHandler();
     }
 
     @Inject
@@ -68,6 +73,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     @Override
     protected void onReveal() {
         super.onReveal();
+        getView().addEnterNativePreviewHandler();
         closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
             @Override
             public void onClose(CloseEvent<Window> event) {
@@ -242,6 +248,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     public void onHide() {
         super.onHide();
         getView().updateInfoLabel(false, null, null);
+        getView().removeEnterNativePreviewHandler();
         closeFormDataHandlerRegistration.removeHandler();
     }
 

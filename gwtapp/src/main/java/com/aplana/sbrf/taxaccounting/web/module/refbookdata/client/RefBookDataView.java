@@ -13,9 +13,11 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -65,6 +67,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     private boolean isVersion, isVersioned;
     private LinkButton printToExcel, printToCSV;
     private boolean uploadAvailable;
+
+    private HandlerRegistration nativePreviewHandler;
 
     public RefBookDataView() {
     }
@@ -415,4 +419,20 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         hierarchyPanelStyle.setProperty("top", DEFAULT_TABLE_PANEL_TOP_POSITION + downShift, Style.Unit.PX);
     }
 
+    @Override
+    public void addEnterNativePreviewHandler() {
+        nativePreviewHandler = Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                    searchButtonClicked(null);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void removeEnterNativePreviewHandler() {
+        nativePreviewHandler.removeHandler();
+    }
 }

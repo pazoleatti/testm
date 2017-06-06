@@ -10,9 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Класс для формирования стандартных запросов для провайдеров данных справочников.
@@ -43,11 +41,11 @@ public class RefBookUtils extends AbstractDao {
     }
 
     public static List<String> checkFillRequiredRefBookAtributes(List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        List<String> errors = new ArrayList<String>();
+        Set<String> errors = new HashSet<String>();
         for (RefBookRecord record : records) {
             errors.addAll(checkFillRequiredRefBookAtributes(attributes, record.getValues()));
         }
-        return errors;
+        return new ArrayList<String>(errors);
     }
 
     public static List<String> checkRefBookAtributeValues(List<RefBookAttribute> attributes, List<RefBookRecord> records) {

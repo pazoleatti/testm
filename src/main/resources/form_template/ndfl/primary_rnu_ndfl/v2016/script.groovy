@@ -243,7 +243,7 @@ import java.text.SimpleDateFormat
                         String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
                         String inp = ndflPerson.getPersonIdentifier().inp
                         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, "",
+                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
                         localLogger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
                                 "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
@@ -1608,6 +1608,7 @@ import java.text.SimpleDateFormat
         xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
         XMLEventReader reader = xmlFactory.createXMLEventReader(xmlInputStream)
 
+        def ndflPersonNum = 1;
         def sb;
         try {
             while (reader.hasNext()) {
@@ -1638,7 +1639,8 @@ import java.text.SimpleDateFormat
                     String personData = sb.toString();
                     if (personData != null && !personData.isEmpty()) {
                         def infoPart = new XmlSlurper().parseText(sb.toString())
-                        processInfoPart(infoPart)
+                        processInfoPart(infoPart, ndflPersonNum)
+                        ndflPersonNum++
                     }
                 }
             }
@@ -1676,7 +1678,7 @@ import java.text.SimpleDateFormat
         return var1.toString();
     }
 
-    void processInfoPart(infoPart) {
+    void processInfoPart(infoPart, rowNum) {
 
         def ndflPersonNode = infoPart.'ПолучДох'[0]
 
@@ -1701,6 +1703,7 @@ import java.text.SimpleDateFormat
         //Идентификатор декларации для которой загружаются данные
         if (ndflPerson.incomes != null && !ndflPerson.incomes.isEmpty()) {
             ndflPerson.declarationDataId = declarationData.getId()
+            ndflPerson.rowNum = rowNum
             ndflPersonService.save(ndflPerson)
         } else {
             logger.warn("ФЛ ФИО = $fio ФЛ ИНП = ${ndflPerson.inp} Не загружен в систему поскольку не имеет операций в отчетном периоде")
@@ -2478,7 +2481,7 @@ class NdflPersonFL {
 
     @Field final String MESSAGE_ERROR_DUBL_OR_ABSENT = "В ТФ имеются пропуски или повторы в нумерации строк."
     @Field final String MESSAGE_ERROR_DUBL = " Повторяются строки:"
-    @Field final String MESSAGE_ERROR_ABSENT = " Отсутсвуют строки:"
+    @Field final String MESSAGE_ERROR_ABSENT = " Отсутствуют строки:"
 
 
     @Field final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" (%d записей)."
@@ -3338,14 +3341,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column7And11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm}",
+                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}}'",
                     "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
             )
             //11 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column20Fill(),
                     new Column7And11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)=${ndflPersonIncome.incomePayoutSumm ?: ""}",
+                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                     "Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20"
             )
             //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 23,23,24
@@ -3362,12 +3365,12 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Срок (Графа 21)='${ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): ""}'",
                     "Раздел 2. Графа 21 должна быть не заполнена, если не заполнены Раздел 2. Графы 7,11 и 22,23,24"
             )
-            //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них
+            //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна из них
             columnFillConditionDataList << new ColumnFillConditionData(
                     new ColumnTrueFillOrNotFill(),
                     new Column22And23And24FillOrColumn22And23And24NotFill(),
                     "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. НДФЛ.Перечисление в бюджет.Платежное поручение.Дата (Графа 22)='${ndflPersonIncome.paymentDate ? ndflPersonIncome.paymentDate.format(DATE_FORMAT): ""}', НДФЛ.Перечисление в бюджет.Платежное поручение.Номер (Графа 23)='${ndflPersonIncome.paymentNumber ?: ""}', НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)='${ndflPersonIncome.taxSumm ?: ""}'",
-                    "Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них"
+                    "Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна из них"
             )
             columnFillConditionDataList.each { columnFillConditionData ->
                 if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
@@ -4024,7 +4027,7 @@ class ColumnFillConditionData {
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                     "НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax ?: ""}'")
                             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 16", fioAndInp, pathError,
-                                    "Не выполнено условие: «Графа 16 Раздел 2» не равно «Сумма Граф 13 Раздел 2» с начала периода на отчетную дату x 13%% - «Сумма Граф 16 Раздел 2» за предыдущие отчетные периоды")
+                                    "Не выполнено условие: «Графа 16 Раздел 2» не равно «Сумма Граф 13 Раздел 2» с начала периода на отчетную дату x 13% - «Сумма Граф 16 Раздел 2» за предыдущие отчетные периоды")
                         }
                     }
                     // СведДох6.3
@@ -4040,7 +4043,7 @@ class ColumnFillConditionData {
                                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                         "НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)='${ndflPersonIncome.calculatedTax ?: ""}'")
                                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 16", fioAndInp, pathError,
-                                        "Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13%% - «Графа 4 Раздел 4»")
+                                        "Не выполнено условие: «Графа 16 Раздел 2» = «Графа 13 Раздел 2» x 13% - «Графа 4 Раздел 4»")
                             }
                         }
                     }
@@ -4086,7 +4089,7 @@ class ColumnFillConditionData {
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                     "НДФЛ.Расчет.Сумма.Удержанный (Графа 17)='${ndflPersonIncome.withholdingTax ?: ""}'")
                             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 17", fioAndInp, pathError,
-                                    "Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» <= ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%%)")
+                                    "Не выполнено условие: если «Графа 17 Раздел 2» = («Графа 16 Раздел 2» + «Графа 16 Раздел 2» предыдущей записи) = «Графа 24 Раздел 2» и «Графа 17 Раздел 2» <= ((«Графа 13 Раздел 2» - «Графа 16 Раздел 2») × 50%)")
                         }
                     } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
                             || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1544", "1545",
