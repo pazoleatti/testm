@@ -260,20 +260,20 @@
 
                                                     //Если выходит за нижниюю границу контента модального окна, то hint там и оставляем
                                                     if (modalFooter.offset().top + scrollTop <= bounds.top + height) {
-                                                        hint.css('top', modalFooter.offset().top + scrollTop);
+                                                        /*hint.css('top', modalFooter.offset().top + scrollTop);*/
                                                     } else {
                                                         //Если выходит за верхнюю границу контента модального окна, то hint там и оставляем
                                                         var maxTop = modalHeader.offset().top + modalHeader.height() +
                                                             parseInt(modalHeader.css('padding-top'), 10) + parseInt(modalHeader.css('padding-bottom'), 10) + heightHelpArrow + scrollTop;
                                                         if (maxTop >= bounds.top + height) {
                                                             //Вычисляем место прижатия hint-а: начало шапки модального окна + высота шапки + отступы шапки сверху и снихзу + высота стрелки-подсказки
-                                                            hint.css('top', maxTop);
+                                                          /*  hint.css('top', maxTop);*/
                                                         } else {
-                                                            hint.css('top', bounds.top + height);
+                                                            // hint.css('top', bounds.top + height);
                                                         }
                                                     }
                                                 } else {
-                                                    hint.css('top', bounds.top + height);
+                                                    /*hint.css('top', bounds.top + height);*/
                                                 }
                                             }
                                         }
