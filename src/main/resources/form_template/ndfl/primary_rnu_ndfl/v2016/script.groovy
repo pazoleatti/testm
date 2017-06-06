@@ -1334,7 +1334,11 @@ import java.text.SimpleDateFormat
         def resultReportParameters = [:]
         reportParameters.each { key, value ->
             if (value != null) {
-                resultReportParameters.put(key, value)
+                def val = value;
+                if (!(key in ["fromBirthDay", "toBirthDay"])) {
+                    val = '%'+value+'%'
+                }
+                resultReportParameters.put(key, val)
             }
         }
 
@@ -1344,6 +1348,17 @@ import java.text.SimpleDateFormat
 
         PagingResult<NdflPerson> pagingResult = ndflPersonService.findNdflPersonByParameters(declarationData.id, resultReportParameters, startIndex, pageSize);
 
+        //Если записи не найдены, то система формирует предупреждение:
+        //Заголовок: "Предупреждение"
+        //Текст: "Физическое лицо: <Данные ФЛ> не найдено в форме", где <Данные ФЛ> - значение полей формы, по которым выполнялся поиск физического лица, через разделитель "; "
+        //Кнопки: "Закрыть"
+
+        if (pagingResult.isEmpty()) {
+            subreportParamsToString = { it.collect { (it.value != null ? (((it.value instanceof Date)?it.value.format('dd.MM.yyyy'):it.value) + ";") : "") } join " " }
+            logger.warn("Физическое лицо: " + subreportParamsToString(reportParameters) + " не найдено в форме");
+            //throw new ServiceException("Физическое лицо: " + subreportParamsToString(reportParameters)+ " не найдено в форме");
+        }
+
         pagingResult.getRecords().each() { ndflPerson ->
             DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
             row.getCell("id").setStringValue(ndflPerson.id.toString())
@@ -1351,7 +1366,7 @@ import java.text.SimpleDateFormat
             row.firstName = ndflPerson.firstName
             row.middleName = ndflPerson.middleName
             row.snils = ndflPerson.snils
-            row.innNp = ndflPerson.innNp
+            row.innNp = ndflPerson.innNp?:ndflPerson.innForeign
             row.birthDay = ndflPerson.birthDay
             row.idDocNumber = ndflPerson.idDocNumber
             dataRows.add(row)
