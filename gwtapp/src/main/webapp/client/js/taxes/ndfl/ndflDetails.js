@@ -438,6 +438,17 @@
                 }
 
                 initPage();
+
+                $scope.isNumber = function (value) {
+                    if (!value || value === "") {
+                        return true;
+                    }
+                    var INTEGER_REGEXP = /^\-?\d+$/;
+                    if (INTEGER_REGEXP.test(value)) {
+                        return true;
+                    }
+                    return false;
+                };
             }])
         /**
          * Контроллер формы создания/редактирования ФЛ
@@ -509,25 +520,20 @@
                     };
 
                     // Селект выбора квартала
-                    $scope.quarterSelect = {
+                    $scope.citizenshipSelect = {
                         options: {
                             minimumResultsForSearch: -1,
-                            id: function (item) {
-                                return item.value;
-                            },
-                            allowClear: false,
+                            allowClear: fale,
                             formatSelection: function (quarter) {
-                                return quarter.value;
+                                return quarter.code;
                             },
                             formatResult: function (quarter) {
-                                return quarter.value;
+                                return quarter.name;
                             },
                             data: {
                                 results: [
-                                    {value: 1},
-                                    {value: 2},
-                                    {value: 3},
-                                    {value: 4}
+                                    {id: 1, name: 'Россия', code: 123},
+                                    {id: 2, name: 'Сомали', code: 456}
                                 ]
                             }
                         }
