@@ -58,7 +58,7 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
             if (declarationDataService.existDeclarationData(id)) {
                 final Long declarationId = id;
                 if (action.isAccepted()) {
-                    logger.info("Постановка операции \"%s\" в очередь на исполнение для %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
+                    logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
                     try {
                         String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
                         if (uuidXml != null) {
@@ -83,7 +83,7 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
 
                                         @Override
                                         public void executePostCheck() {
-                                            logger.error("Найдены запущенные задач, которые блокирует выполнение операции.");
+                                            logger.error("Найдена запущенная задача, которая блокирует выполнение операции.");
                                         }
 
                                         @Override
@@ -113,7 +113,7 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
                     }
                 } else {
                     String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
-                    logger.info("Выполяется операция \"%s\" для %s:", "Отмена принятия", declarationFullName);
+                    logger.info("Выполяется операция \"%s\" для объекта: %s:", "Отмена принятия", declarationFullName);
                     try {
                         declarationDataService.cancel(logger, declarationId, securityService.currentUserInfo());
                         String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", declarationId, State.CREATED.getTitle()).toString();

@@ -349,33 +349,34 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     private static String buildQueryBody(Map<String, Object> parameters) {
         StringBuilder sb = new StringBuilder();
         sb.append("FROM ndfl_person np \n");
-        sb.append(" LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id \n");
+        sb.append("LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id \n");
         sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
 
         if (parameters != null && !parameters.isEmpty()) {
 
             if (contains(parameters, "lastName")) {
-                sb.append("AND lower(np.last_name) = lower(:lastName) \n");
+                sb.append("AND lower(np.last_name) like lower(:lastName) \n");
             }
 
             if (contains(parameters, "firstName")) {
-                sb.append("AND lower(np.first_name) = lower(:firstName) \n");
+                sb.append("AND lower(np.first_name) like lower(:firstName) \n");
             }
 
             if (contains(parameters, "middleName")) {
-                sb.append("AND (np.middle_name is null OR lower(np.middle_name) = lower(:middleName)) \n");
+                sb.append("AND lower(np.middle_name) like lower(:middleName) \n");
             }
 
             if (contains(parameters, "snils")) {
-                sb.append("AND np.snils = :snils \n");
+                sb.append("AND (translate(lower(np.snils), '0-, ', '0') like translate(lower(:snils), '0-, ', '0')) \n");
             }
 
             if (contains(parameters, "inn")) {
-                sb.append("AND np.inn_np = :inn \n");
+                sb.append("AND (translate(lower(np.inn_np), '0-, ', '0') like translate(lower(:inn), '0-, ', '0') OR " +
+                        "translate(lower(np.inn_foreign), '0-, ', '0') like translate(lower(:inn), '0-, ', '0')) \n");
             }
 
             if (contains(parameters, "inp")) {
-                sb.append("AND np.inp = :inp \n");
+                sb.append("AND lower(np.inp) like lower(:inp)) \n");
             }
 
             if (contains(parameters, "fromBirthDay")) {
@@ -387,7 +388,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
 
             if (contains(parameters, "idDocNumber")) {
-                sb.append("AND (np.id_doc_number is null OR np.id_doc_number = :idDocNumber) \n");
+                sb.append("AND (translate(lower(np.id_doc_number), '0-, ', '0') like translate(lower(:idDocNumber), '0-, ', '0')) \n");
             }
         }
         return sb.toString();

@@ -67,7 +67,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
         for (Long id: action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(id)) {
                 final Long declarationId = id;
-                logger.info("Постановка операции \"%s\" в очередь на исполнение для %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
+                logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
                 try {
                     LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(declarationId, DeclarationDataReportType.ACCEPT_DEC));
                     if (lockDataAccept == null) {
@@ -124,7 +124,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
                                         userService.getUser(lockDataAccept.getUserId()).getName(),
                                         declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, action.getTaxType()))
                         );
-                        logger.error("Запущены операция, при которой выполнение данной операции невозможно");
+                        logger.error("Запущена операция, при которой выполнение данной операции невозможно");
                     }
                 } catch (Exception e) {
                     logger.error(e);
