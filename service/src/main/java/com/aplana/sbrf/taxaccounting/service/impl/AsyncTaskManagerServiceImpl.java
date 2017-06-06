@@ -124,7 +124,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     // Шаг 8
                     Object declarationDataId = params.get("declarationDataId");
                     if (declarationDataId != null) {
-                        String message = String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo), "Для формы № " + params.get("declarationDataId"));
+                        String message = String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo), "для формы № " + params.get("declarationDataId"));
                         logger.info(message.replaceAll("\"\"", "\""));
                     } else {
                         String message = String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo), "");
