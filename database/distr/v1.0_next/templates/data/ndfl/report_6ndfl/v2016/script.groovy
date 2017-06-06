@@ -751,7 +751,7 @@ def getNdfl2DeclarationDataId() {
     if (result.isEmpty()) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
         Department department = departmentService.get(departmentReportPeriod.departmentId)
-        logger.error("Отсутствует форма 2-НДФЛ (1) для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED): ""}")
+        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. Отсутствует форма 2-НДФЛ (1) для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED): ""}")
     }
     return result
 }
@@ -1006,8 +1006,7 @@ List<PairKppOktmo> getPairKppOktmoList() {
             if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
                 it.remove()
             }
-            if (departmentReportPeriod.correctionDate != null && depReportPeriod.correctionDate != null &&
-                    depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
+            if (depReportPeriod.correctionDate != null && depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
                 it.remove()
             }
         }
