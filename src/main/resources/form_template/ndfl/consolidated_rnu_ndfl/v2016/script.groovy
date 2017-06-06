@@ -164,7 +164,7 @@ void consolidation() {
         throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
     }
 
-    logForDebug("Номера первичных НФ включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + calcTimeMillis(time));
+    logForDebug("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + calcTimeMillis(time));
 
     List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
 
