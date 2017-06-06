@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -82,6 +83,8 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
     private DataRowColumnFactory factory = new DataRowColumnFactory();
 
+    private HandlerRegistration nativePreviewHandler;
+
     @Inject
     public SubreportParamsView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
@@ -107,14 +110,6 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
         model = new ListDataProvider<DataRow<Cell>>();
         model.addDataDisplay(resultTable);
-        Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-            @Override
-            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-                    getUiHandlers().onFind();
-                }
-            }
-        });
     }
 
     @UiHandler("findButton")
@@ -391,5 +386,22 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
             }
         }
         infoPanel.setVisible(visible);
+    }
+
+    @Override
+    public void addEnterNativePreviewHandler() {
+        nativePreviewHandler = Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                    getUiHandlers().onFind();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void removeEnterNativePreviewHandler() {
+        nativePreviewHandler.removeHandler();
     }
 }
