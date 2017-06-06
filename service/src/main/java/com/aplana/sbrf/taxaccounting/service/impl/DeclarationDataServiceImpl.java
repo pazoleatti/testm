@@ -1301,7 +1301,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         if (ddReportType == null)
             return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                    "налоговая форма",
+                    "Налоговая форма",
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriod.getCorrectionDate() != null
                             ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1712,7 +1712,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     fail++;
                     DeclarationData declarationData = get(entry.getKey(), userInfo);
                     oktmoKppList.add(String.format("ОКТМО: %s, КПП: %s.", declarationData.getOktmo(), declarationData.getKpp()));
-                    logger.error("Произошла непредвиденная ошибка при расчете для " + getDeclarationFullName(entry.getKey(), null));
+                    logger.error("Произошла непредвиденная ошибка при расчете для объекта: " + getDeclarationFullName(entry.getKey(), null));
                     logger.getEntries().addAll(scriptLogger.getEntries());
                     declarationDataDao.delete(entry.getKey());
                 } else {
@@ -1726,7 +1726,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         logger.info("Успешно созданных форм: %d. Не удалось создать форм: %d.", success, fail);
         if (!oktmoKppList.isEmpty()) {
-            logger.info("Не удалось создать формы со следующими парметрами:");
+            logger.info("Не удалось создать формы со следующими параметрами:");
             for(String oktmoKpp: oktmoKppList) {
                 logger.warn(oktmoKpp);
             }
