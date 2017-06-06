@@ -27,8 +27,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -144,6 +142,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void setUploadAvailable(boolean uploadAvailable);
 
         void setLockInformation(String title);
+
+        void addEnterNativePreviewHandler();
+
+        void removeEnterNativePreviewHandler();
     }
 
     @Inject
@@ -168,19 +170,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                 onTimer(true);
             }
         };
-        Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-            @Override
-            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-                    onSearchClick();
-                }
-            }
-        });
     }
 
     @Override
     protected void onHide() {
         super.onHide();
+        getView().removeEnterNativePreviewHandler();
         refBookId = null;
         refBookLinearPresenter.reset();
         editFormPresenter.setIsFormModified(false);
@@ -198,6 +193,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     protected void onReveal() {
         super.onReveal();
+        getView().addEnterNativePreviewHandler();
         LogCleanEvent.fire(this);
         setInSlot(TYPE_editFormPresenter, editFormPresenter);
         setInSlot(TYPE_mainFormPresenter, refBookLinearPresenter);

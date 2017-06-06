@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,7 +30,9 @@ import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
 
@@ -118,6 +121,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		}
 	};
 
+	private HandlerRegistration nativePreviewHandler;
+
 	@Inject
 	@UiConstructor
 	public TaxFormNominationView(final Binder uiBinder) {
@@ -168,20 +173,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 				enterEventDisabled = false;
 			}
 		}, BlurEvent.getType());
-		Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-			@Override
-			public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-				if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER && !enterEventDisabled) {
-					if (isForm) {
-						formPager.firstPage();
-						reloadFormTableData();
-					} else {
-						reloadDeclarationTableData();
-						declarationPager.firstPage();
-					}
-				}
-			}
-		});
 	}
 
 	/* Инициализация таблицы отображающий данные вкладки "Назначение налоговых форм"   */
@@ -543,4 +534,26 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         return new Pair<TaxNominationColumnEnum, Boolean>(sort, asc);
     }
 
+	@Override
+	public void addEnterNativePreviewHandler() {
+		nativePreviewHandler = Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+			@Override
+			public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+				if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER && !enterEventDisabled) {
+					if (isForm) {
+						formPager.firstPage();
+						reloadFormTableData();
+					} else {
+						reloadDeclarationTableData();
+						declarationPager.firstPage();
+					}
+				}
+			}
+		});
+	}
+
+	@Override
+	public void removeEnterNativePreviewHandler() {
+		nativePreviewHandler.removeHandler();
+	}
 }
