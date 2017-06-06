@@ -11,5 +11,6 @@
     <util:properties id="versionInfoProperties">
         <prop key="version">${version}</prop>
         <prop key="revision">${git.buildnumber}.${timestamp}</prop>
+        <prop key="productionMode">${productionMode}</prop>
     </util:properties>
 </beans>

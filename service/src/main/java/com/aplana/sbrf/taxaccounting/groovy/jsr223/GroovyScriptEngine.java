@@ -221,7 +221,7 @@ public class GroovyScriptEngine extends GroovyScriptEngineImpl {
         }
     }
 
-    Class getScriptClass(String script)
+    public Class getScriptClass(String script)
             throws SyntaxException,
             CompilationFailedException,
             IOException {

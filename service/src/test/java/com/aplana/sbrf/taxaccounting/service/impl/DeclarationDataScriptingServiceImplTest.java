@@ -99,6 +99,11 @@ public class DeclarationDataScriptingServiceImplTest {
             }
         };
         ReflectionTestUtils.setField(service, "tx", tx);
+
+		Properties versionInfoProperties = new Properties();
+		versionInfoProperties.put("productionMode", "true");
+		versionInfoProperties.put("version", "test");
+		ReflectionTestUtils.setField(service, "versionInfoProperties", versionInfoProperties);
 	}
 
 	@Test
