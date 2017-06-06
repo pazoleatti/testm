@@ -51,7 +51,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     @Autowired
     private TransactionHelper tx;
 
-	private final static String SCRIPT_PATH_PREFIX_TEMPLATE = "../src/main/resources/form_template";
+	private final static String SCRIPT_PATH_PREFIX = "../src/main/resources/form_template";
 
 	/**
 	 * Возвращает спринг-бины доступные для использования в скрипте создания декларации.
@@ -91,13 +91,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
         String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
 		String scriptFilePath = null;
 		if (versionInfoProperties != null && versionInfoProperties.getProperty("productionMode").equals("false")) {
-			try {
-				scriptFilePath = getLocalScriptPath(script, SCRIPT_PATH_PREFIX_TEMPLATE);
-			} catch (Exception e) {
-				LOG.warn(e.getMessage(), e);
-				logger.error("Не удалось получить локальный скрипт", e);
-				return false;
-			}
+			scriptFilePath = getScriptFilePath(script, SCRIPT_PATH_PREFIX, logger);
 		}
 		if (!canExecuteScript(script, event)) {
             return false;
@@ -193,19 +187,6 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		} catch (Exception e) {
             //TODO: Добавить вывод номера строки в скрипте
 			logger.error(new ServiceException("Обнаружены ошибки в скрипте!", e));
-			return false;
-		}
-	}
-
-	private Object executeLocalScript(Binding binding, String scriptFilePath, Logger logger) {
-		try {
-			File scriptFile = new File(scriptFilePath);
-			config.setSourceEncoding("UTF-8");
-			// Создаем конфигурацию с предопределенными импортами
-			GroovyShell groovyShell = new GroovyShell(binding, config);
-			return groovyShell.evaluate(scriptFile);
-		} catch (Exception e) {
-			logScriptException(e, logger);
 			return false;
 		}
 	}
