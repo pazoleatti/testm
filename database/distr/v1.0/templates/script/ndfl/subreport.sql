@@ -9,9 +9,9 @@ INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blo
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1013,101,'Реестр сформированной отчетности',3,'report_kpp_oktmo','d11ebeb4-07f2-11e7-93ae-92361f002671',0);		
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1021,102,'2-НДФЛ 1',1,'report_2ndfl','047f207c-113e-488d-8390-9afc248a3bc8',1);
+	(1021,102,'2-НДФЛ (1) по физическому лицу',1,'report_2ndfl','047f207c-113e-488d-8390-9afc248a3bc8',1);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1041,104,'2-НДФЛ 2',1,'report_2ndfl','04d9b114-1782-4d09-ad88-729e5605c6ff',1);
+	(1041,104,'2-НДФЛ (2) по физическому лицу',1,'report_2ndfl','04d9b114-1782-4d09-ad88-729e5605c6ff',1);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1022,102,'Первичные РНУ с ошибками',2,'primary_rnu_w_errors','9a7a519a-83ea-4ddf-bee0-b7af67ba5f78',0);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
