@@ -204,14 +204,14 @@
                                     var fieldContent;
 
                                     //Отображается ли подсказка в модальном окне
-                                    var isInModal = ($(hint).parents('.modal').size() !== 0);
+                                    var isInModal = ($(hint).parents('.modal').length !== 0);
                                     var modalFooter; //Шапка модального окна
                                     var modalHeader; //Подвал модального окна
                                     if (isInModal) {
                                         modalFooter = $(hint).parents('.modal').find('.modal-footer');
                                         modalHeader = $(hint).parents('.modal').find('.modal-header');
                                     }
-                                    var isInTab = ($(hint).parents('.tab-pane.ng-scope').size() !== 0);
+                                    var isInTab = ($(hint).parents('.tab-pane.ng-scope').length !== 0);
                                     var tabModel;
                                     if (isInTab) {
                                         tabModel = $(hint).parents('.tab-pane.ng-scope');

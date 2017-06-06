@@ -13,10 +13,14 @@
                     <div>
                         <label class="control-label">{{'title.inp' | translate}}</label>
                     </div>
-                    <div>
-                        <input data-ng-model="entity.inp" required
+                    <div data-aplana-field>
+                        <input style="margin-left: -180px;margin-top: 20px;width: 168px;"
+                               data-ng-model="entity.inp" required
                                type="text" class="form-control"
                                title="{{entity.inp}}"/>
+                        <div data-aplana-validator data-key="required">
+                            Обязательное поле
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -65,16 +69,6 @@
                          data-ng-model="entity.citizenship"
                          data-ng-required="true">
                     </div>
-                    <!--<div>-->
-                        <!--<ui-select ng-model="entity.citizenship" required>-->
-                            <!--<ui-select-match allow-clear="false">-->
-                                <!--<span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>-->
-                            <!--</ui-select-match>-->
-                            <!--<ui-select-choices repeat="item in dialogDataStub.citizenshipList track by $index">-->
-                                <!--<span data-ng-bind-html="item.name | highlight: $select.search"></span>-->
-                            <!--</ui-select-choices>-->
-                        <!--</ui-select>-->
-                    <!--</div>-->
                 </div>
                 <div>
                     <div>
@@ -115,10 +109,15 @@
                         <div>
                             <label class="control-label">{{'title.document.number' | translate}}</label>
                         </div>
-                        <div>
-                            <input data-ng-model="entity.documentNumber" required
+                        <div data-aplana-field>
+                            <input style="margin-left: -180px;margin-top: 20px;width: 168px;"
+                                   data-ng-model="entity.documentNumber" required
                                    type="text" class="form-control"
-                                   title="{{entity.document.number}}"/>
+                                   title="{{entity.document.number}}"
+                                   data-ui-validate="{isNumber : 'isNumber($value)'}"/>
+                            <div data-aplana-validator data-key="isNumber">
+                                В поле должны вводиться только числа
+                            </div>
                         </div>
                     </div>
                 </fieldset>

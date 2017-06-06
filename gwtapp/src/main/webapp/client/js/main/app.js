@@ -20,6 +20,7 @@
             'aplana.submitValid',
             'aplana.dropdownMenu',
             'aplana.collapse',
+            'aplana.field',
             'ui.router',
             'ui.validate',
             'dialogs.main',
