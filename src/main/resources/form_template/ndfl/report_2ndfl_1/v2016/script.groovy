@@ -2163,7 +2163,7 @@ def createSpecificReport() {
     subReportViewParams['Фамилия'] = row.lastName
     subReportViewParams['Имя'] = row.firstName
     subReportViewParams['Отчество'] = row.middleName
-    subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay.format(DATE_FORMAT_DOTTED) : ""
+    subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay : ""
     subReportViewParams['№ ДУЛ'] = row.idDocNumber
 
     def xmlStr = declarationService.getXmlData(declarationData.id)
