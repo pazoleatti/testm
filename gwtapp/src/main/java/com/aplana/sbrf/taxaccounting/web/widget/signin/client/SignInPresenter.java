@@ -32,6 +32,7 @@ public class SignInPresenter extends PresenterWidget<SignInView> implements Sign
 		super(eventBus, view);
 		this.dispatchAsync = dispatchAsync;
 		this.placeManager = placeManager;
+		getView().setUiHandlers(this);
 	}
 
 	@Override

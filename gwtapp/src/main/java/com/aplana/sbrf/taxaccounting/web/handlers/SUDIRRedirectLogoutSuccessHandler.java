@@ -40,7 +40,7 @@ public class SUDIRRedirectLogoutSuccessHandler implements LogoutSuccessHandler {
 				response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=" + URLEncoder.encode(WEBSEAL_LOGOUT_URL, "UTF-8"));
 			} else {
 				LOG.info("LOGOUT: WEBSPHERE");
-				response.sendRedirect(contextPath + "/ibm_security_logout?logoutExitPage=" + REDIRECT_URL);
+				response.sendRedirect(contextPath + "/ibm_security_logout");
 			}
         } else {
 			LOG.info("LOGOUT: OTHER");
