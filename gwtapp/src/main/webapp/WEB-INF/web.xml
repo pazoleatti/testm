@@ -184,12 +184,8 @@
 	</security-role>
 
 	<login-config>
-			<auth-method>FORM</auth-method>
-			<realm-name>defaultWIMFileBasedRealm</realm-name>
-			<form-login-config>
-				<form-login-page>/login</form-login-page>
-				<form-error-page>/login</form-error-page>
-			</form-login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>defaultWIMFileBasedRealm</realm-name>
 	</login-config>
 
 	<security-constraint>
