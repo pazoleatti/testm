@@ -1261,7 +1261,7 @@ def checkDataConsolidated() {
             Long departmentCode = departmentService.get(dd.departmentId)?.code
 
             // Если налоговая форма не принята
-            if (!dd.state.equals(State.ACCEPTED)) {
+            if (!dd.state.equals(State.ACCEPTED) && dd.departmentId != declarationData.departmentId) {
                 listDepartmentNotAcceptedRnu << mapDepartmentNotExistRnu[departmentCode]
             }
             mapDepartmentNotExistRnu.remove(departmentCode)
@@ -1284,6 +1284,7 @@ def checkDataConsolidated() {
                     " года" + correctionDateExpression + " не созданы экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotExistRnu.join("\", \"")}'." +
                     " Данные этих форм не включены в отчетность!")
         }
+
         if (!listDepartmentNotAcceptedRnu.isEmpty()) {
             logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
                     " года" + correctionDateExpression + " имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.join("\", \"")}'," +
