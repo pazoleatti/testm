@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.widget.signin.client;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoAction;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoResult;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -13,7 +13,6 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 public class SignInPresenter extends PresenterWidget<SignInView> implements SignInUiHandlers{
 	
@@ -55,6 +54,6 @@ public class SignInPresenter extends PresenterWidget<SignInView> implements Sign
 
 	@Override
 	public void redirectHomePage() {
-		placeManager.revealPlace(new PlaceRequest(HomeNameTokens.homePage));
+		Window.Location.replace(GWT.getHostPageBaseURL());
 	}
 }

@@ -13,6 +13,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.Date;
+
 public class SignInView extends ViewWithUiHandlers<SignInUiHandlers> implements MyView{
 	interface Binder extends UiBinder<Widget, SignInView> {
 	}
@@ -26,22 +28,11 @@ public class SignInView extends ViewWithUiHandlers<SignInUiHandlers> implements 
 	@UiField
 	Anchor logout;
 
-	@UiField
-	FormPanel formPanelLogout;
-
 	private String userLogin;
 
 	@Inject
 	public SignInView(final Binder binder){
 		initWidget(binder.createAndBindUi(this));
-		formPanelLogout.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				if (getUiHandlers() != null) {
-					getUiHandlers().redirectHomePage();
-				}
-			}
-		});
 	}
 
 	@Override
@@ -67,22 +58,38 @@ public class SignInView extends ViewWithUiHandlers<SignInUiHandlers> implements 
 
 	@UiHandler("logout")
 	public void onLogoutClicked(ClickEvent event) {
-		doGet("controller/actions/clearAuthenticationCache/");
+		logout();
 	}
 
-	public void doGet(String url) {
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
-
+	private void clearAuthenticationCache() {
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "controller/actions/clearAuthenticationCache");
 		try {
 			builder.setUser(userLogin);
-			builder.setPassword("logout");
+			builder.setPassword("logout"+(new Date()).getTime());
+			builder.sendRequest(null, new RequestCallback() {
+				public void onError(Request request, Throwable exception) {
+					getUiHandlers().redirectHomePage();
+				}
+
+				public void onResponseReceived(Request request, Response response) {
+					getUiHandlers().redirectHomePage();
+				}
+			});
+		} catch (RequestException e) {
+			// ничего не делаем
+		}
+	}
+
+	private void logout() {
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "j_spring_security_logout");
+		try {
 			builder.sendRequest(null, new RequestCallback() {
 				public void onError(Request request, Throwable exception) {
 					// ничего не делаем
 				}
 
 				public void onResponseReceived(Request request, Response response) {
-					formPanelLogout.submit();
+					clearAuthenticationCache();
 				}
 			});
 
@@ -90,4 +97,5 @@ public class SignInView extends ViewWithUiHandlers<SignInUiHandlers> implements 
 			// ничего не делаем
 		}
 	}
+
 }

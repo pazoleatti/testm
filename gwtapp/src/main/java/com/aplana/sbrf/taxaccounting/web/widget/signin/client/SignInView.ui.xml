@@ -44,10 +44,8 @@
         </div>
 
 	    <div style="float: right; margin-top: 5px">
-            <g:Anchor ui:field="logout" styleName="{style.whiteColor}" text="Выход" href=""/>
+            <g:Anchor ui:field="logout" styleName="{style.whiteColor}" text="Выход" href="javascript:void(0)"/>
         </div>
-
-        <g:FormPanel ui:field="formPanelLogout" method="get" action="j_spring_security_logout"/>
 
         <g:HTML addStyleNames="{style.separatorLikeInMenuRight}"/>
 	</g:HTMLPanel>
