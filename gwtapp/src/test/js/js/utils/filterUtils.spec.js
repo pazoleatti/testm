@@ -5,7 +5,7 @@ describe('Test filterUtils.', function () {
     var service;
 
     beforeEach(function () {
-        module('ndfl.filterUtils');
+        module('sbrfNdfl.filterUtils');
 
         inject(function ($injector) {
             service = $injector.get('filterUtils');

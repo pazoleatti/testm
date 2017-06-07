@@ -4,7 +4,7 @@
 (function () {
     'use strict';
 
-    angular.module('ndfl.formatters', [])
+    angular.module('sbrfNdfl.formatters', [])
         // Фильтр даты в формате dd.MM.yyyy
         .filter('dateFormatter', ['$filter', function ($filter) {
             return function (value) {

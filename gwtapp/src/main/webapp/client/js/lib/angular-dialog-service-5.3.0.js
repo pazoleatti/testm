@@ -170,8 +170,9 @@
 
 		$scope.header = (angular.isDefined(data.header)) ? data.header : $translate.instant('DIALOGS_CONFIRMATION');
 		$scope.msg = (angular.isDefined(data.msg)) ? data.msg : $translate.instant('DIALOGS_CONFIRMATION_MSG');
-		$scope.icon = (angular.isDefined(data.fa) && angular.equals(data.fa,true)) ? 'fa fa-check' : 'glyphicon glyphicon-check';
-
+		$scope.icon = (angular.isDefined(data.fa) && angular.equals(data.fa,true)) ? 'fa fa-check' : 'glyphicon glyphicon-warning-sign';
+		$scope.labelYes = (angular.isDefined(data.labelYes)) ? data.labelYes : $translate.instant('DIALOGS_YES');
+		$scope.labelNo = (angular.isDefined(data.labelNo)) ? data.labelNo : $translate.instant('DIALOGS_NO');
 		//-- Methods -----//
 
 		$scope.no = function(){
@@ -432,7 +433,40 @@
 								}
 							}
 						}); // end modal.open
-					} // end create
+					}, // end create
+
+					/**
+					 * Confirm Dialog
+					 *
+					 * @param	header 	string
+					 * @param	msg 	string
+					 * @param	opts	object
+					 */
+					confirm : function(header,msg,buttonsLabels,opts){
+						opts = _setOpts(opts);
+
+						return $uibModal.open({
+							templateUrl : '../dialogs/confirm.html',
+							controller : 'confirmDialogCtrl',
+							backdrop: opts.bd,
+							backdropClass: opts.bdc,
+							keyboard: opts.kb,
+							windowClass: opts.wc,
+							size: opts.ws,
+							animation: opts.anim,
+							resolve : {
+								data : function(){
+									return {
+										header : angular.copy(header),
+										msg : angular.copy(msg),
+										labelYes : buttonsLabels && buttonsLabels.labelYes ? buttonsLabels.labelYes : "Да",
+										labelNo: buttonsLabels && buttonsLabels.labelNo ? buttonsLabels.labelNo : "Нет",
+										fa : _fa
+									};
+								}
+							}
+						}); // end modal.open
+					} // end confirm
 
 				}; // end return
 
@@ -528,6 +562,7 @@
 			$templateCache.put('/dialogs/error.html','<div class="modal-header dialog-header-error"><button type="button" class="close" ng-click="close()">&times;</button><h4 class="modal-title text-danger"><span class="'+startSym+'icon'+endSym+'"></span> <span ng-bind-html="header" style="color: red;"></span></h4></div><div class="modal-body text-danger" ng-bind-html="msg"></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="close()">'+startSym+'"DIALOGS_CLOSE" | translate'+endSym+'</button></div>');
 			$templateCache.put('/dialogs/wait.html','<div class="modal-header dialog-header-wait"><h4 class="modal-title"><span class="'+startSym+'icon'+endSym+'"></span> '+startSym+'header'+endSym+'</h4></div><div class="modal-body"><p ng-bind-html="msg"></p><div class="progress progress-striped active"><div class="progress-bar progress-bar-info" ng-style="getProgress()"></div><span class="sr-only">'+startSym+'progress'+endSym+''+startSym+'"DIALOGS_PERCENT_COMPLETE" | translate'+endSym+'</span></div></div>');
 			$templateCache.put('/dialogs/notify.html','<div class="modal-header dialog-header-notify"><button type="button" class="close" ng-click="close()" class="pull-right">&times;</button><h4 class="modal-title text-info"><span class="'+startSym+'icon'+endSym+'"></span> '+startSym+'header'+endSym+'</h4></div><div class="modal-body text-info" ng-bind-html="msg"></div><div class="modal-footer"><button type="button" class="btn btn-primary" ng-click="close()">'+startSym+'"DIALOGS_OK" | translate'+endSym+'</button></div>');
+			$templateCache.put('../dialogs/confirm.html','<div class="modal-header dialog-header-confirm"><button type="button" class="close" ng-click="no()">&times;</button><h4 class="modal-title"><span class="'+startSym+'icon'+endSym+'"></span> '+startSym+'header'+endSym+'</h4></div><div class="modal-body" ng-bind-html="msg"></div><div class="modal-footer"><button type="button" class="btn btn-default" ng-click="yes()">'+startSym+'"DIALOGS_YES" | translate'+endSym+'</button><button type="button" class="btn btn-primary" ng-click="no()">'+startSym+'"DIALOGS_NO" | translate'+endSym+'</button></div>');
 		}]); // end run / dialogs.main
 
 })();

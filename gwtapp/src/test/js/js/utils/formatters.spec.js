@@ -1,7 +1,7 @@
 describe('formatters', function () {
     'use strict';
 
-    beforeEach(module('ndfl.formatters'));
+    beforeEach(module('sbrfNdfl.formatters'));
 
     // Функция аналог data provider
     function using(value, result, func) {

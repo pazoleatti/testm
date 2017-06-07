@@ -442,9 +442,8 @@
         /**
          * Контроллер формы создания/редактирования ФЛ
          */
-        .controller('createOrEditFLCtrl', ["$scope", "$http", "$uibModalInstance", "$alertService", "$translate", 'data',
-            function ($scope, $http, $uibModalInstance, $alertService, $translate, data) {
-
+        .controller('createOrEditFLCtrl', ["$scope", "$http", "$uibModalInstance", "$alertService", "$translate", 'data', 'FormLeaveConfirmer',
+            function ($scope, $http, $uibModalInstance, $alertService, $translate, data, FormLeaveConfirmer) {
                 /**
                  * Инициализация первичных данных
                  */
@@ -472,6 +471,7 @@
                             $scope.buttonTitle = title;
                         });
                         $scope.entity = data.entity;
+                        $scope.startEntity = angular.copy(data.entity);
                     }
 
                     //Статические данные-заглушка
@@ -536,12 +536,47 @@
                     //Сохранение данных
                 $scope.save = function () {
                     //TODO: Send request to server for create/update data
+
+                    FormLeaveConfirmer.clearListeners();
                     $uibModalInstance.close($scope.entity);
                 };
 
+                // Изменялись ли данные на форме
+                $scope.isFormModified = function () {
+                    var isModified = false;
+                    if (data.mode === "create"){
+                        angular.forEach($scope.entity, function (item) {
+                            if (item !== undefined) {
+                                isModified = true;
+                            }
+                        });
+                    } else if (data.mode === "edit"){
+                        if(!_.isEqual($scope.startEntity, $scope.entity)){
+                            isModified = true;
+                        }
+                    }
+                    return isModified;
+                };
+
+                FormLeaveConfirmer.initializeListeners(
+                    $scope.isFormModified,
+                    "Отмена операции",
+                    "Вы уверены, что хотите отменить создание/редактирование записи",
+                    function () {
+                        FormLeaveConfirmer.clearListeners();
+                        $uibModalInstance.close($scope.entity);
+                    },
+                    undefined,
+                    $uibModalInstance
+                );
+
                 //Закрытие окна
                 $scope.cancel = function () {
-                    $uibModalInstance.dismiss('Canceled');
+                    FormLeaveConfirmer.askSaveChanges(
+                        function () {
+                            $uibModalInstance.dismiss('Canceled');
+                        }
+                    );
                 };
 
                 //Проверка значения на число

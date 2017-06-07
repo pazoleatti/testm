@@ -1,7 +1,7 @@
 (function () {
-    'use strict'
+    'use strict';
 
-    var translateDictionary = {}
+    var translateDictionary = {};
 
     angular
         .module('sbrfNdfl', [
@@ -9,7 +9,8 @@
             'sbrfNdfl.ndflForms',
             'sbrfNdfl.ndflDetailsForms',
             'sbrfNdfl.filterDirectives',
-            'ndfl.filterUtils',
+            'sbrfNdfl.filterUtils',
+            'sbrfNdfl.formLeaveConfirmer',
             'pascalprecht.translate',
             'aplana.overlay',
             'aplana.alert',
@@ -21,6 +22,7 @@
             'aplana.dropdownMenu',
             'aplana.collapse',
             'aplana.field',
+            'aplana.modal.dialogs',
             'ui.router',
             'ui.validate',
             'dialogs.main',
@@ -44,18 +46,18 @@
         .config(['$stateProvider', '$urlRouterProvider', '$translateProvider',
             function ($stateProvider, $urlRouterProvider, $translateProvider) {
                 // Указание страницы по умолчанию
-                $urlRouterProvider.otherwise('/')
+                $urlRouterProvider.otherwise('/');
                 // Настройка обработчика главной страницы
                 $stateProvider
                     .state('/', {
                         url: '/',
                         templateUrl: 'client/js/main/app.html'
-                    })
+                    });
 
                 // Настройка источника локализованных сообщений
-                $translateProvider.translations('ru', translateDictionary)
-                $translateProvider.preferredLanguage('ru')
-                $translateProvider.useSanitizeValueStrategy('sanitizeParameters')
+                $translateProvider.translations('ru', translateDictionary);
+                $translateProvider.preferredLanguage('ru');
+                $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
                 // Добавляем форматирование дат
                 Date.prototype.format = function (mask, utc) {
                     return dateFormat(this, mask, utc);
@@ -65,13 +67,13 @@
                     var dat = new Date(this.valueOf());
                     dat.setDate(dat.getDate() + days);
                     return dat;
-                }
+                };
             }
-        ])
+        ]);
 
     // Получение информации о текущем пользователе и запуск приложения
     var initInjector = angular.injector(['ng']);
-    var $http = initInjector.get('$http')
+    var $http = initInjector.get('$http');
 
     //TODO: (dloshkarev) временная заглушка
     var userDataStub = {
@@ -106,6 +108,9 @@
         "theNumberOfSelectedItems": "Выбрано значений:",
         "common.button.add": "Добавить",
         "common.button.cancel": "Отменить",
+        "common.button.save": "Сохранить",
+        "common.button.no": "Нет",
+        "common.button.yes": "Да",
         "DIALOGS_SAVE": "Сохранить",
         "DIALOGS_CANCEL": "Отменить",
         "DIALOGS_ERROR_MSG": "Произошла непредвиденная ошибка.",
@@ -189,7 +194,7 @@
     };
     angular.module('userData', []).constant('USER_DATA', userDataStub);
     angular.element(document).ready(function () {
-        angular.bootstrap(document, ['sbrfNdfl'])
+        angular.bootstrap(document, ['sbrfNdfl']);
     });
     /*$http.get('rest/service/configService/getConfig').then(
      function (response) {
@@ -204,7 +209,7 @@
      * Поиск по нажатию на enter
      */
     window.addEventListener("keydown", function(event) {
-        if (event.keyCode == 13){
+        if (event.keyCode === 13){
             event.preventDefault();
             event.stopPropagation();
             var doc = $(event.target).closest(".grid-filter");
