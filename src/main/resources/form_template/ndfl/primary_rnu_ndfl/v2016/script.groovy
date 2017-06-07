@@ -3254,6 +3254,23 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         "Некорректное значение 'ИНН.В Российской федерации (Графа 8)'")
             }
 
+            //Общ2 Наличие обязательных реквизитов для формирования отчетности
+            checkRequiredAttribute(ndflPerson, fioAndInp, "lastName", "Налогоплательщик.Фамилия")
+            checkRequiredAttribute(ndflPerson, fioAndInp, "firstName", "Налогоплательщик.Имя")
+            checkRequiredAttribute(ndflPerson, fioAndInp, "birthDay", "Налогоплательщик.Дата рождения")
+            boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", "Гражданство (код страны)")
+            checkRequiredAttribute(ndflPerson, fioAndInp, "idDocType", "Документ удостоверяющий личность.Код")
+            checkRequiredAttribute(ndflPerson, fioAndInp, "idDocNumber", "Документ удостоверяющий личность.Номер")
+            checkRequiredAttribute(ndflPerson, fioAndInp, "status", "Статус (Код)")
+            if (checkCitizenship) {
+                if (ndflPerson.citizenship == "643") {
+                    checkRequiredAttribute(ndflPerson, fioAndInp, "regionCode", "Код субъекта")
+                } else {
+                    checkRequiredAttribute(ndflPerson, fioAndInp, "countryCode", "Код страны проживания вне РФ")
+                    checkRequiredAttribute(ndflPerson, fioAndInp, "address", "Адрес проживания вне РФ ")
+                }
+            }
+
             // Общ11 СНИЛС (Необязательное поле)
             if (ndflPerson.snils != null && !ScriptUtils.checkSnils(ndflPerson.snils)) {
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
@@ -3402,6 +3419,17 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
     }
+
+boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, String attributeName) {
+    if (ndflPerson[alias] == null || (ndflPerson[alias]) instanceof String && (org.apache.commons.lang3.StringUtils.isBlank(ndflPerson[alias]) || ndflPerson[alias] == "0")) {
+        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
+                "$attributeName='${ndflPerson[alias]?:""}'")
+        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
+                "Не заполнен обязательный параметр '$attributeName'")
+        return false
+    }
+    return true
+}
 
 /**
  * Класс для проверки заполненности полей

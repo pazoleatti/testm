@@ -301,7 +301,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         boolean createForm = setDeclarationBlobs(logger, declarationData, docDate, userInfo, exchangeParams, stateLogger);
 
         if (!createForm) {
-            declarationDataDao.delete(id);
             return createForm;
         }
 
@@ -1711,16 +1710,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             boolean createForm = true;
             try {
                 createForm = calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
-                if (!createForm) {
-                    if (!scriptLogger.containsLevel(LogLevel.ERROR)) {
-                        fail++;
-                        success--;
-                    }
-                }
             } catch (Exception e) {
-                scriptLogger.error(e);
+                createForm = false;
+                if (e.getMessage() != null) {
+                    scriptLogger.error(e);
+                }
             } finally {
-                if (scriptLogger.containsLevel(LogLevel.ERROR)) {
+                if (!createForm || scriptLogger.containsLevel(LogLevel.ERROR)) {
                     fail++;
                     DeclarationData declarationData = get(entry.getKey(), userInfo);
                     oktmoKppList.add(String.format("ОКТМО: %s, КПП: %s.", declarationData.getOktmo(), declarationData.getKpp()));
@@ -1729,9 +1725,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
-                    if (createForm) {
-                        logger.info("Успешно выполнен расчет для " + getDeclarationFullName(entry.getKey(), null));
-                    }
+                    logger.info("Успешно выполнен расчет для " + getDeclarationFullName(entry.getKey(), null));
                     logger.getEntries().addAll(scriptLogger.getEntries());
                 }
             }

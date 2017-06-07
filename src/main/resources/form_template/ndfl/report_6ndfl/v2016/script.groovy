@@ -1006,8 +1006,7 @@ List<PairKppOktmo> getPairKppOktmoList() {
             if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
                 it.remove()
             }
-            if (departmentReportPeriod.correctionDate != null && depReportPeriod.correctionDate != null &&
-                    depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
+            if (depReportPeriod.correctionDate != null && depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
                 it.remove()
             }
         }
