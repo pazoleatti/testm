@@ -679,20 +679,62 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
  * @return true - заполнены обязательные поля, false - не заполнены обязательные поля
  */
 boolean checkMandatoryFields(List<NdflPerson> ndflPersonList) {
-    boolean  toReturn = true
+    boolean toReturn = true
     for (NdflPerson ndflPerson : ndflPersonList) {
         List<String> mandatoryFields = new LinkedList<>();
-        if (ndflPerson.rowNum == null) mandatoryFields << "№пп"
-        if (ndflPerson.inp == null || ndflPerson.inp.isEmpty()) mandatoryFields << "Налогоплательщик.ИНП"
-        if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty()) mandatoryFields << "Налогоплательщик.Фамилия"
-        if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty()) mandatoryFields << "Налогоплательщик.Имя"
-        if (ndflPerson.birthDay == null) mandatoryFields << "Налогоплательщик.Дата рождения"
-        if (ndflPerson.citizenship == null || ndflPerson.citizenship.isEmpty()) mandatoryFields << "Гражданство (код страны)"
-        if (ndflPerson.idDocType == null || ndflPerson.idDocType.isEmpty()) mandatoryFields << "Документ удостоверяющий личность.Код"
-        if (ndflPerson.idDocNumber == null || ndflPerson.idDocNumber.isEmpty()) mandatoryFields << "Документ удостоверяющий личность.Номер"
-        if (ndflPerson.status == null || ndflPerson.status.isEmpty()) mandatoryFields << "Статус (Код)"
+        if (ndflPerson.rowNum == null) mandatoryFields << "'№пп'"
+        if (ndflPerson.inp == null || ndflPerson.inp.isEmpty()) mandatoryFields << "'Налогоплательщик.ИНП'"
+        if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty()) mandatoryFields << "'Налогоплательщик.Фамилия'"
+        if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty()) mandatoryFields << "'Налогоплательщик.Имя'"
+        if (ndflPerson.birthDay == null) mandatoryFields << "'Налогоплательщик.Дата рождения'"
+        boolean checkCitizenship = true
+        if (ndflPerson.citizenship == null || ndflPerson.citizenship.isEmpty()) {
+            mandatoryFields << "'Гражданство (код страны)'"
+            checkCitizenship = false
+        }
+        if (ndflPerson.idDocType == null || ndflPerson.idDocType.isEmpty()) mandatoryFields << "'Документ удостоверяющий личность.Код'"
+        if (ndflPerson.idDocNumber == null || ndflPerson.idDocNumber.isEmpty()) mandatoryFields << "'Документ удостоверяющий личность.Номер'"
+        if (ndflPerson.status == null || ndflPerson.status.isEmpty()) mandatoryFields << "'Статус (Код)'"
+        if (checkCitizenship) {
+            if (ndflPerson.citizenship == "643") {
+                if (StringUtils.isBlank(ndflPerson.regionCode)) {
+                    mandatoryFields << "'Код субъекта'"
+                }
+            } else {
+                if (StringUtils.isBlank(ndflPerson.countryCode)) {
+                    mandatoryFields << "'Код страны проживания вне РФ'"
+                }
+                if (StringUtils.isBlank(ndflPerson.address)) {
+                    mandatoryFields << "'Адрес проживания вне РФ'"
+                }
+            }
+        }
         if (!mandatoryFields.isEmpty()) {
-            logger.error("Не заполнены обязательные поля: ${mandatoryFields.join(', ')}. ФИО: ${ndflPerson.lastName ?: ""} ${ndflPerson.firstName ?: ""} ${ndflPerson.middleName ?: ""}, ИНП: ${ndflPerson.inp}")
+            def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+            def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            String strCorrPeriod = ""
+            if (departmentReportPeriod.getCorrectionDate() != null) {
+                strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+            }
+            Department department = departmentService.get(departmentReportPeriod.departmentId)
+            String lastname = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
+            String firstname = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
+            String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
+            String fio = lastname + firstname + middlename
+
+            String msg = String.format("Не удалось создать форму \"%s\" за \"%s\", подразделение: \"%s\", КПП: \"%s\", ОКТМО: \"%s\", Код НО: \"%s\". Не заполнены обязательные параметры %s для ФИО: %s, ИНП: %s в консолидированной форме № %s",
+                    currDeclarationTemplate.getName(),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()+ ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                    department.getName(),
+                    declarationData.kpp,
+                    declarationData.oktmo,
+                    declarationData.taxOrganCode,
+                    mandatoryFields.join(', '),
+                    fio,
+                    ndflPerson.inp,
+                    ndflPerson.declarationDataId
+            )
+            logger.error(msg)
             toReturn = false
         }
     }
@@ -2121,7 +2163,7 @@ def createSpecificReport() {
     subReportViewParams['Фамилия'] = row.lastName
     subReportViewParams['Имя'] = row.firstName
     subReportViewParams['Отчество'] = row.middleName
-    subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay.format(DATE_FORMAT_DOTTED) : ""
+    subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay : ""
     subReportViewParams['№ ДУЛ'] = row.idDocNumber
 
     def xmlStr = declarationService.getXmlData(declarationData.id)
