@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuR
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
 import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.*
 import com.aplana.sbrf.taxaccounting.dao.identification.*
@@ -67,6 +68,9 @@ import java.text.SimpleDateFormat
         case FormDataEvent.GET_SOURCES: //формирование списка приемников
             getSourcesListForTemporarySolution()
             break
+        case FormDataEvent.CREATE_EXCEL_REPORT: //создание xlsx отчета
+            createXlsxReport()
+            break
         case FormDataEvent.CREATE_SPECIFIC_REPORT:
             // Формирование спецотчета
             createSpecificReport()
@@ -98,6 +102,8 @@ import java.text.SimpleDateFormat
     final CalendarService calendarService = getProperty("calendarService")
     @Field
     final String DATE_FORMAT = "dd.MM.yyyy"
+    @Field
+    final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
     @Field
     Boolean showTiming = false
 
@@ -1488,6 +1494,22 @@ import java.text.SimpleDateFormat
     }
 
     //------------------ Create Report ----------------------
+/**
+ * Создать XLSX отчет
+ * @return
+ */
+@TypeChecked
+def createXlsxReport() {
+    ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder)getProperty("scriptSpecificReportHolder")
+    def params = new HashMap<String, Object>()
+    params.put("declarationId", declarationData.getId());
+
+    JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, declarationService.getXmlStream(declarationData.id));
+
+    StringBuilder fileName = new StringBuilder("Реестр_загруженных_данных_").append(declarationData.id).append("_").append(new Date().format(DATE_FORMAT_FULL)).append(".xlsx")
+    exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+    scriptSpecificReportHolder.setFileName(fileName.toString())
+}
 
     def createSpecificReport() {
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
@@ -2620,25 +2642,19 @@ class NdflPersonFL {
         long time = System.currentTimeMillis();
         // Реквизиты
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
-        println "Получены записи таблицы '$T_PERSON' (${ndflPersonList.size()} записей)."
         logForDebug(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
 
         // Сведения о доходах и НДФЛ
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
-        println "Получены записи таблицы '$T_PERSON_INCOME' (${ndflPersonList.size()} записей)."
         logForDebug(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
 
         // Сведения о вычетах
         List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
-        println "Получены записи таблицы '$T_PERSON_DEDUCTION' (${ndflPersonList.size()} записей)."
         logForDebug(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
 
         // Сведения о доходах в виде авансовых платежей
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
-        println "Получены записи таблицы '$T_PERSON_PREPAYMENT' (${ndflPersonList.size()} записей)."
         logForDebug(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
-
-        println "Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)";
 
         logForDebug("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)");
 
@@ -2646,8 +2662,7 @@ class NdflPersonFL {
         // ФЛ Map<person_id, RefBook>
         Map<Long, Map<String, RefBookValue>> personMap = getActualRefPersonsByDeclarationDataId(declarationData.id)
         logForDebug(SUCCESS_GET_TABLE, R_PERSON, personMap.size())
-        println(String.format(SUCCESS_GET_TABLE, R_PERSON, personMap.size()))
-        println "Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)";
+
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Физические лица (" + (System.currentTimeMillis() - time) + " мс)");
 
         ScriptUtils.checkInterrupted();
@@ -2670,7 +2685,6 @@ class NdflPersonFL {
         // Проверки Сведения о вычетах
         checkDataDeduction(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, personMap)
 
-        println "Все проверки (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Все проверки (" + (System.currentTimeMillis() - time) + " мс)");
     }
 
@@ -2685,54 +2699,44 @@ class NdflPersonFL {
         long time = System.currentTimeMillis();
         // Страны
         def citizenshipCodeMap = getRefCountryCode()
-        println "Получен справочник '$R_CITIZENSHIP' (${citizenshipCodeMap.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_CITIZENSHIP, citizenshipCodeMap.size())
 
         // Виды документов, удостоверяющих личность
         def documentTypeMap = getRefDocumentTypeCode()
-        println "Получен справочник '$R_ID_DOC_TYPE' (${documentTypeMap.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_ID_DOC_TYPE, documentTypeMap.size())
 
         // Статус налогоплательщика
         def taxpayerStatusMap = getRefTaxpayerStatusCode()
-        println "Получен справочник '$R_STATUS' (${taxpayerStatusMap.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_STATUS, taxpayerStatusMap.size())
 
         // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
         def incomeCodeMap = getRefIncomeCode()
-        println "Получен справочник '$R_INCOME_CODE' (${incomeCodeMap.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_CODE, incomeCodeMap.size())
 
         // Виды доходов Map<REF_BOOK_INCOME_KIND.MARK, List<REF_BOOK_INCOME_KIND.INCOME_TYPE_ID>>
         def incomeTypeMap = getRefIncomeType()
-        println "Получен справочник '$R_INCOME_TYPE' (${incomeTypeMap.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_INCOME_TYPE, incomeTypeMap.size())
 
         // Коды видов вычетов
         def deductionTypeList = getRefDeductionType()
-        println "Получен справочник '$R_TYPE_CODE' (${deductionTypeList.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_TYPE_CODE, deductionTypeList.size())
 
         // Коды налоговых органов
         def taxInspectionList = getRefNotifSource()
-        println "Получен справочник '$R_NOTIF_SOURCE' (${taxInspectionList.size()} записей).";
         logForDebug(SUCCESS_GET_REF_BOOK, R_NOTIF_SOURCE, taxInspectionList.size())
 
-        println "Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочников (" + (System.currentTimeMillis() - time) + " мс)");
 
         time = System.currentTimeMillis();
         // ИНП Map<person_id, List<RefBook>>
         def inpMap = getActualRefInpMapByDeclarationDataId()
         logForDebug(SUCCESS_GET_TABLE, R_INP, inpMap.size())
-        println "Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ИНП (" + (System.currentTimeMillis() - time) + " мс)");
 
         time = System.currentTimeMillis();
         // ДУЛ Map<person_id, List<RefBook>>
         def dulMap = getActualRefDulByDeclarationDataId()
         logForDebug(SUCCESS_GET_TABLE, R_DUL, dulMap.size())
-        println "Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочника ДУЛ (" + (System.currentTimeMillis() - time) + " мс)");
 
         // Получим Мапу адресов
@@ -2750,7 +2754,6 @@ class NdflPersonFL {
             addressMap = getRefAddress(addressIds)
             logForDebug(SUCCESS_GET_TABLE, R_ADDRESS, addressMap.size())
         }
-        println "Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)");
 
         //поиск всех адресов формы в справочнике ФИАС
@@ -2759,7 +2762,6 @@ class NdflPersonFL {
         //первый запрос, проверяет что адрес присутствует в фиас
         Map<Long, Long> checkFiasExistAddressMap = getFiasAddressIdsMap();
 
-        println "Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
 
         long timeIsExistsAddress = 0
@@ -2841,7 +2843,7 @@ class NdflPersonFL {
             }
 
             // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
-            if (!documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
+            if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
                 //TODO turn_to_error
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                         "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}'")
@@ -2963,13 +2965,13 @@ class NdflPersonFL {
                             personDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
                             personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
                         }
-                        if (!personDocTypeList.contains(ndflPerson.idDocType)) {
+                        if (ndflPerson.idDocType != null && !personDocTypeList.contains(ndflPerson.idDocType)) {
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                     "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}'")
                             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ДУЛ справочнику (первичная)", fioAndInp, pathError,
                                     "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_DUL'")
                         }
-                        if (!personDocNumberList.contains(ndflPerson.idDocNumber)) {
+                        if (ndflPerson.idDocNumber != null && !personDocNumberList.contains(ndflPerson.idDocNumber)) {
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                     "Документ удостоверяющий личность.Номер (Графа 11)='${ndflPerson.idDocNumber ?: ""}'")
                             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ДУЛ справочнику (первичная)", fioAndInp, pathError,
@@ -2989,7 +2991,7 @@ class NdflPersonFL {
                                     "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}', Документ удостоверяющий личность.Номер (Графа 11)='${ndflPerson.idDocNumber ?: ""}'")
                             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ДУЛ справочнику (консолидированная)", fioAndInp, pathError,
                                     "'Документ удостоверяющий личность.Код (Графа 10)', 'Документ удостоверяющий личность.Номер (Графа 11)' не соответствует справочнику '$R_DUL'")
-                        } else {
+                        } else {DUL
                             int incRep = dulRecordValues.get(RF_INC_REP).getNumberValue().intValue()
                             if (incRep != 1) {
                                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
@@ -3097,10 +3099,8 @@ class NdflPersonFL {
                 }
             }
         }
-        println "Проверки на соответствие справочникам / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
 
-        println "Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)";
         logForDebug("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)");
 
         time = System.currentTimeMillis();
@@ -3162,7 +3162,6 @@ class NdflPersonFL {
                 }
             }
         }
-        println "Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)");
 
         time = System.currentTimeMillis();
@@ -3190,7 +3189,6 @@ class NdflPersonFL {
                         "'Документ о праве на налоговый вычет.Код источника (Графа 7)' не соответствует справочнику '$R_NOTIF_SOURCE'")
             }
         }
-        println "Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION}' (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION}' (" + (System.currentTimeMillis() - time) + " мс)");
 
         time = System.currentTimeMillis();
@@ -3210,7 +3208,6 @@ class NdflPersonFL {
                         "'Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи. Код налогового органа, выдавшего уведомление (Графа 7)' не соответствует справочнику '$R_NOTIF_SOURCE'")
             }
         }
-        println "Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)");
     }
 
@@ -3224,7 +3221,6 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
     def mapRefBookNdfl = getRefBookNdfl()
     def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
 
-    println "Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)";
     logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
 
     time = System.currentTimeMillis();
@@ -3283,7 +3279,6 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         "Некорректное значение 'СНИЛС'")
             }
         }
-        println "Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
 
         time = System.currentTimeMillis();
@@ -3418,12 +3413,10 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         ScriptUtils.checkInterrupted();
 
-        println "Общие проверки / '$T_PERSON_INCOME' (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Общие проверки / '$T_PERSON_INCOME' (" + (System.currentTimeMillis() - time) + " мс)");
 
         ScriptUtils.checkInterrupted();
 
-        println "Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)";
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
     }
 
@@ -4273,7 +4266,6 @@ class ColumnFillConditionData {
         }
     }
 
-    println "Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)";
     logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
@@ -4644,7 +4636,6 @@ class ColumnFillConditionData {
                         "Значение не соответствует правилу: «Графа 16 Раздел 3» <= «Графа 8 Раздел 3»")
             }
         }
-        println "Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)";
         logForDebug("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
     }
 
