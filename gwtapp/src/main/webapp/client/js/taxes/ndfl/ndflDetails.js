@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('sbrfNdfl.ndflDetailsForms', ['ui.router', 'sbrfNdfl.widgets'])
+    angular.module('sbrfNdfl.ndflDetailsForms', ['ui.router'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflDetailsForms', {
                 url: '/taxes/ndflDetails/{formId}',
@@ -10,8 +10,8 @@
             });
         }])
         .controller('ndflDetailsFormsCtrl', [
-            '$scope', '$timeout', 'aplanaEntityUtils', '$state', '$stateParams', 'dialogs',
-            function ($scope, $timeout, aplanaEntityUtils, $state, $stateParams, dialogs) {
+            '$scope', '$timeout', '$state', '$stateParams', 'dialogs',
+            function ($scope, $timeout, $state, $stateParams, dialogs) {
                 $scope.searchFilter = {
                     ajaxFilter: [],
                     params: {},
