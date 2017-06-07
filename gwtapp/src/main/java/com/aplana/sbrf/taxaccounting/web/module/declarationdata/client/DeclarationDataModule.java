@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.comments.DeclarationDeclarationFilesCommentsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.comments.DeclarationFilesCommentsView;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.move_to_create.MoveToCreatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.move_to_create.MoveToCreateView;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.NdflReferencesEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.NdflReferencesEditView;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.search.NdflReferencesSearchPresenter;
@@ -22,6 +24,7 @@ public class DeclarationDataModule extends AbstractPresenterModule {
         bindSingletonPresenterWidget(DeclarationDeclarationFilesCommentsPresenter.class, DeclarationDeclarationFilesCommentsPresenter.MyView.class, DeclarationFilesCommentsView.class);
         bindSingletonPresenterWidget(NdflReferencesEditPresenter.class, NdflReferencesEditPresenter.MyView.class, NdflReferencesEditView.class);
         bindSingletonPresenterWidget(NdflReferencesSearchPresenter.class, NdflReferencesSearchPresenter.SearchView.class, NdflReferencesSearchView.class);
+        bindSingletonPresenterWidget(MoveToCreatePresenter.class, MoveToCreatePresenter.MyView.class, MoveToCreateView.class);
 	}
 
 }

@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
@@ -12,11 +14,15 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.move_to_create.CommentEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.move_to_create.MoveToCreateListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.event.UpdateNotificationCount;
 import com.google.inject.Inject;
@@ -33,8 +39,8 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.*;
 
 public class DeclarationListPresenter extends
-		DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
-		DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterApplyEvent.DeclarationFilterApplyHandler,
+        DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
+        DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterApplyEvent.DeclarationFilterApplyHandler,
         UpdateNotificationCount.UpdateNotificationCountHandler {
 
     private static final String TYPE = "nType";
@@ -52,6 +58,8 @@ public class DeclarationListPresenter extends
     private Boolean isReports;
     private boolean ready = false;
     private EventBus eventBus;
+    // Стэк ИД налоговых форм, которые должны вернуться в состояние создана
+    private Stack<Long> declarationsIdToCreated = new Stack<Long>();
 
     @ProxyEvent
     @Override
@@ -90,29 +98,50 @@ public class DeclarationListPresenter extends
     }
 
     @ProxyCodeSplit
-	@NameToken(DeclarationListNameTokens.DECLARATION_LIST)
-	public interface MyProxy extends ProxyPlace<DeclarationListPresenter>, Place {
-	}
-
-	@Inject
-	public DeclarationListPresenter(EventBus eventBus, DeclarationListPresenterBase.MyView view, MyProxy proxy,
-	                         PlaceManager placeManager, DispatchAsync dispatcher,
-	                         DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter,
-                             DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter, ChangeStatusEDPresenter changeStatusEDPresenter) {
-        super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter, changeStatusEDPresenter);
-        this.eventBus = eventBus;
-		getView().setUiHandlers(this);
+    @NameToken(DeclarationListNameTokens.DECLARATION_LIST)
+    public interface MyProxy extends ProxyPlace<DeclarationListPresenter>, Place {
     }
 
-	@Override
-	public void prepareFromRequest(PlaceRequest request) {
-		try {
-			LogCleanEvent.fire(this);
-			LogShowEvent.fire(this, false);
-			super.prepareFromRequest(request);
+    @Inject
+    public DeclarationListPresenter(EventBus eventBus, DeclarationListPresenterBase.MyView view, MyProxy proxy,
+                                    PlaceManager placeManager, final DispatchAsync dispatcher,
+                                    DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter,
+                                    DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter, ChangeStatusEDPresenter changeStatusEDPresenter,
+                                    MoveToCreateListPresenter moveToCreateListPresenter) {
+        super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter, changeStatusEDPresenter, moveToCreateListPresenter);
+        this.eventBus = eventBus;
+        eventBus.addHandler(CommentEvent.TYPE, new CommentEvent.CommentEventHandler() {
+            @Override
+            public void update(CommentEvent event) {
+                if (event.getComment() != null && event.getDeclarationDataId() != null) {
+                    AcceptDeclarationDataAction declarationDataAction = new AcceptDeclarationDataAction();
+                    declarationDataAction.setAccepted(false);
+                    declarationDataAction.setDeclarationId(event.getDeclarationDataId());
+                    declarationDataAction.setReasonForReturn(event.getComment());
+                    dispatcher.execute(declarationDataAction, CallbackUtils
+                            .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+                                @Override
+                                public void onSuccess(AcceptDeclarationDataResult result) {
+                                    startMoveToCreate();
+                                }
+                            }, DeclarationListPresenter.this));
+                } else {
+                    startMoveToCreate();
+                }
+            }
+        });
+        getView().setUiHandlers(this);
+    }
+
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+        try {
+            LogCleanEvent.fire(this);
+            LogShowEvent.fire(this, false);
+            super.prepareFromRequest(request);
             TaxType taxTypeOld = taxType;
             Boolean isReportsOld = isReports;
-			taxType = TaxType.valueOf(request.getParameter(TYPE, ""));
+            taxType = TaxType.valueOf(request.getParameter(TYPE, ""));
             isReports = Boolean.parseBoolean(request.getParameter(REPORTS, "false"));
             if (TaxType.PFR.equals(taxType)) {
                 isReports = false;
@@ -124,7 +153,7 @@ public class DeclarationListPresenter extends
             }
             //String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
             filterPresenter.setDeclarationListPresenter(this);
-			filterPresenter.initFilter(taxType, isReports, filterStates.get(taxType.name() + "_" + isReports));
+            filterPresenter.initFilter(taxType, isReports, filterStates.get(taxType.name() + "_" + isReports));
             filterPresenter.getView().updateFilter(taxType, isReports);
             getView().updatePageSize(taxType);
 
@@ -141,14 +170,14 @@ public class DeclarationListPresenter extends
                             getView().setVisibleCreateButton(result.isControl() && !isReports);
                         }
                     }, this));
-		} catch (Exception e) {
-			ErrorEvent.fire(this, "Не удалось открыть список налоговых форм", e);
-		}
-	}
+        } catch (Exception e) {
+            ErrorEvent.fire(this, "Не удалось открыть список налоговых форм", e);
+        }
+    }
 
-	@ProxyEvent
-	@Override
-	public void onFilterReady(DeclarationFilterReadyEvent event) {
+    @ProxyEvent
+    @Override
+    public void onFilterReady(DeclarationFilterReadyEvent event) {
         if (event.getSource() == filterPresenter) {
             ready = true;
             DeclarationDataFilter dataFilter = filterPresenter.getFilterData();
@@ -160,7 +189,7 @@ public class DeclarationListPresenter extends
              Почему GWTP вызывает блокировку даже если страница
              уже видна - непонятно.*/
             getProxy().manualReveal(DeclarationListPresenter.this);
-		}
+        }
     }
 
     @Override
@@ -197,7 +226,7 @@ public class DeclarationListPresenter extends
                             getView().setPage(result.getPage());
                         } else {
                             getView().setTableData(start, result.getTotalCountOfRecords(),
-                                result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(),
+                                    result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(),
                                     selectedItemIds);
                             selectedItemIds = null;
                         }
@@ -205,8 +234,8 @@ public class DeclarationListPresenter extends
                 }, DeclarationListPresenter.this));
     }
 
-    private void updateTitle(TaxType taxType){
-		String description = "Список налоговых форм";
+    private void updateTitle(TaxType taxType) {
+        String description = "Список налоговых форм";
         String title = "Список налоговых форм";
         if (taxType != null) {
             switch (taxType) {
@@ -218,10 +247,10 @@ public class DeclarationListPresenter extends
                     break;
             }
         }
-		TitleUpdateEvent.fire(this, title, description);
-	}
+        TitleUpdateEvent.fire(this, title, description);
+    }
 
-    private void saveFilterState(TaxType taxType, DeclarationDataFilter filter){
+    private void saveFilterState(TaxType taxType, DeclarationDataFilter filter) {
         // Это ворк эраунд.
         // Нужно клонировать состояние т.к. в DeclarationDataPresenter
         // может менять значения в этом объекте, что нужно не всегда.
@@ -322,27 +351,82 @@ public class DeclarationListPresenter extends
                         }
                     }, DeclarationListPresenter.this));
         } else {
+            LogCleanEvent.fire(DeclarationListPresenter.this);
             Dialog.confirmMessageYesClose(Dialog.CONFIRM_MESSAGE, "Вы действительно хотите вернуть в статус \"Создана\" формы?", new DialogHandler() {
                 @Override
                 public void yes() {
-                    AcceptDeclarationListAction action = new AcceptDeclarationListAction();
-                    action.setDeclarationIds(getView().getSelectedIds());
-                    action.setTaxType(taxType);
-                    action.setAccepted(accepted);
-                    dispatcher.execute(action, CallbackUtils
-                            .defaultCallback(new AbstractCallback<AcceptDeclarationListResult>() {
-                                @Override
-                                public void onSuccess(AcceptDeclarationListResult result) {
-                                    LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
-                                    onFind();
-                                }
-                            }, DeclarationListPresenter.this));
+                    declarationsIdToCreated.addAll(getView().getSelectedIds());
+                    startMoveToCreate();
                     super.yes();
                 }
             });
         }
     }
 
+    private void startMoveToCreate() {
+        if (!declarationsIdToCreated.isEmpty()) {
+            final Long declarationDataId = declarationsIdToCreated.pop();
+            CheckReceiversAcceptedPreparedAction action = new CheckReceiversAcceptedPreparedAction();
+            action.setDeclarationDataId(declarationDataId);
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckReceiversAcceptedPreparedResult>() {
+                @Override
+                public void onSuccess(CheckReceiversAcceptedPreparedResult result) {
+                    if (result.getReceiversAcceptedPreparedIdList().isEmpty()) {
+                        moveToCreateListPresenter.setDeclarationDataId(declarationDataId);
+                        addToPopupSlot(moveToCreateListPresenter);
+                    } else {
+                        startMoveToCreate();
+                    }
+                }
+            }, DeclarationListPresenter.this));
+        }
+    }
+
+    private class CheckReceiversCallBack extends AbstractCallback<CheckReceiversAcceptedPreparedResult> {
+
+        private List<Long> receiversAcceptedPreparedIdList;
+
+        @Override
+        public void onSuccess(CheckReceiversAcceptedPreparedResult result) {
+            receiversAcceptedPreparedIdList = result.getReceiversAcceptedPreparedIdList();
+            addToPopupSlot(moveToCreateListPresenter);
+        }
+
+        public List<Long> getReceiversAcceptedPreparedIdList() {
+            return receiversAcceptedPreparedIdList;
+        }
+    }
+
+    private class AcceptCallBack extends AbstractCallback<AcceptDeclarationDataResult> {
+
+        @Override
+        public void onSuccess(AcceptDeclarationDataResult result) {
+
+        }
+    }
+
+    private class Parent {
+        private Stack<Long> ids;
+        private AbstractCallback<Object> calbacks;
+        private int count;
+
+        public Parent(Stack<Long> ids, AbstractCallback<Object> calbacks) {
+            this.ids = ids;
+            this.calbacks = calbacks;
+        }
+
+        public void done() {
+            count++;
+            if (count == 2) {
+
+            }
+        }
+
+        public void action() {
+
+        }
+
+    }
 
     @Override
     public void onRecalculateClicked() {

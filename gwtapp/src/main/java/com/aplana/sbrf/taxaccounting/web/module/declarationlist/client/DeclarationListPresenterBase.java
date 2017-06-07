@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changesta
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.move_to_create.MoveToCreateListPresenter;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -65,6 +66,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final DeclarationCreationPresenter creationPresenter;
     protected final DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter;
     protected final ChangeStatusEDPresenter changeStatusEDPresenter;
+	protected final MoveToCreateListPresenter moveToCreateListPresenter;
 
     static final Object TYPE_filterPresenter = new Object();
 
@@ -73,7 +75,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	                             DeclarationFilterPresenter filterPresenter,
 								 DeclarationCreationPresenter creationPresenter,
                                  DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter,
-                                 ChangeStatusEDPresenter changeStatusEDPresenter) {
+                                 ChangeStatusEDPresenter changeStatusEDPresenter, MoveToCreateListPresenter moveToCreateListPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = placeManager;
 		this.dispatcher = dispatcher;
@@ -81,6 +83,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		this.creationPresenter = creationPresenter;
         this.declarationDownloadReportsPresenter = declarationDownloadReportsPresenter;
         this.changeStatusEDPresenter = changeStatusEDPresenter;
+        this.moveToCreateListPresenter = moveToCreateListPresenter;
 	}
 
 	@Override

@@ -148,10 +148,20 @@ public interface DeclarationDataService {
      * Отмена принятия декларации
      * @param logger - объект журнала
      * @param declarationDataId идентификатор декларации
+	 * @param note - причина возврата
      * @param userInfo информация о пользователе, выполняющего действие
      * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
      */
-    void cancel(Logger logger, long declarationDataId, TAUserInfo userInfo);
+    void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo);
+
+	/**
+	 * Проверяет есть ли у формы приемники в состоянии Принята или Подготовлена
+	 * @param declarationDataId - идентификатор декларации
+	 * @param logger - объект журнала
+	 * @param userInfo - информация о пользователе, выполняющего действие
+	 * @return - список ИД приемников  в состоянии Принята или Подготовлена
+	 */
+    public List<Long> getReceiversAcceptedPrepared(long declarationDataId, Logger logger, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML)

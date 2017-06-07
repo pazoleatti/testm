@@ -115,7 +115,7 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
                     String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
                     logger.info("Выполяется операция \"%s\" для объекта: %s:", "Отмена принятия", declarationFullName);
                     try {
-                        declarationDataService.cancel(logger, declarationId, securityService.currentUserInfo());
+                        declarationDataService.cancel(logger, declarationId, null, securityService.currentUserInfo());
                         String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", declarationId, State.CREATED.getTitle()).toString();
                         logger.info(message);
                         sendNotifications(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);

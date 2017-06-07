@@ -15,6 +15,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.comments.DeclarationDeclarationFilesCommentsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.move_to_create.MoveToCreatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.move_to_create.NoteEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.NdflReferencesEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams.SubreportParamsPresenter;
@@ -22,6 +24,8 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckReceiversAcceptedPreparedAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckReceiversAcceptedPreparedResult;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
@@ -145,6 +149,7 @@ public class DeclarationDataPresenter
     private final ChangeStatusEDPresenter changeStatusEDPresenter;
     private final SourcesPresenter sourcesPresenter;
     private final NdflReferencesEditPresenter ndflReferencesEditPresenter;
+    private final MoveToCreatePresenter moveToCreatePresenter;
 	private long declarationId;
     private DeclarationData declarationData;
     private String taxName;
@@ -154,11 +159,12 @@ public class DeclarationDataPresenter
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
-									final MyProxy proxy, DispatchAsync dispatcher,
+									final MyProxy proxy, final DispatchAsync dispatcher,
 									PlaceManager placeManager,
 									HistoryPresenter historyPresenter, SubreportParamsPresenter subreportParamsPresenter,
                                     SourcesPresenter sourcesPresenter, DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter,
-                                    ChangeStatusEDPresenter changeStatusEDPresenter, NdflReferencesEditPresenter ndflReferencesEditPresenter) {
+                                    ChangeStatusEDPresenter changeStatusEDPresenter, NdflReferencesEditPresenter ndflReferencesEditPresenter,
+                                    MoveToCreatePresenter moveToCreatePresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.historyPresenter = historyPresenter;
@@ -168,6 +174,29 @@ public class DeclarationDataPresenter
         this.declarationFilesCommentsPresenter = declarationFilesCommentsPresenter;
         this.changeStatusEDPresenter = changeStatusEDPresenter;
         this.ndflReferencesEditPresenter = ndflReferencesEditPresenter;
+        this.moveToCreatePresenter = moveToCreatePresenter;
+        eventBus.addHandler(NoteEvent.TYPE, new NoteEvent.CommentEventHandler() {
+            @Override
+            public void update(NoteEvent event) {
+                if (event.getComment() != null && event.getDeclarationDataId() != null) {
+                    AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
+                    action.setAccepted(false);
+                    action.setDeclarationId(event.getDeclarationDataId());
+                    action.setReasonForReturn(event.getComment());
+                    dispatcher.execute(action, CallbackUtils
+                            .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+                                @Override
+                                public void onSuccess(AcceptDeclarationDataResult result) {
+                                    if (!checkExistDeclarationData(result)) return;
+                                    revealPlaceRequest();
+                                }
+                            }, DeclarationDataPresenter.this));
+                }
+            }
+        });
+
+
+
 		getView().setUiHandlers(this);
 	}
 
@@ -474,17 +503,18 @@ public class DeclarationDataPresenter
                 @Override
                 public void yes() {
                     LogCleanEvent.fire(DeclarationDataPresenter.this);
-                    AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
-                    action.setAccepted(false);
-                    action.setDeclarationId(declarationId);
-                    dispatcher.execute(action, CallbackUtils
-                            .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
-                                @Override
-                                public void onSuccess(AcceptDeclarationDataResult result) {
-                                    if (!checkExistDeclarationData(result)) return;
-                                    revealPlaceRequest();
-                                }
-                            }, DeclarationDataPresenter.this));
+                    CheckReceiversAcceptedPreparedAction action = new CheckReceiversAcceptedPreparedAction();
+                    action.setDeclarationDataId(declarationId);
+                    dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckReceiversAcceptedPreparedResult>() {
+                        @Override
+                        public void onSuccess(CheckReceiversAcceptedPreparedResult result) {
+                            if (result.getReceiversAcceptedPreparedIdList().isEmpty()) {
+                                moveToCreatePresenter.setDeclarationDataId(declarationId);
+                                addToPopupSlot(moveToCreatePresenter);
+                            }
+                        }
+                    }, DeclarationDataPresenter.this));
+
                 }
             });
             //dialogPresenter.setDeclarationId(declarationId);

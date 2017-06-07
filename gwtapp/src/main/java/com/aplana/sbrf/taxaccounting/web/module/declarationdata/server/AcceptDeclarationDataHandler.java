@@ -18,8 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
@@ -41,6 +40,9 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
     @Autowired
     private AsyncTaskManagerService asyncTaskManagerService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public AcceptDeclarationDataHandler() {
         super(AcceptDeclarationDataAction.class);
@@ -109,7 +111,16 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                 result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             }
         } else {
-            declarationDataService.cancel(logger, action.getDeclarationId(), securityService.currentUserInfo());
+            String declarationFullName = declarationDataService.getDeclarationFullName(action.getDeclarationId(), null);
+            logger.info("Выполяется операция \"%s\" для %s:", "Отмена принятия", declarationFullName);
+            try {
+                declarationDataService.cancel(logger, action.getDeclarationId(), action.getReasonForReturn(), securityService.currentUserInfo());
+                String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", action.getDeclarationId(), State.CREATED.getTitle()).toString();
+                logger.info(message);
+                sendNotifications(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+            } catch (Exception e) {
+                logger.error(e);
+            }
             result.setStatus(CreateAsyncTaskStatus.EXIST);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
@@ -119,5 +130,20 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
     @Override
     public void undo(AcceptDeclarationDataAction action, AcceptDeclarationDataResult result, ExecutionContext context) throws ActionException {
         // Nothing!
+    }
+
+    private void sendNotifications(String msg, String uuid, Integer userId, NotificationType notificationType, String reportId) {
+        if (msg != null && !msg.isEmpty()) {
+            List<Notification> notifications = new ArrayList<Notification>();
+            Notification notification = new Notification();
+            notification.setUserId(userId);
+            notification.setCreateDate(new Date());
+            notification.setText(msg);
+            notification.setLogId(uuid);
+            notification.setReportId(reportId);
+            notification.setNotificationType(notificationType);
+            notifications.add(notification);
+            notificationService.saveList(notifications);
+        }
     }
 }

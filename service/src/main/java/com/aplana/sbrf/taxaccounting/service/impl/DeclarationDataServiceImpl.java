@@ -438,33 +438,42 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public void cancel(Logger logger, long id, TAUserInfo userInfo) {
+    public void cancel(Logger logger, long id, String note, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
         DeclarationData declarationData = declarationDataDao.get(id);
 
-        //Проверка того, что консолидация вообще когда то выполнялась для всех источников
-        List<Relation> relations = sourceService.getDeclarationDestinationsInfo(declarationData, true, false, null, userInfo, logger);
-        for (Relation relation : relations){
-            if (relation.isCreated() && !State.CREATED.equals(relation.getDeclarationState())){
-                throw new ServiceException(EXIST_DESTINATION_DECLARATION_ERROR);
-            }
-        }
-
-        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        /*Map<String, Object> exchangeParams = new HashMap<String, Object>();
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-        }
+        }*/
 
         declarationData.setState(State.CREATED);
         sourceService.updateDDConsolidation(declarationData.getId());
 
-        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
+        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
         auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
 
         declarationDataDao.setStatus(id, declarationData.getState());
     }
 
+    @Override
+    public List<Long> getReceiversAcceptedPrepared(long declarationDataId, Logger logger, TAUserInfo userInfo) {
+        List<Long> toReturn = new LinkedList<Long>();
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+
+        if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.PRIMARY.getId()
+                || declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()) {
+            List<Relation> relations = sourceService.getDeclarationDestinationsInfo(declarationData, true, false, null, userInfo, logger);
+            for (Relation relation : relations){
+                if (relation.isCreated() && !State.CREATED.equals(relation.getDeclarationState())){
+                    toReturn.add(relation.getDeclarationDataId());
+                }
+            }
+        }
+        return toReturn;
+    }
 
     @Override
     public InputStream getXmlDataAsStream(long declarationId, TAUserInfo userInfo) {
