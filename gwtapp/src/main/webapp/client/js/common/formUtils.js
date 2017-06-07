@@ -1,7 +1,7 @@
 (function () {
     "use strict";
     // Модуль с набором утилит формы
-    angular.module('sbrfNdfl.formUtils', [])
+    angular.module('app.formUtils', [])
         .service('FormUtils', function () {
             var service = {
                 /**

@@ -3,7 +3,6 @@
 
     angular.module('app.header', [
         'ui.router',
-        'sbrfNdfl.Constants',
         'userData'
     ])
         .directive('appHeader', function () {

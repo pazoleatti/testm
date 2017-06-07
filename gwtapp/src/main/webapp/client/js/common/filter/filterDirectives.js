@@ -1,24 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('sbrfNdfl.filterDirectives', [])
-        /**
-         * Две кнопки "Найти", "Сбросить"
-         *
-         * Атрибуты:
-         *   "on-search" - обработчик кнопки "Найти"
-         *   "on-clear" - обработчик кнопки "Сбросить"
-         */
-        .directive('searchClearButtons', function () {
-            return {
-                restrict: 'E',
-                templateUrl: 'client/js/common/filter/searchClearButtons.html',
-                scope: {
-                    onSearch: '&onSearch',
-                    onClear: '&onClear'
-                }
-            }
-        })
+    angular.module('app.filterDirectives', [])
         /**
          * Выбор интервала дат от-до
          *
@@ -50,17 +33,17 @@
                         scope.dateToOptions = {
                             minDate: scope.ngFromModel,
                             maxDate: undefined
-                        }
+                        };
                     };
                     // Изменение пропорций метки и поля
                     scope.labelGridClass = 'col-md-3';
                     scope.pickerGridClass = 'col-md-9';
-                    if (attributes.labelWidth != undefined) {
+                    if (attributes.labelWidth !== undefined) {
                         var labelWidth = parseInt(attributes.labelWidth);
                         scope.labelGridClass = 'col-md-' + labelWidth;
                         scope.pickerGridClass = 'col-md-' + (12 - labelWidth);
                     }
                 }
-            }
-        })
+            };
+        });
 } ());
