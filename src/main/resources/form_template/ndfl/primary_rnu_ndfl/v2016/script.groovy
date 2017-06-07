@@ -2843,7 +2843,7 @@ class NdflPersonFL {
             }
 
             // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
-            if (!documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
+            if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
                 //TODO turn_to_error
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                         "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}'")
