@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('sbrfNdfl.filterDirectives', [])
+    angular.module('app.filterDirectives', [])
         /**
          * Выбор интервала дат от-до
          *

@@ -1,7 +1,7 @@
 (function () {
         "use strict";
         // Вспомогательные утилиты для фильтров в журналах
-        angular.module('sbrfNdfl.filterUtils', [])
+        angular.module('app.filterUtils', [])
             .factory('filterUtils', function () {
                 return {
                     /**

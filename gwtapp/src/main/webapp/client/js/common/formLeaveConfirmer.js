@@ -6,7 +6,7 @@
      * Если при смене режима просмотр/редактирование не происходит смена состояни - запрос не отобразиться
      * Его можно вызвать вручную методом сервиса askSaveChanges
      */
-    angular.module('sbrfNdfl.formLeaveConfirmer', ['sbrfNdfl.formUtils'])
+    angular.module('app.formLeaveConfirmer', ['app.formUtils'])
         .factory('FormLeaveConfirmer', ['$rootScope', '$state', '$window', '$filter', 'dialogs', 'FormUtils', function ($rootScope, $state, $window, $filter, dialogs, FormUtils) {
             var getParameterValue = function (parameter) {
                 return angular.isFunction(parameter) ? parameter() : parameter;
