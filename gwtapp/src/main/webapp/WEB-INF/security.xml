@@ -11,6 +11,7 @@
 	<http pattern="/resources/**" security="none"/>
 	<http pattern="/j_security_check" security="none"/>
     <http pattern="/controller/actions/cache/clear-cache" security="none"/>
+    <http pattern="/controller/actions/clearAuthenticationCache" security="none"/>
 	<http pattern="/GenericAccountManagementService" security="none"/>
 	<http pattern="/GenericAccountManagementService/**" security="none"/>
 	<http pattern="/TaxAccountingSupportingData" security="none"/>

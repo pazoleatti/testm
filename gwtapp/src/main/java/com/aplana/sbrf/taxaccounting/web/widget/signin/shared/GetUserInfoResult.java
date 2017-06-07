@@ -3,10 +3,19 @@ package com.aplana.sbrf.taxaccounting.web.widget.signin.shared;
 import com.gwtplatform.dispatch.shared.Result;
 
 public class GetUserInfoResult implements Result{
-	
+
+	private String userLogon;
 	private String userName;
 	private String roleAnddepartment;
     private String hint;
+
+	public String getUserLogon() {
+		return userLogon;
+	}
+
+	public void setUserLogon(String userLogon) {
+		this.userLogon = userLogon;
+	}
 
 	public String getUserName() {
 		return userName;

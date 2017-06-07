@@ -32,6 +32,7 @@ public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoA
 		Department department = departmentService.getDepartment(user.getDepartmentId());
 
 		GetUserInfoResult result = new GetUserInfoResult();
+		result.setUserLogon(user.getLogin());
 		result.setRoleAnddepartment(department.getName());
 		result.setUserName(user.getName());
 
