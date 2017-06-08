@@ -55,7 +55,7 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
                     TARole.N_ROLE_OPER, TARole.F_ROLE_OPER,
                     TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                     TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-                manualMenu.getSubMenu().add(new MenuItem("Руководство пользователя", "resources/help_un.pdf"));
+                manualMenu.getSubMenu().add(new MenuItem("Руководство пользователя", "resources/help_ndfl.pdf"));
             }
 
             if (currentUser.hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
