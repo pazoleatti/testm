@@ -376,7 +376,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
 
             if (contains(parameters, "inp")) {
-                sb.append("AND lower(np.inp) like lower(:inp)) \n");
+                sb.append("AND lower(np.inp) like lower(:inp) \n");
             }
 
             if (contains(parameters, "fromBirthDay")) {
