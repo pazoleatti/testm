@@ -8,6 +8,7 @@
 
 	<!-- Exclude some URL's from spring security. See also web.xml. -->
 	<http pattern="/login" security="none"/>
+	<http pattern="/logout" security="none"/>
 	<http pattern="/resources/**" security="none"/>
 	<http pattern="/j_security_check" security="none"/>
     <http pattern="/controller/actions/cache/clear-cache" security="none"/>

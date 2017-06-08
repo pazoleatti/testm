@@ -89,6 +89,16 @@
 		<url-pattern>/login</url-pattern>
 	</servlet-mapping>
 
+	<!-- Logout page -->
+	<servlet>
+		<servlet-name>logout</servlet-name>
+		<jsp-file>/WEB-INF/jsp/logout.jsp</jsp-file>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>logout</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
+
 	<!-- Error 403. Access forbidden. Unknown user. -->
 	<error-page>
 		<error-code>403</error-code>
@@ -213,6 +223,7 @@
 		<web-resource-collection>
 			<web-resource-name>Unsecured</web-resource-name>
 			<url-pattern>/login</url-pattern>
+			<url-pattern>/logout</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
             <url-pattern>/cache/clear-cache</url-pattern>
 			<url-pattern>/GenericAccountManagementService</url-pattern>
