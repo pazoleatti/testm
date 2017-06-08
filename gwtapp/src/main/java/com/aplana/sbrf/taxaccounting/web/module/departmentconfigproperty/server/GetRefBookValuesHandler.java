@@ -22,17 +22,12 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
@@ -48,6 +43,8 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
     PeriodService periodService;
     @Autowired
     RefBookHelper refBookHelper;
+    @Autowired
+    RefBookFactory refBookFactory;
     @Autowired
     LogEntryService logEntryService;
 
@@ -158,16 +155,27 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
 
     private List<Map<String, TableCell>> convert(List<Map<String, RefBookValue>> data, Long refBookId, boolean needDeref, Map<String, RefBookDataProvider> refProviders, Map<String, String> refAliases) {
         List<Map<String, TableCell>> converted = new ArrayList<Map<String, TableCell>>();
+        RefBook refBookClone = SerializationUtils.clone(refBookFactory.get(refBookId));
+        List<RefBookAttribute> refBookAttributeList = new ArrayList<RefBookAttribute>();
+        // не разименовываем скрытые атрибуты
+        for(RefBookAttribute refBookAttribute: refBookClone.getAttributes()) {
+            if (refBookAttribute.isVisible()) {
+                refBookAttributeList.add(refBookAttribute);
+            }
+        }
+        refBookClone.setAttributes(refBookAttributeList);
+        Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBookClone, data, false);
         for (Map<String, RefBookValue> row : data) {
-            converted.add(convertRow(row, refBookId, needDeref, refProviders, refAliases));
+            converted.add(convertRow(row, refBookClone, needDeref, refProviders, refAliases, dereferenceValues));
         }
 
         return converted;
     }
 
-    private Map<String, TableCell> convertRow(Map<String, RefBookValue> data, Long refBookId, boolean needDeref, Map<String, RefBookDataProvider> refProviders, Map<String, String> refAliases) {
+    private Map<String, TableCell> convertRow(Map<String, RefBookValue> data, RefBook refBook, boolean needDeref, Map<String, RefBookDataProvider> refProviders, Map<String, String> refAliases, Map<Long, Map<Long, String>> dereferenceValues) {
         Map<String, TableCell> res = new HashMap<String, TableCell>();
-        for (String a : data.keySet()) {
+        for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
+            String a = refBookAttribute.getAlias();
             TableCell cell = new TableCell();
             switch (data.get(a).getAttributeType()) {
                 case STRING:
@@ -183,12 +191,11 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
 					Long refId = data.get(a).getReferenceValue();
                     cell.setRefValue(refId);
                     if (needDeref && refId != null) {
-                        if (refProviders.get(a).isRecordsExist(Arrays.asList(refId)).isEmpty()) {
-                            Map<String, RefBookValue> refValue = refProviders.get(a).getRecordData(refId);
-                            cell.setDeRefValue(refValue.get(refAliases.get(a)).toString());
-                        } else {
-                            //Если ссылка на несуществующую запись, то отображаем пустое поле
+                        Map<Long, String> row = dereferenceValues.get(refBookAttribute.getId());
+                        if (row == null) {
                             cell.setDeRefValue("");
+                        } else {
+                            cell.setDeRefValue(row.get(refId));
                         }
                     }
                     break;
