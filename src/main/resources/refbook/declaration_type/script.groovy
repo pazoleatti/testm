@@ -109,10 +109,10 @@ String ATTR_YEAR = "ОтчетГод";
 
 // Шаблоны имен файлов
 @Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)_(.*)\\.(xml|XML)";
-@Field final String KV_PATTERN = "KV_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String UO_PATTERN = "UO_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String IV_PATTERN = "IV_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String UU_PATTERN = "UU_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
+@Field final String KV_PATTERN = "KV_NONDFL6_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
+@Field final String UO_PATTERN = "UO_NONDFL6_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
+@Field final String IV_PATTERN = "IV_NONDFL6_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
+@Field final String UU_PATTERN = "UU_NONDFL6_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
 
 @Field final String NDFL2_PATTERN_PROT_1 = "PROT_NO_NDFL2"
 @Field final String NDFL2_PATTERN_PROT_2 = "прот_NO_NDFL2"
@@ -594,19 +594,19 @@ def isNdfl6AndNot11151111(fileName) {
  * Возвращает имя отчетного файла для 6НДФЛ
  */
 def getFileName(contentMap, fileName) {
-    if (fileName.startsWith(ANSWER_PATTERN_1)) {
+    if (fileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
         return contentMap.get(NDFL2_KV_FILE_TAG).get(NDFL2_KV_FILE_ATTR)
     }
 
-    if (fileName.startsWith(ANSWER_PATTERN_2)) {
+    if (fileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
         return contentMap.get(NDFL2_UO_FILE_TAG).get(NDFL2_UO_FILE_ATTR)
     }
 
-    if (fileName.startsWith(ANSWER_PATTERN_3)) {
+    if (fileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
         return contentMap.get(NDFL2_IV_FILE_TAG).get(NDFL2_IV_FILE_ATTR)
     }
 
-    if (fileName.startsWith(ANSWER_PATTERN_4)) {
+    if (fileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
         return contentMap.get(NDFL2_UU_FILE_TAG).get(NDFL2_UU_FILE_ATTR)
     }
 
@@ -621,7 +621,7 @@ def getDocWeight(fileName) {
         return 1
     }
 
-    if (fileName.startsWith(ANSWER_PATTERN_1) || fileName.startsWith(ANSWER_PATTERN_2)) {
+    if (fileName.startsWith(ANSWER_PATTERN_NDFL_1) || fileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
         return 1
     }
 
@@ -824,20 +824,20 @@ def readNdfl6ResponseContent() {
 
     SAXHandler handler
 
-    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+    if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
         handler = new SAXHandler('ИмяОбрабФайла', 'СвКвит')
     }
 
-    if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+    if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
         handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлНарФайл')
     }
 
-    if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+    if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
         sett.put(NDFL2_IV_FILE_TAG, [NDFL2_IV_FILE_ATTR])
         handler = new SAXHandler(sett)
     }
 
-    if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+    if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
         handler = new SAXHandler('ИмяОбрабФайла', 'ВыявлОшФайл')
     }
 
@@ -865,17 +865,17 @@ def readNdfl6ResponseContent() {
 
     def result = [:]
 
-    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+    if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
         def value = [:]
         value.put(NDFL2_KV_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
         result.put(NDFL2_KV_FILE_TAG, value)
-    } else if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
         def value = [:]
         value.put(NDFL2_UO_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
         result.put(NDFL2_UO_FILE_TAG, value)
-    } else if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
         result = handler.getAttrValues()
-    } else if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+    } else if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
         def value = [:]
         value.put(NDFL2_UU_FILE_ATTR, handler.nodeValueList.size() > 0 ? handler.nodeValueList.get(0) : null)
         result.put(NDFL2_UU_FILE_TAG, value)
@@ -960,27 +960,27 @@ def importNdflResponse() {
     if (NDFL6 == formTypeCode) {
         def templateFile = null
 
-        if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+        if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
             templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
-                it.fileName.startsWith(ANSWER_PATTERN_1)
+                it.fileName.startsWith(ANSWER_PATTERN_NDFL_1)
             }
         }
 
-        if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+        if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
             templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
-                it.fileName.startsWith(ANSWER_PATTERN_2)
+                it.fileName.startsWith(ANSWER_PATTERN_NDFL_2)
             }
         }
 
-        if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+        if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
             templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
-                it.fileName.startsWith(ANSWER_PATTERN_3)
+                it.fileName.startsWith(ANSWER_PATTERN_NDFL_3)
             }
         }
 
-        if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+        if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
             templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
-                it.fileName.startsWith(ANSWER_PATTERN_4)
+                it.fileName.startsWith(ANSWER_PATTERN_NDFL_4)
             }
         }
 
