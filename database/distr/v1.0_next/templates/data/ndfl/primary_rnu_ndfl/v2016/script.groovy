@@ -239,26 +239,28 @@ import java.text.SimpleDateFormat
         NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper() {
             @Override
             public DocType getDocTypeByCode(String code, NaturalPerson ndflPerson) {
-                if (code != null) {
-                    if (docTypeCodeMap == null) {
-                        throw new ServiceException("Не проинициализирован кэш справочника 'Коды документов'!") as Throwable;
-                    }
-
-                    DocType result = docTypeCodeMap.get(code);
-                    if (result == null) {
-                        String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                        String inp = ndflPerson.getPersonIdentifier().inp
-                        String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
-                        localLogger.errorExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
-                                "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
-                    }
-
-                    return result;
-                } else {
-                    return null;
+                if (docTypeCodeMap == null) {
+                    throw new ServiceException("Не проинициализирован кэш справочника 'Коды документов'!") as Throwable;
                 }
+                DocType result = docTypeCodeMap.get(code);
+                String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                String inp = ndflPerson.getPersonIdentifier().inp
+                String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
+                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.num ?: "",
+                    "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
+                if (code == null) {
+                    result = null
+                    localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
+                            "Не заполнен обязательный параметр")
+                } else if (code == "0") {
+                    result = null
+                    localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
+                            "Параметр не может быть равен \"0\"")
+                } else if (result == null) {
+                    localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
+                            "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
+                }
+                return result;
             }
         }
         naturalPersonRowMapper.setAsnuId(declarationData.asnuId);
