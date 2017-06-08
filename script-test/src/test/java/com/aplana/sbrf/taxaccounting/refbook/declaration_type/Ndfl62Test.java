@@ -305,7 +305,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
         declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
         DeclarationTemplateFile xsdFile = new DeclarationTemplateFile();
-        xsdFile.setFileName("IV_.xsd");
+        xsdFile.setFileName("IV_NONDFL6.xsd");
         declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));
 
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE"), anyLong()))
@@ -383,7 +383,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
         declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
         DeclarationTemplateFile xsdFile = new DeclarationTemplateFile();
-        xsdFile.setFileName("KV_.xsd");
+        xsdFile.setFileName("KV_NONDFL6.xsd");
         declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));
 
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE"), anyLong()))
