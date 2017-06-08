@@ -156,6 +156,7 @@ public class DeclarationDataPresenter
     private TaxType taxType;
     private DeclarationFormKind declarationFormKind;
     private List<DeclarationSubreport> subreports = new ArrayList<DeclarationSubreport>();
+    private boolean isRemoved = false;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
@@ -209,6 +210,7 @@ public class DeclarationDataPresenter
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
+        isRemoved = false;
 		final long id = ParamUtils.getLong(request,
 				DeclarationDataTokens.declarationId);
 
@@ -532,6 +534,7 @@ public class DeclarationDataPresenter
                 LogCleanEvent.fire(t);
                 DeleteDeclarationDataAction action = new DeleteDeclarationDataAction();
                 action.setDeclarationId(declarationId);
+                isRemoved = true;
                 dispatcher
                         .execute(
                                 action,
@@ -540,7 +543,6 @@ public class DeclarationDataPresenter
                                             @Override
                                             public void onSuccess(
                                                     DeleteDeclarationDataResult result) {
-                                                if (!checkExistDeclarationData(result)) return;
                                                 MessageEvent
                                                         .fire(DeclarationDataPresenter.this, DECLARATION_DELETE_MSG);
                                                 boolean isReports = TaxType.NDFL.equals(taxType) && DeclarationFormKind.REPORTS.equals(declarationFormKind);
@@ -549,6 +551,12 @@ public class DeclarationDataPresenter
                                                                 .with("nType", taxName)
                                                                 .with(DeclarationListPresenter.REPORTS, isReports?"true":"false"));
 
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                super.onFailure(caught);
+                                                isRemoved = false;
                                             }
                                         }, DeclarationDataPresenter.this));
                 Dialog.hideMessage();
@@ -753,7 +761,7 @@ public class DeclarationDataPresenter
     }
 
     public boolean checkExistDeclarationData(DeclarationDataResult result) {
-	    if (!result.isExistDeclarationData()) {
+	    if (!isRemoved && !result.isExistDeclarationData() ) {
 	        LogCleanEvent.fire(DeclarationDataPresenter.this);
             Dialog.errorMessage("Налоговая форма с номером = " + result.getDeclarationDataId() + " не существует либо была удалена. Вы будете перенаправлены на главную страницу", new DialogHandler() {
                 @Override
