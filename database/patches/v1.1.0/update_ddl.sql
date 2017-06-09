@@ -6,5 +6,6 @@ commit;
 -- compile source
 prompt compile source
 @@person_pkg.sql;
+@@fias_pkg.sql;
 
 exit;
