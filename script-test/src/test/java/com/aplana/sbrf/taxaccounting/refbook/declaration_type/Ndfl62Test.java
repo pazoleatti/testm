@@ -287,7 +287,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         verify(testHelper.getDeclarationService(), Mockito.times(0)).setDocStateId(anyLong(), anyLong());
     }
 
-    @Test
+    //@Test
     @SuppressWarnings("unchecked")
     public void testNdfl6IV() throws ParseException {
         String fileName = "IV_NONDFL6_7707083893997950001_7707083893997950001_7707_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
@@ -365,7 +365,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         Assert.assertEquals(DOC_STATE_SUCCESS_ID, docStateId.getValue());
     }
 
-    @Test
+    //@Test
     @SuppressWarnings("unchecked")
     public void testNdfl6KV() throws ParseException {
         String fileName = "KV_NONDFL6_7707083893997950001_7707083893997950001_7707_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
