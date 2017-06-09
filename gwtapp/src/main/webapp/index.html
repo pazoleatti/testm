@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html class="not-overflow">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -18,14 +18,23 @@
 
 </head>
 <body>
+<div class="cbr-page">
     <!-- шапка -->
     <div app-header></div>
     <!-- основное содержимое -->
-    <div id="main-content" class="container-fluid" ui-view></div>
+  <!--  <div id="main-content" class="container-fluid" ui-view></div>-->
+
+        <div class="cbr-page-layout">
+            <div class="cbr-page-layout__view">
+                <div ui-view></div>
+            </div>
+        </div>
+    </div>
 
     <script src="client/js/hacks.js"></script> <!-- IE hacks -->
 
-    <script src="client/js/lib/jquery-3.2.1.js"></script>
+   <!-- <script src="client/js/lib/jquery-3.2.1.js"></script>-->
+    <script src="client/js/lib/jquery-1.2.js"></script>
     <script src="client/js/lib/angular-1.5.9.js"></script>
     <script src="client/js/lib/angular-translate-2.15.1.js"></script> <!-- i18n -->
     <script src="client/js/lib/angular-translate-loader-url-2.15.1.js"></script> <!-- i18n -->

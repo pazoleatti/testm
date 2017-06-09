@@ -816,3 +816,90 @@ button.btn.btn-default.ng-binding {
     left: 0!important;
   }
 }
+.container-grid{
+  overflow: hidden;
+  height: 100%;
+  position: relative;
+  padding: 6px;
+}
+div [ui-view] {
+  height: 100%;
+}
+/**
+ * 2-х-колночная структура
+ */
+.cbr-page-layout {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 10;
+}
+.cbr-page-layout:after {
+  content: " ";
+  clear: both;
+  display: table;
+}
+.cbr-page-layout__side {
+  float: left;
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  width: 370px;
+  background-color: #fff;
+}
+.cbr-side-content {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 12px 8px;
+  overflow: auto;
+  transition: .2s;
+}
+/* модификация jquery UI для боковой панели */
+.cbr-page-layout__side .ui-resizable-handle {
+  width: 4px;
+  right: 0;
+  background-color: #515e5e;
+  box-shadow: 2px 0 3px rgba(68, 75, 75, 0.5);
+}
+.cbr-page-layout__side .ui-resizable-handle:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  width: 16px;
+  height: 87px;
+  background: url("../img/drag.png") no-repeat;
+}
+.cbr-page-layout__side_colapsed .ui-resizable-handle {
+  background-color: #444b4b;
+}
+.cbr-page-layout__side_colapsed .ui-resizable-handle:before {
+  background-position: -16px 0;
+}
+.cbr-page-layout__main {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+}
+.cbr-page-layout__view {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  overflow: hidden;
+}
+/*.cbr-page-layout__view{
+  margin-top: 30px;
+}*/
+.ui-jqgrid{
+  width: 100%!important;
+}
+.cbr-page-layout {
+  top: 50px;
+}

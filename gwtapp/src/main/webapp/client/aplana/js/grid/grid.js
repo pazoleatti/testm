@@ -8,7 +8,7 @@
 
     /* Директива для AplanaGrid */
     angular.module("aplana.grid", ['aplana.utils', 'aplana.webStorage'])
-        .factory('GridSettingsStorage', ['AplanaUtils', '$webStorage', function (AplanaUtils, $webStorage) {
+        .factory('GridSettingsStorage', ['AplanaUtils', '$webStorage', '$rootScope', function (AplanaUtils, $webStorage, $rootScope) {
             var predefinedStores = {
                 gridPageSettings: 'gridPageSettings',
                 gridColSettings: 'gridColSettings'
@@ -48,6 +48,7 @@
                         page: grid.jqGrid('getGridParam', 'page')
                     };
 
+                    $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
                     var result = true;
                     result = result && $webStorage.set(predefinedStores.gridPageSettings, gridName, sessionSettings, true);
                     result = result && $webStorage.set(predefinedStores.gridPageSettings, gridName, localSettings, false);
@@ -104,7 +105,7 @@
                             width: colModel[idx].width
                         });
                     }
-
+                    $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
                     $webStorage.set(predefinedStores.gridColSettings, gridName, colSettings, false);
                 },
 
@@ -168,6 +169,7 @@
                         grid.jqGrid("sortGrid", initialConfig.sortname, true, initialConfig.sortorder);
                     }
 
+                    $rootScope.$broadcast('UPDATE_GIRD_HEIGHT');
                     $webStorage.remove(predefinedStores.gridColSettings, gridName, false);
                 },
 
@@ -294,6 +296,7 @@
                         gridParentAdjustWidthCssSelector: '@',
                         gridFillSpace: '=',
                         gridFillSpaceContainerSelector: '@',
+                        gridFillSpaceContainerSelectorTop: '@',
                         gridFillSpaceViewSelector: '@',
                         gridStorePageSettings: '=',
                         gridStoreColSettings: '=',
@@ -482,12 +485,16 @@
                              */
                             refreshGrid: function (page) {
                                 var g = scope.grid;
+                                scope.gridOptions.disableAutoLoad = false;
                                 g[0].refreshIndex();
                                 g.trigger("reloadGrid", [
                                     {page: page}
                                 ]);
                                 this.applyGrouping();
                                 fillLastColumn();
+                                $timeout(function () {
+                                    fillHeight();
+                                }, 0);
                             },
 
                             /**
@@ -1083,29 +1090,35 @@
                                         gridConfig.requestParameters() : gridConfig.requestParameters) || {};
                                 requestParameters = angular.extend($pagingBuilder(postdata), requestParameters);
 
-                                gridConfig.angularResource.query(requestParameters, function (data) {
-                                    scope.gridParams.bdiv.css({
-                                        height: 'auto'
-                                    });
-
-                                    if (data && data.rows) {
-                                        data.rows.forEach(function(element, index) {
-                                            data.rows[index] = AplanaUtils.sanitizeRecursively(element);
+                                var gridLoadData = function () {
+                                    gridConfig.angularResource.query(requestParameters, function (data) {
+                                        scope.gridParams.bdiv.css({
+                                            height: 'auto'
                                         });
-                                    }
 
-                                    scope.grid[0].addJSONData(data);
-                                    scope.grid[0].p.loadComplete.call(scope.grid[0], data);
+                                        if (data && data.rows) {
+                                            data.rows.forEach(function(element, index) {
+                                                data.rows[index] = AplanaUtils.sanitizeRecursively(element);
+                                            });
+                                        }
 
-                                    if (ngModel) {
-                                        scope.$phaseSaveCall(ngModel.$render);
-                                    }
+                                        scope.grid[0].addJSONData(data);
+                                        scope.grid[0].p.loadComplete.call(scope.grid[0], data);
 
-                                    // вызываем подстройку по ширине родителя т.к. возможно
-                                    // что новые данные привели к вертикальной полосе прокрутки
-//                                scope.gridCtrl.adjustGridWidthToParent();
-                                    fillHeight();
-                                });
+                                        if (ngModel) {
+                                            scope.$phaseSaveCall(ngModel.$render);
+                                        }
+
+                                        // вызываем подстройку по ширине родителя т.к. возможно
+                                        // что новые данные привели к вертикальной полосе прокрутки
+                                        // scope.gridCtrl.adjustGridWidthToParent();
+                                        fillHeight();
+                                    });
+                                };
+
+                                if (!scope.gridOptions.disableAutoLoad) {
+                                    gridLoadData();
+                                }
                             };
                         }
 
@@ -1192,8 +1205,7 @@
                             deepempty: true,
                             hidegrid: false,
                             sortable: function (permutation) {
-                                //Иммено такое сравнение, для учета значения true по умолчанию
-                                if (scope.gridStoreColSettings !== false) {
+                                if (scope.gridStoreColSettings) {
                                     GridSettingsStorage.applyColSettings(scope.grid);
 
                                     //Эти операции вызываются jqgrid'ом, angular при них не знает,
@@ -1228,7 +1240,11 @@
                                     scope.gridCtrl.onSelectRow(rowId, status, e);
                                 }
                                 if (ngModel) {
-                                    scope.$apply(read());
+                                    read();
+                                    if ((!scope.$$phase) && (!scope.$root.$$phase)) {
+                                        scope.$apply();
+                                    }
+                                    //scope.$apply(read());
                                 }
 
                                 checkAllSelection();
@@ -1314,59 +1330,96 @@
                             gridConfig.sortable = false;
                         }
 
+                        var grid = null;
+
                         // строим грид
-                        scope.grid.jqGrid(gridConfig);
-                        scope.grid.navGrid(gridConfig.pager, {
-                            search: false,
-                            edit: false,
-                            add: false,
-                            del: false,
-                            refreshstate: "current"
-                        });
+                        scope.buildGrid = function () {
+                            scope.grid.jqGrid(gridConfig);
+                            scope.grid.navGrid(gridConfig.pager, {
+                                search: false,
+                                edit: false,
+                                add: false,
+                                del: false,
+                                refreshstate: "current"
+                            });
 
-                        scope.viewrecords.appendTo(element.find("div.ui-jqgrid.ui-widget"));
-                        // легенда должна быть частью грида, переместим ее в нужный контейнер
-                        scope.legend.appendTo(element.find("div.ui-jqgrid.ui-widget"));
+                            scope.viewrecords.appendTo(element.find("div.ui-jqgrid.ui-widget"));
+                            // легенда должна быть частью грида, переместим ее в нужный контейнер
+                            scope.legend.appendTo(element.find("div.ui-jqgrid.ui-widget"));
 
-                        // Запоминаются параметры грида для режима fullScreen
-                        var grid = $("#" + scope.grid.divId);
-                        scope.gridParams.gridItself = grid;
-                        scope.gridParams.scrollOffset = scope.grid.jqGrid('getGridParam', 'scrollOffset');
-                        scope.gridParams.bdiv = grid.find('.ui-jqgrid-bdiv');
-                        scope.gridParams.fullScreen = gridConfig.fullScreen;
-                        scope.grid.jqGrid("setGridParam", {"fullScreen": scope.gridParams.fullScreen});
+                            // Запоминаются параметры грида для режима fullScreen
+                            grid = $("#" + scope.grid.divId);
+                            scope.gridParams.gridItself = grid;
+                            scope.gridParams.scrollOffset = scope.grid.jqGrid('getGridParam', 'scrollOffset');
+                            scope.gridParams.bdiv = grid.find('.ui-jqgrid-bdiv');
+                            scope.gridParams.fullScreen = gridConfig.fullScreen;
+                            scope.grid.jqGrid("setGridParam", {"fullScreen": scope.gridParams.fullScreen});
 
-                        scope.grid.setGridParam({
-                            gridComplete: function (data) {
-                                if (scope.gridCtrl.gridComplete) {
-                                    scope.gridCtrl.gridComplete(data);
+                            scope.grid.setGridParam({
+                                gridComplete: function (data) {
+                                    if (scope.gridCtrl.gridComplete) {
+                                        scope.gridCtrl.gridComplete(data);
+                                    }
+                                    if (ngModel && (scope.$rawData !== undefined)) {
+                                        if (scope.gridKeepSelection === 'true') {
+                                            /**
+                                             * были проблемы с ajax загрузкой данных, он тоже вызывает digest
+                                             */
+                                            scope.$phaseSaveCall(ngModel.$render);
+                                        }
+                                        else {
+                                            ngModel.$setViewValue([]);
+                                        }
+
+                                        if (scope.$root.$$phase) {
+                                            ngModel.$setPristine();
+                                        }
+                                        else {
+                                            scope.$apply(ngModel.$setPristine());
+                                        }
+                                    }
+                                    setTimeout(function() {
+                                        fillLastColumn();
+                                    }, 0);
                                 }
-                                if (ngModel && (scope.$rawData !== undefined)) {
-                                    if (scope.gridKeepSelection === 'true') {
-                                        /**
-                                         * были проблемы с ajax загрузкой данных, он тоже вызывает digest
-                                         */
-                                        scope.$phaseSaveCall(ngModel.$render);
-                                    }
-                                    else {
-                                        ngModel.$setViewValue([]);
-                                    }
+                            });
 
-                                    if (scope.$root.$$phase) {
-                                        ngModel.$setPristine();
-                                    }
-                                    else {
-                                        scope.$apply(ngModel.$setPristine());
-                                    }
-                                }
-                                setTimeout(function() {
-                                    fillLastColumn();
-                                }, 0);
-                            }
-                        });
+                            // сохраним ссылку на грид
+                            scope.gridCtrl.registerGridElement(scope.grid);
+                        };
 
-                        // сохраним ссылку на грид
-                        scope.gridCtrl.registerGridElement(scope.grid);
+                        // Перестраивает грид
+                        scope.gridCtrl.rebuildGrid = function () {
+                            scope.grid.GridUnload();
+
+                            angular.extend(gridConfig, {
+                                colNames: scope.gridOptions.colNames,
+                                colModel: scope.gridOptions.colModel
+                            });
+
+                            scope.grid = getGrid(element);
+                            scope.paginator = getPaginator(element);
+                            scope.legend = getLegend(element);
+                            scope.viewrecords = getViewRecords(element);
+                            scope.$rawData = undefined;
+                            scope.$multiSelect = !!scope.gridOptions;
+                            scope.gridParams = {};
+
+                            scope.grid.divId = element[0].attributes.id.value;
+                            scope.grid.tableId = 'tbl_' + element[0].attributes.id.value;
+                            scope.grid.attr('id', scope.grid.tableId);
+                            scope.grid.attr('name', scope.grid.tableId);
+
+                            scope.buildGrid();
+
+                            $timeout(function () {
+                                fillHeight();
+                                fillLastColumn();
+                            }, 0);
+                        };
+
+                        // строим грид
+                        scope.buildGrid();
 
                         // подгружаем в модель изменения в гриде
                         function read() {
@@ -1454,7 +1507,8 @@
                          */
                         function fillHeight() {
                             if (scope && scope.gridFillSpace) {
-                                var container = $(scope.gridFillSpaceContainerSelector);
+                                var container = $(scope.gridFillSpaceContainerSelector );
+                                var containerTop = $(scope.gridFillSpaceContainerSelectorTop);
                                 var containerMinHeight = parseInt($(scope.gridFillSpaceContainerSelector).css('min-height'), 10);
                                 var view = $(scope.gridFillSpaceViewSelector);
                                 var table = scope.gridParams.bdiv.find("table");
@@ -1463,6 +1517,7 @@
                                 var viewHeight = view.height();
                                 var tableHeight = table.height();
                                 var bdivHeight = scope.gridParams.bdiv.height();
+                                var containerTopHeight = containerTop.height();
 
                                 if (!!containerMinHeight) {
                                     containerHeight = containerHeight - (bdivHeight - tableHeight);
@@ -1477,9 +1532,30 @@
                                         height: 'auto'
                                     });
                                 } else {
-                                    scope.gridParams.bdiv.css({
-                                        height: Math.max(tableHeight, containerHeight - viewHeight + tableHeight)
-                                    });
+                                    if (scope.gridFillSpaceContainerSelectorTop === undefined) {
+                                        scope.gridParams.bdiv.css({
+                                            height: Math.max(tableHeight, containerHeight - viewHeight + tableHeight)
+                                        });
+                                    } else { // если указан gridFillSpaceContainerSelectorTop то высоту считает так:
+                                        //высота всего грида = (родительский контейнер).высота минус  (контейнер для фильтра).высота
+                                        var tempHeight = containerHeight - containerTopHeight;
+                                        // высота панели по "восстановить по умолчанию"
+                                        var heightRestore = scope.gridParams.gridItself.find('.ui-jqgrid-restore').height();
+
+                                        scope.gridParams.bdiv.parents('.ui-jqgrid').css({
+                                            height: tempHeight - heightRestore + 2
+                                        });
+
+                                        // вычитаем высоту заголовков таблицы. пагинацию и легенду
+                                        var tempOther = scope.gridParams.gridItself.find('.ui-jqgrid-htable').outerHeight() +
+                                            scope.gridParams.gridItself.find('.footer').outerHeight() +
+                                            scope.gridParams.gridItself.find('.viewrecords').outerHeight() +
+                                            scope.gridParams.gridItself.find('.legend').outerHeight();
+                                        // отдельно меняем высоту внутренней части грида, иначе скролл отображается не корректно
+                                        scope.gridParams.bdiv.css({
+                                            height: tempHeight - tempOther - heightRestore
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -1531,16 +1607,18 @@
                             fillLastColumn();
                         }, 0);
 
-                        scope.$on('WINDOW_RESIZED_MSG', function () {
+                        function refreshHeightTimeout() {
                             $timeout(function () {
                                 fillHeight();
-                            }, 0);
+                            }, 50);
+                        }
+
+                        scope.$on('WINDOW_RESIZED_MSG', function () {
+                            refreshHeightTimeout();
                         });
 
                         scope.$on('TAB_CHANGED_MSG', function () {
-                            $timeout(function () {
-                                fillHeight();
-                            }, 0);
+                            refreshHeightTimeout();
                         });
 
                         scope.$on('COLLAPSE_TOGGLED_MSG', function () {
@@ -1549,9 +1627,27 @@
                         });
 
                         scope.$on('UPDATE_VALIDATION_MESSAGE_POSITION', function () {
-                            $timeout(function () {
-                                fillHeight();
-                            }, 0);
+                            refreshHeightTimeout();
+                        });
+
+                        // обработка сообщения для пересчёта высоты грида
+                        scope.$on('UPDATE_GIRD_HEIGHT', function () {
+                            refreshHeightTimeout();
+                        });
+
+                        // что-то выбрано в селекте. надо пересчитать высоту, так как меняется размер фильтра
+                        scope.$on('SELECT2_CHANGE', function () {
+                            refreshHeightTimeout();
+                        });
+
+                        // закрытия dropdown селекта. надо пересчитать высоту, так как меняется размер фильтра
+                        scope.$on('SELECT2_CLOSE', function () {
+                            refreshHeightTimeout();
+                        });
+
+                        // открытие dropdown селекта. надо пересчитать высоту, так как меняется размер фильтра
+                        scope.$on('SELECT2_OPEN', function () {
+                            refreshHeightTimeout();
                         });
 
                         // инициализиуем грид в контроллере
