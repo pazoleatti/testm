@@ -62,7 +62,7 @@ public class SignInView extends ViewWithUiHandlers<SignInUiHandlers> implements 
 	}
 
 	private void clearAuthenticationCache() {
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "controller/actions/clearAuthenticationCache");
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/cache/clearAuthenticationCache");
 		try {
 			builder.setUser(userLogin);
 			builder.setPassword("logout"+(new Date()).getTime());

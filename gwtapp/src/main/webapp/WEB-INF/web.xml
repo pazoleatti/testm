@@ -228,6 +228,7 @@
 			<url-pattern>/resources/*</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
             <url-pattern>/cache/clear-cache</url-pattern>
+            <url-pattern>/cache/clearAuthenticationCache</url-pattern>
 			<url-pattern>/GenericAccountManagementService</url-pattern>
 			<url-pattern>/GenericAccountManagementService/*</url-pattern>
 			<url-pattern>/TaxAccountingSupportingData</url-pattern>
