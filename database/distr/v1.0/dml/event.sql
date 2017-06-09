@@ -16,7 +16,7 @@ insert into event (id,name) values (102,'Вернуть из "Утвержден
 insert into event (id,name) values (103,'Принять из "Утверждена"');
 insert into event (id,name) values (104,'Вернуть из "Принята" в "Утверждена"');
 insert into event (id,name) values (105,'Принять из "Создана"');
-insert into event (id,name) values (106,'Вернуть из "Принята" в "Создана"');
+insert into event (id,name) values (106,'Вернуть в "Создана"');
 insert into event (id,name) values (107,'Подготовить из "Создана"');
 insert into event (id,name) values (108,'Вернуть из "Подготовлена" в "Создана"');
 insert into event (id,name) values (109,'Принять из "Подготовлена"');
