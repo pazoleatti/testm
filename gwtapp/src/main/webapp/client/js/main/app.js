@@ -39,7 +39,8 @@
             'ui.select',
             'ngMessages',
             'ui.select2',
-            'datePicker'
+            'datePicker',
+            'app.dropdown'
         ])
         .config(['$stateProvider', '$urlRouterProvider', '$translateProvider',
             function ($stateProvider, $urlRouterProvider, $translateProvider) {
