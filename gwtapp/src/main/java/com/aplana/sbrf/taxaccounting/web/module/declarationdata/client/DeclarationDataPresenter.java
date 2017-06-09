@@ -195,15 +195,12 @@ public class DeclarationDataPresenter
                 }
             }
         });
-
-
-
 		getView().setUiHandlers(this);
 	}
 
 	/**
 	 * Здесь происходит подготовка декларации.
-	 * 
+	 *
 	 * @param request
 	 *            запрос
 	 */
