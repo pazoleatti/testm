@@ -112,9 +112,9 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
             }
         } else {
             String declarationFullName = declarationDataService.getDeclarationFullName(action.getDeclarationId(), null);
-            logger.info("Выполяется операция \"%s\" для %s:", "Отмена принятия", declarationFullName);
             try {
                 declarationDataService.cancel(logger, action.getDeclarationId(), action.getReasonForReturn(), securityService.currentUserInfo());
+                logger.info("Выполнена операция \"%s\" для %s:", "Возврат в Создана", declarationFullName);
                 String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", action.getDeclarationId(), State.CREATED.getTitle()).toString();
                 logger.info(message);
                 sendNotifications(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);

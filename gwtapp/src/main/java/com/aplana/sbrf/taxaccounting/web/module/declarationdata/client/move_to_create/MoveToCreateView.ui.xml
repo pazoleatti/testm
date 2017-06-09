@@ -33,11 +33,11 @@
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">
                     <g:HorizontalPanel>
-                        <g:Label width="700px" text="Причина возврата:"/>
+                        <g:Label width="300px" text="Причина возврата:"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel>
-                        <g:TextArea width="800px" ui:field="note" visibleLines="4"/>
+                        <g:TextArea width="400px" ui:field="note" visibleLines="4"/>
                     </g:HorizontalPanel>
 
                 </g:VerticalPanel>

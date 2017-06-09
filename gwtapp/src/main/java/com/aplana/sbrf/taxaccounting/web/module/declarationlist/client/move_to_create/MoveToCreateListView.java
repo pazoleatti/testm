@@ -31,7 +31,7 @@ public class MoveToCreateListView extends PopupViewWithUiHandlers<MoveToCreateLi
         super(eventBus);
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
-        note.getElement().setAttribute("maxLength", "1000");
+        note.getElement().setAttribute("maxLength", "205");
     }
 
     @Override
