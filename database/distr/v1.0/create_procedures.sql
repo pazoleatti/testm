@@ -1701,7 +1701,6 @@ as
   
 end fias_pkg;
 /
-show errors;
 create or replace package body fias_pkg as
   
     v_check_path boolean:=true;
@@ -1948,7 +1947,7 @@ begin
        where c.regioncode=p_region
          and c.fname=nvl(replace(lower(p_check_element),' ',''),'-')
          and c.ftype=nvl(lower(p_check_ftype),'г')
-         and (p_parent_id is null and c.parentguid is null or p_parent_id is not null and a.id=p_parent_id)
+         and (p_parent_id is null /*and c.parentguid is null*/ or p_parent_id is not null and a.id=p_parent_id)
          and c.has_child=decode(p_leaf,1,0,1);
     elsif (p_check_type='LOCALITY') then
       select min(id) into v_result
@@ -1958,7 +1957,7 @@ begin
                where l.regioncode=p_region
                  and l.fname=nvl(replace(lower(p_check_element),' ',''),'-')
                  and (p_check_ftype is null or p_check_ftype is not null and l.ftype=nvl(lower(p_check_ftype),'-'))
-                 and (p_parent_id is null and c.parentguid is null or p_parent_id is not null and c.id=p_parent_id)
+                 and (p_parent_id is null /*and c.parentguid is null*/ or p_parent_id is not null and c.id=p_parent_id)
                  and l.has_child=decode(p_leaf,1,0,1)
               union 
               select l.id
@@ -1966,7 +1965,7 @@ begin
                where l.regioncode=p_region
                  and l.fname=nvl(replace(lower(p_check_element),' ',''),'-')
                  and (p_check_ftype is null or p_check_ftype is not null and l.ftype=nvl(lower(p_check_ftype),'-'))
-                 and (p_parent_id is null and l.parentguid is null or p_parent_id is not null and a.id=p_parent_id)
+                 and (p_parent_id is null /*and l.parentguid is null*/ or p_parent_id is not null and a.id=p_parent_id)
                  and l.has_child=decode(p_leaf,1,0,1)
             );
     elsif (p_check_type='STREET') then
@@ -2132,8 +2131,8 @@ begin
                                   from (
                                         select n.id,
                                                n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
-                                               fias_pkg.GetParseType(3,n.area) area_type,
-                                               fias_pkg.GetParseName(3,n.area) area_fname,
+                                               fias_pkg.GetParseType(3,n.area,1) area_type,
+                                               fias_pkg.GetParseName(3,n.area,1) area_fname,
                                                case when n.city is null and n.region_code='77' then 'г'
                                                     when n.city is null and n.region_code='78' then 'г'
                                                     when n.city is null and n.region_code='92' then 'г'
