@@ -3,7 +3,8 @@
 
     angular.module('app.header', [
         'ui.router',
-        'userData'
+        'userData',
+        'ng.deviceDetector'
     ])
         .directive('appHeader', function () {
             return {
@@ -39,21 +40,25 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$translate', '$http', 'USER_DATA', '$rootScope',
-            function ($scope, $translate, $http, USER_DATA, $rootScope) {
+            '$scope', '$translate', '$http', 'USER_DATA', '$rootScope', 'deviceDetector',
+            function ($scope, $translate, $http, USER_DATA, $rootScope, deviceDetector) {
                 /**
                  * Обновляет информацию о текущем пользователе
                  */
                 var updateCurrentUserInfo = function () {
                     var data = USER_DATA;
                     // Формируем строку ФИО
-                    $scope.security.userTitle = "Шевчук Игорь Викторович";
-                    $scope.security.userDep = "Управление налогового планирования";
+                    $scope.security.userTitle = USER_DATA.name;
                 };
 
                 $http.get('controller/rest/configService/getConfig').then(
                     function (response) {
                         $scope.gwtMode = response.data.gwtMode;
+                        $scope.version = response.data.project_properties.version;
+                        $scope.revision = response.data.project_properties.revision;
+                        $scope.serverName = response.data.project_properties.serverName;
+                        $scope.browser = deviceDetector.browser + " " + deviceDetector.browser_version;
+                        $scope.security.userDep = response.data.department;
                         $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
 
                         $scope.treeTaxes = [{
@@ -144,14 +149,22 @@
                  * Выйти из системы. Убить сессию
                  */
                     // Выход из системы
-                $scope.logout = function (logoutUrl) {
-                    // Сообщаем клиентской части системы, что выходим. Если есть несохраненные данные - нужно ловить это сообщение
-                    $rootScope.$broadcast('LOGOUT_MSG');
-
-                    $http({method: "POST", url: "actions/logout"})
-                        .success(function () {
-                            window.location = "/cas/logout?service=" + location.href.toString();
+                $scope.logout = function () {
+                    $.ajax({
+                        type: "GET",
+                        url: "j_spring_security_logout",
+                        noalert: true
+                    }).always(function () {
+                        $.ajax({
+                            type: "GET",
+                            url: "controller/actions/clearAuthenticationCache",
+                            username: USER_DATA.login,
+                            password: 'logout' + (new Date()).getTime().toString(),
+                            noalert: true
+                        }).always(function() {
+                            document.location = "logout";
                         });
+                    });
                 };
             }]);
 }());

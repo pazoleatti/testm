@@ -68,25 +68,6 @@
             }
         ]);
 
-    // Получение информации о текущем пользователе и запуск приложения
-    var initInjector = angular.injector(['ng']);
-    var $http = initInjector.get('$http');
-
-    //TODO: (dloshkarev) временная заглушка
-    var userDataStub = {
-        user: {
-            id: 6,
-            uid: "mkoposov",
-            firstName: "Михаил",
-            lastName: "Копосов",
-            roles: [{role: {name: 'Администратор'}}],
-            fullShortName: 'Михаил Копосов'
-        },
-        role: {id: 1168, name: "Менеджер МР", active: true},
-        authorities: ['PRODUCTION_PLAN_READ', 'REF_BOOK_GUI', 'PRODUCTION_PLAN_CREATE'],
-        macroRegion: null,
-        paging: "20"
-    };
     translateDictionary = {
         "0": "Удаленный сервер недоступен",
         "400": "Сервер обнаружил в запросе клиента синтаксическую ошибку (400)",
@@ -189,19 +170,18 @@
         "button.save": "Сохранить",
         "button.edit": "Редактировать"
     };
-    angular.module('userData', []).constant('USER_DATA', userDataStub);
-    angular.element(document).ready(function () {
-        angular.bootstrap(document, ['sbrfNdfl']);
-    });
-    /*$http.get('rest/service/configService/getConfig').then(
-     function (response) {
-     translateDictionary = response.data.translate
-     angular.module('userData', []).constant('USER_DATA', response.data.user_data)
-     angular.element(document).ready(function() {
-     angular.bootstrap(document, ['sbrfNdfl'])
-     })
-     }
-     )*/
+
+    // Получение информации о текущем пользователе и запуск приложения
+    var initInjector = angular.injector(['ng']);
+    var $http = initInjector.get('$http');
+    $http.get('controller/rest/configService/getConfig').then(
+        function (response) {
+            angular.module('userData', []).constant('USER_DATA', response.data.user_data.user);
+            angular.element(document).ready(function () {
+                angular.bootstrap(document, ['sbrfNdfl']);
+            });
+        }
+    );
     /**
      * Поиск по нажатию на enter
      */
