@@ -40,7 +40,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK: //Проверить
         checkData()
-        checkDataConsolidated()
         break
     case FormDataEvent.CALCULATE: //консолидирование с формированием фиктивного xml
         clearData()
@@ -1228,71 +1227,7 @@ String capitalize(String str) {
             .toString();
 }
 
-/**
- * Проверки которые относятся только к консолидированной
- * @return
- */
-def checkDataConsolidated() {
 
-    // Общ12
-    if (FORM_DATA_KIND.equals(FormDataKind.CONSOLIDATED)) {
-        // Map<DEPARTMENT.CODE, DEPARTMENT.NAME>
-        def mapDepartmentNotExistRnu = [
-                4L  : 'Байкальский банк',
-                8L  : 'Волго-Вятский банк',
-                20L : 'Дальневосточный банк',
-                27L : 'Западно-Сибирский банк',
-                32L : 'Западно-Уральский банк',
-                37L : 'Московский банк',
-                44L : 'Поволжский банк',
-                52L : 'Северный банк',
-                64L : 'Северо-Западный банк',
-                82L : 'Сибирский банк',
-                88L : 'Среднерусский банк',
-                97L : 'Уральский банк',
-                113L : 'Центральный аппарат ПАО Сбербанк',
-                102L : 'Центрально-Чернозёмный банк',
-                109L : 'Юго-Западный банк'
-        ]
-        def listDepartmentNotAcceptedRnu = []
-        List<DeclarationData> declarationDataList = declarationService.find(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, declarationData.departmentReportPeriodId)
-        for (DeclarationData dd : declarationDataList) {
-            // Подразделение
-            Long departmentCode = departmentService.get(dd.departmentId)?.code
-
-            // Если налоговая форма не принята
-            if (!dd.state.equals(State.ACCEPTED) && dd.departmentId != declarationData.departmentId) {
-                listDepartmentNotAcceptedRnu << mapDepartmentNotExistRnu[departmentCode]
-            }
-            mapDepartmentNotExistRnu.remove(departmentCode)
-        }
-
-        // Период
-        def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-        def reportPeriod = departmentReportPeriod.reportPeriod
-        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-        def periodCode = period?.CODE?.stringValue
-        def periodName = period?.NAME?.stringValue
-        def calendarStartDate = reportPeriod?.calendarStartDate
-        String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format(DATE_FORMAT)},"
-        if (!mapDepartmentNotExistRnu.isEmpty()) {
-            def listDepartmentNotExistRnu = []
-            mapDepartmentNotExistRnu.each {
-                listDepartmentNotExistRnu.add(it.value)
-            }
-            logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                    " года" + correctionDateExpression + " не созданы экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotExistRnu.join("\", \"")}'." +
-                    " Данные этих форм не включены в отчетность!")
-        }
-
-        if (!listDepartmentNotAcceptedRnu.isEmpty()) {
-            logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                    " года" + correctionDateExpression + " имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.join("\", \"")}'," +
-                    " для которых в системе существуют КНФ в текущем периоде, состояние которых <> 'Принята'. Данные этих форм не включены в отчетность!")
-        }
-    }
-
-}
 
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
 //если проверки различаются то используется параметр {@link #FORM_DATA_KIND}

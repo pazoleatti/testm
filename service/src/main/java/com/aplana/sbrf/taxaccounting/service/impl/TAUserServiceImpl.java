@@ -184,6 +184,8 @@ public class TAUserServiceImpl implements TAUserService {
         TAUser taUser = new TAUser();
         taUser.setLogin(user.getLogin());
         taUser.setName(user.getName());
+		taUser.setActive(user.getActive());
+		taUser.setEmail(user.getEmail());
         taUser.setRoles(new ArrayList<TARole>());
         for(Long roleId: user.getTaRoleIds()) {
             taUser.getRoles().add(roleDao.getRole(roleId.intValue()));
