@@ -9,7 +9,7 @@
             return {
                 templateUrl: 'client/js/main/header.html',
                 controller: 'MainMenuController'
-            }
+            };
         })
         .directive('tree', function() {
             return {
@@ -39,8 +39,8 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$translate', '$http', 'USER_DATA',
-            function ($scope, $translate, $http, USER_DATA) {
+            '$scope', '$translate', '$http', 'USER_DATA', '$rootScope',
+            function ($scope, $translate, $http, USER_DATA, $rootScope) {
                 /**
                  * Обновляет информацию о текущем пользователе
                  */
@@ -54,6 +54,7 @@
                 $http.get('controller/rest/configService/getConfig').then(
                     function (response) {
                         $scope.gwtMode = response.data.gwtMode;
+                        $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
 
                         $scope.treeTaxes = [{
                             name: "НДФЛ",
@@ -123,6 +124,14 @@
                                 href: "Main.jsp" + $scope.gwtMode + "#!scriptsImport"
                             }]
                         }];
+
+                        $scope.treeManual = [{
+                            name: "Руководство пользователя",
+                            href: "resources/help_ndfl.pdf"
+                        }, {
+                            name: "Руководство настройщика макета",
+                            href: "resources/help_conf.pdf"
+                        }];
                     }
                 );
 
@@ -134,8 +143,15 @@
                 /**
                  * Выйти из системы. Убить сессию
                  */
-                $scope.logout = function () {
-                    $http.get('rest/service/securityService/logout');
+                    // Выход из системы
+                $scope.logout = function (logoutUrl) {
+                    // Сообщаем клиентской части системы, что выходим. Если есть несохраненные данные - нужно ловить это сообщение
+                    $rootScope.$broadcast('LOGOUT_MSG');
+
+                    $http({method: "POST", url: "actions/logout"})
+                        .success(function () {
+                            window.location = "/cas/logout?service=" + location.href.toString();
+                        });
                 };
             }]);
 }());

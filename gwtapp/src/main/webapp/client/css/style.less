@@ -380,9 +380,9 @@ input[type="checkbox"] {
 
 /* Панель для отображения информации о версии приложения и его сборке */
 .build_info {
-  font-size: 80%;
-  padding-top: 6px;
-  margin-right: 10px;
+  font-size: 100%;
+  position: fixed; /* Фиксированное положение */
+  left: 0; bottom: 20px; /* Левый нижний угол */
 }
 
 /* Признак обязательности поля */
@@ -562,10 +562,6 @@ hr {
     margin-top: 4px;
     div {
       padding: 0 10px;
-    }
-    &[class="build_info"]{
-      margin-top: 0;
-      border: none;
     }
     &.dropdown {
       border: none;

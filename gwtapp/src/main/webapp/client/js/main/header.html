@@ -126,18 +126,19 @@
         </li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-
-        <li class="build_info">
-            <div>Версия: {{'Implementation-Version' | translate}}</div>
-            <div>Номер сборки: {{'Git-Revision' | translate}}</div>
-            <div>Дата сборки: {{'Build-Date' | translate}}</div>
-        </li>
         <li class="border-none">
            <div class="message" style="padding-top: 13px;">Нет оповещений</div>
         </li>
         <li>
-            <a href="#"><i class="glyphicon glyphicon-info-sign"></i></a>
-            <a href="#"><i class="glyphicon glyphicon-question-sign"></i></a>
+            <a href="{{aboutHref}}"><i class="glyphicon glyphicon-info-sign"></i></a>
+            <li class="border-none">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a data-toggle="dropdown" style="margin-top: -5px;"><b class='glyphicon glyphicon-question-sign'></b></a>
+                        <tree tree='treeManual'></tree>
+                    </li>
+                </ul>
+            </li>
         </li>
         <li class="app-header-user-info" style="padding-top: 4px;">
             <div>{{security.userDep}}</div>
@@ -145,4 +146,8 @@
         </li>
         <li><a class="logout_link" data-ng-click="logout()">Выход</a></li>
     </ul>
+
+    <li class="build_info">
+        <div>Версия: {{'Implementation-Version' | translate}} Номер сборки: {{'Git-Revision' | translate}} Дата сборки: {{'Build-Date' | translate}}</div>
+    </li>
 </nav>
