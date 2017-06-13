@@ -234,7 +234,7 @@ import java.text.SimpleDateFormat
     }
 
 
-    NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper() {
+    NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper(boolean isLog) {
         final Logger localLogger = logger
         NaturalPersonPrimaryRnuRowMapper naturalPersonRowMapper = new NaturalPersonPrimaryRnuRowMapper() {
             @Override
@@ -250,15 +250,21 @@ import java.text.SimpleDateFormat
                     "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
                 if (code == null) {
                     result = null
-                    localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
-                            "Не заполнен обязательный параметр")
+                    if (isLog) {
+                        localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
+                                "Не заполнен обязательный параметр")
+                    }
                 } else if (code == "0") {
                     result = null
-                    localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
-                            "Параметр не может быть равен \"0\"")
+                    if (isLog) {
+                        localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
+                                "Параметр не может быть равен \"0\"")
+                    }
                 } else if (result == null) {
-                    localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
-                            "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
+                    if (isLog) {
+                        localLogger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
+                                "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
+                    }
                 }
                 return result;
             }
@@ -363,7 +369,7 @@ import java.text.SimpleDateFormat
         calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
         //Получаем список всех ФЛ в первичной НФ
-        List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper());
+        List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper(false));
         if (logger.containsLevel(LogLevel.ERROR)) {
             return
         }
@@ -385,7 +391,7 @@ import java.text.SimpleDateFormat
 
         //Шаг 1. список физлиц первичной формы для создания записей в справочниках
         time = System.currentTimeMillis();
-        List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper());
+        List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true));
         logForDebug("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + calcTimeMillis(time));
 
         //println "Select for insert " + insertPersonList.size() + " person " + calcTimeMillis(time)
@@ -447,7 +453,7 @@ import java.text.SimpleDateFormat
                 }
 
                 PersonDocument personDocument = person.getPersonDocument();
-                if (personDocument != null) {
+                if (personDocument != null && personDocument.docType != null) {
                     documentList.add(personDocument);
                 }
 
@@ -623,8 +629,10 @@ import java.text.SimpleDateFormat
                     PersonDocument personDocument = BaseWeigthCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
 
                     if (personDocument == null) {
-                        insertDocumentList.add(primaryPersonDocument);
-                        refBookPerson.getPersonDocumentList().add(primaryPersonDocument);
+                        if (primaryPersonDocument.docType != null) {
+                            insertDocumentList.add(primaryPersonDocument);
+                            refBookPerson.getPersonDocumentList().add(primaryPersonDocument);
+                        }
                     }
                 }
 
@@ -2844,15 +2852,6 @@ class NdflPersonFL {
                         "'Гражданство (код страны) (Графа 7)' не соответствует справочнику '$R_CITIZENSHIP'")
             }
 
-            // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
-            if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
-                //TODO turn_to_error
-                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                        "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}'")
-                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
-                        "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
-            }
-
             // Спр4 Статус (Обязательное поле)
             if (!taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
                 //TODO turn_to_error
@@ -2993,7 +2992,7 @@ class NdflPersonFL {
                                     "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}', Документ удостоверяющий личность.Номер (Графа 11)='${ndflPerson.idDocNumber ?: ""}'")
                             logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ДУЛ справочнику (консолидированная)", fioAndInp, pathError,
                                     "'Документ удостоверяющий личность.Код (Графа 10)', 'Документ удостоверяющий личность.Номер (Графа 11)' не соответствует справочнику '$R_DUL'")
-                        } else {DUL
+                        } else {
                             int incRep = dulRecordValues.get(RF_INC_REP).getNumberValue().intValue()
                             if (incRep != 1) {
                                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
