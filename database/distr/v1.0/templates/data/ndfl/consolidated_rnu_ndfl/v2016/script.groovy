@@ -2003,7 +2003,7 @@ def checkDataReference(
         timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
 
         // Спр2 Гражданство (Обязательное поле)
-        if (!citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
+        if (ndflPerson.citizenship != null && !citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
             //TODO turn_to_error
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                     "Гражданство (код страны) (Графа 7)='${ndflPerson.citizenship ?: ""}'")
@@ -2012,7 +2012,7 @@ def checkDataReference(
         }
 
         // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
-        if (!documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
+        if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
             //TODO turn_to_error
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                     "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}'")
@@ -2021,7 +2021,7 @@ def checkDataReference(
         }
 
         // Спр4 Статус (Обязательное поле)
-        if (!taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
+        if (ndflPerson.status != null && !taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
             //TODO turn_to_error
             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                     "Cтатус (Графа 12)='${ndflPerson.status ?: ""}'")
@@ -2046,7 +2046,7 @@ def checkDataReference(
 
             } else {
                 // Спр11 Фамилия (Обязательное поле)
-                if (!ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
+                if (ndflPerson.lastName != null && !ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                             "Налогоплательщик.Фамилия (Графа 3)='${ndflPerson.lastName ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
@@ -2054,7 +2054,7 @@ def checkDataReference(
                 }
 
                 // Спр11 Имя (Обязательное поле)
-                if (!ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
+                if (ndflPerson.firstName != null && !ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                             "Налогоплательщик.Имя (Графа 4)='${ndflPerson.firstName ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
@@ -2092,7 +2092,7 @@ def checkDataReference(
                 }
 
                 // Спр13 Дата рождения (Обязательное поле)
-                if (!ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
+                if (ndflPerson.birthDay != null && !ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                             "Налогоплательщик.Дата рождения (Графа 6)='${ndflPerson.birthDay ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие даты рождения справочнику", fioAndInp, pathError,
@@ -2101,7 +2101,7 @@ def checkDataReference(
 
                 // Спр14 Гражданство (Обязательное поле)
                 def citizenship = citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP).value)
-                if (!ndflPerson.citizenship.equals(citizenship)) {
+                if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(citizenship)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                             "Гражданство (код страны) (Графа 7)='${ndflPerson.citizenship ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие гражданства справочнику", fioAndInp, pathError,
@@ -2136,13 +2136,13 @@ def checkDataReference(
                         personDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
                         personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
                     }
-                    if (!personDocTypeList.contains(ndflPerson.idDocType)) {
+                    if (ndflPerson.idDocType != null && !personDocTypeList.contains(ndflPerson.idDocType)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ДУЛ справочнику (первичная)", fioAndInp, pathError,
                                 "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_DUL'")
                     }
-                    if (!personDocNumberList.contains(ndflPerson.idDocNumber)) {
+                    if (ndflPerson.idDocNumber != null && !personDocNumberList.contains(ndflPerson.idDocNumber)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Документ удостоверяющий личность.Номер (Графа 11)='${ndflPerson.idDocNumber ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ДУЛ справочнику (первичная)", fioAndInp, pathError,
@@ -2157,12 +2157,7 @@ def checkDataReference(
                         return ndflPerson.idDocType.equals(docTypeCode) && ndflPerson.idDocNumber.equals(docNumber)
                     }
 
-                    if (dulRecordValues == null) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Документ удостоверяющий личность.Код (Графа 10)='${ndflPerson.idDocType ?: ""}', Документ удостоверяющий личность.Номер (Графа 11)='${ndflPerson.idDocNumber ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ДУЛ справочнику (консолидированная)", fioAndInp, pathError,
-                                "'Документ удостоверяющий личность.Код (Графа 10)', 'Документ удостоверяющий личность.Номер (Графа 11)' не соответствует справочнику '$R_DUL'")
-                    } else {
+                    if (dulRecordValues != null) {
                         int incRep = dulRecordValues.get(RF_INC_REP).getNumberValue().intValue()
                         if (incRep != 1) {
                             String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
@@ -2175,7 +2170,7 @@ def checkDataReference(
 
                 // Спр18 Статус налогоплательщика (Обязательное поле)
                 def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
-                if (!ndflPerson.status.equals(taxpayerStatus)) {
+                if (ndflPerson.status != null && !ndflPerson.status.equals(taxpayerStatus)) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                             "Cтатус (Графа 12)='${ndflPerson.status ?: ""}'")
                     logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие статуса справочнику", fioAndInp, pathError,

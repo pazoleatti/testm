@@ -44,6 +44,7 @@ public class SAXHandler extends DefaultHandler {
     public SAXHandler(Map<String, List<String>> findAttrNames) {
         this.findAttrNames = findAttrNames;
     }
+
     public SAXHandler(String nodeNameFind, String parentNodeNameFind) {
         this.findAttrNames = new HashMap<String, Map<String, String>>();
         this.nodeValueList = new ArrayList<>();
@@ -54,6 +55,7 @@ public class SAXHandler extends DefaultHandler {
     public Map<String, Map<String, String>> getAttrValues() {
         return attrValues;
     }
+
     public List<String> getNodeValueList() {
         return nodeValueList;
     }
@@ -70,20 +72,28 @@ public class SAXHandler extends DefaultHandler {
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         for (Map.Entry<String, List<String>> entry : findAttrNames.entrySet()) {
             if (entry.getKey().equals(qName)) {
-                for (String attrName: entry.getValue()) {
+                for (String attrName : entry.getValue()) {
                     attrValues.get(qName).put(attrName, attributes.getValue(attrName));
                 }
             }
         }
-        if(qName.equals(nodeNameFind)) { isNodeNameFind = true; }
-        if(qName.equals(parentNodeNameFind)) { isParentNodeNameFind = true; }
+        if (qName.equals(nodeNameFind)) {
+            isNodeNameFind = true;
+        }
+        if (qName.equals(parentNodeNameFind)) {
+            isParentNodeNameFind = true;
+        }
     }
 
     @Override
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
-        if(qName.equals(nodeNameFind)) { isNodeNameFind = false; }
-        if(qName.equals(parentNodeNameFind)) { isParentNodeNameFind = false; }
+        if (qName.equals(nodeNameFind)) {
+            isNodeNameFind = false;
+        }
+        if (qName.equals(parentNodeNameFind)) {
+            isParentNodeNameFind = false;
+        }
     }
 
     @Override
@@ -138,8 +148,8 @@ String ATTR_YEAR = "ОтчетГод";
 @Field final String NDFL2_2 = "2 НДФЛ (2)"
 @Field final String NDFL6 = "6 НДФЛ"
 
-@Field final KND_ACCEPT = 1166002	// Принят
-@Field final KND_REFUSE = 1166006	// Отклонен
+@Field final KND_ACCEPT = 1166002    // Принят
+@Field final KND_REFUSE = 1166006    // Отклонен
 @Field final KND_SUCCESS = 1166007 //	Успешно отработан
 @Field final KND_REQUIRED = 1166009 // Требует уточнения
 
@@ -176,8 +186,8 @@ def importTF() {
     Pattern patternUuOtch = Pattern.compile(UU_PATTERN)
 
     if (UploadFileName != null
-        && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
-        && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
+            && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
+            && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
     ) {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
@@ -187,10 +197,10 @@ def importTF() {
     } else if (isNdfl2Response(UploadFileName)) {
         importNdflResponse()
     } else if (
-        patternKvOtch.matcher(UploadFileName).matches() ||
-        patternUoOtch.matcher(UploadFileName).matches() ||
-        patternIvOtch.matcher(UploadFileName).matches() ||
-        patternUuOtch.matcher(UploadFileName).matches()
+    patternKvOtch.matcher(UploadFileName).matches() ||
+            patternUoOtch.matcher(UploadFileName).matches() ||
+            patternIvOtch.matcher(UploadFileName).matches() ||
+            patternUuOtch.matcher(UploadFileName).matches()
     ) {
         importAnswer1151111()
     } else {
@@ -338,22 +348,22 @@ def importAnswer1151111() {
     def String attrNameFind = null
     if (patternKvOtch.matcher(UploadFileName).matches()) {
         // Квитанция о приеме налоговой декларации
-        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(KV_PATTERN, "\$5").substring(0,8));
+        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(KV_PATTERN, "\$5").substring(0, 8));
         nodeNameFind = "ИмяОбрабФайла"
         parentNodeNameFind = "СвКвит"
     } else if (patternUoOtch.matcher(UploadFileName).matches()) {
         // Уведомление об отказе в приеме налоговой декларации
-        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UO_PATTERN, "\$5").substring(0,8));
+        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UO_PATTERN, "\$5").substring(0, 8));
         nodeNameFind = "ИмяОбрабФайла"
         parentNodeNameFind = "ОбщСвУвед"
     } else if (patternIvOtch.matcher(UploadFileName).matches()) {
         // Извещение о вводе
-        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(IV_PATTERN, "\$5").substring(0,8));
+        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(IV_PATTERN, "\$5").substring(0, 8));
         nodeNameFind = "СвИзвещВ"
         attrNameFind = "ИмяОбрабФайла"
     } else if (patternUuOtch.matcher(UploadFileName).matches()) {
         // 	Уведомление об уточнении
-        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UU_PATTERN, "\$5").substring(0,8));
+        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UU_PATTERN, "\$5").substring(0, 8));
         nodeNameFind = "ОбщСвУвед"
         attrNameFind = "ИмяОбрабФайла"
     }
@@ -646,7 +656,7 @@ def getDocWeight(fileName) {
 @Field final Pattern NDFL2_CORRECT_ADDRESS_PATTERN_BEFORE = Pattern.compile("\\s*Адрес ДО исправления:.+")
 @Field final Pattern NDFL2_CORRECT_ADDRESS_PATTERN_AFTER = Pattern.compile("\\s*Адрес ПОСЛЕ исправления:.+")
 @Field final Pattern NDFL2_CORRECT_ADDRESS_PATTERN_VALID = Pattern.compile("\\s*Адрес ПРИЗНАН ВЕРНЫМ \\(ИФНСМЖ - (.+)\\)\\s*")
-@Field final String NDFL2_PROTOCOL_DATE ="ПРОТОКОЛ №"
+@Field final String NDFL2_PROTOCOL_DATE = "ПРОТОКОЛ №"
 @Field final Pattern NDFL2_PROTOCOL_DATE_PATTERN = Pattern.compile("ПРОТОКОЛ № .+ от (\\d{2}\\.\\d{2}\\.\\d{4})")
 @Field final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
 @Field final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
@@ -884,7 +894,6 @@ def readNdfl6ResponseContent() {
     return result
 }
 
-
 /**
  * Загрузка ответов ФНС 2 и 6 НДФЛ
  */
@@ -919,7 +928,9 @@ def importNdflResponse() {
         reportFileName = getFileName(ndfl6Content, UploadFileName)
     }
 
-    if (reportFileName == null) {
+    //проверка что в строке есть имя файла происходит по наличию расширения файла
+    reportEndFile = reportFileName.substring(reportFileName.length() - 4)
+    if (!(reportEndFile.contains(".xml") || (reportEndFile.contains(".txt")) || (reportEndFile.contains(".XML")) || (reportEndFile.contains(".TXT")))) {
         logger.error("Не найдено имя отчетного файла в файле ответа  \"%s\"", UploadFileName)
         return
     }
@@ -961,25 +972,25 @@ def importNdflResponse() {
         def templateFile = null
 
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
                 it.fileName.startsWith(ANSWER_PATTERN_NDFL_1)
             }
         }
 
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
                 it.fileName.startsWith(ANSWER_PATTERN_NDFL_2)
             }
         }
 
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
                 it.fileName.startsWith(ANSWER_PATTERN_NDFL_3)
             }
         }
 
         if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find {it ->
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
                 it.fileName.startsWith(ANSWER_PATTERN_NDFL_4)
             }
         }
@@ -1213,7 +1224,7 @@ def _importTF() {
         declarationTypeId = DECLARATION_TYPE_RASCHSV_NDFL_ID;
         kpp = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$4");
         reportPeriodCode = null;
-        createDateFile = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$5").substring(0,8));
+        createDateFile = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$5").substring(0, 8));
         attachFileType = AttachFileType.TYPE_1
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
