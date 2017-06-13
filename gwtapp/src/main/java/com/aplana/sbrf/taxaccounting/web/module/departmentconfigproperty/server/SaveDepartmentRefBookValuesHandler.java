@@ -85,10 +85,8 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             String approveDocName = row.get("APPROVE_DOC_NAME").getStringValue();
             String approveOrgName = row.get("APPROVE_ORG_NAME").getStringValue();
 
-            if ((signatoryId != null && signatoryId == 1)
-                    && ((approveDocName != null && !approveDocName.isEmpty())
-                    ||  (approveOrgName != null && !approveOrgName.isEmpty()))
-               ) {
+            /*if ((signatoryId != null && signatoryId == 1)
+                    && ((approveDocName != null && !approveDocName.isEmpty()) ||  (approveOrgName != null && !approveOrgName.isEmpty()))) {
                 logger.error("Поля \"Наименование документа представителя\", " +
                         "\"Наименование организации представителя\" " +
                         "должны заполняться только в том случае, если " +
@@ -96,7 +94,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 result.setHasFatalError(true);
                 result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.INCORRECT_FIELDS);
                 break;
-            }
+            }*/
             String taxOrganCode = row.get("TAX_ORGAN_CODE").getStringValue();
             String kpp = row.get("KPP").getStringValue();
             if (row.get("REORG_INN").getStringValue() != null && !row.get("REORG_INN").getStringValue().isEmpty()) {
