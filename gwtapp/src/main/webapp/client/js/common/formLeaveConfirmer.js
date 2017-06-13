@@ -6,8 +6,8 @@
      * Если при смене режима просмотр/редактирование не происходит смена состояни - запрос не отобразиться
      * Его можно вызвать вручную методом сервиса askSaveChanges
      */
-    angular.module('app.formLeaveConfirmer', ['app.formUtils'])
-        .factory('FormLeaveConfirmer', ['$rootScope', '$state', '$window', '$filter', 'dialogs', 'FormUtils', function ($rootScope, $state, $window, $filter, dialogs, FormUtils) {
+    angular.module('app.formLeaveConfirmer', [])
+        .factory('FormLeaveConfirmer', ['$rootScope', '$state', '$window', '$filter', 'dialogs', function ($rootScope, $state, $window, $filter, dialogs) {
             var getParameterValue = function (parameter) {
                 return angular.isFunction(parameter) ? parameter() : parameter;
             };
@@ -149,86 +149,6 @@
                     }
                 },
                 /**
-                 * Проверяет наличие неактуальных полей на форме и выдает сообщение при необходимости
-                 * @param form      форма для проверки
-                 * @param title     заголовок информационного сообщения
-                 * @param message   текст информационного сообщения
-                 * @param callback  действие, которое нужно выполнить при отсутсвии ошибок или подтверждении пользователя
-                 */
-                checkOutdated: function (form, title, message, callback) {
-                    var errorInfo = FormUtils.hasOnlyActualizationErrors(form);
-
-                    if (errorInfo.hasErrors && errorInfo.onlyThisKeyErrors) {
-                        var buttons = {
-                            labelYes: $filter('translate')('common.button.save'),
-                            labelNo: $filter('translate')('common.button.no')
-                        };
-                        var dlg = dialogs.confirm(title, message, buttons);
-                        dlg.result.then(
-                            function () {
-                                if (angular.isFunction(callback)) {
-                                    callback();
-                                }
-                            },
-                            function () {
-                            });
-                    }
-                },
-                /**
-                 * Проверяет наличие ошибок связаных с ФИАС на форме и выдает сообщение при необходимости
-                 * @param form      форма для проверки
-                 * @param title     заголовок информационного сообщения
-                 * @param message   текст информационного сообщения
-                 * @param callback  действие, которое нужно выполнить при отсутсвии ошибок или подтверждении пользователя
-                 */
-                checkFiasAddrObj: function (form, title, message, callback) {
-                    var errorInfo = FormUtils.hasOnlyFiasErrors(form);
-
-                    if (errorInfo.hasErrors && errorInfo.onlyThisKeyErrors) {
-                        var buttons = {
-                            labelYes: $filter('translate')('common.button.save'),
-                            labelNo: $filter('translate')('common.button.cancel')
-                        };
-                        var dlg = dialogs.confirm(title, message, buttons);
-                        dlg.result.then(
-                            function () {
-                                if (angular.isFunction(callback)) {
-                                    callback();
-                                }
-                            },
-                            function () {
-                            });
-                    }
-                },
-                /**
-                 * Проверяет наличие ошибок перечисленных в @param warningKeys
-                 * @param form        форма для проверки
-                 * @param title       заголовок информационного сообщения
-                 * @param message     текст информационного сообщения
-                 * @param callback    действие, которое нужно выполнить при отсутсвии ошибок или подтверждении пользователя
-                 * @param warningKeys алиас или алиасы предупреждений
-                 */
-                checkWarning: function (form, title, message, callback, warningKeys) {
-                    var errorInfo = FormUtils.hasOnlyKeyErrors(form, warningKeys);
-
-                    if (errorInfo.hasErrors && errorInfo.onlyThisKeyErrors) {
-
-                        var buttons = {
-                            labelYes: $filter('translate')('common.button.save'),
-                            labelNo: $filter('translate')('common.button.cancel')
-                        };
-                        var dlg = dialogs.confirm(title, message, buttons);
-                        dlg.result.then(
-                            function () {
-                                if (angular.isFunction(callback)) {
-                                    callback();
-                                }
-                            },
-                            function () {
-                            });
-                    }
-                },
-                /**
                  * Метод для очищения контекста сервиса
                  * Нужно вызывать при нажатии на кнопку "Сохранить"
                  */
@@ -252,17 +172,6 @@
                         service.initializeListeners(settings.isModified, settings.title, settings.message,
                             settings.successCallBack, settings.unlockAction);
                     }
-                },
-                /**
-                 * Отсылает запрос на /. Нужно выполнять после синхронно запроса, чтобы при потере сессии он перешел на
-                 * на корневую страницу, а не на адрес этого запроса
-                 */
-                logoutRedirect: function () {
-                    $.ajax({
-                        async: false,
-                        type: "POST",
-                        url: ""
-                    });
                 }
             };
 
