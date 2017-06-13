@@ -287,7 +287,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         verify(testHelper.getDeclarationService(), Mockito.times(0)).setDocStateId(anyLong(), anyLong());
     }
 
-    //@Test
+    @Test
     @SuppressWarnings("unchecked")
     public void testNdfl6IV() throws ParseException {
         String fileName = "IV_NONDFL6_7707083893997950001_7707083893997950001_7707_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
@@ -308,7 +308,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         xsdFile.setFileName("IV_NONDFL6.xsd");
         declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));
 
-        when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE"), anyLong()))
+        when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE.XML"), anyLong()))
                 .thenReturn(Arrays.asList(declarationData));
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq(fileName), anyLong()))
                 .thenReturn(new ArrayList<DeclarationData>());
@@ -365,8 +365,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         Assert.assertEquals(DOC_STATE_SUCCESS_ID, docStateId.getValue());
     }
 
-    //@Test
-    @SuppressWarnings("unchecked")
+    @Test
     public void testNdfl6KV() throws ParseException {
         String fileName = "KV_NONDFL6_7707083893997950001_7707083893997950001_7707_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
         InputStream inputStream = Ndfl62Test.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/refbook/declaration_type/" + fileName);
@@ -386,7 +385,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         xsdFile.setFileName("KV_NONDFL6.xsd");
         declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));
 
-        when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE"), anyLong()))
+        when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE.XML"), anyLong()))
                 .thenReturn(Arrays.asList(declarationData));
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq(fileName), anyLong()))
                 .thenReturn(new ArrayList<DeclarationData>());
