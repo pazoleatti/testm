@@ -1495,8 +1495,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case ACCEPT_DEC:
             case EXCEL_DEC:
             case XML_DEC:
-            case PDF_DEC:
                 return String.format(ddReportType.getReportType().getDescription(), taxType.getDeclarationShortName());
+            case PDF_DEC:
+                return String.format(ddReportType.getReportType().getDescription(), "");
             case SPECIFIC_REPORT_DEC:
                 return String.format(ddReportType.getReportType().getDescription(), ddReportType.getSubreport().getName(), taxType.getDeclarationShortName());
             default:

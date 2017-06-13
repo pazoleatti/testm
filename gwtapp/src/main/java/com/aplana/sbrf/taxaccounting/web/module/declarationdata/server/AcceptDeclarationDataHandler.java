@@ -114,7 +114,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
             String declarationFullName = declarationDataService.getDeclarationFullName(action.getDeclarationId(), null);
             try {
                 declarationDataService.cancel(logger, action.getDeclarationId(), action.getReasonForReturn(), securityService.currentUserInfo());
-                logger.info("Выполнена операция \"%s\" для %s:", "Возврат в Создана", declarationFullName);
+                logger.info("Выполнена операция \"%s\" для %s:", "Возврат в Создана", declarationFullName.replace("Налоговая", "налоговой").replace("форма", "формы"));
                 String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", action.getDeclarationId(), State.CREATED.getTitle()).toString();
                 logger.info(message);
                 sendNotifications(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
