@@ -58,7 +58,7 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
             if (declarationDataService.existDeclarationData(id)) {
                 final Long declarationId = id;
                 if (action.isAccepted()) {
-                    logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
+                    logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
                     try {
                         String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
                         if (uuidXml != null) {

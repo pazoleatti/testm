@@ -67,7 +67,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
         for (Long id: action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(id)) {
                 final Long declarationId = id;
-                logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
+                logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
                 try {
                     LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(declarationId, DeclarationDataReportType.ACCEPT_DEC));
                     if (lockDataAccept == null) {

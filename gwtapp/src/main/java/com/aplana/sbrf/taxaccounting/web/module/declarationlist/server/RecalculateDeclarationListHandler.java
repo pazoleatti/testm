@@ -54,7 +54,7 @@ public class RecalculateDeclarationListHandler extends AbstractActionHandler<Rec
         for (Long id: action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(id)) {
                 final Long declarationId = id;
-                logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s:", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
+                logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
                 try {
                     try {
                         declarationDataService.preCalculationCheck(logger, declarationId, userInfo);
