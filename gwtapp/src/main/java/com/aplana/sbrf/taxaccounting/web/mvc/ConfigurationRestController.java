@@ -1,5 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.widget.version.server.GetProjectVersionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,12 +22,25 @@ import java.util.*;
 @EnableWebMvc
 public class ConfigurationRestController {
 
+    @Autowired
+    private SecurityService securityService;
+    @Autowired
+    private GetProjectVersionHandler getProjectVersionHandler;
+    @Autowired
+    private DepartmentService departmentService;
+
     @RequestMapping("/getConfig")
     @ResponseBody
     public Map<String, Object> getConfig(HttpServletRequest request) {
         Map<String, Object> result = new HashMap<String, Object>();
 
         result.put("gwtMode", PropertyLoader.isProductionMode()?"":"?gwt.codesvr=127.0.0.1:9997");
+        result.put("user_data", securityService.currentUserInfo());
+        result.put("project_properties", getProjectVersionHandler.getProjectVersionProperties());
+
+        TAUser user = securityService.currentUserInfo().getUser();
+        Department department = departmentService.getDepartment(user.getDepartmentId());
+        result.put("department", department.getName());
         return result;
     }
 }
