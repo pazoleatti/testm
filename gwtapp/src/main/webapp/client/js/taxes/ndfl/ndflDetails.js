@@ -12,6 +12,9 @@
         .controller('ndflDetailsFormsCtrl', [
             '$scope', '$timeout', '$state', '$stateParams', 'dialogs',
             function ($scope, $timeout, $state, $stateParams, dialogs) {
+                $scope.refreshGrid = function(page) {
+                    $scope.ctrlMyGrid.refreshGrid(page);
+                };
                 $scope.searchFilter = {
                     ajaxFilter: [],
                     params: {},

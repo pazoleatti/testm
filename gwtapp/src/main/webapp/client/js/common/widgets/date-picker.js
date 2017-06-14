@@ -2,12 +2,14 @@
     'use strict';
     var widgets = angular.module('datePicker', []);
     /**
-     * Виджет для поля даты
+     * @description Виджет для поля даты
      *
-     * @attr label - метка поля
      * @attr required - обязательность заполнения поля, ставится метка (*). Никакой валидации не происходит
      * @attr model - модель данных
-     * @attr labelWidth - ширина метки в колонках bootstrap'а
+     * @attr minDate - самая ранняя дата, которую можно выбрать
+     * @attr maxDate - самая поздняя дата, которую можно выбрать
+     * @attr inputStyle - дополнительная настройка поля ввода
+     * @attr onBlur - метод, который срабатывает при событии onBlur
      */
     widgets.directive('muDatePicker', function () {
         return {

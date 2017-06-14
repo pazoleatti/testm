@@ -84,7 +84,7 @@
         }
     );
     /**
-     * Поиск по нажатию на enter
+     * @description Поиск по нажатию на enter
      */
     window.addEventListener("keydown", function(event) {
         if (event.keyCode === 13){

@@ -1,7 +1,14 @@
 (function () {
     'use strict';
 
+    /**
+     * @description Модуль, содержащий директивы для работы с многоуровневым меню
+     */
+
     angular.module('app.dropdown', [])
+        /**
+         * @description Директива для многоуровневого меню
+         */
         .directive('tree', function() {
             return {
                 restrict: "E",
@@ -12,6 +19,10 @@
                 templateUrl: 'client/js/common/widgets/tree.html'
             };
         })
+
+        /**
+         * @description Директива для перехода по ссылке в многоуровневом меню
+         */
         .directive('leaf', function($compile) {
             return {
                 restrict: "E",

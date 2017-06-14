@@ -4,8 +4,17 @@
 (function () {
     'use strict';
 
+    /**
+     * @description Модуль, содержащий форматтеры
+     */
+
     angular.module('app.formatters', [])
-        // Фильтр даты в формате dd.MM.yyyy
+        /**
+         * @description Фильтр даты
+         *
+         * @param value - значение, которое необходимо отформатировать
+         * @return Дата в формате 'dd.MM.yyyy'
+         */
         .filter('dateFormatter', ['$filter', function ($filter) {
             return function (value) {
                 if (!value) {

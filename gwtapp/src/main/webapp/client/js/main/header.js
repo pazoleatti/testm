@@ -1,6 +1,10 @@
 (function () {
     'use strict';
 
+    /**
+     * @description Модуль для главной страницы
+     */
+
     angular.module('app.header', [
         'ui.router',
         'userData',
@@ -16,14 +20,14 @@
             '$scope', '$translate', '$http', 'USER_DATA', '$rootScope', 'deviceDetector',
             function ($scope, $translate, $http, USER_DATA, $rootScope, deviceDetector) {
                 /**
-                 * Обновляет информацию о текущем пользователе
+                 * @description Обновляет информацию о текущем пользователе
                  */
                 var updateCurrentUserInfo = function () {
-                    var data = USER_DATA;
                     // Формируем строку ФИО
                     $scope.security.userTitle = USER_DATA.name;
                 };
 
+                //Получаем необходимые настройки с сервера
                 $http.get('controller/rest/configService/getConfig').then(
                     function (response) {
                         $scope.gwtMode = response.data.gwtMode;
@@ -34,6 +38,7 @@
                         $scope.security.userDep = response.data.department;
                         $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
 
+                        //Задаем ссылки для главного меню
                         $scope.treeTaxes = [{
                             name: "НДФЛ",
                             subtree: [{
@@ -119,9 +124,8 @@
                 updateCurrentUserInfo();
 
                 /**
-                 * Выйти из системы. Убить сессию
+                 * @description Выход из системы
                  */
-                    // Выход из системы
                 $scope.logout = function () {
                     $.ajax({
                         type: "GET",

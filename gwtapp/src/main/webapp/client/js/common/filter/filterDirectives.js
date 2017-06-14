@@ -1,14 +1,18 @@
 (function() {
     'use strict';
 
+    /**
+     * @description Модуль, содержащий директивы фильтров
+     */
+
     angular.module('app.filterDirectives', [])
         /**
-         * Выбор интервала дат от-до
+         * @description Директива для выбора интервала дат от-до
          *
-         * Атрибуты:
-         *   "ng-label" - css-класс для контейнера с подписью
-         *   "ng-from-model" - модель для даты "С"
-         *   "ng-to-model" - модель для даты "По"
+         *   @attr ng-label - css-класс для контейнера с подписью
+         *   @attr ng-from-model - модель для даты "С"
+         *   @attr ng-to-model - модель для даты "По"
+         *   @attr labelWidth - ширина метки в колонках bootstrap'а
          */
         .directive('dateFromToFilter', function () {
             return {
