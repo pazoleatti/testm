@@ -21,12 +21,13 @@ public class SUDIRRedirectLogoutSuccessHandler implements LogoutSuccessHandler {
     private static final Log LOG = LogFactory.getLog(SUDIRRedirectLogoutSuccessHandler.class);
 
 	// Один из заголовков, которые вебсил добавляет к запросам идущим от него к нашему приложениию
-	private final static String WEBSEAL_HEADER_NAME = "iv_server_name";
+	public final static String WEBSEAL_HEADER_NAME = "iv_server_name";
 	// Путь к pkmslogout нужно указывать так, чтобы нивелировать наш корневой url,
 	// иначе получим 404 и логаут не сработает
 	private final static String WEBSEAL_LOGOUT_URL = "../../pkmslogout";
 	// Адрес для входа в приложение по умолчанию
-	private final static String REDIRECT_URL = "/";
+	private final static String REDIRECT_URL = "/logout";
+
 
 	@Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
