@@ -29,10 +29,10 @@
                     $scope.datePickerOptions = {
                         minDate: $scope.minDate,
                         maxDate: $scope.maxDate
-                    }
+                    };
                 };
                 $scope.pickerStyle = $scope.inputStyle ? $scope.inputStyle : '';
             }
-        }
+        };
     });
 }());

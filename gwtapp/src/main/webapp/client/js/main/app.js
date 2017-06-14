@@ -1,8 +1,6 @@
 (function () {
     'use strict';
 
-    var translateDictionary = {};
-
     angular
         .module('sbrfNdfl', [
             'app.header',
@@ -11,6 +9,7 @@
             'app.filterDirectives',
             'app.filterUtils',
             'app.formLeaveConfirmer',
+            'ngCookies',
             'pascalprecht.translate',
             'aplana.overlay',
             'aplana.alert',
@@ -29,7 +28,6 @@
             'angularFileUpload',
             'ui.grid.moveColumns',
             'ui.grid',
-            'pascalprecht.translate', // локализация
             'ui.grid.pagination',     // пейджинг
             'ui.grid.resizeColumns',  // изменение ширины столбцов
             'ui.grid.saveState',      // сохранение состояния таблицы при переходах
@@ -54,8 +52,12 @@
                     });
 
                 // Настройка источника локализованных сообщений
-                $translateProvider.translations('ru', translateDictionary);
-                $translateProvider.preferredLanguage('ru');
+                $translateProvider.useStaticFilesLoader({
+                    prefix: 'resources/locale-',
+                    suffix: '.json'
+                });
+                $translateProvider.preferredLanguage('ru_RU');
+                $translateProvider.useLocalStorage();
                 $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
                 // Добавляем форматирование дат
                 Date.prototype.format = function (mask, utc) {
@@ -69,109 +71,6 @@
                 };
             }
         ]);
-
-    translateDictionary = {
-        "0": "Удаленный сервер недоступен",
-        "400": "Сервер обнаружил в запросе клиента синтаксическую ошибку (400)",
-        "401": "Неавторизованный доступ (401)",
-        "403": "Доступ к ресурсу запрещен (403)",
-        "404": "Не найдено. Сервер не может найти данные (404)",
-        "500": "Внутренняя серверная ошибка (500)",
-        "503": "Сервис недоступен (503)",
-        "12029": "Удаленный сервер недоступен",
-        "common.button.search": "Найти",
-        "common.button.clear": "Сбросить",
-        "filter.placeholder.all": "-Все-",
-        "filterPanelLabel": "Фильтр",
-        "infoPanelLabel": "Информация",
-        "filter.placeholder.search": "Введите строку",
-        "theNumberOfSelectedItems": "Выбрано значений:",
-        "common.button.add": "Добавить",
-        "common.button.cancel": "Отменить",
-        "common.button.save": "Сохранить",
-        "common.button.no": "Нет",
-        "common.button.yes": "Да",
-        "DIALOGS_SAVE": "Сохранить",
-        "DIALOGS_CANCEL": "Отменить",
-        "DIALOGS_ERROR_MSG": "Произошла непредвиденная ошибка.",
-        "DIALOGS_CONFIRMATION": "Подтверждение",
-        "DIALOGS_REJECTED": "Отказать",
-        "DIALOGS_NOTIFICATION_MSG": "Неопределенное уведомление.",
-        "DIALOGS_OK": "Применить",
-        "DIALOGS_PERCENT_COMPLETE": "% завершено",
-        "DIALOGS_PLEASE_WAIT_MSG": "Ожидание выполнения операции.",
-        "DIALOGS_CLOSE": "Закрыть",
-        "DIALOGS_YES": "Да",
-        "DIALOGS_NO": "Нет",
-        "DIALOGS_PLEASE_WAIT": "Пожалуйста, подождите",
-        "DIALOGS_ERROR": "Ошибка",
-        "DIALOGS_CONFIRMATION_MSG": "Требуется подтвеждение.",
-        "DIALOGS_NOTIFICATION": "Уведомление",
-
-        "menu.taxes": "Налоги",
-        "menu.taxes.ndfl": "НДФЛ",
-        "menu.taxes.ndfl.details": "НДФЛ детализация",
-        "menu.taxes.ndfl.forms": "Формы",
-
-        "header.ndfl.forms": "НДФЛ - Список налоговых форм",
-        "header.ndflDetails.forms": "РНУ НДФЛ",
-        "header.ndfl.form.create": "Создание новой записи",
-        "header.ndfl.fl.create": "Добавить запись ФЛ",
-        "header.ndfl.fl.edit": "Редактировать запись ФЛ",
-
-        "title.period": "Период",
-        "title.department": "Подразделение",
-        "title.formNumber": "Номер формы",
-        "title.formType": "Тип налоговой формы",
-        "title.formKind": "Вид налоговой формы",
-        "title.asnu": "Наименование АСНУ",
-        "title.nameAsnu" : "АСНУ",
-        "title.state": "Состояние",
-        "title.file": "Файл",
-        "title.creator": "Создал",
-        "title.inp": "ИНП",
-        "title.idOperation": "ID операции",
-        "title.kpp": "КПП",
-        "title.oktmo": "ОКТМО",
-        "title.snils": "СНИЛС",
-        "title.inn": "ИНН",
-        "title.numberDul": "№ ДУЛ",
-        "title.surname": "Фамилия",
-        "title.name": "Имя",
-        "title.patronymic": "Отчество",
-        "title.dateOfBirthFrom": "Дата рождения c",
-        "title.dateFromFilterLabel": "Дата изменения c",
-        "title.dateToFilterLabel": "по",
-        "title.taxpayer": "Налогоплательщик",
-        "title.dateOfBirth": "Дата рождения",
-        "title.citizenship": "Гражданство (код страны)",
-        "title.statusCode": "Статус (код)",
-        "title.document": "Документ",
-        "title.document.code": "Код",
-        "title.document.number": "Номер",
-        "title.registrationAddress": "Адрес регистрации в РФ",
-        "title.innRF": "ИНН в РФ",
-        "title.innINO": "ИНН в ИНО",
-        "title.subject": "Субьект",
-        "title.area": "Район",
-        "title.city": "Город",
-        "title.locality": "Населенный пункт",
-        "title.street": "Улица",
-        "title.index": "Индекс",
-        "title.building": "Дом",
-        "title.housing": "Корпус",
-        "title.apartment": "Квартира",
-
-        "button.create": "Создать",
-        "button.check": "Проверить",
-        "button.calculate": "Расчитать",
-        "button.delete": "Удалить",
-        "button.accept": "Принять",
-        "button.return": "Вернуть в создана",
-        "button.add": "Добавить",
-        "button.save": "Сохранить",
-        "button.edit": "Редактировать"
-    };
 
     // Получение информации о текущем пользователе и запуск приложения
     var initInjector = angular.injector(['ng']);

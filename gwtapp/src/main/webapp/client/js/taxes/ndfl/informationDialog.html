@@ -5,13 +5,13 @@
     </h4>
 </div>
 <div class="modal-body information-dialog-body" style="height: 500px; width: 800px;">
-    <form role="form" name="createOrEditFLForm" novalidate class="modal-form form-horizontal">
+    <form role="form" name="InformationDialogForm" novalidate class="modal-form form-horizontal">
         <div>
 
             <div style="overflow: hidden;" >
                 <div style="width: 200px; float: left;">
                     <div>
-                        <label class="control-label">ИНП</label>
+                        <label class="control-label">{{::'title.inp' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control" data-ng-model="entity.inp" />
@@ -19,7 +19,7 @@
                 </div>
                 <div style="width: 200px; float: left; margin-left: 20px;">
                     <div>
-                        <label class="control-label">ID операции</label>
+                        <label class="control-label">{{::'title.idOperation' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control" />
@@ -27,7 +27,7 @@
                 </div>
                 <div style="width: 200px; float: left; margin-left: 20px;">
                     <div>
-                        <label class="control-label">Код вычета</label>
+                        <label class="control-label">{{::'title.deductionCode' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control" />
@@ -37,86 +37,86 @@
 
             <div style="margin-top: 30px;" >
                 <fieldset class="form-fieldset" style="width: 200px; float: left" >
-                    <legend>Документ о праве на вычет</legend>
+                    <legend>{{::'title.documentOnTheRightToDeduct' | translate}}</legend>
                     <div>
-                        <label class="control-label">Тип</label>
+                        <label class="control-label">{{::'title.type' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control" />
                     </div>
                     <div>
-                        <label class="control-label">Дата документа</label>
+                        <label class="control-label">{{::'title.documentDate' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control" />
                     </div>
                     <div>
-                        <label class="control-label" >Номер</label>
+                        <label class="control-label" >{{::'title.number' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control"/>
                     </div>
                     <div>
-                        <label class="control-label" >Код источника</label>
+                        <label class="control-label" >{{::'title.sourceCode' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control"/>
                     </div>
                     <div>
-                        <label class="control-label" >Сумма документа</label>
+                        <label class="control-label" >{{::'title.documentAmount' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control"/>
                     </div>
                 </fieldset>
                 <fieldset class="form-fieldset" style="width: 200px; float: left; margin-left: 20px;" >
-                    <legend>Доход</legend>
+                    <legend>{{::'title.income' | translate}}</legend>
                     <div>
-                        <label class="control-label" >Код дохода</label>
+                        <label class="control-label" >{{::'title.incomeCode' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control"/>
                     </div>
                     <div>
-                        <label class="control-label" >Дата дохода</label>
+                        <label class="control-label" >{{::'title.incomeDate' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control"/>
                     </div>
                     <div>
-                        <label class="control-label" >Сумма дохода</label>
+                        <label class="control-label" >{{::'title.incomeAmount' | translate}}</label>
                     </div>
                     <div>
                         <input type="text" class="form-control"/>
                     </div>
                 </fieldset>
                 <fieldset class="form-fieldset" style="width: 250px; float: left; margin-left: 20px;" >
-                    <legend>Применение вычета</legend>
+                    <legend>{{::'title.applicationOfDeduction' | translate}}</legend>
                     <fieldset class="form-fieldset" >
-                        <legend>Предыдущий период</legend>
+                        <legend>{{::'title.previousPeriod' | translate}}</legend>
                         <div>
-                            <label class="control-label">Дата предыдущего вычета</label>
+                            <label class="control-label">{{::'title.previousDeductionDate' | translate}}</label>
                         </div>
                         <div>
                             <input type="text" class="form-control"/>
                         </div>
                         <div>
-                            <label class="control-label">Сумма предыдущего вычета</label>
+                            <label class="control-label">{{::'title.previousDeductionAmount' | translate}}</label>
                         </div>
                         <div>
                             <input type="text" class="form-control" />
                         </div>
                     </fieldset>
                     <fieldset class="form-fieldset" >
-                        <legend>Текущий период</legend>
+                        <legend>{{::'title.currentPeriod' | translate}}</legend>
                         <div>
-                            <label class="control-label">Дата текущего вычета</label>
+                            <label class="control-label">{{::'title.currentDeductionDate' | translate}}</label>
                         </div>
                         <div>
                             <input type="text"  class="form-control" />
                         </div>
                         <div>
-                            <label class="control-label">Сумма текущего вычета</label>
+                            <label class="control-label">{{::'title.currentDeductionAmount' | translate}}</label>
                         </div>
                         <div>
                             <input type="text" class="form-control" />
@@ -131,11 +131,11 @@
 <div class="modal-footer">
     <button type="button"
             class="btn btn-danger"
-            data-ng-disabled="createOrEditFLForm.$invalid"
+            data-ng-disabled="InformationDialogForm.$invalid"
             ng-click="save()">
-        {{'common.button.add' | translate}}
+        <span data-translate-once="common.button.add"></span>
     </button>
-    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{'common.button.cancel' |
-        translate}}
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">
+        <span data-translate-once="common.button.cancel"></span>
     </button>
 </div>

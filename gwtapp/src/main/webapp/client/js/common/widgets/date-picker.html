@@ -1,6 +1,6 @@
-<p class="input-group" style="{{pickerStyle}}">
+<p class="input-group">
     <input type="text" class="form-control" datetime="{{format}}" uib-datepicker-popup="{{format}}" datepicker-timezone
-           is-open="isOpen" close-text="Закрыть" current-text="Сегодня" clear-text="Очистить"
+           is-open="isOpen" close-text="{{'button.close' | translate}}" current-text="{{'button.today' | translate}}" clear-text="{{'button.select' | translate}}"
            data-ng-blur="onBlur()"
            data-ng-model="model"
            datepicker-options="datePickerOptions"

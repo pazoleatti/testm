@@ -2,10 +2,11 @@
     <!--Заголовок-->
     <div class="row" style="min-width: 1400px;">
         <div class="header-col" style="margin-left: 15px;">
-            <h1><a href="{{'Main.jsp' + gwtMode + '#!declarationList;nType=NDFL'}}">{{'menu.taxes.ndfl' | translate}}:</a> - {{'header.ndflDetails.forms' | translate}}:</h1>
+            <h1><a href="{{'Main.jsp' + gwtMode + '#!declarationList;nType=NDFL'}}">{{::'menu.taxes.ndfl' |
+                translate}}:</a> - {{::'header.ndflDetails.forms' | translate}}:</h1>
         </div>
         <div class="header-col w200" style="float: right; margin-top: 20px;">
-            <label class="w200"><a href="#">Формирование отчетов</a></label>
+            <label class="w200"><a href="#">{{::'link.ndfl.reporting' | translate}}</a></label>
         </div>
     </div>
 
@@ -16,282 +17,287 @@
                 <div class="row">
                     <div class="header-col w400">
                         <div>
-                            <label class="w100">{{('title.department' | translate)}}:</label>
+                            <label class="w100">{{::'title.department' | translate}}:</label>
                             <label class="font-normal">{{department}}</label>
                         </div>
                         <div>
-                            <label class="w100">{{('title.formNumber' | translate)}}:</label>
+                            <label class="w100">{{::'title.formNumber' | translate}}:</label>
                             <label class="font-normal">{{formNumber}}</label>
                         </div>
                         <div>
-                            <label class="w100">{{('title.creator' | translate)}}:</label>
+                            <label class="w100">{{::'title.creator' | translate}}:</label>
                             <label class="font-normal">{{creator}}</label>
                         </div>
                     </div>
                     <div class="header-col w300">
                         <div>
-                            <label>{{('title.formType' | translate)}}:</label>
+                            <label>{{::'title.formType' | translate}}:</label>
                             <label class="font-normal">{{formType}}</label>
                         </div>
                         <div>
-                            <label>{{('title.period' | translate)}}:</label>
+                            <label>{{::'title.period' | translate}}:</label>
                             <label class="font-normal">{{period}}</label>
                         </div>
                         <div>
-                            <label>{{('title.state' | translate)}}:</label>
+                            <label>{{::'title.state' | translate}}:</label>
                             <label class="font-normal">{{state}}</label>
                         </div>
                     </div>
                     <div class="header-col w350">
                         <div>
-                            <label>{{('title.nameAsnu' | translate)}}:</label>
+                            <label>{{::'title.nameAsnu' | translate}}:</label>
                             <label class="font-normal">{{nameAsnu}}</label>
                         </div>
                     </div>
                     <div class="header-col w200" style="float: right;">
                         <div>
-                            <label class="w200"><a href="#">История изменений</a></label>
+                            <label class="w200"><a href="#">{{::'link.ndfl.historyOfChange' | translate}}</a></label>
                         </div>
                         <div>
-                            <label class="w200"><a href="#">Файлы и комментарии</a></label>
+                            <label class="w200"><a href="#">{{::'link.ndfl.filesAndComment' | translate}}</a></label>
                         </div>
                         <div>
-                            <label class="w200"><a href="#">Источники</a></label>
+                            <label class="w200"><a href="#">{{::'link.ndfl.sources' | translate}}</a></label>
                         </div>
                     </div>
                 </div>
             </div>
-           <!--Панель кнопок -->
+            <!--Панель кнопок -->
             <div class="button_panel">
                 <div class="btn-toolbar" role="toolbar">
-                   <!--Проверить -->
+                    <!--Проверить -->
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
                         data-ng-click="checkButtonClick()">
-                    <img src="client/img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/confirmation.png" width="32px" height="22px"
+                    <img src="client/img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/confirmation.png"
+                         width="32px" height="22px"
                          alt="{{'button.check' | translate}}"/>
-                    {{'button.check' | translate}}
+                    <span data-translate-once="button.check"></span>
                 </button>
             </span>
-                   <!--Рассчитать -->
+                    <!--Рассчитать -->
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
                         data-ng-click="calculateButtonClick()">
-                    <img src="client/img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/shape.png" width="32px" height="22px"
+                    <img src="client/img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/shape.png"
+                         width="32px" height="22px"
                          alt="{{'button.calculate' | translate}}"/>
-                    {{'button.calculate' | translate}}
+                    <span data-translate-once="button.calculate"></span>
                 </button>
             </span>
-                   <!--Принять -->
+                    <!--Принять -->
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
                         data-ng-click="acceptButtonClick()">
-                    <img src="client/img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/reconcile.png" width="32px" height="22px"
+                    <img src="client/img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/reconcile.png"
+                         width="32px" height="22px"
                          alt="{{'button.accept' | translate}}"/>
-                    {{'button.accept' | translate}}
+                    <span data-translate-once="button.accept"></span>
                 </button>
             </span>
-                   <!--Вернуть в Создана -->
+                    <!--Вернуть в Создана -->
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
                         data-ng-click="returnButtonClick()">
-                    <img src="client/img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/query_correction.png" width="32px" height="22px"
+                    <img src="client/img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/query_correction.png"
+                         width="32px" height="22px"
                          alt="{{'button.return' | translate}}"/>
-                    {{'button.return' | translate}}
+                    <span data-translate-once="button.return"></span>
                 </button>
             </span>
                     <!--Редактировать-->
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!editButtonEnabled"
                         data-ng-click="editRecordClick()">
-                    <img src="client/img/button/{{editButtonEnabled ? 'enable' : 'disable'}}/edit.png" width="32px" height="22px"
+                    <img src="client/img/button/{{editButtonEnabled ? 'enable' : 'disable'}}/edit.png" width="32px"
+                         height="22px"
                          alt="{{'button.edit' | translate}}"/>
-                    {{'button.edit' | translate}}
+                    <span data-translate-once="button.edit"></span>
                 </button>
             </span>
                 </div>
             </div>
-            <hr />
+            <hr/>
         </div>
     </div>
     <!--Вкладки-->
 
-        <uib-tabset active="activeForm" class="form100" style="height:63%;">
-            <uib-tab index="0" heading="1. Реквизиты" select="selectTab('requisites')">
-                <div data-ng-controller="ndflDetailsFormsCtrl">
-                    <div class="container-grid" style="height: 100%">
-                        <div class='container-grid-top'>
-                            <div data-ng-controller="CommonFilterCtrl">
-                                <div class="grid-filter"
-                                     style="min-width: 1900px; margin: 0 0 0 -19px; padding: 0 0 0 21px;">
-                                    <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
-                                         data-label="'filterPanelLabel' | translate">
-                                        <form class="form-horizontal" role="form" novalidate>
-                                            <div class="row">
-                                                <div class="filter-col w400">
-                                                    <div class="form-group">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label">{{'title.inp' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <input data-ng-model="searchFilter.params.inp"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.inp}}"/>
-                                                        </div>
+    <uib-tabset active="activeForm" class="form100" style="height:63%;">
+        <uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('requisites')">
+            <div data-ng-controller="ndflDetailsFormsCtrl">
+                <div class="container-grid" style="height: 100%">
+                    <div class='container-grid-top'>
+                        <div data-ng-controller="CommonFilterCtrl">
+                            <div class="grid-filter"
+                                 style="min-width: 1900px; margin: 0 0 0 -19px; padding: 0 0 0 21px;">
+                                <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
+                                     data-label="'filterPanelLabel' | translate">
+                                    <form class="form-horizontal" role="form" novalidate>
+                                        <div class="row">
+                                            <div class="filter-col w400">
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label">{{::'title.inp' |
+                                                            translate}}:</label>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label">{{'title.idOperation' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <input data-ng-model="searchFilter.params.idOperation"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.idOperation}}"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label">{{'title.kpp' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <input data-ng-model="searchFilter.params.kpp"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.kpp}}"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label">{{'title.oktmo' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <input data-ng-model="searchFilter.params.oktmo"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.oktmo}}"/>
-                                                        </div>
+                                                    <div class="col-md-9">
+                                                        <input data-ng-model="searchFilter.params.inp"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.inp}}"/>
                                                     </div>
                                                 </div>
-                                                <div class="filter-col w450">
-                                                    <div class="form-group">
-                                                        <div class="col-md-2">
-                                                            <label class="control-label">{{'title.snils' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-10">
-                                                            <input data-ng-model="searchFilter.params.snils"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.snils}}"/>
-                                                        </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label">{{::'title.idOperation' |
+                                                            translate}}:</label>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-2">
-                                                            <label class="control-label">{{'title.inn' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-10">
-                                                            <input data-ng-model="searchFilter.params.inn"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.inn}}"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-2">
-                                                            <label class="control-label">{{'title.numberDul' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-10">
-                                                            <input data-ng-model="searchFilter.params.numberDul"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.numberDul}}"/>
-                                                        </div>
+                                                    <div class="col-md-9">
+                                                        <input data-ng-model="searchFilter.params.idOperation"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.idOperation}}"/>
                                                     </div>
                                                 </div>
-                                                <div class="filter-col w400">
-                                                    <div class="form-group">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label">{{'title.surname' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <input data-ng-model="searchFilter.params.surname"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.surname}}"/>
-                                                        </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label">{{::'title.kpp' |
+                                                            translate}}:</label>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label">{{'title.name' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <input data-ng-model="searchFilter.params.name"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.name}}"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-3">
-                                                            <label class="control-label">{{'title.patronymic' |
-                                                                translate}}:</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <input data-ng-model="searchFilter.params.patronymic"
-                                                                   placeholder="{{'filter.placeholder.search' | translate}}"
-                                                                   type="text" class="form-control"
-                                                                   title="{{dataOptions.filter.patronymic}}"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <date-from-to-filter
-                                                                data-label-width="4"
-                                                                ng-from-model="searchFilter.params.dateFrom"
-                                                                ng-to-model="searchFilter.params.dateTo"
-                                                                ng-label="title.dateOfBirthFrom"/>
+                                                    <div class="col-md-9">
+                                                        <input data-ng-model="searchFilter.params.kpp"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.kpp}}"/>
                                                     </div>
                                                 </div>
-                                                <div class="filter-col">
-                                                    <!--Кнопка Найти-->
-                                                    <button type="button"
-                                                            class="btn btn-danger"
-                                                            id="searchButton"
-                                                            data-ng-click="searchClick()">
-                                                        {{'common.button.search' | translate}}
-                                                    </button>
-                                                    <!--Кнопка Сбросить-->
-                                                    <button type="button" data-ng-show="searchFilter.isClear"
-                                                            class="btn btn-default"
-                                                            id="clearButton"
-                                                            data-ng-click="resetFilter()">
-                                                        {{'common.button.clear' | translate}}
-                                                    </button>
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label">{{::'title.oktmo' |
+                                                            translate}}:</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input data-ng-model="searchFilter.params.oktmo"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.oktmo}}"/>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </form>
-                                    </div>
+                                            <div class="filter-col w450">
+                                                <div class="form-group">
+                                                    <div class="col-md-2">
+                                                        <label class="control-label">{{::'title.snils' |
+                                                            translate}}:</label>
+                                                    </div>
+                                                    <div class="col-md-10">
+                                                        <input data-ng-model="searchFilter.params.snils"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.snils}}"/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-2">
+                                                        <label class="control-label">{{::'title.inn' |
+                                                            translate}}:</label>
+                                                    </div>
+                                                    <div class="col-md-10">
+                                                        <input data-ng-model="searchFilter.params.inn"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.inn}}"/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-2">
+                                                        <label class="control-label">{{::'title.numberDul' |
+                                                            translate}}:</label>
+                                                    </div>
+                                                    <div class="col-md-10">
+                                                        <input data-ng-model="searchFilter.params.numberDul"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.numberDul}}"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="filter-col w400">
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label">{{::'title.surname' |
+                                                            translate}}:</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input data-ng-model="searchFilter.params.surname"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.surname}}"/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label">{{::'title.name' |
+                                                            translate}}:</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input data-ng-model="searchFilter.params.name"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.name}}"/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label">{{::'title.patronymic' |
+                                                            translate}}:</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input data-ng-model="searchFilter.params.patronymic"
+                                                               placeholder="{{'filter.placeholder.search' | translate}}"
+                                                               type="text" class="form-control"
+                                                               title="{{dataOptions.filter.patronymic}}"/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <date-from-to-filter
+                                                            data-label-width="4"
+                                                            ng-from-model="searchFilter.params.dateFrom"
+                                                            ng-to-model="searchFilter.params.dateTo"
+                                                            ng-label="title.dateOfBirthFrom"/>
+                                                </div>
+                                            </div>
+                                            <div class="filter-col">
+                                                <!--Кнопка Найти-->
+                                                <button type="button"
+                                                        class="btn btn-danger"
+                                                        id="searchButton"
+                                                        data-ng-click="searchClick()">
+                                                    <span data-translate-once="common.button.search"></span>
+                                                </button>
+                                                <!--Кнопка Сбросить-->
+                                                <button type="button" data-ng-show="searchFilter.isClear"
+                                                        class="btn btn-default"
+                                                        id="clearButton"
+                                                        data-ng-click="resetFilter()">
+                                                    <span data-translate-once="common.button.clear"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="button_panel" style="float: right;">
-                                <div class="btn-toolbar" role="toolbar">
-                                    <!--Редактировать запись в таблице-->
+                        </div>
+                        <div class="button_panel" style="float: right;">
+                            <div class="btn-toolbar" role="toolbar">
+                                <!--Редактировать запись в таблице-->
                                     <span>
                                 <button type="button" class="btn btn-default" data-ng-disabled="!editReqsEnabled"
                                         data-ng-click="editFLClick()">
                                     <img src="client/img/button/enable/editRequisites.png" width="15px" height="15px"/>
                                 </button>
                             </span>
-                                    <!--Создать запись в таблице-->
+                                <!--Создать запись в таблице-->
                                     <span>
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="createFLClick()">
@@ -299,7 +305,7 @@
                                          height="15px"/>
                                 </button>
                             </span>
-                                    <!--Удалить запись из таблицы-->
+                                <!--Удалить запись из таблицы-->
                                     <span>
                                 <button type="button" class="btn btn-default" data-ng-disabled="!deleteReqsEnabled"
                                         data-ng-click="deleteFLClick()">
@@ -307,52 +313,54 @@
                                          height="15px"/>
                                 </button>
                             </span>
-                                </div>
                             </div>
                         </div>
-
-                        <div data-aplana-grid
-                             data-grid-fill-space="true"
-                             data-grid-fill-space-container-selector=".form100"
-                             data-grid-fill-space-container-selector-top=".container-grid-top"
-                             data-grid-options="requisitesGridOptions"
-                             data-grid-ctrl="ourGrid2"
-                             data-init-grid="initOurGrid(ctrl)"
-                             id="requisitesTable2"
-                             style="float: left;"></div>
                     </div>
+
+                    <div data-aplana-grid
+                         data-grid-fill-space="true"
+                         data-grid-fill-space-container-selector=".form100"
+                         data-grid-fill-space-container-selector-top=".container-grid-top"
+                         data-grid-options="requisitesGridOptions"
+                         data-grid-ctrl="ourGrid2"
+                         data-init-grid="initOurGrid(ctrl)"
+                         id="requisitesTable2"
+                         style="float: left;"></div>
                 </div>
-            </uib-tab>
+            </div>
+        </uib-tab>
 
-            <uib-tab index="1" heading="2. Сведения о доходах и НДФЛ" select="selectTab('incomesAndNdfl')">
-            </uib-tab>
+        <uib-tab index="1" heading="2. {{::'tab.ndfl.informationOnIncomesAndNdfl' | translate}}"
+                 select="selectTab('incomesAndNdfl')">
+        </uib-tab>
 
-            <uib-tab index="2" heading="3. Сведения о вычетах" select="selectTab('deductions')">
-                <!--<div data-ng-controller="informationDetailsFormsCtrl" >-->
-                <!--<div id="information-details-content" class="content-with-table" style="" >-->
+        <uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
+                 select="selectTab('deductions')">
+            <!--<div data-ng-controller="informationDetailsFormsCtrl" >-->
+            <!--<div id="information-details-content" class="content-with-table" style="" >-->
 
-                <!--<div style="overflow:hidden;" >-->
-                <!--<form class="tableForm"><input type="image" src="client/img/icon/delete.png" data-ng-click="" ></form>-->
-                <!--<form class="tableForm"><input type="image" src="client/img/icon/add.png" data-ng-click="addInformationData()" ></form>-->
-                <!--<form class="tableForm"><input type="image" src="client/img/icon/edit.png" data-ng-click="editInformationData()" ></form>-->
-                <!--</div>-->
+            <!--<div style="overflow:hidden;" >-->
+            <!--<form class="tableForm"><input type="image" src="client/img/icon/delete.png" data-ng-click="" ></form>-->
+            <!--<form class="tableForm"><input type="image" src="client/img/icon/add.png" data-ng-click="addInformationData()" ></form>-->
+            <!--<form class="tableForm"><input type="image" src="client/img/icon/edit.png" data-ng-click="editInformationData()" ></form>-->
+            <!--</div>-->
 
-                <!--<div class="gridStyle" ui-grid="informationOptions" ui-grid-resize-columns-->
-                <!--ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div>-->
+            <!--<div class="gridStyle" ui-grid="informationOptions" ui-grid-resize-columns-->
+            <!--ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div>-->
 
-                <!--<!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="infoGridOptions"-->
-                <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->-->
+            <!--<!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="infoGridOptions"-->
+            <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->-->
 
-                <!--<!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="gridOptions"-->
-                <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->-->
+            <!--<!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="gridOptions"-->
+            <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->-->
 
-                <!--</div>-->
-                <!--</div>-->
-            </uib-tab>
+            <!--</div>-->
+            <!--</div>-->
+        </uib-tab>
 
-            <uib-tab index="3" heading="4. Сведения о доходах в виде авансовых платежей"
-                     select="selectTab('advancePayments')">
-            </uib-tab>
+        <uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
+                 select="selectTab('advancePayments')">
+        </uib-tab>
 
-        </uib-tabset>
+    </uib-tabset>
 </div>

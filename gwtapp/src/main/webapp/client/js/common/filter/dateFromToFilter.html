@@ -8,9 +8,9 @@
                 <input type="text" class="form-control" datetime="dd.MM.yyyy" datepicker-timezone
                        uib-datepicker-popup="dd.MM.yyyy"
                        is-open="dateFromOpened"
-                       close-text="Выбрать"
-                       current-text="Сегодня"
-                       clear-text="Очистить"
+                       close-text="{{'button.select' | translate}}"
+                       current-text="{{'button.today' | translate}}"
+                       clear-text="{{'button.clear' | translate}}"
                        data-ng-model="ngFromModel"
                        data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
                        title="{{ngFromModel}}">
@@ -30,9 +30,9 @@
                 <input type="text" class="form-control" datetime="dd.MM.yyyy" datepicker-timezone
                        uib-datepicker-popup="dd.MM.yyyy"
                        is-open="dateToOpened"
-                       close-text="Выбрать"
-                       current-text="Сегодня"
-                       clear-text="Очистить"
+                       close-text="{{'button.select' | translate}}"
+                       current-text="{{'button.today' | translate}}"
+                       clear-text="{{'button.clear' | translate}}"
                        datepicker-options="dateToOptions"
                        data-ng-model="ngToModel"
                        data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"

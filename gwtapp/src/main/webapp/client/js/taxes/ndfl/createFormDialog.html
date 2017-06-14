@@ -8,7 +8,7 @@
     <form role="form" name="createForm" novalidate class="modal-form form-horizontal">
         <div class="form-group">
             <div class="col-md-4">
-                <label class="control-label">{{'title.period' | translate}}</label>
+                <label class="control-label">{{::'title.period' | translate}}</label>
             </div>
             <div class="col-md-8">
                 <ui-select ng-model="entity.period" required>
@@ -23,7 +23,7 @@
         </div>
         <div class="form-group">
             <div class="col-md-4">
-                <label class="control-label">{{'title.department' | translate}}</label>
+                <label class="control-label">{{::'title.department' | translate}}</label>
             </div>
             <div class="col-md-8">
                 <ui-select ng-model="entity.department" required>
@@ -38,7 +38,7 @@
         </div>
         <div class="form-group">
             <div class="col-md-4">
-                <label class="control-label">{{'title.formKind' | translate}}</label>
+                <label class="control-label">{{::'title.formKind' | translate}}</label>
             </div>
             <div class="col-md-8">
                 <ui-select ng-model="entity.formKind" required>
@@ -54,6 +54,10 @@
     </form>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-danger" data-ng-disabled="createForm.$invalid" ng-click="save()">{{'common.button.add' | translate}}</button>
-    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{'common.button.cancel' | translate}}</button>
+    <button type="button" class="btn btn-danger" data-ng-disabled="createForm.$invalid" ng-click="save()">
+        <span data-translate-once="common.button.add"></span>
+    </button>
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">
+        <span data-translate-once="common.button.cancel"></span>
+    </button>
 </div>

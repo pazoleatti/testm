@@ -8,24 +8,24 @@
     <form role="form" name="createOrEditFLForm" novalidate class="modal-form form-horizontal">
         <div>
             <fieldset class="form-fieldset" style="width: 200px; float: left">
-                <legend>{{'title.taxpayer' | translate}}</legend>
+                <legend>{{::'title.taxpayer' | translate}}</legend>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.inp' | translate}}</label>
+                        <label class="control-label">{{::'title.inp' | translate}}</label>
                     </div>
                     <div data-aplana-field>
-                        <input style="margin-left: -180px;margin-top: 20px;width: 168px;"
+                        <input style="margin-left: -180px;width: 168px;"
                                data-ng-model="entity.inp" required
                                type="text" class="form-control"
                                title="{{entity.inp}}"/>
                         <div data-aplana-validator data-key="required">
-                            Обязательное поле
+                            {{::'field.ndfl.requiredField' | translate}}
                         </div>
                     </div>
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.surname' | translate}}</label>
+                        <label class="control-label">{{::'title.surname' | translate}}</label>
                     </div>
                     <div>
                         <input data-ng-model="entity.surname" required
@@ -35,7 +35,7 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.name' | translate}}</label>
+                        <label class="control-label">{{::'title.name' | translate}}</label>
                     </div>
                     <div>
                         <input data-ng-model="entity.name" required
@@ -45,7 +45,7 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.patronymic' | translate}}</label>
+                        <label class="control-label">{{::'title.patronymic' | translate}}</label>
                     </div>
                     <div>
                         <input data-ng-model="entity.patronymic" required
@@ -55,30 +55,15 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.dateOfBirth' | translate}}</label>
+                        <label class="control-label">{{::'title.dateOfBirth' | translate}}</label>
                     </div>
                     <div>
-                        <p class="input-group" style="{{pickerStyle}}">
-                            <input type="text" class="form-control" datetime="{{format}}" uib-datepicker-popup="{{format}}" datepicker-timezone
-                                   is-open="isOpen" close-text="Закрыть" current-text="Сегодня" clear-text="Очистить"
-                                   data-ng-blur="onBlur()"
-                                   data-ng-model="model"
-                                   datepicker-options="datePickerOptions"
-                                   data-ng-required="required ? required : false"
-                                   data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
-                                   title="{{model}}">
-                            <span class="input-group-btn">
-                                <button style="height: 27px" type="button" class="btn btn-default" ng-click="click()">
-                                    <i class="glyphicon glyphicon-calendar"></i>
-                                </button>
-                            </span>
-                        </p>
-                        <!--<mu-date-picker required="true" model="entity.dateOfBirth"></mu-date-picker>-->
+                        <mu-date-picker required="true" model="entity.dateOfBirth"></mu-date-picker>
                     </div>
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.citizenship' | translate}}</label>
+                        <label class="control-label">{{::'title.citizenship' | translate}}</label>
                     </div>
                     <div style="width: 100%" data-ui-select2="citizenshipSelect.options"
                          data-ng-model="entity.citizenship"
@@ -87,7 +72,7 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.statusCode' | translate}}</label>
+                        <label class="control-label">{{::'title.statusCode' | translate}}</label>
                     </div>
                     <div>
                         <ui-select ng-model="entity.statusCode" required>
@@ -104,10 +89,10 @@
 
             <div style="width: 200px; display: inline-block; margin-left: 15px;">
                 <fieldset class="form-fieldset">
-                    <legend>{{'title.document' | translate}}</legend>
+                    <legend>{{::'title.document' | translate}}</legend>
                     <div>
                         <div>
-                            <label class="control-label">{{'title.document.code' | translate}}</label>
+                            <label class="control-label">{{::'title.document.code' | translate}}</label>
                         </div>
                         <div>
                             <ui-select ng-model="entity.documentCode" required>
@@ -122,26 +107,26 @@
                     </div>
                     <div>
                         <div>
-                            <label class="control-label">{{'title.document.number' | translate}}</label>
+                            <label class="control-label">{{::'title.document.number' | translate}}</label>
                         </div>
                         <div data-aplana-field>
-                            <input style="margin-left: -180px;margin-top: 20px;width: 168px;"
+                            <input style="margin-left: -180px;width: 168px;"
                                    data-ng-model="entity.documentNumber" required
                                    type="text" class="form-control"
                                    title="{{entity.document.number}}"
                                    data-ui-validate="{isNumber : 'isNumber($value)'}"/>
                             <div data-aplana-validator data-key="isNumber">
-                                В поле должны вводиться только числа
+                                {{::'field.ndfl.isNumber' | translate}}
                             </div>
                         </div>
                     </div>
                 </fieldset>
 
                 <fieldset class="form-fieldset" style="margin-top: 15px;">
-                    <legend>{{'title.document' | translate}}</legend>
+                    <legend>{{::'title.document' | translate}}</legend>
                     <div>
                         <div>
-                            <label class="control-label">{{'title.innRF' | translate}}</label>
+                            <label class="control-label">{{::'title.innRF' | translate}}</label>
                         </div>
                         <div>
                             <input data-ng-model="entity.innRF" required
@@ -151,7 +136,7 @@
                     </div>
                     <div>
                         <div>
-                            <label class="control-label">{{'title.innINO' | translate}}</label>
+                            <label class="control-label">{{::'title.innINO' | translate}}</label>
                         </div>
                         <div>
                             <input data-ng-model="entity.innINO" required
@@ -164,10 +149,10 @@
             </div>
 
             <fieldset class="form-fieldset" style="width: 300px; float: right">
-                <legend>{{'title.registrationAddress' | translate}}</legend>
+                <legend>{{::'title.registrationAddress' | translate}}</legend>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.subject' | translate}}</label>
+                        <label class="control-label">{{::'title.subject' | translate}}</label>
                     </div>
                     <div>
                         <ui-select ng-model="entity.subject" required>
@@ -182,7 +167,7 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.area' | translate}}</label>
+                        <label class="control-label">{{::'title.area' | translate}}</label>
                     </div>
                     <div>
                         <ui-select ng-model="entity.area" required>
@@ -197,7 +182,7 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.city' | translate}}</label>
+                        <label class="control-label">{{::'title.city' | translate}}</label>
                     </div>
                     <div>
                         <ui-select ng-model="entity.city">
@@ -212,7 +197,7 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.locality' | translate}}</label>
+                        <label class="control-label">{{::'title.locality' | translate}}</label>
                     </div>
                     <div>
                         <ui-select ng-model="entity.locality">
@@ -227,7 +212,7 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.street' | translate}}</label>
+                        <label class="control-label">{{::'title.street' | translate}}</label>
                     </div>
                     <div>
                         <ui-select ng-model="entity.street" required>
@@ -242,7 +227,7 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{'title.index' | translate}}</label>
+                        <label class="control-label">{{::'title.index' | translate}}</label>
                     </div>
                     <div>
                         <input data-ng-model="entity.index" required
@@ -252,7 +237,7 @@
                 </div>
                 <div style="float: left; width: 80px;">
                     <div>
-                        <label class="control-label">{{'title.building' | translate}}</label>
+                        <label class="control-label">{{::'title.building' | translate}}</label>
                     </div>
                     <div>
                         <input data-ng-model="entity.building" required
@@ -262,7 +247,7 @@
                 </div>
                 <div style="width: 80px; display: inline-block; margin-left: 15px;">
                     <div>
-                        <label class="control-label">{{'title.housing' | translate}}</label>
+                        <label class="control-label">{{::'title.housing' | translate}}</label>
                     </div>
                     <div>
                         <input data-ng-model="entity.housing"
@@ -272,7 +257,7 @@
                 </div>
                 <div style="float: right; width: 80px;">
                     <div>
-                        <label class="control-label">{{'title.apartment' | translate}}</label>
+                        <label class="control-label">{{::'title.apartment' | translate}}</label>
                     </div>
                     <div>
                         <input data-ng-model="entity.apartment" required
@@ -291,7 +276,7 @@
             ng-click="save()">
         {{buttonTitle}}
     </button>
-    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{'common.button.cancel' |
-        translate}}
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">
+        <span data-translate-once="common.button.cancel"></span>
     </button>
 </div>

@@ -1,5 +1,5 @@
 <div id="production-planning">
-    <h1>{{'header.ndfl.forms' | translate}}:</h1>
+    <h1>{{::'header.ndfl.forms' | translate}}:</h1>
     <!-- Панель фильтрации -->
     <div class="grid-filter" style="min-width: 1400px;">
         <div data-aplana-collapse data-is-collapsed="false" data-label="'filterPanelLabel' | translate">
@@ -8,7 +8,7 @@
                     <div class="filter-col w400">
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.period' | translate}}:</label>
+                                <label class="control-label">{{::'title.period' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.period">
@@ -23,7 +23,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.department' | translate}}:</label>
+                                <label class="control-label">{{::'title.department' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.department">
@@ -40,7 +40,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.formNumber' | translate}}:</label>
+                                <label class="control-label">{{::'title.formNumber' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <input data-ng-model="dataOptions.filter.formNumber"
@@ -53,7 +53,7 @@
                     <div class="filter-col w500">
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.formType' | translate}}:</label>
+                                <label class="control-label">{{::'title.formType' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.formType">
@@ -68,7 +68,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.formKind' | translate}}:</label>
+                                <label class="control-label">{{::'title.formKind' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.formKind">
@@ -83,7 +83,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.asnu' | translate}}:</label>
+                                <label class="control-label">{{::'title.asnu' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.asnu">
@@ -100,7 +100,7 @@
                     <div class="filter-col w300">
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.state' | translate}}:</label>
+                                <label class="control-label">{{::'title.state' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <ui-select ng-model="dataOptions.filter.state">
@@ -115,7 +115,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{'title.file' | translate}}:</label>
+                                <label class="control-label">{{::'title.file' | translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <input data-ng-model="dataOptions.filter.file"
@@ -142,8 +142,8 @@
                 <button type="button" class="btn btn-default" data-ng-disabled="!createButtonEnabled"
                         data-ng-click="createButtonClick()">
                     <img src="client/img/button/{{createButtonEnabled ? 'enable' : 'disable'}}/new_add.png" width="32px" height="22px"
-                         alt="{{'button.create' | translate}}"/>
-                    {{'button.create' | translate}}
+                         alt="{{::'button.create' | translate}}"/>
+                    <span data-translate-once="button.create"></span>
                 </button>
             </span>
             <!-- Проверить -->
@@ -151,8 +151,8 @@
                 <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
                         data-ng-click="checkButtonClick()">
                     <img src="client/img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/confirmation.png" width="32px" height="22px"
-                         alt="{{'button.check' | translate}}"/>
-                    {{'button.check' | translate}}
+                         alt="{{::'button.check' | translate}}"/>
+                    <span data-translate-once="button.check"></span>
                 </button>
             </span>
             <!-- Рассчитать -->
@@ -160,8 +160,8 @@
                 <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
                         data-ng-click="calculateButtonClick()">
                     <img src="client/img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/shape.png" width="32px" height="22px"
-                         alt="{{'button.calculate' | translate}}"/>
-                    {{'button.calculate' | translate}}
+                         alt="{{::'button.calculate' | translate}}"/>
+                    <span data-translate-once="button.calculate"></span>
                 </button>
             </span>
             <!-- Удалить -->
@@ -169,8 +169,8 @@
                 <button type="button" class="btn btn-default" data-ng-disabled="!deleteButtonEnabled"
                         data-ng-click="deleteButtonClick()">
                     <img src="client/img/button/{{deleteButtonEnabled ? 'enable' : 'disable'}}/delete.png" width="32px" height="22px"
-                         alt="{{'button.delete' | translate}}"/>
-                    {{'button.delete' | translate}}
+                         alt="{{::'button.delete' | translate}}"/>
+                    <span data-translate-once="button.delete"></span>
                 </button>
             </span>
             <!-- Принять -->
@@ -178,8 +178,8 @@
                 <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
                         data-ng-click="acceptButtonClick()">
                     <img src="client/img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/reconcile.png" width="32px" height="22px"
-                         alt="{{'button.accept' | translate}}"/>
-                    {{'button.accept' | translate}}
+                         alt="{{::'button.accept' | translate}}"/>
+                    <span data-translate-once="button.accept"></span>
                 </button>
             </span>
             <!-- Вернуть в Создана -->
@@ -187,8 +187,8 @@
                 <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
                         data-ng-click="returnButtonClick()">
                     <img src="client/img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/query_correction.png" width="32px" height="22px"
-                         alt="{{'button.return' | translate}}"/>
-                    {{'button.return' | translate}}
+                         alt="{{::'button.return' | translate}}"/>
+                    <span data-translate-once="button.return"></span>
                 </button>
             </span>
         </div>
