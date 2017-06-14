@@ -797,7 +797,7 @@ import java.text.SimpleDateFormat
             for (int i = 0; i < personDocumentList.size(); i++) {
 
                 PersonDocument personDocument = personDocumentList.get(i);
-                String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
+                String docInf = new StringBuilder().append(personDocument.getId()?:"").append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
 
                 if (i == incRepIndex) {
                     if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
