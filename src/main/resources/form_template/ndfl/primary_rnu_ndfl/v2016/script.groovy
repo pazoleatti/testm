@@ -244,7 +244,7 @@ import java.text.SimpleDateFormat
                 }
                 DocType result = docTypeCodeMap.get(code);
                 String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                String inp = ndflPerson.getPersonIdentifier().inp
+                String inp = ndflPerson.getPersonIdentifier()?.inp?:""
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.num ?: "",
                     "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
