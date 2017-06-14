@@ -109,25 +109,25 @@
 
     <ul class="nav navbar-nav">
         <li class="dropdown">
-            <a data-toggle="dropdown">Налоги<b class='caret'></b></a>
+            <a data-toggle="dropdown">{{::'main.menu.taxes' | translate}}<b class='caret'></b></a>
             <tree tree='treeTaxes'></tree>
         </li>
     </ul>
     <ul class="nav navbar-nav">
         <li class="dropdown">
-            <a data-toggle="dropdown">НСИ<b class='caret'></b></a>
+            <a data-toggle="dropdown">{{::'main.menu.nsi' | translate}}<b class='caret'></b></a>
             <tree tree='treeNsi'></tree>
         </li>
     </ul>
     <ul class="nav navbar-nav">
         <li class="dropdown">
-            <a data-toggle="dropdown">Администрирование<b class='caret'></b></a>
+            <a data-toggle="dropdown">{{::'main.menu.administration' | translate}}<b class='caret'></b></a>
             <tree tree='treeAdministration'></tree>
         </li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
         <li class="border-none">
-           <div class="message" style="padding-top: 13px;">Нет оповещений</div>
+           <div class="message" style="padding-top: 13px;">{{::'main.menu.notifications' | translate}}</div>
         </li>
         <li>
             <a href="{{aboutHref}}"><i class="glyphicon glyphicon-info-sign"></i></a>
@@ -144,10 +144,10 @@
             <div>{{security.userDep}}</div>
             <div style="text-align: center;">{{security.userTitle}}</div>
         </li>
-        <li><a class="logout_link" data-ng-click="logout()">Выход</a></li>
+        <li><a class="logout_link" data-ng-click="logout()">{{::'main.menu.exit' | translate}}</a></li>
     </ul>
 
     <li class="build_info">
-        <div>Версия: {{version}}; Ревизия: {{revision}}; Сервер: {{serverName}}; Браузер: {{browser}}</div>
+        <div>{{::'main.footer.version' | translate}}: {{version}}; {{::'main.footer.revision' | translate}}: {{revision}}; {{::'main.footer.server' | translate}}: {{serverName}}; {{::'main.footer.browser' | translate}}: {{browser}}</div>
     </li>
 </nav>
