@@ -1958,7 +1958,7 @@ def checkDataReference(
             } else {
                 // РНУ-НДФЛ консолидированная
                 def personRecord = personMap.get(ndflPerson.recordId)
-                String fio = personRecord.get(RF_LAST_NAME).value + " " + personRecord.get(RF_FIRST_NAME).value + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
+                String fio = (personRecord.get(RF_LAST_NAME).value?:"") + " " + (personRecord.get(RF_FIRST_NAME).value?:"") + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
             }
             ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
@@ -2399,12 +2399,12 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         if (ndflPersonFL == null) {
             if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                 // РНУ-НДФЛ первичная
-                String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                String fio = (ndflPerson.lastName?:"") + " " + (ndflPerson.firstName?:"") + " " + (ndflPerson.middleName ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
             } else {
                 // РНУ-НДФЛ консолидированная
                 def personRecord = personMap.get(ndflPerson.recordId)
-                String fio = personRecord.get(RF_LAST_NAME).value + " " + personRecord.get(RF_FIRST_NAME).value + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
+                String fio = (personRecord.get(RF_LAST_NAME).value?:"") + " " + (personRecord.get(RF_FIRST_NAME).value?:"") + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
             }
             ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
@@ -2677,12 +2677,12 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         if (ndflPersonFL == null) {
             if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                 // РНУ-НДФЛ первичная
-                String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                String fio = (ndflPerson.lastName?:"") + " " + (ndflPerson.firstName?:"") + " " + (ndflPerson.middleName ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
             } else {
                 // РНУ-НДФЛ консолидированная
                 def personRecord = personMap.get(ndflPerson.recordId)
-                String fio = personRecord.get(RF_LAST_NAME).value + " " + personRecord.get(RF_FIRST_NAME).value + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
+                String fio = (personRecord.get(RF_LAST_NAME).value?:"") + " " + (personRecord.get(RF_FIRST_NAME).value?:"") + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
             }
             ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
@@ -3828,12 +3828,12 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
         if (ndflPersonFL == null) {
             if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                 // РНУ-НДФЛ первичная
-                String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+                String fio = (ndflPerson.lastName?:"") + " " + (ndflPerson.firstName?:"") + " " + (ndflPerson.middleName ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
             } else {
                 // РНУ-НДФЛ консолидированная
                 def personRecord = personMap.get(ndflPerson.recordId)
-                String fio = personRecord.get(RF_LAST_NAME).value + " " + personRecord.get(RF_FIRST_NAME).value + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
+                String fio = (personRecord.get(RF_LAST_NAME).value?:"") + " " + (personRecord.get(RF_FIRST_NAME).value?:"") + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
             }
             ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
