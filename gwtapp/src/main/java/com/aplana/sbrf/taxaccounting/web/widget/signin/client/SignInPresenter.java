@@ -54,6 +54,11 @@ public class SignInPresenter extends PresenterWidget<SignInView> implements Sign
 
 	@Override
 	public void redirectLogoutUrl() {
-		Window.Location.replace(GWT.getHostPageBaseURL()+"logout");
+		Window.Location.replace(GWT.getHostPageBaseURL() + "logout");
+	}
+
+	@Override
+	public void redirectHomeUrl() {
+		Window.Location.replace(GWT.getHostPageBaseURL());
 	}
 }

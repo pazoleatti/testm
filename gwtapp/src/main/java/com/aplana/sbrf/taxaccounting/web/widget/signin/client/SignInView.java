@@ -80,7 +80,11 @@ public class SignInView extends ViewWithUiHandlers<SignInUiHandlers> implements 
 						Object isWebseal = answer.get(UuidEnum.IS_WEBSEAL.name());
 						if (isWebseal == null || !(isWebseal instanceof JSONBoolean) || !((JSONBoolean) isWebseal).booleanValue()) {
 							getUiHandlers().redirectLogoutUrl();
+						} else {
+							getUiHandlers().redirectHomeUrl();
 						}
+					} else {
+						getUiHandlers().redirectHomeUrl();
 					}
 				}
 			});
