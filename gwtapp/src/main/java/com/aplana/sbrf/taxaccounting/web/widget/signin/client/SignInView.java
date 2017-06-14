@@ -71,12 +71,19 @@ public class SignInView extends ViewWithUiHandlers<SignInUiHandlers> implements 
 			builder.setPassword("logout"+(new Date()).getTime());
 			builder.sendRequest(null, new RequestCallback() {
 				public void onError(Request request, Throwable exception) {
+					getUiHandlers().redirectHomeUrl();
 				}
 
 				public void onResponseReceived(Request request, Response response) {
 					String result = response.getText();
 					if (result != null && !result.isEmpty()) {
-						JSONObject answer = JSONParser.parseLenient(response.getText()).isObject();
+						JSONObject answer;
+						try {
+							answer = JSONParser.parseLenient(response.getText()).isObject();
+						} catch (Exception e) {
+							getUiHandlers().redirectHomeUrl();
+							return;
+						}
 						Object isWebseal = answer.get(UuidEnum.IS_WEBSEAL.name());
 						if (isWebseal == null || !(isWebseal instanceof JSONBoolean) || !((JSONBoolean) isWebseal).booleanValue()) {
 							getUiHandlers().redirectLogoutUrl();
