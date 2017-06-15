@@ -14,8 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.DeclarationDownloadReportsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
@@ -113,21 +111,20 @@ public class DeclarationListPresenter extends
         eventBus.addHandler(CommentEvent.TYPE, new CommentEvent.CommentEventHandler() {
             @Override
             public void update(CommentEvent event) {
-                if (event.getComment() != null && event.getDeclarationDataId() != null) {
-                    AcceptDeclarationDataAction declarationDataAction = new AcceptDeclarationDataAction();
-                    declarationDataAction.setAccepted(false);
-                    declarationDataAction.setDeclarationId(event.getDeclarationDataId());
-                    declarationDataAction.setReasonForReturn(event.getComment());
-                    dispatcher.execute(declarationDataAction, CallbackUtils
-                            .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
-                                @Override
-                                public void onSuccess(AcceptDeclarationDataResult result) {
-                                    startMoveToCreate();
-                                }
-                            }, DeclarationListPresenter.this));
-                } else {
-                    startMoveToCreate();
-                }
+                LogCleanEvent.fire(DeclarationListPresenter.this);
+                AcceptDeclarationListAction action = new AcceptDeclarationListAction();
+                action.setDeclarationIds(getView().getSelectedIds());
+                action.setTaxType(taxType);
+                action.setAccepted(false);
+                action.setReasonForReturn(event.getComment());
+                dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<AcceptDeclarationListResult>() {
+                            @Override
+                            public void onSuccess(AcceptDeclarationListResult result) {
+                                LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                                onFind();
+                            }
+                        }, DeclarationListPresenter.this));
             }
         });
         getView().setUiHandlers(this);
@@ -352,80 +349,9 @@ public class DeclarationListPresenter extends
                     }, DeclarationListPresenter.this));
         } else {
             LogCleanEvent.fire(DeclarationListPresenter.this);
-            Dialog.confirmMessageYesClose(Dialog.CONFIRM_MESSAGE, "Вы действительно хотите вернуть в статус \"Создана\" формы?", new DialogHandler() {
-                @Override
-                public void yes() {
-                    declarationsIdToCreated.addAll(getView().getSelectedIds());
-                    startMoveToCreate();
-                    super.yes();
-                }
-            });
-        }
-    }
-
-    private void startMoveToCreate() {
-        if (!declarationsIdToCreated.isEmpty()) {
-            final Long declarationDataId = declarationsIdToCreated.pop();
-            CheckReceiversAcceptedPreparedAction action = new CheckReceiversAcceptedPreparedAction();
-            action.setDeclarationDataId(declarationDataId);
-            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckReceiversAcceptedPreparedResult>() {
-                @Override
-                public void onSuccess(CheckReceiversAcceptedPreparedResult result) {
-                    if (result.getReceiversAcceptedPreparedIdList().isEmpty()) {
-                        moveToCreateListPresenter.setDeclarationDataId(declarationDataId);
-                        addToPopupSlot(moveToCreateListPresenter);
-                    } else {
-                        startMoveToCreate();
-                    }
-                }
-            }, DeclarationListPresenter.this));
-        }
-    }
-
-    private class CheckReceiversCallBack extends AbstractCallback<CheckReceiversAcceptedPreparedResult> {
-
-        private List<Long> receiversAcceptedPreparedIdList;
-
-        @Override
-        public void onSuccess(CheckReceiversAcceptedPreparedResult result) {
-            receiversAcceptedPreparedIdList = result.getReceiversAcceptedPreparedIdList();
+            moveToCreateListPresenter.setDeclarationDataIdList(getView().getSelectedIds());
             addToPopupSlot(moveToCreateListPresenter);
         }
-
-        public List<Long> getReceiversAcceptedPreparedIdList() {
-            return receiversAcceptedPreparedIdList;
-        }
-    }
-
-    private class AcceptCallBack extends AbstractCallback<AcceptDeclarationDataResult> {
-
-        @Override
-        public void onSuccess(AcceptDeclarationDataResult result) {
-
-        }
-    }
-
-    private class Parent {
-        private Stack<Long> ids;
-        private AbstractCallback<Object> calbacks;
-        private int count;
-
-        public Parent(Stack<Long> ids, AbstractCallback<Object> calbacks) {
-            this.ids = ids;
-            this.calbacks = calbacks;
-        }
-
-        public void done() {
-            count++;
-            if (count == 2) {
-
-            }
-        }
-
-        public void action() {
-
-        }
-
     }
 
     @Override

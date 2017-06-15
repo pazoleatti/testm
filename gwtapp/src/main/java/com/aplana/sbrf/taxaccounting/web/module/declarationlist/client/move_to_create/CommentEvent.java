@@ -9,14 +9,11 @@ public class CommentEvent extends GwtEvent<CommentEvent.CommentEventHandler>{
         void update(CommentEvent event);
     }
 
-    private Long declarationDataId;
-
     private String comment;
 
     public static Type<CommentEvent.CommentEventHandler> TYPE = new Type<CommentEvent.CommentEventHandler>();
 
-    public CommentEvent(Long declarationDataId, String comment) {
-        this.declarationDataId = declarationDataId;
+    public CommentEvent(String comment) {
         this.comment = comment;
     }
 
@@ -28,14 +25,6 @@ public class CommentEvent extends GwtEvent<CommentEvent.CommentEventHandler>{
     @Override
     protected void dispatch(CommentEventHandler handler) {
         handler.update(this);
-    }
-
-    public Long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(Long declarationDataId) {
-        this.declarationDataId = declarationDataId;
     }
 
     public String getComment() {

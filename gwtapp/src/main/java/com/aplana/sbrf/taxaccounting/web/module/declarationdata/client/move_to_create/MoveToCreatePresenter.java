@@ -39,7 +39,6 @@ public class MoveToCreatePresenter extends PresenterWidget<MoveToCreatePresenter
 
     @Override
     public void onCancel() {
-        eventBus.fireEvent(new NoteEvent(null, null));
         getView().hide();
     }
 
