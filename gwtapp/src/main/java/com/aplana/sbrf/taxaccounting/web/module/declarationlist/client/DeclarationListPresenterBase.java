@@ -58,6 +58,15 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void setVisibleCancelButton(boolean isVisible);
 
 		void setVisibleCreateButton(boolean isVisible);
+
+		void showCheck(boolean show);
+
+		void showRecalculate(boolean show);
+
+		void showAccept(boolean show);
+
+		void showDelete(boolean show);
+
     }
 
 	protected final DispatchAsync dispatcher;

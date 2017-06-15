@@ -26,6 +26,7 @@ public class DetectUserRoleHandler extends AbstractActionHandler<DetectUserRoleA
 	public DetectUserRoleResult execute(DetectUserRoleAction action, ExecutionContext executionContext) throws ActionException {
 		DetectUserRoleResult result = new DetectUserRoleResult();
 		result.setControl(securityService.currentUserInfo().getUser().hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS));
+		result.setHasRoleOperator(securityService.currentUserInfo().getUser().hasRoles(action.getTaxType(), TARole.N_ROLE_OPER, TARole.F_ROLE_OPER));
 		return result;
 	}
 

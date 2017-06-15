@@ -739,4 +739,24 @@ public class DeclarationListView extends
     public void setVisibleCreateButton(boolean isVisible) {
         create.setVisible(isVisible);
     }
+
+    @Override
+    public void showCheck(boolean show) {
+        checkButton.setVisible(show);
+    }
+
+    @Override
+    public void showRecalculate(boolean show) {
+        recalculateButton.setVisible(show);
+    }
+
+    @Override
+    public void showAccept(boolean show) {
+        acceptButton.setVisible(show);
+    }
+
+    @Override
+    public void showDelete(boolean show) {
+        deleteButton.setVisible(show);
+    }
 }
