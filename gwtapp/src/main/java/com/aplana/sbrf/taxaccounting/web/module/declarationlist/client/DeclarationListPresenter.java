@@ -56,8 +56,6 @@ public class DeclarationListPresenter extends
     private Boolean isReports;
     private boolean ready = false;
     private EventBus eventBus;
-    // Стэк ИД налоговых форм, которые должны вернуться в состояние создана
-    private Stack<Long> declarationsIdToCreated = new Stack<Long>();
 
     @ProxyEvent
     @Override
@@ -165,6 +163,10 @@ public class DeclarationListPresenter extends
                         public void onSuccess(DetectUserRoleResult result) {
                             getView().setVisibleCancelButton(result.isControl());
                             getView().setVisibleCreateButton(result.isControl() && !isReports);
+                            getView().showCheck(result.isControl() || result.isHasRoleOperator());
+                            getView().showRecalculate(result.isControl() || result.isHasRoleOperator());
+                            getView().showAccept(result.isControl());
+                            getView().showDelete(result.isControl() || result.isHasRoleOperator());
                         }
                     }, this));
         } catch (Exception e) {
