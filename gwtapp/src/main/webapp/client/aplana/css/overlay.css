@@ -26,7 +26,6 @@
     min-height: 100%;
     float: right;
     display: inline-block;
-    /*border: 1px solid #dd0;*/
     background-position: center;
     background-repeat: no-repeat;
     width: 40px;
@@ -45,7 +44,6 @@
     border: 1px solid seagreen;
     background-color: #F5F2EB;
     text-align: center;
-    /*display : inline*/
 }
 
 #overlay-left {
@@ -64,7 +62,6 @@
     vertical-align: middle;
     margin: 0;
     padding: 0;
-    /*border: 1px solid red;*/
 }
 
 #overlay-helper {
@@ -73,5 +70,4 @@
     height: 100%;
     width: 0px;
     vertical-align: middle;
-    /*display : inline*/
 }

@@ -4,11 +4,6 @@ div[data-grid-required] .ui-jqgrid-bdiv table {
     background-color: #fdfdeb;
 }
 
-/* альтернативный вариант отображения ошибки */
-/*.control-group.error td[aria-describedby="grid_value_cb"] {*/
-    /*background-color: #f9cccc;*/
-/*}*/
-
 /* стиль для отображения ошибки валидации */
 .control-group.error div.ui-jqgrid.ui-widget.ui-widget-content.ui-corner-all {
     border-color: #ff0000;
