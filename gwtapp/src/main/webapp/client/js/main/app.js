@@ -17,7 +17,6 @@
             'aplana.utils',
             'aplana.grid',
             'aplana.submitValid',
-            'aplana.dropdownMenu',
             'aplana.collapse',
             'aplana.field',
             'aplana.modal.dialogs',
