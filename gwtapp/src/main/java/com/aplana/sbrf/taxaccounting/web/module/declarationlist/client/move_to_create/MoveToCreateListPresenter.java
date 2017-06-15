@@ -7,13 +7,15 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 
+import java.util.List;
+
 public class MoveToCreateListPresenter extends PresenterWidget<MoveToCreateListPresenter.MyView> implements MoveToCreateListUiHandlers {
 
     public interface MyView extends PopupView, HasUiHandlers<MoveToCreateListUiHandlers> {
         String getText();
     }
 
-    private Long declarationDataId;
+    private List<Long> declarationDataIdList;
     private EventBus eventBus;
 
     @Inject
@@ -23,14 +25,14 @@ public class MoveToCreateListPresenter extends PresenterWidget<MoveToCreateListP
         getView().setUiHandlers(this);
     }
 
-    public void setDeclarationDataId(Long declarationDataId) {
-        this.declarationDataId = declarationDataId;
+    public void setDeclarationDataIdList(List<Long> declarationDataIdList) {
+        this.declarationDataIdList = declarationDataIdList;
     }
 
     @Override
     public void onContinue() {
         if (isTextAreaFill()) {
-            eventBus.fireEvent(new CommentEvent(declarationDataId, getView().getText()));
+            eventBus.fireEvent(new CommentEvent(getView().getText()));
             getView().hide();
         } else {
             Dialog.warningMessage("Внимание!", "Необходимо указать причину возврата");
@@ -39,7 +41,6 @@ public class MoveToCreateListPresenter extends PresenterWidget<MoveToCreateListP
 
     @Override
     public void onCancel() {
-        eventBus.fireEvent(new CommentEvent(null, null));
         getView().hide();
     }
 

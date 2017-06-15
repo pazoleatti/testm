@@ -23,6 +23,7 @@ public enum ReportType {
     ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие %s", 15L, 115L),
     IMPORT_TF_DEC(2, "IMPORT_TF_DECLARATION", "Импорт ТФ из каталога загрузки", 0L, 0L), //формально является задачей, блокирует форму при импорт из каталога загрузки
     DELETE_DEC(5, "DELETE_DECLARATION", "Удаление налоговой формы", 0L, 0L), //формально является задачей,
+    TO_CREATE_DEC(6, "MOVE_TO_CREATE", "Возврат в Создана", 0L, 0L),
 
     CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 28L, 128L),
     CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Формирование отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L, 129L),
