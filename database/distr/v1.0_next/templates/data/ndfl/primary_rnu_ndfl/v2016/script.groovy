@@ -244,7 +244,7 @@ import java.text.SimpleDateFormat
                 }
                 DocType result = docTypeCodeMap.get(code);
                 String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                String inp = ndflPerson.getPersonIdentifier().inp
+                String inp = ndflPerson.getPersonIdentifier()?.inp?:""
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.num ?: "",
                     "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
@@ -797,7 +797,7 @@ import java.text.SimpleDateFormat
             for (int i = 0; i < personDocumentList.size(); i++) {
 
                 PersonDocument personDocument = personDocumentList.get(i);
-                String docInf = new StringBuilder().append(personDocument.getId()).append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
+                String docInf = new StringBuilder().append(personDocument.getId()?:"").append(", ").append(personDocument.getDocumentNumber()).append(" ").toString();
 
                 if (i == incRepIndex) {
                     if (!personDocument.getIncRep().equals(INCLUDE_TO_REPORT)) {
@@ -2785,12 +2785,12 @@ class NdflPersonFL {
             if (ndflPersonFL == null) {
                 if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                     // РНУ-НДФЛ первичная
-                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
+                    String fio = (ndflPerson.lastName?:"") + " " + (ndflPerson.firstName?:"") + " " + (ndflPerson.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp?:"")
                 } else {
                     // РНУ-НДФЛ консолидированная
                     def personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = personRecord.get(RF_LAST_NAME).value + " " + personRecord.get(RF_FIRST_NAME).value + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
+                    String fio = (personRecord.get(RF_LAST_NAME).value?:"") + " " + (personRecord.get(RF_FIRST_NAME).value?:"") + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
                     ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
                 }
                 ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
@@ -3234,12 +3234,12 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (ndflPersonFL == null) {
                 if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                     // РНУ-НДФЛ первичная
-                    String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
+                    String fio = (ndflPerson.lastName?:"") + " " + (ndflPerson.firstName?:"") + " " + (ndflPerson.middleName ?: "")
+                    ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp?:"")
                 } else {
                     // РНУ-НДФЛ консолидированная
                     def personRecord = personMap.get(ndflPerson.recordId)
-                    String fio = personRecord.get(RF_LAST_NAME).value + " " + personRecord.get(RF_FIRST_NAME).value + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
+                    String fio = (personRecord.get(RF_LAST_NAME).value?:"") + " " + (personRecord.get(RF_FIRST_NAME).value?:"") + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
                     ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
                 }
                 ndflPersonFLMap.put(ndflPerson.id, ndflPersonFL)
@@ -4894,20 +4894,21 @@ class ColumnFillConditionData {
             Long refBookPersonId = naturalPerson.getId();
             Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
             Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(refBookPersonId);
+            Integer docStatus = SqlUtils.getInteger(rs, "doc_status")
 
             if (pesonDocumentMap == null) {
                 pesonDocumentMap = new HashMap<Long, PersonDocument>();
                 documentsMap.put(refBookPersonId, pesonDocumentMap);
             }
 
-            if (docId != null && !pesonDocumentMap.containsKey(docId)) {
+            if (docId != null && !pesonDocumentMap.containsKey(docId) && docStatus == 0) {
                 Long docTypeId = SqlUtils.getLong(rs, "doc_id");
                 DocType docType = getDocTypeById(docTypeId);
                 PersonDocument personDocument = new PersonDocument();
                 personDocument.setId(docId);
 
                 personDocument.setRecordId(SqlUtils.getLong(rs, "doc_record_id"));
-                personDocument.setStatus(SqlUtils.getInteger(rs, "doc_status"));
+                personDocument.setStatus(docStatus);
                 personDocument.setVersion(rs.getDate("doc_version"));
 
                 personDocument.setDocType(docType);

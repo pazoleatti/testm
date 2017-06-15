@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -60,7 +61,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractDec
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
 
         Map<String, Object> subreportParamValues = null;
-        Map<String, String> viewParamValues = null;
+        Map<String, String> viewParamValues = Collections.EMPTY_MAP;
         DataRow<Cell> selectedRecord = null;
         if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
             subreportParamValues = (Map<String, Object>) params.get("subreportParamValues");

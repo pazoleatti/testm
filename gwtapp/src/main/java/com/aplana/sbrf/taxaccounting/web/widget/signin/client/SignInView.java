@@ -1,13 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.widget.signin.client;
 
+import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.client.SignInPresenter.MyView;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.*;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -62,17 +65,34 @@ public class SignInView extends ViewWithUiHandlers<SignInUiHandlers> implements 
 	}
 
 	private void clearAuthenticationCache() {
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/cache/clearAuthenticationCache");
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "cache/clearAuthenticationCache");
 		try {
 			builder.setUser(userLogin);
 			builder.setPassword("logout"+(new Date()).getTime());
 			builder.sendRequest(null, new RequestCallback() {
 				public void onError(Request request, Throwable exception) {
-					getUiHandlers().redirectHomePage();
+					getUiHandlers().redirectHomeUrl();
 				}
 
 				public void onResponseReceived(Request request, Response response) {
-					getUiHandlers().redirectHomePage();
+					String result = response.getText();
+					if (result != null && !result.isEmpty()) {
+						JSONObject answer;
+						try {
+							answer = JSONParser.parseLenient(response.getText()).isObject();
+						} catch (Exception e) {
+							getUiHandlers().redirectHomeUrl();
+							return;
+						}
+						Object isWebseal = answer.get(UuidEnum.IS_WEBSEAL.name());
+						if (isWebseal == null || !(isWebseal instanceof JSONBoolean) || !((JSONBoolean) isWebseal).booleanValue()) {
+							getUiHandlers().redirectLogoutUrl();
+						} else {
+							getUiHandlers().redirectHomeUrl();
+						}
+					} else {
+						getUiHandlers().redirectHomeUrl();
+					}
 				}
 			});
 		} catch (RequestException e) {
