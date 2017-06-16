@@ -10,6 +10,8 @@ public class UpdateNdflReferencesAction extends UnsecuredActionImpl<UpdateNdflRe
 
     private String note;
 
+    private Long declarationDataId;
+
     public List<Long> getNdflReferences() {
         return ndflReferences;
     }
@@ -24,5 +26,13 @@ public class UpdateNdflReferencesAction extends UnsecuredActionImpl<UpdateNdflRe
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public Long getDeclarationDataId() {
+        return declarationDataId;
+    }
+
+    public void setDeclarationDataId(Long declarationDataId) {
+        this.declarationDataId = declarationDataId;
     }
 }

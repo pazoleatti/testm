@@ -175,6 +175,7 @@ public class DeclarationDataPresenter
         this.changeStatusEDPresenter = changeStatusEDPresenter;
         this.ndflReferencesEditPresenter = ndflReferencesEditPresenter;
         this.moveToCreatePresenter = moveToCreatePresenter;
+        ndflReferencesEditPresenter.setDeclarationDataPresenter(DeclarationDataPresenter.this);
         eventBus.addHandler(NoteEvent.TYPE, new NoteEvent.CommentEventHandler() {
             @Override
             public void update(NoteEvent event) {
