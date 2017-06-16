@@ -1727,7 +1727,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
-                    logger.info("Успешно выполнен расчет для " + getDeclarationFullName(entry.getKey(), null));
+                    String message = getDeclarationFullName(entry.getKey(), null);
+                    logger.info("Успешно выполнен расчет для " + message.replace("Налоговая форма", "налоговой формы"));
                     logger.getEntries().addAll(scriptLogger.getEntries());
                 }
             }
