@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.core.client.GWT;
@@ -84,6 +83,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.setRowCount(0);
         dataProvider.addDataDisplay(table);
         initCheckboxes();
+        // Скрыт в соответствии с https://jira.aplana.com/browse/SBRFNDFL-1246
+        uncreated.setVisible(false);
     }
 
     @Override
