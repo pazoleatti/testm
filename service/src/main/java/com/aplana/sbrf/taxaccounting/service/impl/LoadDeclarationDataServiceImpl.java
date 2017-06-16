@@ -115,8 +115,8 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                 Enumeration<ZipArchiveEntry> entries = zf.getEntries();
                 try {
                     while (entries.hasMoreElements()) {
+                        ZipArchiveEntry entry = entries.nextElement();
                         try {
-                            ZipArchiveEntry entry = entries.nextElement();
                             InputStream is = zf.getInputStream(entry);
                             Logger localLogger = new Logger();
                             try {
@@ -129,7 +129,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                                 logger.getEntries().addAll(localLogger.getEntries());
                             }
                         } catch (ServiceException se) {
-                            log(userInfo, LogData.L33, logger, lock, fileName, se.getMessage());
+                            log(userInfo, LogData.L33, logger, lock, entry.getName(), se.getMessage());
                             fail++;
                             LOG.error(se.getMessage(), se);
                         }

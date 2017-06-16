@@ -85,7 +85,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
                 || userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
 			List<Integer> executors = departmentService.getTaxDeclarationDepartments(userInfo.getUser(), declarationTemplate.getType());
 			if (executors.contains(declarationDepartment.getId())) {
-			    if (!userInfo.getUser().hasRole(taxType, TARole.N_ROLE_OPER) ||
+			    if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS) ||
                         !declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
                     return;
                 }
