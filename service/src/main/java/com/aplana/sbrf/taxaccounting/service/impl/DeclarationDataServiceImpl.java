@@ -640,6 +640,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void setPdfDataBlobs(Logger logger,
                                 DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        LOG.info(String.format("Удаление старых отчетов налоговой формы %s", declarationData.getId()));
+        reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
         LOG.info(String.format("Получение данных налоговой формы %s", declarationData.getId()));
         stateLogger.updateState("Получение данных налоговой формы");
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC);
