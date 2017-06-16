@@ -22,6 +22,7 @@ public abstract class AbstractMenuView extends ViewImpl implements AbstractMenuP
     MenuBar menu;
 
     protected void addSubMenu(MenuItem menuItem, MenuBar menu) {
+        menu.setAutoOpen(true);
         for (MenuItem item : menuItem.getSubMenu()) {
             if (!item.getSubMenu().isEmpty()) {
                 MenuBar subMenuBar = new MenuBar(true);
