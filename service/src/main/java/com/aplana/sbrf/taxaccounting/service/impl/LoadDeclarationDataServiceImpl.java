@@ -209,7 +209,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                 dataFile.delete();
             }
         }
-        logger.info("Завершена обработка файл \"%s\"", fileName);
+        logger.info("Завершена обработка файла \"%s\"", fileName);
         return true;
     }
 
