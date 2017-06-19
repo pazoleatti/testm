@@ -24,6 +24,8 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.OperationInfoAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.OperationInfoResult;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
@@ -178,25 +180,38 @@ public class DeclarationDataPresenter
         ndflReferencesEditPresenter.setDeclarationDataPresenter(DeclarationDataPresenter.this);
         eventBus.addHandler(NoteEvent.TYPE, new NoteEvent.CommentEventHandler() {
             @Override
-            public void update(NoteEvent event) {
+            public void update(final NoteEvent event) {
                 if (event.getComment() != null && event.getDeclarationDataId() != null) {
                     LogCleanEvent.fire(DeclarationDataPresenter.this);
-                    AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
-                    action.setAccepted(false);
-                    action.setDeclarationId(event.getDeclarationDataId());
-                    action.setReasonForReturn(event.getComment());
-                    action.setTaxType(taxType);
-                    dispatcher.execute(action, CallbackUtils
-                            .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
-                                @Override
-                                public void onSuccess(AcceptDeclarationDataResult result) {
-                                    if (!checkExistDeclarationData(result)) return;
-                                    revealPlaceRequest();
-                                }
-                            }, DeclarationDataPresenter.this));
+                    OperationInfoAction actionInfo = new OperationInfoAction();
+                    actionInfo.setDeclarationDataReportType(DeclarationDataReportType.TO_CREATE_DEC.getReportType().getDescription());
+                    List<Long> ddList = new ArrayList<Long>();
+                    ddList.add(event.getDeclarationDataId());
+                    actionInfo.setDeclarationDataIdList(ddList);
+                    dispatcher.execute(actionInfo, CallbackUtils.defaultCallback(new AbstractCallback<OperationInfoResult>() {
+                        @Override
+                        public void onSuccess(OperationInfoResult result) {
+                            LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                            AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
+                            action.setAccepted(false);
+                            action.setDeclarationId(event.getDeclarationDataId());
+                            action.setReasonForReturn(event.getComment());
+                            action.setTaxType(taxType);
+                            dispatcher.execute(action, CallbackUtils
+                                    .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+                                        @Override
+                                        public void onSuccess(AcceptDeclarationDataResult result) {
+                                            if (!checkExistDeclarationData(result)) return;
+                                            revealPlaceRequest();
+                                        }
+                                    }, DeclarationDataPresenter.this));
+                        }
+
+                    }, DeclarationDataPresenter.this));
                 }
             }
         });
+
         getView().setUiHandlers(this);
     }
 

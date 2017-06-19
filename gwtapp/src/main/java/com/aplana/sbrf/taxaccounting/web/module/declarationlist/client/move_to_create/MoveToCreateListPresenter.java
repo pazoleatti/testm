@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.move_to_
 import com.aplana.gwt.client.dialog.Dialog;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
@@ -17,11 +18,13 @@ public class MoveToCreateListPresenter extends PresenterWidget<MoveToCreateListP
 
     private List<Long> declarationDataIdList;
     private EventBus eventBus;
+    private final DispatchAsync dispatcher;
 
     @Inject
-    public MoveToCreateListPresenter(final EventBus eventBus, final MoveToCreateListPresenter.MyView view) {
+    public MoveToCreateListPresenter(final EventBus eventBus, DispatchAsync dispatcher, final MoveToCreateListPresenter.MyView view) {
         super(eventBus, view);
         this.eventBus = eventBus;
+        this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
     }
 
@@ -32,8 +35,11 @@ public class MoveToCreateListPresenter extends PresenterWidget<MoveToCreateListP
     @Override
     public void onContinue() {
         if (isTextAreaFill()) {
-            eventBus.fireEvent(new CommentEvent(getView().getText()));
-            getView().hide();
+
+                    eventBus.fireEvent(new CommentEvent(getView().getText(), declarationDataIdList));
+                    getView().hide();
+
+
         } else {
             Dialog.warningMessage("Внимание!", "Необходимо указать причину возврата");
         }
