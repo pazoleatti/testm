@@ -49,7 +49,7 @@ public enum FormDataEvent implements Serializable {
 	MOVE_APPROVED_TO_ACCEPTED(103, "Принять из \"Утверждена\""),
 	MOVE_ACCEPTED_TO_APPROVED(104, "Вернуть из \"Принята\" в \"Утверждена\""),
 	MOVE_CREATED_TO_ACCEPTED(105, "Принять из \"Создана\""),
-	MOVE_ACCEPTED_TO_CREATED(106, "Вернуть в \"Создана\""),
+	MOVE_ACCEPTED_TO_CREATED(106, "Возврат в \"Создана\""),
 	MOVE_CREATED_TO_PREPARED(107, "Подготовить из \"Создана\""),
 	MOVE_PREPARED_TO_CREATED(108,  "Вернуть из \"Подготовлена\" в \"Создана\""),
 	MOVE_PREPARED_TO_ACCEPTED(109,  "Принять из \"Подготовлена\""),

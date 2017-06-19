@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.move_to_
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
+import java.util.List;
+
 public class CommentEvent extends GwtEvent<CommentEvent.CommentEventHandler>{
 
     public interface CommentEventHandler extends EventHandler{
@@ -11,10 +13,13 @@ public class CommentEvent extends GwtEvent<CommentEvent.CommentEventHandler>{
 
     private String comment;
 
+    private List<Long> declarationDataIdList;
+
     public static Type<CommentEvent.CommentEventHandler> TYPE = new Type<CommentEvent.CommentEventHandler>();
 
-    public CommentEvent(String comment) {
+    public CommentEvent(String comment, List<Long> declarationDataIdList) {
         this.comment = comment;
+        this.declarationDataIdList = declarationDataIdList;
     }
 
     @Override
@@ -33,5 +38,13 @@ public class CommentEvent extends GwtEvent<CommentEvent.CommentEventHandler>{
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public List<Long> getDeclarationDataIdList() {
+        return declarationDataIdList;
+    }
+
+    public void setDeclarationDataIdList(List<Long> declarationDataIdList) {
+        this.declarationDataIdList = declarationDataIdList;
     }
 }
