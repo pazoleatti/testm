@@ -244,7 +244,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         // Нет прав на АСНУ
         if (!checkUserAsnu(userInfo, declaration)) {
-            throw new AccessDeniedException("Нет прав на АСНУ декларации");
+            throw new AccessDeniedException("Нет прав на АСНУ");
         }
 
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());

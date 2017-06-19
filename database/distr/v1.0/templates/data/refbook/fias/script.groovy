@@ -6,21 +6,15 @@ import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly
 import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-
 import java.io.*;
 import net.sf.sevenzipjbinding.*;
 import groovy.transform.Field
-
-
 
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.Attribute
 import javax.xml.stream.events.XMLEvent
 
-/**
- * Импорт справочника адресообразующих объектов
- */
 switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importData()
@@ -253,22 +247,22 @@ Map addressObjectRowMapper(generatedId, addressObjectGuidsMap, attrMap) {
     recordsMap.put('FORMALNAME', attrMap.get(QName.valueOf('FORMALNAME')))
     recordsMap.put('SHORTNAME', attrMap.get(QName.valueOf('SHORTNAME')))
     recordsMap.put('REGIONCODE', attrMap.get(QName.valueOf('REGIONCODE')))
-    recordsMap.put('AUTOCODE', attrMap.get(QName.valueOf('AUTOCODE')))
-    recordsMap.put('AREACODE', attrMap.get(QName.valueOf('AREACODE')))
-    recordsMap.put('CITYCODE', attrMap.get(QName.valueOf('CITYCODE')))
-    recordsMap.put('CTARCODE', attrMap.get(QName.valueOf('CTARCODE')))
-    recordsMap.put('PLACECODE', attrMap.get(QName.valueOf('PLACECODE')))
-    recordsMap.put('PLANCODE', attrMap.get(QName.valueOf('PLANCODE')))
-    recordsMap.put('STREETCODE', attrMap.get(QName.valueOf('STREETCODE')))
-    recordsMap.put('EXTRCODE', attrMap.get(QName.valueOf('EXTRCODE')))
-    recordsMap.put('SEXTCODE', attrMap.get(QName.valueOf('SEXTCODE')))
+//        recordsMap.put('AUTOCODE', attrMap.get(QName.valueOf('AUTOCODE')))
+//        recordsMap.put('AREACODE', attrMap.get(QName.valueOf('AREACODE')))
+//        recordsMap.put('CITYCODE', attrMap.get(QName.valueOf('CITYCODE')))
+//        recordsMap.put('CTARCODE', attrMap.get(QName.valueOf('CTARCODE')))
+//        recordsMap.put('PLACECODE', attrMap.get(QName.valueOf('PLACECODE')))
+//        recordsMap.put('PLANCODE', attrMap.get(QName.valueOf('PLANCODE')))
+//        recordsMap.put('STREETCODE', attrMap.get(QName.valueOf('STREETCODE')))
+//        recordsMap.put('EXTRCODE', attrMap.get(QName.valueOf('EXTRCODE')))
+//        recordsMap.put('SEXTCODE', attrMap.get(QName.valueOf('SEXTCODE')))
     recordsMap.put('LIVESTATUS', getInteger(attrMap.get(QName.valueOf('LIVESTATUS'))))
-    recordsMap.put('CENTSTATUS', getInteger(attrMap.get(QName.valueOf('CENTSTATUS'))))
-    recordsMap.put('OPERSTATUS', getInteger(attrMap.get(QName.valueOf('OPERSTATUS'))))
+//        recordsMap.put('CENTSTATUS', getInteger(attrMap.get(QName.valueOf('CENTSTATUS'))))
+//        recordsMap.put('OPERSTATUS', getInteger(attrMap.get(QName.valueOf('OPERSTATUS'))))
     recordsMap.put('CURRSTATUS', getInteger(attrMap.get(QName.valueOf('CURRSTATUS'))))
     //Поле тип адресации. Хотя поле обязательное в выгрузке его нет, ставим значение 0 - не определено
-    recordsMap.put('DIVTYPE', getInteger(attrMap.get(QName.valueOf('DIVTYPE')), 0))
-    recordsMap.put('OFFNAME', attrMap.get(QName.valueOf('OFFNAME')))
+//    recordsMap.put('DIVTYPE', getInteger(attrMap.get(QName.valueOf('DIVTYPE')), 0))
+//    recordsMap.put('OFFNAME', attrMap.get(QName.valueOf('OFFNAME')))
     recordsMap.put('AOLEVEL', attrMap.get(QName.valueOf('AOLEVEL')))
     recordsMap.put('POSTALCODE', attrMap.get(QName.valueOf('POSTALCODE')))
 

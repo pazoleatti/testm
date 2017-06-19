@@ -2002,21 +2002,8 @@ create table fias_addrobj
     formalname varchar2(120 char) not null,
     shortname varchar2(10 char),
     regioncode varchar2(2 char) not null,
-    autocode varchar2(1 char) not null,
-    areacode varchar2(3 char) not null,
-    citycode varchar2(3 char) not null,
-    ctarcode varchar2(3 char) not null,
-    placecode varchar2(3 char) not null,
-    plancode varchar2(4 char) not null,
-    streetcode varchar2(4 char) not null,
-    extrcode varchar2(4 char) not null,
-    sextcode varchar2(3 char) not null,
     livestatus number(1) not null,
-    centstatus number(2) not null,
-    operstatus number(2) not null,
     currstatus number(2) not null,
-    divtype number(1) not null,
-    offname varchar2(120 char),
     aolevel number(10) not null,
     postalcode varchar2(6 char),
     parentguid number(18)
@@ -2027,21 +2014,8 @@ comment on column fias_addrobj.aoid is 'Глобальный уникальны�
 comment on column fias_addrobj.formalname is 'Формализованное наименование';
 comment on column fias_addrobj.shortname is 'Краткое наименование типа объекта';
 comment on column fias_addrobj.regioncode is 'Код региона';
-comment on column fias_addrobj.autocode is 'Код автономии';
-comment on column fias_addrobj.areacode is 'Код района';
-comment on column fias_addrobj.citycode is 'Код города';
-comment on column fias_addrobj.ctarcode is 'Код внутригородского района';
-comment on column fias_addrobj.placecode is 'Код населенного пункта';
-comment on column fias_addrobj.plancode is 'Код элемента планировочной структуры';
-comment on column fias_addrobj.streetcode is 'Код улицы';
-comment on column fias_addrobj.extrcode is 'Код дополнительного адресообразующего элемента';
-comment on column fias_addrobj.sextcode is 'Код подчиненного дополнительного адресообразующего элемента';
 comment on column fias_addrobj.livestatus is 'Статус актуальности адресного объекта ФИАС на текущую дату: 0 – Не актуальный, 1 - Актуальный';
-comment on column fias_addrobj.centstatus is 'Статус центра: 0 – объект не является центром административно-территориального образования; 1 – объект является центром района; 2 – объект является центром (столицей) региона; 3 – объект является одновременно и центром района и центром региона.';
-comment on column fias_addrobj.operstatus is 'Статус действия над записью – причина появления записи (см. fias_operstat)';
 comment on column fias_addrobj.currstatus is 'Статус актуальности КЛАДР 4 (последние две цифры в коде)';
-comment on column fias_addrobj.divtype is 'Тип деления: 0 – не определено, 1 – муниципальное, 2 – административное';
-comment on column fias_addrobj.offname is 'Официальное наименование';
 comment on column fias_addrobj.aolevel is 'Уровень адресного объекта';
 comment on column fias_addrobj.postalcode is 'Почтовый индекс';
 comment on column fias_addrobj.parentguid is 'Идентификатор объекта родительского объекта';
