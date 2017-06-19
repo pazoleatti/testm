@@ -38,11 +38,19 @@ public class SAXHandler extends DefaultHandler {
     private List<String> nodeValueList;
     private boolean isNodeNameFind;
     private boolean isParentNodeNameFind;
+    private boolean isGetValueAttributesTag = false;
     private String nodeNameFind;
     private String parentNodeNameFind;
 
+    //Хранит содержимое атрибутов(название атрибута, значение)
+    public Map<String, String> ListValueAttributesTag = null;
+
     public SAXHandler(Map<String, List<String>> findAttrNames) {
         this.findAttrNames = findAttrNames;
+    }
+
+    public Map<String, String> getListValueAttributesTag() {
+        return ListValueAttributesTag;
     }
 
     public SAXHandler(String nodeNameFind, String parentNodeNameFind) {
@@ -50,6 +58,12 @@ public class SAXHandler extends DefaultHandler {
         this.nodeValueList = new ArrayList<>();
         this.nodeNameFind = nodeNameFind;
         this.parentNodeNameFind = parentNodeNameFind;
+    }
+
+    public SAXHandler(String nodeNameFind, String parentNodeNameFind, boolean isGetValueAttributes) {
+        this(nodeNameFind, parentNodeNameFind);
+        this.ListValueAttributesTag = new HashMap<String, String>();
+        this.isGetValueAttributesTag = isGetValueAttributes;
     }
 
     public Map<String, Map<String, String>> getAttrValues() {
@@ -82,6 +96,12 @@ public class SAXHandler extends DefaultHandler {
         }
         if (qName.equals(parentNodeNameFind)) {
             isParentNodeNameFind = true;
+        }
+        //Заполняем атрибуты тега
+        if (isGetValueAttributesTag && isParentNodeNameFind && isNodeNameFind) {
+            for (int i = 0; i < attributes.length; i++) {
+                ListValueAttributesTag.put(attributes.getQName(i), attributes.getValue(attributes.getQName(i)))
+            }
         }
     }
 
@@ -903,7 +923,7 @@ def importNdflResponse() {
     def ndfl2ContentReestrMap = [:]
     def reportFileName
     def docWeight = getDocWeight(UploadFileName)
-    boolean isNdfl2=true
+    boolean isNdfl2 = true
     if (isNdfl2Response(UploadFileName)) {
         if (isNdfl2ResponseProt(UploadFileName)) {
             ndfl2ContentMap = readNdfl2ResponseContent()
@@ -919,7 +939,7 @@ def importNdflResponse() {
             reportFileName = ndfl2ContentReestrMap.get(NDFL2_TO_FILE)
         }
     } else {
-        isNdfl2=false
+        isNdfl2 = false
         def ndfl6Content = readNdfl6ResponseContent()
 
         if (ndfl6Content == null) {
@@ -931,7 +951,7 @@ def importNdflResponse() {
 
     //проверка что в строке есть имя файла происходит по наличию расширения файла для NDFL 2 и не пустой строке для NDFL 6
     reportEndFile = reportFileName.substring(reportFileName.length() - 4)
-    if (reportFileName==null||(isNdfl2 && !(reportEndFile.contains(".xml") || (reportEndFile.contains(".txt")) || (reportEndFile.contains(".XML")) || (reportEndFile.contains(".TXT"))))) {
+    if (reportFileName == null || (isNdfl2 && !(reportEndFile.contains(".xml") || (reportEndFile.contains(".txt")) || (reportEndFile.contains(".XML")) || (reportEndFile.contains(".TXT"))))) {
         logger.error("Не найдено имя отчетного файла в файле ответа  \"%s\"", UploadFileName)
         return
     }
@@ -1166,11 +1186,20 @@ def importNdflResponse() {
     declarationService.createPdfReport(logger, declarationData, userInfo)
 }
 
+//Параметры имени ТФ
+@Field final String KOD_DEPARTMENT = "КодПодр"
+@Field final String KOD_ASNU = "КодАС"
+@Field final String NAME_TF_NOT_EXTENSION = "ИдФайл"
+
+@Field final String KOD_REPORT_PERIOD = "ПериодОтч"
+@Field final String REPORT_YEAR = "ОтчетГод"
+
 @Deprecated
 def _importTF() {
     logger.setMessageDecorator(null)
     Integer declarationTypeId;
     int departmentId;
+    String departmentCode;
     String reportPeriodCode;
     String asnuCode = null;
     String guid = null;
@@ -1200,7 +1229,7 @@ def _importTF() {
         // РНУ_НДФЛ (первичная)
         declarationTypeId = DECLARATION_TYPE_RNU_NDFL_ID;
         attachFileType = AttachFileType.TYPE_1
-        String departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim();
+        departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim();
         Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
         if (formDepartment == null) {
             logger.error("Не удалось определить подразделение \"%s\"", departmentCode)
@@ -1341,6 +1370,61 @@ def _importTF() {
         return
     }
 
+    //достать из XML файла атрибуты тега СлЧасть
+    SAXHandler handler = new SAXHandler('СлЧасть', 'Файл', true)
+    try {
+        inputStream = new FileInputStream(dataFile)
+        SAXParserFactory factory = SAXParserFactory.newInstance()
+        SAXParser saxParser = factory.newSAXParser()
+        saxParser.parse(inputStream, handler)
+    } catch (Exception e) {
+
+        e.printStackTrace()
+
+    } finally {
+        IOUtils.closeQuietly(inputStream)
+    }
+    handler.getListValueAttributesTag();
+
+    //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
+    if (!departmentCode.equals(handler.getListValueAttributesTag().get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())) {
+        logger.error("В ТФ не совпадают значения параметров имени «Код подразделения» = «%s» и содержимого «Код подразделения» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
+    }
+
+    if (!asnuCode.equals(handler.getListValueAttributesTag().get(KOD_ASNU))) {
+        logger.error("В ТФ не совпадают значения параметров имени «Код АСНУ» = «%s» и содержимого «Код АСНУ» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
+    }
+
+    if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))) {
+        logger.error("В ТФ не совпадают значения параметров имени «Имя файла» = «%s» и содержимого «Имя ТФ без расширения» = «%s»", UploadFileName, handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
+    }
+
+    //достать из XML файла атрибуты тега СлЧасть
+    handler = new SAXHandler('Файл', 'ИнфЧасть', true)
+    try {
+        inputStream = new FileInputStream(dataFile)
+        SAXParserFactory factory = SAXParserFactory.newInstance()
+        SAXParser saxParser = factory.newSAXParser()
+        saxParser.parse(inputStream, handler)
+    } catch (Exception e) {
+        e.printStackTrace()
+    }
+
+    //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть
+    if (!reportPeriodCode.equals(handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))) {
+        logger.error("В ТФ не совпадают значения параметров имени «Код периода» = «%s» и содержимого «Код периода» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
+    }
+
+    Integer reportYear;
+    try {
+        reportYear = Integer.parseInt(handler.getListValueAttributesTag().get(REPORT_YEAR));
+    } catch (NumberFormatException nfe) {
+        nfe.printStackTrace()
+    }
+
+    if (!year.equals(reportYear)) {
+        logger.error("В ТФ не совпадают значения параметров имени «Год» = «%s» и содержимого «Год» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
+    }
     // Проверка GUID
     if (guid != null && !guid.isEmpty()) {
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
