@@ -21,6 +21,11 @@ import java.util.Map;
 @ScriptExposed
 public interface RefBookPersonService {
 
+    /**
+     * Очищает данные по ФЛ
+     * @param declarationDataId
+     */
+    void clearRnuNdflPerson(Long declarationDataId);
 
     NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger);
 

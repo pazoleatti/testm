@@ -26,6 +26,12 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
     // ----------------------------- РНУ-НДФЛ  -----------------------------
 
+
+    @Override
+    public void clearRnuNdflPerson(Long declarationDataId) {
+        refBookPersonDao.clearRnuNdflPerson(declarationDataId);
+    }
+
     @Override
     public void fillRecordVersions(Date version) {
         refBookPersonDao.fillRecordVersions(version);

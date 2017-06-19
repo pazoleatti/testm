@@ -1499,6 +1499,10 @@ def createForm() {
         ScriptUtils.checkInterrupted();
         declarationService.delete(it.id, userInfo)
     }
+
+    if (ndflPersonsIdGroupedByKppOktmo == null) {
+        return
+    }
     // Создание ОНФ для каждой пары КПП и ОКТМО
     ndflPersonsIdGroupedByKppOktmo.each { npGroup ->
         ScriptUtils.checkInterrupted();
@@ -1606,6 +1610,12 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
             }
         }
         declarations.removeAll(declarationsForRemove)
+
+        if (declarations.isEmpty()) {
+            createCorrPeriodNotFoundMessage(departmentReportPeriod, true)
+            return null
+        }
+
         declarations.each { declaration ->
             def pairKppOktmo = new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
             if (!pairKppOktmoList.contains(pairKppOktmo)) {
@@ -1616,8 +1626,13 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
             ScriptUtils.checkInterrupted();
             ndflReferencesWithError.addAll(getNdflReferencesWithError(it.id, it.reportPeriodId))
         }
-        // Поиск КПП и ОКТМО для некорр периода
+
+        if (ndflReferencesWithError.isEmpty()) {
+            createCorrPeriodNotFoundMessage(departmentReportPeriod, departmentReportPeriodList, false)
+            return null
+        }
     } else {
+        // Поиск КПП и ОКТМО для некорр периода
         // Поиск дочерних подразделений. Поскольку могут существовать пары КПП+ОКТМО в ref_book_ndfl_detail ссылающиеся
         // только на обособленные подразделения тербанка
         List<Department> childrenDepartments = departmentService.getAllChildren(departmentReportPeriod.departmentId)
@@ -1644,6 +1659,9 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
     }
     // Все подходящие КНФ
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
+    if (allDeclarationData == null) {
+        return null
+    }
     /*declarationService.findDeclarationDataIdByTypeStatusReportPeriod(declarationData.reportPeriodId, departmentParam?.id.value,
     RNU_NDFL_DECLARATION_TYPE, DepartmentType.TERR_BANK.getCode(),
     Boolean.TRUE, State.ACCEPTED.getId())*/
@@ -1688,6 +1706,24 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
     }
     return ndflPersonsIdGroupedByKppOktmo
 }
+
+/**
+ * Добавляет в логгер сообщение о том что не найдены формы для корректирующего периода
+ * @param departmentReportPeriod
+ * @param forDepartment
+ * @return
+ */
+@TypeChecked
+def createCorrPeriodNotFoundMessage(DepartmentReportPeriod departmentReportPeriod, boolean forDepartment) {
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
+    if (forDepartment) {
+        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
+    } else {
+        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены физические лица для формирования уточненной отчетности")
+    }
+}
+
 /**
  * Добавить ФЛ к паре КПП и ОКТМО. Если какая-то пара КПП+ОКТМО указана в справочнике больше 1 раза,
  * прозводится анализ значения "Код НО конечный", указанные для этих повтояющихся пар
@@ -1735,6 +1771,12 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         ScriptUtils.checkInterrupted();
         allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
     }
+
+    if (allDeclarationData.isEmpty()) {
+        createEmptyMessage(departmentReportPeriod, false)
+        return null
+    }
+
     // удаление форм не со статусом Принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
@@ -1742,10 +1784,26 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
             declarationsForRemove << declaration
         }
     }
+
+    if (allDeclarationData.isEmpty()) {
+        createEmptyMessage(departmentReportPeriod, true)
+        return null
+    }
+
     allDeclarationData.removeAll(declarationsForRemove)
     return allDeclarationData
 }
 
+@TypeChecked
+def createEmptyMessage(DepartmentReportPeriod departmentReportPeriod, boolean acceptChecking) {
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
+    if (acceptChecking) {
+        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
+    } else {
+        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
+    }
+}
 /************************************* ВЫГРУЗКА ***********************************************************************/
 
 /**
@@ -1814,7 +1872,15 @@ boolean preCreateReports() {
         return false
     }
 
-    Set<PairKppOktmo> pairKppOktmoList = getNdflPersonsGroupedByKppOktmo().keySet()
+    Set<PairKppOktmo> pairKppOktmoList = getNdflPersonsGroupedByKppOktmo()?.keySet()
+    if (pairKppOktmoList == null) {
+        String msg = "Сформируйте отчетность и повторите операцию"
+        logger.error(msg)
+        if (paramMap != null) {
+            paramMap.put("errMsg", msg)
+        }
+        return false
+    }
 
     declarationList.each {
         pairKppOktmoList.remove(new PairKppOktmo(it.kpp, it.oktmo, it.taxOrganCode))
