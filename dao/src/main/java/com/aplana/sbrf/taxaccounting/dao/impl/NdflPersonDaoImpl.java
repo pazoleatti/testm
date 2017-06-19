@@ -434,21 +434,35 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo) {
-        String sql = "SELECT DISTINCT /*+rule */" + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2) {
+        StringBuilder queryBuilder = new StringBuilder("SELECT DISTINCT /*+rule */")
+                .append(createColumns(NdflPerson.COLUMNS, "np"))
+                .append(", r.record_id ")
+                .append(" FROM ndfl_person np ")
+                .append(" JOIN REF_BOOK_PERSON r ON np.person_id = r.id ")
+                .append(" JOIN ndfl_person_income npi ")
+                .append(" ON np.id = npi.ndfl_person_id ")
+                .append(" WHERE npi.kpp = :kpp ")
+                .append(" AND npi.oktmo = :oktmo ")
+                .append(" AND np.DECLARATION_DATA_ID in (:declarationDataId)");
+        if (is2Ndfl2) {
+            queryBuilder.append(" AND npi.NOT_HOLDING_TAX IS NOT NULL")
+                    .append(" AND npi.NOT_HOLDING_TAX > 0");
+        }
+        /*String sql = "SELECT DISTINCT *//*+rule *//*" + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
                 " FROM ndfl_person np " +
                 " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
                 " INNER JOIN ndfl_person_income npi " +
                 " ON np.id = npi.ndfl_person_id " +
                 " WHERE npi.kpp = :kpp " +
                 " AND npi.oktmo = :oktmo " +
-                " AND np.DECLARATION_DATA_ID in (:declarationDataId)";
+                " AND np.DECLARATION_DATA_ID in (:declarationDataId)";*/
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declarationDataId", declarationDataId)
                 .addValue("kpp", kpp)
                 .addValue("oktmo", oktmo);
         try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonRowMapper());
+            return getNamedParameterJdbcTemplate().query(queryBuilder.toString(), params, new NdflPersonDaoImpl.NdflPersonRowMapper());
         } catch (EmptyResultDataAccessException ex) {
             return new ArrayList<NdflPerson>();
         }

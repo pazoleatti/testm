@@ -227,7 +227,7 @@ public interface NdflPersonService {
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
 
     /**
      * Данные об авансах Физлиц

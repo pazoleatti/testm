@@ -1083,6 +1083,14 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
     def pairKppOktmoList = getPairKppOktmoList()
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
+    def reportPeriod = departmentReportPeriod.reportPeriod
+    def otchetGod = reportPeriod.taxPeriod.year
+    String strCorrPeriod = ""
+    if (departmentReportPeriod.getCorrectionDate() != null) {
+        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+    }
+    departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id, false)
+    String depName = departmentService.get(departmentParam.DEPARTMENT_ID.value.toInteger()).name
     // список форм рну-ндфл для отчетного периода всех ТБ
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
     // Список физлиц для каждой пары КПП и ОКТМО
@@ -1091,9 +1099,11 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
     if (!allDeclarationData.isEmpty()) {
         pairKppOktmoList.each { pair ->
             ScriptUtils.checkInterrupted()
-            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString())
+            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString(), false)
             if (ndflPersons != null && ndflPersons.size() != 0) {
                 addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
+            } else {
+                logger.warn("Для подразделения: $depName, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo} за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют сведения о НДФЛ.")
             }
         }
     }

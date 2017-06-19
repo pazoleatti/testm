@@ -1541,7 +1541,14 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
     def priznakF = definePriznakF()
     def declarationTypeId = currDeclarationTemplate.type.id
     def ndflReferencesWithError = []
-    def departmentParam
+    def departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id, false)
+    String depName = departmentService.get(departmentParam.DEPARTMENT_ID.value.toInteger()).name
+    def reportPeriod = departmentReportPeriod.reportPeriod
+    def otchetGod = reportPeriod.taxPeriod.year
+    String strCorrPeriod = ""
+    if (departmentReportPeriod.getCorrectionDate() != null) {
+        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+    }
     // Поиск КПП и ОКТМО для корр периода
     if (departmentReportPeriod.correctionDate != null) {
         def declarations = []
@@ -1647,9 +1654,14 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
             ScriptUtils.checkInterrupted();
             // Поиск физлиц по КПП и ОКТМО операций относящихся к ФЛ
 
-            def ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString())
+            def ndflPersons
+            if (declarationData.declarationTemplateId == NDFL_2_2_DECLARATION_TYPE) {
+                ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString(), true)
+            } else {
+                ndflPersons = ndflPersonService.findNdflPersonByPairKppOktmo(allDeclarationData.id, pair.kpp.toString(), pair.oktmo.toString(), false)
+            }
 
-            if (ndflPersons != null && ndflPersons.size() != 0) {
+            if (ndflPersons != null && !ndflPersons.isEmpty()) {
                 if (departmentReportPeriod.correctionDate != null) {
                     def ndflPersonsPicked = []
                     ndflReferencesWithError.each { reference ->
@@ -1664,6 +1676,13 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
                     ndflPersons = ndflPersonsPicked
                 }
                 addNdflPersons(ndflPersonsIdGroupedByKppOktmo, pair, ndflPersons)
+            } else {
+
+                if (declarationData.declarationTemplateId == NDFL_2_2_DECLARATION_TYPE) {
+                    logger.warn("Для подразделения: $depName, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo} за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют сведения о не удержанном налоге.")
+                } else {
+                    logger.warn("Для подразделения: $depName, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo} за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют сведения о НДФЛ.")
+                }
             }
         }
     }
