@@ -3218,9 +3218,6 @@ class NdflPersonFL {
 def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, Map<String, RefBookValue>> personMap) {
     long time = System.currentTimeMillis();
     long timeTotal = time
-    // Параметры подразделения
-    def mapRefBookNdfl = getRefBookNdfl()
-    def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
 
     logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
 
