@@ -19,5 +19,11 @@ when matched then update
 when not matched then
 insert (t.code,t.department_id,t.value) values (n.code,0,n.val);
 
+prompt update ref_book_income_kind
+update ref_book_income_kind
+   set mark = '13',
+       name = 'Суммы вознаграждений, выплачиваемых за счет средств прибыли организации, средств специального назначения или целевых поступлений'
+where income_type_id in (select id from ref_book_income_type t where t.code='2003' and t.status=0);
+
 commit;
 exit;
