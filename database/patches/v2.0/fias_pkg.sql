@@ -196,6 +196,9 @@ as
   -- возвращается курсор на таблицу типа TTblCheckExistsAddrByFias
   function CheckExistsAddrByFias(p_declaration number,p_check_type number default 0) return ref_cursor;
   
+  -- Обновить материализованные представления
+  procedure RefreshViews;
+  
 end fias_pkg;
 /
 show errors;
@@ -810,6 +813,17 @@ begin
 
     return v_ref;
   end;
+
+  -- Обновить материализованные представления
+  procedure RefreshViews
+  is
+  begin
+    dbms_mview.REFRESH('MV_FIAS_AREA_ACT', 'C');
+    dbms_mview.REFRESH('MV_FIAS_CITY_ACT', 'C');
+    dbms_mview.REFRESH('MV_FIAS_LOCALITY_ACT', 'C');
+    dbms_mview.REFRESH('MV_FIAS_STREET_ACT', 'C');
+  end;
+  
 
 end fias_pkg;
 /
