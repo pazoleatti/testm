@@ -83,6 +83,7 @@ insert into ref_book_income_kind(id,income_type_id,mark,name) values(seq_ref_boo
 insert into ref_book_income_kind(id,income_type_id,mark,name) values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2750' and status=0 order by version desc) where rownum=1),'14','Выплата дохода в натуральной форме');
 insert into ref_book_income_kind(id,income_type_id,mark,name) values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2790' and status=0 order by version desc) where rownum=1),'14','Выплата дохода в натуральной форме');
 insert into ref_book_income_kind(id,income_type_id,mark,name) values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='4800' and status=0 order by version desc) where rownum=1),'14','Выплата дохода в натуральной форме');
+insert into ref_book_income_kind(id,income_type_id,mark,name) values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2003' and status=0 order by version desc) where rownum=1),'13','Суммы вознаграждений, выплачиваемых за счет средств прибыли организации, средств специального назначения или целевых поступлений');
 
 --заполняем оставшиеся
 insert into ref_book_income_kind(id,income_type_id,mark,name)

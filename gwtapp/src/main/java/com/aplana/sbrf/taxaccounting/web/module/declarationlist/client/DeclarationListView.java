@@ -22,7 +22,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -347,7 +346,7 @@ public class DeclarationListView extends
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
                 if (object.getDeclarationDataCreationDate() != null) {
-                    return DATE_TIME_FORMAT.format(object.getDeclarationDataCreationDate(), TimeZone.createTimeZone(-180));
+                    return DATE_TIME_FORMAT.format(object.getDeclarationDataCreationDate());
                 } else {
                     return "";
                 }

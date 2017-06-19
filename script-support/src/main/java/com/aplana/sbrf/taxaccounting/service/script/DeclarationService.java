@@ -409,4 +409,12 @@ public interface DeclarationService {
     List<Integer> findDeclarationDataIdByTypeStatusReportPeriod(Integer reportPeriodId, Long ndflId,
                                                                 Integer declarationTypeId, Integer departmentType,
                                                                 Boolean departmentReportPeriodStatus, Integer declarationState);
+
+    /**
+     * Найти все формы всех подразделений в активном периоде по виду и периоду, имеющие статус отличный от Принята
+     * @param declarationTypeId
+     * @param reportPeriodId
+     * @return
+     */
+    List<DeclarationData> findAllActiveWithNotAcceptedState(int declarationTypeId, int reportPeriodId);
 }

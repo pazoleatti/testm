@@ -454,4 +454,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         return declarationDataDao.findDeclarationDataIdByTypeStatusReportPeriod(reportPeriodId, ndflId, declarationTypeId,
                 departmentType, departmentReportPeriodStatus, declarationState);
     }
+
+
+    @Override
+    public List<DeclarationData> findAllActiveWithNotAcceptedState(int declarationTypeId, int reportPeriodId) {
+        return declarationDataDao.findAllActiveWithNotAcceptedState(declarationTypeId, reportPeriodId);
+    }
 }

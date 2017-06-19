@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -108,21 +109,29 @@ public class DeclarationListPresenter extends
         this.eventBus = eventBus;
         eventBus.addHandler(CommentEvent.TYPE, new CommentEvent.CommentEventHandler() {
             @Override
-            public void update(CommentEvent event) {
+            public void update(final CommentEvent event) {
                 LogCleanEvent.fire(DeclarationListPresenter.this);
-                AcceptDeclarationListAction action = new AcceptDeclarationListAction();
-                action.setDeclarationIds(getView().getSelectedIds());
-                action.setTaxType(taxType);
-                action.setAccepted(false);
-                action.setReasonForReturn(event.getComment());
-                dispatcher.execute(action, CallbackUtils
-                        .defaultCallback(new AbstractCallback<AcceptDeclarationListResult>() {
-                            @Override
-                            public void onSuccess(AcceptDeclarationListResult result) {
-                                LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
-                                onFind();
-                            }
-                        }, DeclarationListPresenter.this));
+                OperationInfoAction actionInfo = new OperationInfoAction();
+                actionInfo.setDeclarationDataReportType(DeclarationDataReportType.TO_CREATE_DEC.getReportType().getDescription());
+                actionInfo.setDeclarationDataIdList(event.getDeclarationDataIdList());
+                dispatcher.execute(actionInfo, CallbackUtils.defaultCallback(new AbstractCallback<OperationInfoResult>() {
+                    @Override
+                    public void onSuccess(OperationInfoResult result) {
+                        LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                        AcceptDeclarationListAction action = new AcceptDeclarationListAction();
+                        action.setDeclarationIds(getView().getSelectedIds());
+                        action.setTaxType(taxType);
+                        action.setAccepted(false);
+                        action.setReasonForReturn(event.getComment());
+                        dispatcher.execute(action, CallbackUtils
+                                .defaultCallback(new AbstractCallback<AcceptDeclarationListResult>() {
+                                    @Override
+                                    public void onSuccess(AcceptDeclarationListResult result) {
+                                        onFind();
+                                    }
+                                }, DeclarationListPresenter.this));
+                    }
+                }, DeclarationListPresenter.this));
             }
         });
         getView().setUiHandlers(this);

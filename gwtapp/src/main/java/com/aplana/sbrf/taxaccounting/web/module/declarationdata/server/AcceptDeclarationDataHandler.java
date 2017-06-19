@@ -121,9 +121,9 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
             final DeclarationDataReportType toCreatedReportType = DeclarationDataReportType.TO_CREATE_DEC;
             final String toCreateTaskName = declarationDataService.getTaskName(toCreatedReportType, action.getTaxType());
             String declarationFullName = declarationDataService.getDeclarationFullName(action.getDeclarationId(), null);
-            logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s", toCreateTaskName, declarationDataService.getDeclarationFullName(action.getDeclarationId(), null));
+            //logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s", toCreateTaskName, declarationDataService.getDeclarationFullName(action.getDeclarationId(), null));
             // Блокировка формы
-            LockData lockData = lockDataService.lock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), DeclarationDataReportType.IMPORT_TF_DEC),
+            LockData lockData = lockDataService.lock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), DeclarationDataReportType.TO_CREATE_DEC),
                     userInfo.getUser().getId(), declarationFullName);
 
             if (lockData != null) {
@@ -136,13 +136,13 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                 sendNotifications(String.format(LOCK_MSG, declarationTemplate.getType().getName(), department.getName()), uuid, userInfo.getUser().getId(), NotificationType.DEFAULT, null);
                 return result;
             }
-
+            logger.info("Операция \"Возврат в Создана\" для налоговой формы № %d поставлена в очередь на исполнение", action.getDeclarationId());
             try {
                 List<Long> receiversIdList = declarationDataService.getReceiversAcceptedPrepared(action.getDeclarationId(), logger, userInfo);
                 if (!receiversIdList.isEmpty()) {
                     DeclarationData declaration = declarationDataService.get(action.getDeclarationId(), userInfo);
-                    Department department = departmentService.getDepartment(declaration.getDepartmentId());
-                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+                    /*Department department = departmentService.getDepartment(declaration.getDepartmentId());
+                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());*/
                     String message = getCheckReceiversErrorMessage(receiversIdList);
                     logger.error(message);
                     String uuid = logEntryService.save(logger.getEntries());
@@ -153,12 +153,13 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                 declarationDataService.cancel(logger, action.getDeclarationId(), action.getReasonForReturn(), securityService.currentUserInfo());
                 String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", action.getDeclarationId(), State.CREATED.getTitle()).toString();
                 logger.info(message);
-                sendNotifications(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+
             } catch (Exception e) {
                 logger.error(e);
             } finally {
                 lockDataService.unlock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), DeclarationDataReportType.IMPORT_TF_DEC), userInfo.getUser().getId());
             }
+            sendNotifications("Выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
             result.setStatus(CreateAsyncTaskStatus.EXIST);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

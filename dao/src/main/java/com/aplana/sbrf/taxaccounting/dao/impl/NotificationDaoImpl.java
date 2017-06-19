@@ -57,14 +57,13 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         jt.update(
                 "insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
                         "IS_READ, TEXT, CREATE_DATE, DEADLINE, LOG_ID, REPORT_ID, TYPE)" +
-                        " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        " values (?, ?, ?, ?, ?, ?, sysdate, ?, ?, ?, ?)",
                 id,
                 notification.getReportPeriodId(),
                 notification.getSenderDepartmentId(),
                 notification.getReceiverDepartmentId(),
                 notification.isRead() ? 1 : 0,
                 notification.getText(),
-                notification.getCreateDate(),
                 notification.getDeadline(),
                 notification.getLogId(),
                 notification.getReportId(),
@@ -98,7 +97,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     public void saveList(final List<Notification> notifications) {
         getJdbcTemplate().batchUpdate("insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
                 "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, LOG_ID, TYPE, REPORT_ID)" +
-                " values (?, ?, ?, ?, ?, ?, sysdate ,?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+                " values (?, ?, ?, ?, ?, ?, sysdate, ?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
 
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {

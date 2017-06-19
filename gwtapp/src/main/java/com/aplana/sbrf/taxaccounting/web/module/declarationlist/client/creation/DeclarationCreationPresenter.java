@@ -81,9 +81,17 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     @Override
     public void onContinue() {
         final DeclarationDataFilter filter = new DeclarationDataFilter();
-        filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
+        if (getView().getSelectedDeclarationType() != null) {
+            filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
+        }
         filter.setDepartmentIds(getView().getSelectedDepartment());
         filter.setReportPeriodIds(getView().getSelectedReportPeriod());
+        if (filter.getDeclarationTypeIds() == null || filter.getDepartmentIds() == null ||
+                filter.getReportPeriodIds() == null || filter.getDeclarationTypeIds().isEmpty() ||
+                filter.getDepartmentIds().isEmpty() || filter.getReportPeriodIds().isEmpty()) {
+            Dialog.warningMessage("", "Заполнены не все поля отчетности");
+            return;
+        }
         if(isFilterDataCorrect(filter)){
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);
