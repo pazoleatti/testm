@@ -368,6 +368,8 @@ import java.text.SimpleDateFormat
         //выставляем параметр что скрипт не формирует новый xml-файл
         calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
+        refBookPersonService.clearRnuNdflPerson(declarationData.id)
+
         //Получаем список всех ФЛ в первичной НФ
         List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper(false));
         if (logger.containsLevel(LogLevel.ERROR)) {

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Types;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,13 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     RefBookDao refBookDao;
 
     //--------------------------- РНУ ---------------------------
+
+    @Override
+    public void clearRnuNdflPerson(Long declarationDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("declarationDataId", declarationDataId);
+        getNamedParameterJdbcTemplate().update("update NDFL_PERSON set PERSON_ID = null where DECLARATION_DATA_ID = :declarationDataId", values);
+    }
 
     @Override
     public void fillRecordVersions(Date version) {
