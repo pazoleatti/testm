@@ -122,7 +122,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 return (NaturalPerson) identificatedPerson;
             } else {
                 //msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
-                logger.info(msg.toString());
                 return null;
             }
         } else {
