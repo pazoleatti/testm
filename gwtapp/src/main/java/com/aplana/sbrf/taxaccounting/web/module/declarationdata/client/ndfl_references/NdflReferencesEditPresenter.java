@@ -123,7 +123,7 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
     }
 
     @Override
-    public void onCancellClicked() {
+    public void onCancelClicked() {
         Dialog.confirmMessageYesNo("Закрытие", "Закрыть окно?", new DialogHandler() {
             @Override
             public void yes() {
@@ -138,6 +138,11 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
         super.onHide();
         /*getView().getTable().setRowData(new ArrayList<DataRow<Cell>>());
         getView().setNote(null);*/
+    }
+
+    public void clean() {
+        getView().updateTable(0);
+        getView().setNote("");
     }
 
     private DataRow<Cell> createDataRow() {
