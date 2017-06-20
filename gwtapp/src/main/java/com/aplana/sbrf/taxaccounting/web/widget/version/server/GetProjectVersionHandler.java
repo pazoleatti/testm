@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 @Service
@@ -49,5 +51,15 @@ public class GetProjectVersionHandler extends AbstractActionHandler<GetProjectVe
 			GetProjectVersionResult getProjectVersionResult,
 			ExecutionContext executionContext) throws ActionException {
 		// ничего не делаем
+	}
+
+	public Map<String, String> getProjectVersionProperties(){
+		Map<String, String> result = new HashMap<String, String>();
+		if (versionInfoProperties != null) {
+			result.put("version", versionInfoProperties.getProperty("version"));
+			result.put("revision", versionInfoProperties.getProperty("revision"));
+			result.put("serverName", serverInfo.getServerName());
+		}
+		return result;
 	}
 }

@@ -1,7 +1,6 @@
 @grid-float-breakpoint: 1;
 
 @import "select-0.19.4";
-@import "ui-grid";
 @import "bootstrap";
 //@import "bootstrap-theme";
 @import "bootstrap-custom";
@@ -10,6 +9,8 @@
 @import "sb-modals";
 @import "alert";
 
+@import "less/bootstrap";
+//@import "tables";
 /* style.css */
 
 @mts_red: #1a9f29;
@@ -195,8 +196,8 @@ body {
 
 .modal-dialog .btn-primary {
   color: #ffffff;
-  background-color: #d9534f;
-  border-color: #d43f3a;
+  background-color: #1a9f29;
+  border-color: #1a9f29;
 }
 
 .modal-dialog .btn-primary:focus,
@@ -273,7 +274,9 @@ button.btn-back-to-list.btn-default:hover:not([disabled]),
 .grid-filter .row {
   margin-bottom: 0;
 }
-
+.grid-filter form {
+  margin: 0 0 8px;
+}
 .filter-col, .header-col {
   float: left;
   margin-right: 15px;
@@ -378,9 +381,9 @@ input[type="checkbox"] {
 
 /* Панель для отображения информации о версии приложения и его сборке */
 .build_info {
-  font-size: 80%;
-  padding-top: 6px;
-  margin-right: 10px;
+  font-size: 100%;
+  position: fixed; /* Фиксированное положение */
+  left: 0; bottom: 0px; /* Левый нижний угол */
 }
 
 /* Признак обязательности поля */
@@ -511,7 +514,7 @@ label.required:after {
 }
 
 input.ui-select-search {
-  width: 100% !important;
+  width: 98% !important;
 }
 
 .ui-grid-header-cell-label {
@@ -560,10 +563,6 @@ hr {
     margin-top: 4px;
     div {
       padding: 0 10px;
-    }
-    &[class="build_info"]{
-      margin-top: 0;
-      border: none;
     }
     &.dropdown {
       border: none;
@@ -702,7 +701,7 @@ button.btn.btn-default.ng-binding {
 }
 
 .btn-sm {
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 .button_panel {
@@ -776,7 +775,7 @@ button.btn.btn-default.ng-binding {
 }
 
 .btn-sm {
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 .button_panel {
@@ -809,4 +808,99 @@ button.btn.btn-default.ng-binding {
 }
 .border-none{
   border:none!important;
+}
+/*================hint-style============*/
+.error{
+  position: relative;;
+  .help-bottom-popup{
+    position: absolute!important;
+    left: 0!important;
+  }
+}
+.container-grid{
+  overflow: hidden;
+  height: 100%;
+  position: relative;
+  padding: 6px;
+}
+div [ui-view] {
+  height: 100%;
+}
+/**
+ * 2-х-колночная структура
+ */
+.cbr-page-layout {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 10;
+}
+.cbr-page-layout:after {
+  content: " ";
+  clear: both;
+  display: table;
+}
+.cbr-page-layout__side {
+  float: left;
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  width: 370px;
+  background-color: #fff;
+}
+.cbr-side-content {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 12px 8px;
+  overflow: auto;
+  transition: .2s;
+}
+/* модификация jquery UI для боковой панели */
+.cbr-page-layout__side .ui-resizable-handle {
+  width: 4px;
+  right: 0;
+  background-color: #515e5e;
+  box-shadow: 2px 0 3px rgba(68, 75, 75, 0.5);
+}
+.cbr-page-layout__side .ui-resizable-handle:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  width: 16px;
+  height: 87px;
+  background: url("../img/drag.png") no-repeat;
+}
+.cbr-page-layout__side_colapsed .ui-resizable-handle {
+  background-color: #444b4b;
+}
+.cbr-page-layout__side_colapsed .ui-resizable-handle:before {
+  background-position: -16px 0;
+}
+.cbr-page-layout__main {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+}
+.cbr-page-layout__view {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  overflow: hidden;
+}
+/*.cbr-page-layout__view{
+  margin-top: 30px;
+}*/
+.ui-jqgrid{
+  width: 100%!important;
+}
+.cbr-page-layout {
+  top: 50px;
 }

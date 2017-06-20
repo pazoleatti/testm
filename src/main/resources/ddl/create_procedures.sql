@@ -42,10 +42,10 @@ create or replace package person_pkg as
         and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.last_name),' ','')
                                                          and replace(lower(p.first_name),' ','') = replace(lower(n.first_name),' ','')
                                                          and replace(lower(p.middle_name),' ','') = replace(lower(n.middle_name),' ','')
-                                                         and p.birth_date=n.birth_day)
-        and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', ''))
-        and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ',''))
-        and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ',''));
+                                                         and p.birth_date=n.birth_day
+                                                         and p.status=0)
+        and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', '') and p.status=0)
+        and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ','') and p.status=0);
 
   cursor persons_for_update(c_declaration number) is
     select fv.person_id,
@@ -522,8 +522,8 @@ create or replace package person_pkg as
   procedure FillRecordVersions(p_date date default trunc(sysdate));
   
   -- Получение курсоров для идентификации НДФЛ
-  function GetPersonForIns(p_declaration number) return ref_cursor;
-  function GetPersonForUpd(p_declaration number) return ref_cursor;
+  function GetPersonForIns(p_declaration number,p_asnu number default 1) return ref_cursor;
+  function GetPersonForUpd(p_declaration number,p_asnu number default 1) return ref_cursor;
   function GetPersonForCheck(p_declaration number,p_asnu number default 1) return ref_cursor;
   -- Получение курсоров для идентификации 115
   function GetPersonForIns115(p_declaration number) return ref_cursor;
@@ -557,7 +557,7 @@ create or replace package body person_pkg as
   end;
 
   -- Получение курсоров для идентификации НДФЛ
-  function GetPersonForIns(p_declaration number) return ref_cursor
+  function GetPersonForIns(p_declaration number,p_asnu number default 1) return ref_cursor
   is
     v_ref ref_cursor;
   begin
@@ -603,15 +603,17 @@ create or replace package body person_pkg as
           and not exists(select 1 from ref_book_person p where replace(lower(p.last_name),' ','') = replace(lower(n.last_name),' ','')
                                                            and replace(lower(p.first_name),' ','') = replace(lower(n.first_name),' ','')
                                                            and replace(lower(p.middle_name),' ','') = replace(lower(n.middle_name),' ','')
-                                                           and p.birth_date=n.birth_day)
-          and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', ''))
-          and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ',''))
-          and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ',''));
+                                                           and p.birth_date=n.birth_day
+                                                           and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(replace(p.snils,' ',''),'-','') = replace(replace(n.snils, ' ', ''), '-', '') and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(p.inn,' ','') = replace(n.inn_np,' ','') and p.status=0)
+          and not exists(select 1 from ref_book_person p where replace(p.inn_foreign,' ','') = replace(n.inn_foreign,' ','') and p.status=0)
+          and not exists(select 1 from ref_book_id_tax_payer t join ref_book_person p on (p.id=t.person_id) where t.as_nu=p_asnu and lower(t.inp)=lower(n.inp) and p.status=0 and t.status=0);
   
     return v_ref;
   end;
 
-  function GetPersonForUpd(p_declaration number) return ref_cursor
+  function GetPersonForUpd(p_declaration number,p_asnu number default 1) return ref_cursor
   is
     v_ref ref_cursor;
   begin
@@ -681,7 +683,7 @@ create or replace package body person_pkg as
                                                                and replace(nvl(fv.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
                                                                )
               where n.declaration_data_id=p_declaration
-                and exists (select 1 from ref_book_person c
+                and exists (select 1 from ref_book_person c left join ref_book_id_tax_payer t on (t.person_id=c.id)
                              where replace(lower(nvl(c.last_name,'empty')),' ','') = replace(lower(nvl(n.last_name,'empty')),' ','')
                                and replace(lower(nvl(c.first_name,'empty')),' ','') = replace(lower(nvl(n.first_name,'empty')),' ','')
                                and replace(lower(nvl(c.middle_name,'empty')),' ','') = replace(lower(nvl(n.middle_name,'empty')),' ','')
@@ -689,12 +691,13 @@ create or replace package body person_pkg as
                                and replace(replace(nvl(c.snils,'empty'),' ',''),'-','') = replace(replace(nvl(n.snils,'empty'), ' ', ''), '-', '')
                                and replace(nvl(c.inn,'empty'),' ','') = replace(nvl(n.inn_np,'empty'),' ','')
                                and replace(nvl(c.inn_foreign,'empty'),' ','') = replace(nvl(n.inn_foreign,'empty'),' ','')
+                               and t.as_nu=p_asnu and lower(t.inp)=lower(n.inp)
                                )
                 and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = fv.version and t.record_id = fv.record_id)
                 ) fv join ref_book_person person on (person.id=fv.ref_person_id)
-                     left join ref_book_id_tax_payer tax on (tax.person_id=person.id)
-                     left join ref_book_id_doc doc on (doc.person_id=person.id)
-                     left join ref_book_address addr on (addr.id=person.address);
+                     left join ref_book_id_tax_payer tax on (tax.person_id=person.id and tax.status=0)
+                     left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
+                     left join ref_book_address addr on (addr.id=person.address and addr.status=0);
   
     return v_ref;
   end;
@@ -764,9 +767,9 @@ create or replace package body person_pkg as
                                                            replace(lower(person.middle_name),' ','') = replace(lower(t.middle_name),' ','') and
                                                            person.birth_date=t.birth_day
                                                                )
-                           left join ref_book_id_doc doc on (doc.person_id=person.id)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id)
-                           left join ref_book_address addr on (addr.id=person.address)
+                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
@@ -827,9 +830,9 @@ create or replace package body person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t join ref_book_person person on (replace(replace(person.snils,' ',''),'-','') = replace(replace(t.snils, ' ', ''), '-', ''))
-                           left join ref_book_id_doc doc on (doc.person_id=person.id)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id)
-                           left join ref_book_address addr on (addr.id=person.address)
+                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
@@ -890,9 +893,9 @@ create or replace package body person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t join ref_book_person person on (replace(person.inn,' ','') = replace(t.inn_np,' ',''))
-                           left join ref_book_id_doc doc on (doc.person_id=person.id)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id)
-                           left join ref_book_address addr on (addr.id=person.address)
+                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
@@ -953,9 +956,9 @@ create or replace package body person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t join ref_book_person person on (replace(person.inn_foreign,' ','') = replace(t.inn_foreign,' ',''))
-                           left join ref_book_id_doc doc on (doc.person_id=person.id)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id)
-                           left join ref_book_address addr on (addr.id=person.address)
+                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
+                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
@@ -1016,10 +1019,10 @@ create or replace package body person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t left join ref_book_doc_type dt on (dt.code=t.id_doc_type)
-                           left join ref_book_id_doc doc on (doc.doc_id=dt.id and replace(lower(doc.doc_number),' ','') = replace(lower(t.id_doc_number),' ',''))
+                           left join ref_book_id_doc doc on (doc.doc_id=dt.id and replace(lower(doc.doc_number),' ','') = replace(lower(t.id_doc_number),' ','') and doc.status=0)
                            left join ref_book_person person on (person.id = doc.person_id)
-                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id)
-                           left join ref_book_address addr on (addr.id=person.address)
+                           left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
+                           left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
@@ -1079,10 +1082,10 @@ create or replace package body person_pkg as
              addr.appartment,
              addr.address_type,
              addr.address
-        from ndfl_person t join ref_book_id_tax_payer tax on (tax.as_nu = p_asnu and lower(tax.inp)=lower(t.inp))
+        from ndfl_person t join ref_book_id_tax_payer tax on (tax.as_nu = p_asnu and lower(tax.inp)=lower(t.inp) and tax.status=0)
                            left join ref_book_person person on (person.id = tax.person_id)
-                           left join ref_book_address addr on (addr.id=person.address)
-                           left join ref_book_id_doc doc on (doc.person_id=person.id)
+                           left join ref_book_address addr on (addr.id=person.address and addr.status=0)
+                           left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id);
@@ -1098,7 +1101,6 @@ create or replace package body person_pkg as
     open v_ref for     
        select n.id,
               n.person_id,
-              null row_num,
               null inp,
               n.snils,
               n.familia last_name,
@@ -1498,7 +1500,6 @@ create or replace package body person_pkg as
 end person_pkg;
 /
 show errors;
-
 create or replace package fias_pkg
 -- Пакет для поиска адресов в справочнике ФИАС
 as
@@ -1697,13 +1698,12 @@ as
   -- возвращается курсор на таблицу типа TTblCheckExistsAddrByFias
   function CheckExistsAddrByFias(p_declaration number,p_check_type number default 0) return ref_cursor;
   
-  -- Обновление мат. представлений после обновления справочника ФИАС
+  -- Обновить материализованные представления
   procedure RefreshViews;
   
 end fias_pkg;
 /
 show errors;
-
 create or replace package body fias_pkg as
   
     v_check_path boolean:=true;
@@ -1941,7 +1941,7 @@ begin
       select min(a.id) into v_result
         from mv_fias_area_act a
        where a.regioncode=p_region
-         and a.fname=nvl(replace(lower(p_check_element),' ',''),'-')
+         and (p_check_element is null or p_check_element is not null and a.fname=nvl(replace(lower(p_check_element),' ',''),'-'))
          and (p_check_ftype is null or p_check_ftype is not null and a.ftype=nvl(lower(p_check_ftype),'-'))
          and a.has_child=decode(p_leaf,1,0,1);
     elsif (p_check_type='CITY') then
@@ -1950,7 +1950,7 @@ begin
        where c.regioncode=p_region
          and c.fname=nvl(replace(lower(p_check_element),' ',''),'-')
          and c.ftype=nvl(lower(p_check_ftype),'г')
-         and (p_parent_id is null and c.parentguid is null or p_parent_id is not null and a.id=p_parent_id)
+         and (p_parent_id is null /*and c.parentguid is null*/ or p_parent_id is not null and a.id=p_parent_id)
          and c.has_child=decode(p_leaf,1,0,1);
     elsif (p_check_type='LOCALITY') then
       select min(id) into v_result
@@ -1960,7 +1960,7 @@ begin
                where l.regioncode=p_region
                  and l.fname=nvl(replace(lower(p_check_element),' ',''),'-')
                  and (p_check_ftype is null or p_check_ftype is not null and l.ftype=nvl(lower(p_check_ftype),'-'))
-                 and (p_parent_id is null and c.parentguid is null or p_parent_id is not null and c.id=p_parent_id)
+                 and (p_parent_id is null /*and c.parentguid is null*/ or p_parent_id is not null and c.id=p_parent_id)
                  and l.has_child=decode(p_leaf,1,0,1)
               union 
               select l.id
@@ -1968,7 +1968,7 @@ begin
                where l.regioncode=p_region
                  and l.fname=nvl(replace(lower(p_check_element),' ',''),'-')
                  and (p_check_ftype is null or p_check_ftype is not null and l.ftype=nvl(lower(p_check_ftype),'-'))
-                 and (p_parent_id is null and l.parentguid is null or p_parent_id is not null and a.id=p_parent_id)
+                 and (p_parent_id is null /*and l.parentguid is null*/ or p_parent_id is not null and a.id=p_parent_id)
                  and l.has_child=decode(p_leaf,1,0,1)
             );
     elsif (p_check_type='STREET') then
@@ -1978,7 +1978,7 @@ begin
                 from mv_fias_street_act s left join mv_fias_city_act c on (c.aoid=s.parentguid)
                where s.regioncode=p_region
                  and s.fname=nvl(replace(lower(p_check_element),' ',''),'-')
-                 and s.ftype=nvl(lower(p_check_ftype),'ул')
+                 and (p_check_ftype is null or p_check_ftype is not null and s.ftype=nvl(lower(p_check_ftype),'ул'))
                  and (p_parent_id is null and s.parentguid is null or p_parent_id is not null and c.id=p_parent_id)
                  and s.has_child=decode(p_leaf,1,0,1)
               union 
@@ -1986,7 +1986,7 @@ begin
                 from mv_fias_street_act s left join mv_fias_locality_act l on (l.aoid=s.parentguid)
                where s.regioncode=p_region
                  and s.fname=nvl(replace(lower(p_check_element),' ',''),'-')
-                 and s.ftype=nvl(lower(p_check_ftype),'ул')
+                 and (p_check_ftype is null or p_check_ftype is not null and s.ftype=nvl(lower(p_check_ftype),'ул'))
                  and (p_parent_id is null and s.parentguid is null or p_parent_id is not null and l.id=p_parent_id)
                  and s.has_child=decode(p_leaf,1,0,1)
               union 
@@ -1994,7 +1994,7 @@ begin
                 from mv_fias_street_act s left join mv_fias_area_act a on (a.aoid=s.parentguid)
                where s.regioncode=p_region
                  and s.fname=nvl(replace(lower(p_check_element),' ',''),'-')
-                 and s.ftype=nvl(lower(p_check_ftype),'ул')
+                 and (p_check_ftype is null or p_check_ftype is not null and s.ftype=nvl(lower(p_check_ftype),'ул'))
                  and (p_parent_id is null and s.parentguid is null or p_parent_id is not null and a.id=p_parent_id)
                  and s.has_child=decode(p_leaf,1,0,1)
             );
@@ -2118,7 +2118,7 @@ begin
                fias_pkg.CheckAddrElementRetID(t4.region_code,t4.street_fname,t4.street_type,nvl(t4.loc_id,t4.city_id),'STREET',1) street_id
           from (                     
                 select t3.*,
-                       fias_pkg.CheckAddrElementRetID(t3.region_code,t3.loc_fname,t3.loc_type,nvl(t3.city_id,t3.area_id),'LOCALITY',t3.loc_leaf) loc_id
+                       fias_pkg.CheckAddrElementRetID(t3.region_code,t3.loc_fname,t3.loc_type,nvl(t3.city_id,t3.area_id),'LOCALITY',-1/*t3.loc_leaf*/) loc_id
                   from (
                         select t2.*,
                                fias_pkg.CheckAddrElementRetID(t2.region_code,t2.city_fname,t2.city_type,t2.area_id,'CITY',t2.city_leaf) city_id
@@ -2316,9 +2316,7 @@ begin
     return v_ref;
   end;
 
-  -------------------------------------------------------------------------------------------------------------
-  -- Обновление мат. представлений после обновления справочника ФИАС
-  -------------------------------------------------------------------------------------------------------------
+  -- Обновить материализованные представления
   procedure RefreshViews
   is
   begin
@@ -2326,7 +2324,8 @@ begin
     dbms_mview.REFRESH('MV_FIAS_CITY_ACT', 'C');
     dbms_mview.REFRESH('MV_FIAS_LOCALITY_ACT', 'C');
     dbms_mview.REFRESH('MV_FIAS_STREET_ACT', 'C');
- end;
+  end;
+  
 
 end fias_pkg;
 /

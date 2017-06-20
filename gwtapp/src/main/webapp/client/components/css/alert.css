@@ -1,0 +1,94 @@
+#alertContainer {
+    z-index: 4000;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 422px;
+    overflow-y: auto;
+}
+
+.aplanaAlert {
+    width: 400px;
+    border: 1px solid #b4acac;
+    background: #f9cccc;
+    min-height: 100px;
+    display: block;
+    word-wrap: break-word;
+}
+
+/*
+    todo AOrlov временый фикс крестика
+    todo убрать весь стиль когда будет вёрстка всего всплывающего окна
+*/
+.aplanaAlert .close {
+    float: right;
+    position: relative;
+    height: 100%;
+    width: 30px;
+    border: 0;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.aplanaAlert.success {
+    background: #ccf8cc;
+}
+
+.aplanaAlert.warning {
+    background: #fafabb;
+}
+
+.aplanaAlert.error {
+    background: #f9cccc;
+}
+
+.aplanaAlert.notification {
+    background: #ffd3a8;
+}
+
+.aplanaAlert.message {
+    background: #99CCFF;
+}
+
+.aplanaAlert.default {
+    background: #ffffff;
+}
+
+.aplanaAlert .text {
+    width: 315px;
+    padding-top: 10px;
+    padding-right: 20px;
+    display: inline-block;
+}
+
+.aplanaAlert .icon {
+    min-height: 100%;
+    padding-top: 10px;
+    padding-left: 5px;
+    padding-right: 20px;
+    float: left;
+    display: inline-block;
+
+    background-position: top;
+    background-repeat: no-repeat;
+    margin-top: 14px;
+    width: 25px;
+    height: 40px;
+}
+
+.icon.error {
+    background-image: url('../img/alert/error.png');
+}
+
+.icon.success {
+    background-image: url('../img/alert/success.png');
+}
+
+.icon.warning {
+    background-image: url('../img/alert/warning.png');
+}
+
+.icon.error_validation {
+    background-image: url('../img/alert/error_validation.png');
+}
+

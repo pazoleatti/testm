@@ -4,18 +4,22 @@ import com.aplana.sbrf.taxaccounting.groovy.jsr223.GroovyScriptEngine;
 import com.aplana.sbrf.taxaccounting.groovy.jsr223.GroovyScriptEngineFactory;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyShell;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.syntax.SyntaxException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import java.io.*;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +56,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	};
 
 	private GroovyScriptEngine groovyScriptEngine;
+	protected CompilerConfiguration config;
 
 	public TAAbstractScriptingServiceImpl() {
 		ScriptEngineManager factory = new ScriptEngineManager();
@@ -59,7 +64,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		groovyScriptEngine = (GroovyScriptEngine)factory.getEngineByName("groovy");
 
 		// Predefined imports
-        CompilerConfiguration config = new CompilerConfiguration();
+		config = new CompilerConfiguration();
 		ImportCustomizer ic = new ImportCustomizer();
 		ic.addStarImports(PREDEFINED_IMPORTS);
 		ic.addStaticStars(PREDEFINED_STATIC_IMPORTS);
@@ -78,8 +83,8 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	public void setApplicationContext(ApplicationContext context) {
 		this.applicationContext = context;
 	}
-	
-	protected void logScriptException(ScriptException e, Logger logger) {
+
+	protected void logScriptException(Exception e, Logger logger) {
 		String message = e.getMessage();
 		Throwable t = e;
 		Throwable rootCause = e;
@@ -125,5 +130,55 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		Pattern pattern = Pattern.compile("\\s*case\\s+FormDataEvent." + event.name() + "\\s*:");
 		matcher = pattern.matcher(noCommentString);
 		return matcher.find();
+	}
+
+	protected String getScriptFilePath(String script, String scriptPathPrefix, Logger logger) {
+		String scriptFilePath = null;
+		try {
+			scriptFilePath = getLocalScriptPath(script, scriptPathPrefix);
+		} catch (Exception e) {
+			LOG.warn(e.getMessage(), e);
+			logger.error("Не удалось получить локальный скрипт", e);
+		}
+		return scriptFilePath;
+	}
+	protected String getLocalScriptPath(String script, String path) throws SyntaxException, IOException {
+		Class scriptClass = ((GroovyScriptEngine)getScriptEngine()).getScriptClass(script);
+		String packageName = scriptClass.getName().substring(0, scriptClass.getName().lastIndexOf('.'));
+		return findLocalScriptPath(new File(path), packageName, System.getProperty("line.separator"));
+	}
+
+	protected String findLocalScriptPath(File folder, String packageName, String lineSeparator) throws IOException {
+		for (File file : folder.listFiles()) {
+			if (file.isDirectory()) {
+				//Если папка - достаем из нее файлы groovy
+				String script = findLocalScriptPath(file, packageName, lineSeparator);
+				if (script != null) {
+					return script;
+				}
+			} else if (file.getName().equals("script.groovy")){
+				Scanner scanner = new Scanner(file);
+				try {
+					if (scanner.hasNextLine() && scanner.nextLine().startsWith("package " + packageName)) {
+						return file.getAbsolutePath();
+					}
+				} finally {
+					scanner.close();
+				}
+			}
+		}
+		return null;
+	}
+
+	protected Object executeLocalScript(Binding binding, String scriptFilePath, Logger logger) {
+		try {
+			File scriptFile = new File(scriptFilePath);
+			config.setSourceEncoding("UTF-8");
+			GroovyShell groovyShell = new GroovyShell(binding, config);
+			return groovyShell.evaluate(scriptFile);
+		} catch (Exception e) {
+			logScriptException(e, logger);
+			return false;
+		}
 	}
 }

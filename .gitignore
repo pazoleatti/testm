@@ -9,7 +9,6 @@ target
 *.iml
 .gwt
 .gradle
-templatesync/build
 bin
 *~
 libpeerconnection.log
@@ -19,3 +18,4 @@ database/distr/*/_logs
 database/distr/*/_bad
 build
 gwtapp/src/karma-unit-report.xml
+node_modules

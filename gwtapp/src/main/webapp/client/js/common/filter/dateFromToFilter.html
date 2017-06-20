@@ -5,40 +5,40 @@
     <div class="{{pickerGridClass}}">
         <div style="width: 130px; float: left;">
             <p class="input-group">
-                <input type="text" class="form-control" datetime="dd.MM.yyyy" datepicker-timezone
-                       uib-datepicker-popup="dd.MM.yyyy"
-                       is-open="dateFromOpened"
-                       close-text="Выбрать"
-                       current-text="Сегодня"
-                       clear-text="Очистить"
+                <input type="text" class="form-control" data-datetime="dd.MM.yyyy" data-datepicker-timezone
+                       data-uib-datepicker-popup="dd.MM.yyyy"
+                       data-is-open="dateFromOpened"
+                       data-close-text="{{'button.select' | translate}}"
+                       data-current-text="{{'button.today' | translate}}"
+                       data-clear-text="{{'button.clear' | translate}}"
                        data-ng-model="ngFromModel"
                        data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
                        title="{{ngFromModel}}">
             <span class="input-group-btn">
-                <button type="button" class="btn btn-default btn-sm" ng-click="dateFromSelectClick()">
+                <button type="button" class="btn btn-default btn-sm" data-ng-click="dateFromSelectClick()">
                     <i class="glyphicon glyphicon-calendar"></i>
                 </button>
             </span>
             </p>
         </div>
-        <div style="float: left; margin-left: -10px;">
+        <div style="float: left; margin-left: -42px; width: 52px;">
             <label class="control-label">{{'title.dateToFilterLabel' | translate}}:</label>
         </div>
 
         <div style="width: 130px; float: right; margin-right: -17px">
             <p class="input-group">
-                <input type="text" class="form-control" datetime="dd.MM.yyyy" datepicker-timezone
-                       uib-datepicker-popup="dd.MM.yyyy"
-                       is-open="dateToOpened"
-                       close-text="Выбрать"
-                       current-text="Сегодня"
-                       clear-text="Очистить"
-                       datepicker-options="dateToOptions"
+                <input type="text" class="form-control" data-datetime="dd.MM.yyyy" data-datepicker-timezone
+                       data-uib-datepicker-popup="dd.MM.yyyy"
+                       data-is-open="dateToOpened"
+                       data-close-text="{{'button.select' | translate}}"
+                       data-current-text="{{'button.today' | translate}}"
+                       data-clear-text="{{'button.clear' | translate}}"
+                       data-datepicker-options="dateToOptions"
                        data-ng-model="ngToModel"
                        data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
                        title="{{ngToModel}}">
             <span class="input-group-btn">
-                <button type="button" class="btn btn-default btn-sm" ng-click="dateToSelectClick()">
+                <button type="button" class="btn btn-default btn-sm" data-ng-click="dateToSelectClick()">
                     <i class="glyphicon glyphicon-calendar"></i>
                 </button>
             </span>

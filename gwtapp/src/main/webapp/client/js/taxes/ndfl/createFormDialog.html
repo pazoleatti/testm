@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <button type="button" class="close" ng-click="cancel()">×</button>
+    <button type="button" class="close" data-ng-click="cancel()">×</button>
     <h4 class="modal-title">
         <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{header}}
     </h4>
@@ -8,52 +8,35 @@
     <form role="form" name="createForm" novalidate class="modal-form form-horizontal">
         <div class="form-group">
             <div class="col-md-4">
-                <label class="control-label">{{'title.period' | translate}}</label>
+                <label class="control-label">{{::'title.period' | translate}}</label>
             </div>
-            <div class="col-md-8">
-                <ui-select ng-model="entity.period" required>
-                    <ui-select-match allow-clear="false">
-                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
-                    </ui-select-match>
-                    <ui-select-choices repeat="item in parentScope.filterList.periodList track by $index">
-                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                    </ui-select-choices>
-                </ui-select>
+            <div class="col-md-8" data-ui-select2="parentScope.periodSelect.options"
+                 data-ng-model="entity.period">
             </div>
         </div>
         <div class="form-group">
             <div class="col-md-4">
-                <label class="control-label">{{'title.department' | translate}}</label>
+                <label class="control-label">{{::'title.department' | translate}}</label>
             </div>
-            <div class="col-md-8">
-                <ui-select ng-model="entity.department" required>
-                    <ui-select-match allow-clear="false">
-                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
-                    </ui-select-match>
-                    <ui-select-choices repeat="item in parentScope.filterList.departmentList track by $index">
-                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                    </ui-select-choices>
-                </ui-select>
+            <div class="col-md-8" data-ui-select2="parentScope.departmentSelect.options"
+                 data-ng-model="entity.department">
             </div>
         </div>
         <div class="form-group">
             <div class="col-md-4">
-                <label class="control-label">{{'title.formKind' | translate}}</label>
+                <label class="control-label">{{::'title.formKind' | translate}}</label>
             </div>
-            <div class="col-md-8">
-                <ui-select ng-model="entity.formKind" required>
-                    <ui-select-match allow-clear="false">
-                        <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
-                    </ui-select-match>
-                    <ui-select-choices repeat="item in parentScope.filterList.formKindList track by $index">
-                        <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                    </ui-select-choices>
-                </ui-select>
+            <div class="col-md-8" data-ui-select2="parentScope.formKindSelect.options"
+                 data-ng-model="entity.formKind">
             </div>
         </div>
     </form>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-danger" data-ng-disabled="createForm.$invalid" ng-click="save()">{{'common.button.add' | translate}}</button>
-    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{'common.button.cancel' | translate}}</button>
+    <button type="button" class="btn btn-danger" data-ng-disabled="createForm.$invalid" data-ng-click="save()">
+        <span data-translate-once="common.button.add"></span>
+    </button>
+    <button type="button" class="btn btn-default" id="cancelButton" data-ng-click="cancel()">
+        <span data-translate-once="common.button.cancel"></span>
+    </button>
 </div>

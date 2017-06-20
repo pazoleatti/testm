@@ -1,0 +1,9 @@
+<div class="aplana-collapse">
+    <a class="collapse-link"
+       data-bindonce
+       data-ng-class="{'collapsed': isCollapsed}"
+       data-ng-click="isCollapsed = !isCollapsed"
+       data-unselectable="on">{{::label}}</a>
+
+    <div data-ng-hide="isCollapsed"></div>
+</div>

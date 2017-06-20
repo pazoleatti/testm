@@ -1,0 +1,70 @@
+/* стиль для grid-required режима */
+div[grid-required] .ui-jqgrid-bdiv table,
+div[data-grid-required] .ui-jqgrid-bdiv table {
+    background-color: #fdfdeb;
+}
+
+/* стиль для отображения ошибки валидации */
+.control-group.error div.ui-jqgrid.ui-widget.ui-widget-content.ui-corner-all {
+    border-color: #ff0000;
+}
+
+/* фикс иначе инпуты в гриде с ошибкой будут с красной рамкой */
+.control-group.error .ui-jqgrid-pager input,
+.control-group.error .ui-jqgrid-pager select {
+    border-color: #808080;
+}
+
+/* фикс иначе инпуты в гриде с ошибкой будут с красной рамкой при выделении */
+.control-group.error .ng-invalid-grid-required input:focus, .control-group.error .ng-invalid-grid-required select:focus {
+    background-image: url(../img/input-focus-bg.png);
+    background-repeat: repeat-x;
+    border-color: #c7a159;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0px 4px 1px rgba(199, 161, 89, 0.6);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0px 4px 1px rgba(199, 161, 89, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0px 4px 1px rgba(199, 161, 89, 0.6);
+}
+
+/* Серый чекбокс */
+.cbox.opacityCbox {
+    opacity: 0.4
+}
+
+/* Запрет выделения +/- */
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.grid-group-row-parent[grid-group-row-collapse-state='open'] .grid-group-row-collapse-clickable::after {
+    content: '-'
+}
+
+.grid-group-row-parent[grid-group-row-collapse-state='close'] .grid-group-row-collapse-clickable::after {
+    content: '+'
+}
+
+.grid-group-row-group[grid-group-row-collapse-state='open'] .grid-group-row-collapse-clickable::after {
+    content: '-'
+}
+
+.grid-group-row-group[grid-group-row-collapse-state='close'] .grid-group-row-collapse-clickable::after {
+    content: '+'
+}
+
+.grid-hide-button .upButtonOrder {
+    display: none !important;
+}
+
+.grid-hide-button .downButtonOrder {
+    display: none !important;
+}
+
+.grid-hide-button .removeButton {
+    display: none !important;
+}
