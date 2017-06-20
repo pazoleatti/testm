@@ -43,4 +43,9 @@ public interface FiasRefBookService {
      */
     Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationDataId, int p_check_type);
 
+    /**
+     * Вызывает процедуру обновляющую материальные представления после импорта в ФИАС
+     */
+    public void refreshViews();
+
 }

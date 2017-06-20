@@ -686,8 +686,8 @@ boolean checkMandatoryFields(List<NdflPerson> ndflPersonList) {
         List<String> mandatoryFields = new LinkedList<>();
         if (ndflPerson.rowNum == null) mandatoryFields << "'№пп'"
         if (ndflPerson.inp == null || ndflPerson.inp.isEmpty()) mandatoryFields << "'Налогоплательщик.ИНП'"
-        if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty()) mandatoryFields << "'Налогоплательщик.Фамилия'"
-        if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty()) mandatoryFields << "'Налогоплательщик.Имя'"
+        if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty() || ndflPerson.lastName == "0") mandatoryFields << "'Налогоплательщик.Фамилия'"
+        if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty() || ndflPerson.firstName == "0") mandatoryFields << "'Налогоплательщик.Имя'"
         if (ndflPerson.birthDay == null) mandatoryFields << "'Налогоплательщик.Дата рождения'"
         boolean checkCitizenship = true
         if (ndflPerson.citizenship == null || ndflPerson.citizenship.isEmpty()) {
@@ -1791,12 +1791,12 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         }
     }
 
+    allDeclarationData.removeAll(declarationsForRemove)
+
     if (allDeclarationData.isEmpty()) {
         createEmptyMessage(departmentReportPeriod, true)
         return null
     }
-
-    allDeclarationData.removeAll(declarationsForRemove)
     return allDeclarationData
 }
 
@@ -1805,7 +1805,7 @@ def createEmptyMessage(DepartmentReportPeriod departmentReportPeriod, boolean ac
     Department department = departmentService.get(departmentReportPeriod.departmentId)
     String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
     if (acceptChecking) {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
+        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
     } else {
         logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
     }
