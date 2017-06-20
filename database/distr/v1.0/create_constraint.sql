@@ -401,9 +401,7 @@ alter table fias_addrobj add constraint pk_fias_addrobj primary key (id);
 alter table fias_addrobj add constraint fk_fias_addrobj_parentid foreign key (parentguid) references fias_addrobj (id) on delete cascade deferrable initially deferred;
 
 -- checks
-alter table fias_addrobj add constraint chk_fias_addrobj_centstatus check (centstatus between 0 and 4);
 alter table fias_addrobj add constraint chk_fias_addrobj_currstatus check (currstatus between 0 and 99);
-alter table fias_addrobj add constraint chk_fias_addrobj_divtype check (divtype in (0,1,2));
 alter table fias_addrobj add constraint chk_fias_addrobj_livestatus check (livestatus in (0,1));
 
 --------------------------------------------------------------------------------------------------------

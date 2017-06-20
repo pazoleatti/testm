@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <uib-tabset active="activeForm" class="form100" style="height:63%;">
+    <uib-tabset active="activeForm" class="form100" style="height:66%;">
         <uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('requisites')">
             <div data-ng-controller="ndflCtrl">
                 <div class="container-grid" style="height: 100%">
@@ -314,17 +314,16 @@
                             </span>
                             </div>
                         </div>
+                        <div data-aplana-grid
+                             data-grid-fill-space="true"
+                             data-grid-fill-space-container-selector=".form100"
+                             data-grid-fill-space-container-selector-top=".container-grid-top"
+                             data-grid-options="requisitesGridOptions"
+                             data-grid-ctrl="ourGrid2"
+                             data-init-grid="initOurGrid(ctrl)"
+                             id="requisitesTable"
+                             style="float: left;"></div>
                     </div>
-
-                    <div data-aplana-grid
-                         data-grid-fill-space="true"
-                         data-grid-fill-space-container-selector=".form100"
-                         data-grid-fill-space-container-selector-top=".container-grid-top"
-                         data-grid-options="requisitesGridOptions"
-                         data-grid-ctrl="ourGrid2"
-                         data-init-grid="initOurGrid(ctrl)"
-                         id="requisitesTable2"
-                         style="float: left;"></div>
                 </div>
             </div>
         </uib-tab>
