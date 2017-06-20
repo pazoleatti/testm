@@ -9,7 +9,6 @@ target
 *.iml
 .gwt
 .gradle
-templatesync/build
 bin
 *~
 libpeerconnection.log
