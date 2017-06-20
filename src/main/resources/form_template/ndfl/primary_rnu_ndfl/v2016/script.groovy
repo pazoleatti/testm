@@ -578,7 +578,6 @@ def updateNaturalPersonRefBookRecords(Map<Long, NaturalPerson> primaryPersonMap,
             if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
                 Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
                 downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
-                continue
             }
 
             //address
