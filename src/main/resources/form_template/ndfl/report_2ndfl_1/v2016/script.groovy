@@ -686,8 +686,8 @@ boolean checkMandatoryFields(List<NdflPerson> ndflPersonList) {
         List<String> mandatoryFields = new LinkedList<>();
         if (ndflPerson.rowNum == null) mandatoryFields << "'№пп'"
         if (ndflPerson.inp == null || ndflPerson.inp.isEmpty()) mandatoryFields << "'Налогоплательщик.ИНП'"
-        if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty()) mandatoryFields << "'Налогоплательщик.Фамилия'"
-        if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty()) mandatoryFields << "'Налогоплательщик.Имя'"
+        if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty() || ndflPerson.lastName == "0") mandatoryFields << "'Налогоплательщик.Фамилия'"
+        if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty() || ndflPerson.firstName == "0") mandatoryFields << "'Налогоплательщик.Имя'"
         if (ndflPerson.birthDay == null) mandatoryFields << "'Налогоплательщик.Дата рождения'"
         boolean checkCitizenship = true
         if (ndflPerson.citizenship == null || ndflPerson.citizenship.isEmpty()) {
