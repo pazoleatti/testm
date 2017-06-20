@@ -7,7 +7,7 @@
     angular.module('sbrfNdfl.ndflJournal', ['ui.router'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflJournal', {
-                url: '/taxes/ndfl/journals',
+                url: '/taxes/ndflJournal',
                 templateUrl: 'client/js/taxes/ndfl/ndflJournal.html',
                 controller: 'ndflJournalCtrl'
             });
