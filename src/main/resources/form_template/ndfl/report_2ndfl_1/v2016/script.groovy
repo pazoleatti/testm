@@ -1785,12 +1785,12 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         }
     }
 
+    allDeclarationData.removeAll(declarationsForRemove)
+
     if (allDeclarationData.isEmpty()) {
         createEmptyMessage(departmentReportPeriod, true)
         return null
     }
-
-    allDeclarationData.removeAll(declarationsForRemove)
     return allDeclarationData
 }
 
@@ -1799,7 +1799,7 @@ def createEmptyMessage(DepartmentReportPeriod departmentReportPeriod, boolean ac
     Department department = departmentService.get(departmentReportPeriod.departmentId)
     String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
     if (acceptChecking) {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
+        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
     } else {
         logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
     }
