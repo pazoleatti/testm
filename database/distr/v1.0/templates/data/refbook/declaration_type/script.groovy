@@ -903,7 +903,7 @@ def importNdflResponse() {
     def ndfl2ContentReestrMap = [:]
     def reportFileName
     def docWeight = getDocWeight(UploadFileName)
-
+    boolean isNdfl2=true
     if (isNdfl2Response(UploadFileName)) {
         if (isNdfl2ResponseProt(UploadFileName)) {
             ndfl2ContentMap = readNdfl2ResponseContent()
@@ -919,6 +919,7 @@ def importNdflResponse() {
             reportFileName = ndfl2ContentReestrMap.get(NDFL2_TO_FILE)
         }
     } else {
+        isNdfl2=false
         def ndfl6Content = readNdfl6ResponseContent()
 
         if (ndfl6Content == null) {
@@ -928,9 +929,9 @@ def importNdflResponse() {
         reportFileName = getFileName(ndfl6Content, UploadFileName)
     }
 
-    //проверка что в строке есть имя файла происходит по наличию расширения файла
+    //проверка что в строке есть имя файла происходит по наличию расширения файла для NDFL 2 и не пустой строке для NDFL 6
     reportEndFile = reportFileName.substring(reportFileName.length() - 4)
-    if (!(reportEndFile.contains(".xml") || (reportEndFile.contains(".txt")) || (reportEndFile.contains(".XML")) || (reportEndFile.contains(".TXT")))) {
+    if (reportFileName==null||(isNdfl2 && !(reportEndFile.contains(".xml") || (reportEndFile.contains(".txt")) || (reportEndFile.contains(".XML")) || (reportEndFile.contains(".TXT"))))) {
         logger.error("Не найдено имя отчетного файла в файле ответа  \"%s\"", UploadFileName)
         return
     }
