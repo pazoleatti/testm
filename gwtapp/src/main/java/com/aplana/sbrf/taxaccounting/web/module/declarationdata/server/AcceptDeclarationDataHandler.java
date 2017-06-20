@@ -157,7 +157,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
             } catch (Exception e) {
                 logger.error(e);
             } finally {
-                lockDataService.unlock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), DeclarationDataReportType.IMPORT_TF_DEC), userInfo.getUser().getId());
+                lockDataService.unlock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
             }
             sendNotifications("Выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
             result.setStatus(CreateAsyncTaskStatus.EXIST);

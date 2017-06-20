@@ -154,8 +154,7 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
                         logger.error(e);
                     } finally {
                         uuid = logEntryService.save(logger.getEntries());
-
-                        lockDataService.unlock(declarationDataService.generateAsyncTaskKey(declarationId, DeclarationDataReportType.IMPORT_TF_DEC), userInfo.getUser().getId());
+                        lockDataService.unlock(declarationDataService.generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
                     }
                 }
             } else {
