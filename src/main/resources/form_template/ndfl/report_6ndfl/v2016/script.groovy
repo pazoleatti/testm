@@ -1209,7 +1209,7 @@ def createForm() {
         declarationService.delete(it.id, userInfo)
     }
 
-    if (ndflPersonsIdGroupedByKppOktmo == null) {
+    if (ndflPersonsGroupedByKppOktmo == null) {
         return
     }
 
