@@ -775,7 +775,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<DeclarationData> findAllActiveWithNotAcceptedState(int declarationTypeId, int reportPeriodId) {
+    public List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId) {
         String sql = "select " +
                 "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
@@ -783,12 +783,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
              "from declaration_data dd join department_report_period drp on drp.ID = dd.department_report_period_id " +
                 "where dd.declaration_template_id = :declarationTypeId " +
                 "and drp.report_period_id = :reportPeriodId " +
-                "and drp.is_active = 1 " +
-                "and dd.state <> :accepted";
+                "and drp.is_active = 1 ";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTypeId", declarationTypeId)
-                .addValue("reportPeriodId", reportPeriodId)
-                .addValue("accepted", State.ACCEPTED.getId());
+                .addValue("reportPeriodId", reportPeriodId);
         try {
             return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
