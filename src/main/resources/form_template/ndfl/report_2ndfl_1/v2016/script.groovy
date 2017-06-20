@@ -1445,11 +1445,17 @@ def checkDataConsolidated() {
             109L: 'Юго-Западный банк'
     ]
     DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    List<DeclarationData> listDepartmentNotAcceptedRnu = declarationService.findAllActiveWithNotAcceptedState(RNU_NDFL_DECLARATION_TYPE, drp.reportPeriod.id)
+    List<String> listDepartmentNotAcceptedRnu = []
+    List<DeclarationData> declarationDataList = declarationService.findAllActive(RNU_NDFL_DECLARATION_TYPE, drp.reportPeriod.id)
 
-    for (DeclarationData dd : listDepartmentNotAcceptedRnu) {
+    for (DeclarationData dd : declarationDataList) {
         // Подразделение
         Long departmentCode = departmentService.get(dd.departmentId)?.code
+
+        // Если налоговая форма не принята
+        if (!dd.state.equals(State.ACCEPTED)) {
+            listDepartmentNotAcceptedRnu << mapDepartmentNotExistRnu[departmentCode]
+        }
         mapDepartmentNotExistRnu.remove(departmentCode)
     }
 
@@ -1473,8 +1479,8 @@ def checkDataConsolidated() {
 
     if (!listDepartmentNotAcceptedRnu.isEmpty()) {
         logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                " года" + correctionDateExpression + " имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.id.join("\", \"")}'," +
-                " для которых в системе существуют КНФ в текущем периоде, состояние которых <> 'Принята'. Данные этих форм не включены в отчетность!")
+                " года" + correctionDateExpression + " имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.join("\", \"")}'," +
+                ". Данные этих форм не включены в отчетность!")
     }
 }
 
