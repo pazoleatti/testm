@@ -229,6 +229,7 @@ public class DeclarationDataPresenter
 
         GetDeclarationDataAction action = new GetDeclarationDataAction();
         action.setId(id);
+        ndflReferencesEditPresenter.clean();
         dispatcher.execute(
                 action,
                 CallbackUtils.defaultCallback(
