@@ -279,7 +279,7 @@ public class DeclarationListView extends
                                 + DeclarationDataTokens.declarationId + "="
                                 + declaration.getDeclarationDataId() + "\">"
                                 + declaration.getDeclarationType() + "</a> <br>");
-                        sb.appendHtmlConstant("<a href=\"index.html#/taxes/ndflDetails/1\">"
+                        sb.appendHtmlConstant("<a href=\"index.html#/taxes/ndfl/1\">"
                                 + declaration.getDeclarationType() + "(prototype)</a>");
                     }
                 }) {

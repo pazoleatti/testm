@@ -27,7 +27,10 @@
                     $scope.security.userTitle = USER_DATA.name;
                 };
 
-                //Получаем необходимые настройки с сервера
+                /**
+                 * @description Получаем необходимые настройки с сервера
+                 * @param {{project_properties}} response
+                 */
                 $http.get('controller/rest/configService/getConfig').then(
                     function (response) {
                         $scope.gwtMode = response.data.gwtMode;
@@ -123,8 +126,10 @@
                 $scope.security.userTitle = '';
                 updateCurrentUserInfo();
 
+                //noinspection JSValidateJSDoc
                 /**
                  * @description Выход из системы
+                 * @param USER_DATA.login
                  */
                 $scope.logout = function () {
                     $.ajax({

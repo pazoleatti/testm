@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <button type="button" class="close" ng-click="cancel()">×</button>
+    <button type="button" class="close" data-ng-click="cancel()">×</button>
     <h4 class="modal-title">
         <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{header}}
     </h4>
@@ -74,15 +74,9 @@
                     <div>
                         <label class="control-label">{{::'title.statusCode' | translate}}</label>
                     </div>
-                    <div>
-                        <ui-select ng-model="entity.statusCode" required>
-                            <ui-select-match allow-clear="false">
-                                <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
-                            </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.statusList track by $index">
-                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                            </ui-select-choices>
-                        </ui-select>
+                    <div style="width: 100%" data-ui-select2="statusCodeSelect.options"
+                         data-ng-model="entity.statusCode"
+                         data-ng-required="true">
                     </div>
                 </div>
             </fieldset>
@@ -94,15 +88,9 @@
                         <div>
                             <label class="control-label">{{::'title.document.code' | translate}}</label>
                         </div>
-                        <div>
-                            <ui-select ng-model="entity.documentCode" required>
-                                <ui-select-match allow-clear="false">
-                                    <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
-                                </ui-select-match>
-                                <ui-select-choices repeat="item in dialogDataStub.documentCodeList track by $index">
-                                    <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                                </ui-select-choices>
-                            </ui-select>
+                        <div style="width: 100%" data-ui-select2="documentCodeSelect.options"
+                             data-ng-model="entity.documentCode"
+                             data-ng-required="true">
                         </div>
                     </div>
                     <div>
@@ -154,75 +142,45 @@
                     <div>
                         <label class="control-label">{{::'title.subject' | translate}}</label>
                     </div>
-                    <div>
-                        <ui-select ng-model="entity.subject" required>
-                            <ui-select-match allow-clear="false">
-                                <span data-ng-bind="$select.selected.code" title="{{$select.selected.code}}"></span>
-                            </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.subjectCodeList track by $index">
-                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                            </ui-select-choices>
-                        </ui-select>
+                    <div style="width: 100%" data-ui-select2="subjectCodeSelect.options"
+                         data-ng-model="entity.subject"
+                         data-ng-required="true">
                     </div>
                 </div>
                 <div>
                     <div>
                         <label class="control-label">{{::'title.area' | translate}}</label>
                     </div>
-                    <div>
-                        <ui-select ng-model="entity.area" required>
-                            <ui-select-match allow-clear="false">
-                                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
-                            </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.areaList track by $index">
-                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                            </ui-select-choices>
-                        </ui-select>
+                    <div style="width: 100%" data-ui-select2="areaSelect.options"
+                         data-ng-model="entity.area"
+                         data-ng-required="true">
                     </div>
                 </div>
                 <div>
                     <div>
                         <label class="control-label">{{::'title.city' | translate}}</label>
                     </div>
-                    <div>
-                        <ui-select ng-model="entity.city">
-                            <ui-select-match allow-clear="false">
-                                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
-                            </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.cityList track by $index">
-                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                            </ui-select-choices>
-                        </ui-select>
+                    <div style="width: 100%" data-ui-select2="citySelect.options"
+                         data-ng-model="entity.city"
+                         data-ng-required="true">
                     </div>
                 </div>
                 <div>
                     <div>
                         <label class="control-label">{{::'title.locality' | translate}}</label>
                     </div>
-                    <div>
-                        <ui-select ng-model="entity.locality">
-                            <ui-select-match allow-clear="false">
-                                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
-                            </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.localityList track by $index">
-                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                            </ui-select-choices>
-                        </ui-select>
+                    <div style="width: 100%" data-ui-select2="localitySelect.options"
+                         data-ng-model="entity.locality"
+                         data-ng-required="true">
                     </div>
                 </div>
                 <div>
                     <div>
                         <label class="control-label">{{::'title.street' | translate}}</label>
                     </div>
-                    <div>
-                        <ui-select ng-model="entity.street" required>
-                            <ui-select-match allow-clear="false">
-                                <span data-ng-bind="$select.selected.name" title="{{$select.selected.name}}"></span>
-                            </ui-select-match>
-                            <ui-select-choices repeat="item in dialogDataStub.streetList track by $index">
-                                <span data-ng-bind-html="item.name | highlight: $select.search"></span>
-                            </ui-select-choices>
-                        </ui-select>
+                    <div style="width: 100%" data-ui-select2="streetSelect.options"
+                         data-ng-model="entity.street"
+                         data-ng-required="true">
                     </div>
                 </div>
                 <div>
@@ -273,10 +231,10 @@
     <button type="button"
             class="btn btn-danger"
             data-ng-disabled="createOrEditFLForm.$invalid"
-            ng-click="save()">
+            data-ng-click="save()">
         {{buttonTitle}}
     </button>
-    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">
+    <button type="button" class="btn btn-default" id="cancelButton" data-ng-click="cancel()">
         <span data-translate-once="common.button.cancel"></span>
     </button>
 </div>

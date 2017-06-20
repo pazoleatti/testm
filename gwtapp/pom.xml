@@ -303,7 +303,7 @@
 								<resource>
 									<directory>src/main/webapp</directory>
 									<includes>
-										<include>client/aplana/**</include>
+										<include>client/components/**</include>
 										<include>client/css/*.css</include>
 										<include>client/css/fonts/*.*</include>
 										<include>client/img/**</include>

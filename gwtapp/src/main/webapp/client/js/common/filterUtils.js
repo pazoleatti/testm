@@ -71,6 +71,10 @@
                     };
 
                     // Если следует выводить надпись "сброс", то isClear становится true
+                    //noinspection JSValidateJSDoc
+                    /**
+                     * @param searchFilter.isClearByFilterParams
+                     */
                     $scope.updateIsClear = function() {
                         if ($scope.searchFilter.isClearByFilterParams) {
                             $scope.searchFilter.isClearByFilterParams();
@@ -124,6 +128,10 @@
                         $scope.searchFilter.isClear = false;
 
                         // Кастомный код очистки фильтра
+                        //noinspection JSValidateJSDoc
+                        /**
+                         * @param searchFilter.resetFilterParams
+                         */
                         if ($scope.searchFilter.resetFilterParams) {
                             $scope.searchFilter.resetFilterParams();
                         }

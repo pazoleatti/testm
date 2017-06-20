@@ -4,8 +4,8 @@
     angular
         .module('sbrfNdfl', [
             'app.header',
-            'sbrfNdfl.ndflForms',
-            'sbrfNdfl.ndflDetailsForms',
+            'sbrfNdfl.ndflJournal',
+            'sbrfNdfl.ndfl',
             'app.filterDirectives',
             'app.filterUtils',
             'app.formLeaveConfirmer',
@@ -25,20 +25,21 @@
             'dialogs.main',
             'ngMessages',
             'angularFileUpload',
-            'ui.grid.moveColumns',
-            'ui.grid',
-            'ui.grid.pagination',     // пейджинг
-            'ui.grid.resizeColumns',  // изменение ширины столбцов
-            'ui.grid.saveState',      // сохранение состояния таблицы при переходах
-            'ui.grid.selection',      // выделение строк
-            'ui.grid.autoResize',
             'ui.bootstrap',
-            'ui.select',
             'ngMessages',
+            'ui.select',
             'ui.select2',
             'datePicker',
             'app.dropdown'
         ])
+
+        // Отображение диалогового окна с сообщением .
+        .factory('ShowToDoDialog', ['dialogs', '$filter', function (dialogs, $filter) {
+            return function () {
+                dialogs.message($filter('translate')('messageDialog.toDo.title'),$filter('translate')('messageDialog.toDo.message'));
+            };
+        }])
+
         .config(['$stateProvider', '$urlRouterProvider', '$translateProvider',
             function ($stateProvider, $urlRouterProvider, $translateProvider) {
                 // Указание страницы по умолчанию
@@ -58,20 +59,14 @@
                 $translateProvider.preferredLanguage('ru_RU');
                 $translateProvider.useLocalStorage();
                 $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
-                // Добавляем форматирование дат
-                Date.prototype.format = function (mask, utc) {
-                    return dateFormat(this, mask, utc);
-                };
-                // Добавляем возможность прибавления дней к дате
-                Date.prototype.addDays = function (days) {
-                    var dat = new Date(this.valueOf());
-                    dat.setDate(dat.getDate() + days);
-                    return dat;
-                };
             }
         ]);
 
-    // Получение информации о текущем пользователе и запуск приложения
+    /**
+     *
+     * @description Получение информации о текущем пользователе и запуск приложения
+     * @param {{user_data}} response
+     */
     var initInjector = angular.injector(['ng']);
     var $http = initInjector.get('$http');
     $http.get('controller/rest/configService/getConfig').then(

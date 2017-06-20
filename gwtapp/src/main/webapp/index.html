@@ -8,20 +8,16 @@
     <link rel="icon" href="client/img/favicon.ico">
     <title>ФП "НДФЛ, Фонды и Сборы"</title>
 
-    <link rel="stylesheet" type="text/css" href="client/aplana/css/accordion.css">
-    <link rel="stylesheet" type="text/css" href="client/aplana/css/grid.css">
-    <link href="client/aplana/css/bootstrap-select.css" rel="stylesheet">
-    <link href="client/aplana/css/select2.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="client/components/css/accordion.css">
+    <link rel="stylesheet" href="client/components/css/select2.css">
     <link rel="stylesheet" type="text/css" href="client/css/style.css">
 
 </head>
 <body>
 <div class="cbr-page">
     <!-- шапка -->
-    <div app-header></div>
+    <div data-app-header></div>
     <!-- основное содержимое -->
-  <!--  <div id="main-content" class="container-fluid" ui-view></div>-->
-
         <div class="cbr-page-layout">
             <div class="cbr-page-layout__view">
                 <div ui-view></div>
@@ -29,7 +25,6 @@
         </div>
     </div>
 
-   <!-- <script src="client/js/lib/jquery-3.2.1.js"></script>-->
     <script src="client/js/lib/jquery-3.2.1.js"></script>
     <script src="client/js/lib/jquery-1.2.js"></script>
     <script src="client/js/lib/angular-1.5.9.js"></script>
@@ -37,12 +32,10 @@
     <script src="client/js/lib/angular-translate-loader-url-2.15.1.js"></script> <!-- i18n -->
     <script src="client/js/lib/angular-sanitize-1.5.9.js"></script>
     <script src="client/js/lib/angular-ui-router-1.0.3.js"></script>
-    <script src="client/js/lib/ui-grid-4.0.4.js"></script> <!-- angular ui grid  -->
     <script src="client/js/lib/ui-bootstrap-tpls-1.3.3.js"></script> <!-- angular + bootstrap -->
     <script src="client/js/lib/bootstrap-3.3.7.js"></script>
     <script src="client/js/lib/angular-messages-1.5.9.js"></script> <!--https://code.angularjs.org/1.5.6/angular-messages.js-->
     <script src="client/js/lib/angular-animate-1.5.9.js"></script>
-    <script src="client/js/lib/select-0.19.7.js"></script>
     <script src="client/js/lib/validate-1.2.2.js"></script>
     <script src="client/js/lib/angular-file-upload-2.5.0.js"></script> <!--загрузка файлов-->
     <script src="client/js/lib/moment-2.18.1.js"></script>
@@ -50,6 +43,7 @@
     <script src="client/js/lib/angular-dialog-service-5.3.0.js"></script> <!--https://github.com/m-e-conroy/angular-dialog-service-->
     <script src="client/js/lib/grid.locale-en.js"></script>
     <script src="client/js/lib/jquery.jqGrid.js"></script>
+    <script src="client/js/lib/select-0.19.4.js"></script>
     <script src="client/js/lib/select2.js"></script>
     <script src="client/js/lib/he.js"></script>
     <script src="client/js/lib/re-tree.js"></script>
@@ -59,33 +53,30 @@
     <script src="client/js/lib/angular-cookies-1.6.5.js"></script>
     <script src="client/js/lib/angular-translate-storage-cookie-2.15.1.js"></script>
     <script src="client/js/lib/angular-translate-once.js"></script>
-    <!--<script src="js/lib/angular-resource-1.5.5.js"></script>-->
 
-    <script src="client/aplana/js/utils/aplana.js"></script>
-    <script src="client/aplana/js/dropdownMenu/dropdownMenu.js"></script>
-    <script src="client/aplana/js/collapse/collapse.js"></script>
-    <script src="client/aplana/js/modal/modal.js"></script>
-    <script src="client/aplana/js/submitValid/submitValid.js"></script>
-    <script src="client/aplana/js/overlay/overlay.js"></script>
-    <script src="client/aplana/js/alert/alert.js"></script>
-    <script src="client/aplana/js/grid/grid.js"></script>
-    <script src="client/aplana/js/webStorage/webStorage.js"></script>
-    <script src="client/aplana/js/uiSelect2/uiSelect2.js"></script>
-    <script src="client/aplana/js/field/field.js"></script>
-    <script src="client/aplana/js/focus/focus.js"></script>
-    <script src="client/aplana/js/modal/dialogs.js"></script>
+    <script src="client/components/js/utils/aplana.js"></script>
+    <script src="client/components/js/collapse/collapse.js"></script>
+    <script src="client/components/js/modal/modal.js"></script>
+    <script src="client/components/js/submitValid/submitValid.js"></script>
+    <script src="client/components/js/overlay/overlay.js"></script>
+    <script src="client/components/js/alert/alert.js"></script>
+    <script src="client/components/js/grid/grid.js"></script>
+    <script src="client/components/js/webStorage/webStorage.js"></script>
+    <script src="client/components/js/uiSelect2/uiSelect2.js"></script>
+    <script src="client/components/js/field/field.js"></script>
+    <script src="client/components/js/focus/focus.js"></script>
+    <script src="client/components/js/modal/dialogs.js"></script>
+    <script src="client/components/js/datePicker/date-picker.js"></script>
+    <script src="client/components/js/dropDown/dropdown.js"></script>
+    <script src="client/components/js/formLeaveConfirmer/formLeaveConfirmer.js"></script>
 
     <script src="resources/locale-ru_RU.json"></script>
 
     <script src="client/js/common/filterUtils.js"></script>
-    <script src="client/js/common/formLeaveConfirmer.js"></script>
     <script src="client/js/main/app.js"></script>
     <script src="client/js/main/header.js"></script>
-    <script src="client/js/taxes/ndfl/ndflForms.js"></script>
-    <script src="client/js/taxes/ndfl/ndflDetails.js"></script>
-    <script src="client/js/taxes/ndfl/informationDetails.js"></script>
+    <script src="client/js/taxes/ndfl/ndflJournal.js"></script>
+    <script src="client/js/taxes/ndfl/ndfl.js"></script>
     <script src="client/js/common/filter/filterDirectives.js"></script>
-    <script src="client/js/common/widgets/date-picker.js"></script>
-    <script src="client/js/common/widgets/dropdown.js"></script>
 </body>
 </html>

@@ -163,8 +163,8 @@
 	}]); // end WaitDialogCtrl
 
 	/**
-	 * Confirm Dialog Controller
-	 */
+	* Confirm Dialog Controller
+	*/
 	ctrlrs.controller('confirmDialogCtrl',['$scope','$uibModalInstance','$translate','data',function($scope,$uibModalInstance,$translate,data){
 		//-- Variables -----//
 
@@ -182,6 +182,22 @@
 		$scope.yes = function(){
 			$uibModalInstance.close('yes');
 		}; // end yes
+	}]); // end ConfirmDialogCtrl / dialogs.controllers
+
+	/**
+	 * Confirm Dialog Controller
+	 */
+	ctrlrs.controller('messageDialogCtrl',['$scope','$uibModalInstance','$filter', 'data',function($scope,$uibModalInstance,$filter,data){
+		//-- Variables -----//
+		$scope.options = {};
+		$scope.options.title = data.title;
+		$scope.options.content = data.content;
+		$scope.options.closeBtnCaption = $filter('translate')('button.close');
+		//-- Methods -----//
+
+		$scope.closeBtnClick = function(){
+			$uibModalInstance.dismiss('no');
+		}; // end close
 	}]); // end ConfirmDialogCtrl / dialogs.controllers
 //== Services ================================================================//
 
@@ -466,7 +482,37 @@
 								}
 							}
 						}); // end modal.open
-					} // end confirm
+					}, // end confirm
+
+					/**
+					 * Message Dialog
+					 *
+					 * @param	title 	string
+					 * @param	content 	string
+					 * @param	opts	object
+					 */
+					message : function(title,content,opts){
+						opts = _setOpts(opts);
+
+						return $uibModal.open({
+							templateUrl : 'client/components/templates/modal/message.html',
+							controller : 'messageDialogCtrl',
+							backdrop: opts.bd,
+							backdropClass: opts.bdc,
+							keyboard: opts.kb,
+							windowClass: opts.wc,
+							size: opts.ws,
+							animation: opts.anim,
+							resolve : {
+								data : function(){
+									return {
+										title : angular.copy(title),
+										content : angular.copy(content),
+									};
+								}
+							}
+						}); // end modal.open
+					} // end message
 
 				}; // end return
 

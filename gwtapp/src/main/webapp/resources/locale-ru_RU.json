@@ -44,7 +44,7 @@
   "common.button.yes": "Да",
   "button.create": "Создать",
   "button.check": "Проверить",
-  "button.calculate": "Расчитать",
+  "button.calculate": "Рассчитать",
   "button.delete": "Удалить",
   "button.accept": "Принять",
   "button.return": "Вернуть в создана",
@@ -55,6 +55,9 @@
   "button.today": "Сегодня",
   "button.clear": "Очистить",
   "button.select": "Выбрать",
+
+  "messageDialog.toDo.title": "Информация",
+  "messageDialog.toDo.message": "Функционал находится в разработке",
 
   "filter.placeholder.all": "-Все-",
   "filterPanelLabel": "Фильтр",
@@ -88,8 +91,8 @@
   "menu.manuals.manualUser": "Руководство пользователя",
   "menu.manuals.manualLayoutDesigner": "Руководство настройщика макетов",
 
-  "header.ndfl.forms": "НДФЛ - Список налоговых форм",
-  "header.ndflDetails.forms": "РНУ НДФЛ",
+  "header.ndflJournal.forms": "НДФЛ - Список налоговых форм",
+  "header.ndfl.forms": "РНУ НДФЛ",
   "header.ndfl.form.create": "Создание новой записи",
   "header.ndfl.fl.create": "Добавить запись ФЛ",
   "header.ndfl.fl.edit": "Редактировать запись ФЛ",
