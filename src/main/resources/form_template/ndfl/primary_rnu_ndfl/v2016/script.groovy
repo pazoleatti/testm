@@ -599,6 +599,15 @@ import java.text.SimpleDateFormat
             if (refBookPerson != null) {
 
                 primaryPerson.setId(refBookPerson.getId());
+                /*
+               Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
+               тогда версия записи в справочнике меняется на более раннюю дату, без изменения атрибутов. Такая ситуация
+               вряд ли может возникнуть на практике и проверка создана по заданию тестировщиков.
+              */
+                if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
+                    Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
+                    downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
+                }
 
                 //address
                 if (primaryPerson.getAddress() != null) {
@@ -758,6 +767,11 @@ import java.text.SimpleDateFormat
 
         logForDebug("Обновлено записей: " + updCnt);
 
+    }
+
+    def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
+        Date newVersion = getReportPeriodStartDate()
+        getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
     }
 
     def fillSystemAliases(Map<String, RefBookValue> values, RefBookObject refBookObject) {
