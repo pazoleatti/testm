@@ -27,7 +27,6 @@
             'angularFileUpload',
             'ui.bootstrap',
             'ngMessages',
-            'ui.select',
             'ui.select2',
             'datePicker',
             'app.dropdown'
