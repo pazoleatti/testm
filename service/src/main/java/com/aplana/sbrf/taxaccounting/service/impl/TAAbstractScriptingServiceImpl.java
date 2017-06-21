@@ -211,12 +211,13 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	}
 
 
-	protected Object executeLocalScript(Binding binding, String scriptFilePath, Logger logger) {
+	protected boolean executeLocalScript(Binding binding, String scriptFilePath, Logger logger) {
 		try {
 			File scriptFile = new File(scriptFilePath);
 			config.setSourceEncoding("UTF-8");
 			GroovyShell groovyShell = new GroovyShell(binding, config);
-			return groovyShell.evaluate(scriptFile);
+			groovyShell.evaluate(scriptFile);
+			return true;
 		} catch (Exception e) {
 			logScriptException(e, logger);
 			return false;
