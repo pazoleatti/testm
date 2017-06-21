@@ -12,7 +12,7 @@
     ])
         .directive('appHeader', function () {
             return {
-                templateUrl: 'client/js/main/header.html',
+                templateUrl: 'client/app/main/header.html',
                 controller: 'MainMenuController'
             };
         })

@@ -1,0 +1,314 @@
+<div class="modal-header">
+    <button type="button" class="close" data-ng-click="cancel()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{header}}
+    </h4>
+</div>
+<form role="form" name="createOrEditFLForm" novalidate class="modal-form form-horizontal"
+      data-aplana-submit-valid="save()">
+    <div class="modal-body" style="height: 500px">
+        <fieldset class="form-fieldset" style="width: 200px; float: left">
+            <legend>{{::'title.taxpayer' | translate}}</legend>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.inp' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <input style="margin-left: -180px;width: 168px;"
+                           data-ng-model="entity.inp" required
+                           type="text" class="form-control"
+                           title="{{entity.inp}}"/>
+
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.surname' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <input style="margin-left: -180px;width: 168px;"
+                           data-ng-model="entity.surname" required
+                           type="text" class="form-control"
+                           title="{{entity.surname}}"/>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.name' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <input style="margin-left: -180px;width: 168px;"
+                           data-ng-model="entity.name" required
+                           type="text" class="form-control"
+                           title="{{entity.name}}"/>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.patronymic' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <input style="margin-left: -180px;width: 168px;"
+                           data-ng-model="entity.patronymic" required
+                           type="text" class="form-control"
+                           title="{{entity.patronymic}}"/>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.dateOfBirth' | translate}}</label>
+                </div>
+                <div>
+                    <mu-date-picker model="entity.dateOfBirth"></mu-date-picker>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.citizenship' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <div style="margin-left: -180px;width: 168px;" data-ui-select2="citizenshipSelect.options"
+                         data-ng-model="entity.citizenship"
+                         data-ng-required="true">
+                    </div>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.statusCode' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <div style="margin-left: -180px;width: 168px;" data-ui-select2="statusCodeSelect.options"
+                         data-ng-model="entity.statusCode"
+                         data-ng-required="true">
+                    </div>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div style="width: 200px; display: inline-block; margin-left: 15px;">
+            <fieldset class="form-fieldset">
+                <legend>{{::'title.document' | translate}}</legend>
+                <div>
+                    <div>
+                        <label class="control-label">{{::'title.document.code' | translate}}</label>
+                    </div>
+                    <div data-aplana-field>
+                        <div style="margin-left: -180px;width: 168px;" data-ui-select2="documentCodeSelect.options"
+                             data-ng-model="entity.documentCode"
+                             data-ng-required="true">
+                        </div>
+                        <div data-aplana-validator data-key="required">
+                            {{::'field.ndfl.requiredField' | translate}}
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{::'title.document.number' | translate}}</label>
+                    </div>
+                    <div data-aplana-field>
+                        <input style="margin-left: -180px;width: 168px;"
+                               data-ng-model="entity.documentNumber" required
+                               type="text" class="form-control"
+                               title="{{entity.document.number}}"
+                               data-ui-validate="{isNumber : 'isNumber($value)'}"/>
+
+                        <div data-aplana-validator data-key="required">
+                            {{::'field.ndfl.requiredField' | translate}}
+                        </div>
+                        <div data-aplana-validator data-key="isNumber">
+                            {{::'field.ndfl.isNumber' | translate}}
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-fieldset" style="margin-top: 15px;">
+                <legend>{{::'title.document' | translate}}</legend>
+                <div>
+                    <div>
+                        <label class="control-label">{{::'title.innRF' | translate}}</label>
+                    </div>
+                    <div data-aplana-field>
+                        <input style="margin-left: -180px;width: 168px;"
+                               data-ng-model="entity.innRF" required
+                               type="text" class="form-control"
+                               title="{{entity.innRF}}"/>
+                        <div data-aplana-validator data-key="required">
+                            {{::'field.ndfl.requiredField' | translate}}
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label class="control-label">{{::'title.innINO' | translate}}</label>
+                    </div>
+                    <div data-aplana-field>
+                        <input style="margin-left: -180px;width: 168px;"
+                               data-ng-model="entity.innINO" required
+                               type="text" class="form-control"
+                               title="{{entity.innINO}}"/>
+                        <div data-aplana-validator data-key="required">
+                            {{::'field.ndfl.requiredField' | translate}}
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+        </div>
+
+        <fieldset class="form-fieldset" style="width: 300px; float: right">
+            <legend>{{::'title.registrationAddress' | translate}}</legend>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.subject' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="subjectCodeSelect.options"
+                         data-ng-model="entity.subject"
+                         data-ng-required="true">
+                    </div>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.area' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="areaSelect.options"
+                         data-ng-model="entity.area"
+                         data-ng-required="true">
+                    </div>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.city' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="citySelect.options"
+                         data-ng-model="entity.city"
+                         data-ng-required="true">
+                    </div>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.locality' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="localitySelect.options"
+                         data-ng-model="entity.locality"
+                         data-ng-required="true">
+                    </div>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.street' | translate}}</label>
+                </div>
+                <div data-aplana-field="">
+                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="streetSelect.options"
+                         data-ng-model="entity.street"
+                         data-ng-required="true">
+                    </div>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <label class="control-label">{{::'title.index' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <input style="margin-left: -180px;width: 268px;"
+                           data-ng-model="entity.index" required
+                           type="text" class="form-control"
+                           title="{{entity.index}}"/>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div style="float: left; width: 80px;">
+                <div>
+                    <label class="control-label">{{::'title.building' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <input style="margin-left: -180px;width: 80px;"
+                           data-ng-model="entity.building" required
+                           type="text" class="form-control"
+                           title="{{entity.building}}"/>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+            <div style="width: 80px; display: inline-block; margin-left: 15px;">
+                <div>
+                    <label class="control-label">{{::'title.housing' | translate}}</label>
+                </div>
+                <div>
+                    <input data-ng-model="entity.housing"
+                           type="text" class="form-control"
+                           title="{{entity.housing}}"/>
+                </div>
+            </div>
+            <div style="float: right; width: 80px;">
+                <div>
+                    <label class="control-label">{{::'title.apartment' | translate}}</label>
+                </div>
+                <div data-aplana-field>
+                    <input style="margin-left: -180px;width: 80px;"
+                           data-ng-model="entity.apartment" required
+                           type="text" class="form-control"
+                           title="{{entity.apartment}}"/>
+                    <div data-aplana-validator data-key="required">
+                        {{::'field.ndfl.requiredField' | translate}}
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="modal-footer">
+        <span class="modal-hint-text" style="width: 320px;" data-translate-once="common.hint"></span>
+        <button type="submit" class="btn btn-danger">
+            {{buttonTitle}}
+        </button>
+        <button type="button" class="btn btn-default" id="cancelButton" data-ng-click="cancel()">
+            <span data-translate-once="common.button.cancel"></span>
+        </button>
+    </div>
+</form>

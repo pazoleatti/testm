@@ -34,6 +34,7 @@
   "DIALOGS_ERROR": "Ошибка",
   "DIALOGS_CONFIRMATION_MSG": "Требуется подтвеждение.",
   "DIALOGS_NOTIFICATION": "Уведомление",
+  "common.hint": "Заполните обязательные поля (отмечены желтым)",
 
   "common.button.search": "Найти",
   "common.button.clear": "Сбросить",

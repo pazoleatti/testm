@@ -13,13 +13,11 @@
             'pascalprecht.translate',
             'aplana.overlay',
             'aplana.alert',
-            'aplana.modal',
             'aplana.utils',
             'aplana.grid',
             'aplana.submitValid',
             'aplana.collapse',
             'aplana.field',
-            'aplana.modal.dialogs',
             'ui.router',
             'ui.validate',
             'dialogs.main',
@@ -47,7 +45,7 @@
                 $stateProvider
                     .state('/', {
                         url: '/',
-                        templateUrl: 'client/js/main/app.html'
+                        templateUrl: 'client/app/main/app.html'
                     });
 
                 // Настройка источника локализованных сообщений

@@ -18,7 +18,7 @@
             return {
                 restrict: 'E',
                 ngModel: 'ngModel',
-                templateUrl: 'client/js/common/filter/dateFromToFilter.html',
+                templateUrl: 'client/app/common/filter/dateFromToFilter.html',
                 scope: {
                     ngLabel: '@?',
                     ngFromModel: '=',

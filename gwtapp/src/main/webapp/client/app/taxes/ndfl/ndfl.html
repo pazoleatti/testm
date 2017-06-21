@@ -1,0 +1,204 @@
+<div id="ndfl" style="height: 100%;">
+    <!--Заголовок-->
+    <div class="row" style="min-width: 1400px;">
+        <div class="header-col" style="margin-left: 15px;">
+            <h1><a href="{{'Main.jsp' + gwtMode + '#!declarationList;nType=NDFL'}}">{{::'menu.taxes.ndfl' |
+                translate}}:</a> - {{::'header.ndfl.forms' | translate}}:</h1>
+        </div>
+        <div class="header-col w200" style="float: right; margin-top: 20px;">
+            <label class="w200"><a href="#">{{::'link.ndfl.reporting' | translate}}</a></label>
+        </div>
+    </div>
+
+    <div class="grid-filter" style="min-width: 1400px;">
+        <div data-aplana-collapse data-is-collapsed="false" data-label="'infoPanelLabel' | translate">
+            <!--Основная информация-->
+            <div class="header-details">
+                <div class="row">
+                    <div class="header-col w400">
+                        <div>
+                            <label class="w100">{{::'title.department' | translate}}:</label>
+                            <label class="font-normal">{{department}}</label>
+                        </div>
+                        <div>
+                            <label class="w100">{{::'title.formNumber' | translate}}:</label>
+                            <label class="font-normal">{{formNumber}}</label>
+                        </div>
+                        <div>
+                            <label class="w100">{{::'title.creator' | translate}}:</label>
+                            <label class="font-normal">{{creator}}</label>
+                        </div>
+                    </div>
+                    <div class="header-col w300">
+                        <div>
+                            <label>{{::'title.formType' | translate}}:</label>
+                            <label class="font-normal">{{formType}}</label>
+                        </div>
+                        <div>
+                            <label>{{::'title.period' | translate}}:</label>
+                            <label class="font-normal">{{period}}</label>
+                        </div>
+                        <div>
+                            <label>{{::'title.state' | translate}}:</label>
+                            <label class="font-normal">{{state}}</label>
+                        </div>
+                    </div>
+                    <div class="header-col w350">
+                        <div>
+                            <label>{{::'title.nameAsnu' | translate}}:</label>
+                            <label class="font-normal">{{nameAsnu}}</label>
+                        </div>
+                    </div>
+                    <div class="header-col w200" style="float: right;">
+                        <div>
+                            <label class="w200"><a href="#">{{::'link.ndfl.historyOfChange' | translate}}</a></label>
+                        </div>
+                        <div>
+                            <label class="w200"><a href="#">{{::'link.ndfl.filesAndComment' | translate}}</a></label>
+                        </div>
+                        <div>
+                            <label class="w200"><a href="#">{{::'link.ndfl.sources' | translate}}</a></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Панель кнопок -->
+            <div class="button_panel">
+                <div class="btn-toolbar" role="toolbar">
+                    <!--Проверить -->
+                    <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
+                        data-ng-click="checkButtonClick()">
+                    <img src="/client/img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/check.png"
+                         width="32px" height="22px"
+                         alt="{{'button.check' | translate}}"/>
+                    <span data-translate-once="button.check"></span>
+                </button>
+            </span>
+                    <!--Рассчитать -->
+                    <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
+                        data-ng-click="calculateButtonClick()">
+                    <img src="/client/img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/calculate.png"
+                         width="32px" height="22px"
+                         alt="{{'button.calculate' | translate}}"/>
+                    <span data-translate-once="button.calculate"></span>
+                </button>
+            </span>
+                    <!--Принять -->
+                    <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
+                        data-ng-click="acceptButtonClick()">
+                    <img src="/client/img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/accept.png"
+                         width="32px" height="22px"
+                         alt="{{'button.accept' | translate}}"/>
+                    <span data-translate-once="button.accept"></span>
+                </button>
+            </span>
+                    <!--Вернуть в Создана -->
+                    <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
+                        data-ng-click="returnButtonClick()">
+                    <img src="/client/img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/return.png"
+                         width="32px" height="22px"
+                         alt="{{'button.return' | translate}}"/>
+                    <span data-translate-once="button.return"></span>
+                </button>
+            </span>
+                    <!--Редактировать-->
+                    <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!editButtonEnabled"
+                        data-ng-click="editRecordClick()">
+                    <img src="/client/img/button/{{editButtonEnabled ? 'enable' : 'disable'}}/edit.png" width="32px"
+                         height="22px"
+                         alt="{{'button.edit' | translate}}"/>
+                    <span data-translate-once="button.edit"></span>
+                </button>
+            </span>
+                </div>
+            </div>
+            <hr/>
+        </div>
+    </div>
+
+    <uib-tabset active="activeForm" class="form100" style="height:66%;">
+        <uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('requisites')">
+            <div data-ng-controller="ndflCtrl">
+                <div class="container-grid" style="height: 100%">
+                    <div class='container-grid-top'>
+                        <span data-ng-include="'/client/app/taxes/ndfl/filters/ndflFilter.html'"></span>
+                        <div class="button_panel" style="float: right;">
+                            <div class="btn-toolbar" role="toolbar">
+                                <!--Редактировать запись в таблице-->
+                                    <span>
+                                <button type="button" class="btn btn-default" data-ng-disabled="!editReqsEnabled"
+                                        data-ng-click="editFLClick()">
+                                    <img src="/client/img/button/enable/edit_entry.png" width="15px" height="15px"/>
+                                </button>
+                            </span>
+                                <!--Создать запись в таблице-->
+                                    <span>
+                                <button type="button" class="btn btn-default"
+                                        data-ng-click="createFLClick()">
+                                    <img src="/client/img/button/enable/create_entry.png" width="15px"
+                                         height="15px"/>
+                                </button>
+                            </span>
+                                <!--Удалить запись из таблицы-->
+                                    <span>
+                                <button type="button" class="btn btn-default" data-ng-disabled="!deleteReqsEnabled"
+                                        data-ng-click="deleteFLClick()">
+                                    <img src="/client/img/button/enable/delete_entry.png" width="15px"
+                                         height="15px"/>
+                                </button>
+                            </span>
+                            </div>
+                        </div>
+                        <div data-aplana-grid
+                             data-grid-fill-space="true"
+                             data-grid-fill-space-container-selector=".form100"
+                             data-grid-fill-space-container-selector-top=".container-grid-top"
+                             data-grid-options="requisitesGridOptions"
+                             data-grid-ctrl="ourGrid2"
+                             data-init-grid="initOurGrid(ctrl)"
+                             id="requisitesTable"
+                             style="float: left;"></div>
+                    </div>
+                </div>
+            </div>
+        </uib-tab>
+
+        <uib-tab index="1" heading="2. {{::'tab.ndfl.informationOnIncomesAndNdfl' | translate}}"
+                 select="selectTab('incomesAndNdfl')">
+        </uib-tab>
+
+        <uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
+                 select="selectTab('deductions')">
+            <!--<div data-ng-controller="informationDetailsFormsCtrl" >-->
+            <!--<div id="information-details-content" class="content-with-table" style="" >-->
+
+            <!--<div style="overflow:hidden;" >-->
+            <!--<form class="tableForm"><input type="image" src="client/img/icon/delete.png" data-ng-click="" ></form>-->
+            <!--<form class="tableForm"><input type="image" src="client/img/icon/add.png" data-ng-click="addInformationData()" ></form>-->
+            <!--<form class="tableForm"><input type="image" src="client/img/icon/edit.png" data-ng-click="editInformationData()" ></form>-->
+            <!--</div>-->
+
+            <!--<div class="gridStyle" ui-grid="informationOptions" ui-grid-resize-columns-->
+            <!--ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div>-->
+
+            <!--<!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="infoGridOptions"-->
+            <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->-->
+
+            <!--<!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="gridOptions"-->
+            <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->-->
+
+            <!--</div>-->
+            <!--</div>-->
+        </uib-tab>
+
+        <uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
+                 select="selectTab('advancePayments')">
+        </uib-tab>
+
+    </uib-tabset>
+</div>
