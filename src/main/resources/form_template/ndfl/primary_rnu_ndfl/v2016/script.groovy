@@ -3382,7 +3382,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column7And11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}}'",
+                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                     "Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
             )
             //11 Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 20
