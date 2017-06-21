@@ -599,6 +599,15 @@ import java.text.SimpleDateFormat
             if (refBookPerson != null) {
 
                 primaryPerson.setId(refBookPerson.getId());
+                /*
+               Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
+               тогда версия записи в справочнике меняется на более раннюю дату, без изменения атрибутов. Такая ситуация
+               вряд ли может возникнуть на практике и проверка создана по заданию тестировщиков.
+              */
+                if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
+                    Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
+                    downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
+                }
 
                 //address
                 if (primaryPerson.getAddress() != null) {
@@ -758,6 +767,11 @@ import java.text.SimpleDateFormat
 
         logForDebug("Обновлено записей: " + updCnt);
 
+    }
+
+    def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
+        Date newVersion = getReportPeriodStartDate()
+        getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
     }
 
     def fillSystemAliases(Map<String, RefBookValue> values, RefBookObject refBookObject) {
@@ -3423,9 +3437,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, String attributeName) {
     if (ndflPerson[alias] == null || (ndflPerson[alias]) instanceof String && (org.apache.commons.lang3.StringUtils.isBlank(ndflPerson[alias]) || ndflPerson[alias] == "0")) {
         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                "$attributeName='${ndflPerson[alias]?:""}'")
-        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
-                "Не заполнен обязательный параметр '$attributeName'")
+                "$attributeName='${ndflPerson[alias]!=null?ndflPerson[alias]:""}'")
+        String msg
+        if (ndflPerson[alias] == "0") {
+            msg = "Значение гр. \"$attributeName\" не может быть равно \"0\""
+        } else {
+            msg = "Не заполнена гр. \"$attributeName\""
+        }
+        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError, msg)
         return false
     }
     return true
