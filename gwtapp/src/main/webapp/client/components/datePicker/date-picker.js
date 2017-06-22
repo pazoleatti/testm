@@ -30,11 +30,17 @@
                     $scope.isOpen = true;
                     $scope.datePickerOptions = {
                         minDate: $scope.minDate,
-                        maxDate: $scope.maxDate
+                        maxDate: $scope.maxDate,
+                        dateDisabled: disabled
                     };
                 };
                 $scope.pickerStyle = $scope.inputStyle ? $scope.inputStyle : '';
             }
         };
+        function disabled(data) {
+            var date = data.date,
+                mode = data.mode;
+            return mode === 'day' && (date.getDay() === 0 || date.getDay() === 6);
+        }
     });
 }());

@@ -31,12 +31,16 @@
                     scope.dateToOpened = false;
                     scope.dateFromSelectClick = function () {
                         scope.dateFromOpened = true;
+                        scope.dateFromOptions = {
+                            dateDisabled: disabled
+                        };
                     };
                     scope.dateToSelectClick = function () {
                         scope.dateToOpened = true;
                         scope.dateToOptions = {
                             minDate: scope.ngFromModel,
-                            maxDate: undefined
+                            maxDate: undefined,
+                            dateDisabled: disabled
                         };
                     };
                     // Изменение пропорций метки и поля
@@ -49,5 +53,10 @@
                     }
                 }
             };
+            function disabled(data) {
+                var date = data.date,
+                    mode = data.mode;
+                return mode === 'day' && (date.getDay() === 0 || date.getDay() === 6);
+            }
         });
 } ());
