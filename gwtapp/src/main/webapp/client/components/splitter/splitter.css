@@ -1,0 +1,71 @@
+div[data-splitter="vertical"]{
+    background-color: #666;
+    position: absolute;
+    height: 100%;
+    bottom: 0;
+    cursor: e-resize;
+}
+
+div[data-splitter="horizontal"]{
+    background-color: #666;
+    bottom: 100px;
+    width: 100%;
+    cursor: ns-resize;
+}
+
+div[data-splitter] {
+    background-color: #AAA;
+}
+
+
+div[data-splitter] {
+    background-color: #515e5e;
+    box-shadow: 2px 0 3px rgba(68, 75, 75, 0.5);
+}
+
+div[data-splitter] a {
+    content: "";
+    position: absolute;
+}
+
+.splitter-icon-chevron-left{
+    background: url("icon-chevron-left.png") no-repeat;
+    width: 16px;
+    height: 87px;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+}
+
+.splitter-icon-chevron-right{
+    background: url("icon-chevron-right.png") no-repeat;
+    width: 16px;
+    height: 87px;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+}
+
+.splitter-icon-chevron-up{
+    background: url("icon-chevron-up.png") no-repeat;
+    width: 87px;
+    height: 16px;
+
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+}
+
+.splitter-icon-chevron-down{
+    background: url("icon-chevron-down.png") no-repeat;
+    width: 87px;
+    height: 16px;
+
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+}

@@ -1,0 +1,76 @@
+<div id="production-planning" class="container-grid" style="height: 100%">
+    <div class="page-top-content">
+        <h1>{{::'header.ndflJournal.forms' | translate}}:</h1>
+        <!-- Панель фильтрации -->
+        <span data-ng-include="'/client/app/taxes/ndfl/ndflJournalFilter.html'"></span>
+        <!-- Панель кнопок над таблицей -->
+        <div class="button_panel">
+            <div class="btn-toolbar" role="toolbar">
+                <!-- Создать -->
+                <span data-ng-check-operation="['PRODUCTION_PLAN_CREATE']">
+                <button type="button" class="btn btn-default" data-ng-disabled="!createButtonEnabled"
+                        data-ng-click="createButtonClick()">
+                    <img src="/client/img/button/{{createButtonEnabled ? 'enable' : 'disable'}}/new_add.png" width="32px" height="22px"
+                         alt="{{::'button.create' | translate}}"/>
+                    <span data-translate-once="button.create"></span>
+                </button>
+            </span>
+                <!-- Проверить -->
+                <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
+                        data-ng-click="checkButtonClick()">
+                    <img src="/client/img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/check.png" width="32px" height="22px"
+                         alt="{{::'button.check' | translate}}"/>
+                    <span data-translate-once="button.check"></span>
+                </button>
+            </span>
+                <!-- Рассчитать -->
+                <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
+                        data-ng-click="calculateButtonClick()">
+                    <img src="/client/img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/calculate.png" width="32px" height="22px"
+                         alt="{{::'button.calculate' | translate}}"/>
+                    <span data-translate-once="button.calculate"></span>
+                </button>
+            </span>
+                <!-- Удалить -->
+                <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!deleteButtonEnabled"
+                        data-ng-click="deleteButtonClick()">
+                    <img src="/client/img/button/{{deleteButtonEnabled ? 'enable' : 'disable'}}/delete.png" width="32px" height="22px"
+                         alt="{{::'button.delete' | translate}}"/>
+                    <span data-translate-once="button.delete"></span>
+                </button>
+            </span>
+                <!-- Принять -->
+                <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
+                        data-ng-click="acceptButtonClick()">
+                    <img src="/client/img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/accept.png" width="32px" height="22px"
+                         alt="{{::'button.accept' | translate}}"/>
+                    <span data-translate-once="button.accept"></span>
+                </button>
+            </span>
+                <!-- Вернуть в Создана -->
+                <span>
+                <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
+                        data-ng-click="returnButtonClick()">
+                    <img src="/client/img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/return.png" width="32px" height="22px"
+                         alt="{{::'button.return' | translate}}"/>
+                    <span data-translate-once="button.return"></span>
+                </button>
+            </span>
+            </div>
+        </div>
+    </div>
+    <!-- Таблица -->
+        <div data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector=".cbr-page-layout__view"
+             data-grid-fill-space-container-selector-top=".page-top-content"
+             data-grid-options="ndflJournalGridOptions"
+             data-grid-ctrl="ourGrid2"
+             data-init-grid="initOurGrid(ctrl)"
+             id="ndflJournalTable"
+             style="float: left; width: 100%;"></div>
+</div>

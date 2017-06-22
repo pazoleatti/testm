@@ -6,7 +6,7 @@
 @import "bootstrap-custom";
 @import "overlay";
 @import "dialogs";
-@import "sb-modals";
+@import "app-modals";
 @import "alert";
 
 @import "less/bootstrap";
@@ -16,7 +16,9 @@
 @mts_red: #1a9f29;
 // Высота шапки модального окна
 @mts_modal_header_height: 75px;
-
+html{
+  overflow: auto;
+}
 body {
   color: #777;
   background-color: #fff;
@@ -38,7 +40,6 @@ form input[type="submit"], form input[type="button"] {
 form .row {
   margin: 10px 0;
 }
-
 a{
   text-decoration: none;
 }
@@ -103,9 +104,7 @@ a{
 .fullwidth {
   width: 100%;
 }
-html{
-  overflow: auto;
-}
+
 html,
 body {
   margin: 0;
@@ -551,12 +550,12 @@ hr {
 }
 
 .fl-modal-window .modal-dialog {
-   width: 765px;
+  width: 765px;
 }
 
 .tableForm {
-    float: right;
-    margin-right: 5px;
+  float: right;
+  margin-right: 5px;
 }
 
 /*-------new-style----------*/
