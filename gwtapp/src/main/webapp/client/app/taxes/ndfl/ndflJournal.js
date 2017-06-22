@@ -118,16 +118,16 @@
                         'Дата и время создания формы',
                         'Создал'],
                     colModel: [
-                        {name: 'id', index: 'id', width: 129, key: true},
+                        {name: 'id', index: 'id', width: 135, key: true},
                         {name: 'formType.name', index: 'formType.name', width: 175, formatter:linkformatter},
                         {name: 'formKind.name', index: 'formKind.name', width: 175},
-                        {name: 'department.name', index: 'department.name', width: 280},
+                        {name: 'department.name', index: 'department.name', width: 130},
                         {name: 'asnu.name', index: 'asnu.name', width: 180},
-                        {name: 'period.name', index: 'period.name', width: 120},
-                        {name: 'state.name', index: 'state.name', width: 120},
-                        {name: 'fileTF', index: 'fileTF', width: 268},
+                        {name: 'period.name', index: 'period.name', width: 90},
+                        {name: 'state.name', index: 'state.name', width: 90},
+                        {name: 'fileTF', index: 'fileTF', width: 85},
                         {name: 'creationDate', index: 'creationDate', width: 230, formatter: 'date', formatoptions: { newformat: 'd.m.Y H:m:s'}},
-                        {name: 'creator', index: 'creator', width: 170}
+                        {name: 'creator', index: 'creator', width: 80}
                     ],
                     rowNum: 10,
                     rowList: [10, 20, 30],

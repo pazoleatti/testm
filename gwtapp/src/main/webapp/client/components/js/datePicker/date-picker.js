@@ -11,7 +11,7 @@
      * @attr inputStyle - дополнительная настройка поля ввода
      * @attr onBlur - метод, который срабатывает при событии onBlur
      */
-    widgets.directive('muDatePicker', function () {
+    widgets.directive('datePicker', function () {
         return {
             restrict: 'E',
             scope: {

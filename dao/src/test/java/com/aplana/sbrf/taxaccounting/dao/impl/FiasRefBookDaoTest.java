@@ -84,8 +84,11 @@ public class FiasRefBookDaoTest {
     }
 
 
-    private static final int AOLEVEL = 0, CURRSTATUS = 1, FORMALNAME = 4, LIVESTATUS = 5,
-            POSTALCODE = 10, PARENTGUID = 12, REGIONCODE = 14, ID = 17, AOID = 18, SHORTNAME = 19;
+    private static final int AOLEVEL = 0, CURRSTATUS = 1, CENTSTATUS = 2, SEXTCODE = 3, FORMALNAME = 4, LIVESTATUS = 5,
+            CITYCODE = 6, OFFNAME = 7, DIVTYPE = 8, PLANCODE = 9, POSTALCODE = 10, OPERSTATUS = 11, PARENTGUID = 12,
+            STREETCODE = 13, REGIONCODE = 14, AUTOCODE = 15, EXTRCODE = 16, ID = 17, AOID = 18, SHORTNAME = 19,
+            CTARCODE = 20, AREACODE = 21, PLACECODE = 22;
+
 
     private static Map<String, Object> createAddrObjectRow(Object[] values) {
 
@@ -96,9 +99,22 @@ public class FiasRefBookDaoTest {
         recordsMap.put("FORMALNAME", values[FORMALNAME]);
         recordsMap.put("SHORTNAME", values[SHORTNAME]);
         recordsMap.put("REGIONCODE", values[REGIONCODE]);
+        recordsMap.put("AUTOCODE", values[AUTOCODE]);
+        recordsMap.put("AREACODE", values[AREACODE]);
+        recordsMap.put("CITYCODE", values[CITYCODE]);
+        recordsMap.put("CTARCODE", values[CTARCODE]);
+        recordsMap.put("PLACECODE", values[PLACECODE]);
+        recordsMap.put("PLANCODE", values[PLANCODE]);
+        recordsMap.put("STREETCODE", values[STREETCODE]);
+        recordsMap.put("EXTRCODE", values[EXTRCODE]);
+        recordsMap.put("SEXTCODE", values[SEXTCODE]);
         recordsMap.put("LIVESTATUS", values[LIVESTATUS]);
+        recordsMap.put("CENTSTATUS", values[CENTSTATUS]);
+        recordsMap.put("OPERSTATUS", values[OPERSTATUS]);
         recordsMap.put("CURRSTATUS", values[CURRSTATUS]);
         //Поле тип адресации. Хотя поле обязательное в выгрузке его нет, ставим значение 0 - не определено
+        recordsMap.put("DIVTYPE", values[DIVTYPE]);
+        recordsMap.put("OFFNAME", values[OFFNAME]);
         recordsMap.put("AOLEVEL", values[AOLEVEL]);
         recordsMap.put("POSTALCODE", values[POSTALCODE]);
         return recordsMap;
