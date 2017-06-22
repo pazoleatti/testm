@@ -8,10 +8,6 @@
 }
 
 .aplanaAlert {
-    /*z-index:4000;
-    position: fixed;
-    bottom: 0;
-    right: 0;*/
     width: 400px;
     border: 1px solid #b4acac;
     background: #f9cccc;
@@ -81,18 +77,18 @@
 }
 
 .icon.error {
-    background-image: url('../components/alert/error.png');
+    background-image: url('error.png');
 }
 
 .icon.success {
-    background-image: url('../components/alert/success.png');
+    background-image: url('success.png');
 }
 
 .icon.warning {
-    background-image: url('../components/alert/warning.png');
+    background-image: url('warning.png');
 }
 
 .icon.error_validation {
-    background-image: url('../components/alert/error_validation.png');
+    background-image: url('error_validation.png');
 }
 

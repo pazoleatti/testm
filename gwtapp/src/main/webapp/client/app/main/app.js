@@ -6,7 +6,7 @@
             'app.header',
             'sbrfNdfl.ndflJournal',
             'sbrfNdfl.ndfl',
-            'app.filterDirectives',
+            'dateFromToFilter',
             'app.filterUtils',
             'app.formLeaveConfirmer',
             'ngCookies',

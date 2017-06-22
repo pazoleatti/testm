@@ -126,7 +126,7 @@
             <div data-ng-controller="ndflCtrl">
                 <div class="container-grid" style="height: 100%">
                     <div class='container-grid-top'>
-                        <span data-ng-include="'/client/app/taxes/ndfl/filters/ndflFilter.html'"></span>
+                        <span data-ng-include="'/client/app/taxes/ndfl/ndflFilter.html'"></span>
                         <div class="button_panel" style="float: right;">
                             <div class="btn-toolbar" role="toolbar">
                                 <!--Редактировать запись в таблице-->
@@ -174,26 +174,6 @@
 
         <uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
                  select="selectTab('deductions')">
-            <!--<div data-ng-controller="informationDetailsFormsCtrl" >-->
-            <!--<div id="information-details-content" class="content-with-table" style="" >-->
-
-            <!--<div style="overflow:hidden;" >-->
-            <!--<form class="tableForm"><input type="image" src="client/img/icon/delete.png" data-ng-click="" ></form>-->
-            <!--<form class="tableForm"><input type="image" src="client/img/icon/add.png" data-ng-click="addInformationData()" ></form>-->
-            <!--<form class="tableForm"><input type="image" src="client/img/icon/edit.png" data-ng-click="editInformationData()" ></form>-->
-            <!--</div>-->
-
-            <!--<div class="gridStyle" ui-grid="informationOptions" ui-grid-resize-columns-->
-            <!--ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div>-->
-
-            <!--<!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="infoGridOptions"-->
-            <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->-->
-
-            <!--<!-- <div id="information-details-grid" class="usim-grid" data-ui-grid="gridOptions"-->
-            <!--ui-grid-resize-columns ui-grid-selection ui-grid-pagination ui-grid-autoResize > </div> -->-->
-
-            <!--</div>-->
-            <!--</div>-->
         </uib-tab>
 
         <uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
