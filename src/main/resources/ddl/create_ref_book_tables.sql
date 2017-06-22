@@ -96,9 +96,7 @@ create table ref_book_present_place
   version   date not null,
   status    number(1) default 0 not null,
   code      varchar2(3 char) not null,
-  name      varchar2(255) not null,
-  for_ndfl  number(1) default 1 not null,
-  for_fond  number(1) default 1 not null
+  name      varchar2(255) not null
 );
 
 comment on table ref_book_present_place is 'Коды места представления расчета';
@@ -108,8 +106,6 @@ comment on column ref_book_present_place.version is 'Версия. Дата ак
 comment on column ref_book_present_place.status is 'Статус записи (0 - обычная запись, -1 - удаленная, 1 - черновик, 2 - фиктивная)';
 comment on column ref_book_present_place.code is 'Код';
 comment on column ref_book_present_place.name is 'Наименование';
-comment on column ref_book_present_place.for_ndfl is 'Используется для НДФЛ';
-comment on column ref_book_present_place.for_fond is 'Используется для Страховых сборов взносов';
 
 -- Справочник АСНУ
 create table ref_book_asnu (
@@ -130,15 +126,13 @@ create table ref_book_form_type
 (
   id number(18) not null,
   code varchar2(14 char) not null,
-  name varchar2(255) not null,
-  tax_kind varchar2(1 char) not null
+  name varchar2(255) not null
 );
 
 comment on table ref_book_form_type is 'Виды налоговых форм';
 comment on column ref_book_form_type.id is 'Идентификатор';
 comment on column ref_book_form_type.code is 'Код';
 comment on column ref_book_form_type.name is 'Наименование';
-comment on column ref_book_form_type.tax_kind is 'Вид налога';
 
 -- Типы налоговых форм
 create table declaration_kind 
@@ -355,8 +349,6 @@ create table report_period_type
   id                  number(18) not null,
   code                varchar2(2 char) not null,
   name                varchar2(255 char) not null,
-  n                   number(1),
-  f                   number(1),
   start_date          date,
   end_date            date,
   calendar_start_date date
@@ -365,8 +357,6 @@ comment on table report_period_type is 'Коды, определяющие на�
 comment on column report_period_type.id is 'Уникальный идентификатор';
 comment on column report_period_type.code is 'Код';
 comment on column report_period_type.name is 'Наименование';
-comment on column report_period_type.n is 'Признак принадлежности к НДФЛ';
-comment on column report_period_type.f is 'Признак принадлежности к Страховым сборам, взносам';
 comment on column report_period_type.start_date is 'Дата начала периода';
 comment on column report_period_type.end_date is 'Дата окончания периода';
 comment on column report_period_type.calendar_start_date is 'Календарная дата начала периода';
