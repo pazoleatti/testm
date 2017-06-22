@@ -495,7 +495,7 @@
 						opts = _setOpts(opts);
 
 						return $uibModal.open({
-							templateUrl : 'client/components/templates/modal/message.html',
+							templateUrl : 'client/components/modal/message.html',
 							controller : 'messageDialogCtrl',
 							backdrop: opts.bd,
 							backdropClass: opts.bdc,
