@@ -121,13 +121,13 @@
                         {name: 'id', index: 'id', width: 135, key: true},
                         {name: 'formType.name', index: 'formType.name', width: 175, formatter:linkformatter},
                         {name: 'formKind.name', index: 'formKind.name', width: 175},
-                        {name: 'department.name', index: 'department.name', width: 130},
+                        {name: 'department.name', index: 'department.name', width: 150},
                         {name: 'asnu.name', index: 'asnu.name', width: 180},
-                        {name: 'period.name', index: 'period.name', width: 90},
-                        {name: 'state.name', index: 'state.name', width: 90},
-                        {name: 'fileTF', index: 'fileTF', width: 85},
+                        {name: 'period.name', index: 'period.name', width: 110},
+                        {name: 'state.name', index: 'state.name', width: 100},
+                        {name: 'fileTF', index: 'fileTF', width: 400},
                         {name: 'creationDate', index: 'creationDate', width: 230, formatter: 'date', formatoptions: { newformat: 'd.m.Y H:m:s'}},
-                        {name: 'creator', index: 'creator', width: 80}
+                        {name: 'creator', index: 'creator', width: 175}
                     ],
                     rowNum: 10,
                     rowList: [10, 20, 30],

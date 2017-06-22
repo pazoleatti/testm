@@ -1613,7 +1613,7 @@
                         function refreshHeightTimeout() {
                             $timeout(function () {
                                 fillHeight();
-                            }, 0);
+                            }, 10);
                         }
 
                         scope.$on('WINDOW_RESIZED_MSG', function () {
