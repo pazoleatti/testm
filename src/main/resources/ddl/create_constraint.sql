@@ -223,7 +223,6 @@ alter table department add constraint department_chk_garant_use check (garant_us
 alter table department add constraint department_chk_sunr_use check (sunr_use in (0, 1));
 alter table report_period add constraint report_period_chk_date check (end_date >= start_date);
 alter table declaration_type add constraint declaration_type_chk_status check (status in (-1, 0, 1, 2));
-alter table declaration_type add constraint declaration_type_chk_is_ifrs check ((is_ifrs in (0,1) and tax_type='I') or (is_ifrs = 0 and tax_type<>'I'));
 alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
 alter table declaration_template add constraint chk_declaration_template_fkind check ((status in (0,1) and form_kind is not null) or status not in (0,1));
 alter table declaration_template add constraint chk_declaration_template_ftype check ((status in (0,1) and form_type is not null) or status not in (0,1));
