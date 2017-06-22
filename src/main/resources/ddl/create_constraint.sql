@@ -102,7 +102,6 @@ alter table department add constraint dept_fk_parent_id foreign key (parent_id) 
 alter table department add constraint department_fk_type foreign key(type) references department_type(id);
 alter table configuration add constraint configuration_fk foreign key (department_id) references department(id) on delete cascade;
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period(id);
-alter table declaration_type add constraint declaration_type_fk_taxtype foreign key (tax_type) references tax_type(id);
 alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department(id);
 alter table department_declaration_type add constraint dept_decl_type_fk_decl_type foreign key (declaration_type_id) references declaration_type(id);
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
