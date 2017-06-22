@@ -2,10 +2,10 @@
     'use strict';
 
     /**
-     * @description Модуль, содержащий директивы фильтров
+     * @description Модуль, содержащий компонент для выбора интервала дат
      */
 
-    angular.module('app.filterDirectives', [])
+    angular.module('dateFromToFilter', [])
         /**
          * @description Директива для выбора интервала дат от-до
          *
@@ -18,7 +18,7 @@
             return {
                 restrict: 'E',
                 ngModel: 'ngModel',
-                templateUrl: 'client/app/common/filter/dateFromToFilter.html',
+                templateUrl: 'client/components/templates/dateFromToFilter/dateFromToFilter.html',
                 scope: {
                     ngLabel: '@?',
                     ngFromModel: '=',
