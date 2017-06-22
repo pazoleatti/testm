@@ -1941,7 +1941,7 @@ begin
       select min(a.id) into v_result
         from mv_fias_area_act a
        where a.regioncode=p_region
-         and (p_check_element is null or p_check_element is not null and a.fname=nvl(replace(lower(p_check_element),' ',''),'-'))
+         and (a.fname=nvl(replace(lower(p_check_element),' ',''),'-'))
          and (p_check_ftype is null or p_check_ftype is not null and a.ftype=nvl(lower(p_check_ftype),'-'))
          and a.has_child=decode(p_leaf,1,0,1);
     elsif (p_check_type='CITY') then
@@ -2164,7 +2164,9 @@ begin
                                ) t2
                        ) t3
                ) t4
-       ) n left join mv_fias_street_act f on (f.id=n.street_id)
+       ) n left join (select * from mv_fias_street_act
+                      union
+                      select * from mv_fias_locality_act) f on (f.id=nvl(n.street_id,n.loc_id))
            left join mv_fias_locality_act fl on (fl.aoid=f.parentguid)
            left join mv_fias_city_act fc on (fc.aoid=f.parentguid);
 
