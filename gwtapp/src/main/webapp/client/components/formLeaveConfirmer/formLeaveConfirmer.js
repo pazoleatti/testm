@@ -82,6 +82,10 @@
                     if (logoutListener) {
                         logoutListener();
                     }
+
+                    /**
+                     * @description Чтобы это срабатывало, необходимо создавать сообщение броадкастом $rootScope.$broadcast('LOGOUT_MSG');
+                     */
                     logoutListener = $rootScope.$on('LOGOUT_MSG', function () {
                         service.unlockAction();
                         $window.onunload = null;
