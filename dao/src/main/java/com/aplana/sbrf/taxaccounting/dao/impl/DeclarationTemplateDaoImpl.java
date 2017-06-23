@@ -290,9 +290,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                        "where declaration_template.status in (0,1)"
         );
 
-        if (filter.getTaxType() != null) {
-            query.append(" and declaration_type.TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
-        }
         return getJdbcTemplate().queryForList(
                 query.toString(),
                 Integer.class

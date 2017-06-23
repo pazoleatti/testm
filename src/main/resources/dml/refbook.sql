@@ -360,7 +360,9 @@ update ref_book_attribute set attribute_id = 652 where id=9421;
 update ref_book_attribute set max_length=1000 where id=9534;
 
 update ref_book_attribute set attribute_id = 9122 where id = 9054;
-
+---------------------------------
+delete from ref_book_attribute where id in (9243,9244,9313,27,28,843,2072);
+delete from ref_book_attribute where id in (9044,9055,9056,9057,9023,9024);
 ---------------------------------
 
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;

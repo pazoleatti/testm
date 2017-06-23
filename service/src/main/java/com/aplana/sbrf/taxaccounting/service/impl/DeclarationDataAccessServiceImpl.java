@@ -17,8 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Arrays.asList;
-
 /**
  * Реализация сервиса для проверки прав на доступ к декларациям
  * 
@@ -61,15 +59,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         }
 
 		Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        TaxType taxType = declarationTemplate.getType().getTaxType();
+        TaxType taxType = TaxType.NDFL;
 		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
         if (departmentReportPeriod.isBalance()) {
             error("Налоговая форма не может быть создана в периоде ввода остатков!", logger);
-        }
-
-        // Проверка возможности работать с видом налога
-        if (!userInfo.getUser().hasTax(taxType)) {
-            error("Нет прав доступа к данному налогу", logger);
         }
 
         // Выборка для доступа к экземплярам деклараций
@@ -122,7 +115,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
 		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentReportPeriod.getDepartmentId(),
-                declarationTemplate.getType().getTaxType(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 		boolean found = false;
 		for (DepartmentDeclarationType ddt : ddts) {
 			if (ddt.getDeclarationTypeId() == declarationTypeId) {
@@ -164,7 +157,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
-        if (!userInfo.getUser().hasRoles(declarationTemplate.getType().getTaxType(), TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException("Нет прав на принятие налоговой формы");
         }
 
@@ -194,7 +187,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
-        if (!userInfo.getUser().hasRoles(declarationTemplate.getType().getTaxType(), TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException("Нет прав на отмену принятия налоговой формы");
         }
 
@@ -270,7 +263,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
-        if (!userInfo.getUser().hasRoles(declarationTemplate.getType().getTaxType(), TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException("Нет прав на изменение состояния ЭД");
         }
 

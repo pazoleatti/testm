@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataFileDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormDataFile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -599,6 +599,15 @@ import java.text.SimpleDateFormat
             if (refBookPerson != null) {
 
                 primaryPerson.setId(refBookPerson.getId());
+                /*
+               Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
+               тогда версия записи в справочнике меняется на более раннюю дату, без изменения атрибутов. Такая ситуация
+               вряд ли может возникнуть на практике и проверка создана по заданию тестировщиков.
+              */
+                if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
+                    Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
+                    downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
+                }
 
                 //address
                 if (primaryPerson.getAddress() != null) {
@@ -760,6 +769,11 @@ import java.text.SimpleDateFormat
 
     }
 
+    def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
+        Date newVersion = getReportPeriodStartDate()
+        getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
+    }
+
     def fillSystemAliases(Map<String, RefBookValue> values, RefBookObject refBookObject) {
         values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getId()));
         values.put("RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getRecordId()));
@@ -875,7 +889,6 @@ import java.text.SimpleDateFormat
         putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
         putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
         putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-        putOrUpdate(values, "SEX", RefBookAttributeType.NUMBER, person.getSex(), attributeChangeListener);
         putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
         putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
         putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
@@ -883,9 +896,6 @@ import java.text.SimpleDateFormat
         putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate(), attributeChangeListener);
         putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null, attributeChangeListener);
         putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId(), attributeChangeListener);
-        putOrUpdate(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension(), attributeChangeListener);
-        putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical(), attributeChangeListener);
-        putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial(), attributeChangeListener);
         putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee(), attributeChangeListener);
         putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId(), attributeChangeListener);
         putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId(), attributeChangeListener);
@@ -898,7 +908,6 @@ import java.text.SimpleDateFormat
         putValue(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName());
         putValue(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName());
         putValue(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName());
-        putValue(values, "SEX", RefBookAttributeType.NUMBER, person.getSex());
         putValue(values, "INN", RefBookAttributeType.STRING, person.getInn());
         putValue(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign());
         putValue(values, "SNILS", RefBookAttributeType.STRING, person.getSnils());
@@ -906,9 +915,6 @@ import java.text.SimpleDateFormat
         putValue(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate());
         putValue(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null);
         putValue(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId());
-        putValue(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension() ?: 2);
-        putValue(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical() ?: 2);
-        putValue(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial() ?: 2);
         putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2);
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
@@ -921,8 +927,6 @@ import java.text.SimpleDateFormat
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
         putValue(values, "PERSON_ID", RefBookAttributeType.REFERENCE, personDocument.getNaturalPerson().getId());
         putValue(values, "DOC_NUMBER", RefBookAttributeType.STRING, personDocument.getDocumentNumber());
-        putValue(values, "ISSUED_BY", RefBookAttributeType.STRING, null);
-        putValue(values, "ISSUED_DATE", RefBookAttributeType.DATE, null);
         def incRepVal = personDocument.getIncRep() != null ? personDocument.getIncRep() : 1;
         putValue(values, "INC_REP", RefBookAttributeType.NUMBER, incRepVal); //default value is 1
         putValue(values, "DOC_ID", RefBookAttributeType.REFERENCE, personDocument.getDocType()?.getId());
@@ -2803,7 +2807,7 @@ class NdflPersonFL {
             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
 
             long tIsExistsAddress = System.currentTimeMillis();
-            if (!isExistsAddress(ndflPerson.id)) {
+            if (!isPersonAddressEmpty(ndflPerson) && !isExistsAddress(ndflPerson.id)) {
 
                 List<String> address = []
                 if (!ScriptUtils.isEmpty(ndflPerson.regionCode)) {
@@ -2819,7 +2823,6 @@ class NdflPersonFL {
                     address.add("Населенный пункт='${ndflPerson.locality}'")
                 }
                 if (!ScriptUtils.isEmpty(ndflPerson.street)) {
-                    address.add(ndflPerson.street)
                     address.add("Улица='${ndflPerson.street}'")
                 }
                 if (!ScriptUtils.isEmpty(ndflPerson.house)) {
@@ -2846,7 +2849,7 @@ class NdflPersonFL {
             timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
 
             // Спр2 Гражданство (Обязательное поле)
-            if (!citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
+            if (ndflPerson.citizenship != null && !citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
                 //TODO turn_to_error
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                         "Гражданство (код страны) (Графа 7)='${ndflPerson.citizenship ?: ""}'")
@@ -2855,7 +2858,7 @@ class NdflPersonFL {
             }
 
             // Спр4 Статус (Обязательное поле)
-            if (!taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
+            if (ndflPerson.status != "0" && !taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
                 //TODO turn_to_error
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                         "Cтатус (Графа 12)='${ndflPerson.status ?: ""}'")
@@ -2879,7 +2882,7 @@ class NdflPersonFL {
 
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
-                    if (!ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
+                    if (personRecord.get(RF_LAST_NAME).value != null && !ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Налогоплательщик.Фамилия (Графа 3)='${ndflPerson.lastName ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
@@ -2887,7 +2890,7 @@ class NdflPersonFL {
                     }
 
                     // Спр11 Имя (Обязательное поле)
-                    if (!ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
+                    if (personRecord.get(RF_FIRST_NAME).value != null && !ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Налогоплательщик.Имя (Графа 4)='${ndflPerson.firstName ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
@@ -2895,7 +2898,7 @@ class NdflPersonFL {
                     }
 
                     // Спр11 Отчество (Необязательное поле)
-                    if (ndflPerson.middleName != null && !ndflPerson.middleName.equals(personRecord.get(RF_MIDDLE_NAME).value)) {
+                    if (personRecord.get(RF_MIDDLE_NAME).value != null && ndflPerson.middleName != null && !ndflPerson.middleName.equals(personRecord.get(RF_MIDDLE_NAME).value)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Налогоплательщик.Отчество (Графа 5)='${ndflPerson.middleName ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
@@ -2925,7 +2928,7 @@ class NdflPersonFL {
                     }
 
                     // Спр13 Дата рождения (Обязательное поле)
-                    if (!ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
+                    if (personRecord.get(RF_BIRTH_DATE).value != null && !ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Налогоплательщик.Дата рождения (Графа 6)='${ndflPerson.birthDay ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие даты рождения справочнику", fioAndInp, pathError,
@@ -2934,7 +2937,7 @@ class NdflPersonFL {
 
                     // Спр14 Гражданство (Обязательное поле)
                     def citizenship = citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP).value)
-                    if (!ndflPerson.citizenship.equals(citizenship)) {
+                    if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(citizenship)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Гражданство (код страны) (Графа 7)='${ndflPerson.citizenship ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие гражданства справочнику", fioAndInp, pathError,
@@ -3007,7 +3010,7 @@ class NdflPersonFL {
 
                     // Спр18 Статус налогоплательщика (Обязательное поле)
                     def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
-                    if (!ndflPerson.status.equals(taxpayerStatus)) {
+                    if (ndflPerson.status!= null && !ndflPerson.status.equals(taxpayerStatus)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Cтатус (Графа 12)='${ndflPerson.status ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие статуса справочнику", fioAndInp, pathError,
@@ -3037,7 +3040,7 @@ class NdflPersonFL {
                     }
 
                     // Адрес регистрации в Российской Федерации.Код субъекта
-                    if (!ndflPerson.regionCode.equals(regionCode)) {
+                    if (ndflPerson.regionCode != null && !ndflPerson.regionCode.equals(regionCode)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Адрес регистрации в Российской Федерации.Код субъекта (Графа 13)='${ndflPerson.regionCode ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
@@ -3045,7 +3048,7 @@ class NdflPersonFL {
                     }
 
                     // Адрес регистрации в Российской Федерации.Район
-                    if (!ndflPerson.area.equals(area)) {
+                    if (ndflPerson.area != null && !ndflPerson.area.equals(area)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Адрес регистрации в Российской Федерации.Район (Графа 15)='${ndflPerson.area ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
@@ -3053,7 +3056,7 @@ class NdflPersonFL {
                     }
 
                     // Адрес регистрации в Российской Федерации.Город
-                    if (!ndflPerson.city.equals(city)) {
+                    if (ndflPerson.city != null && !ndflPerson.city.equals(city)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Адрес регистрации в Российской Федерации.Город (Графа 16)='${ndflPerson.city ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
@@ -3061,7 +3064,7 @@ class NdflPersonFL {
                     }
 
                     // Адрес регистрации в Российской Федерации.Населенный пункт
-                    if (!ndflPerson.locality.equals(locality)) {
+                    if (ndflPerson.locality != null && !ndflPerson.locality.equals(locality)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Адрес регистрации в Российской Федерации.Населенный пункт (Графа 17)='${ndflPerson.locality ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
@@ -3069,7 +3072,7 @@ class NdflPersonFL {
                     }
 
                     // Адрес регистрации в Российской Федерации.Улица
-                    if (!ndflPerson.street.equals(street)) {
+                    if (ndflPerson.street != null && !ndflPerson.street.equals(street)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Адрес регистрации в Российской Федерации.Улица (Графа 18)='${ndflPerson.street ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
@@ -3077,7 +3080,7 @@ class NdflPersonFL {
                     }
 
                     // Адрес регистрации в Российской Федерации.Дом
-                    if (!ndflPerson.house.equals(house)) {
+                    if (ndflPerson.house != null && !ndflPerson.house.equals(house)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Адрес регистрации в Российской Федерации.Дом (Графа 19)='${ndflPerson.house ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
@@ -3085,7 +3088,7 @@ class NdflPersonFL {
                     }
 
                     // Адрес регистрации в Российской Федерации.Корпус
-                    if (!ndflPerson.building.equals(building)) {
+                    if (ndflPerson.building != null && !ndflPerson.building.equals(building)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Адрес регистрации в Российской Федерации.Корпус (Графа 20)='${ndflPerson.building ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
@@ -3093,7 +3096,7 @@ class NdflPersonFL {
                     }
 
                     // Адрес регистрации в Российской Федерации.Квартира
-                    if (!ndflPerson.flat.equals(flat)) {
+                    if (ndflPerson.flat != null && !ndflPerson.flat.equals(flat)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Адрес регистрации в Российской Федерации.Квартира (Графа 21)='${ndflPerson.flat ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
@@ -3136,7 +3139,7 @@ class NdflPersonFL {
                 Доход.Вид.Код (Графа 4) - (Необязательное поле)
                 incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
                  */
-            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeType)) {
+            if (ndflPersonIncome.incomeType != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomeType)) {
                 List<Long> incomeTypeIdList = incomeTypeMap.get(ndflPersonIncome.incomeType)
                 if (incomeTypeIdList == null || incomeTypeIdList.isEmpty()) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
@@ -3176,7 +3179,7 @@ class NdflPersonFL {
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // Спр8 Код вычета (Обязательное поле)
-            if (!deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
+            if (ndflPersonDeduction.typeCode != "000" && ndflPersonDeduction.typeCode != null && !deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "",
                         "Код вычета (Графа 3)='${ndflPersonDeduction.typeCode ?: ""}'")
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода вычета справочнику", fioAndInp, pathError,
@@ -3368,7 +3371,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column7And11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}}'",
+                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                     "Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
             )
             //11 Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 20
@@ -3423,9 +3426,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, String attributeName) {
     if (ndflPerson[alias] == null || (ndflPerson[alias]) instanceof String && (org.apache.commons.lang3.StringUtils.isBlank(ndflPerson[alias]) || ndflPerson[alias] == "0")) {
         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                "$attributeName='${ndflPerson[alias]?:""}'")
-        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
-                "Не заполнен обязательный параметр '$attributeName'")
+                "$attributeName='${ndflPerson[alias]!=null?ndflPerson[alias]:""}'")
+        String msg
+        if (ndflPerson[alias] == "0") {
+            msg = "Значение гр. \"$attributeName\" не может быть равно \"0\""
+        } else {
+            msg = "Не заполнена гр. \"$attributeName\""
+        }
+        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError, msg)
         return false
     }
     return true
@@ -4728,6 +4736,19 @@ class ColumnFillConditionData {
     }
 
     /**
+    * Проверка адреса на пустоту
+    * @param Данные о ФЛ из формы
+    * @return
+    */
+    boolean isPersonAddressEmpty(NdflPerson ndflPerson) {
+        boolean  emptyAddress = ScriptUtils.isEmpty(ndflPerson.regionCode) && ScriptUtils.isEmpty(ndflPerson.area) &&
+                                ScriptUtils.isEmpty(ndflPerson.city) &&  ScriptUtils.isEmpty(ndflPerson.locality) &&
+                                ScriptUtils.isEmpty(ndflPerson.street) && ScriptUtils.isEmpty(ndflPerson.house) &&
+                                ScriptUtils.isEmpty(ndflPerson.building) &&  ScriptUtils.isEmpty(ndflPerson.flat);
+        return emptyAddress;
+    }
+
+    /**
      * Преобразование массива имен полей в строку с помещением каждого имени в кавычки
      * @param fieldNameList
      */
@@ -4940,7 +4961,6 @@ class ColumnFillConditionData {
                 person.setLastName(rs.getString("last_name"));
                 person.setFirstName(rs.getString("first_name"));
                 person.setMiddleName(rs.getString("middle_name"));
-                person.setSex(SqlUtils.getInteger(rs, "sex"));
                 person.setInn(rs.getString("inn"));
                 person.setInnForeign(rs.getString("inn_foreign"));
                 person.setSnils(rs.getString("snils"));
@@ -4951,9 +4971,6 @@ class ColumnFillConditionData {
                 person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
 
                 //additional
-                person.setPension(SqlUtils.getInteger(rs, "pension"));
-                person.setMedical(SqlUtils.getInteger(rs, "medical"));
-                person.setSocial(SqlUtils.getInteger(rs, "social"));
                 person.setEmployee(SqlUtils.getInteger(rs, "employee"));
                 person.setSourceId(SqlUtils.getLong(rs, "source_id"));
                 person.setRecordId(SqlUtils.getLong(rs, "record_id"));

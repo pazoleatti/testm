@@ -28,10 +28,6 @@ create or replace package person_pkg as
             n.country_code,
             n.address,
             n.additional_data,
-            to_number(null) sex, 
-            to_number(null) pension, 
-            to_number(null) medical, 
-            to_number(null) social, 
             to_char(null) correct_num, 
             to_char(null) period, 
             to_char(null) rep_period, 
@@ -56,7 +52,6 @@ create or replace package person_pkg as
            person.last_name,
            person.first_name,
            person.middle_name,
-           person.sex,
            person.inn,
            person.inn_foreign,
            person.snils,
@@ -64,9 +59,6 @@ create or replace package person_pkg as
            person.birth_date,
            person.birth_place,
            person.citizenship,
-           person.pension,
-           person.medical,
-           person.social,
            person.employee,
            person.record_id,
            person.source_id,
@@ -83,8 +75,6 @@ create or replace package person_pkg as
            doc.record_id as doc_record_id,
            doc.doc_id,
            doc.doc_number,
-           doc.issued_by,
-           doc.issued_date,
            doc.inc_rep,
            addr.id as ref_book_address_id,
            addr.version as addr_version,
@@ -138,7 +128,6 @@ create or replace package person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -146,9 +135,6 @@ create or replace package person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -165,8 +151,6 @@ create or replace package person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -205,7 +189,6 @@ create or replace package person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -213,9 +196,6 @@ create or replace package person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -232,8 +212,6 @@ create or replace package person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -268,7 +246,6 @@ create or replace package person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -276,9 +253,6 @@ create or replace package person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -295,8 +269,6 @@ create or replace package person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -331,7 +303,6 @@ create or replace package person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -339,9 +310,6 @@ create or replace package person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -358,8 +326,6 @@ create or replace package person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -394,7 +360,6 @@ create or replace package person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -402,9 +367,6 @@ create or replace package person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -421,8 +383,6 @@ create or replace package person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -458,7 +418,6 @@ create or replace package person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -466,9 +425,6 @@ create or replace package person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -485,8 +441,6 @@ create or replace package person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -589,10 +543,6 @@ create or replace package body person_pkg as
               n.country_code,
               n.address,
               n.additional_data,
-              null sex, 
-              null pension, 
-              null medical, 
-              null social, 
               null correct_num, 
               null period, 
               null rep_period, 
@@ -626,7 +576,6 @@ create or replace package body person_pkg as
                person.last_name,
                person.first_name,
                person.middle_name,
-               person.sex,
                person.inn,
                person.inn_foreign,
                person.snils,
@@ -634,9 +583,6 @@ create or replace package body person_pkg as
                person.birth_date,
                person.birth_place,
                person.citizenship,
-               person.pension,
-               person.medical,
-               person.social,
                person.employee,
                person.record_id,
                person.source_id,
@@ -653,8 +599,6 @@ create or replace package body person_pkg as
                doc.record_id as doc_record_id,
                doc.doc_id,
                doc.doc_number,
-               doc.issued_by,
-               doc.issued_date,
                doc.inc_rep,
                addr.id as ref_book_address_id,
                addr.version as addr_version,
@@ -716,7 +660,6 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -724,9 +667,6 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -743,8 +683,6 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -783,7 +721,6 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -791,9 +728,6 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -810,8 +744,6 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -846,7 +778,6 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -854,9 +785,6 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -873,8 +801,6 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -909,7 +835,6 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -917,9 +842,6 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -936,8 +858,6 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -972,7 +892,6 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -980,9 +899,6 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -999,8 +915,6 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -1036,7 +950,6 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -1044,9 +957,6 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -1063,8 +973,6 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -1159,7 +1067,7 @@ create or replace package body person_pkg as
                person.last_name,
                person.first_name,
                person.middle_name,
-               person.sex,
+               to_number(null) sex,
                person.inn,
                person.inn_foreign,
                person.snils,
@@ -1167,9 +1075,9 @@ create or replace package body person_pkg as
                person.birth_date,
                person.birth_place,
                person.citizenship,
-               person.pension,
-               person.medical,
-               person.social,
+               to_number(null) pension,
+               to_number(null) medical,
+               to_number(null) social,
                person.employee,
                person.record_id,
                person.source_id,
@@ -1186,8 +1094,8 @@ create or replace package body person_pkg as
                doc.record_id as doc_record_id,
                doc.doc_id,
                doc.doc_number,
-               doc.issued_by,
-               doc.issued_date,
+               to_char(null) issued_by,
+               to_date(null) issued_date,
                doc.inc_rep,
                addr.id as ref_book_address_id,
                addr.version as addr_version,
@@ -1246,7 +1154,7 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
+             to_number(null) sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -1254,9 +1162,9 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
+             to_number(null) pension,
+             to_number(null) medical,
+             to_number(null) social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -1273,8 +1181,8 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
+             to_char(null) issued_by,
+             to_date(null) issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -1313,7 +1221,7 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
+             to_number(null) sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -1321,9 +1229,9 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
+             to_number(null) pension,
+             to_number(null) medical,
+             to_number(null) social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -1340,8 +1248,8 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
+             to_char(null) issued_by,
+             to_date(null) issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -1376,7 +1284,7 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
+             to_number(null) sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -1384,9 +1292,9 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
+             to_number(null) pension,
+             to_number(null) medical,
+             to_number(null) social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -1403,8 +1311,8 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
+             to_char(null) issued_by,
+             to_date(null) issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -1439,7 +1347,7 @@ create or replace package body person_pkg as
              person.last_name,
              person.first_name,
              person.middle_name,
-             person.sex,
+             to_number(null) sex,
              person.inn,
              person.inn_foreign,
              person.snils,
@@ -1447,9 +1355,9 @@ create or replace package body person_pkg as
              person.birth_date,
              person.birth_place,
              person.citizenship,
-             person.pension,
-             person.medical,
-             person.social,
+             to_number(null) pension,
+             to_number(null) medical,
+             to_number(null) social,
              person.employee,
              person.record_id,
              person.source_id,
@@ -1466,8 +1374,8 @@ create or replace package body person_pkg as
              doc.record_id as doc_record_id,
              doc.doc_id,
              doc.doc_number,
-             doc.issued_by,
-             doc.issued_date,
+             to_char(null) issued_by,
+             to_date(null) issued_date,
              doc.inc_rep,
              addr.id as ref_book_address_id,
              addr.version as addr_version,
@@ -1941,7 +1849,7 @@ begin
       select min(a.id) into v_result
         from mv_fias_area_act a
        where a.regioncode=p_region
-         and (p_check_element is null or p_check_element is not null and a.fname=nvl(replace(lower(p_check_element),' ',''),'-'))
+         and (a.fname=nvl(replace(lower(p_check_element),' ',''),'-'))
          and (p_check_ftype is null or p_check_ftype is not null and a.ftype=nvl(lower(p_check_ftype),'-'))
          and a.has_child=decode(p_leaf,1,0,1);
     elsif (p_check_type='CITY') then
@@ -2164,7 +2072,9 @@ begin
                                ) t2
                        ) t3
                ) t4
-       ) n left join mv_fias_street_act f on (f.id=n.street_id)
+       ) n left join (select * from mv_fias_street_act
+                      union
+                      select * from mv_fias_locality_act) f on (f.id=nvl(n.street_id,n.loc_id))
            left join mv_fias_locality_act fl on (fl.aoid=f.parentguid)
            left join mv_fias_city_act fc on (fc.aoid=f.parentguid);
 
@@ -2328,5 +2238,76 @@ begin
   
 
 end fias_pkg;
+/
+show errors;
+create or replace package report_pkg as 
+
+  -- Сконвертировать BLOB в CLOB
+  function blob_to_clob (p_blob in blob) return clob;
+  
+  -- Получить количество ФЛ в отчетной форме НДФЛ-6
+  function GetNDFL6PersCnt(p_declaration number) return number;
+
+end report_pkg;
+/
+show errors;
+
+create or replace package body report_pkg as
+
+  --------------------------------------------------------------------------------
+  -- Сконвертировать BLOB в CLOB
+  --------------------------------------------------------------------------------
+  function blob_to_clob (p_blob in blob) return clob
+  is
+  v_file_clob clob;
+  v_file_size integer := 1024;
+  v_dest_offset integer := 1;
+  v_src_offset integer := 1;
+  v_blob_csid number :=  nls_charset_id('CL8MSWIN1251');--dbms_lob.default_csid;
+  v_lang_context number := dbms_lob.default_lang_ctx;
+  v_warning integer;
+  v_size integer := 0;
+  
+  begin
+  
+  dbms_lob.createtemporary(v_file_clob, true);
+  
+  select dbms_lob.getlength(p_blob) into v_size from dual;
+  
+  --if (v_size <= v_file_size) then v_file_size := v_size; end if;
+  
+  v_file_size := v_size;
+  
+  dbms_lob.converttoclob(v_file_clob,
+  p_blob,
+  v_file_size,
+  v_dest_offset,
+  v_src_offset,
+  v_blob_csid,
+  v_lang_context,
+  v_warning);
+  
+  return v_file_clob;
+  
+  end;
+
+
+  function GetNDFL6PersCnt(p_declaration number) return number 
+  as
+    v_result number:=null;
+  begin
+    select to_number(extractValue(xmltype(report_pkg.blob_to_clob(bd.data)),'/Файл/Документ/НДФЛ6/ОбобщПоказ/@КолФЛДоход')) into v_result
+      from declaration_data_file ddf left join blob_data bd on (bd.id=ddf.blob_data_id)
+     where declaration_data_id=p_declaration;
+
+    return v_result;
+  
+  exception when others then
+  
+    return null;
+  
+  end getndfl6perscnt;
+
+end report_pkg;
 /
 show errors;

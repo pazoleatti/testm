@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -14,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -91,13 +88,18 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
         String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
 		String scriptFilePath = null;
 		if (versionInfoProperties != null && versionInfoProperties.getProperty("productionMode").equals("false")) {
-			scriptFilePath = getScriptFilePath(script, SCRIPT_PATH_PREFIX, logger);
+			scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger);
+			if (scriptFilePath != null) {
+				script = getScript(scriptFilePath);
+			}
 		}
 		if (!canExecuteScript(script, event)) {
             return false;
         }
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
-        declarationTemplate.setCreateScript(script);
+		if (scriptFilePath == null) {
+			declarationTemplate.setCreateScript(script);
+		}
         return executeScript(userInfo, declarationTemplate, declarationData, scriptFilePath, event, logger, exchangeParams);
     }
 
@@ -118,7 +120,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		Bindings b = getScriptEngine().createBindings();
 		Binding binding = new Binding();
 
-		Map<String, ?> scriptComponents = getScriptExposedBeans(declarationTemplate.getType().getTaxType(), event);
+		Map<String, ?> scriptComponents = getScriptExposedBeans(TaxType.NDFL, event);
 		for (Object component : scriptComponents.values()) {
 			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
 			scriptComponentContext.setUserInfo(userInfo);
@@ -128,19 +130,11 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			}
 		}
 		b.putAll(scriptComponents);
-		for(Map.Entry<String, ?> entry: scriptComponents.entrySet()) {
-			binding.setVariable(entry.getKey(), entry.getValue());
-		}
 
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
         b.put("userInfo", userInfo);
 		b.put("declarationData", declarationData);
-
-		binding.setVariable("formDataEvent", event);
-		binding.setVariable("logger", logger);
-		binding.setVariable("userInfo", userInfo);
-		binding.setVariable("declarationData", declarationData);
 
 		String applicationVersion = "ФП «НДФЛ, Фонды и Сборы»";
         if (versionInfoProperties != null) {
@@ -148,14 +142,11 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
         }
         b.put("applicationVersion", applicationVersion);
 
-		binding.setVariable("applicationVersion", applicationVersion);
-
 		if (exchangeParams != null) {
 			for (Map.Entry<String, Object> entry : exchangeParams.entrySet()) {
 				if (b.containsKey(entry.getKey()))
 					throw new IllegalArgumentException(String.format(DUPLICATING_ARGUMENTS_ERROR, entry.getKey()));
 				b.put(entry.getKey(), entry.getValue());
-				binding.setVariable(entry.getKey(), entry.getValue());
 			}
 		}
 
@@ -165,7 +156,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		if (scriptFilePath == null || versionInfoProperties == null || versionInfoProperties.getProperty("productionMode").equals("true")) {
 			executeScript(b, declarationTemplate.getCreateScript(), logger);
 		} else {
-			executeLocalScript(binding, scriptFilePath, logger);
+			executeLocalScript(toBinding(b), scriptFilePath, logger);
 		}
 
 		logger.setMessageDecorator(null);

@@ -59,7 +59,7 @@ public class GetCurrentAssignsHandler extends
             if (action.getMode() == SourceMode.SOURCES) {
                 List<DepartmentFormType> departmentFormTypes = sourceService
                         .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo, queryParams);
-                result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes, sourceService.getDeclarationType(action.getTypeId()).getTaxType(), isControlUNP));
+                result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes, TaxType.NDFL, isControlUNP));
             } else {
                 List<DepartmentDeclarationType> departmentFormTypes = sourceService.
                         getDeclarationDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);

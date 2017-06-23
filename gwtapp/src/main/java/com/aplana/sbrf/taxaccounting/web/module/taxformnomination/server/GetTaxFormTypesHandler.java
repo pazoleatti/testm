@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesResult;
@@ -39,7 +40,7 @@ public class GetTaxFormTypesHandler extends AbstractActionHandler<GetTaxFormType
                 FormType m = new FormType();
                 m.setId(item.getId());
                 m.setName(item.getName());
-                m.setTaxType(item.getTaxType());
+                m.setTaxType(TaxType.NDFL);
                 resultList.add(m);
             }
         }

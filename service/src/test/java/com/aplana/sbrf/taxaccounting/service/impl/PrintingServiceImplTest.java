@@ -2,9 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Before;
-import org.junit.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,7 +27,6 @@ public class PrintingServiceImplTest {
 
         TARole role = new TARole();
         role.setAlias(USER_ROLE);
-        role.setTaxType(TaxType.NDFL);
         List<TARole> listUserRoles = new ArrayList<TARole>();
         listUserRoles.add(role);
 

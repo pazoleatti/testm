@@ -67,7 +67,7 @@ create index idx_fias_addrobj_region_status on fias_addrobj (regioncode, currsta
 create index idx_fias_addrobj_aoid on fias_addrobj(aoid);
 create index idx_log_entry_date on log_entry(creation_date);
 create index idx_ref_book_cal_work on ref_book_calendar(ctype);
-create index i_ref_book_oktmo_code on ref_book_oktmo (code);
+--create index i_ref_book_oktmo_code on ref_book_oktmo (code); -- дубль в create_ref_constraints.sql
 create index idx_ref_book_ndfl_detail_load on ref_book_ndfl_detail (ref_book_ndfl_id,tax_organ_code,kpp);
 create index idx_fias_socrbase_lev on fias_socrbase(lev);
 create index idx_ndfl_references_person on ndfl_references(ndfl_person_id);

@@ -11,5 +11,5 @@ public interface NdflReferencesEditUiHandlers extends UiHandlers {
     void onAddClicked();
     void onRemoveClicked(Set<DataRow<Cell>> selectedItems);
     void onSaveClicked(String note, List<DataRow<Cell>> files, boolean exit);
-    void onCancellClicked();
+    void onCancelClicked();
 }

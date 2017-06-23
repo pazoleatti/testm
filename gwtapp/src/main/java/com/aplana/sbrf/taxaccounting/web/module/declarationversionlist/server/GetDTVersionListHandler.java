@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
@@ -49,7 +50,7 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
         GetDTVersionListResult result = new GetDTVersionListResult();
         DeclarationType dType = declarationTypeService.get(action.getDeclarationFormTypeId());
         result.setDtTypeName(dType.getName());
-        result.setTaxType(dType.getTaxType());
+        result.setTaxType(TaxType.NDFL);
 
 
         List<DeclarationTemplate> declarationTemplateList = declarationTemplateService.getDecTemplateVersionsByStatus(action.getDeclarationFormTypeId());

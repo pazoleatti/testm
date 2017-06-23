@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.AbstractTreeListenerComponent;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.JoinSqlPartBuilder;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.Simple2SimpleJoinSqlPartBuilder;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.Universal2SimpleJoinSqlPartBuilder;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.foreignkeyresolver.Universal2UniversalJoinSqlPartBuilder;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;

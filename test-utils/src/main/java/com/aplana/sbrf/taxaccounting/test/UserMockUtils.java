@@ -1,17 +1,13 @@
 package com.aplana.sbrf.taxaccounting.test;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public final class UserMockUtils {
 
@@ -48,7 +44,6 @@ public final class UserMockUtils {
         when(user.hasRoles(any(TaxType.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class))).then(answer);
         when(user.hasRoles(any(TaxType.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class))).then(answer);
         when(user.hasRoles(any(TaxType.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class), any(String.class))).then(answer);
-        when(user.hasTax(any(TaxType.class))).thenReturn(true);
         return user;
 	}
 }

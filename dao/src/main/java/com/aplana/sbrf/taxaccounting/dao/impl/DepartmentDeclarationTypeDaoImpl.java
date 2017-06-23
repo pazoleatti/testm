@@ -43,7 +43,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 			departmentDeclarationType.setId(SqlUtils.getInteger(rs, "id"));
 			departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
 			departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
-            departmentDeclarationType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            departmentDeclarationType.setTaxType(TaxType.NDFL);
             departmentDeclarationType.setPerformers(getPerformers(departmentDeclarationType.getId()));
 			return departmentDeclarationType;
 		}
@@ -71,7 +71,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             departmentDeclarationType.setId(rs.getInt("id"));
             departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
             departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
-            departmentDeclarationType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            departmentDeclarationType.setTaxType(TaxType.NDFL);
             departmentDeclarationType.setPerformers(getPerformers(departmentDeclarationType.getId()));
             Pair<Date, Date> dates = new Pair<Date, Date>(rs.getDate("start_date"), rs.getDate("end_date"));
             return new Pair<DepartmentDeclarationType, Pair<Date, Date>>(departmentDeclarationType, dates);
@@ -96,7 +96,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             "where department_id = :departmentId and exists (\n" +
             "select 1 from declaration_type dt \n" +
             "left join declaration_template dtemp on dtemp.declaration_type_id = dt.id\n" +
-            "where dt.id = ddt.declaration_type_id and (:taxType is null or dt.tax_type = :taxType) \n" +
+            "where dt.id = ddt.declaration_type_id \n" +
             "and (:periodStart is null or (dtemp.version >= :periodStart or (:periodEnd is null or dtemp.version <= :periodEnd)))\n" +
             ") order by dt.name\n";
 
@@ -126,7 +126,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                         "join declaration_type dt1 on dt1.id = ddt.declaration_type_id \n" +
                         "where department_id = ?" +
                         " and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id " +
-                        (taxType != null ? "and dt.tax_type in " +SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : "") + ")",
+                        ")",
                 new Object[] {
                         departmentId
                 },
@@ -166,8 +166,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "  tgt.DEPARTMENT_ID       department_id,\n" +
                     "  tgt.DECLARATION_TYPE_ID declaration_type_id,\n" +
                     "  ds.PERIOD_START         start_date,\n" +
-                    "  ds.PERIOD_END           end_date,\n" +
-                    "  dt.tax_type             tax_type\n" +
+                    "  ds.PERIOD_END           end_date\n" +
                     "FROM department_form_type src\n" +
                     "  JOIN declaration_source ds ON src.id = ds.src_department_form_type_id\n" +
                     "  JOIN department_declaration_type tgt ON ds.department_declaration_type_id = tgt.id\n" +
@@ -233,7 +232,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     @Override
     public List<DepartmentDeclarationType> getDDTByDeclarationType(Integer declarationTypeId) {
         try {
-            return getJdbcTemplate().query("select ddt.id, ddt.department_id, ddt.DECLARATION_TYPE_ID, dt.tax_type from DEPARTMENT_DECLARATION_TYPE ddt "+
+            return getJdbcTemplate().query("select ddt.id, ddt.department_id, ddt.DECLARATION_TYPE_ID from DEPARTMENT_DECLARATION_TYPE ddt "+
                     "join declaration_type dt on dt.id = ddt.declaration_type_id \n" +
                     "where ddt.DECLARATION_TYPE_ID = ?",
                     new Object[]{declarationTypeId},
@@ -341,7 +340,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "FROM department_declaration_type ddt\n" +
                     "JOIN declaration_type ft ON ft.ID = ddt.DECLARATION_TYPE_ID\n" +
                     "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) d ON d.ID = ddt.DEPARTMENT_ID\n" +
-                    "WHERE ft.tax_type = :taxType\n" +
+                    "WHERE 1=1\n" +
                     "%s\n" +
                     ") ddtOrd \n" +
                     ") ddt \n" +
@@ -354,8 +353,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams, boolean withoutPerformers){
         boolean paging = queryParams != null && queryParams.getCount() != 0;
 
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("taxType", String.valueOf(taxType));
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
 
         // order
         StringBuilder order = new StringBuilder("");
@@ -418,7 +416,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         // departments
         String departmentClause = "";
         if (departmentIds != null && !departmentIds.isEmpty()){
-            departmentClause = "AND " + SqlUtils.transformToSqlInStatement("ddt.DEPARTMENT_ID", departmentIds) + "\n";
+            departmentClause = " " + SqlUtils.transformToSqlInStatement("ddt.DEPARTMENT_ID", departmentIds) + "\n";
         }
 
         // order
@@ -487,7 +485,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "ON ddt.DECLARATION_TYPE_ID = dt.ID\n" +
                     "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id = 0 CONNECT BY PRIOR id = parent_id) d \n" +
                     "ON d.id = ddt.DEPARTMENT_ID\n" +
-                    "WHERE dt.TAX_TYPE = :taxType\n"+
+                    "WHERE "+
                     departmentClause +
                     order.toString() +
                 ")";

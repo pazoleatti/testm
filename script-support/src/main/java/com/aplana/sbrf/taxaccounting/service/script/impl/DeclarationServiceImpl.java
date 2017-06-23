@@ -219,7 +219,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         this.context = context;
     }
 
-    @Override
+    /*@Override
     public boolean checkUnique(DeclarationData declarationData, Logger logger) {
         DeclarationTemplate template = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
         DeclarationData existingDeclarationData = declarationDataDao.find(template.getType().getId(),
@@ -231,7 +231,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             return false;
         }
         return true;
-    }
+    }*/
 
     @Override
     public String getXmlDataFileName(long declarationDataId) {
@@ -457,7 +457,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 
     @Override
-    public List<DeclarationData> findAllActiveWithNotAcceptedState(int declarationTypeId, int reportPeriodId) {
-        return declarationDataDao.findAllActiveWithNotAcceptedState(declarationTypeId, reportPeriodId);
+    public List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId) {
+        return declarationDataDao.findAllActive(declarationTypeId, reportPeriodId);
     }
 }

@@ -60,7 +60,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user, Boolean force) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
-        checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
+        checkRole(TaxType.NDFL, user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
         Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
@@ -128,7 +128,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
-        checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
+        checkRole(TaxType.NDFL, user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
         DeclarationType type = declarationTemplate.getType();
@@ -150,7 +150,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
-        checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
+        checkRole(TaxType.NDFL, user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
@@ -167,7 +167,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
     @Override
     public void deleteTemplate(int typeId, Logger logger, TAUserInfo user) {
-        checkRole(declarationTypeService.get(typeId).getTaxType(), user.getUser());
+        checkRole(TaxType.NDFL, user.getUser());
         List<DeclarationTemplate> templates = declarationTemplateService.getDecTemplateVersionsByStatus(typeId,
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         if (templates != null && !templates.isEmpty()){
@@ -193,7 +193,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     public boolean deleteVersionTemplate(int templateId, Logger logger, TAUserInfo user) {
         boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
         DeclarationTemplate template = declarationTemplateService.get(templateId);
-        checkRole(template.getType().getTaxType(), user.getUser());
+        checkRole(TaxType.NDFL, user.getUser());
         Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
         versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
@@ -231,7 +231,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public boolean setStatusTemplate(int templateId, Logger logger, TAUserInfo user, boolean force) {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(templateId);
-        checkRole(declarationTemplate.getType().getTaxType(), user.getUser());
+        checkRole(TaxType.NDFL, user.getUser());
         if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                     declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);

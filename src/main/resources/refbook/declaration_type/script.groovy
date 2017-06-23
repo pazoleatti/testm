@@ -268,7 +268,7 @@ def importPrimary1151111() {
     }
 
     DeclarationType declarationType = declarationService.getTemplateType(DECLARATION_TYPE_RASCHSV_NDFL_ID.intValue())
-    ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(declarationType.getTaxType(), reportPeriodTypeCode, year)
+    ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(TaxType.NDFL, reportPeriodTypeCode, year)
     if (reportPeriod == null) {
         logger.error("Файл «%s» не загружен: " +
                 "Для 1151111 (первичная) в системе не создан период с кодом «%s», календарный год «%s»!",
@@ -313,7 +313,7 @@ def importPrimary1151111() {
     if (guid != null && !guid.isEmpty()) {
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
         declarationFilter.setFileName(guid)
-        declarationFilter.setTaxType(declarationType.getTaxType())
+        declarationFilter.setTaxType(TaxType.NDFL)
         declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID)
         List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false)
         if (!declarationDataSearchResultItems.isEmpty()) {
@@ -1293,9 +1293,9 @@ def _importTF() {
     DeclarationType declarationType = declarationService.getTemplateType(declarationTypeId);
 
     // Указан недопустимый код периода
-    ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(declarationType.getTaxType(), reportPeriodCode, year);
+    ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(TaxType.NDFL, reportPeriodCode, year);
     if (reportPeriod == null) {
-        logger.error("Для вида налога «%s» в Системе не создан период с кодом «%s», календарный год «%s»! Загрузка файла «%s» не выполнена.", declarationType.getTaxType().getName(), reportPeriodCode, year, UploadFileName);
+        logger.error("Для вида налога «%s» в Системе не создан период с кодом «%s», календарный год «%s»! Загрузка файла «%s» не выполнена.", TaxType.NDFL.getName(), reportPeriodCode, year, UploadFileName);
         return;
     }
 
@@ -1349,7 +1349,7 @@ def _importTF() {
 
     // Назначение подразделению Декларации
     List<DepartmentDeclarationType> ddts = declarationService.getDDTByDepartment(departmentId,
-            declarationTemplate.getType().getTaxType(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+            TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
     boolean found = false;
     for (DepartmentDeclarationType ddt : ddts) {
         if (ddt.getDeclarationTypeId() == declarationType.getId()) {
@@ -1429,7 +1429,7 @@ def _importTF() {
     if (guid != null && !guid.isEmpty()) {
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
         declarationFilter.setFileName(guid);
-        declarationFilter.setTaxType(declarationType.getTaxType());
+        declarationFilter.setTaxType(TaxType.NDFL);
         declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
         List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false);
         if (!declarationDataSearchResultItems.isEmpty()) {

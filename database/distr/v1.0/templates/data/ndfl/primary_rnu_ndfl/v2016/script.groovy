@@ -368,6 +368,8 @@ import java.text.SimpleDateFormat
         //выставляем параметр что скрипт не формирует новый xml-файл
         calculateParams.put(DeclarationDataScriptParams.NOT_REPLACE_XML, Boolean.TRUE);
 
+        refBookPersonService.clearRnuNdflPerson(declarationData.id)
+
         //Получаем список всех ФЛ в первичной НФ
         List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper(false));
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -597,6 +599,15 @@ import java.text.SimpleDateFormat
             if (refBookPerson != null) {
 
                 primaryPerson.setId(refBookPerson.getId());
+                /*
+               Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
+               тогда версия записи в справочнике меняется на более раннюю дату, без изменения атрибутов. Такая ситуация
+               вряд ли может возникнуть на практике и проверка создана по заданию тестировщиков.
+              */
+                if (refBookPerson.getVersion() > getReportPeriodEndDate()) {
+                    Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
+                    downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
+                }
 
                 //address
                 if (primaryPerson.getAddress() != null) {
@@ -758,6 +769,11 @@ import java.text.SimpleDateFormat
 
     }
 
+    def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
+        Date newVersion = getReportPeriodStartDate()
+        getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
+    }
+
     def fillSystemAliases(Map<String, RefBookValue> values, RefBookObject refBookObject) {
         values.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getId()));
         values.put("RECORD_ID", new RefBookValue(RefBookAttributeType.NUMBER, refBookObject.getRecordId()));
@@ -873,7 +889,6 @@ import java.text.SimpleDateFormat
         putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
         putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
         putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-        putOrUpdate(values, "SEX", RefBookAttributeType.NUMBER, person.getSex(), attributeChangeListener);
         putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
         putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
         putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
@@ -881,9 +896,6 @@ import java.text.SimpleDateFormat
         putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate(), attributeChangeListener);
         putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null, attributeChangeListener);
         putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId(), attributeChangeListener);
-        putOrUpdate(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension(), attributeChangeListener);
-        putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical(), attributeChangeListener);
-        putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial(), attributeChangeListener);
         putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee(), attributeChangeListener);
         putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId(), attributeChangeListener);
         putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId(), attributeChangeListener);
@@ -896,7 +908,6 @@ import java.text.SimpleDateFormat
         putValue(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName());
         putValue(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName());
         putValue(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName());
-        putValue(values, "SEX", RefBookAttributeType.NUMBER, person.getSex());
         putValue(values, "INN", RefBookAttributeType.STRING, person.getInn());
         putValue(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign());
         putValue(values, "SNILS", RefBookAttributeType.STRING, person.getSnils());
@@ -904,9 +915,6 @@ import java.text.SimpleDateFormat
         putValue(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate());
         putValue(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null);
         putValue(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId());
-        putValue(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension() ?: 2);
-        putValue(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical() ?: 2);
-        putValue(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial() ?: 2);
         putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2);
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
@@ -3218,9 +3226,6 @@ class NdflPersonFL {
 def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, Map<Long, Map<String, RefBookValue>> personMap) {
     long time = System.currentTimeMillis();
     long timeTotal = time
-    // Параметры подразделения
-    def mapRefBookNdfl = getRefBookNdfl()
-    def mapRefBookNdflDetail = getRefBookNdflDetail(mapRefBookNdfl.id)
 
     logForDebug("Общие проверки: инициализация (" + (System.currentTimeMillis() - time) + " мс)");
 
@@ -3369,7 +3374,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column7And11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}}'",
+                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'. Доход.Дата.Выплата (Графа 7)='${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}', Доход.Сумма.Выплата (Графа 11)='${ndflPersonIncome.incomePayoutSumm ?: ""}'",
                     "Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 17"
             )
             //11 Раздел 2. Графы 7, 11 должны быть заполнены, если заполнена Раздел 2. Графа 20
@@ -3424,9 +3429,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, String attributeName) {
     if (ndflPerson[alias] == null || (ndflPerson[alias]) instanceof String && (org.apache.commons.lang3.StringUtils.isBlank(ndflPerson[alias]) || ndflPerson[alias] == "0")) {
         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                "$attributeName='${ndflPerson[alias]?:""}'")
-        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError,
-                "Не заполнен обязательный параметр '$attributeName'")
+                "$attributeName='${ndflPerson[alias]!=null?ndflPerson[alias]:""}'")
+        String msg
+        if (ndflPerson[alias] == "0") {
+            msg = "Значение гр. \"$attributeName\" не может быть равно \"0\""
+        } else {
+            msg = "Не заполнена гр. \"$attributeName\""
+        }
+        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Наличие обязательных реквизитов для формирования отчетности", fioAndInp, pathError, msg)
         return false
     }
     return true
@@ -4941,7 +4951,6 @@ class ColumnFillConditionData {
                 person.setLastName(rs.getString("last_name"));
                 person.setFirstName(rs.getString("first_name"));
                 person.setMiddleName(rs.getString("middle_name"));
-                person.setSex(SqlUtils.getInteger(rs, "sex"));
                 person.setInn(rs.getString("inn"));
                 person.setInnForeign(rs.getString("inn_foreign"));
                 person.setSnils(rs.getString("snils"));
@@ -4952,9 +4961,6 @@ class ColumnFillConditionData {
                 person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
 
                 //additional
-                person.setPension(SqlUtils.getInteger(rs, "pension"));
-                person.setMedical(SqlUtils.getInteger(rs, "medical"));
-                person.setSocial(SqlUtils.getInteger(rs, "social"));
                 person.setEmployee(SqlUtils.getInteger(rs, "employee"));
                 person.setSourceId(SqlUtils.getLong(rs, "source_id"));
                 person.setRecordId(SqlUtils.getLong(rs, "record_id"));

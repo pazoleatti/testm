@@ -102,7 +102,6 @@ alter table department add constraint dept_fk_parent_id foreign key (parent_id) 
 alter table department add constraint department_fk_type foreign key(type) references department_type(id);
 alter table configuration add constraint configuration_fk foreign key (department_id) references department(id) on delete cascade;
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period(id);
-alter table declaration_type add constraint declaration_type_fk_taxtype foreign key (tax_type) references tax_type(id);
 alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department(id);
 alter table department_declaration_type add constraint dept_decl_type_fk_decl_type foreign key (declaration_type_id) references declaration_type(id);
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
@@ -224,7 +223,6 @@ alter table department add constraint department_chk_garant_use check (garant_us
 alter table department add constraint department_chk_sunr_use check (sunr_use in (0, 1));
 alter table report_period add constraint report_period_chk_date check (end_date >= start_date);
 alter table declaration_type add constraint declaration_type_chk_status check (status in (-1, 0, 1, 2));
-alter table declaration_type add constraint declaration_type_chk_is_ifrs check ((is_ifrs in (0,1) and tax_type='I') or (is_ifrs = 0 and tax_type<>'I'));
 alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
 alter table declaration_template add constraint chk_declaration_template_fkind check ((status in (0,1) and form_kind is not null) or status not in (0,1));
 alter table declaration_template add constraint chk_declaration_template_ftype check ((status in (0,1) and form_type is not null) or status not in (0,1));

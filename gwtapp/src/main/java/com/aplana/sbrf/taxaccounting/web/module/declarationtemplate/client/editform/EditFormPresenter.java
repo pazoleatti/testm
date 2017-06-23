@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.edit
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTableEvent;
@@ -12,8 +11,8 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.EditD
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationTypeAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationTypeResult;
 import com.google.inject.Inject;
-import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
@@ -56,7 +55,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             public void onSuccess(GetDeclarationTypeResult result) {
                 changeItem(result.getDeclarationType());
                 DeclarationType type = result.getDeclarationType();
-                getView().setVisibleIfrs(type.getTaxType() == TaxType.INCOME);
+                //getView().setVisibleIfrs(type.getTaxType() == TaxType.INCOME);
             }
         }, this));
     }

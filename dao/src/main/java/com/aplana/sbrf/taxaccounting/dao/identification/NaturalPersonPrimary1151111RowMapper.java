@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.identification;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
-import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,11 +43,7 @@ public class NaturalPersonPrimary1151111RowMapper extends NaturalPersonPrimaryRo
         }
 
         //добавлено для 115 макета
-        person.setPension(SqlUtils.getInteger(rs, "pension"));
-        person.setMedical(SqlUtils.getInteger(rs, "medical"));
-        person.setSocial(SqlUtils.getInteger(rs, "social"));
         person.setNum(SqlUtils.getInteger(rs, "num"));
-        person.setSex(SqlUtils.getInteger(rs, "sex"));
 
         return person;
     }

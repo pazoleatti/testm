@@ -104,8 +104,8 @@ public interface DeclarationService {
     /**
      * Проверка декларации на уникальность с аналогичными параметрам
      */
-    @SuppressWarnings("unused")
-    boolean checkUnique(DeclarationData declarationData, Logger logger);
+    /*@SuppressWarnings("unused")
+    boolean checkUnique(DeclarationData declarationData, Logger logger);*/
 
     /**
      * Получить имя файла в формате законодателя
@@ -411,10 +411,10 @@ public interface DeclarationService {
                                                                 Boolean departmentReportPeriodStatus, Integer declarationState);
 
     /**
-     * Найти все формы всех подразделений в активном периоде по виду и периоду, имеющие статус отличный от Принята
+     * Найти все формы всех подразделений в активном периоде по виду и периоду
      * @param declarationTypeId
      * @param reportPeriodId
      * @return
      */
-    List<DeclarationData> findAllActiveWithNotAcceptedState(int declarationTypeId, int reportPeriodId);
+    List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId);
 }

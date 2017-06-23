@@ -233,7 +233,7 @@ public interface NdflPersonDao {
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
 
     /**
      * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ

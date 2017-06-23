@@ -3,10 +3,12 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.groovy.jsr223.GroovyScriptEngine;
 import com.aplana.sbrf.taxaccounting.groovy.jsr223.GroovyScriptEngineFactory;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,10 +18,11 @@ import org.codehaus.groovy.syntax.SyntaxException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.io.*;
-import java.util.Scanner;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -132,50 +135,89 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		return matcher.find();
 	}
 
-	protected String getScriptFilePath(String script, String scriptPathPrefix, Logger logger) {
+	protected String getPackageName(String script) {
+		try {
+			Class scriptClass = ((GroovyScriptEngine)getScriptEngine()).getScriptClass(script);
+			return scriptClass.getName().substring(0, scriptClass.getName().lastIndexOf('.'));
+		} catch (Exception e) {
+			LOG.warn(e.getMessage(), e);
+			throw new ServiceException(e.getMessage(), e);
+		}
+
+	}
+
+	public static String getScriptFilePath(String packageName, String scriptPathPrefix, Logger logger) {
 		String scriptFilePath = null;
 		try {
-			scriptFilePath = getLocalScriptPath(script, scriptPathPrefix);
+			return findLocalScriptPath(new File(scriptPathPrefix), packageName);
 		} catch (Exception e) {
 			LOG.warn(e.getMessage(), e);
 			logger.error("Не удалось получить локальный скрипт", e);
 		}
 		return scriptFilePath;
 	}
-	protected String getLocalScriptPath(String script, String path) throws SyntaxException, IOException {
-		Class scriptClass = ((GroovyScriptEngine)getScriptEngine()).getScriptClass(script);
-		String packageName = scriptClass.getName().substring(0, scriptClass.getName().lastIndexOf('.'));
-		return findLocalScriptPath(new File(path), packageName, System.getProperty("line.separator"));
-	}
 
-	protected String findLocalScriptPath(File folder, String packageName, String lineSeparator) throws IOException {
+	public static String findLocalScriptPath(File folder, String packageName) throws IOException {
 		for (File file : folder.listFiles()) {
 			if (file.isDirectory()) {
 				//Если папка - достаем из нее файлы groovy
-				String script = findLocalScriptPath(file, packageName, lineSeparator);
+				String script = findLocalScriptPath(file, packageName);
 				if (script != null) {
 					return script;
 				}
 			} else if (file.getName().equals("script.groovy")){
-				Scanner scanner = new Scanner(file);
+				BufferedReader reader = new BufferedReader(new FileReader(file));
 				try {
-					if (scanner.hasNextLine() && scanner.nextLine().startsWith("package " + packageName)) {
+					if (reader.readLine().contains("package " + packageName)) {
 						return file.getAbsolutePath();
 					}
 				} finally {
-					scanner.close();
+					reader.close();
 				}
 			}
 		}
 		return null;
 	}
 
-	protected Object executeLocalScript(Binding binding, String scriptFilePath, Logger logger) {
+	/**
+	 * Получить текст скрипта
+	 * @param filePath
+	 * @return
+	 */
+	public static String getScript(String filePath) {
+		FileReader reader = null;
+		StringBuilder stringBuilder = new StringBuilder();
+		try {
+			reader = new FileReader(filePath);
+			// читаем посимвольно
+			int c;
+			while((c=reader.read())!=-1) {
+				stringBuilder.append((char)c);
+			}
+		} catch(IOException ex){
+			LOG.error(ex.getMessage(), ex);
+		} finally {
+			IOUtils.closeQuietly(reader);
+		}
+		return stringBuilder.toString();
+	}
+
+	protected static Binding toBinding(Bindings bindings) {
+		Binding binding = new Binding();
+		for(Map.Entry<String, Object> entry: bindings.entrySet()) {
+			binding.setVariable(entry.getKey(), entry.getValue());
+		}
+		return binding;
+	}
+
+
+	protected boolean executeLocalScript(Binding binding, String scriptFilePath, Logger logger) {
 		try {
 			File scriptFile = new File(scriptFilePath);
 			config.setSourceEncoding("UTF-8");
 			GroovyShell groovyShell = new GroovyShell(binding, config);
-			return groovyShell.evaluate(scriptFile);
+			groovyShell.evaluate(scriptFile);
+			return true;
 		} catch (Exception e) {
 			logScriptException(e, logger);
 			return false;

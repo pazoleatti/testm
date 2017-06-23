@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TARoleDao;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -28,7 +27,6 @@ public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
 			result.setId(SqlUtils.getInteger(rs, "id"));
 			result.setName(rs.getString("name"));
 			result.setAlias(rs.getString("alias"));
-            result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 			return result;
 		}
 	};
@@ -38,7 +36,7 @@ public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
 		TARole role;
 		try {
 			role = getJdbcTemplate().queryForObject(
-					"select id, alias, name, tax_type from sec_role where id = ?",
+					"select id, alias, name from sec_role where id = ?",
 					new Object[] { id },
 					new int[] { Types.NUMERIC },
 					TA_ROLE_MAPPER
@@ -64,7 +62,7 @@ public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
         TARole role;
         try {
             role = getJdbcTemplate().queryForObject(
-                    "select id, alias, name, tax_type from sec_role where alias = ?",
+                    "select id, alias, name from sec_role where alias = ?",
                     new Object[] { alias },
                     new int[] { Types.VARCHAR },
                     TA_ROLE_MAPPER
