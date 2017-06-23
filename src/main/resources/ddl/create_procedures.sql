@@ -2331,6 +2331,7 @@ end fias_pkg;
 /
 show errors;
 create or replace package report_pkg as 
+/* Пакет для отчетности*/
 
   -- Сконвертировать BLOB в CLOB
   function blob_to_clob (p_blob in blob) return clob;
