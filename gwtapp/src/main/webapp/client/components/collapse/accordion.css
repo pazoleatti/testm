@@ -7,14 +7,14 @@
 
 .accordion-heading a.accordion-toggle.collapsed,
 a.collapse-link.collapsed {
-    background-image: url(cbr_icons_sprite.png);
+    background-image: url(icons_sprite.png);
     background-repeat: no-repeat;
     background-position: 0 -673px;
 }
 
 .accordion-heading a.accordion-toggle,
 a.collapse-link {
-    background-image: url(cbr_icons_sprite.png);
+    background-image: url(icons_sprite.png);
     background-repeat: no-repeat;
     background-position: 0 -694px;
     background-color: transparent;
