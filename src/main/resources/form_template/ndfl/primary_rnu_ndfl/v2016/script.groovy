@@ -927,8 +927,6 @@ import java.text.SimpleDateFormat
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
         putValue(values, "PERSON_ID", RefBookAttributeType.REFERENCE, personDocument.getNaturalPerson().getId());
         putValue(values, "DOC_NUMBER", RefBookAttributeType.STRING, personDocument.getDocumentNumber());
-        putValue(values, "ISSUED_BY", RefBookAttributeType.STRING, null);
-        putValue(values, "ISSUED_DATE", RefBookAttributeType.DATE, null);
         def incRepVal = personDocument.getIncRep() != null ? personDocument.getIncRep() : 1;
         putValue(values, "INC_REP", RefBookAttributeType.NUMBER, incRepVal); //default value is 1
         putValue(values, "DOC_ID", RefBookAttributeType.REFERENCE, personDocument.getDocType()?.getId());
