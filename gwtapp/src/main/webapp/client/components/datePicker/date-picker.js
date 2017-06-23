@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    var widgets = angular.module('datePicker', []);
+    var widgets = angular.module('aplana.datePicker', []);
     /**
      * @description Виджет для поля даты
      *

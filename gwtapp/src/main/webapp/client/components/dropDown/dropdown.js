@@ -5,7 +5,7 @@
      * @description Модуль, содержащий директивы для работы с многоуровневым меню
      */
 
-    angular.module('app.dropdown', [])
+    angular.module('aplana.dropdown', [])
         /**
          * @description Директива для многоуровневого меню
          */

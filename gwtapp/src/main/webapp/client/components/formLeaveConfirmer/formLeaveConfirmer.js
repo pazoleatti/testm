@@ -6,7 +6,7 @@
      * Если при смене режима просмотр/редактирование не происходит смена состояни - запрос не отобразиться
      * Его можно вызвать вручную методом сервиса askSaveChanges
      */
-    angular.module('app.formLeaveConfirmer', [])
+    angular.module('aplana.formLeaveConfirmer', [])
         .factory('FormLeaveConfirmer', ['$rootScope', '$state', '$window', '$filter', 'dialogs', function ($rootScope, $state, $window, $filter, dialogs) {
             var getParameterValue = function (parameter) {
                 return angular.isFunction(parameter) ? parameter() : parameter;
