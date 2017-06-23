@@ -1,6 +1,8 @@
 (function () {
     'use strict';
-
+    /**
+     * @description Основной модуль приложения
+     */
     angular
         .module('sbrfNdfl', [
             'app.header',
