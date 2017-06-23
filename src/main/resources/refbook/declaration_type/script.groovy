@@ -1410,7 +1410,7 @@ def _importTF() {
         e.printStackTrace()
     }
 
-    //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть
+    //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
     if (!reportPeriodCode.equals(handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))) {
         logger.error("В ТФ не совпадают значения параметров имени «Код периода» = «%s» и содержимого «Код периода» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
     }
