@@ -59,7 +59,6 @@ public class TAUserServiceTest {
 
 		TARole role = new TARole();
 		role.setAlias(USER_ROLE);
-		role.setTaxType(TaxType.NDFL);
 		List<TARole> listUserRoles = new ArrayList<TARole>();
 		listUserRoles.add(role);
 
@@ -124,7 +123,6 @@ public class TAUserServiceTest {
 		user.setDepartmentId(USER_DEPARTMENT_ID);
 		TARole role = new TARole();
 		role.setAlias(USER_ROLE);
-		role.setTaxType(TaxType.NDFL);
 		List<TARole> listUserRoles = new ArrayList<TARole>();
 		listUserRoles.add(role);
 		user.setRoles(listUserRoles);

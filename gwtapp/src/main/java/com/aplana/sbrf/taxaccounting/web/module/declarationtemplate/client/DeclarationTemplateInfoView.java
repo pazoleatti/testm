@@ -25,11 +25,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -118,7 +119,6 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
         downloadXsd.setEnabled(template.getXsdId() != null);
         deleteXsd.setEnabled(template.getXsdId() != null);
         formKindPicker.setSingleValue(declarationTemplateExt.getDeclarationTemplate().getDeclarationFormKind().getId());
-        formTypePicker.setFilter("TAX_KIND = '"+declarationTemplateExt.getDeclarationTemplate().getType().getTaxType().getCode()+"'");
         formTypePicker.setSingleValue(declarationTemplateExt.getDeclarationTemplate().getDeclarationFormTypeId());
     }
 

@@ -130,7 +130,6 @@ public class DepartmentServiceImplTest {
         for (String alias : asList(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_ADMIN, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
             TARole taRole = new TARole();
             taRole.setAlias(alias);
-            taRole.setTaxType(TaxType.NDFL);
             taRoles.add(taRole);
         }
 

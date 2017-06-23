@@ -46,13 +46,13 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
             throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
         }
 
-        String taskName = declarationDataService.getTaskName(ddReportType, declarationTemplate.getType().getTaxType());
+        String taskName = declarationDataService.getTaskName(ddReportType, TaxType.NDFL);
         return checkTask(getReportType(), value, taskName, getTaskLimitMsg(value, params));
     }
 
     protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(getDeclaration(params).getDeclarationTemplateId());
-        return String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!", declarationTemplate.getType().getTaxType().getDeclarationShortName(), value);
+        return String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!", TaxType.NDFL.getDeclarationShortName(), value);
     }
 
     protected DeclarationDataReportType getDeclarationDataReportType(Map<String, Object> params) {

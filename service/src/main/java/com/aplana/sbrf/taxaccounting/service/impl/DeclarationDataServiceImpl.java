@@ -199,7 +199,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
         if (lockDataService.lock(key, userInfo.getUser().getId(),
                 String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                        String.format("Создание %s", declarationTemplate.getType().getTaxType().getDeclarationShortName()),
+                        String.format("Создание %s", TaxType.NDFL.getDeclarationShortName()),
                         departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         departmentReportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + sdf.get().format(departmentReportPeriod.getCorrectionDate())
@@ -236,9 +236,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
                         FormDataEvent.CREATE, logger);
                 if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceLoggerException(
-                            (declarationTemplate.getType().getTaxType().equals(TaxType.DEAL) ? "Уведомление не создано" : "Налоговая форма не создана"),
-                            logEntryService.save(logger.getEntries()));
+                    throw new ServiceLoggerException(("Уведомление не создано"), logEntryService.save(logger.getEntries()));
                 }
 
                 DeclarationData newDeclaration = new DeclarationData();
@@ -255,6 +253,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setNote(note);
 
                 // Вызываем событие скрипта CREATE
+
                 declarationDataScriptingService.executeScript(userInfo, newDeclaration, FormDataEvent.CREATE, logger, null);
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException(
@@ -931,7 +930,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                      FormDataEvent operation, LockStateLogger lockStateLogger) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC);
         if (xmlUuid == null) {
-            TaxType taxType = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
+            TaxType taxType = TaxType.NDFL;
             String declarationName = "налоговой формы";
             String operationName = operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle();
             logger.error("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
@@ -1222,10 +1221,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
                 for(DeclarationSubreport subreport : subreports) {
                     ddReportType.setSubreport(subreport);
-                    exist |= checkExistTask(declarationDataId, ddReportType, declarationTemplate.getType().getTaxType(), logger);
+                    exist |= checkExistTask(declarationDataId, ddReportType, TaxType.NDFL, logger);
                 }
             } else {
-                exist |= checkExistTask(declarationDataId, ddReportType, declarationTemplate.getType().getTaxType(), logger);
+                exist |= checkExistTask(declarationDataId, ddReportType, TaxType.NDFL, logger);
             }
         }
         return exist;
@@ -1336,7 +1335,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case CHECK_DEC:
             case ACCEPT_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                        getTaskName(ddReportType, declarationTemplate.getType().getTaxType()),
+                        getTaskName(ddReportType, TaxType.NDFL),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1354,7 +1353,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "");
             case SPECIFIC_REPORT_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                        getTaskName(ddReportType, declarationTemplate.getType().getTaxType()),
+                        getTaskName(ddReportType, TaxType.NDFL),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1452,7 +1451,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         //Проверка на неактуальные консолидированные данные  3А
         if (!sourceService.isDDConsolidationTopical(dd.getId())){
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            boolean isReports = TaxType.NDFL.equals(declarationTemplate.getType().getTaxType()) && DeclarationFormKind.REPORTS.equals(declarationTemplate.getDeclarationFormKind());
+            boolean isReports = DeclarationFormKind.REPORTS.equals(declarationTemplate.getDeclarationFormKind());
             logger.error(CALCULATION_NOT_TOPICAL + (isReports?"":CALCULATION_NOT_TOPICAL_SUFFIX));
             consolidationOk = false;
         } else {

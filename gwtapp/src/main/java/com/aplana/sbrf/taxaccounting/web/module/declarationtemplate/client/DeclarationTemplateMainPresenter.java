@@ -135,7 +135,6 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
         declarationType.setId(0);
         declarationType.setName("");
         declarationType.setStatus(VersionedObjectStatus.DRAFT);
-        declarationType.setTaxType(event.getTaxType());
         declarationTemplate.setType(declarationType);
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
         getView().setTemplateId(0);

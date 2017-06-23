@@ -136,7 +136,6 @@ public class ConfigurationServiceTest {
         userInfo.setUser(user);
         TARole role = new TARole();
         role.setAlias(TARole.N_ROLE_CONF);
-        role.setTaxType(TaxType.NDFL);
         user.setRoles(asList(role));
         Logger logger = new Logger();
         service.saveAllConfig(userInfo, new ConfigurationParamModel(), new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
@@ -565,7 +564,6 @@ public class ConfigurationServiceTest {
         userInfo.setUser(user);
         TARole role = new TARole();
         role.setAlias(TARole.N_ROLE_ADMIN);
-        role.setTaxType(TaxType.NDFL);
         user.setRoles(asList(role));
         return userInfo;
     }

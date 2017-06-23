@@ -260,7 +260,6 @@ public class RegionSecurityServiceImplTest {
         TARole role = new TARole();
         role.setId(1);
         role.setAlias(roleAlias);
-        role.setTaxType(TaxType.NDFL);
         roles.add(role);
 
         user.setRoles(roles);

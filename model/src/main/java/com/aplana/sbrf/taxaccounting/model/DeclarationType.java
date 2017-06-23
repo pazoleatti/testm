@@ -12,7 +12,6 @@ public class DeclarationType implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private int id;
-	private TaxType taxType;
 	private String name;
     private VersionedObjectStatus status;
     private Boolean isIfrs;
@@ -40,22 +39,6 @@ public class DeclarationType implements Serializable {
 	 */
 	public void setId(int id) {
 		this.id = id;
-	}
-	
-	/**
-	 * Получить вид налога
-	 * @return вид налога
-	 */
-	public TaxType getTaxType() {
-		return taxType;
-	}
-	
-	/**
-	 *  Задать вид налога
-	 * @param taxType вид налога
-	 */
-	public void setTaxType(TaxType taxType) {
-		this.taxType = taxType;
 	}
 	
 	/**

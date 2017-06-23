@@ -104,8 +104,8 @@ public interface DeclarationService {
     /**
      * Проверка декларации на уникальность с аналогичными параметрам
      */
-    @SuppressWarnings("unused")
-    boolean checkUnique(DeclarationData declarationData, Logger logger);
+    /*@SuppressWarnings("unused")
+    boolean checkUnique(DeclarationData declarationData, Logger logger);*/
 
     /**
      * Получить имя файла в формате законодателя

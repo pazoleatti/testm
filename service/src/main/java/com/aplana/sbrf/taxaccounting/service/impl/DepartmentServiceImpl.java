@@ -451,7 +451,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> getTaxDeclarationDepartments(TAUser tAUser, DeclarationType declarationType) {
-        TaxType taxType = declarationType.getTaxType();
+        TaxType taxType = TaxType.NDFL;
         if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)
                 || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений

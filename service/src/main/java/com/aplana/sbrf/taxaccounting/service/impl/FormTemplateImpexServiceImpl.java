@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormTemplateContent;
-import com.aplana.sbrf.taxaccounting.model.Translator;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -243,7 +240,7 @@ public class FormTemplateImpexServiceImpl implements
                 String translatedName = Translator.transliterate(template.getType().getName());
                 String folderTemplateName =
                         Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
-                                template.getType().getTaxType().name().toLowerCase(),
+                                TaxType.NDFL.name().toLowerCase(),
                                 template.getType().getId(),
                                 (translatedName.length() > MAX_NAME_OF_DIR
                                         ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")

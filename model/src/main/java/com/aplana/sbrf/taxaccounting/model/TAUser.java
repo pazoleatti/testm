@@ -102,7 +102,7 @@ public class TAUser implements Serializable {
         }
 
         for (TARole role: roles) {
-            if (roleAlias.equals(role.getAlias()) && taxType.equals(role.getTaxType())) {
+            if (roleAlias.equals(role.getAlias())) {
                 return true;
             }
         }
@@ -128,28 +128,6 @@ public class TAUser implements Serializable {
             }
         }
         return hashRole;
-    }
-
-    /**
-     * Проверяет, что у пользователя есть роль с заданным {@link TARole#getTaxType() видом налога}
-     * @param taxType вид налоганалог
-     * @return true - если у пользователя есть такая роль, false - в противном случае
-     */
-    public boolean hasTax(TaxType taxType) {
-        if (roles == null) {
-            throw new IllegalStateException("Roles list is not initialized properly!");
-        }
-
-        if (taxType == null) {
-            throw new IllegalArgumentException("taxType cannot be null");
-        }
-
-        for (TARole role: roles) {
-            if (taxType.equals(role.getTaxType())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

@@ -161,7 +161,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
         StringBuffer stringBuffer = new StringBuffer();
         DeclarationType type = declarationTypeService.get(dft.getDeclarationTypeId());
         List<ReportPeriod> periods =
-                periodService.getReportPeriodsByDateAndDepartment(type.getTaxType(), dft.getDepartmentId(), dft.getPeriodStart(), dft.getPeriodEnd());
+                periodService.getReportPeriodsByDateAndDepartment(TaxType.NDFL, dft.getDepartmentId(), dft.getPeriodStart(), dft.getPeriodEnd());
         String periodCombo = "";
         if (!periods.isEmpty()){
             if (periods.size() == 1){

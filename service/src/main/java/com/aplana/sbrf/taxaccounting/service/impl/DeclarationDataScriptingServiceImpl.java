@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -14,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -123,7 +120,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		Bindings b = getScriptEngine().createBindings();
 		Binding binding = new Binding();
 
-		Map<String, ?> scriptComponents = getScriptExposedBeans(declarationTemplate.getType().getTaxType(), event);
+		Map<String, ?> scriptComponents = getScriptExposedBeans(TaxType.NDFL, event);
 		for (Object component : scriptComponents.values()) {
 			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
 			scriptComponentContext.setUserInfo(userInfo);

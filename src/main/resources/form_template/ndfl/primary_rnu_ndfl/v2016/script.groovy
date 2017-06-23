@@ -889,7 +889,6 @@ import java.text.SimpleDateFormat
         putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
         putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
         putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-        putOrUpdate(values, "SEX", RefBookAttributeType.NUMBER, person.getSex(), attributeChangeListener);
         putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
         putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
         putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
@@ -897,9 +896,6 @@ import java.text.SimpleDateFormat
         putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate(), attributeChangeListener);
         putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null, attributeChangeListener);
         putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId(), attributeChangeListener);
-        putOrUpdate(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension(), attributeChangeListener);
-        putOrUpdate(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical(), attributeChangeListener);
-        putOrUpdate(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial(), attributeChangeListener);
         putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee(), attributeChangeListener);
         putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId(), attributeChangeListener);
         putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId(), attributeChangeListener);
@@ -912,7 +908,6 @@ import java.text.SimpleDateFormat
         putValue(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName());
         putValue(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName());
         putValue(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName());
-        putValue(values, "SEX", RefBookAttributeType.NUMBER, person.getSex());
         putValue(values, "INN", RefBookAttributeType.STRING, person.getInn());
         putValue(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign());
         putValue(values, "SNILS", RefBookAttributeType.STRING, person.getSnils());
@@ -920,9 +915,6 @@ import java.text.SimpleDateFormat
         putValue(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate());
         putValue(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null);
         putValue(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId());
-        putValue(values, "PENSION", RefBookAttributeType.NUMBER, person.getPension() ?: 2);
-        putValue(values, "MEDICAL", RefBookAttributeType.NUMBER, person.getMedical() ?: 2);
-        putValue(values, "SOCIAL", RefBookAttributeType.NUMBER, person.getSocial() ?: 2);
         putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2);
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
@@ -4959,7 +4951,6 @@ class ColumnFillConditionData {
                 person.setLastName(rs.getString("last_name"));
                 person.setFirstName(rs.getString("first_name"));
                 person.setMiddleName(rs.getString("middle_name"));
-                person.setSex(SqlUtils.getInteger(rs, "sex"));
                 person.setInn(rs.getString("inn"));
                 person.setInnForeign(rs.getString("inn_foreign"));
                 person.setSnils(rs.getString("snils"));
@@ -4970,9 +4961,6 @@ class ColumnFillConditionData {
                 person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
 
                 //additional
-                person.setPension(SqlUtils.getInteger(rs, "pension"));
-                person.setMedical(SqlUtils.getInteger(rs, "medical"));
-                person.setSocial(SqlUtils.getInteger(rs, "social"));
                 person.setEmployee(SqlUtils.getInteger(rs, "employee"));
                 person.setSourceId(SqlUtils.getLong(rs, "source_id"));
                 person.setRecordId(SqlUtils.getLong(rs, "record_id"));
