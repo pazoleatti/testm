@@ -3043,11 +3043,6 @@ class NdflPersonFL {
 
                     // Адрес регистрации в Российской Федерации.Код субъекта
                     if (ndflPerson.regionCode != null && !ndflPerson.regionCode.equals(regionCode)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Код субъекта (Графа 13)='${ndflPerson.regionCode ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Код субъекта (Графа 13)' не соответствует справочнику '$R_PERSON'")
-                    if (!ndflPerson.regionCode.equals(regionCode)) {
                         ndflPersonAddress.add("Код субъекта='${ndflPerson.regionCode ?: ""}'")
                     }
 
