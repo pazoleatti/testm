@@ -78,12 +78,8 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
 
-        //Используются только адреса которые прошли проверку по ФИАС
-        Long fiasAddressId = getFiasAddressId(person, ndflPersonId);
-
-        if (fiasAddressId != null) {
-            person.setAddress(buildAddress(rs));
-        }
+        //Используются все адреса, а не только те, которые прошли проверку по ФИАС
+        person.setAddress(buildAddress(rs));
 
         //rs.getString("additional_data")
         return person;
