@@ -6,6 +6,7 @@
 	<property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
 	<property name="net.sf.jasperreports.export.xls.collapse.row.span" value="false"/>
 	<property name="net.sf.jasperreports.page.break.no.pagination" value="apply"/>
+	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="true"/>
 	<parameter name="declarationId" class="java.lang.Long">
 		<defaultValueExpression><![CDATA[18422]]></defaultValueExpression>
 	</parameter>
@@ -13,7 +14,9 @@
 		<![CDATA[select row_number() over(partition by datas.declaration_data_id order by datas.kpp,datas.oktmo) rn,
        datas.kpp,datas.oktmo,datas.terbank,datas.reptype,
        datas.pers_cnt,datas.inc_accured,datas.tax_calc,
-       datas.declaration_data_id,datas.rep_decl_id
+       datas.declaration_data_id,datas.rep_decl_id,
+       datas.rep_pers_cnt,
+       datas.note
   from (
         select distinct
                tab.kpp,tab.oktmo,
@@ -23,8 +26,11 @@
                tab.inc_accured,
                tab.tax_calc,
                tab.declaration_data_id,
-               sdd.id rep_decl_id
+               sdd.id rep_decl_id,
+               nvl(to_char(sdd.pers_cnt),'-') rep_pers_cnt,
+               sdd.note
           from (select p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id,drr.correction_date,
+                       dd.note,
                        count(distinct inc.ndfl_person_id) pers_cnt,
                        sum(nvl(inc.income_accrued_summ,0)) inc_accured,
                        sum(nvl(inc.calculated_tax,0)) tax_calc
@@ -32,7 +38,7 @@
                                            join ndfl_person p on (p.declaration_data_id=dd.id)
                                            join ndfl_person_income inc on (inc.ndfl_person_id=p.id)
                 where dd.id=$P{declarationId}
-                 group by p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id,drr.correction_date) tab
+                 group by p.declaration_data_id,inc.kpp,inc.oktmo,drr.report_period_id,drr.department_id,drr.correction_date,dd.note) tab
                left join vw_depart_kpp_oktmo d on (d.kpp=tab.kpp and d.oktmo=tab.oktmo and d.dep_id=tab.department_id)
                left join vw_decl_kpp_oktmo_form7 sdd on (sdd.kpp=tab.kpp and sdd.oktmo=tab.oktmo and
 					      sdd.report_period_id=tab.report_period_id and nvl(sdd.correction_date,to_date('01.01.1900','dd.mm.yyyy'))=nvl(tab.correction_date,to_date('01.01.1900','dd.mm.yyyy')))
@@ -64,6 +70,8 @@
 	<field name="TAX_CALC" class="java.math.BigDecimal"/>
 	<field name="DECLARATION_DATA_ID" class="java.math.BigDecimal"/>
 	<field name="REP_DECL_ID" class="java.math.BigDecimal"/>
+	<field name="REP_PERS_CNT" class="java.lang.String"/>
+	<field name="NOTE" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -81,9 +89,9 @@
 		</band>
 	</title>
 	<columnHeader>
-		<band height="30" splitType="Stretch">
+		<band height="44" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="0b15a635-c558-4535-bafe-5d42945794fd" mode="Opaque" x="1" y="0" width="25" height="30" backcolor="#E3E3E3"/>
+				<reportElement uuid="0b15a635-c558-4535-bafe-5d42945794fd" mode="Opaque" x="1" y="0" width="25" height="44" backcolor="#E3E3E3"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -98,7 +106,7 @@
 п/п]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="41092dd3-eb38-44d5-af25-2c9b5d04874e" mode="Opaque" x="26" y="0" width="71" height="30" forecolor="#000000" backcolor="#E3E3E3"/>
+				<reportElement uuid="41092dd3-eb38-44d5-af25-2c9b5d04874e" mode="Opaque" x="26" y="0" width="71" height="44" forecolor="#000000" backcolor="#E3E3E3"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -113,7 +121,7 @@
 				<text><![CDATA[КПП]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e4a2f86a-cbd6-47cb-9b32-0f261b51332c" mode="Opaque" x="97" y="0" width="75" height="30" forecolor="#000000" backcolor="#E3E3E3"/>
+				<reportElement uuid="e4a2f86a-cbd6-47cb-9b32-0f261b51332c" mode="Opaque" x="97" y="0" width="75" height="44" forecolor="#000000" backcolor="#E3E3E3"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -128,7 +136,7 @@
 				<text><![CDATA[ОКТМО]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="d2507c71-c557-49ff-a978-25ea730cfb1d" mode="Opaque" x="172" y="0" width="171" height="30" forecolor="#000000" backcolor="#E3E3E3"/>
+				<reportElement uuid="d2507c71-c557-49ff-a978-25ea730cfb1d" mode="Opaque" x="172" y="0" width="171" height="44" forecolor="#000000" backcolor="#E3E3E3"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -143,7 +151,7 @@
 				<text><![CDATA[Тербанк]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="4840adc6-e2a5-4b18-801d-454feb448db5" mode="Opaque" x="343" y="0" width="86" height="30" forecolor="#000000" backcolor="#E3E3E3"/>
+				<reportElement uuid="4840adc6-e2a5-4b18-801d-454feb448db5" mode="Opaque" x="343" y="0" width="86" height="44" forecolor="#000000" backcolor="#E3E3E3"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -158,7 +166,7 @@
 				<text><![CDATA[Отчетность]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a0b2bbba-79b9-45ef-b74d-991a3ec9f750" mode="Opaque" x="429" y="0" width="75" height="30" forecolor="#000000" backcolor="#E3E3E3"/>
+				<reportElement uuid="a0b2bbba-79b9-45ef-b74d-991a3ec9f750" mode="Opaque" x="529" y="0" width="89" height="44" forecolor="#000000" backcolor="#E3E3E3"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -170,11 +178,12 @@
 					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<text><![CDATA[Количество
-ФЛ]]></text>
+				<text><![CDATA[Количество ФЛ
+в отчетной
+форме]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="97db714a-32fe-4f1d-a291-d52fd3c67fce" mode="Opaque" x="504" y="0" width="100" height="30" forecolor="#000000" backcolor="#E3E3E3"/>
+				<reportElement uuid="8cd2b8e7-0e41-4146-a623-bd57c6fe6311" mode="Opaque" x="429" y="0" width="100" height="44" forecolor="#000000" backcolor="#E3E3E3"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -186,24 +195,7 @@
 					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<text><![CDATA[Сумма дохода
-начисленного]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="ec3abf87-8ae6-40ef-9cc7-242857ad441a" mode="Opaque" x="604" y="0" width="100" height="30" forecolor="#000000" backcolor="#E3E3E3"/>
-				<box>
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
-				</textElement>
-				<text><![CDATA[Сумма налога
-исчисленного]]></text>
+				<text><![CDATA[Примечание]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -220,6 +212,7 @@
 				</box>
 				<textElement textAlignment="Right">
 					<font fontName="Arial" pdfEncoding="Identity-H"/>
+					<paragraph rightIndent="2"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RN}]]></textFieldExpression>
 			</textField>
@@ -234,7 +227,7 @@
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
+					<paragraph lineSpacing="Single" leftIndent="2"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{KPP}]]></textFieldExpression>
 			</textField>
@@ -249,7 +242,7 @@
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
+					<paragraph lineSpacing="Single" leftIndent="2"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{OKTMO}]]></textFieldExpression>
 			</textField>
@@ -264,7 +257,7 @@
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
+					<paragraph lineSpacing="Single" leftIndent="2"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TERBANK}]]></textFieldExpression>
 			</textField>
@@ -279,12 +272,12 @@
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
+					<paragraph lineSpacing="Single" leftIndent="2"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REPTYPE}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0" isBlankWhenNull="false">
-				<reportElement uuid="d7f68b67-f4b6-4915-bbf4-0329ada73836" mode="Transparent" x="429" y="0" width="75" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="d7f68b67-f4b6-4915-bbf4-0329ada73836" mode="Transparent" x="529" y="0" width="89" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -292,14 +285,14 @@
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PERS_CNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{REP_PERS_CNT}]]></textFieldExpression>
 			</textField>
-			<textField pattern="###0.00" isBlankWhenNull="false">
-				<reportElement uuid="e5495fb1-fbda-42e4-90c4-5265510d1038" mode="Transparent" x="504" y="0" width="100" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement uuid="a93041b7-4cef-44ac-af15-be8c5ffdea11" mode="Transparent" x="429" y="0" width="100" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -307,26 +300,11 @@
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
+					<paragraph lineSpacing="Single" leftIndent="2"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{INC_ACCURED}]]></textFieldExpression>
-			</textField>
-			<textField pattern="###0.00" isBlankWhenNull="false">
-				<reportElement uuid="9e38f663-bf77-4887-b92c-d5bca1c88224" mode="Transparent" x="604" y="0" width="100" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
-				<box>
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{TAX_CALC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTE}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
