@@ -2823,7 +2823,6 @@ class NdflPersonFL {
                     address.add("Населенный пункт='${ndflPerson.locality}'")
                 }
                 if (!ScriptUtils.isEmpty(ndflPerson.street)) {
-                    address.add(ndflPerson.street)
                     address.add("Улица='${ndflPerson.street}'")
                 }
                 if (!ScriptUtils.isEmpty(ndflPerson.house)) {
