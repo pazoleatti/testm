@@ -139,7 +139,12 @@
                             labelYes: $filter('translate')('common.button.yes'),
                             labelNo: $filter('translate')('common.button.no')
                         };
-                        var dlg = dialogs.confirm(service.title(), service.message(), buttons);
+
+                        var opts = {
+                            size: 'md'
+                        };
+
+                        var dlg = dialogs.confirm(service.title(), service.message(), buttons, opts);
                         dlg.result.then(
                             function () {
                                 successHandler();
