@@ -222,66 +222,69 @@
                                     }
 
                                     // управление позицией всплывающих подсказок
-                                    var updateHintPosition = function () {
-                                        //Если мы оказались на невидимой вкладке - ничего не меняем
-                                        if (!isInTab || tabModel.hasClass('active')) {
-                                            if (angular.isUndefined(fieldContent) && ($(divControls).find("div.field-content").length !== 0)) {
-                                                fieldContent = $(divControls).find("div.field-content")[0];
+                                var updateHintPosition = function () {
+                                    //Если мы оказались на невидимой вкладке - ничего не меняем
+                                    if (!isInTab || tabModel.hasClass('active')) {
+                                        if (angular.isUndefined(fieldContent) && ($(divControls).find("div.field-content").length !== 0)) {
+                                            fieldContent = $(divControls).find("div.field-content")[0];
+                                        }
+
+                                        var bounds;
+                                        if (angular.isUndefined(fieldContent)) {
+                                            try {
+                                                // Bug IE: вызов getBoundingClientRect на не добавленном объекте
+                                                bounds = divControls.getBoundingClientRect();
+                                            } catch (e) {
+                                                return;
                                             }
+                                        } else {
+                                            bounds = fieldContent.getBoundingClientRect();
+                                        }
 
-                                            var bounds;
-                                            if (angular.isUndefined(fieldContent)) {
-                                                try {
-                                                    // Bug IE: вызов getBoundingClientRect на не добавленном объекте
-                                                    bounds = divControls.getBoundingClientRect();
-                                                } catch (e) {
-                                                    return;
-                                                }
-                                            } else {
-                                                bounds = fieldContent.getBoundingClientRect();
-                                            }
+                                        //Если у нашего контейнера нулевые размеры - значит он невидимый и мы
+                                        // позиционируем ошибку далеко, где ее не видно
+                                        // Игнорируем, если объект в коллапсе, т.к. при его сворачивании
+                                        // ошибку не видно без переноса
+                                        if (((bounds.top === 0) && (bounds.left === 0) ||
+                                            angular.isUndefined(bounds.top) || angular.isUndefined(bounds.left)) &&
+                                            !isInCollapse) {
 
-                                            //Если у нашего контейнера нулевые размеры - значит он невидимый и мы
-                                            // позиционируем ошибку далеко, где ее не видно
-                                            if ((bounds.top === 0) && (bounds.left === 0) ||
-                                                angular.isUndefined(bounds.top) || angular.isUndefined(bounds.left)) {
+                                            hint.css('position', 'fixed');
+                                            hint.css('left', 2000);
+                                            hint.css('top', 0);
+                                        } else {
+                                            // Bug в IE8: bounds.height = undefined, поэтому высоту элемента будем
+                                            // вычислять по формуле: bounds.bottom - bounds.top
+                                            var height = (bounds.height) ? bounds.height :
+                                                (bounds.bottom ? bounds.bottom - bounds.top : 0);
+                                            hint.css('position', 'fixed');
+                                            hint.css('left', bounds.left);
 
-                                                hint.css('position', 'fixed');
-                                                hint.css('left', 2000);
-                                                hint.css('top', 0);
-                                            } else {
-                                                // Bug в IE8: bounds.height = undefined, поэтому высоту элемента будем
-                                                // вычислять по формуле: bounds.bottom - bounds.top
-                                                var height = (bounds.height) ? bounds.height :
-                                                    (bounds.bottom ? bounds.bottom - bounds.top : 0);
-                                                hint.css('position', 'fixed');
-                                                hint.css('left', bounds.left);
+                                            //Если модальное окно, то проверить выход за границы
+                                            if (isInModal) {
+                                                // Значение скролла страницы
+                                                var scrollTop = -$(window).scrollTop();
 
-                                                //Если модальное окно, то проверить выход за границы
-                                                if (isInModal) {
-                                                    // Значение скролла страницы
-                                                    var scrollTop = -$(window).scrollTop();
-
-                                                    //Если выходит за нижниюю границу контента модального окна, то hint там и оставляем
-                                                    if (modalFooter.offset().top + scrollTop <= bounds.top + height) {
-                                                        /*hint.css('top', modalFooter.offset().top + scrollTop);*/
-                                                    } else {
-                                                        //Если выходит за верхнюю границу контента модального окна, то hint там и оставляем
-                                                        var maxTop = modalHeader.offset().top + modalHeader.height() +
-                                                            parseInt(modalHeader.css('padding-top'), 10) + parseInt(modalHeader.css('padding-bottom'), 10) + heightHelpArrow + scrollTop;
-                                                        if (maxTop >= bounds.top + height) {
-                                                            //Вычисляем место прижатия hint-а: начало шапки модального окна + высота шапки + отступы шапки сверху и снихзу + высота стрелки-подсказки
-                                                          /*  hint.css('top', maxTop);*/
-                                                        } else {
-                                                            // hint.css('top', bounds.top + height);
-                                                        }
-                                                    }
+                                                //Если выходит за нижниюю границу контента модального окна, то hint там и оставляем
+                                                if (modalFooter.offset().top + scrollTop <= bounds.top + height) {
+                                                    /*hint.css('top', modalFooter.offset().top + scrollTop);*/
                                                 } else {
-                                                    /*hint.css('top', bounds.top + height);*/
+                                                    //Если выходит за верхнюю границу контента модального окна, то hint там и оставляем
+                                                    var maxTop = modalHeader.offset().top + modalHeader.height() +
+                                                        parseInt(modalHeader.css('padding-top'), 10) + parseInt(modalHeader.css('padding-bottom'), 10) + heightHelpArrow + scrollTop;
+                                                    if (maxTop >= bounds.top + height) {
+                                                        //Вычисляем место прижатия hint-а: начало шапки модального окна + высота шапки + отступы шапки сверху и снихзу + высота стрелки-подсказки
+                                                        /*hint.css('top', maxTop);*/
+                                                    } else {
+                                                        /*hint.css('top', bounds.top + height);*/
+                                                    }
                                                 }
+                                            } else {
+                                                /* hint.css('top', bounds.top + height);*/
                                             }
                                         }
-                                    };
+                                    }
+                                };
 
                                     var updateHintHide = function () {
                                         for (var key in childScope.$form) {
@@ -295,7 +298,7 @@
                                         }
                                     };
 
-                                    updateHintPosition();
+
 
                                     scope.$on('WINDOW_RESIZED_MSG', function () {
                                         $timeout(function () {
@@ -355,6 +358,7 @@
                                             }
                                         );
                                     }
+                                    updateHintPosition();
                                 }
                             );
                         };

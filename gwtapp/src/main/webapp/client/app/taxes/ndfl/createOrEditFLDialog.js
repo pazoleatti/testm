@@ -53,6 +53,16 @@
                             formatResult: function (citizenship) {
                                 return citizenship.name;
                             },
+                            initSelection: function (element, callback) {
+                                //данные об выбранном значении лучше брать в ng-model
+                                var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
+                                if (id) {
+                                    //запрашиваем расширенную информацию по id. если все данные уже есть - запрос можно не далать, просто вернуть их
+                                    $http.get('/getData?id='+id).success(function (res) {
+                                        callback(res);
+                                    });
+                                }
+                            },
                             data: {
                                 results: [
                                     {id: 1, name: 'Россия', code: 123},
@@ -70,6 +80,14 @@
                             },
                             formatResult: function (status) {
                                 return status.name;
+                            },
+                            initSelection: function (element, callback) {
+                                var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
+                                if (id) {
+                                    $http.get('/getData?id='+id).success(function (res) {
+                                        callback(res);
+                                    });
+                                }
                             },
                             data: {
                                 results: [
@@ -89,6 +107,14 @@
                             formatResult: function (document) {
                                 return document.name;
                             },
+                            initSelection: function (element, callback) {
+                                var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
+                                if (id) {
+                                    $http.get('/getData?id='+id).success(function (res) {
+                                        callback(res);
+                                    });
+                                }
+                            },
                             data: {
                                 results: [
                                     {id: 1, code: '21', name: 'Паспорт гражданина Российской Федерации'},
@@ -107,6 +133,14 @@
                             formatResult: function (subject) {
                                 return subject.name;
                             },
+                            initSelection: function (element, callback) {
+                                var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
+                                if (id) {
+                                    $http.get('/getData?id='+id).success(function (res) {
+                                        callback(res);
+                                    });
+                                }
+                            },
                             data: {
                                 results: [
                                     {id: 1, code: '52', name: 'Нижегородская область'},
@@ -124,6 +158,14 @@
                             },
                             formatResult: function (area) {
                                 return area.name;
+                            },
+                            initSelection: function (element, callback) {
+                                var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
+                                if (id) {
+                                    $http.get('/getData?id='+id).success(function (res) {
+                                        callback(res);
+                                    });
+                                }
                             },
                             data: {
                                 results: [
@@ -145,6 +187,14 @@
                             formatResult: function (city) {
                                 return city.name;
                             },
+                            initSelection: function (element, callback) {
+                                var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
+                                if (id) {
+                                    $http.get('/getData?id='+id).success(function (res) {
+                                        callback(res);
+                                    });
+                                }
+                            },
                             data: {
                                 results: [
                                     {id: 1, name: 'Ардатов'},
@@ -165,6 +215,14 @@
                             formatResult: function (city) {
                                 return city.name;
                             },
+                            initSelection: function (element, callback) {
+                                var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
+                                if (id) {
+                                    $http.get('/getData?id='+id).success(function (res) {
+                                        callback(res);
+                                    });
+                                }
+                            },
                             data: {
                                 results: [
                                     {id: 1, name: 'Простоквашино'}
@@ -181,6 +239,14 @@
                             },
                             formatResult: function (city) {
                                 return city.name;
+                            },
+                            initSelection: function (element, callback) {
+                                var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
+                                if (id) {
+                                    $http.get('/getData?id='+id).success(function (res) {
+                                        callback(res);
+                                    });
+                                }
                             },
                             data: {
                                 results: [

@@ -15,8 +15,10 @@
                 </div>
                 <div data-aplana-field>
                     <input style="margin-left: -180px;width: 168px;"
-                           data-ng-model="entity.inp" required
-                           type="text" class="form-control"
+                           data-ng-model="entity.inp"
+                           required
+                           type="text"
+                           class="form-control"
                            title="{{entity.inp}}"/>
 
                     <div data-aplana-validator data-key="required">
@@ -76,10 +78,13 @@
             </div>
             <div>
                 <div>
-                    <label class="control-label">{{::'title.citizenship' | translate}}</label>
+                    <label class="control-label" for="entity_citizenship">{{::'title.citizenship' | translate}}</label>
                 </div>
                 <div data-aplana-field>
-                    <div style="margin-left: -180px;width: 168px;" data-ui-select2="citizenshipSelect.options"
+                    <div style="margin-left: -180px;width: 168px;"
+                         name="entity_citizenship"
+                         id="entity_citizenship"
+                         data-ui-select2="citizenshipSelect.options"
                          data-ng-model="entity.citizenship"
                          data-ng-required="true">
                     </div>
@@ -90,12 +95,15 @@
             </div>
             <div>
                 <div>
-                    <label class="control-label">{{::'title.statusCode' | translate}}</label>
+                    <label class="control-label" for="entity_statuscode">{{::'title.statusCode' | translate}}</label>
                 </div>
                 <div data-aplana-field>
-                    <div style="margin-left: -180px;width: 168px;" data-ui-select2="statusCodeSelect.options"
+                    <div style="margin-left: -180px;width: 168px;"
+                         data-ui-select2="statusCodeSelect.options"
                          data-ng-model="entity.statusCode"
-                         data-ng-required="true">
+                         data-ng-required="true"
+                         name="entity_statuscode"
+                         id="entity_statuscode">
                     </div>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
@@ -109,12 +117,15 @@
                 <legend>{{::'title.document' | translate}}</legend>
                 <div>
                     <div>
-                        <label class="control-label">{{::'title.document.code' | translate}}</label>
+                        <label class="control-label" for="entity_documentcode">{{::'title.document.code' | translate}}</label>
                     </div>
                     <div data-aplana-field>
-                        <div style="margin-left: -180px;width: 168px;" data-ui-select2="documentCodeSelect.options"
+                        <div style="margin-left: -180px;width: 168px;"
+                             data-ui-select2="documentCodeSelect.options"
                              data-ng-model="entity.documentCode"
-                             data-ng-required="true">
+                             data-ng-required="true"
+                             name="entity_documentcode"
+                             id="entity_documentcode">
                         </div>
                         <div data-aplana-validator data-key="required">
                             {{::'field.ndfl.requiredField' | translate}}
@@ -127,7 +138,8 @@
                     </div>
                     <div data-aplana-field>
                         <input style="margin-left: -180px;width: 168px;"
-                               data-ng-model="entity.documentNumber" required
+                               data-ng-model="entity.documentNumber"
+                               required
                                type="text" class="form-control"
                                title="{{entity.document.number}}"
                                data-ui-validate="{isNumber : 'isNumber($value)'}"/>
@@ -183,9 +195,11 @@
                     <label class="control-label">{{::'title.subject' | translate}}</label>
                 </div>
                 <div data-aplana-field>
-                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="subjectCodeSelect.options"
+                    <div style="margin-left: -180px;width: 268px;"
+                         data-ui-select2="subjectCodeSelect.options"
                          data-ng-model="entity.subject"
-                         data-ng-required="true">
+                         data-ng-required="true"
+                         name="entity_subject">
                     </div>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
@@ -197,9 +211,11 @@
                     <label class="control-label">{{::'title.area' | translate}}</label>
                 </div>
                 <div data-aplana-field>
-                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="areaSelect.options"
+                    <div style="margin-left: -180px;width: 268px;"
+                         data-ui-select2="areaSelect.options"
                          data-ng-model="entity.area"
-                         data-ng-required="true">
+                         data-ng-required="true"
+                         name="entity_area">
                     </div>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
@@ -211,9 +227,11 @@
                     <label class="control-label">{{::'title.city' | translate}}</label>
                 </div>
                 <div data-aplana-field>
-                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="citySelect.options"
+                    <div style="margin-left: -180px;width: 268px;"
+                         data-ui-select2="citySelect.options"
                          data-ng-model="entity.city"
-                         data-ng-required="true">
+                         data-ng-required="true"
+                         name="entity_city">
                     </div>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
@@ -225,9 +243,11 @@
                     <label class="control-label">{{::'title.locality' | translate}}</label>
                 </div>
                 <div data-aplana-field>
-                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="localitySelect.options"
+                    <div style="margin-left: -180px;width: 268px;"
+                         data-ui-select2="localitySelect.options"
                          data-ng-model="entity.locality"
-                         data-ng-required="true">
+                         data-ng-required="true"
+                         name="entity_locality">
                     </div>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
@@ -239,9 +259,11 @@
                     <label class="control-label">{{::'title.street' | translate}}</label>
                 </div>
                 <div data-aplana-field="">
-                    <div style="margin-left: -180px;width: 268px;" data-ui-select2="streetSelect.options"
+                    <div style="margin-left: -180px;width: 268px;"
+                         data-ui-select2="streetSelect.options"
                          data-ng-model="entity.street"
-                         data-ng-required="true">
+                         data-ng-required="true"
+                         name="entity_street">
                     </div>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
