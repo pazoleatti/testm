@@ -771,6 +771,7 @@ import java.text.SimpleDateFormat
 
     def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
         Date newVersion = getReportPeriodStartDate()
+        refBookValue.put("VERSION", new RefBookValue(RefBookAttributeType.DATE, newVersion))
         getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
     }
 
