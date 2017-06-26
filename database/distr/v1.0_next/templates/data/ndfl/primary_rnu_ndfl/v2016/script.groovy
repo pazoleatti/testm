@@ -927,8 +927,6 @@ import java.text.SimpleDateFormat
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
         putValue(values, "PERSON_ID", RefBookAttributeType.REFERENCE, personDocument.getNaturalPerson().getId());
         putValue(values, "DOC_NUMBER", RefBookAttributeType.STRING, personDocument.getDocumentNumber());
-        putValue(values, "ISSUED_BY", RefBookAttributeType.STRING, null);
-        putValue(values, "ISSUED_DATE", RefBookAttributeType.DATE, null);
         def incRepVal = personDocument.getIncRep() != null ? personDocument.getIncRep() : 1;
         putValue(values, "INC_REP", RefBookAttributeType.NUMBER, incRepVal); //default value is 1
         putValue(values, "DOC_ID", RefBookAttributeType.REFERENCE, personDocument.getDocType()?.getId());
@@ -2809,7 +2807,7 @@ class NdflPersonFL {
             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
 
             long tIsExistsAddress = System.currentTimeMillis();
-            if (!isExistsAddress(ndflPerson.id)) {
+            if (!isPersonAddressEmpty(ndflPerson) && !isExistsAddress(ndflPerson.id)) {
 
                 List<String> address = []
                 if (!ScriptUtils.isEmpty(ndflPerson.regionCode)) {
@@ -2825,7 +2823,6 @@ class NdflPersonFL {
                     address.add("Населенный пункт='${ndflPerson.locality}'")
                 }
                 if (!ScriptUtils.isEmpty(ndflPerson.street)) {
-                    address.add(ndflPerson.street)
                     address.add("Улица='${ndflPerson.street}'")
                 }
                 if (!ScriptUtils.isEmpty(ndflPerson.house)) {
@@ -2852,7 +2849,7 @@ class NdflPersonFL {
             timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
 
             // Спр2 Гражданство (Обязательное поле)
-            if (!citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
+            if (ndflPerson.citizenship != null && !citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
                 //TODO turn_to_error
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                         "Гражданство (код страны) (Графа 7)='${ndflPerson.citizenship ?: ""}'")
@@ -2861,7 +2858,7 @@ class NdflPersonFL {
             }
 
             // Спр4 Статус (Обязательное поле)
-            if (!taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
+            if (ndflPerson.status != "0" && !taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
                 //TODO turn_to_error
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                         "Cтатус (Графа 12)='${ndflPerson.status ?: ""}'")
@@ -2885,7 +2882,7 @@ class NdflPersonFL {
 
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
-                    if (!ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
+                    if (personRecord.get(RF_LAST_NAME).value != null && !ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Налогоплательщик.Фамилия (Графа 3)='${ndflPerson.lastName ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
@@ -2893,7 +2890,7 @@ class NdflPersonFL {
                     }
 
                     // Спр11 Имя (Обязательное поле)
-                    if (!ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
+                    if (personRecord.get(RF_FIRST_NAME).value != null && !ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Налогоплательщик.Имя (Графа 4)='${ndflPerson.firstName ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
@@ -2901,7 +2898,7 @@ class NdflPersonFL {
                     }
 
                     // Спр11 Отчество (Необязательное поле)
-                    if (ndflPerson.middleName != null && !ndflPerson.middleName.equals(personRecord.get(RF_MIDDLE_NAME).value)) {
+                    if (personRecord.get(RF_MIDDLE_NAME).value != null && ndflPerson.middleName != null && !ndflPerson.middleName.equals(personRecord.get(RF_MIDDLE_NAME).value)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Налогоплательщик.Отчество (Графа 5)='${ndflPerson.middleName ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие ФИО справочнику", fioAndInp, pathError,
@@ -2931,7 +2928,7 @@ class NdflPersonFL {
                     }
 
                     // Спр13 Дата рождения (Обязательное поле)
-                    if (!ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
+                    if (personRecord.get(RF_BIRTH_DATE).value != null && !ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Налогоплательщик.Дата рождения (Графа 6)='${ndflPerson.birthDay ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие даты рождения справочнику", fioAndInp, pathError,
@@ -2940,7 +2937,7 @@ class NdflPersonFL {
 
                     // Спр14 Гражданство (Обязательное поле)
                     def citizenship = citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP).value)
-                    if (!ndflPerson.citizenship.equals(citizenship)) {
+                    if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(citizenship)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Гражданство (код страны) (Графа 7)='${ndflPerson.citizenship ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие гражданства справочнику", fioAndInp, pathError,
@@ -3013,7 +3010,7 @@ class NdflPersonFL {
 
                     // Спр18 Статус налогоплательщика (Обязательное поле)
                     def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
-                    if (!ndflPerson.status.equals(taxpayerStatus)) {
+                    if (ndflPerson.status!= null && !ndflPerson.status.equals(taxpayerStatus)) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
                                 "Cтатус (Графа 12)='${ndflPerson.status ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие статуса справочнику", fioAndInp, pathError,
@@ -3042,68 +3039,52 @@ class NdflPersonFL {
                         flat = address.get(RF_APPARTMENT).value
                     }
 
+                    List<String> ndflPersonAddress = []
+
                     // Адрес регистрации в Российской Федерации.Код субъекта
-                    if (!ndflPerson.regionCode.equals(regionCode)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Код субъекта (Графа 13)='${ndflPerson.regionCode ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Код субъекта (Графа 13)' не соответствует справочнику '$R_PERSON'")
+                    if (ndflPerson.regionCode != null && !ndflPerson.regionCode.equals(regionCode)) {
+                        ndflPersonAddress.add("Код субъекта='${ndflPerson.regionCode ?: ""}'")
                     }
 
                     // Адрес регистрации в Российской Федерации.Район
-                    if (!ndflPerson.area.equals(area)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Район (Графа 15)='${ndflPerson.area ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Район (Графа 15)' не соответствует справочнику '$R_PERSON'")
+                    if (ndflPerson.area != null && !ndflPerson.area.equals(area)) {
+                        ndflPersonAddress.add("Район='${ndflPerson.area ?: ""}'")
                     }
 
                     // Адрес регистрации в Российской Федерации.Город
-                    if (!ndflPerson.city.equals(city)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Город (Графа 16)='${ndflPerson.city ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Город (Графа 16)' не соответствует справочнику '$R_PERSON'")
+                    if (ndflPerson.city != null && !ndflPerson.city.equals(city)) {
+                        ndflPersonAddress.add("Город='${ndflPerson.city ?: ""}'")
                     }
 
                     // Адрес регистрации в Российской Федерации.Населенный пункт
-                    if (!ndflPerson.locality.equals(locality)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Населенный пункт (Графа 17)='${ndflPerson.locality ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Населенный пункт (Графа 17)' не соответствует справочнику '$R_PERSON'")
+                    if (ndflPerson.locality != null && !ndflPerson.locality.equals(locality)) {
+                        ndflPersonAddress.add("Населенный пункт='${ndflPerson.locality ?: ""}'")
                     }
 
                     // Адрес регистрации в Российской Федерации.Улица
-                    if (!ndflPerson.street.equals(street)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Улица (Графа 18)='${ndflPerson.street ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Улица (Графа 18)' не соответствует справочнику '$R_PERSON'")
+                    if (ndflPerson.street != null && !ndflPerson.street.equals(street)) {
+                        ndflPersonAddress.add("Улица='${ndflPerson.street ?: ""}'")
                     }
 
                     // Адрес регистрации в Российской Федерации.Дом
-                    if (!ndflPerson.house.equals(house)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Дом (Графа 19)='${ndflPerson.house ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Дом (Графа 19)' не соответствует справочнику '$R_PERSON'")
+                    if (ndflPerson.house != null && !ndflPerson.house.equals(house)) {
+                        ndflPersonAddress.add("Дом='${ndflPerson.house ?: ""}'")
                     }
 
                     // Адрес регистрации в Российской Федерации.Корпус
-                    if (!ndflPerson.building.equals(building)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Корпус (Графа 20)='${ndflPerson.building ?: ""}'")
-                        logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Корпус (Графа 20)' не соответствует справочнику '$R_PERSON'")
+                    if (ndflPerson.building != null && !ndflPerson.building.equals(building)) {
+                        ndflPersonAddress.add("Корпус='${ndflPerson.building ?: ""}'")
                     }
 
                     // Адрес регистрации в Российской Федерации.Квартира
-                    if (!ndflPerson.flat.equals(flat)) {
+                    if (ndflPerson.flat != null && !ndflPerson.flat.equals(flat)) {
+                        ndflPersonAddress.add("Квартира='${ndflPerson.flat ?: ""}'")
+                    }
+                    if (!ndflPersonAddress.isEmpty()) {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                                "Адрес регистрации в Российской Федерации.Квартира (Графа 21)='${ndflPerson.flat ?: ""}'")
+                                "Графы ${ndflPersonAddress.join(", ")}")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адреса справочнику", fioAndInp, pathError,
-                                "'Адрес регистрации в Российской Федерации.Квартира (Графа 21)' не соответствует справочнику '$R_PERSON'")
+                                "'Адрес регистрации в Российской Федерации' не соответствует справочнику '$R_PERSON'")
                     }
                 }
             }
@@ -3142,7 +3123,7 @@ class NdflPersonFL {
                 Доход.Вид.Код (Графа 4) - (Необязательное поле)
                 incomeCodeMap <REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>
                  */
-            if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeType)) {
+            if (ndflPersonIncome.incomeType != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomeType)) {
                 List<Long> incomeTypeIdList = incomeTypeMap.get(ndflPersonIncome.incomeType)
                 if (incomeTypeIdList == null || incomeTypeIdList.isEmpty()) {
                     String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
@@ -3182,7 +3163,7 @@ class NdflPersonFL {
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // Спр8 Код вычета (Обязательное поле)
-            if (!deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
+            if (ndflPersonDeduction.typeCode != "000" && ndflPersonDeduction.typeCode != null && !deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
                 String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "",
                         "Код вычета (Графа 3)='${ndflPersonDeduction.typeCode ?: ""}'")
                 logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода вычета справочнику", fioAndInp, pathError,
@@ -4736,6 +4717,19 @@ class ColumnFillConditionData {
     boolean isExistsAddress(ndflPersonId) {
         Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
         return (checkFiasAddressMap.get(ndflPersonId) != null)
+    }
+
+    /**
+    * Проверка адреса на пустоту
+    * @param Данные о ФЛ из формы
+    * @return
+    */
+    boolean isPersonAddressEmpty(NdflPerson ndflPerson) {
+        boolean  emptyAddress = ScriptUtils.isEmpty(ndflPerson.regionCode) && ScriptUtils.isEmpty(ndflPerson.area) &&
+                                ScriptUtils.isEmpty(ndflPerson.city) &&  ScriptUtils.isEmpty(ndflPerson.locality) &&
+                                ScriptUtils.isEmpty(ndflPerson.street) && ScriptUtils.isEmpty(ndflPerson.house) &&
+                                ScriptUtils.isEmpty(ndflPerson.building) &&  ScriptUtils.isEmpty(ndflPerson.flat);
+        return emptyAddress;
     }
 
     /**
