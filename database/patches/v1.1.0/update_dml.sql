@@ -25,5 +25,9 @@ update ref_book_income_kind
        name = 'Суммы вознаграждений, выплачиваемых за счет средств прибыли организации, средств специального назначения или целевых поступлений'
 where income_type_id in (select id from ref_book_income_type t where t.code='2003' and t.status=0);
 
+
+prompt update and alter ref_books
+@upd_ref_books.sql;
+
 commit;
 exit;

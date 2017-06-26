@@ -13,11 +13,11 @@ select distinct f.*,
        nvl2(c.id,1,0) has_child
   from fias_addrobj f left join fias_addrobj c on (c.parentguid=f.aoid and c.currstatus=0)
  where f.currstatus=0
-   and (f.aolevel=3 or
-        f.aolevel=1 and replace(lower(f.formalname),' ','') not in ('москва','санкт-петербург','севастополь','байконур')
+   and (f.aolevel=3 or 
+        f.aolevel=1 and replace(lower(f.formalname),' ','') not in ('РјРѕСЃРєРІР°','СЃР°РЅРєС‚-РїРµС‚РµСЂР±СѓСЂРі','СЃРµРІР°СЃС‚РѕРїРѕР»СЊ','Р±Р°Р№РєРѕРЅСѓСЂ')
         );
    
-comment on materialized view mv_fias_area_act is 'Актуальные районы из справочника ФИАС';
+comment on materialized view mv_fias_area_act is 'РђРєС‚СѓР°Р»СЊРЅС‹Рµ СЂР°Р№РѕРЅС‹ РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° Р¤РРђРЎ';
    
 create index idx_mv_fias_area_aoid on mv_fias_area_act (aoid asc);
 create index idx_mv_fias_area_fname on mv_fias_area_act (fname asc);
@@ -34,10 +34,10 @@ select distinct f.*,
   from fias_addrobj f left join fias_addrobj c on (c.parentguid=f.aoid and c.currstatus=0)
  where f.currstatus=0
    and (f.aolevel=4 or
-        f.aolevel=1 and replace(lower(f.formalname),' ','') in ('москва','санкт-петербург','севастополь','байконур')
+        f.aolevel=1 and replace(lower(f.formalname),' ','') in ('РјРѕСЃРєРІР°','СЃР°РЅРєС‚-РїРµС‚РµСЂР±СѓСЂРі','СЃРµРІР°СЃС‚РѕРїРѕР»СЊ','Р±Р°Р№РєРѕРЅСѓСЂ')
        );
 
-comment on materialized view mv_fias_city_act is 'Актуальные города из справочника ФИАС';
+comment on materialized view mv_fias_city_act is 'РђРєС‚СѓР°Р»СЊРЅС‹Рµ РіРѕСЂРѕРґР° РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° Р¤РРђРЎ';
    
 create index idx_mv_fias_city_aoid on mv_fias_city_act (aoid asc);
 create index idx_mv_fias_city_fname on mv_fias_city_act (fname asc);
@@ -55,7 +55,7 @@ select distinct f.*,
  where f.currstatus=0
    and f.aolevel in (6,90);
 
-comment on materialized view mv_fias_locality_act is 'Актуальные населенные пункты из справочника ФИАС';
+comment on materialized view mv_fias_locality_act is 'РђРєС‚СѓР°Р»СЊРЅС‹Рµ РЅР°СЃРµР»РµРЅРЅС‹Рµ РїСѓРЅРєС‚С‹ РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° Р¤РРђРЎ';
    
 create index idx_mv_fias_locality_aoid on mv_fias_locality_act (aoid asc);
 create index idx_mv_fias_locality_fname on mv_fias_locality_act (fname asc);
@@ -73,7 +73,7 @@ select distinct f.*,
  where f.currstatus=0
    and f.aolevel in (7,91);
 
-comment on materialized view mv_fias_street_act is 'Актуальные улицы из справочника ФИАС';
+comment on materialized view mv_fias_street_act is 'РђРєС‚СѓР°Р»СЊРЅС‹Рµ СѓР»РёС†С‹ РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° Р¤РРђРЎ';
    
 create index idx_mv_fias_street_aoid on mv_fias_street_act (aoid asc);
 create index idx_mv_fias_street_fname on mv_fias_street_act (fname asc);
