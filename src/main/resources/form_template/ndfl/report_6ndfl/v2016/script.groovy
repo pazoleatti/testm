@@ -1047,7 +1047,6 @@ List<PairKppOktmo> getPairKppOktmoList() {
 
         if (declarations.isEmpty()) {
             createCorrPeriodNotFoundMessage(departmentReportPeriod, true)
-            return null
         }
 
         declarations.each { declaration ->
