@@ -208,6 +208,22 @@
 
 	<build>
 		<outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>maven-jetty-plugin</artifactId>
+					<version>6.1.26</version>
+					<configuration>
+						<scanIntervalSeconds>10</scanIntervalSeconds>
+						<contextPath>/</contextPath>
+						<webAppSourceDirectory>${webappDirectory}</webAppSourceDirectory>
+						<jettyEnvXml>src/main/webapp/WEB-INF/jetty-web.xml</jettyEnvXml>
+						<webXml>src/main/profiles/development/jetty/web.xml</webXml>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -316,6 +332,10 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -341,6 +361,16 @@
 						<configuration>
 							<draftCompile>true</draftCompile>
 							<validateOnly>true</validateOnly>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<configuration>
+							<tasks>
+								<delete file="${webappDirectory}/WEB-INF/jetty-web.xml" />
+							</tasks>
 						</configuration>
 					</plugin>
 				</plugins>

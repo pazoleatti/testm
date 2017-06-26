@@ -132,6 +132,9 @@
                  * @param USER_DATA.login
                  */
                 $scope.logout = function () {
+                    // Сообщаем клиентской части системы, что выходим. Если есть несохраненные данные - нужно ловить это сообщение
+                    $rootScope.$broadcast('LOGOUT_MSG');
+
                     $.ajax({
                         type: "GET",
                         url: "j_spring_security_logout",

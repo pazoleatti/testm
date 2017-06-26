@@ -5,7 +5,7 @@
      * @description Модуль, содержащий компонент для выбора интервала дат
      */
 
-    angular.module('dateFromToFilter', [])
+    angular.module('aplana.dateFromToFilter', [])
         /**
          * @description Директива для выбора интервала дат от-до
          *

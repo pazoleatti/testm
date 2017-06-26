@@ -4,8 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.widget.version.server.GetProjectVersionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,7 +25,8 @@ public class ConfigurationRestController {
     @Autowired
     private SecurityService securityService;
     @Autowired
-    private GetProjectVersionHandler getProjectVersionHandler;
+    @Qualifier("versionInfoProperties")
+    private Properties versionInfoProperties;
     @Autowired
     private DepartmentService departmentService;
 
@@ -36,7 +37,7 @@ public class ConfigurationRestController {
 
         result.put("gwtMode", PropertyLoader.isProductionMode()?"":"?gwt.codesvr=127.0.0.1:9997");
         result.put("user_data", securityService.currentUserInfo());
-        result.put("project_properties", getProjectVersionHandler.getProjectVersionProperties());
+        result.put("project_properties", versionInfoProperties);
 
         TAUser user = securityService.currentUserInfo().getUser();
         Department department = departmentService.getDepartment(user.getDepartmentId());

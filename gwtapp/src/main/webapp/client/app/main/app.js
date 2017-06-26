@@ -8,9 +8,7 @@
             'app.header',
             'sbrfNdfl.ndflJournal',
             'sbrfNdfl.ndfl',
-            'dateFromToFilter',
             'app.filterUtils',
-            'app.formLeaveConfirmer',
             'ngCookies',
             'pascalprecht.translate',
             'aplana.overlay',
@@ -20,6 +18,10 @@
             'aplana.submitValid',
             'aplana.collapse',
             'aplana.field',
+            'aplana.dateFromToFilter',
+            'aplana.datePicker',
+            'aplana.dropdown',
+            'aplana.formLeaveConfirmer',
             'ui.router',
             'ui.validate',
             'dialogs.main',
@@ -27,15 +29,16 @@
             'angularFileUpload',
             'ui.bootstrap',
             'ngMessages',
-            'ui.select2',
-            'datePicker',
-            'app.dropdown'
+            'ui.select2'
         ])
 
         // Отображение диалогового окна с сообщением .
         .factory('ShowToDoDialog', ['dialogs', '$filter', function (dialogs, $filter) {
             return function () {
-                dialogs.message($filter('translate')('messageDialog.toDo.title'),$filter('translate')('messageDialog.toDo.message'));
+                var opts = {
+                    size: 'md'
+                };
+                dialogs.message($filter('translate')('messageDialog.toDo.title'),$filter('translate')('messageDialog.toDo.message'), opts);
             };
         }])
 

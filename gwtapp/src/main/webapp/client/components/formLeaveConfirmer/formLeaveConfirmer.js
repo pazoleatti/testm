@@ -6,7 +6,7 @@
      * Если при смене режима просмотр/редактирование не происходит смена состояни - запрос не отобразиться
      * Его можно вызвать вручную методом сервиса askSaveChanges
      */
-    angular.module('app.formLeaveConfirmer', [])
+    angular.module('aplana.formLeaveConfirmer', [])
         .factory('FormLeaveConfirmer', ['$rootScope', '$state', '$window', '$filter', 'dialogs', function ($rootScope, $state, $window, $filter, dialogs) {
             var getParameterValue = function (parameter) {
                 return angular.isFunction(parameter) ? parameter() : parameter;
@@ -82,6 +82,10 @@
                     if (logoutListener) {
                         logoutListener();
                     }
+
+                    /**
+                     * @description Чтобы это срабатывало, необходимо создавать сообщение броадкастом $rootScope.$broadcast('LOGOUT_MSG');
+                     */
                     logoutListener = $rootScope.$on('LOGOUT_MSG', function () {
                         service.unlockAction();
                         $window.onunload = null;
@@ -135,7 +139,12 @@
                             labelYes: $filter('translate')('common.button.yes'),
                             labelNo: $filter('translate')('common.button.no')
                         };
-                        var dlg = dialogs.confirm(service.title(), service.message(), buttons);
+
+                        var opts = {
+                            size: 'md'
+                        };
+
+                        var dlg = dialogs.confirm(service.title(), service.message(), buttons, opts);
                         dlg.result.then(
                             function () {
                                 successHandler();

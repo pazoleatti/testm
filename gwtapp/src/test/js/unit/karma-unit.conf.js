@@ -7,7 +7,7 @@ module.exports = function(config) {
             'test/js/lib/angular-mocks-1.5.9.js',
             'test/js/lib/underscore-1.8.3.js',
             'main/webapp/client/app/common/*.js',
-            'test/js/js/utils/*.spec.js'
+            'test/js/unit/utils/*.spec.js'
         ],
         autoWatch: true,
         singleRun: true,
