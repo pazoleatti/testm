@@ -1,3 +1,7 @@
+--indexes
+prompt indexes
+@@indexes.sql;
+
 -- alter ref_book_address and update attributes
 prompt alter ref_book_address and update attributes
 @@alter_ref_book_address.sql;
