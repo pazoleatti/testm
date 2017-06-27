@@ -79,7 +79,7 @@ public class GetMainMenuActionHandler extends
             MenuItem taxMenu = new MenuItem("Налоги");
             if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
                     TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-                for (TaxType taxType : Arrays.asList(TaxType.NDFL, TaxType.PFR)) {
+                for (TaxType taxType : Arrays.asList(TaxType.NDFL)) {
                     if (currentUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP,
                             TARole.F_ROLE_OPER, TARole.F_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_UNP)) {
                         MenuItem menu = new MenuItem(taxType.getName(), "", taxType.name());

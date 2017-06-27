@@ -173,7 +173,7 @@ public class DeclarationListPresenter extends
                             getView().setVisibleCancelButton(result.isControl());
                             getView().setVisibleCreateButton(result.isControl() && !isReports);
                             getView().showCheck(result.isControl() || result.isHasRoleOperator());
-                            getView().showRecalculate(result.isControl() || result.isHasRoleOperator());
+                            getView().showRecalculate(!isReports && (result.isControl() || result.isHasRoleOperator()));
                             getView().showAccept(result.isControl());
                             getView().showDelete(result.isControl() || result.isHasRoleOperator());
                         }

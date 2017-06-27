@@ -309,15 +309,17 @@ def importPrimary1151111() {
         return
     }
 
-    // Проверка GUID
-    if (guid != null && !guid.isEmpty()) {
-        DeclarationDataFilter declarationFilter = new DeclarationDataFilter()
-        declarationFilter.setFileName(guid)
-        declarationFilter.setTaxType(TaxType.NDFL)
-        declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID)
-        List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false)
+    // Проверка не загружен ли уже такой файл в систему
+    if (UploadFileName != null && !UploadFileName.isEmpty()) {
+        DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
+
+        declarationFilter.setFileName(UploadFileName);
+        declarationFilter.setTaxType(TaxType.NDFL);
+        declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
+
+        List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false);
         if (!declarationDataSearchResultItems.isEmpty()) {
-            logger.error("Файл «%s» не загружен: ТФ с GUID \"%s\" уже загружен в систему", UploadFileName, guid)
+            logger.error("ТФ с именем «%s» уже загружен в систему.", UploadFileName)
         }
     }
 
@@ -959,8 +961,8 @@ def importNdflResponse() {
     // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
     def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
     def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
-
     def declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
+
     if (declarationDataList.isEmpty()) {
         logger.error(ERROR_NOT_FOUND_FORM, reportFileName, UploadFileName);
         return
@@ -1425,15 +1427,19 @@ def _importTF() {
     if (!year.equals(reportYear)) {
         logger.error("В ТФ не совпадают значения параметров имени «Год» = «%s» и содержимого «Год» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
     }
-    // Проверка GUID
-    if (guid != null && !guid.isEmpty()) {
+
+
+    // Проверка не загружен ли уже такой файл в систему
+    if (UploadFileName != null && !UploadFileName.isEmpty()) {
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
-        declarationFilter.setFileName(guid);
+
+        declarationFilter.setFileName(UploadFileName);
         declarationFilter.setTaxType(TaxType.NDFL);
         declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
+
         List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false);
         if (!declarationDataSearchResultItems.isEmpty()) {
-            logger.error("ТФ с GUID \"%s\" уже загружен в систему. Загрузка файла «%s» не выполнена.", guid, UploadFileName)
+            logger.error("ТФ с именем «%s» уже загружен в систему.", UploadFileName)
         }
     }
 
