@@ -5,7 +5,10 @@
     <div class="{{pickerGridClass}}">
         <div style="width: 130px; float: left;">
             <p class="input-group">
-                <input type="text" class="form-control" data-datetime="dd.MM.yyyy" data-datepicker-timezone
+                <input type="text"
+                       class="form-control"
+                       data-datetime="dd.MM.yyyy"
+                       data-datepicker-timezone
                        data-uib-datepicker-popup="dd.MM.yyyy"
                        data-is-open="dateFromOpened"
                        data-close-text="{{'button.select' | translate}}"
@@ -21,13 +24,16 @@
             </span>
             </p>
         </div>
-        <div style="float: left; margin-left: -42px; width: 52px;">
+        <div style="float: left;margin-left: -6px;width: 39px;">
             <label class="control-label">{{'title.dateToFilterLabel' | translate}}:</label>
         </div>
 
         <div style="width: 130px; float: right; margin-right: -17px">
             <p class="input-group">
-                <input type="text" class="form-control" data-datetime="dd.MM.yyyy" data-datepicker-timezone
+                <input type="text"
+                       class="form-control"
+                       data-datetime="dd.MM.yyyy"
+                       data-datepicker-timezone
                        data-uib-datepicker-popup="dd.MM.yyyy"
                        data-is-open="dateToOpened"
                        data-close-text="{{'button.select' | translate}}"
@@ -36,7 +42,7 @@
                        data-datepicker-options="dateToOptions"
                        data-ng-model="ngToModel"
                        data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
-                       title="{{ngToModel}}">
+                       title="{{ngToModel}}" >
             <span class="input-group-btn">
                 <button type="button" class="btn btn-default btn-sm" data-ng-click="dateToSelectClick()">
                     <i class="glyphicon glyphicon-calendar"></i>
