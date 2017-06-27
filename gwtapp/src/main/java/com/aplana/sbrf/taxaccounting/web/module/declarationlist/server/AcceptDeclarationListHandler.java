@@ -161,7 +161,9 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
                 logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id);
             }
         }
-        sendNotifications("Выполнена операция \"Возврат в Создана\"", uuid, userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+        if (!action.isAccepted()) {
+            sendNotifications("Выполнена операция \"Возврат в Создана\"", uuid, userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+        }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
