@@ -101,27 +101,39 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         if (personDataList != null && !personDataList.isEmpty()) {
 
             calculateWeigth(personData, personDataList, weigthComporators);
-
-            StringBuffer msg = new StringBuffer();
-
-            msg.append("Для ФЛ " + IdentificationUtils.buildNotice((NaturalPerson) personData) + " сходных записей найдено: " + personDataList.size()).append(" ");
-            DecimalFormat df = new DecimalFormat("0.00");
-            for (IdentityPerson applicablePersonData : personDataList) {
-                msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
+            // Удаляем ФЛ с весом < порога схожести
+            List<IdentityPerson> personForRemoveList = new LinkedList<IdentityPerson>();
+            for (IdentityPerson person : personDataList) {
+                if (person.getWeigth() <= tresholdValue / 1000d) {
+                    personForRemoveList.add(person);
+                }
             }
+            personDataList.removeAll(personForRemoveList);
+            if (!personDataList.isEmpty()) {
+                StringBuffer msg = new StringBuffer();
 
-            //Выбор из найденных записей одной записи с максимальной Степенью соответствия критериям
-            IdentityPerson identificatedPerson = Collections.max(personDataList, new PersonDataComparator());
-            if (identificatedPerson.getWeigth() > treshold) {
-                //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
-                if (personDataList.size() > 1) {
-                    msg.append(". Выбрана запись: [" + IdentificationUtils.buildRefBookNotice((NaturalPerson) identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
-                    logger.info(msg.toString());
+                msg.append("Для ФЛ " + IdentificationUtils.buildNotice((NaturalPerson) personData) + " сходных записей найдено: " + personDataList.size()).append(" ");
+                DecimalFormat df = new DecimalFormat("0.00");
+                for (IdentityPerson applicablePersonData : personDataList) {
+                    msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
                 }
 
-                return (NaturalPerson) identificatedPerson;
+                //Выбор из найденных записей одной записи с максимальной Степенью соответствия критериям
+                IdentityPerson identificatedPerson = Collections.max(personDataList, new PersonDataComparator());
+                if (identificatedPerson.getWeigth() > treshold) {
+                    //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
+                    if (personDataList.size() > 1) {
+                        msg.append(". Выбрана запись: [" + IdentificationUtils.buildRefBookNotice((NaturalPerson) identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
+                        logger.info(msg.toString());
+                    }
+
+                    return (NaturalPerson) identificatedPerson;
+                } else {
+                    //msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
+                    return null;
+                }
+
             } else {
-                //msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
                 return null;
             }
         } else {
