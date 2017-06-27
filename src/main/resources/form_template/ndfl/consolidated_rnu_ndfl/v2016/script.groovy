@@ -116,9 +116,9 @@ def getProperty(String name) {
 /**
  * Карта соответствия адреса формы адресу в справочнике ФИАС
  */
-@Field Map<Long, Long> fiasAddressIdsCache = [:];
+@Field Map<Long, FiasCheckInfo> fiasAddressIdsCache = [:];
 
-Map<Long, Long> getFiasAddressIdsMap() {
+Map<Long, FiasCheckInfo> getFiasAddressIdsMap() {
     if (fiasAddressIdsCache.isEmpty()) {
         fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id, 1);
     }
@@ -1938,7 +1938,7 @@ def checkDataReference(
 
     //поиск всех адресов формы в справочнике ФИАС
     time = System.currentTimeMillis();
-    Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
+    Map<Long, FiasCheckInfo> checkFiasAddressMap = getFiasAddressIdsMap();
     logForDebug(SUCCESS_GET_TABLE, R_FIAS, checkFiasAddressMap.size());
     logForDebug("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
 
@@ -1968,36 +1968,25 @@ def checkDataReference(
         // Спр1 ФИАС
         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
         long tIsExistsAddress = System.currentTimeMillis();
-        if (!isExistsAddress(ndflPerson.id)) {
+        if (!isPersonAddressEmpty(ndflPerson)) {
+
             List<String> address = []
-            if (!ScriptUtils.isEmpty(ndflPerson.regionCode)) {
-                address.add("Код субъекта='${ndflPerson.regionCode}'")
+            FiasCheckInfo fiasCheckInfo = checkFiasAddressMap.get(ndflPerson.id)
+            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+            if (!ScriptUtils.isEmpty(ndflPerson.regionCode) && !fiasCheckInfo.validRegion) {
+                logFiasError(fioAndInp, pathError, "Код субъекта", ndflPerson.regionCode)
+            } else if (!ScriptUtils.isEmpty(ndflPerson.area) && !fiasCheckInfo.validArea ) {
+                logFiasError(fioAndInp, pathError, "Район", ndflPerson.area)
+            } else if (!ScriptUtils.isEmpty(ndflPerson.city) && !fiasCheckInfo.validCity) {
+                logFiasError(fioAndInp, pathError, "Город", ndflPerson.city)
+            } else if (!ScriptUtils.isEmpty(ndflPerson.locality) && !fiasCheckInfo.validLoc) {
+                logFiasError(fioAndInp, pathError, "Населенный пункт", ndflPerson.locality)
+            } else if (!ScriptUtils.isEmpty(ndflPerson.street) && !fiasCheckInfo.validStreet) {
+                logFiasError(fioAndInp, pathError, "Улица", ndflPerson.street)
             }
-            if (!ScriptUtils.isEmpty(ndflPerson.area)) {
-                address.add("Район='${ndflPerson.area}'")
+            if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))){
+                logFiasIndexError(fioAndInp, pathError, "Индекс", ndflPerson.postIndex)
             }
-            if (!ScriptUtils.isEmpty(ndflPerson.city)) {
-                address.add("Город='${ndflPerson.city}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.locality)) {
-                address.add("Населенный пункт='${ndflPerson.locality}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.street)) {
-                address.add("Улица='${ndflPerson.street}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.house)) {
-                address.add("Дом='${ndflPerson.house}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.building)) {
-                address.add("Корпус='${ndflPerson.building}'")
-            }
-            if (!ScriptUtils.isEmpty(ndflPerson.flat)) {
-                address.add("Квартира='${ndflPerson.flat}'")
-            }
-            String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                    "Графы ${address.join(", ")}")
-            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
-                    "'Адрес регистрации в Российской Федерации' не соответствует справочнику '$R_FIAS'")
         }
         timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
 
@@ -2358,6 +2347,29 @@ def checkDataReference(
         }
     }
     logForDebug("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)");
+}
+
+void logFiasError (fioAndInp, pathError, name, value) {
+    logger.warnExp("Ошибка в значенииt: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
+            "'Значение гр. \"" + name + "\" (\""+ value + "\") отсутствует в справочнике \"КЛАДР\"")
+}
+
+void logFiasIndexError (fioAndInp, pathError, name, value) {
+    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
+            "'Значение гр. \"" + name + "\" (\""+ value + "\") не соответствует требуемому формату")
+}
+
+/**
+ * Проверка адреса на пустоту
+ * @param Данные о ФЛ из формы
+ * @return
+ */
+boolean isPersonAddressEmpty(NdflPerson ndflPerson) {
+    boolean  emptyAddress = ScriptUtils.isEmpty(ndflPerson.regionCode) && ScriptUtils.isEmpty(ndflPerson.area) &&
+            ScriptUtils.isEmpty(ndflPerson.city) &&  ScriptUtils.isEmpty(ndflPerson.locality) &&
+            ScriptUtils.isEmpty(ndflPerson.street) && ScriptUtils.isEmpty(ndflPerson.house) &&
+            ScriptUtils.isEmpty(ndflPerson.building) &&  ScriptUtils.isEmpty(ndflPerson.flat);
+    return emptyAddress;
 }
 
 /**
@@ -3987,7 +3999,7 @@ def getRefOktmoByDepartmentId() {
  */
 @Memoized
 boolean isExistsAddress(ndflPersonId) {
-    Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
+    Map<Long, FiasCheckInfo> checkFiasAddressMap = getFiasAddressIdsMap();
     return (checkFiasAddressMap.get(ndflPersonId) != null)
 }
 
