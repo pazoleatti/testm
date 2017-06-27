@@ -771,6 +771,7 @@ import java.text.SimpleDateFormat
 
     def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
         Date newVersion = getReportPeriodStartDate()
+        refBookValue.put("VERSION", new RefBookValue(RefBookAttributeType.DATE, newVersion))
         getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
     }
 
@@ -4156,6 +4157,8 @@ class ColumnFillConditionData {
                 Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.overholdingTax ?: 0 } ?: 0
                 // "Сумма Граф 20"
                 Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
+                // "Сумма Граф 24"
+                Long taxSumm = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {it.taxSumm?: 0} ?: 0
 
                 // СведДох8 НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
                 if (calculatedTaxSum > withholdingTaxSum) {
@@ -4194,7 +4197,7 @@ class ColumnFillConditionData {
                 }
 
                 // СведДох11 НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
-                if (ndflPersonIncome.taxSumm != null) {
+                if (taxSumm != null) {
 
                     dateConditionDataListForBudget.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
