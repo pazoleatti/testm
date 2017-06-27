@@ -4821,6 +4821,7 @@ class ColumnFillConditionData {
 
         @Override
         public void processRow(ResultSet rs, int rowNum, Map<Long, Map<Long, NaturalPerson>> map) throws SQLException {
+            ScriptUtils.checkInterrupted();
 
             //Идентификатор записи первичной формы
             Long primaryPersonId = SqlUtils.getLong(rs, PRIMARY_PERSON_ID);
