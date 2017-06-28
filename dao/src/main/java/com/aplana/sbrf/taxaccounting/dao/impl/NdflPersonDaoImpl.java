@@ -1018,4 +1018,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             return personPrepayment;
         }
     }
+
+    @Override
+    public int getNdflPersonCount(Long declarationDataId) {
+        String query = "select np.id from ndfl_person np where declaration_data_id = :declarationDataId";
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("declarationDataId", declarationDataId);
+        return getCount(query, parameters);
+    }
+
+    @Override
+    public int getNdflPersonReferencesCount(Long declarationDataId) {
+        String query = "select nr.id from ndfl_references nr where declaration_data_id = :declarationDataId";
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("declarationDataId", declarationDataId);
+        return getCount(query, parameters);
+    }
 }

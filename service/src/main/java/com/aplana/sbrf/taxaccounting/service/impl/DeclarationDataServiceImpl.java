@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -136,6 +137,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private BDUtils bdUtils;
     @Autowired
     private DeclarationTypeService declarationTypeService;
+    @Autowired
+    private NdflPersonDao ndflPersonDao;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -1415,23 +1418,37 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType reportType) {
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         switch (reportType.getReportType()) {
             case PDF_DEC:
             case EXCEL_DEC:
             case ACCEPT_DEC:
             case CHECK_DEC:
-                String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
-                if (uuidXml != null) {
-                    return (long)Math.ceil(blobDataService.getLength(uuidXml) / 1024.);
+                if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
+                    return (long) ndflPersonDao.getNdflPersonReferencesCount(declarationDataId);
                 } else {
-                    return null;
+                    return (long) ndflPersonDao.getNdflPersonCount(declarationDataId);
                 }
             case XML_DEC:
-                String uuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
-                if (uuid != null) {
-                    return (long)Math.ceil(blobDataService.getLength(uuid) / 1024.);
+                if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
+                    return (long) ndflPersonDao.getNdflPersonReferencesCount(declarationDataId);
+                } else if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
+                    Logger logger = new Logger();
+                    Long personCount = 0L;
+                    try {
+                        List<Relation> relationList = sourceService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
+                        for(Relation relation: relationList) {
+                            if (relation.getDeclarationDataId() != null && State.ACCEPTED.equals(relation.getState())) {
+                                personCount += ndflPersonDao.getNdflPersonCount(relation.getDeclarationDataId());
+                            }
+                        }
+                    } catch (ServiceException e) {
+                        return 0L;
+                    }
+                    return personCount;
                 } else {
-                    return 0L;
+                    return (long) ndflPersonDao.getNdflPersonCount(declarationDataId);
                 }
             case SPECIFIC_REPORT_DEC:
                 Map<String, Object> exchangeParams = new HashMap<String, Object>();
