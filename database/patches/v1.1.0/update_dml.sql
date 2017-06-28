@@ -25,6 +25,9 @@ update ref_book_income_kind
        name = 'Суммы вознаграждений, выплачиваемых за счет средств прибыли организации, средств специального назначения или целевых поступлений'
 where income_type_id in (select id from ref_book_income_type t where t.code='2003' and t.status=0);
 
+-- update async_task_type
+prompt update async_task_type
+update async_task_type set limit_kind='Количество ФЛ в НФ' where id in (5, 6, 7, 14, 15);
 
 prompt update and alter ref_books
 @upd_ref_books.sql;
