@@ -135,7 +135,7 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
     }
 
     public void addExceptionStyle() {
-        getElement().getStyle().setBackgroundColor("#ffccd2");
+        getElement().getStyle().setBackgroundColor("");
     }
 
     public void removeExceptionStyle() {
