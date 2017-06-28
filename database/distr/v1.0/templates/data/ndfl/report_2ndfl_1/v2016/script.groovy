@@ -1619,7 +1619,6 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
 
         if (declarations.isEmpty()) {
             createCorrPeriodNotFoundMessage(departmentReportPeriod, true)
-            return null
         }
 
         declarations.each { declaration ->
@@ -1778,6 +1777,11 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
     }
 
+    if (!checkExistingAcceptedConsDDForCurrTB(departmentReportPeriod, allDeclarationData)) {
+        createNotExistAcceptedConsDDForCurrTBMesage(departmentReportPeriod)
+        return null;
+    }
+
     if (allDeclarationData.isEmpty()) {
         createEmptyMessage(departmentReportPeriod, false)
         return null
@@ -1798,6 +1802,23 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         return null
     }
     return allDeclarationData
+}
+
+@TypeChecked
+boolean checkExistingAcceptedConsDDForCurrTB(DepartmentReportPeriod departmentReportPeriod, List<DeclarationData> ddList) {
+    for (DeclarationData dd : ddList) {
+        if (dd.departmentReportPeriodId == departmentReportPeriod.id && dd.state == State.ACCEPTED) {
+            return true;
+        }
+    }
+    return false;
+}
+
+@TypeChecked
+def createNotExistAcceptedConsDDForCurrTBMesage(DepartmentReportPeriod departmentReportPeriod) {
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
+    logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
 }
 
 @TypeChecked

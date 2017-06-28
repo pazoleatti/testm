@@ -37,7 +37,8 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
     import javax.xml.stream.XMLEventReader
     import javax.xml.stream.XMLInputFactory
     import javax.xml.stream.events.*
-    import java.sql.ResultSet
+import javax.xml.ws.LogicalMessage
+import java.sql.ResultSet
     import java.sql.SQLException
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -224,9 +225,9 @@ import java.text.SimpleDateFormat
     /**
      * Карта соответствия адреса формы адресу в справочнике ФИАС
      */
-    @Field Map<Long, Long> fiasAddressIdsCache = [:];
+    @Field Map<Long, FiasCheckInfo> fiasAddressIdsCache = [:];
 
-    Map<Long, Long> getFiasAddressIdsMap() {
+    Map<Long, FiasCheckInfo> getFiasAddressIdsMap() {
         if (fiasAddressIdsCache.isEmpty()) {
             fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id, 1);
         }
@@ -288,7 +289,7 @@ import java.text.SimpleDateFormat
             [it.code, it]
         });
 
-        Map<Long, Long> fiasAddressIdsMap = getFiasAddressIdsMap();
+        Map<Long, FiasCheckInfo> fiasAddressIdsMap = getFiasAddressIdsMap();
         naturalPersonRowMapper.setFiasAddressIdsMap(fiasAddressIdsMap);
 
         return naturalPersonRowMapper;
@@ -771,6 +772,7 @@ import java.text.SimpleDateFormat
 
     def downGradeRefBookVersion(Map<String, RefBookValue> refBookValue, Long uniqueRecordId, Long refBookId) {
         Date newVersion = getReportPeriodStartDate()
+        refBookValue.put("VERSION", new RefBookValue(RefBookAttributeType.DATE, newVersion))
         getProvider(refBookId).updateRecordVersionWithoutLock(logger, uniqueRecordId, newVersion, null, refBookValue)
     }
 
@@ -2776,7 +2778,7 @@ class NdflPersonFL {
         time = System.currentTimeMillis();
 
         //первый запрос, проверяет что адрес присутствует в фиас
-        Map<Long, Long> checkFiasExistAddressMap = getFiasAddressIdsMap();
+        Map<Long, FiasCheckInfo> checkFiasExistAddressMap = getFiasAddressIdsMap();
 
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
 
@@ -2807,44 +2809,25 @@ class NdflPersonFL {
             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
 
             long tIsExistsAddress = System.currentTimeMillis();
-            if (!isPersonAddressEmpty(ndflPerson) && !isExistsAddress(ndflPerson.id)) {
+            if (!isPersonAddressEmpty(ndflPerson)) {
 
                 List<String> address = []
-                if (!ScriptUtils.isEmpty(ndflPerson.regionCode)) {
-                    address.add("Код субъекта='${ndflPerson.regionCode}'")
+                FiasCheckInfo fiasCheckInfo = checkFiasExistAddressMap.get(ndflPerson.id)
+                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                if (!ScriptUtils.isEmpty(ndflPerson.regionCode) && !fiasCheckInfo.validRegion) {
+                    logFiasError(fioAndInp, pathError, "Код субъекта", ndflPerson.regionCode)
+                } else if (!ScriptUtils.isEmpty(ndflPerson.area) && !fiasCheckInfo.validArea ) {
+                    logFiasError(fioAndInp, pathError, "Район", ndflPerson.area)
+                } else if (!ScriptUtils.isEmpty(ndflPerson.city) && !fiasCheckInfo.validCity) {
+                    logFiasError(fioAndInp, pathError, "Город", ndflPerson.city)
+                } else if (!ScriptUtils.isEmpty(ndflPerson.locality) && !fiasCheckInfo.validLoc) {
+                    logFiasError(fioAndInp, pathError, "Населенный пункт", ndflPerson.locality)
+                } else if (!ScriptUtils.isEmpty(ndflPerson.street) && !fiasCheckInfo.validStreet) {
+                    logFiasError(fioAndInp, pathError, "Улица", ndflPerson.street)
                 }
-                if (!ScriptUtils.isEmpty(ndflPerson.area)) {
-                    address.add("Район='${ndflPerson.area}'")
-                }
-                if (!ScriptUtils.isEmpty(ndflPerson.city)) {
-                    address.add("Город='${ndflPerson.city}'")
-                }
-                if (!ScriptUtils.isEmpty(ndflPerson.locality)) {
-                    address.add("Населенный пункт='${ndflPerson.locality}'")
-                }
-                if (!ScriptUtils.isEmpty(ndflPerson.street)) {
-                    address.add("Улица='${ndflPerson.street}'")
-                }
-                if (!ScriptUtils.isEmpty(ndflPerson.house)) {
-                    address.add("Дом='${ndflPerson.house}'")
-                }
-                if (!ScriptUtils.isEmpty(ndflPerson.building)) {
-                    address.add("Корпус='${ndflPerson.building}'")
-                }
-                if (!ScriptUtils.isEmpty(ndflPerson.flat)) {
-                    address.add("Квартира='${ndflPerson.flat}'")
-                }
-
-                //Индекс Индекс соответствует следующему формату: [0-9]{6}
                 if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))){
-                    address.add("Индекс - '${ndflPerson.postIndex ?: ""}' - не соответствует формату");
+                    logFiasIndexError(fioAndInp, pathError, "Индекс", ndflPerson.postIndex)
                 }
-
-                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.rowNum ?: "",
-                        "Графы ${address.join(", ")}")
-
-                logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
-                        "'Адрес регистрации в Российской Федерации' не соответствует справочнику '$R_FIAS'")
             }
             timeIsExistsAddress += System.currentTimeMillis() - tIsExistsAddress
 
@@ -3200,6 +3183,16 @@ class NdflPersonFL {
         }
         logForDebug("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)");
     }
+
+void logFiasError (fioAndInp, pathError, name, value) {
+    logger.warnExp("Ошибка в значенииt: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
+            "'Значение гр. \"" + name + "\" (\""+ value + "\") отсутствует в справочнике \"КЛАДР\"")
+}
+
+void logFiasIndexError (fioAndInp, pathError, name, value) {
+    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
+                    "'Значение гр. \"" + name + "\" (\""+ value + "\") не соответствует требуемому формату")
+}
 
 /**
  * Общие проверки
@@ -4156,6 +4149,8 @@ class ColumnFillConditionData {
                 Long overholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.overholdingTax ?: 0 } ?: 0
                 // "Сумма Граф 20"
                 Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
+                // "Сумма Граф 24"
+                Long taxSumm = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {it.taxSumm?: 0} ?: 0
 
                 // СведДох8 НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
                 if (calculatedTaxSum > withholdingTaxSum) {
@@ -4194,7 +4189,7 @@ class ColumnFillConditionData {
                 }
 
                 // СведДох11 НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
-                if (ndflPersonIncome.taxSumm != null) {
+                if (taxSumm != null) {
 
                     dateConditionDataListForBudget.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
@@ -4715,7 +4710,7 @@ class ColumnFillConditionData {
      */
     @Memoized
     boolean isExistsAddress(ndflPersonId) {
-        Map<Long, Long> checkFiasAddressMap = getFiasAddressIdsMap();
+        Map<Long, FiasCheckInfo> checkFiasAddressMap = getFiasAddressIdsMap();
         return (checkFiasAddressMap.get(ndflPersonId) != null)
     }
 
@@ -4826,6 +4821,7 @@ class ColumnFillConditionData {
 
         @Override
         public void processRow(ResultSet rs, int rowNum, Map<Long, Map<Long, NaturalPerson>> map) throws SQLException {
+            ScriptUtils.checkInterrupted();
 
             //Идентификатор записи первичной формы
             Long primaryPersonId = SqlUtils.getLong(rs, PRIMARY_PERSON_ID);
