@@ -1654,6 +1654,25 @@ def createXlsxReport() {
             throw new ServiceException("Отсутствует значение параметра ImportInputStream!");
         }
 
+        // "Загрузка ТФ РНУ НДФЛ" п.9
+        // Проверка соответствия атрибута ДатаОтч периоду в наименовании файла
+        // reportPeriod.endDate создаётся на основании периода из имени файла
+
+        def reportPeriodEndDate = reportPeriod.endDate?.format(DATE_FORMAT)
+
+        File dFile = dataFile
+
+        if(dFile == null){
+            throw new ServiceException("Отсутствует значение параметра dataFile!")
+        }
+
+        def Файл = new XmlSlurper().parse(dataFile)
+        String reportDate = Файл.СлЧасть.'@ДатаОтч'
+
+        if(reportPeriodEndDate != reportDate ){
+            logger.error("В ТФ неверно указана «Отчетная дата»: «${reportDate}». Должна быть указана дата окончания периода ТФ, равная «${reportPeriodEndDate}»")
+        }
+
         //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
         QName infoPartName = QName.valueOf('ИнфЧасть')
 
