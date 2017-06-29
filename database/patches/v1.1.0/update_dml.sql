@@ -29,6 +29,12 @@ where income_type_id in (select id from ref_book_income_type t where t.code='200
 prompt update async_task_type
 update async_task_type set limit_kind='Количество ФЛ в НФ' where id in (5, 6, 7, 14, 15);
 
+-- update ref_book_tariff_payer
+prompt update ref_book_tariff_payer
+update ref_book_tariff_payer
+set code='22'
+where name='Плательщики страховых взносов, уплачивающие страховые взносы по дополнительным тарифам, установленных пунктом 2 статьи 428 Кодекса';
+
 prompt update and alter ref_books
 @upd_ref_books.sql;
 
