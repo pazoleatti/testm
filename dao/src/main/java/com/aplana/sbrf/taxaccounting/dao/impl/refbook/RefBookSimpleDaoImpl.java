@@ -180,9 +180,6 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     public Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(RefBook refBook, String whereClause, Date version) {
         PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, whereClause, version);
 
-        String sql = ps.getQueryString();
-        System.out.println(sql);
-
         try {
             return mapListToData(getJdbcTemplate().query(ps.getQueryString(), ps.getParams().toArray(), getRowMapper(refBook)));
         } catch (EmptyResultDataAccessException e) {

@@ -1151,11 +1151,8 @@ import java.text.SimpleDateFormat
      */
     Map<Long, Map<String, RefBookValue>> getActualRefInpMapByDeclarationDataId() {
         if (inpActualCache.isEmpty()) {
-            String whereClause = """
-                    JOIN ref_book_person p ON (frb.person_id = p.id)
-                    JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
-                """
-            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause, getReportPeriodEndDate() - 1)
+            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} AND ref_book_id_tax_payer.person_id = np.person_id)"
+            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause)
 
             refBookMap.each { id, refBook ->
                 List<String> inpList = inpActualCache.get(refBook?.PERSON_ID?.referenceValue)
@@ -2335,6 +2332,22 @@ class NdflPersonFL {
      */
     def getRefBookByRecordVersionWhere(def long refBookId, def whereClause, def version) {
         Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataVersionWhere(whereClause, version)
+        if (refBookMap == null || refBookMap.size() == 0) {
+            //throw new ScriptException("Не найдены записи справочника " + refBookId)
+            return Collections.emptyMap();
+        }
+        return refBookMap
+    }
+
+    /**
+     * Выгрузка из справочников по условию
+     * @param refBookId
+     * @param whereClause
+     * @return
+     * Поскольку поиск осуществляется с использованием оператора EXISTS необходимодимо всегда связывать поле подзапроса через ALIAS frb
+     */
+    def getRefBookByRecordWhere(def long refBookId, def whereClause) {
+        Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataWhere(whereClause)
         if (refBookMap == null || refBookMap.size() == 0) {
             //throw new ScriptException("Не найдены записи справочника " + refBookId)
             return Collections.emptyMap();
