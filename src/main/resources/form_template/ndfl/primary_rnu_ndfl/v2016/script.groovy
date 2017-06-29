@@ -1653,9 +1653,7 @@ def createXlsxReport() {
 
         // "Загрузка ТФ РНУ НДФЛ" п.9
         // Проверка соответствия атрибута ДатаОтч периоду в наименовании файла
-        // reportPeriod.endDate создаётся на основании периода из имени файла
-
-        def reportPeriodEndDate = reportPeriod.endDate?.format(DATE_FORMAT)
+        // reportPeriodEndDate создаётся на основании периода из имени файла
 
         File dFile = dataFile
 
@@ -1663,7 +1661,9 @@ def createXlsxReport() {
             throw new ServiceException("Отсутствует значение параметра dataFile!")
         }
 
-        def Файл = new XmlSlurper().parse(dataFile)
+        def reportPeriodEndDate = getReportPeriodEndDate().format(DATE_FORMAT)
+
+        def Файл = new XmlSlurper().parse(dFile)
         String reportDate = Файл.СлЧасть.'@ДатаОтч'
 
         if(reportPeriodEndDate != reportDate ){
